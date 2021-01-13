@@ -17,6 +17,7 @@
 package org.springframework.http.converter.xml;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -50,6 +51,8 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "xml"))).isTrue();
 		assertThat(converter.canRead(MyBean.class, new MediaType("text", "xml"))).isTrue();
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "soap+xml"))).isTrue();
+		assertThat(converter.canRead(MyBean.class, new MediaType("text", "xml", StandardCharsets.UTF_8))).isTrue();
+		assertThat(converter.canRead(MyBean.class, new MediaType("text", "xml", StandardCharsets.ISO_8859_1))).isTrue();
 	}
 
 	@Test
@@ -57,6 +60,8 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "xml"))).isTrue();
 		assertThat(converter.canWrite(MyBean.class, new MediaType("text", "xml"))).isTrue();
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "soap+xml"))).isTrue();
+		assertThat(converter.canWrite(MyBean.class, new MediaType("text", "xml", StandardCharsets.UTF_8))).isTrue();
+		assertThat(converter.canWrite(MyBean.class, new MediaType("text", "xml", StandardCharsets.ISO_8859_1))).isFalse();
 	}
 
 	@Test
@@ -184,6 +189,21 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		assertThatExceptionOfType(HttpMessageNotReadableException.class).isThrownBy(() ->
 				this.converter.read(MyBean.class, inputMessage));
 	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void readNonUnicode() throws Exception {
+		String body = "<MyBean>" +
+				"<string>føø bår</string>" +
+				"</MyBean>";
+
+		Charset charset = StandardCharsets.ISO_8859_1;
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(charset));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "xml", charset));
+		MyBean result = (MyBean) converter.read(MyBean.class, inputMessage);
+		assertThat(result.getString()).isEqualTo("føø bår");
+	}
+
 
 
 	public static class MyBean {

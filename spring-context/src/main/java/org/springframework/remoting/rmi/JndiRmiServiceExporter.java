@@ -67,7 +67,9 @@ import org.springframework.util.ReflectionUtils;
  * @see JndiRmiClientInterceptor
  * @see JndiRmiProxyFactoryBean
  * @see javax.rmi.PortableRemoteObject#exportObject
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public class JndiRmiServiceExporter extends RmiBasedExporter implements InitializingBean, DisposableBean {
 
 	@Nullable

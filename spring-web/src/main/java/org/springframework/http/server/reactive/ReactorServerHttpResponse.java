@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ import java.nio.file.Path;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelId;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,6 +30,7 @@ import reactor.netty.http.server.HttpServerResponse;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -42,6 +46,9 @@ import org.springframework.util.Assert;
  * @since 5.0
  */
 class ReactorServerHttpResponse extends AbstractServerHttpResponse implements ZeroCopyHttpOutputMessage {
+
+	private static final Log logger = LogFactory.getLog(ReactorServerHttpResponse.class);
+
 
 	private final HttpServerResponse response;
 
@@ -61,16 +68,21 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 
 	@Override
 	public HttpStatus getStatusCode() {
-		HttpStatus httpStatus = super.getStatusCode();
-		return (httpStatus != null ? httpStatus : HttpStatus.resolve(this.response.status().code()));
+		HttpStatus status = super.getStatusCode();
+		return (status != null ? status : HttpStatus.resolve(this.response.status().code()));
 	}
 
+	@Override
+	public Integer getRawStatusCode() {
+		Integer status = super.getRawStatusCode();
+		return (status != null ? status : this.response.status().code());
+	}
 
 	@Override
 	protected void applyStatusCode() {
-		Integer statusCode = getStatusCodeValue();
-		if (statusCode != null) {
-			this.response.status(statusCode);
+		Integer status = super.getRawStatusCode();
+		if (status != null) {
+			this.response.status(status);
 		}
 	}
 
@@ -108,6 +120,16 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 		return dataBuffers instanceof Mono ?
 				Mono.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf) :
 				Flux.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf);
+	}
+
+	@Override
+	protected void touchDataBuffer(DataBuffer buffer) {
+		if (logger.isDebugEnabled()) {
+			this.response.withConnection(connection -> {
+				ChannelId id = connection.channel().id();
+				DataBufferUtils.touch(buffer, "Channel id: " + id.asShortText());
+			});
+		}
 	}
 
 }

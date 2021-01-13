@@ -51,7 +51,7 @@ public interface CacheAwareContextLoaderDelegate {
 	 * implementation in Spring overrides this method appropriately.
 	 * @param mergedContextConfiguration the merged context configuration used
 	 * to load the application context; never {@code null}
-	 * @return {@code true} if the the application context has been loaded
+	 * @return {@code true} if the application context has been loaded
 	 * @since 5.2
 	 * @see #loadContext
 	 * @see #closeContext

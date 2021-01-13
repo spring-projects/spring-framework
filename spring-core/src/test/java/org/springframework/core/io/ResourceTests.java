@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.io;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -125,6 +126,14 @@ class ResourceTests {
 	@Test
 	void fileSystemResource() throws IOException {
 		String file = getClass().getResource("Resource.class").getFile();
+		Resource resource = new FileSystemResource(file);
+		doTestResource(resource);
+		assertThat(resource).isEqualTo(new FileSystemResource(file));
+	}
+
+	@Test
+	void fileSystemResourceWithFile() throws IOException {
+		File file = new File(getClass().getResource("Resource.class").getFile());
 		Resource resource = new FileSystemResource(file);
 		doTestResource(resource);
 		assertThat(resource).isEqualTo(new FileSystemResource(file));
@@ -289,18 +298,11 @@ class ResourceTests {
 	@Test
 	void readableChannel() throws IOException {
 		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
-		ReadableByteChannel channel = null;
-		try {
-			channel = resource.readableChannel();
+		try (ReadableByteChannel channel = resource.readableChannel()) {
 			ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
 			channel.read(buffer);
 			buffer.rewind();
 			assertThat(buffer.limit() > 0).isTrue();
-		}
-		finally {
-			if (channel != null) {
-				channel.close();
-			}
 		}
 	}
 

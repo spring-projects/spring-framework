@@ -29,7 +29,9 @@ import org.springframework.format.Parser;
  *
  * @author Keith Donald
  * @since 3.0
+ * @deprecated as of 5.3, in favor of standard JSR-310 support
  */
+@Deprecated
 public final class DateTimeParser implements Parser<DateTime> {
 
 	private final DateTimeFormatter formatter;

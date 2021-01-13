@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -232,6 +233,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 			if (decoder.canDecode(elementType, mimeType)) {
 				if (adapter != null && adapter.isMultiValue()) {
 					Flux<?> flux = content
+							.filter(this::nonEmptyDataBuffer)
 							.map(buffer -> decoder.decode(buffer, elementType, mimeType, hints))
 							.onErrorResume(ex -> Flux.error(handleReadError(parameter, message, ex)));
 					if (isContentRequired) {
@@ -245,6 +247,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 				else {
 					// Single-value (with or without reactive type wrapper)
 					Mono<?> mono = content.next()
+							.filter(this::nonEmptyDataBuffer)
 							.map(buffer -> decoder.decode(buffer, elementType, mimeType, hints))
 							.onErrorResume(ex -> Mono.error(handleReadError(parameter, message, ex)));
 					if (isContentRequired) {
@@ -260,6 +263,14 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 
 		return Mono.error(new MethodArgumentResolutionException(
 				message, parameter, "Cannot decode to [" + targetType + "]" + message));
+	}
+
+	private boolean nonEmptyDataBuffer(DataBuffer buffer) {
+		if (buffer.readableByteCount() > 0) {
+			return true;
+		}
+		DataBufferUtils.release(buffer);
+		return false;
 	}
 
 	private Throwable handleReadError(MethodParameter parameter, Message<?> message, Throwable ex) {

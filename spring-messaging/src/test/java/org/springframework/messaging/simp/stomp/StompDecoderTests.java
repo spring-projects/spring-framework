@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -78,7 +77,7 @@ public class StompDecoderTests {
 	}
 
 	@Test
-	public void decodeFrame() throws UnsupportedEncodingException {
+	public void decodeFrame() {
 		Message<byte[]> frame = decode("SEND\ndestination:test\n\nThe body of the message\0");
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
 
@@ -166,6 +165,17 @@ public class StompDecoderTests {
 				decode("CONNECT\naccept-version:1.2\n\nThe body of the message\0"));
 	}
 
+	@Test // gh-23713
+	public void decodeFramesWithExtraNewLines() {
+		String frame1 = "SEND\ndestination:test\n\nbody\0\n\n\n";
+		ByteBuffer buffer = ByteBuffer.wrap((frame1).getBytes());
+
+		final List<Message<byte[]>> messages = decoder.decode(buffer);
+
+		assertThat(messages.size()).isEqualTo(1);
+		assertThat(StompHeaderAccessor.wrap(messages.get(0)).getCommand()).isEqualTo(StompCommand.SEND);
+	}
+
 	@Test
 	public void decodeMultipleFramesFromSameBuffer() {
 		String frame1 = "SEND\ndestination:test\n\nThe body of the message\0";
@@ -179,9 +189,7 @@ public class StompDecoderTests {
 		assertThat(StompHeaderAccessor.wrap(messages.get(1)).getCommand()).isEqualTo(StompCommand.DISCONNECT);
 	}
 
-	// SPR-13111
-
-	@Test
+	@Test // SPR-13111
 	public void decodeFrameWithHeaderWithEmptyValue() {
 		String accept = "accept-version:1.1\n";
 		String valuelessKey = "key:\n";

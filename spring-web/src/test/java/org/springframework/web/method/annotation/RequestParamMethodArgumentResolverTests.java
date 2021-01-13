@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockMultipartFile;
-import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
-import org.springframework.mock.web.test.MockPart;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,17 +38,22 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockMultipartFile;
+import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockPart;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestPart;
+import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestParam;
+import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestPart;
 
 /**
  * Test fixture with {@link RequestParamMethodArgumentResolver}.
@@ -200,6 +200,17 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
+	public void resolveMultipartFileListMissing() throws Exception {
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		request.addFile(new MockMultipartFile("other", "Hello World 3".getBytes()));
+		webRequest = new ServletWebRequest(request);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(List.class, MultipartFile.class);
+		assertThatExceptionOfType(MissingServletRequestPartException.class).isThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null));
+	}
+
+	@Test
 	public void resolveMultipartFileArray() throws Exception {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		MultipartFile expected1 = new MockMultipartFile("mfilearray", "Hello World 1".getBytes());
@@ -218,6 +229,17 @@ public class RequestParamMethodArgumentResolverTests {
 		assertThat(parts.length).isEqualTo(2);
 		assertThat(expected1).isEqualTo(parts[0]);
 		assertThat(expected2).isEqualTo(parts[1]);
+	}
+
+	@Test
+	public void resolveMultipartFileArrayMissing() throws Exception {
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		request.addFile(new MockMultipartFile("other", "Hello World 3".getBytes()));
+		webRequest = new ServletWebRequest(request);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultipartFile[].class);
+		assertThatExceptionOfType(MissingServletRequestPartException.class).isThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null));
 	}
 
 	@Test
@@ -258,6 +280,19 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
+	public void resolvePartListMissing() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("POST");
+		request.setContentType("multipart/form-data");
+		request.addPart(new MockPart("other", "Hello World 3".getBytes()));
+		webRequest = new ServletWebRequest(request);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(List.class, Part.class);
+		assertThatExceptionOfType(MissingServletRequestPartException.class).isThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null));
+	}
+
+	@Test
 	public void resolvePartArray() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockPart expected1 = new MockPart("pfilearray", "Hello World 1".getBytes());
@@ -278,6 +313,19 @@ public class RequestParamMethodArgumentResolverTests {
 		assertThat(parts.length).isEqualTo(2);
 		assertThat(expected1).isEqualTo(parts[0]);
 		assertThat(expected2).isEqualTo(parts[1]);
+	}
+
+	@Test
+	public void resolvePartArrayMissing() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("POST");
+		request.setContentType("multipart/form-data");
+		request.addPart(new MockPart("other", "Hello World 3".getBytes()));
+		webRequest = new ServletWebRequest(request);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Part[].class);
+		assertThatExceptionOfType(MissingServletRequestPartException.class).isThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null));
 	}
 
 	@Test

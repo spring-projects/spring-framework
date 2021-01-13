@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -295,7 +295,7 @@ public class ValidatorFactoryTests {
 		private ValidAddress address = new ValidAddress();
 
 		@Valid
-		private List<ValidAddress> addressList = new LinkedList<>();
+		private List<ValidAddress> addressList = new ArrayList<>();
 
 		@Valid
 		private Set<ValidAddress> addressSet = new LinkedHashSet<>();
@@ -457,7 +457,7 @@ public class ValidatorFactoryTests {
 	public static class ListContainer {
 
 		@NotXList
-		private List<String> list = new LinkedList<>();
+		private List<String> list = new ArrayList<>();
 
 		public void addString(String value) {
 			list.add(value);

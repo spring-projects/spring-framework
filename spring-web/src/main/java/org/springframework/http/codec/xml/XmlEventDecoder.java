@@ -34,14 +34,15 @@ import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.evt.EventAllocatorImpl;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 import org.reactivestreams.Publisher;
-import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoder;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
@@ -94,7 +95,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 
 	public XmlEventDecoder() {
-		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
+		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML, new MediaType("application", "*+xml"));
 	}
 
 
@@ -142,7 +143,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 							return result;
 						}
 						catch (XMLStreamException ex) {
-							throw Exceptions.propagate(ex);
+							throw new DecodingException(ex.getMessage(), ex);
 						}
 						finally {
 							DataBufferUtils.release(buffer);
@@ -203,7 +204,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 				return events;
 			}
 			catch (XMLStreamException ex) {
-				throw Exceptions.propagate(ex);
+				throw new DecodingException(ex.getMessage(), ex);
 			}
 			finally {
 				DataBufferUtils.release(dataBuffer);

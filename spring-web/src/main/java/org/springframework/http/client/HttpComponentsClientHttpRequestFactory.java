@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
+import java.util.function.BiFunction;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -65,6 +66,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	private RequestConfig requestConfig;
 
 	private boolean bufferRequestBody = true;
+
+	@Nullable
+	private BiFunction<HttpMethod, URI, HttpContext> httpContextFactory;
 
 
 	/**
@@ -157,6 +161,19 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		this.bufferRequestBody = bufferRequestBody;
 	}
 
+	/**
+	 * Configure a factory to pre-create the {@link HttpContext} for each request.
+	 * <p>This may be useful for example in mutual TLS authentication where a
+	 * different {@code RestTemplate} for each client certificate such that
+	 * all calls made through a given {@code RestTemplate} instance as associated
+	 * for the same client identity. {@link HttpClientContext#setUserToken(Object)}
+	 * can be used to specify a fixed user token for all requests.
+	 * @param httpContextFactory the context factory to use
+	 * @since 5.2.7
+	 */
+	public void setHttpContextFactory(BiFunction<HttpMethod, URI, HttpContext> httpContextFactory) {
+		this.httpContextFactory = httpContextFactory;
+	}
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
@@ -296,7 +313,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	@Nullable
 	protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
-		return null;
+		return (this.httpContextFactory != null ? this.httpContextFactory.apply(httpMethod, uri) : null);
 	}
 
 

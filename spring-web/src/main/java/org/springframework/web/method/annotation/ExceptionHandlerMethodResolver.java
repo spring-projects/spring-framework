@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  */
 public class ExceptionHandlerMethodResolver {
@@ -48,6 +49,18 @@ public class ExceptionHandlerMethodResolver {
 	 */
 	public static final MethodFilter EXCEPTION_HANDLER_METHODS = method ->
 			AnnotatedElementUtils.hasAnnotation(method, ExceptionHandler.class);
+
+	private static final Method NO_MATCHING_EXCEPTION_HANDLER_METHOD;
+
+	static {
+		try {
+			NO_MATCHING_EXCEPTION_HANDLER_METHOD =
+					ExceptionHandlerMethodResolver.class.getDeclaredMethod("noMatchingExceptionHandler");
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("Expected method not found: " + ex);
+		}
+	}
 
 
 	private final Map<Class<? extends Throwable>, Method> mappedMethods = new HashMap<>(16);
@@ -112,7 +125,7 @@ public class ExceptionHandlerMethodResolver {
 
 	/**
 	 * Find a {@link Method} to handle the given exception.
-	 * Use {@link ExceptionDepthComparator} if more than one match is found.
+	 * <p>Uses {@link ExceptionDepthComparator} if more than one match is found.
 	 * @param exception the exception
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
@@ -123,7 +136,7 @@ public class ExceptionHandlerMethodResolver {
 
 	/**
 	 * Find a {@link Method} to handle the given Throwable.
-	 * Use {@link ExceptionDepthComparator} if more than one match is found.
+	 * <p>Uses {@link ExceptionDepthComparator} if more than one match is found.
 	 * @param exception the exception
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 * @since 5.0
@@ -134,7 +147,7 @@ public class ExceptionHandlerMethodResolver {
 		if (method == null) {
 			Throwable cause = exception.getCause();
 			if (cause != null) {
-				method = resolveMethodByExceptionType(cause.getClass());
+				method = resolveMethodByThrowable(cause);
 			}
 		}
 		return method;
@@ -143,6 +156,7 @@ public class ExceptionHandlerMethodResolver {
 	/**
 	 * Find a {@link Method} to handle the given exception type. This can be
 	 * useful if an {@link Exception} instance is not available (e.g. for tools).
+	 * <p>Uses {@link ExceptionDepthComparator} if more than one match is found.
 	 * @param exceptionType the exception type
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
@@ -153,13 +167,13 @@ public class ExceptionHandlerMethodResolver {
 			method = getMappedMethod(exceptionType);
 			this.exceptionLookupCache.put(exceptionType, method);
 		}
-		return method;
+		return (method != NO_MATCHING_EXCEPTION_HANDLER_METHOD ? method : null);
 	}
 
 	/**
-	 * Return the {@link Method} mapped to the given exception type, or {@code null} if none.
+	 * Return the {@link Method} mapped to the given exception type, or
+	 * {@link #NO_MATCHING_EXCEPTION_HANDLER_METHOD} if none.
 	 */
-	@Nullable
 	private Method getMappedMethod(Class<? extends Throwable> exceptionType) {
 		List<Class<? extends Throwable>> matches = new ArrayList<>();
 		for (Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {
@@ -168,12 +182,21 @@ public class ExceptionHandlerMethodResolver {
 			}
 		}
 		if (!matches.isEmpty()) {
-			matches.sort(new ExceptionDepthComparator(exceptionType));
+			if (matches.size() > 1) {
+				matches.sort(new ExceptionDepthComparator(exceptionType));
+			}
 			return this.mappedMethods.get(matches.get(0));
 		}
 		else {
-			return null;
+			return NO_MATCHING_EXCEPTION_HANDLER_METHOD;
 		}
+	}
+
+	/**
+	 * For the {@link #NO_MATCHING_EXCEPTION_HANDLER_METHOD} constant.
+ 	 */
+	@SuppressWarnings("unused")
+	private void noMatchingExceptionHandler() {
 	}
 
 }

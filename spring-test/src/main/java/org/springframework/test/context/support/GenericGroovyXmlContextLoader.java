@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class GenericGroovyXmlContextLoader extends GenericXmlContextLoader {
 	}
 
 	/**
-	 * Returns {@code "-context.xml" and "Context.groovy"} in order to
+	 * Returns {@code "-context.xml"} and {@code "Context.groovy"} in order to
 	 * support detection of a default XML config file or Groovy script.
 	 */
 	@Override

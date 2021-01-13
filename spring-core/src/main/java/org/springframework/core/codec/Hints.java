@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,14 @@
 package org.springframework.core.codec;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Constants and convenience methods for working with hints.
@@ -120,7 +122,7 @@ public abstract class Hints {
 			return hints2;
 		}
 		else {
-			Map<String, Object> result = new HashMap<>(hints1.size() + hints2.size());
+			Map<String, Object> result = CollectionUtils.newHashMap(hints1.size() + hints2.size());
 			result.putAll(hints1);
 			result.putAll(hints2);
 			return result;
@@ -141,10 +143,28 @@ public abstract class Hints {
 			return Collections.singletonMap(hintName, hintValue);
 		}
 		else {
-			Map<String, Object> result = new HashMap<>(hints.size() + 1);
+			Map<String, Object> result = CollectionUtils.newHashMap(hints.size() + 1);
 			result.putAll(hints);
 			result.put(hintName, hintValue);
 			return result;
+		}
+	}
+
+	/**
+	 * If the hints contain a {@link #LOG_PREFIX_HINT} and the given logger has
+	 * DEBUG level enabled, apply the log prefix as a hint to the given buffer
+	 * via {@link DataBufferUtils#touch(DataBuffer, Object)}.
+	 * @param buffer the buffer to touch
+	 * @param hints the hints map to check for a log prefix
+	 * @param logger the logger whose level to check
+	 * @since 5.3.2
+	 */
+	public static void touchDataBuffer(DataBuffer buffer, @Nullable Map<String, Object> hints, Log logger) {
+		if (logger.isDebugEnabled() && hints != null) {
+			Object logPrefix = hints.get(LOG_PREFIX_HINT);
+			if (logPrefix != null) {
+				DataBufferUtils.touch(buffer, logPrefix);
+			}
 		}
 	}
 

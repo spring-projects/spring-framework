@@ -155,8 +155,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 * @param name the name of the cache to be added
 	 */
 	private void updateCacheNames(String name) {
-		Set<String> cacheNames = new LinkedHashSet<>(this.cacheNames.size() + 1);
-		cacheNames.addAll(this.cacheNames);
+		Set<String> cacheNames = new LinkedHashSet<>(this.cacheNames);
 		cacheNames.add(name);
 		this.cacheNames = Collections.unmodifiableSet(cacheNames);
 	}

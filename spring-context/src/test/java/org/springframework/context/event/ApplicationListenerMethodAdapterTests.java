@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.PayloadApplicationEvent;
+import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.ResolvableTypeProvider;
 import org.springframework.core.annotation.Order;
@@ -56,27 +57,27 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 	@Test
 	public void rawListener() {
 		Method method = ReflectionUtils.findMethod(SampleEvents.class, "handleRaw", ApplicationEvent.class);
-		supportsEventType(true, method, getGenericApplicationEventType("applicationEvent"));
+		supportsEventType(true, method, ResolvableType.forClass(ApplicationEvent.class));
 	}
 
 	@Test
 	public void rawListenerWithGenericEvent() {
 		Method method = ReflectionUtils.findMethod(SampleEvents.class, "handleRaw", ApplicationEvent.class);
-		supportsEventType(true, method, getGenericApplicationEventType("stringEvent"));
+		supportsEventType(true, method, ResolvableType.forClassWithGenerics(GenericTestEvent.class, String.class));
 	}
 
 	@Test
 	public void genericListener() {
 		Method method = ReflectionUtils.findMethod(
 				SampleEvents.class, "handleGenericString", GenericTestEvent.class);
-		supportsEventType(true, method, getGenericApplicationEventType("stringEvent"));
+		supportsEventType(true, method, ResolvableType.forClassWithGenerics(GenericTestEvent.class, String.class));
 	}
 
 	@Test
 	public void genericListenerWrongParameterizedType() {
 		Method method = ReflectionUtils.findMethod(
 				SampleEvents.class, "handleGenericString", GenericTestEvent.class);
-		supportsEventType(false, method, getGenericApplicationEventType("longEvent"));
+		supportsEventType(false, method, ResolvableType.forClassWithGenerics(GenericTestEvent.class, Long.class));
 	}
 
 	@Test
@@ -161,7 +162,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		Method method = ReflectionUtils.findMethod(
 				SampleEvents.class, "handleGenericString", GenericTestEvent.class);
 		ApplicationListenerMethodAdapter adapter = createTestInstance(method);
-		assertThat(adapter.getOrder()).isEqualTo(0);
+		assertThat(adapter.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 	}
 
 	@Test

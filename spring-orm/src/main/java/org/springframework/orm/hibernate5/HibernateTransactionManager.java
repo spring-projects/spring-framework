@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate5;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.util.function.Consumer;
 
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
@@ -124,6 +125,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	private boolean allowResultAccessAfterCompletion = false;
 
 	private boolean hibernateManagedSession = false;
+
+	@Nullable
+	private Consumer<Session> sessionInitializer;
 
 	@Nullable
 	private Object entityInterceptor;
@@ -301,6 +305,18 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	/**
+	 * Specify a callback for customizing every Hibernate {@code Session} resource
+	 * created for a new transaction managed by this {@code HibernateTransactionManager}.
+	 * <p>This enables convenient customizations for application purposes, e.g.
+	 * setting Hibernate filters.
+	 * @since 5.3
+	 * @see Session#enableFilter
+	 */
+	public void setSessionInitializer(Consumer<Session> sessionInitializer) {
+		this.sessionInitializer = sessionInitializer;
+	}
+
+	/**
 	 * Set the bean name of a Hibernate entity interceptor that allows to inspect
 	 * and change property values before writing to and reading from the database.
 	 * Will get applied to any new Session created by this transaction manager.
@@ -442,7 +458,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
@@ -454,7 +469,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					"on a single DataSource, no matter whether Hibernate or JDBC access.");
 		}
 
-		Session session = null;
+		SessionImplementor session = null;
 
 		try {
 			if (!txObject.hasSessionHolder() || txObject.getSessionHolder().isSynchronizedWithTransaction()) {
@@ -462,23 +477,27 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				Session newSession = (entityInterceptor != null ?
 						obtainSessionFactory().withOptions().interceptor(entityInterceptor).openSession() :
 						obtainSessionFactory().openSession());
+				if (this.sessionInitializer != null) {
+					this.sessionInitializer.accept(newSession);
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new Session [" + newSession + "] for Hibernate transaction");
 				}
 				txObject.setSession(newSession);
 			}
 
-			session = txObject.getSessionHolder().getSession();
+			session = txObject.getSessionHolder().getSession().unwrap(SessionImplementor.class);
 
 			boolean holdabilityNeeded = this.allowResultAccessAfterCompletion && !txObject.isNewSession();
 			boolean isolationLevelNeeded = (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT);
 			if (holdabilityNeeded || isolationLevelNeeded || definition.isReadOnly()) {
-				if (this.prepareConnection && isSameConnectionForEntireSession(session)) {
+				if (this.prepareConnection && ConnectionReleaseMode.ON_CLOSE.equals(
+						session.getJdbcCoordinator().getLogicalConnection().getConnectionHandlingMode().getReleaseMode())) {
 					// We're allowed to change the transaction settings of the JDBC Connection.
 					if (logger.isDebugEnabled()) {
 						logger.debug("Preparing JDBC Connection of Hibernate Session [" + session + "]");
 					}
-					Connection con = ((SessionImplementor) session).connection();
+					Connection con = session.connection();
 					Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 					txObject.setPreviousIsolationLevel(previousIsolationLevel);
 					txObject.setReadOnly(definition.isReadOnly());
@@ -489,6 +508,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 							con.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
 						}
 					}
+					txObject.connectionPrepared();
 				}
 				else {
 					// Not allowed to change the transaction settings of the JDBC Connection.
@@ -497,7 +517,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 						throw new InvalidIsolationLevelException(
 								"HibernateTransactionManager is not allowed to support custom isolation levels: " +
 								"make sure that its 'prepareConnection' flag is on (the default) and that the " +
-								"Hibernate connection release mode is set to 'on_close' (the default for JDBC).");
+								"Hibernate connection release mode is set to ON_CLOSE.");
 					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Not preparing JDBC Connection of Hibernate Session [" + session + "]");
@@ -507,16 +527,16 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			if (definition.isReadOnly() && txObject.isNewSession()) {
 				// Just set to MANUAL in case of a new Session for this transaction.
-				session.setFlushMode(FlushMode.MANUAL);
+				session.setHibernateFlushMode(FlushMode.MANUAL);
 				// As of 5.1, we're also setting Hibernate's read-only entity mode by default.
 				session.setDefaultReadOnly(true);
 			}
 
 			if (!definition.isReadOnly() && !txObject.isNewSession()) {
 				// We need AUTO or COMMIT for a non-read-only transaction.
-				FlushMode flushMode = SessionFactoryUtils.getFlushMode(session);
+				FlushMode flushMode = session.getHibernateFlushMode();
 				if (FlushMode.MANUAL.equals(flushMode)) {
-					session.setFlushMode(FlushMode.AUTO);
+					session.setHibernateFlushMode(FlushMode.AUTO);
 					txObject.getSessionHolder().setPreviousFlushMode(flushMode);
 				}
 			}
@@ -542,11 +562,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			// Register the Hibernate Session's JDBC Connection for the DataSource, if set.
 			if (getDataSource() != null) {
-				SessionImplementor sessionImpl = (SessionImplementor) session;
-				// The following needs to use a lambda expression instead of a method reference
-				// for compatibility with Hibernate ORM <5.2 where connection() is defined on
-				// SessionImplementor itself instead of on SharedSessionContractImplementor...
-				ConnectionHolder conHolder = new ConnectionHolder(() -> sessionImpl.connection());
+				ConnectionHolder conHolder = new ConnectionHolder(session::connection);
 				if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
 					conHolder.setTimeoutInSeconds(timeout);
 				}
@@ -688,7 +704,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	protected void doCleanupAfterCompletion(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
@@ -702,13 +717,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			TransactionSynchronizationManager.unbindResource(getDataSource());
 		}
 
-		Session session = txObject.getSessionHolder().getSession();
-		if (this.prepareConnection && isPhysicallyConnected(session)) {
-			// We're running with connection release mode "on_close": We're able to reset
+		SessionImplementor session = txObject.getSessionHolder().getSession().unwrap(SessionImplementor.class);
+		if (txObject.needsConnectionReset() &&
+				session.getJdbcCoordinator().getLogicalConnection().isPhysicallyConnected()) {
+			// We're running with connection release mode ON_CLOSE: We're able to reset
 			// the isolation level and/or read-only flag of the JDBC Connection here.
 			// Else, we need to rely on the connection pool to perform proper cleanup.
 			try {
-				Connection con = ((SessionImplementor) session).connection();
+				Connection con = session.connection();
 				Integer previousHoldability = txObject.getPreviousHoldability();
 				if (previousHoldability != null) {
 					con.setHoldability(previousHoldability);
@@ -735,7 +751,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				logger.debug("Not closing pre-bound Hibernate Session [" + session + "] after transaction");
 			}
 			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
-				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
+				session.setHibernateFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
 			}
 			if (!this.allowResultAccessAfterCompletion && !this.hibernateManagedSession) {
 				disconnectOnCompletion(session);
@@ -755,41 +771,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	protected void disconnectOnCompletion(Session session) {
 		session.disconnect();
 	}
-
-	/**
-	 * Return whether the given Hibernate Session will always hold the same
-	 * JDBC Connection. This is used to check whether the transaction manager
-	 * can safely prepare and clean up the JDBC Connection used for a transaction.
-	 * <p>The default implementation checks the Session's connection release mode
-	 * to be "on_close".
-	 * @param session the Hibernate Session to check
-	 * @see ConnectionReleaseMode#ON_CLOSE
-	 */
-	@SuppressWarnings("deprecation")
-	protected boolean isSameConnectionForEntireSession(Session session) {
-		if (!(session instanceof SessionImplementor)) {
-			// The best we can do is to assume we're safe.
-			return true;
-		}
-		ConnectionReleaseMode releaseMode =
-				((SessionImplementor) session).getJdbcCoordinator().getConnectionReleaseMode();
-		return ConnectionReleaseMode.ON_CLOSE.equals(releaseMode);
-	}
-
-	/**
-	 * Determine whether the given Session is (still) physically connected
-	 * to the database, that is, holds an active JDBC Connection internally.
-	 * @param session the Hibernate Session to check
-	 * @see #isSameConnectionForEntireSession(Session)
-	 */
-	protected boolean isPhysicallyConnected(Session session) {
-		if (!(session instanceof SessionImplementor)) {
-			// The best we can do is to check whether we're logically connected.
-			return session.isConnected();
-		}
-		return ((SessionImplementor) session).getJdbcCoordinator().getLogicalConnection().isPhysicallyConnected();
-	}
-
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception
@@ -817,6 +798,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		private boolean newSessionHolder;
 
 		private boolean newSession;
+
+		private boolean needsConnectionReset;
 
 		@Nullable
 		private Integer previousHoldability;
@@ -854,6 +837,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		public boolean isNewSession() {
 			return this.newSession;
+		}
+
+		public void connectionPrepared() {
+			this.needsConnectionReset = true;
+		}
+
+		public boolean needsConnectionReset() {
+			return this.needsConnectionReset;
 		}
 
 		public void setPreviousHoldability(@Nullable Integer previousHoldability) {

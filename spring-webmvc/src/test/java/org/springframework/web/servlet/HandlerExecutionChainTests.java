@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.web.servlet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -65,9 +65,7 @@ public class HandlerExecutionChainTests {
 
 		this.chain.addInterceptor(this.interceptor1);
 		this.chain.addInterceptor(this.interceptor2);
-		assertThat(this.chain.getInterceptors().length).isEqualTo(2);
 		this.chain.addInterceptor(this.interceptor3);
-		assertThat(this.chain.getInterceptors().length).isEqualTo(3);
 	}
 
 

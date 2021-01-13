@@ -23,10 +23,10 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.DataBinder;
 
 import static org.assertj.core.api.Assertions.assertThat;

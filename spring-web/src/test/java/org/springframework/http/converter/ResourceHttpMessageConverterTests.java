@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class ResourceHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
 		inputMessage.getHeaders().setContentType(MediaType.IMAGE_JPEG);
 		inputMessage.getHeaders().setContentDisposition(
-				ContentDisposition.builder("attachment").filename("yourlogo.jpg").build());
+				ContentDisposition.attachment().filename("yourlogo.jpg").build());
 		Resource actualResource = converter.read(Resource.class, inputMessage);
 		assertThat(FileCopyUtils.copyToByteArray(actualResource.getInputStream())).isEqualTo(body);
 		assertThat(actualResource.getFilename()).isEqualTo("yourlogo.jpg");
@@ -79,11 +79,13 @@ public class ResourceHttpMessageConverterTests {
 			MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
 			inputMessage.getHeaders().setContentType(MediaType.IMAGE_JPEG);
 			inputMessage.getHeaders().setContentDisposition(
-					ContentDisposition.builder("attachment").filename("yourlogo.jpg").build());
+					ContentDisposition.attachment().filename("yourlogo.jpg").build());
+			inputMessage.getHeaders().setContentLength(123);
 			Resource actualResource = converter.read(InputStreamResource.class, inputMessage);
 			assertThat(actualResource).isInstanceOf(InputStreamResource.class);
 			assertThat(actualResource.getInputStream()).isEqualTo(body);
 			assertThat(actualResource.getFilename()).isEqualTo("yourlogo.jpg");
+			assertThat(actualResource.contentLength()).isEqualTo(123);
 		}
 	}
 

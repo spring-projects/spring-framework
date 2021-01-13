@@ -64,18 +64,34 @@ import org.springframework.messaging.Message;
  * authenticated user.</li>
  * </ul>
  *
- * <p>How the return value is handled depends on the processing scenario. For
- * STOMP over WebSocket, it is turned into a message and sent to a default response
- * destination or to a custom destination specified with an {@link SendTo @SendTo}
- * or {@link org.springframework.messaging.simp.annotation.SendToUser @SendToUser}
- * annotation. For RSocket, the response is used to reply to the stream request.
+ * <p>Return value handling depends on the processing scenario:
+ * <ul>
+ * <li>STOMP over WebSocket -- the value is turned into a message and sent to a
+ * default response destination or to a custom destination specified with an
+ * {@link SendTo @SendTo} or
+ * {@link org.springframework.messaging.simp.annotation.SendToUser @SendToUser}
+ * annotation.
+ * <li>RSocket -- the response is used to reply to the stream request.
+ * </ul>
  *
- * <p>Specializations of this annotation including
- * {@link org.springframework.messaging.simp.annotation.SubscribeMapping @SubscribeMapping} or
+ * <p>Specializations of this annotation include
+ * {@link org.springframework.messaging.simp.annotation.SubscribeMapping @SubscribeMapping}
+ * (e.g. STOMP subscriptions) and
  * {@link org.springframework.messaging.rsocket.annotation.ConnectMapping @ConnectMapping}
- * further narrow the mapping by message type. Both can be combined with a
- * type-level {@code @MessageMapping} for declaring a common pattern prefix
- * (or prefixes).
+ * (e.g. RSocket connections). Both narrow the primary mapping further and also match
+ * against the message type. Both can be combined with a type-level
+ * {@code @MessageMapping} that declares a common pattern prefix (or prefixes).
+ *
+ * <p>For further details on the use of this annotation in different contexts,
+ * see the following sections of the Spring Framework reference:
+ * <ul>
+ * <li>STOMP over WebSocket
+ * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#websocket-stomp-handle-annotations">
+ * "Annotated Controllers"</a>.
+ * <li>RSocket
+ * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#rsocket-annot-responders">
+ * "Annotated Responders"</a>.
+ * </ul>
  *
  * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
  * make sure to consistently put <i>all</i> your mapping annotations - such as

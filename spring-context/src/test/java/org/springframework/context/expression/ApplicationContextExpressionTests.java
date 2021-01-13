@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,12 +36,14 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
@@ -50,15 +52,10 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.tests.Assume;
-import org.springframework.tests.EnabledForTestGroups;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.SerializationTestUtils;
-import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
@@ -185,7 +182,7 @@ class ApplicationContextExpressionTests {
 			assertThat(tb3.optionalValue3.isPresent()).isFalse();
 			assertThat(tb3.tb).isSameAs(tb0);
 
-			tb3 = (ValueTestBean) SerializationTestUtils.serializeAndDeserialize(tb3);
+			tb3 = SerializationTestUtils.serializeAndDeserialize(tb3);
 			assertThat(tb3.countryFactory.getObject()).isEqualTo("123 UK");
 
 			ConstructorValueTestBean tb4 = ac.getBean("tb4", ConstructorValueTestBean.class);
@@ -219,7 +216,7 @@ class ApplicationContextExpressionTests {
 		cs.addConverter(String.class, String.class, String::trim);
 		ac.getBeanFactory().registerSingleton(GenericApplicationContext.CONVERSION_SERVICE_BEAN_NAME, cs);
 		RootBeanDefinition rbd = new RootBeanDefinition(PrototypeTestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getPropertyValues().add("country", "#{systemProperties.country}");
 		rbd.getPropertyValues().add("country2", new TypedStringValue("-#{systemProperties.country}-"));
 		ac.registerBeanDefinition("test", rbd);
@@ -244,37 +241,6 @@ class ApplicationContextExpressionTests {
 			System.getProperties().remove("name");
 			System.getProperties().remove("country");
 		}
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	void prototypeCreationIsFastEnough() {
-		Assume.notLogging(factoryLog);
-		GenericApplicationContext ac = new GenericApplicationContext();
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue("#{systemProperties.name}");
-		rbd.getPropertyValues().add("country", "#{systemProperties.country}");
-		ac.registerBeanDefinition("test", rbd);
-		ac.refresh();
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		System.getProperties().put("name", "juergen");
-		System.getProperties().put("country", "UK");
-		try {
-			for (int i = 0; i < 100000; i++) {
-				TestBean tb = (TestBean) ac.getBean("test");
-				assertThat(tb.getName()).isEqualTo("juergen");
-				assertThat(tb.getCountry()).isEqualTo("UK");
-			}
-			sw.stop();
-		}
-		finally {
-			System.getProperties().remove("country");
-			System.getProperties().remove("name");
-		}
-		assertThat(sw.getTotalTimeMillis() < 6000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
-		ac.close();
 	}
 
 	@Test

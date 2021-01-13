@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,12 +130,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 			return;
 		}
 		final CountDownLatch latch = new CountDownLatch(1);
-		this.activeMQBroker.addShutdownHook(new Runnable() {
-			@Override
-			public void run() {
-				latch.countDown();
-			}
-		});
+		this.activeMQBroker.addShutdownHook(latch::countDown);
 		this.activeMQBroker.stop();
 		assertThat(latch.await(5, TimeUnit.SECONDS)).as("Broker did not stop").isTrue();
 		logger.debug("Broker stopped");
@@ -279,8 +274,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 
 		public void expectMessages(MessageExchange... messageExchanges) throws InterruptedException {
-			List<MessageExchange> expectedMessages =
-					new ArrayList<>(Arrays.<MessageExchange>asList(messageExchanges));
+			List<MessageExchange> expectedMessages = new ArrayList<>(Arrays.asList(messageExchanges));
 			while (expectedMessages.size() > 0) {
 				Message<?> message = this.queue.poll(10000, TimeUnit.MILLISECONDS);
 				assertThat(message).as("Timed out waiting for messages, expected [" + expectedMessages + "]").isNotNull();
@@ -456,7 +450,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		@Override
 		public final boolean match(Message<?> message) {
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-			if (!this.command.equals(headers.getCommand()) || (this.sessionId != headers.getSessionId())) {
+			if (!this.command.equals(headers.getCommand()) || !this.sessionId.equals(headers.getSessionId())) {
 				return false;
 			}
 			return matchInternal(headers, message.getPayload());

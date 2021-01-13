@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,10 @@ import org.springframework.util.ObjectUtils;
  * @since 3.0.2
  * @param <T> the body type
  * @see #getStatusCode()
+ * @see org.springframework.web.client.RestOperations#getForEntity(String, Class, Object...)
+ * @see org.springframework.web.client.RestOperations#getForEntity(String, Class, java.util.Map)
+ * @see org.springframework.web.client.RestOperations#getForEntity(URI, Class)
+ * @see RequestEntity
  */
 public class ResponseEntity<T> extends HttpEntity<T> {
 
@@ -109,9 +113,18 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param status the status code
 	 */
 	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, HttpStatus status) {
-		super(body, headers);
-		Assert.notNull(status, "HttpStatus must not be null");
-		this.status = status;
+		this(body, headers, (Object) status);
+	}
+
+	/**
+	 * Create a new {@code HttpEntity} with the given body, headers, and status code.
+	 * @param body the entity body
+	 * @param headers the entity headers
+	 * @param rawStatus the status code value
+	 * @since 5.3.2
+	 */
+	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, int rawStatus) {
+		this(body, headers, (Object) rawStatus);
 	}
 
 	/**
@@ -218,19 +231,6 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * A shortcut for creating a {@code ResponseEntity} with the given body
-	 * and the {@linkplain HttpStatus#OK OK} status, or an empty body and a
-	 * {@linkplain HttpStatus#NOT_FOUND NOT FOUND} status in case of an
-	 * {@linkplain Optional#empty()} parameter.
-	 * @return the created {@code ResponseEntity}
-	 * @since 5.1
-	 */
-	public static <T> ResponseEntity<T> of(Optional<T> body) {
-		Assert.notNull(body, "Body must not be null");
-		return body.map(ResponseEntity::ok).orElse(notFound().build());
-	}
-
-	/**
 	 * Create a builder with the status set to {@linkplain HttpStatus#OK OK}.
 	 * @return the created builder
 	 * @since 4.1
@@ -246,8 +246,20 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @since 4.1
 	 */
 	public static <T> ResponseEntity<T> ok(T body) {
-		BodyBuilder builder = ok();
-		return builder.body(body);
+		return ok().body(body);
+	}
+
+	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body
+	 * and the {@linkplain HttpStatus#OK OK} status, or an empty body and a
+	 * {@linkplain HttpStatus#NOT_FOUND NOT FOUND} status in case of an
+	 * {@linkplain Optional#empty()} parameter.
+	 * @return the created {@code ResponseEntity}
+	 * @since 5.1
+	 */
+	public static <T> ResponseEntity<T> of(Optional<T> body) {
+		Assert.notNull(body, "Body must not be null");
+		return body.map(ResponseEntity::ok).orElseGet(() -> notFound().build());
 	}
 
 	/**
@@ -258,8 +270,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @since 4.1
 	 */
 	public static BodyBuilder created(URI location) {
-		BodyBuilder builder = status(HttpStatus.CREATED);
-		return builder.location(location);
+		return status(HttpStatus.CREATED).location(location);
 	}
 
 	/**

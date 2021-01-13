@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.mock.web;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -23,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -121,9 +124,17 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 		if (file != null) {
 			return file.getContentType();
 		}
-		else {
-			return null;
+		try {
+			Part part = getPart(paramOrFileName);
+			if (part != null) {
+				return part.getContentType();
+			}
 		}
+		catch (ServletException | IOException ex) {
+			// Should never happen (we're not actually parsing)
+			throw new IllegalStateException(ex);
+		}
+		return null;
 	}
 
 	@Override
@@ -147,7 +158,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 		String contentType = getMultipartContentType(paramOrFileName);
 		if (contentType != null) {
 			HttpHeaders headers = new HttpHeaders();
-			headers.add("Content-Type", contentType);
+			headers.add(HttpHeaders.CONTENT_TYPE, contentType);
 			return headers;
 		}
 		else {

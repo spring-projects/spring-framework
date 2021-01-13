@@ -62,6 +62,12 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 	@Override
 	ServerDefaultCodecs defaultCodecs();
 
+	/**
+	 * {@inheritDoc}.
+	 */
+	@Override
+	ServerCodecConfigurer clone();
+
 
 	/**
 	 * Static factory method for a {@code ServerCodecConfigurer}.
@@ -85,6 +91,9 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 		 * MultipartHttpMessageReader} created with an instance of
 		 * {@link org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader
 		 * SynchronossPartHttpMessageReader}.
+		 * <p>Note that {@link #maxInMemorySize(int)} and/or
+		 * {@link #enableLoggingRequestDetails(boolean)}, if configured, will be
+		 * applied to the given reader, if applicable.
 		 * @param reader the message reader to use for multipart requests.
 		 * @since 5.1.11
 		 */

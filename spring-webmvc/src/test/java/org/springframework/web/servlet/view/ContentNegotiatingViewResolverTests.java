@@ -29,9 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.FixedContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
@@ -44,6 +41,9 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -86,9 +86,16 @@ public class ContentNegotiatingViewResolverTests {
 
 	@Test
 	public void resolveViewNameWithPathExtension() throws Exception {
-		request.setRequestURI("/test.xls");
+		request.setRequestURI("/test");
+		request.setParameter("format", "xls");
+
+		String mediaType = "application/vnd.ms-excel";
+		ContentNegotiationManager manager = new ContentNegotiationManager(
+				new ParameterContentNegotiationStrategy(
+						Collections.singletonMap("xls", MediaType.parseMediaType(mediaType))));
 
 		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		viewResolver.setContentNegotiationManager(manager);
 		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
 		viewResolver.afterPropertiesSet();
 
@@ -99,7 +106,7 @@ public class ContentNegotiatingViewResolverTests {
 
 		given(viewResolverMock.resolveViewName(viewName, locale)).willReturn(null);
 		given(viewResolverMock.resolveViewName(viewName + ".xls", locale)).willReturn(viewMock);
-		given(viewMock.getContentType()).willReturn("application/vnd.ms-excel");
+		given(viewMock.getContentType()).willReturn(mediaType);
 
 		View result = viewResolver.resolveViewName(viewName, locale);
 		assertThat(result).as("Invalid view").isSameAs(viewMock);
@@ -308,8 +315,12 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveViewNameFilename() throws Exception {
 		request.setRequestURI("/test.html");
 
+		ContentNegotiationManager manager =
+				new ContentNegotiationManager(new PathExtensionContentNegotiationStrategy());
+
 		ViewResolver viewResolverMock1 = mock(ViewResolver.class, "viewResolver1");
 		ViewResolver viewResolverMock2 = mock(ViewResolver.class, "viewResolver2");
+		viewResolver.setContentNegotiationManager(manager);
 		viewResolver.setViewResolvers(Arrays.asList(viewResolverMock1, viewResolverMock2));
 
 		viewResolver.afterPropertiesSet();
@@ -332,6 +343,7 @@ public class ContentNegotiatingViewResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void resolveViewNameFilenameDefaultView() throws Exception {
 		request.setRequestURI("/test.json");
 

@@ -127,10 +127,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	public Mono<Object> invoke(Message<?> message, Object... providedArgs) {
 		return getMethodArgumentValues(message, providedArgs).flatMap(args -> {
 			Object value;
+			boolean isSuspendingFunction = false;
 			try {
 				Method method = getBridgedMethod();
 				ReflectionUtils.makeAccessible(method);
-				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+				if (KotlinDetector.isSuspendingFunction(method)) {
+					isSuspendingFunction = true;
 					value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
 				}
 				else {
@@ -151,7 +153,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 
 			MethodParameter returnType = getReturnType();
-			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(returnType.getParameterType());
+			Class<?> reactiveType = (isSuspendingFunction ? value.getClass() : returnType.getParameterType());
+			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(reactiveType);
 			return (isAsyncVoidReturnType(returnType, adapter) ?
 					Mono.from(adapter.toPublisher(value)) : Mono.justOrEmpty(value));
 		});

@@ -541,6 +541,16 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="allowed-origin-patterns" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Alternative to allowed-origins that supports origins declared via patterns,
+	e.g. "*.domain1.com".
+
+	By default this is not set.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
@@ -737,6 +747,16 @@
 
 		By default, all origins are allowed.
 								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="allowed-origin-patterns" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Alternative to allowed-origins that supports origins declared via patterns,
+	e.g. "*.domain1.com".
+
+	By default this is not set.
+					]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
 					</xsd:complexType>

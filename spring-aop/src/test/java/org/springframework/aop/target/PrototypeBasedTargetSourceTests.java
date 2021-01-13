@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.tests.sample.beans.SerializablePerson;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.beans.testfixture.beans.SerializablePerson;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,14 +48,14 @@ public class PrototypeBasedTargetSourceTests {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		RootBeanDefinition bd = new RootBeanDefinition(SerializablePerson.class);
 		bd.setPropertyValues(pvs);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("ts", tsBd);
 		bf.registerBeanDefinition("person", bd);
 
 		TestTargetSource cpts = (TestTargetSource) bf.getBean("ts");
-		TargetSource serialized = (TargetSource) SerializationTestUtils.serializeAndDeserialize(cpts);
+		TargetSource serialized = SerializationTestUtils.serializeAndDeserialize(cpts);
 		boolean condition = serialized instanceof SingletonTargetSource;
 		assertThat(condition).as("Changed to SingletonTargetSource on deserialization").isTrue();
 		SingletonTargetSource sts = (SingletonTargetSource) serialized;

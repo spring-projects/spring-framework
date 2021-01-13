@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.stream.Stream;
 
@@ -37,6 +38,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
@@ -92,6 +94,33 @@ class HeadersAdaptersTests {
 		headers.put("TestHeader", Arrays.asList("override"));
 		assertThat(headers.getFirst("TestHeader")).isEqualTo("override");
 		assertThat(headers.get("TestHeader").size()).isEqualTo(1);
+	}
+
+	@ParameterizedHeadersTest
+	void nullValuesShouldNotFail(String displayName, MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", null);
+		assertThat(headers.getFirst("TestHeader")).isNull();
+		headers.set("TestHeader", null);
+		assertThat(headers.getFirst("TestHeader")).isNull();
+	}
+
+	@ParameterizedHeadersTest
+	void shouldReflectChangesOnKeyset(String displayName, MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		assertThat(headers.keySet()).hasSize(1);
+		headers.keySet().removeIf("TestHeader"::equals);
+		assertThat(headers.keySet()).hasSize(0);
+	}
+
+	@ParameterizedHeadersTest
+	void shouldFailIfHeaderRemovedFromKeyset(String displayName, MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		assertThat(headers.keySet()).hasSize(1);
+		Iterator<String> names = headers.keySet().iterator();
+		assertThat(names.hasNext()).isTrue();
+		assertThat(names.next()).isEqualTo("TestHeader");
+		names.remove();
+		assertThatThrownBy(names::remove).isInstanceOf(IllegalStateException.class);
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

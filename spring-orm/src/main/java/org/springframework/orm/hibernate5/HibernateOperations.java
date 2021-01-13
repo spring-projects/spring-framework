@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ import org.springframework.lang.Nullable;
  * general {@link #execute} method and custom lambda blocks creating the queries,
  * ideally setting named parameters through {@link org.hibernate.query.Query}.
  * <b>Please be aware that deprecated operations are known to work with Hibernate
- * ORM 5.0-5.2 but may not work with Hibernate ORM 5.3 and higher anymore.</b>
+ * ORM 5.2 but may not work with Hibernate ORM 5.3 and higher anymore.</b>
  *
  * @author Juergen Hoeller
  * @since 4.2

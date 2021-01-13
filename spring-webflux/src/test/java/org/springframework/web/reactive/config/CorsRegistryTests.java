@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.config;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -56,11 +57,20 @@ public class CorsRegistryTests {
 		assertThat(configs.size()).isEqualTo(1);
 		CorsConfiguration config = configs.get("/foo");
 		assertThat(config.getAllowedOrigins()).isEqualTo(Arrays.asList("https://domain2.com", "https://domain2.com"));
-		assertThat(config.getAllowedMethods()).isEqualTo(Arrays.asList("DELETE"));
+		assertThat(config.getAllowedMethods()).isEqualTo(Collections.singletonList("DELETE"));
 		assertThat(config.getAllowedHeaders()).isEqualTo(Arrays.asList("header1", "header2"));
 		assertThat(config.getExposedHeaders()).isEqualTo(Arrays.asList("header3", "header4"));
 		assertThat(config.getAllowCredentials()).isEqualTo(false);
 		assertThat(config.getMaxAge()).isEqualTo(Long.valueOf(3600));
+	}
+
+	@Test
+	public void allowCredentials() {
+		this.registry.addMapping("/foo").allowCredentials(true);
+		CorsConfiguration config = this.registry.getCorsConfigurations().get("/foo");
+		assertThat(config.getAllowedOrigins())
+				.as("Globally origins=\"*\" and allowCredentials=true should be possible")
+				.containsExactly("*");
 	}
 
 }

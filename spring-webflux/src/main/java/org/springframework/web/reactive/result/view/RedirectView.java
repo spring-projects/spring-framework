@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import org.springframework.web.util.UriUtils;
  */
 public class RedirectView extends AbstractUrlBasedView {
 
-	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
+	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)}");
 
 
 	private HttpStatus statusCode = HttpStatus.SEE_OTHER;
@@ -220,10 +220,9 @@ public class RedirectView extends AbstractUrlBasedView {
 		return (processor != null ? processor.processUrl(exchange, result) : result);
 	}
 
-	@SuppressWarnings("unchecked")
 	private Map<String, String> getCurrentUriVariables(ServerWebExchange exchange) {
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		return exchange.getAttributeOrDefault(name, Collections.<String, String>emptyMap());
+		return exchange.getAttributeOrDefault(name, Collections.emptyMap());
 	}
 
 	/**
@@ -245,12 +244,12 @@ public class RedirectView extends AbstractUrlBasedView {
 			String name = matcher.group(1);
 			Object value = (model.containsKey(name) ? model.get(name) : uriVariables.get(name));
 			Assert.notNull(value, () -> "No value for URI variable '" + name + "'");
-			result.append(targetUrl.substring(endLastMatch, matcher.start()));
+			result.append(targetUrl, endLastMatch, matcher.start());
 			result.append(encodeUriVariable(value.toString()));
 			endLastMatch = matcher.end();
 			found = matcher.find();
 		}
-		result.append(targetUrl.substring(endLastMatch, targetUrl.length()));
+		result.append(targetUrl, endLastMatch, targetUrl.length());
 		return result;
 	}
 

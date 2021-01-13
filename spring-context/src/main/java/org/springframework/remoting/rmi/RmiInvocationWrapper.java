@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * @since 14.05.2003
  * @see RmiServiceExporter
  */
+@Deprecated
 class RmiInvocationWrapper implements RmiInvocationHandler {
 
 	private final Object wrappedObject;

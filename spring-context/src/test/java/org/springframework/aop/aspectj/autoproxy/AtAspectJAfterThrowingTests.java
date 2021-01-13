@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,24 +36,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AtAspectJAfterThrowingTests {
 
 	@Test
-	public void testAccessThrowable() throws Exception {
+	public void testAccessThrowable() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 
 		ITestBean bean = (ITestBean) ctx.getBean("testBean");
 		ExceptionHandlingAspect aspect = (ExceptionHandlingAspect) ctx.getBean("aspect");
 
 		assertThat(AopUtils.isAopProxy(bean)).isTrue();
+		IOException exceptionThrown = null;
 		try {
 			bean.unreliableFileOperation();
 		}
-		catch (IOException e) {
-			//
+		catch (IOException ex) {
+			exceptionThrown = ex;
 		}
 
 		assertThat(aspect.handled).isEqualTo(1);
-		assertThat(aspect.lastException).isNotNull();
+		assertThat(aspect.lastException).isSameAs(exceptionThrown);
 	}
+
 }
 
 
@@ -64,7 +66,7 @@ class ExceptionHandlingAspect {
 
 	public IOException lastException;
 
-	@AfterThrowing(pointcut = "within(org.springframework.tests.sample.beans.ITestBean+)", throwing = "ex")
+	@AfterThrowing(pointcut = "within(org.springframework.beans.testfixture.beans.ITestBean+)", throwing = "ex")
 	public void handleIOException(IOException ex) {
 		handled++;
 		lastException = ex;

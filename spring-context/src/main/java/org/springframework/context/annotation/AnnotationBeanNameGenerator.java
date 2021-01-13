@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.context.annotation;
 
 import java.beans.Introspector;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -32,15 +34,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link org.springframework.beans.factory.support.BeanNameGenerator}
- * implementation for bean classes annotated with the
- * {@link org.springframework.stereotype.Component @Component} annotation
- * or with another annotation that is itself annotated with
- * {@link org.springframework.stereotype.Component @Component} as a
+ * {@link BeanNameGenerator} implementation for bean classes annotated with the
+ * {@link org.springframework.stereotype.Component @Component} annotation or
+ * with another annotation that is itself annotated with {@code @Component} as a
  * meta-annotation. For example, Spring's stereotype annotations (such as
  * {@link org.springframework.stereotype.Repository @Repository}) are
- * themselves annotated with
- * {@link org.springframework.stereotype.Component @Component}.
+ * themselves annotated with {@code @Component}.
  *
  * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and
  * JSR-330's {@link javax.inject.Named} annotations, if available. Note that
@@ -60,6 +59,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.stereotype.Service#value()
  * @see org.springframework.stereotype.Controller#value()
  * @see javax.inject.Named#value()
+ * @see FullyQualifiedAnnotationBeanNameGenerator
  */
 public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
@@ -71,6 +71,8 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	public static final AnnotationBeanNameGenerator INSTANCE = new AnnotationBeanNameGenerator();
 
 	private static final String COMPONENT_ANNOTATION_CLASSNAME = "org.springframework.stereotype.Component";
+
+	private final Map<String, Set<String>> metaAnnotationTypesCache = new ConcurrentHashMap<>();
 
 
 	@Override
@@ -98,16 +100,22 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		String beanName = null;
 		for (String type : types) {
 			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(amd, type);
-			if (attributes != null && isStereotypeWithNameValue(type, amd.getMetaAnnotationTypes(type), attributes)) {
-				Object value = attributes.get("value");
-				if (value instanceof String) {
-					String strVal = (String) value;
-					if (StringUtils.hasLength(strVal)) {
-						if (beanName != null && !strVal.equals(beanName)) {
-							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
-									"component names: '" + beanName + "' versus '" + strVal + "'");
+			if (attributes != null) {
+				Set<String> metaTypes = this.metaAnnotationTypesCache.computeIfAbsent(type, key -> {
+					Set<String> result = amd.getMetaAnnotationTypes(key);
+					return (result.isEmpty() ? Collections.emptySet() : result);
+				});
+				if (isStereotypeWithNameValue(type, metaTypes, attributes)) {
+					Object value = attributes.get("value");
+					if (value instanceof String) {
+						String strVal = (String) value;
+						if (StringUtils.hasLength(strVal)) {
+							if (beanName != null && !strVal.equals(beanName)) {
+								throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
+										"component names: '" + beanName + "' versus '" + strVal + "'");
+							}
+							beanName = strVal;
 						}
-						beanName = strVal;
 					}
 				}
 			}

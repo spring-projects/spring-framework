@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,15 +32,14 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTests;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorResourceFactory;
-import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
@@ -63,6 +62,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 
 	@BeforeAll
 	void setUpReactorResourceFactory() {
+		this.factory.setShutdownQuietPeriod(Duration.ofMillis(100));
 		this.factory.afterPropertiesSet();
 	}
 
@@ -86,8 +86,8 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 
 		if (super.bufferFactory instanceof NettyDataBufferFactory) {
 			ByteBufAllocator allocator = ((NettyDataBufferFactory) super.bufferFactory).getByteBufAllocator();
-			return new ReactorClientHttpConnector(this.factory, httpClient ->
-					httpClient.tcpConfiguration(tcpClient -> tcpClient.option(ChannelOption.ALLOCATOR, allocator)));
+			return new ReactorClientHttpConnector(this.factory,
+					client -> client.option(ChannelOption.ALLOCATOR, allocator));
 		}
 		else {
 			return new ReactorClientHttpConnector();
@@ -126,7 +126,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.retrieve()
 				.bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {});
 
-		StepVerifier.create(mono).expectError(UnsupportedMediaTypeException.class).verify(Duration.ofSeconds(3));
+		StepVerifier.create(mono).expectError(WebClientResponseException.class).verify(Duration.ofSeconds(3));
 		assertThat(this.server.getRequestCount()).isEqualTo(1);
 	}
 
@@ -182,9 +182,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.setBody("foo bar"));
 
 		Mono<Void> result  = this.webClient.get()
-				.exchange()
-				.flatMap(ClientResponse::releaseBody);
-
+				.exchangeToMono(ClientResponse::releaseBody);
 
 		StepVerifier.create(result)
 				.expectComplete()
@@ -201,8 +199,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.setBody("foo bar"));
 
 		Mono<ResponseEntity<Void>> result  = this.webClient.get()
-				.exchange()
-				.flatMap(ClientResponse::toBodilessEntity);
+				.exchangeToMono(ClientResponse::toBodilessEntity);
 
 		StepVerifier.create(result)
 				.assertNext(entity -> {

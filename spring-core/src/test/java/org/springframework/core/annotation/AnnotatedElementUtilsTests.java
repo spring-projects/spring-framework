@@ -42,10 +42,10 @@ import org.springframework.core.annotation.AnnotationUtilsTests.ExtendsBaseClass
 import org.springframework.core.annotation.AnnotationUtilsTests.ImplementsInterfaceWithGenericAnnotatedMethod;
 import org.springframework.core.annotation.AnnotationUtilsTests.WebController;
 import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
+import org.springframework.core.testfixture.stereotype.Component;
+import org.springframework.core.testfixture.stereotype.Indexed;
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Indexed;
 import org.springframework.util.MultiValueMap;
 
 import static java.util.Arrays.asList;
@@ -517,6 +517,20 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	void getMergedAnnotationWithImplicitAliasesWithDefaultsInMetaAnnotationOnComposedAnnotation() {
+		Class<?> element = ImplicitAliasesWithDefaultsClass.class;
+		String name = AliasesWithDefaults.class.getName();
+		AliasesWithDefaults annotation = getMergedAnnotation(element, AliasesWithDefaults.class);
+
+		assertThat(annotation).as("Should find @AliasesWithDefaults on " + element.getSimpleName()).isNotNull();
+		assertThat(annotation.a1()).as("a1").isEqualTo("ImplicitAliasesWithDefaults");
+		assertThat(annotation.a2()).as("a2").isEqualTo("ImplicitAliasesWithDefaults");
+
+		// Verify contracts between utility methods:
+		assertThat(isAnnotated(element, name)).isTrue();
+	}
+
+	@Test
 	void getMergedAnnotationAttributesWithInvalidConventionBasedComposedAnnotation() {
 		Class<?> element = InvalidConventionBasedComposedContextConfigClass.class;
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
@@ -597,7 +611,7 @@ class AnnotatedElementUtilsTests {
 
 	/**
 	 * Bridge/bridged method setup code copied from
-	 * {@link org.springframework.core.BridgeMethodResolverTests#testWithGenericParameter()}.
+	 * {@link org.springframework.core.BridgeMethodResolverTests#withGenericParameter()}.
 	 * @since 4.2
 	 */
 	@Test
@@ -1064,7 +1078,6 @@ class AnnotatedElementUtilsTests {
 		String[] xmlConfigFiles() default {};
 	}
 
-
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface AliasedComposedContextConfig {
@@ -1103,6 +1116,27 @@ class AnnotatedElementUtilsTests {
 	@ImplicitAliasesContextConfig(xmlFiles = {"A.xml", "B.xml"})
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ComposedImplicitAliasesContextConfig {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface AliasesWithDefaults {
+
+		@AliasFor("a2")
+		String a1() default "AliasesWithDefaults";
+
+		@AliasFor("a1")
+		String a2() default "AliasesWithDefaults";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@AliasesWithDefaults
+	@interface ImplicitAliasesWithDefaults {
+
+		@AliasFor(annotation = AliasesWithDefaults.class, attribute = "a1")
+		String b1() default "ImplicitAliasesWithDefaults";
+
+		@AliasFor(annotation = AliasesWithDefaults.class, attribute = "a2")
+		String b2() default "ImplicitAliasesWithDefaults";
 	}
 
 	@ImplicitAliasesContextConfig
@@ -1408,6 +1442,10 @@ class AnnotatedElementUtilsTests {
 
 	@ImplicitAliasesContextConfig(xmlFiles = "baz.xml")
 	static class ImplicitAliasesContextConfigClass3 {
+	}
+
+	@ImplicitAliasesWithDefaults
+	static class ImplicitAliasesWithDefaultsClass {
 	}
 
 	@TransitiveImplicitAliasesContextConfig(groovy = "test.groovy")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,16 @@
 package org.springframework.web.bind.support;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.lang.Nullable;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartRequest;
+import org.springframework.web.multipart.support.StandardServletPartUtils;
 
 /**
  * Special {@link org.springframework.validation.DataBinder} to perform data binding
@@ -101,7 +98,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 * <p>The type of the target property for a multipart file can be Part, MultipartFile,
 	 * byte[], or String. The latter two receive the contents of the uploaded file;
 	 * all metadata like original file name, content type, etc are lost in those cases.
-	 * @param request request with parameters to bind (can be multipart)
+	 * @param request the request with parameters to bind (can be multipart)
 	 * @see org.springframework.web.multipart.MultipartRequest
 	 * @see org.springframework.web.multipart.MultipartFile
 	 * @see javax.servlet.http.Part
@@ -109,51 +106,19 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 */
 	public void bind(WebRequest request) {
 		MutablePropertyValues mpvs = new MutablePropertyValues(request.getParameterMap());
-		if (isMultipartRequest(request) && request instanceof NativeWebRequest) {
+		if (request instanceof NativeWebRequest) {
 			MultipartRequest multipartRequest = ((NativeWebRequest) request).getNativeRequest(MultipartRequest.class);
 			if (multipartRequest != null) {
 				bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
 			}
-			else {
+			else if (StringUtils.startsWithIgnoreCase(request.getHeader("Content-Type"), "multipart/")) {
 				HttpServletRequest servletRequest = ((NativeWebRequest) request).getNativeRequest(HttpServletRequest.class);
 				if (servletRequest != null) {
-					bindParts(servletRequest, mpvs);
+					StandardServletPartUtils.bindParts(servletRequest, mpvs, isBindEmptyMultipartFiles());
 				}
 			}
 		}
 		doBind(mpvs);
-	}
-
-	/**
-	 * Check if the request is a multipart request (by checking its Content-Type header).
-	 * @param request request with parameters to bind
-	 */
-	private boolean isMultipartRequest(WebRequest request) {
-		String contentType = request.getHeader("Content-Type");
-		return (contentType != null && StringUtils.startsWithIgnoreCase(contentType, "multipart"));
-	}
-
-	private void bindParts(HttpServletRequest request, MutablePropertyValues mpvs) {
-		try {
-			MultiValueMap<String, Part> map = new LinkedMultiValueMap<>();
-			for (Part part : request.getParts()) {
-				map.add(part.getName(), part);
-			}
-			map.forEach((key, values) -> {
-				if (values.size() == 1) {
-					Part part = values.get(0);
-					if (isBindEmptyMultipartFiles() || part.getSize() > 0) {
-						mpvs.add(key, part);
-					}
-				}
-				else {
-					mpvs.add(key, values);
-				}
-			});
-		}
-		catch (Exception ex) {
-			throw new MultipartException("Failed to get request parts", ex);
-		}
 	}
 
 	/**

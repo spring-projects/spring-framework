@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,13 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Simple {@link TransactionAttributeSource} implementation that
@@ -44,7 +46,7 @@ import org.springframework.util.PatternMatchUtils;
  * @see NameMatchTransactionAttributeSource
  */
 public class MethodMapTransactionAttributeSource
-		implements TransactionAttributeSource, BeanClassLoaderAware, InitializingBean {
+		implements TransactionAttributeSource, EmbeddedValueResolverAware, BeanClassLoaderAware, InitializingBean {
 
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -52,6 +54,9 @@ public class MethodMapTransactionAttributeSource
 	/** Map from method name to attribute value. */
 	@Nullable
 	private Map<String, TransactionAttribute> methodMap;
+
+	@Nullable
+	private StringValueResolver embeddedValueResolver;
 
 	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
@@ -81,6 +86,11 @@ public class MethodMapTransactionAttributeSource
 	 */
 	public void setMethodMap(Map<String, TransactionAttribute> methodMap) {
 		this.methodMap = methodMap;
+	}
+
+	@Override
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.embeddedValueResolver = resolver;
 	}
 
 	@Override
@@ -188,6 +198,9 @@ public class MethodMapTransactionAttributeSource
 		Assert.notNull(attr, "TransactionAttribute must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding transactional method [" + method + "] with attribute [" + attr + "]");
+		}
+		if (this.embeddedValueResolver != null && attr instanceof DefaultTransactionAttribute) {
+			((DefaultTransactionAttribute) attr).resolveAttributeStrings(this.embeddedValueResolver);
 		}
 		this.transactionAttributeMap.put(method, attr);
 	}

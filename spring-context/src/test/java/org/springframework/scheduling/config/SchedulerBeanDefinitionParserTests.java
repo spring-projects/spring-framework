@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,14 +44,14 @@ public class SchedulerBeanDefinitionParserTests {
 	public void defaultScheduler() {
 		ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) this.context.getBean("defaultScheduler");
 		Integer size = (Integer) new DirectFieldAccessor(scheduler).getPropertyValue("poolSize");
-		assertThat(size).isEqualTo(new Integer(1));
+		assertThat(size).isEqualTo(1);
 	}
 
 	@Test
 	public void customScheduler() {
 		ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) this.context.getBean("customScheduler");
 		Integer size = (Integer) new DirectFieldAccessor(scheduler).getPropertyValue("poolSize");
-		assertThat(size).isEqualTo(new Integer(42));
+		assertThat(size).isEqualTo(42);
 	}
 
 	@Test

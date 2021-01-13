@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,6 +117,24 @@ public class MockRestServiceServerTests {
 		server.verify();
 	}
 
+	@Test  // gh-24486
+	public void resetClearsRequestFailures() {
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
+		server.expect(once(), requestTo("/remoteurl")).andRespond(withSuccess());
+		this.restTemplate.postForEntity("/remoteurl", null, String.class);
+		server.verify();
+
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> this.restTemplate.postForEntity("/remoteurl", null, String.class))
+				.withMessageStartingWith("No further requests expected");
+
+		server.reset();
+
+		server.expect(once(), requestTo("/remoteurl")).andRespond(withSuccess());
+		this.restTemplate.postForEntity("/remoteurl", null, String.class);
+		server.verify();
+	}
+
 	@Test  // SPR-16132
 	public void followUpRequestAfterFailure() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
@@ -144,13 +162,13 @@ public class MockRestServiceServerTests {
 		server.expect(once(), requestTo("/remoteurl")).andRespond(withSuccess());
 
 		this.restTemplate.postForEntity("/remoteurl", null, String.class);
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				this.restTemplate.postForEntity("/remoteurl", null, String.class))
-			.withMessageStartingWith("No further requests expected");
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> this.restTemplate.postForEntity("/remoteurl", null, String.class))
+				.withMessageStartingWith("No further requests expected");
 
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(
-				server::verify)
-			.withMessageStartingWith("Some requests did not execute successfully");
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(server::verify)
+				.withMessageStartingWith("Some requests did not execute successfully");
 	}
 
 }

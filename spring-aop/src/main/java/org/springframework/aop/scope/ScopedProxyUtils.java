@@ -124,8 +124,8 @@ public abstract class ScopedProxyUtils {
 	}
 
 	/**
-	 * Specify if the {@code beanName} is the name of a bean that references the target
-	 * bean within a scoped proxy.
+	 * Determine if the {@code beanName} is the name of a bean that references
+	 * the target bean within a scoped proxy.
 	 * @since 4.1.4
 	 */
 	public static boolean isScopedTarget(@Nullable String beanName) {

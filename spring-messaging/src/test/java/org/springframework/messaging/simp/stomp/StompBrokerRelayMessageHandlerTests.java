@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.stomp;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -25,32 +25,34 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.tcp.ReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for StompBrokerRelayMessageHandler.
+ * Unit tests for {@link StompBrokerRelayMessageHandler}.
  *
  * @author Rossen Stoyanchev
  */
-public class StompBrokerRelayMessageHandlerTests {
+class StompBrokerRelayMessageHandlerTests {
 
 	private StompBrokerRelayMessageHandler brokerRelay;
 
@@ -58,14 +60,16 @@ public class StompBrokerRelayMessageHandlerTests {
 
 	private StubTcpOperations tcpClient;
 
+	ArgumentCaptor<Runnable> messageCountTaskCaptor = ArgumentCaptor.forClass(Runnable.class);
+
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 
 		this.outboundChannel = new StubMessageChannel();
 
 		this.brokerRelay = new StompBrokerRelayMessageHandler(new StubMessageChannel(),
-				this.outboundChannel, new StubMessageChannel(), Arrays.asList("/topic")) {
+				this.outboundChannel, new StubMessageChannel(), Collections.singletonList("/topic")) {
 
 			@Override
 			protected void startInternal() {
@@ -76,11 +80,13 @@ public class StompBrokerRelayMessageHandlerTests {
 
 		this.tcpClient = new StubTcpOperations();
 		this.brokerRelay.setTcpClient(this.tcpClient);
+
+		this.brokerRelay.setTaskScheduler(mock(TaskScheduler.class));
 	}
 
 
 	@Test
-	public void virtualHost() throws Exception {
+	void virtualHost() {
 
 		this.brokerRelay.setVirtualHost("ABC");
 
@@ -101,7 +107,7 @@ public class StompBrokerRelayMessageHandlerTests {
 	}
 
 	@Test
-	public void loginAndPasscode() throws Exception {
+	void loginAndPasscode() {
 
 		this.brokerRelay.setSystemLogin("syslogin");
 		this.brokerRelay.setSystemPasscode("syspasscode");
@@ -125,23 +131,56 @@ public class StompBrokerRelayMessageHandlerTests {
 	}
 
 	@Test
-	public void destinationExcluded() throws Exception {
+	void destinationExcluded() {
+		this.brokerRelay.start();
+		this.brokerRelay.handleMessage(connectMessage("sess1", "joe"));
+
+		SimpMessageHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		accessor.setLeaveMutable(true);
+		this.tcpClient.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
+
+		accessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		accessor.setSessionId("sess1");
+		accessor.setDestination("/user/daisy/foo");
+		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
+
+		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+		StompHeaderAccessor headers = this.tcpClient.getSentHeaders(0);
+		assertThat(headers.getCommand()).isEqualTo(StompCommand.CONNECT);
+		assertThat(headers.getSessionId()).isEqualTo(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID);
+
+		headers = this.tcpClient.getSentHeaders(1);
+		assertThat(headers.getCommand()).isEqualTo(StompCommand.CONNECT);
+		assertThat(headers.getSessionId()).isEqualTo("sess1");
+	}
+
+	@Test // gh-22822
+	void destinationExcludedWithHeartbeat() {
+		Message<byte[]> connectMessage = connectMessage("sess1", "joe");
+		MessageHeaderAccessor.getAccessor(connectMessage, StompHeaderAccessor.class).setHeartbeat(10000, 10000);
 
 		this.brokerRelay.start();
+		this.brokerRelay.handleMessage(connectMessage);
 
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
-		headers.setSessionId("sess1");
-		headers.setDestination("/user/daisy/foo");
-		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()));
+		SimpMessageHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		accessor.setLeaveMutable(true);
+		this.tcpClient.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(1);
-		StompHeaderAccessor headers1 = this.tcpClient.getSentHeaders(0);
-		assertThat(headers1.getCommand()).isEqualTo(StompCommand.CONNECT);
-		assertThat(headers1.getSessionId()).isEqualTo(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID);
+		// Run the messageCountTask to clear the message count
+		verify(this.brokerRelay.getTaskScheduler()).scheduleWithFixedDelay(this.messageCountTaskCaptor.capture(), eq(5000L));
+		this.messageCountTaskCaptor.getValue().run();
+
+		accessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		accessor.setSessionId("sess1");
+		accessor.setDestination("/user/daisy/foo");
+		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
+
+		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(3);
+		assertThat(this.tcpClient.getSentHeaders(2).getMessageType()).isEqualTo(SimpMessageType.HEARTBEAT);
 	}
 
 	@Test
-	public void messageFromBrokerIsEnriched() throws Exception {
+	void messageFromBrokerIsEnriched() {
 
 		this.brokerRelay.start();
 		this.brokerRelay.handleMessage(connectMessage("sess1", "joe"));
@@ -161,7 +200,7 @@ public class StompBrokerRelayMessageHandlerTests {
 	// SPR-12820
 
 	@Test
-	public void connectWhenBrokerNotAvailable() throws Exception {
+	void connectWhenBrokerNotAvailable() {
 
 		this.brokerRelay.start();
 		this.brokerRelay.stopInternal();
@@ -176,7 +215,7 @@ public class StompBrokerRelayMessageHandlerTests {
 	}
 
 	@Test
-	public void sendAfterBrokerUnavailable() throws Exception {
+	void sendAfterBrokerUnavailable() {
 
 		this.brokerRelay.start();
 		assertThat(this.brokerRelay.getConnectionCount()).isEqualTo(1);
@@ -197,7 +236,8 @@ public class StompBrokerRelayMessageHandlerTests {
 	}
 
 	@Test
-	public void systemSubscription() throws Exception {
+	@SuppressWarnings("rawtypes")
+	void systemSubscription() {
 
 		MessageHandler handler = mock(MessageHandler.class);
 		this.brokerRelay.setSystemSubscriptions(Collections.singletonMap("/topic/foo", handler));
@@ -225,6 +265,7 @@ public class StompBrokerRelayMessageHandlerTests {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
 		headers.setSessionId(sessionId);
 		headers.setUser(new TestPrincipal(user));
+		headers.setLeaveMutable(true);
 		return MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 	}
 
@@ -247,18 +288,7 @@ public class StompBrokerRelayMessageHandlerTests {
 	private static ListenableFutureTask<Void> getVoidFuture() {
 		ListenableFutureTask<Void> futureTask = new ListenableFutureTask<>(new Callable<Void>() {
 			@Override
-			public Void call() throws Exception {
-				return null;
-			}
-		});
-		futureTask.run();
-		return futureTask;
-	}
-
-	private static ListenableFutureTask<Boolean> getBooleanFuture() {
-		ListenableFutureTask<Boolean> futureTask = new ListenableFutureTask<>(new Callable<Boolean>() {
-			@Override
-			public Boolean call() throws Exception {
+			public Void call() {
 				return null;
 			}
 		});

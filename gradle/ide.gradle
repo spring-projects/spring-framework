@@ -29,12 +29,11 @@ eclipse.classpath.file.whenMerged { classpath ->
 	classpath.entries.removeAll { entry -> (entry.path =~ /(?!.*?repack.*\.jar).*?\/([^\/]+)\/build\/libs\/[^\/]+\.jar/) }
 }
 
-
 // Use separate main/test outputs (prevents WTP from packaging test classes)
 eclipse.classpath.defaultOutputDir = file(project.name+"/bin/eclipse")
 eclipse.classpath.file.beforeMerged { classpath ->
 	classpath.entries.findAll{ it instanceof SourceFolder }.each {
-		if(it.output.startsWith("bin/")) {
+		if (it.output.startsWith("bin/")) {
 			it.output = null
 		}
 	}
@@ -53,6 +52,15 @@ eclipse.classpath.file.whenMerged { classpath ->
 		classpath.entries.remove(it)
 		// append to end of classpath
 		classpath.entries.add(it)
+	}
+}
+
+// Ensure that JMH sources and resources are treated as test classpath entries
+// so that they can see test fixtures.
+// https://github.com/melix/jmh-gradle-plugin/issues/157
+eclipse.classpath.file.whenMerged {
+	entries.findAll { it.path =~ /src\/jmh\/(java|resources)/ }.each {
+		it.entryAttributes['test'] = 'true'
 	}
 }
 

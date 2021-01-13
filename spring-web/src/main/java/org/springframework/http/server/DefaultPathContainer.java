@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ final class DefaultPathContainer implements PathContainer {
 
 
 	static PathContainer createFromUrlPath(String path, Options options) {
-		if (path.equals("")) {
+		if (path.isEmpty()) {
 			return EMPTY_PATH;
 		}
 		char separator = options.separator();
@@ -107,7 +107,7 @@ final class DefaultPathContainer implements PathContainer {
 		}
 		List<Element> elements = new ArrayList<>();
 		int begin;
-		if (path.length() > 0 && path.charAt(0) == separator) {
+		if (path.charAt(0) == separator) {
 			begin = 1;
 			elements.add(separatorElement);
 		}
@@ -117,7 +117,7 @@ final class DefaultPathContainer implements PathContainer {
 		while (begin < path.length()) {
 			int end = path.indexOf(separator, begin);
 			String segment = (end != -1 ? path.substring(begin, end) : path.substring(begin));
-			if (!segment.equals("")) {
+			if (!segment.isEmpty()) {
 				elements.add(options.shouldDecodeAndParseSegments() ?
 						decodeAndParsePathSegment(segment) :
 						new DefaultPathSegment(segment, separatorElement));
@@ -232,8 +232,6 @@ final class DefaultPathContainer implements PathContainer {
 
 		private final String valueToMatch;
 
-		private final char[] valueToMatchAsChars;
-
 		private final MultiValueMap<String, String> parameters;
 
 
@@ -243,7 +241,6 @@ final class DefaultPathContainer implements PathContainer {
 		DefaultPathSegment(String value, String valueToMatch, MultiValueMap<String, String> params) {
 			this.value = value;
 			this.valueToMatch = valueToMatch;
-			this.valueToMatchAsChars = valueToMatch.toCharArray();
 			this.parameters = CollectionUtils.unmodifiableMultiValueMap(params);
 		}
 
@@ -254,7 +251,6 @@ final class DefaultPathContainer implements PathContainer {
 			this.value = value;
 			this.valueToMatch = value.contains(separator.encodedSequence()) ?
 					value.replaceAll(separator.encodedSequence(), separator.value()) : value;
-			this.valueToMatchAsChars = this.valueToMatch.toCharArray();
 			this.parameters = EMPTY_PARAMS;
 		}
 
@@ -271,7 +267,7 @@ final class DefaultPathContainer implements PathContainer {
 
 		@Override
 		public char[] valueToMatchAsChars() {
-			return this.valueToMatchAsChars;
+			return this.valueToMatch.toCharArray();
 		}
 
 		@Override

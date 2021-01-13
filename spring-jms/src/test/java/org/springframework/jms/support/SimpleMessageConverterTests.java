@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public class SimpleMessageConverterTests {
 		Session session = mock(Session.class);
 		ObjectMessage message = mock(ObjectMessage.class);
 
-		Integer content = new Integer(5);
+		Integer content = 5;
 
 		given(session.createObjectMessage(content)).willReturn(message);
 		given(message.getObject()).willReturn(content);

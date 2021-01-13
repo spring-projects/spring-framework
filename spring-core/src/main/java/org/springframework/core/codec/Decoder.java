@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@ package org.springframework.core.codec;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -78,9 +79,9 @@ public interface Decoder<T> {
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints);
 
 	/**
-	 * Decode a data buffer to an Object of type T. This is useful when the input
-	 * stream consists of discrete messages (or events) and the content for each
-	 * can be decoded on its own.
+	 * Decode a data buffer to an Object of type T. This is useful for scenarios,
+	 * that distinct messages (or events) are decoded and handled individually,
+	 * in fully aggregated form.
 	 * @param buffer the {@code DataBuffer} to decode
 	 * @param targetType the expected output type
 	 * @param mimeType the MIME type associated with the data
@@ -88,20 +89,25 @@ public interface Decoder<T> {
 	 * @return the decoded value, possibly {@code null}
 	 * @since 5.2
 	 */
-	@SuppressWarnings("ConstantConditions")
+	@Nullable
 	default T decode(DataBuffer buffer, ResolvableType targetType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
 
-		MonoProcessor<T> processor = MonoProcessor.create();
-		decodeToMono(Mono.just(buffer), targetType, mimeType, hints).subscribeWith(processor);
+		CompletableFuture<T> future = decodeToMono(Mono.just(buffer), targetType, mimeType, hints).toFuture();
+		Assert.state(future.isDone(), "DataBuffer decoding should have completed.");
 
-		Assert.state(processor.isTerminated(), "DataBuffer decoding should have completed.");
-		Throwable ex = processor.getError();
-		if (ex != null) {
-			throw (ex instanceof CodecException ? (CodecException) ex :
-					new DecodingException("Failed to decode: " + ex.getMessage(), ex));
+		Throwable failure;
+		try {
+			return future.get();
 		}
-		return processor.peek();
+		catch (ExecutionException ex) {
+			failure = ex.getCause();
+		}
+		catch (InterruptedException ex) {
+			failure = ex;
+		}
+		throw (failure instanceof CodecException ? (CodecException) failure :
+				new DecodingException("Failed to decode: " + failure.getMessage(), failure));
 	}
 
 	/**

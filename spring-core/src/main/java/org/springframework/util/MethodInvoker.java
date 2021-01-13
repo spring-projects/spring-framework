@@ -225,8 +225,8 @@ public class MethodInvoker {
 
 		for (Method candidate : candidates) {
 			if (candidate.getName().equals(targetMethod)) {
-				Class<?>[] paramTypes = candidate.getParameterTypes();
-				if (paramTypes.length == argCount) {
+				if (candidate.getParameterCount() == argCount) {
+					Class<?>[] paramTypes = candidate.getParameterTypes();
 					int typeDiffWeight = getTypeDifferenceWeight(paramTypes, arguments);
 					if (typeDiffWeight < minTypeDiffWeight) {
 						minTypeDiffWeight = typeDiffWeight;

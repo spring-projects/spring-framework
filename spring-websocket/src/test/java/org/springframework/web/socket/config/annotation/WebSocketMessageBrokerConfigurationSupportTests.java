@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -67,6 +68,7 @@ import static org.mockito.Mockito.mock;
  * Test fixture for {@link WebSocketMessageBrokerConfigurationSupport}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class WebSocketMessageBrokerConfigurationSupportTests {
 
@@ -168,12 +170,12 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		WebSocketMessageBrokerStats stats = config.getBean(name, WebSocketMessageBrokerStats.class);
 		String actual = stats.toString();
 		String expected = "WebSocketSession\\[0 current WS\\(0\\)-HttpStream\\(0\\)-HttpPoll\\(0\\), " +
-				"0 total, 0 closed abnormally \\(0 connect failure, 0 send limit, 0 transport error\\)\\], " +
-				"stompSubProtocol\\[processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
-				"stompBrokerRelay\\[null\\], " +
-				"inboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
-				"outboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
-				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\]";
+				"0 total, 0 closed abnormally \\(0 connect failure, 0 send limit, 0 transport error\\)], " +
+				"stompSubProtocol\\[processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)], " +
+				"stompBrokerRelay\\[null], " +
+				"inboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d], " +
+				"outboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d], " +
+				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d]";
 
 		assertThat(actual.matches(expected)).as("\nExpected: " + expected.replace("\\", "") + "\n  Actual: " + actual).isTrue();
 	}
@@ -251,24 +253,25 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientInboundChannel() {
+		public AbstractSubscribableChannel clientInboundChannel(TaskExecutor clientInboundChannelExecutor) {
 			TestChannel channel = new TestChannel();
-			channel.setInterceptors(super.clientInboundChannel().getInterceptors());
+			channel.setInterceptors(super.clientInboundChannel(clientInboundChannelExecutor).getInterceptors());
 			return channel;
 		}
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientOutboundChannel() {
+		public AbstractSubscribableChannel clientOutboundChannel(TaskExecutor clientOutboundChannelExecutor) {
 			TestChannel channel = new TestChannel();
-			channel.setInterceptors(super.clientOutboundChannel().getInterceptors());
+			channel.setInterceptors(super.clientOutboundChannel(clientOutboundChannelExecutor).getInterceptors());
 			return channel;
 		}
 
 		@Override
-		public AbstractSubscribableChannel brokerChannel() {
+		public AbstractSubscribableChannel brokerChannel(AbstractSubscribableChannel clientInboundChannel,
+				AbstractSubscribableChannel clientOutboundChannel, TaskExecutor brokerChannelExecutor) {
 			TestChannel channel = new TestChannel();
-			channel.setInterceptors(super.brokerChannel().getInterceptors());
+			channel.setInterceptors(super.brokerChannel(clientInboundChannel, clientOutboundChannel, brokerChannelExecutor).getInterceptors());
 			return channel;
 		}
 	}

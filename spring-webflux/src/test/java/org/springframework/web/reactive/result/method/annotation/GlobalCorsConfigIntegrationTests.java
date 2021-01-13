@@ -26,13 +26,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -64,7 +64,7 @@ class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingIntegration
 
 	@Override
 	protected RestTemplate initRestTemplate() {
-		// JDK default HTTP client blacklists headers like Origin
+		// JDK default HTTP client disallowed headers like Origin
 		return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 	}
 
@@ -161,8 +161,7 @@ class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingIntegration
 		ResponseEntity<String> entity = performOptions("/ambiguous", this.headers, String.class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isEqualTo("http://localhost:9000");
-		assertThat(entity.getHeaders().getAccessControlAllowMethods())
-				.containsExactly(HttpMethod.GET);
+		assertThat(entity.getHeaders().getAccessControlAllowMethods()).containsExactly(HttpMethod.GET);
 		assertThat(entity.getHeaders().getAccessControlAllowCredentials()).isEqualTo(true);
 		assertThat(entity.getHeaders().get(HttpHeaders.VARY))
 				.containsExactly(HttpHeaders.ORIGIN, HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD,
@@ -177,12 +176,9 @@ class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingIntegration
 
 		@Override
 		protected void addCorsMappings(CorsRegistry registry) {
-			registry.addMapping("/cors-restricted")
-					.allowedOrigins("https://foo")
-					.allowedMethods("GET", "POST");
+			registry.addMapping("/cors-restricted").allowedOrigins("https://foo").allowedMethods("GET", "POST");
 			registry.addMapping("/cors");
-			registry.addMapping("/ambiguous")
-					.allowedMethods("GET", "POST");
+			registry.addMapping("/ambiguous").allowedMethods("GET", "POST");
 		}
 	}
 

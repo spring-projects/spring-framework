@@ -1,33 +1,16 @@
-buildscript {
-	dependencies {
-		classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16'
-		classpath 'io.spring.asciidoctor:spring-asciidoctor-extensions:0.1.3.RELEASE'
-	}
-}
-
 plugins {
-	id 'io.spring.dependency-management' version '1.0.8.RELEASE' apply false
-	id 'org.jetbrains.kotlin.jvm' version '1.3.50' apply false
-	id 'org.jetbrains.dokka' version '0.9.18' apply false
-	id 'org.asciidoctor.convert' version '1.5.8'
-	id 'io.spring.nohttp' version '0.0.3.RELEASE'
-	id 'de.undercouch.download' version '4.0.0'
-	id 'com.gradle.build-scan' version '2.4.2'
-	id "com.jfrog.artifactory" version '4.9.8' apply false
-	id "io.freefair.aspectj" version "4.1.1" apply false
-	id "com.github.ben-manes.versions" version "0.24.0"
-}
-
-if (System.getenv('GRADLE_ENTERPRISE_URL')) {
-	apply from: "$rootDir/gradle/build-scan-user-data.gradle"
-	buildScan {
-		captureTaskInputFiles = true
-		obfuscation {
-			ipAddresses { addresses -> addresses.collect { address -> '0.0.0.0'} }
-		}
-		publishAlways()
-		server = System.getenv('GRADLE_ENTERPRISE_URL')
-	}
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE' apply false
+	id 'io.spring.nohttp' version '0.0.5.RELEASE'
+	id 'org.jetbrains.kotlin.jvm' version '1.4.21' apply false
+	id 'org.jetbrains.dokka' version '0.10.1' apply false
+	id 'org.asciidoctor.jvm.convert' version '3.1.0'
+	id 'org.asciidoctor.jvm.pdf' version '3.1.0'
+	id 'de.undercouch.download' version '4.1.1'
+	id "io.freefair.aspectj" version '5.1.1' apply false
+	id "com.github.ben-manes.versions" version '0.28.0'
+	id "com.github.johnrengelman.shadow" version "6.1.0" apply false
+	id "me.champeau.gradle.jmh" version "0.5.2" apply false
+	id "org.jetbrains.kotlin.plugin.serialization" version "1.4.21" apply false
 }
 
 ext {
@@ -43,74 +26,83 @@ configure(allprojects) { project ->
 
 	dependencyManagement {
 		imports {
-			mavenBom "com.fasterxml.jackson:jackson-bom:2.10.0"
-			mavenBom "io.netty:netty-bom:4.1.43.Final"
-			mavenBom "io.projectreactor:reactor-bom:Dysprosium-SR1"
-			mavenBom "io.rsocket:rsocket-bom:1.0.0-RC5"
-			mavenBom "org.eclipse.jetty:jetty-bom:9.4.21.v20190926"
-			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.3.50"
-			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.3.2"
-			mavenBom "org.junit:junit-bom:5.5.2"
+			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.0"
+			mavenBom "io.netty:netty-bom:4.1.56.Final"
+			mavenBom "io.projectreactor:reactor-bom:2020.0.3"
+			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR8"
+			mavenBom "io.rsocket:rsocket-bom:1.1.0"
+			mavenBom "org.eclipse.jetty:jetty-bom:9.4.35.v20201120"
+			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.4.21"
+			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.4.2"
+			mavenBom "org.junit:junit-bom:5.7.0"
 		}
 		dependencies {
-			dependencySet(group: 'org.apache.logging.log4j', version: '2.12.1') {
+			dependencySet(group: 'org.apache.logging.log4j', version: '2.14.0') {
 				entry 'log4j-api'
 				entry 'log4j-core'
-				entry 'log4j-slf4j-impl'
 				entry 'log4j-jul'
+				entry 'log4j-slf4j-impl'
 			}
-			dependency "org.slf4j:slf4j-api:1.7.28"
-
+			dependency "org.slf4j:slf4j-api:1.7.30"
+			dependency("com.google.code.findbugs:findbugs:3.0.1") {
+				exclude group: "dom4j", name: "dom4j"
+			}
 			dependency "com.google.code.findbugs:jsr305:3.0.2"
 
-			dependencySet(group: 'org.aspectj', version: '1.9.4') {
+			dependencySet(group: 'org.aspectj', version: '1.9.6') {
 				entry 'aspectjrt'
 				entry 'aspectjtools'
 				entry 'aspectjweaver'
 			}
-			dependencySet(group: 'org.codehaus.groovy', version: '2.5.8') {
+			dependencySet(group: 'org.codehaus.groovy', version: '3.0.7') {
 				entry 'groovy'
 				entry 'groovy-jsr223'
-				entry 'groovy-templates'
+				entry 'groovy-templates'  // requires findbugs for warning-free compilation
 				entry 'groovy-test'
 				entry 'groovy-xml'
 			}
 
 			dependency "io.reactivex:rxjava:1.3.8"
 			dependency "io.reactivex:rxjava-reactive-streams:1.2.1"
-			dependency "io.reactivex.rxjava2:rxjava:2.2.13"
+			dependency "io.reactivex.rxjava2:rxjava:2.2.20"
+			dependency "io.reactivex.rxjava3:rxjava:3.0.9"
+			dependency "io.projectreactor.tools:blockhound:1.0.4.RELEASE"
 
-			dependency "com.caucho:hessian:4.0.62"
+			dependency "com.caucho:hessian:4.0.63"
 			dependency "com.fasterxml:aalto-xml:1.2.2"
-			dependency("com.fasterxml.woodstox:woodstox-core:5.2.0") {
+			dependency("com.fasterxml.woodstox:woodstox-core:6.2.3") {
 				exclude group: "stax", name: "stax-api"
 			}
 			dependency "com.google.code.gson:gson:2.8.6"
-			dependency "com.google.protobuf:protobuf-java-util:3.10.0"
+			dependency "com.google.protobuf:protobuf-java-util:3.14.0"
 			dependency "com.googlecode.protobuf-java-format:protobuf-java-format:1.4"
-			dependency("com.thoughtworks.xstream:xstream:1.4.11.1") {
+			dependency("com.thoughtworks.xstream:xstream:1.4.14") {
 				exclude group: "xpp3", name: "xpp3_min"
 				exclude group: "xmlpull", name: "xmlpull"
 			}
-			dependency "org.apache.johnzon:johnzon-jsonb:1.2.1"
+			dependency "org.apache.johnzon:johnzon-jsonb:1.2.8"
 			dependency("org.codehaus.jettison:jettison:1.3.8") {
 				exclude group: "stax", name: "stax-api"
 			}
-			dependencySet(group: 'org.jibx', version: '1.3.1') {
+			dependencySet(group: 'org.jibx', version: '1.3.3') {
 				entry 'jibx-bind'
 				entry 'jibx-run'
 			}
 			dependency "org.ogce:xpp3:1.1.6"
-			dependency "org.yaml:snakeyaml:1.25"
+			dependency "org.yaml:snakeyaml:1.27"
+			dependencySet(group: 'org.jetbrains.kotlinx', version: '1.0.0') {
+				entry 'kotlinx-serialization-core'
+				entry 'kotlinx-serialization-json'
+			}
 
 			dependency "com.h2database:h2:1.4.200"
-			dependency "com.github.ben-manes.caffeine:caffeine:2.8.0"
-			dependency "com.github.librepdf:openpdf:1.3.11"
-			dependency "com.rometools:rome:1.12.2"
+			dependency "com.github.ben-manes.caffeine:caffeine:2.8.8"
+			dependency "com.github.librepdf:openpdf:1.3.24"
+			dependency "com.rometools:rome:1.15.0"
 			dependency "commons-io:commons-io:2.5"
-			dependency "io.vavr:vavr:0.10.0"
+			dependency "io.vavr:vavr:0.10.3"
 			dependency "net.sf.jopt-simple:jopt-simple:5.0.4"
-			dependencySet(group: 'org.apache.activemq', version: '5.8.0') {
+			dependencySet(group: 'org.apache.activemq', version: '5.16.0') {
 				entry 'activemq-broker'
 				entry('activemq-kahadb-store') {
 					exclude group: "org.springframework", name: "spring-context"
@@ -118,37 +110,37 @@ configure(allprojects) { project ->
 				entry 'activemq-stomp'
 			}
 			dependency "org.apache.bcel:bcel:6.0"
-			dependency "org.apache.commons:commons-pool2:2.6.0"
+			dependency "org.apache.commons:commons-pool2:2.9.0"
 			dependencySet(group: 'org.apache.derby', version: '10.14.2.0') {
 				entry 'derby'
 				entry 'derbyclient'
 			}
-			dependency "org.apache.poi:poi-ooxml:4.1.1"
-			dependency "org.beanshell:bsh:2.0b5"
-			dependency "org.freemarker:freemarker:2.3.29"
-			dependency "org.hsqldb:hsqldb:2.5.0"
+			dependency "org.apache.poi:poi-ooxml:4.1.2"
+			dependency "org.apache-extras.beanshell:bsh:2.0b6"
+			dependency "org.freemarker:freemarker:2.3.30"
+			dependency "org.hsqldb:hsqldb:2.5.1"
 			dependency "org.quartz-scheduler:quartz:2.3.2"
 			dependency "org.codehaus.fabric3.api:commonj:1.1.0"
 			dependency "net.sf.ehcache:ehcache:2.10.6"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core:5.4.8.Final"
-			dependency "org.hibernate:hibernate-validator:6.0.17.Final"
-			dependency "org.webjars:webjars-locator-core:0.42"
+			dependency "org.hibernate:hibernate-core:5.4.27.Final"
+			dependency "org.hibernate:hibernate-validator:6.2.0.Final"
+			dependency "org.webjars:webjars-locator-core:0.46"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.27') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.41') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.27') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.41') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.0.27.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.3.Final') {
 				entry 'undertow-core'
 				entry('undertow-websockets-jsr') {
 					exclude group: "org.jboss.spec.javax.websocket", name: "jboss-websocket-api_1.1_spec"
@@ -159,62 +151,65 @@ configure(allprojects) { project ->
 				}
 			}
 
-			dependencySet(group: 'com.squareup.okhttp3', version: '3.14.3') {
+			dependencySet(group: 'com.squareup.okhttp3', version: '3.14.9') {
 				entry 'okhttp'
 				entry 'mockwebserver'
 			}
-			dependency("org.apache.httpcomponents:httpclient:4.5.10") {
+			dependency("org.apache.httpcomponents:httpclient:4.5.13") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.apache.httpcomponents:httpasyncclient:4.1.4") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.0.3"
+			dependency 'org.apache.httpcomponents.client5:httpclient5:5.0.3'
+			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.0.3'
+			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.1.5"
 
-			dependency "org.jruby:jruby:9.2.7.0"
+			dependency "org.jruby:jruby:9.2.13.0"
 			dependency "org.python:jython-standalone:2.7.1"
-			dependency "org.mozilla:rhino:1.7.10"
+			dependency "org.mozilla:rhino:1.7.11"
 
 			dependency "commons-fileupload:commons-fileupload:1.4"
 			dependency "org.synchronoss.cloud:nio-multipart-parser:1.1.0"
 
-			dependency("dom4j:dom4j:1.6.1") {
-				exclude group: "xml-apis", name: "xml-apis"
+			dependency("org.dom4j:dom4j:2.1.3") {
+				exclude group: "jaxen", name: "jaxen"
+				exclude group: "net.java.dev.msv", name: "xsdlib"
+				exclude group: "pull-parser", name: "pull-parser"
+				exclude group: "xpp3", name: "xpp3"
 			}
-			dependency("jaxen:jaxen:1.1.1") {
-				exclude group: "xml-apis", name: "xml-apis"
-				exclude group: "xom", name: "xom"
-				exclude group: "xerces", name: "xercesImpl"
+			dependency("jaxen:jaxen:1.2.0") {
+				exclude group: "dom4j", name: "dom4j"
 			}
 
-			dependency("junit:junit:4.12") {
+			dependency("junit:junit:4.13.1") {
 				exclude group: "org.hamcrest", name: "hamcrest-core"
 			}
 			dependency("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1") {
 				exclude group: "junit", name: "junit"
 			}
-			dependency "org.testng:testng:6.14.3"
+			dependency "org.testng:testng:7.3.0"
 			dependency "org.hamcrest:hamcrest:2.1"
-			dependency "org.awaitility:awaitility:3.1.3"
-			dependency "org.assertj:assertj-core:3.14.0"
-			dependencySet(group: 'org.xmlunit', version: '2.6.2') {
+			dependency "org.awaitility:awaitility:3.1.6"
+			dependency "org.assertj:assertj-core:3.18.1"
+			dependencySet(group: 'org.xmlunit', version: '2.8.2') {
 				entry 'xmlunit-assertj'
 				entry('xmlunit-matchers') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '3.1.0') {
+			dependencySet(group: 'org.mockito', version: '3.7.0') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 				entry 'mockito-junit-jupiter'
 			}
-			dependency "io.mockk:mockk:1.9.3"
+			dependency "io.mockk:mockk:1.10.2"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.36.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.46.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.36.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.46.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
@@ -223,6 +218,7 @@ configure(allprojects) { project ->
 			}
 			dependency "org.skyscreamer:jsonassert:1.5.0"
 			dependency "com.jayway.jsonpath:json-path:2.4.0"
+			dependency "org.bouncycastle:bcpkix-jdk15on:1.66"
 
 			dependencySet(group: 'org.apache.tiles', version: '3.0.8') {
 				entry 'tiles-api'
@@ -240,9 +236,9 @@ configure(allprojects) { project ->
 			}
 
 			dependency "com.ibm.websphere:uow:6.0.2.17"
-			dependency "com.jamonapi:jamon:2.81"
-			dependency "joda-time:joda-time:2.10.4"
-			dependency "org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.5"
+			dependency "com.jamonapi:jamon:2.82"
+			dependency "joda-time:joda-time:2.10.9"
+			dependency "org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.7"
 			dependency "org.javamoney:moneta:1.3"
 
 			dependency "com.sun.activation:javax.activation:1.2.0"
@@ -310,8 +306,10 @@ configure([rootProject] + javaProjects) { project ->
 	group = "org.springframework"
 
 	apply plugin: "java"
+	apply plugin: "java-test-fixtures"
 	apply plugin: "checkstyle"
 	apply plugin: 'org.springframework.build.compile'
+	apply from: "${rootDir}/gradle/custom-java-home.gradle"
 	apply from: "${rootDir}/gradle/ide.gradle"
 
 	pluginManager.withPlugin("kotlin") {
@@ -319,6 +317,8 @@ configure([rootProject] + javaProjects) { project ->
 		compileKotlin {
 			kotlinOptions {
 				jvmTarget = "1.8"
+				languageVersion = "1.3"
+				apiVersion = "1.3"
 				freeCompilerArgs = ["-Xjsr305=strict"]
 				allWarningsAsErrors = true
 			}
@@ -340,8 +340,8 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.26"
-		configDir = rootProject.file("src/checkstyle")
+		toolVersion = "8.39"
+		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
 	dependencies {
@@ -374,14 +374,15 @@ configure([rootProject] + javaProjects) { project ->
 			"https://tiles.apache.org/tiles-request/apidocs/",
 			"https://tiles.apache.org/framework/apidocs/",
 			"https://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
-			"https://www.ehcache.org/apidocs/2.10.4",
+			"https://www.ehcache.org/apidocs/2.10.4/",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
 			"https://fasterxml.github.io/jackson-core/javadoc/2.10/",
 			"https://fasterxml.github.io/jackson-databind/javadoc/2.10/",
 			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.10/",
 			"https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
-			"https://junit.org/junit4/javadoc/4.12/",
-			"https://junit.org/junit5/docs/5.5.2/api/"
+			"https://projectreactor.io/docs/test/release/api/",
+			"https://junit.org/junit4/javadoc/4.13.1/",
+			"https://junit.org/junit5/docs/5.7.0/api/"
 	] as String[]
 }
 
@@ -401,7 +402,7 @@ configure(rootProject) {
 
 	nohttp {
 		source.exclude "**/test-output/**"
-		whitelistFile = project.file("src/nohttp/whitelist.lines")
+		allowlistFile = project.file("src/nohttp/allowlist.lines")
 		def rootPath = file(rootDir).toPath()
 		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc"
 		projectDirs.forEach { dir ->
@@ -412,10 +413,6 @@ configure(rootProject) {
 				.collect { rootPath.relativize(new File(dir, it).toPath()) }
 				.forEach { source.exclude "$it" }
 		}
-	}
-
-	dependencies {
-		asciidoctor("io.spring.asciidoctor:spring-asciidoctor-extensions:0.1.3.RELEASE")
 	}
 
 	publishing {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class FileUrlResource extends UrlResource implements WritableResource {
 	/**
 	 * Create a new {@code FileUrlResource} based on the given URL object.
 	 * <p>Note that this does not enforce "file" as URL protocol. If a protocol
-	 * is known to be resolvable to a file,
+	 * is known to be resolvable to a file, it is acceptable for this purpose.
 	 * @param url a URL
 	 * @see ResourceUtils#isFileURL(URL)
 	 * @see #getFile()
@@ -89,15 +89,8 @@ public class FileUrlResource extends UrlResource implements WritableResource {
 	@Override
 	public boolean isWritable() {
 		try {
-			URL url = getURL();
-			if (ResourceUtils.isFileURL(url)) {
-				// Proceed with file system resolution
-				File file = getFile();
-				return (file.canWrite() && !file.isDirectory());
-			}
-			else {
-				return true;
-			}
+			File file = getFile();
+			return (file.canWrite() && !file.isDirectory());
 		}
 		catch (IOException ex) {
 			return false;

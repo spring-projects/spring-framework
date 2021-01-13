@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,9 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.NestedTestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
@@ -56,9 +59,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.NestedTestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -280,12 +280,49 @@ public class ConfigurationClassProcessingTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithApplicationListener.class);
 		ctx.refresh();
+
 		ConfigWithApplicationListener config = ctx.getBean(ConfigWithApplicationListener.class);
 		assertThat(config.closed).isFalse();
 		ctx.close();
 		assertThat(config.closed).isTrue();
 	}
 
+	@Test
+	public void configurationWithOverloadedBeanMismatch() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(OverloadedBeanMismatch.class));
+		ctx.refresh();
+
+		TestBean tb = ctx.getBean(TestBean.class);
+		assertThat(tb.getLawyer()).isEqualTo(ctx.getBean(NestedTestBean.class));
+	}
+
+	@Test
+	public void configurationWithOverloadedBeanMismatchWithAsm() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(OverloadedBeanMismatch.class.getName()));
+		ctx.refresh();
+
+		TestBean tb = ctx.getBean(TestBean.class);
+		assertThat(tb.getLawyer()).isEqualTo(ctx.getBean(NestedTestBean.class));
+	}
+
+	@Test  // gh-26019
+	public void autowiringWithDynamicPrototypeBeanClass() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				ConfigWithDynamicPrototype.class, PrototypeDependency.class);
+
+		PrototypeInterface p1 = ctx.getBean(PrototypeInterface.class, 1);
+		assertThat(p1).isInstanceOf(PrototypeOne.class);
+		assertThat(((PrototypeOne) p1).prototypeDependency).isNotNull();
+
+		PrototypeInterface p2 = ctx.getBean(PrototypeInterface.class, 2);
+		assertThat(p2).isInstanceOf(PrototypeTwo.class);
+
+		PrototypeInterface p3 = ctx.getBean(PrototypeInterface.class, 1);
+		assertThat(p3).isInstanceOf(PrototypeOne.class);
+		assertThat(((PrototypeOne) p3).prototypeDependency).isNotNull();
+	}
 
 
 	/**
@@ -592,6 +629,61 @@ public class ConfigurationClassProcessingTests {
 		@Bean
 		public ApplicationListener<ContextClosedEvent> listener() {
 			return (event -> this.closed = true);
+		}
+	}
+
+
+	@Configuration
+	public static class OverloadedBeanMismatch {
+
+		@Bean(name = "other")
+		public NestedTestBean foo() {
+			return new NestedTestBean();
+		}
+
+		@Bean(name = "foo")
+		public TestBean foo(@Qualifier("other") NestedTestBean other) {
+			TestBean tb = new TestBean();
+			tb.setLawyer(other);
+			return tb;
+		}
+	}
+
+
+	static class PrototypeDependency {
+	}
+
+	interface PrototypeInterface {
+	}
+
+	static class PrototypeOne extends AbstractPrototype {
+
+		@Autowired
+		PrototypeDependency prototypeDependency;
+
+	}
+
+	static class PrototypeTwo extends AbstractPrototype {
+
+		// no autowired dependency here, in contrast to above
+	}
+
+	static class AbstractPrototype implements PrototypeInterface {
+	}
+
+	@Configuration
+	static class ConfigWithDynamicPrototype {
+
+		@Bean
+		@Scope(value = "prototype")
+		public PrototypeInterface getDemoBean( int i) {
+			switch ( i) {
+				case 1: return new PrototypeOne();
+				case 2:
+				default:
+					return new PrototypeTwo();
+
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,7 +206,7 @@ public abstract class AopProxyUtils {
 	 * Check equality of the advisors behind the given AdvisedSupport objects.
 	 */
 	public static boolean equalsAdvisors(AdvisedSupport a, AdvisedSupport b) {
-		return Arrays.equals(a.getAdvisors(), b.getAdvisors());
+		return a.getAdvisorCount() == b.getAdvisorCount() && Arrays.equals(a.getAdvisors(), b.getAdvisors());
 	}
 
 
@@ -224,8 +224,8 @@ public abstract class AopProxyUtils {
 			return new Object[0];
 		}
 		if (method.isVarArgs()) {
-			Class<?>[] paramTypes = method.getParameterTypes();
-			if (paramTypes.length == arguments.length) {
+			if (method.getParameterCount() == arguments.length) {
+				Class<?>[] paramTypes = method.getParameterTypes();
 				int varargIndex = paramTypes.length - 1;
 				Class<?> varargType = paramTypes[varargIndex];
 				if (varargType.isArray()) {

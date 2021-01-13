@@ -37,8 +37,6 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
@@ -56,22 +54,24 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.method;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.post;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.put;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
 import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
-import static org.springframework.web.method.MvcAnnotationPredicates.getMapping;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestMapping;
-import static org.springframework.web.method.ResolvableMethod.on;
 import static org.springframework.web.reactive.HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE;
 import static org.springframework.web.reactive.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
 import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.method;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.post;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.put;
+import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.getMapping;
+import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestMapping;
+import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link RequestMappingInfoHandlerMapping}.

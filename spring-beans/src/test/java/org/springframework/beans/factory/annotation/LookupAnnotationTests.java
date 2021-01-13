@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package org.springframework.beans.factory.annotation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -44,7 +45,7 @@ public class LookupAnnotationTests {
 		beanFactory.registerBeanDefinition("abstractBean", new RootBeanDefinition(AbstractBean.class));
 		beanFactory.registerBeanDefinition("beanConsumer", new RootBeanDefinition(BeanConsumer.class));
 		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
-		tbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		tbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		beanFactory.registerBeanDefinition("testBean", tbd);
 	}
 
@@ -107,10 +108,23 @@ public class LookupAnnotationTests {
 		assertThat(beanFactory.getBean(BeanConsumer.class).abstractBean).isSameAs(bean);
 	}
 
+	@Test  // gh-25806
+	public void testWithNullBean() {
+		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class, () -> null);
+		tbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		beanFactory.registerBeanDefinition("testBean", tbd);
+
+		AbstractBean bean = beanFactory.getBean("beanConsumer", BeanConsumer.class).abstractBean;
+		assertThat(bean).isNotNull();
+		Object expected = bean.get();
+		assertThat(expected).isNull();
+		assertThat(beanFactory.getBean(BeanConsumer.class).abstractBean).isSameAs(bean);
+	}
+
 
 	public static abstract class AbstractBean {
 
-		@Lookup
+		@Lookup("testBean")
 		public abstract TestBean get();
 
 		@Lookup

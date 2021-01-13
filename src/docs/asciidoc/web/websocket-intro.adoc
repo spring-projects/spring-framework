@@ -10,8 +10,7 @@ A WebSocket interaction begins with an HTTP request that uses the HTTP `Upgrade`
 to upgrade or, in this case, to switch to the WebSocket protocol. The following example
 shows such an interaction:
 
-[source,yaml,indent=0]
-[subs="verbatim,quotes"]
+[source,yaml,indent=0,subs="verbatim,quotes"]
 ----
 	GET /spring-websocket-portfolio/portfolio HTTP/1.1
 	Host: localhost:8080
@@ -29,8 +28,7 @@ shows such an interaction:
 Instead of the usual 200 status code, a server with WebSocket support returns output
 similar to the following:
 
-[source,yaml,indent=0]
-[subs="verbatim,quotes"]
+[source,yaml,indent=0,subs="verbatim,quotes"]
 ----
 	HTTP/1.1 101 Switching Protocols <1>
 	Upgrade: websocket

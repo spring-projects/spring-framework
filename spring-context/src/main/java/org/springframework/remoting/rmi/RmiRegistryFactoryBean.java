@@ -60,7 +60,9 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.jmx.support.ConnectorServerFactoryBean
  * @see java.rmi.registry.Registry
  * @see java.rmi.registry.LocateRegistry
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public class RmiRegistryFactoryBean implements FactoryBean<Registry>, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());

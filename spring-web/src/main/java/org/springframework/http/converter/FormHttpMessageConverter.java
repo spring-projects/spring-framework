@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
@@ -159,8 +160,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	static final MediaType MULTIPART_ALL = new MediaType("multipart", "*");
-
 	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =
 			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_CHARSET);
 
@@ -233,6 +232,15 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	/**
+	 * Return the {@linkplain #setPartConverters configured converters} for MIME
+	 * parts.
+	 * @since 5.3
+	 */
+	public List<HttpMessageConverter<?>> getPartConverters() {
+		return Collections.unmodifiableList(this.partConverters);
+	}
+
+	/**
 	 * Add a message body converter. Such a converter is used to convert objects
 	 * to MIME parts.
 	 */
@@ -300,7 +308,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			return true;
 		}
 		for (MediaType supportedMediaType : getSupportedMediaTypes()) {
-			if (MULTIPART_ALL.includes(supportedMediaType)) {
+			if (supportedMediaType.getType().equalsIgnoreCase("multipart")) {
 				// We can't read multipart, so skip this supported media type.
 				continue;
 			}
@@ -368,7 +376,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	private boolean isMultipart(MultiValueMap<String, ?> map, @Nullable MediaType contentType) {
 		if (contentType != null) {
-			return MULTIPART_ALL.includes(contentType);
+			return contentType.getType().equalsIgnoreCase("multipart");
 		}
 		for (List<?> values : map.values()) {
 			for (Object value : values) {
@@ -383,7 +391,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	private void writeForm(MultiValueMap<String, Object> formData, @Nullable MediaType contentType,
 			HttpOutputMessage outputMessage) throws IOException {
 
-		contentType = getMediaType(contentType);
+		contentType = getFormContentType(contentType);
 		outputMessage.getHeaders().setContentType(contentType);
 
 		Charset charset = contentType.getCharset();
@@ -401,21 +409,36 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		}
 	}
 
-	private MediaType getMediaType(@Nullable MediaType mediaType) {
-		if (mediaType == null) {
+	/**
+	 * Return the content type used to write forms, given the preferred content type.
+	 * By default, this method returns the given content type, but adds the
+	 * {@linkplain #setCharset(Charset) charset} if it does not have one.
+	 * If {@code contentType} is {@code null},
+	 * {@code application/x-www-form-urlencoded; charset=UTF-8} is returned.
+	 * <p>Subclasses can override this method to change this behavior.
+	 * @param contentType the preferred content type (can be {@code null})
+	 * @return the content type to be used
+	 * @since 5.2.2
+	 */
+	protected MediaType getFormContentType(@Nullable MediaType contentType) {
+		if (contentType == null) {
 			return DEFAULT_FORM_DATA_MEDIA_TYPE;
 		}
-		else if (mediaType.getCharset() == null) {
-			return new MediaType(mediaType, this.charset);
+		else if (contentType.getCharset() == null) {
+			return new MediaType(contentType, this.charset);
 		}
 		else {
-			return mediaType;
+			return contentType;
 		}
 	}
 
 	protected String serializeForm(MultiValueMap<String, Object> formData, Charset charset) {
 		StringBuilder builder = new StringBuilder();
-		formData.forEach((name, values) ->
+		formData.forEach((name, values) -> {
+				if (name == null) {
+					Assert.isTrue(CollectionUtils.isEmpty(values), "Null name in form data: " + formData);
+					return;
+				}
 				values.forEach(value -> {
 					try {
 						if (builder.length() != 0) {
@@ -430,7 +453,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 					catch (UnsupportedEncodingException ex) {
 						throw new IllegalStateException(ex);
 					}
-				}));
+				});
+		});
 
 		return builder.toString();
 	}
@@ -446,10 +470,15 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			contentType = MediaType.MULTIPART_FORM_DATA;
 		}
 
+		Map<String, String> parameters = new LinkedHashMap<>(contentType.getParameters().size() + 2);
+		parameters.putAll(contentType.getParameters());
+
 		byte[] boundary = generateMultipartBoundary();
-		Map<String, String> parameters = new LinkedHashMap<>(2);
 		if (!isFilenameCharsetSet()) {
-			parameters.put("charset", this.charset.name());
+			if (!this.charset.equals(StandardCharsets.UTF_8) &&
+					!this.charset.equals(StandardCharsets.US_ASCII)) {
+				parameters.put("charset", this.charset.name());
+			}
 		}
 		parameters.put("boundary", new String(boundary, StandardCharsets.US_ASCII));
 

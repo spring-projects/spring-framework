@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -156,6 +157,12 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	public void setParent(@Nullable ApplicationContext parent) {
 		super.setParent(parent);
 		this.beanFactory.setParentBeanFactory(getInternalParentBeanFactory());
+	}
+
+	@Override
+	public void setApplicationStartup(ApplicationStartup applicationStartup) {
+		super.setApplicationStartup(applicationStartup);
+		this.beanFactory.setApplicationStartup(applicationStartup);
 	}
 
 	/**

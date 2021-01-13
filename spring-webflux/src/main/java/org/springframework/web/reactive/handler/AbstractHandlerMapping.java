@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,11 +182,14 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 			if (logger.isDebugEnabled()) {
 				logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
 			}
-			if (hasCorsConfigurationSource(handler)) {
-				ServerHttpRequest request = exchange.getRequest();
+			ServerHttpRequest request = exchange.getRequest();
+			if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
 				CorsConfiguration config = (this.corsConfigurationSource != null ? this.corsConfigurationSource.getCorsConfiguration(exchange) : null);
 				CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
 				config = (config != null ? config.combine(handlerConfig) : handlerConfig);
+				if (config != null) {
+					config.validateAllowCredentials();
+				}
 				if (!this.corsProcessor.process(config, exchange) || CorsUtils.isPreFlightRequest(request)) {
 					return REQUEST_HANDLED_HANDLER;
 				}

@@ -20,6 +20,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -77,6 +79,15 @@ class MockCookieTests {
 		assertThat(cookie.getExpires()).isEqualTo(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
 				DateTimeFormatter.RFC_1123_DATE_TIME));
 		assertThat(cookie.getSameSite()).isEqualTo("Lax");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"0", "bogus"})
+	void parseHeaderWithInvalidExpiresAttribute(String expiresValue) {
+		MockCookie cookie = MockCookie.parse("SESSION=123; Expires=" + expiresValue);
+
+		assertCookie(cookie, "SESSION", "123");
+		assertThat(cookie.getExpires()).isNull();
 	}
 
 	private void assertCookie(MockCookie cookie, String name, String value) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,15 +39,15 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.IndexedTestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.Resource;
-import org.springframework.tests.sample.beans.IndexedTestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * Unit tests for various {@link PropertyResourceConfigurer} implementations including:
@@ -414,7 +414,7 @@ public class PropertyResourceConfigurerTests {
 		assertThat(tb2.getSomeSet().size()).isEqualTo(3);
 		assertThat(tb2.getSomeSet().contains("na98me")).isTrue();
 		assertThat(tb2.getSomeSet().contains(tb2)).isTrue();
-		assertThat(tb2.getSomeSet().contains(new Integer(98))).isTrue();
+		assertThat(tb2.getSomeSet().contains(98)).isTrue();
 		assertThat(tb2.getSomeMap().size()).isEqualTo(6);
 		assertThat(tb2.getSomeMap().get("key98")).isEqualTo("98");
 		assertThat(tb2.getSomeMap().get("key98ref")).isEqualTo(tb2);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.cache.Cache;
+import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -41,6 +42,8 @@ public class ResourceHandlerRegistration {
 
 	private final List<String> locationValues = new ArrayList<>();
 
+	private final List<Resource> locationsResources = new ArrayList<>();
+
 	@Nullable
 	private Integer cachePeriod;
 
@@ -49,6 +52,8 @@ public class ResourceHandlerRegistration {
 
 	@Nullable
 	private ResourceChainRegistration resourceChainRegistration;
+
+	private boolean useLastModified = true;
 
 
 	/**
@@ -79,8 +84,21 @@ public class ResourceHandlerRegistration {
 	 * @return the same {@link ResourceHandlerRegistration} instance, for
 	 * chained method invocation
 	 */
-	public ResourceHandlerRegistration addResourceLocations(String... resourceLocations) {
-		this.locationValues.addAll(Arrays.asList(resourceLocations));
+	public ResourceHandlerRegistration addResourceLocations(String... locations) {
+		this.locationValues.addAll(Arrays.asList(locations));
+		return this;
+	}
+
+	/**
+	 * Configure locations to serve static resources from based on pre-resolved
+	 * {@code Resource} references.
+	 * @param locations the resource locations to use
+	 * @return the same {@link ResourceHandlerRegistration} instance, for
+	 * chained method invocation
+	 * @since 5.3.3
+	 */
+	public ResourceHandlerRegistration addResourceLocations(Resource... locations) {
+		this.locationsResources.addAll(Arrays.asList(locations));
 		return this;
 	}
 
@@ -106,6 +124,18 @@ public class ResourceHandlerRegistration {
 	 */
 	public ResourceHandlerRegistration setCacheControl(CacheControl cacheControl) {
 		this.cacheControl = cacheControl;
+		return this;
+	}
+
+	/**
+	 * Set whether the {@link Resource#lastModified()} information should be used to drive HTTP responses.
+	 * <p>This configuration is set to {@code true} by default.
+	 * @param useLastModified whether the "last modified" resource information should be used.
+	 * @return the same {@link ResourceHandlerRegistration} instance, for chained method invocation
+	 * @since 5.3
+	 */
+	public ResourceHandlerRegistration setUseLastModified(boolean useLastModified) {
+		this.useLastModified = useLastModified;
 		return this;
 	}
 
@@ -166,12 +196,14 @@ public class ResourceHandlerRegistration {
 			handler.setResourceTransformers(this.resourceChainRegistration.getResourceTransformers());
 		}
 		handler.setLocationValues(this.locationValues);
+		handler.setLocations(this.locationsResources);
 		if (this.cacheControl != null) {
 			handler.setCacheControl(this.cacheControl);
 		}
 		else if (this.cachePeriod != null) {
 			handler.setCacheSeconds(this.cachePeriod);
 		}
+		handler.setUseLastModified(this.useLastModified);
 		return handler;
 	}
 

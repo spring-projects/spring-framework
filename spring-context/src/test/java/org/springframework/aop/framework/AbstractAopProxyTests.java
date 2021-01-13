@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.MarshalException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -57,24 +57,21 @@ import org.springframework.aop.support.Pointcuts;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.aop.testfixture.advice.CountingAfterReturningAdvice;
+import org.springframework.aop.testfixture.advice.CountingBeforeAdvice;
+import org.springframework.aop.testfixture.advice.MethodCounter;
+import org.springframework.aop.testfixture.advice.MyThrowsHandler;
+import org.springframework.aop.testfixture.interceptor.NopInterceptor;
+import org.springframework.aop.testfixture.interceptor.SerializableNopInterceptor;
+import org.springframework.aop.testfixture.interceptor.TimestampIntroductionInterceptor;
+import org.springframework.beans.testfixture.beans.IOther;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.Person;
+import org.springframework.beans.testfixture.beans.SerializablePerson;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.testfixture.TimeStamped;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.EnabledForTestGroups;
-import org.springframework.tests.TestGroup;
-import org.springframework.tests.TimeStamped;
-import org.springframework.tests.aop.advice.CountingAfterReturningAdvice;
-import org.springframework.tests.aop.advice.CountingBeforeAdvice;
-import org.springframework.tests.aop.advice.MethodCounter;
-import org.springframework.tests.aop.advice.MyThrowsHandler;
-import org.springframework.tests.aop.interceptor.NopInterceptor;
-import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
-import org.springframework.tests.aop.interceptor.TimestampIntroductionInterceptor;
-import org.springframework.tests.sample.beans.IOther;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.Person;
-import org.springframework.tests.sample.beans.SerializablePerson;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
-import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -157,36 +154,6 @@ public abstract class AbstractAopProxyTests {
 		assertThat(tb.getName()).isEqualTo(name);
 	}
 
-	/**
-	 * This is primarily a test for the efficiency of our
-	 * usage of CGLIB. If we create too many classes with
-	 * CGLIB this will be slow or will run out of memory.
-	 */
-	@Test
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	public void testManyProxies() {
-		int howMany = 10000;
-		StopWatch sw = new StopWatch();
-		sw.start("Create " + howMany + " proxies");
-		testManyProxies(howMany);
-		sw.stop();
-		assertThat(sw.getTotalTimeMillis() < 5000).as("Proxy creation was too slow").isTrue();
-	}
-
-	private void testManyProxies(int howMany) {
-		int age1 = 33;
-		TestBean target1 = new TestBean();
-		target1.setAge(age1);
-		ProxyFactory pf1 = new ProxyFactory(target1);
-		pf1.addAdvice(new NopInterceptor());
-		pf1.addAdvice(new NopInterceptor());
-		ITestBean[] proxies = new ITestBean[howMany];
-		for (int i = 0; i < howMany; i++) {
-			proxies[i] = (ITestBean) createAopProxy(pf1).getProxy();
-			assertThat(proxies[i].getAge()).isEqualTo(age1);
-		}
-	}
-
 	@Test
 	public void testSerializationAdviceAndTargetNotSerializable() throws Exception {
 		TestBean tb = new TestBean();
@@ -246,7 +213,7 @@ public abstract class AbstractAopProxyTests {
 		assertThat(cta.getCalls()).isEqualTo(1);
 
 		// Will throw exception if it fails
-		Person p2 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		Person p2 = SerializationTestUtils.serializeAndDeserialize(p);
 		assertThat(p2).isNotSameAs(p);
 		assertThat(p2.getName()).isEqualTo(p.getName());
 		assertThat(p2.getAge()).isEqualTo(p.getAge());
@@ -765,7 +732,7 @@ public abstract class AbstractAopProxyTests {
 		@SuppressWarnings("serial")
 		class MyDi extends DelegatingIntroductionInterceptor implements TimeStamped {
 			/**
-			 * @see test.util.TimeStamped#getTimeStamp()
+			 * @see org.springframework.core.testfixture.TimeStamped#getTimeStamp()
 			 */
 			@Override
 			public long getTimeStamp() {
@@ -1128,7 +1095,7 @@ public abstract class AbstractAopProxyTests {
 		};
 
 		class NameSaver implements MethodInterceptor {
-			private List<Object> names = new LinkedList<>();
+			private List<Object> names = new ArrayList<>();
 
 			@Override
 			public Object invoke(MethodInvocation mi) throws Throwable {

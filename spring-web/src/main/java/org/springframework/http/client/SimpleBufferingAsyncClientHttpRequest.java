@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpHeaders;
@@ -74,29 +73,26 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 
 	@Override
 	protected ListenableFuture<ClientHttpResponse> executeInternal(
-			final HttpHeaders headers, final byte[] bufferedOutput) throws IOException {
+			HttpHeaders headers, byte[] bufferedOutput) throws IOException {
 
-		return this.taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
-			@Override
-			public ClientHttpResponse call() throws Exception {
-				SimpleBufferingClientHttpRequest.addHeaders(connection, headers);
-				// JDK <1.8 doesn't support getOutputStream with HTTP DELETE
-				if (getMethod() == HttpMethod.DELETE && bufferedOutput.length == 0) {
-					connection.setDoOutput(false);
-				}
-				if (connection.getDoOutput() && outputStreaming) {
-					connection.setFixedLengthStreamingMode(bufferedOutput.length);
-				}
-				connection.connect();
-				if (connection.getDoOutput()) {
-					FileCopyUtils.copy(bufferedOutput, connection.getOutputStream());
-				}
-				else {
-					// Immediately trigger the request in a no-output scenario as well
-					connection.getResponseCode();
-				}
-				return new SimpleClientHttpResponse(connection);
+		return this.taskExecutor.submitListenable(() -> {
+			SimpleBufferingClientHttpRequest.addHeaders(this.connection, headers);
+			// JDK <1.8 doesn't support getOutputStream with HTTP DELETE
+			if (getMethod() == HttpMethod.DELETE && bufferedOutput.length == 0) {
+				this.connection.setDoOutput(false);
 			}
+			if (this.connection.getDoOutput() && outputStreaming) {
+				this.connection.setFixedLengthStreamingMode(bufferedOutput.length);
+			}
+			this.connection.connect();
+			if (this.connection.getDoOutput()) {
+				FileCopyUtils.copy(bufferedOutput, this.connection.getOutputStream());
+			}
+			else {
+				// Immediately trigger the request in a no-output scenario as well
+				this.connection.getResponseCode();
+			}
+			return new SimpleClientHttpResponse(this.connection);
 		});
 	}
 

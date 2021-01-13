@@ -35,6 +35,7 @@ dependencies {
 	optional("org.xmlunit:xmlunit-matchers")
 	optional("org.skyscreamer:jsonassert")
 	optional("com.jayway.jsonpath:json-path")
+	optional("commons-fileupload:commons-fileupload")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("io.projectreactor:reactor-test")
@@ -42,6 +43,11 @@ dependencies {
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	testCompile(project(":spring-context-support"))
 	testCompile(project(":spring-oxm"))
+	testCompile(testFixtures(project(":spring-beans")))
+	testCompile(testFixtures(project(":spring-context")))
+	testCompile(testFixtures(project(":spring-core")))
+	testCompile(testFixtures(project(":spring-tx")))
+	testCompile(testFixtures(project(":spring-web")))
 	testCompile("javax.annotation:javax.annotation-api")
 	testCompile("javax.cache:cache-api")
 	testCompile("javax.ejb:javax.ejb-api")
@@ -62,7 +68,7 @@ dependencies {
 	testCompile("org.apache.tiles:tiles-servlet")
 	testCompile("org.hsqldb:hsqldb")
 	testCompile("org.apache.httpcomponents:httpclient")
-	testCompile("io.projectreactor.netty:reactor-netty")
+	testCompile("io.projectreactor.netty:reactor-netty-http")
 	testCompile("de.bechte.junit:junit-hierarchicalcontextrunner")
 	testRuntime("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "junit", module: "junit"

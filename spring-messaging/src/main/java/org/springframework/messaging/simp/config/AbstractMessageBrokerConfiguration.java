@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
+import org.springframework.messaging.converter.GsonMessageConverter;
+import org.springframework.messaging.converter.JsonbMessageConverter;
+import org.springframework.messaging.converter.KotlinSerializationJsonMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
@@ -68,18 +71,18 @@ import org.springframework.validation.Validator;
  * Provides essential configuration for handling messages with simple messaging
  * protocols such as STOMP.
  *
- * <p>{@link #clientInboundChannel()} and {@link #clientOutboundChannel()} deliver
+ * <p>{@link #clientInboundChannel(TaskExecutor)} and {@link #clientOutboundChannel(TaskExecutor)} deliver
  * messages to and from remote clients to several message handlers such as the
  * following.
  * <ul>
- * <li>{@link #simpAnnotationMethodMessageHandler()}</li>
- * <li>{@link #simpleBrokerMessageHandler()}</li>
- * <li>{@link #stompBrokerRelayMessageHandler()}</li>
- * <li>{@link #userDestinationMessageHandler()}</li>
+ * <li>{@link #simpAnnotationMethodMessageHandler(AbstractSubscribableChannel, AbstractSubscribableChannel, SimpMessagingTemplate, CompositeMessageConverter)}</li>
+ * <li>{@link #simpleBrokerMessageHandler(AbstractSubscribableChannel, AbstractSubscribableChannel, AbstractSubscribableChannel, UserDestinationResolver)}</li>
+ * <li>{@link #stompBrokerRelayMessageHandler(AbstractSubscribableChannel, AbstractSubscribableChannel, AbstractSubscribableChannel, UserDestinationMessageHandler, MessageHandler, UserDestinationResolver)}</li>
+ * <li>{@link #userDestinationMessageHandler(AbstractSubscribableChannel, AbstractSubscribableChannel, AbstractSubscribableChannel, UserDestinationResolver)}</li>
  * </ul>
  *
- * <p>{@link #brokerChannel()} delivers messages from within the application to the
- * the respective message handlers. {@link #brokerMessagingTemplate()} can be injected
+ * <p>{@link #brokerChannel(AbstractSubscribableChannel, AbstractSubscribableChannel, TaskExecutor)} delivers messages from within the application to the
+ * the respective message handlers. {@link #brokerMessagingTemplate(AbstractSubscribableChannel, AbstractSubscribableChannel, AbstractSubscribableChannel, CompositeMessageConverter)} can be injected
  * into any application component to send messages.
  *
  * <p>Subclasses are responsible for the parts of the configuration that feed messages
@@ -87,14 +90,30 @@ import org.springframework.validation.Validator;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public abstract class AbstractMessageBrokerConfiguration implements ApplicationContextAware {
 
 	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
 
-	private static final boolean jackson2Present = ClassUtils.isPresent(
-			"com.fasterxml.jackson.databind.ObjectMapper", AbstractMessageBrokerConfiguration.class.getClassLoader());
+	private static final boolean jackson2Present;
+
+	private static final boolean gsonPresent;
+
+	private static final boolean jsonbPresent;
+
+	private static final boolean kotlinSerializationJsonPresent;
+
+
+	static {
+		ClassLoader classLoader = AbstractMessageBrokerConfiguration.class.getClassLoader();
+		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
+		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
+		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
+		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
+	}
 
 
 	@Nullable
@@ -129,8 +148,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 
 	@Bean
-	public AbstractSubscribableChannel clientInboundChannel() {
-		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientInboundChannelExecutor());
+	public AbstractSubscribableChannel clientInboundChannel(TaskExecutor clientInboundChannelExecutor) {
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientInboundChannelExecutor);
 		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		ChannelRegistration reg = getClientInboundChannelRegistration();
 		if (reg.hasInterceptors()) {
@@ -165,8 +184,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	public AbstractSubscribableChannel clientOutboundChannel() {
-		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientOutboundChannelExecutor());
+	public AbstractSubscribableChannel clientOutboundChannel(TaskExecutor clientOutboundChannelExecutor) {
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientOutboundChannelExecutor);
 		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		ChannelRegistration reg = getClientOutboundChannelRegistration();
 		if (reg.hasInterceptors()) {
@@ -201,10 +220,11 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	public AbstractSubscribableChannel brokerChannel() {
-		ChannelRegistration reg = getBrokerRegistry().getBrokerChannelRegistration();
+	public AbstractSubscribableChannel brokerChannel(AbstractSubscribableChannel clientInboundChannel,
+			AbstractSubscribableChannel clientOutboundChannel, TaskExecutor brokerChannelExecutor) {
+		ChannelRegistration reg = getBrokerRegistry(clientInboundChannel, clientOutboundChannel).getBrokerChannelRegistration();
 		ExecutorSubscribableChannel channel = (reg.hasTaskExecutor() ?
-				new ExecutorSubscribableChannel(brokerChannelExecutor()) : new ExecutorSubscribableChannel());
+				new ExecutorSubscribableChannel(brokerChannelExecutor) : new ExecutorSubscribableChannel());
 		reg.interceptors(new ImmutableMessageChannelInterceptor());
 		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		channel.setInterceptors(reg.getInterceptors());
@@ -212,8 +232,9 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	public TaskExecutor brokerChannelExecutor() {
-		ChannelRegistration reg = getBrokerRegistry().getBrokerChannelRegistration();
+	public TaskExecutor brokerChannelExecutor(AbstractSubscribableChannel clientInboundChannel,
+			AbstractSubscribableChannel clientOutboundChannel) {
+		ChannelRegistration reg = getBrokerRegistry(clientInboundChannel, clientOutboundChannel).getBrokerChannelRegistration();
 		ThreadPoolTaskExecutor executor;
 		if (reg.hasTaskExecutor()) {
 			executor = reg.taskExecutor().getTaskExecutor();
@@ -233,9 +254,10 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * An accessor for the {@link MessageBrokerRegistry} that ensures its one-time creation
 	 * and initialization through {@link #configureMessageBroker(MessageBrokerRegistry)}.
 	 */
-	protected final MessageBrokerRegistry getBrokerRegistry() {
+	protected final MessageBrokerRegistry getBrokerRegistry(AbstractSubscribableChannel clientInboundChannel,
+			AbstractSubscribableChannel clientOutboundChannel) {
 		if (this.brokerRegistry == null) {
-			MessageBrokerRegistry registry = new MessageBrokerRegistry(clientInboundChannel(), clientOutboundChannel());
+			MessageBrokerRegistry registry = new MessageBrokerRegistry(clientInboundChannel, clientOutboundChannel);
 			configureMessageBroker(registry);
 			this.brokerRegistry = registry;
 		}
@@ -254,15 +276,20 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * configuration classes.
 	 */
 	@Nullable
-	public final PathMatcher getPathMatcher() {
-		return getBrokerRegistry().getPathMatcher();
+	public final PathMatcher getPathMatcher(AbstractSubscribableChannel clientInboundChannel,
+			AbstractSubscribableChannel clientOutboundChannel) {
+		return getBrokerRegistry(clientInboundChannel, clientOutboundChannel).getPathMatcher();
 	}
 
 	@Bean
-	public SimpAnnotationMethodMessageHandler simpAnnotationMethodMessageHandler() {
-		SimpAnnotationMethodMessageHandler handler = createAnnotationMethodMessageHandler();
-		handler.setDestinationPrefixes(getBrokerRegistry().getApplicationDestinationPrefixes());
-		handler.setMessageConverter(brokerMessageConverter());
+	public SimpAnnotationMethodMessageHandler simpAnnotationMethodMessageHandler(
+			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel,
+			SimpMessagingTemplate brokerMessagingTemplate, CompositeMessageConverter brokerMessageConverter) {
+		SimpAnnotationMethodMessageHandler handler = createAnnotationMethodMessageHandler(clientInboundChannel,
+				clientOutboundChannel, brokerMessagingTemplate);
+		MessageBrokerRegistry brokerRegistry = getBrokerRegistry(clientInboundChannel, clientOutboundChannel);
+		handler.setDestinationPrefixes(brokerRegistry.getApplicationDestinationPrefixes());
+		handler.setMessageConverter(brokerMessageConverter);
 		handler.setValidator(simpValidator());
 
 		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
@@ -273,7 +300,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		addReturnValueHandlers(returnValueHandlers);
 		handler.setCustomReturnValueHandlers(returnValueHandlers);
 
-		PathMatcher pathMatcher = getBrokerRegistry().getPathMatcher();
+		PathMatcher pathMatcher = brokerRegistry.getPathMatcher();
 		if (pathMatcher != null) {
 			handler.setPathMatcher(pathMatcher);
 		}
@@ -284,11 +311,12 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * Protected method for plugging in a custom subclass of
 	 * {@link org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler
 	 * SimpAnnotationMethodMessageHandler}.
-	 * @since 4.2
+	 * @since 5.3.2
 	 */
-	protected SimpAnnotationMethodMessageHandler createAnnotationMethodMessageHandler() {
-		return new SimpAnnotationMethodMessageHandler(clientInboundChannel(),
-				clientOutboundChannel(), brokerMessagingTemplate());
+	protected SimpAnnotationMethodMessageHandler createAnnotationMethodMessageHandler(
+			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel,
+			SimpMessagingTemplate brokerMessagingTemplate) {
+		return new SimpAnnotationMethodMessageHandler(clientInboundChannel, clientOutboundChannel, brokerMessagingTemplate);
 	}
 
 	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
@@ -299,48 +327,56 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	@Nullable
-	public AbstractBrokerMessageHandler simpleBrokerMessageHandler() {
-		SimpleBrokerMessageHandler handler = getBrokerRegistry().getSimpleBroker(brokerChannel());
+	public AbstractBrokerMessageHandler simpleBrokerMessageHandler(AbstractSubscribableChannel clientInboundChannel,
+			AbstractSubscribableChannel clientOutboundChannel, AbstractSubscribableChannel brokerChannel,
+			UserDestinationResolver userDestinationResolver) {
+		SimpleBrokerMessageHandler handler = getBrokerRegistry(clientInboundChannel, clientOutboundChannel).getSimpleBroker(brokerChannel);
 		if (handler == null) {
 			return null;
 		}
-		updateUserDestinationResolver(handler);
+		updateUserDestinationResolver(handler, userDestinationResolver);
 		return handler;
 	}
 
-	private void updateUserDestinationResolver(AbstractBrokerMessageHandler handler) {
+	private void updateUserDestinationResolver(AbstractBrokerMessageHandler handler, UserDestinationResolver userDestinationResolver) {
 		Collection<String> prefixes = handler.getDestinationPrefixes();
 		if (!prefixes.isEmpty() && !prefixes.iterator().next().startsWith("/")) {
-			((DefaultUserDestinationResolver) userDestinationResolver()).setRemoveLeadingSlash(true);
+			((DefaultUserDestinationResolver) userDestinationResolver).setRemoveLeadingSlash(true);
 		}
 	}
 
 	@Bean
 	@Nullable
-	public AbstractBrokerMessageHandler stompBrokerRelayMessageHandler() {
-		StompBrokerRelayMessageHandler handler = getBrokerRegistry().getStompBrokerRelay(brokerChannel());
+	public AbstractBrokerMessageHandler stompBrokerRelayMessageHandler(AbstractSubscribableChannel clientInboundChannel,
+			AbstractSubscribableChannel clientOutboundChannel, AbstractSubscribableChannel brokerChannel,
+			UserDestinationMessageHandler userDestinationMessageHandler, @Nullable MessageHandler userRegistryMessageHandler,
+			UserDestinationResolver userDestinationResolver) {
+		MessageBrokerRegistry brokerRegistry = getBrokerRegistry(clientInboundChannel, clientOutboundChannel);
+		StompBrokerRelayMessageHandler handler = brokerRegistry.getStompBrokerRelay(brokerChannel);
 		if (handler == null) {
 			return null;
 		}
 		Map<String, MessageHandler> subscriptions = new HashMap<>(4);
-		String destination = getBrokerRegistry().getUserDestinationBroadcast();
+		String destination = brokerRegistry.getUserDestinationBroadcast();
 		if (destination != null) {
-			subscriptions.put(destination, userDestinationMessageHandler());
+			subscriptions.put(destination, userDestinationMessageHandler);
 		}
-		destination = getBrokerRegistry().getUserRegistryBroadcast();
+		destination = brokerRegistry.getUserRegistryBroadcast();
 		if (destination != null) {
-			subscriptions.put(destination, userRegistryMessageHandler());
+			subscriptions.put(destination, userRegistryMessageHandler);
 		}
 		handler.setSystemSubscriptions(subscriptions);
-		updateUserDestinationResolver(handler);
+		updateUserDestinationResolver(handler, userDestinationResolver);
 		return handler;
 	}
 
 	@Bean
-	public UserDestinationMessageHandler userDestinationMessageHandler() {
-		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(clientInboundChannel(),
-				brokerChannel(), userDestinationResolver());
-		String destination = getBrokerRegistry().getUserDestinationBroadcast();
+	public UserDestinationMessageHandler userDestinationMessageHandler(AbstractSubscribableChannel clientInboundChannel,
+			AbstractSubscribableChannel clientOutboundChannel, AbstractSubscribableChannel brokerChannel,
+			UserDestinationResolver userDestinationResolver) {
+		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(clientInboundChannel,
+				brokerChannel, userDestinationResolver);
+		String destination = getBrokerRegistry(clientInboundChannel, clientOutboundChannel).getUserDestinationBroadcast();
 		if (destination != null) {
 			handler.setBroadcastDestination(destination);
 		}
@@ -349,15 +385,17 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	@Nullable
-	public MessageHandler userRegistryMessageHandler() {
-		if (getBrokerRegistry().getUserRegistryBroadcast() == null) {
+	public MessageHandler userRegistryMessageHandler(AbstractSubscribableChannel clientInboundChannel,
+			AbstractSubscribableChannel clientOutboundChannel, SimpUserRegistry userRegistry,
+			SimpMessagingTemplate brokerMessagingTemplate, TaskScheduler messageBrokerTaskScheduler) {
+		MessageBrokerRegistry brokerRegistry = getBrokerRegistry(clientInboundChannel, clientOutboundChannel);
+		if (brokerRegistry.getUserRegistryBroadcast() == null) {
 			return null;
 		}
-		SimpUserRegistry userRegistry = userRegistry();
 		Assert.isInstanceOf(MultiServerUserRegistry.class, userRegistry, "MultiServerUserRegistry required");
 		return new UserRegistryMessageHandler((MultiServerUserRegistry) userRegistry,
-				brokerMessagingTemplate(), getBrokerRegistry().getUserRegistryBroadcast(),
-				messageBrokerTaskScheduler());
+				brokerMessagingTemplate, brokerRegistry.getUserRegistryBroadcast(),
+				messageBrokerTaskScheduler);
 	}
 
 	// Expose alias for 4.1 compatibility
@@ -371,13 +409,15 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	public SimpMessagingTemplate brokerMessagingTemplate() {
-		SimpMessagingTemplate template = new SimpMessagingTemplate(brokerChannel());
-		String prefix = getBrokerRegistry().getUserDestinationPrefix();
+	public SimpMessagingTemplate brokerMessagingTemplate(AbstractSubscribableChannel brokerChannel,
+			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel,
+			CompositeMessageConverter brokerMessageConverter) {
+		SimpMessagingTemplate template = new SimpMessagingTemplate(brokerChannel);
+		String prefix = getBrokerRegistry(clientInboundChannel, clientOutboundChannel).getUserDestinationPrefix();
 		if (prefix != null) {
 			template.setUserDestinationPrefix(prefix);
 		}
-		template.setMessageConverter(brokerMessageConverter());
+		template.setMessageConverter(brokerMessageConverter);
 		return template;
 	}
 
@@ -390,6 +430,15 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			converters.add(new ByteArrayMessageConverter());
 			if (jackson2Present) {
 				converters.add(createJacksonConverter());
+			}
+			else if (gsonPresent) {
+				converters.add(new GsonMessageConverter());
+			}
+			else if (jsonbPresent) {
+				converters.add(new JsonbMessageConverter());
+			}
+			else if (kotlinSerializationJsonPresent) {
+				converters.add(new KotlinSerializationJsonMessageConverter());
 			}
 		}
 		return new CompositeMessageConverter(converters);
@@ -414,9 +463,10 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	public UserDestinationResolver userDestinationResolver() {
-		DefaultUserDestinationResolver resolver = new DefaultUserDestinationResolver(userRegistry());
-		String prefix = getBrokerRegistry().getUserDestinationPrefix();
+	public UserDestinationResolver userDestinationResolver(SimpUserRegistry userRegistry,
+			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel) {
+		DefaultUserDestinationResolver resolver = new DefaultUserDestinationResolver(userRegistry);
+		String prefix = getBrokerRegistry(clientInboundChannel, clientOutboundChannel).getUserDestinationPrefix();
 		if (prefix != null) {
 			resolver.setUserDestinationPrefix(prefix);
 		}
@@ -425,12 +475,14 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	@SuppressWarnings("deprecation")
-	public SimpUserRegistry userRegistry() {
+	public SimpUserRegistry userRegistry(AbstractSubscribableChannel clientInboundChannel,
+			AbstractSubscribableChannel clientOutboundChannel) {
 		SimpUserRegistry registry = createLocalUserRegistry();
+		MessageBrokerRegistry brokerRegistry = getBrokerRegistry(clientInboundChannel, clientOutboundChannel);
 		if (registry == null) {
-			registry = createLocalUserRegistry(getBrokerRegistry().getUserRegistryOrder());
+			registry = createLocalUserRegistry(brokerRegistry.getUserRegistryOrder());
 		}
-		boolean broadcast = getBrokerRegistry().getUserRegistryBroadcast() != null;
+		boolean broadcast = brokerRegistry.getUserRegistryBroadcast() != null;
 		return (broadcast ? new MultiServerUserRegistry(registry) : registry);
 	}
 

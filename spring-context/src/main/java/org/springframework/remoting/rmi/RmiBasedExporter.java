@@ -36,7 +36,9 @@ import org.springframework.remoting.support.RemoteInvocationBasedExporter;
  * @since 1.2.5
  * @see RmiServiceExporter
  * @see JndiRmiServiceExporter
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public abstract class RmiBasedExporter extends RemoteInvocationBasedExporter {
 
 	/**

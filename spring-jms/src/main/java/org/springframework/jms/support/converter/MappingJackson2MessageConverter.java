@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import org.springframework.util.ClassUtils;
  * <li>{@link DeserializationFeature#FAIL_ON_UNKNOWN_PROPERTIES} is disabled</li>
  * </ul>
  *
- * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
+ * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
  *
  * @author Mark Pollack
  * @author Dave Syer
@@ -123,7 +123,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	/**
 	 * Specify the encoding to use when converting to and from text-based
 	 * message body content. The default encoding will be "UTF-8".
-	 * <p>When reading from a a text-based message, an encoding may have been
+	 * <p>When reading from a text-based message, an encoding may have been
 	 * suggested through a special JMS property which will then be preferred
 	 * over the encoding set on this MessageConverter instance.
 	 * @see #setEncodingPropertyName
@@ -275,7 +275,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	protected TextMessage mapToTextMessage(Object object, Session session, ObjectWriter objectWriter)
 			throws JMSException, IOException {
 
-		StringWriter writer = new StringWriter();
+		StringWriter writer = new StringWriter(1024);
 		objectWriter.writeValue(writer, object);
 		return session.createTextMessage(writer.toString());
 	}
@@ -340,7 +340,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 * sets the resulting value (either a mapped id or the raw Java class name)
 	 * into the configured type id message property.
 	 * @param object the payload object to set a type id for
-	 * @param message the JMS Message to set the type id on
+	 * @param message the JMS Message on which to set the type id property
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #getJavaTypeForMessage(javax.jms.Message)
 	 * @see #setTypeIdPropertyName(String)
@@ -442,7 +442,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 * <p>The default implementation parses the configured type id property name
 	 * and consults the configured type id mapping. This can be overridden with
 	 * a different strategy, e.g. doing some heuristics based on message origin.
-	 * @param message the JMS Message to set the type id on
+	 * @param message the JMS Message from which to get the type id property
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #setTypeIdOnMessage(Object, javax.jms.Message)
 	 * @see #setTypeIdPropertyName(String)
@@ -457,11 +457,11 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 		}
 		Class<?> mappedClass = this.idClassMappings.get(typeId);
 		if (mappedClass != null) {
-			return this.objectMapper.getTypeFactory().constructType(mappedClass);
+			return this.objectMapper.constructType(mappedClass);
 		}
 		try {
 			Class<?> typeClass = ClassUtils.forName(typeId, this.beanClassLoader);
-			return this.objectMapper.getTypeFactory().constructType(typeClass);
+			return this.objectMapper.constructType(typeClass);
 		}
 		catch (Throwable ex) {
 			throw new MessageConversionException("Failed to resolve type id [" + typeId + "]", ex);

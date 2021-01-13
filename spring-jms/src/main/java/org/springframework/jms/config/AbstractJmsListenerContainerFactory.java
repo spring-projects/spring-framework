@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.jms.config;
 
 import javax.jms.ConnectionFactory;
+import javax.jms.ExceptionListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,10 +49,13 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	private DestinationResolver destinationResolver;
 
 	@Nullable
-	private ErrorHandler errorHandler;
+	private MessageConverter messageConverter;
 
 	@Nullable
-	private MessageConverter messageConverter;
+	private ExceptionListener exceptionListener;
+
+	@Nullable
+	private ErrorHandler errorHandler;
 
 	@Nullable
 	private Boolean sessionTransacted;
@@ -99,17 +103,25 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	}
 
 	/**
-	 * @see AbstractMessageListenerContainer#setErrorHandler(ErrorHandler)
-	 */
-	public void setErrorHandler(ErrorHandler errorHandler) {
-		this.errorHandler = errorHandler;
-	}
-
-	/**
 	 * @see AbstractMessageListenerContainer#setMessageConverter(MessageConverter)
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
 		this.messageConverter = messageConverter;
+	}
+
+	/**
+	 * @since 5.2.8
+	 * @see AbstractMessageListenerContainer#setExceptionListener(ExceptionListener)
+	 */
+	public void setExceptionListener(ExceptionListener exceptionListener) {
+		this.exceptionListener = exceptionListener;
+	}
+
+	/**
+	 * @see AbstractMessageListenerContainer#setErrorHandler(ErrorHandler)
+	 */
+	public void setErrorHandler(ErrorHandler errorHandler) {
+		this.errorHandler = errorHandler;
 	}
 
 	/**
@@ -182,6 +194,7 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		this.autoStartup = autoStartup;
 	}
 
+
 	@Override
 	public C createListenerContainer(JmsListenerEndpoint endpoint) {
 		C instance = createContainerInstance();
@@ -192,11 +205,14 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		if (this.destinationResolver != null) {
 			instance.setDestinationResolver(this.destinationResolver);
 		}
-		if (this.errorHandler != null) {
-			instance.setErrorHandler(this.errorHandler);
-		}
 		if (this.messageConverter != null) {
 			instance.setMessageConverter(this.messageConverter);
+		}
+		if (this.exceptionListener != null) {
+			instance.setExceptionListener(this.exceptionListener);
+		}
+		if (this.errorHandler != null) {
+			instance.setErrorHandler(this.errorHandler);
 		}
 		if (this.sessionTransacted != null) {
 			instance.setSessionTransacted(this.sessionTransacted);

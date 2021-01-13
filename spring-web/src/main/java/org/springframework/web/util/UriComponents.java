@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.util.MultiValueMap;
 public abstract class UriComponents implements Serializable {
 
 	/** Captures URI template variable names. */
-	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
+	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)}");
 
 
 	@Nullable
@@ -276,8 +276,10 @@ public abstract class UriComponents implements Serializable {
 	 */
 	private static String sanitizeSource(String source) {
 		int level = 0;
-		StringBuilder sb = new StringBuilder();
-		for (char c : source.toCharArray()) {
+		int lastCharIndex = 0;
+		char[] chars = new char[source.length()];
+		for (int i = 0; i < source.length(); i++) {
+			char c = source.charAt(i);
 			if (c == '{') {
 				level++;
 			}
@@ -287,9 +289,9 @@ public abstract class UriComponents implements Serializable {
 			if (level > 1 || (level == 1 && c == '}')) {
 				continue;
 			}
-			sb.append(c);
+			chars[lastCharIndex++] = c;
 		}
-		return sb.toString();
+		return new String(chars, 0, lastCharIndex);
 	}
 
 	private static String getVariableName(String match) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -38,62 +37,88 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sam Brannen
  * @since July 18, 2004
  */
-@SuppressWarnings("serial")
-public class KeyHolderTests {
+class KeyHolderTests {
 
 	private final KeyHolder kh = new GeneratedKeyHolder();
 
 
 	@Test
-	public void singleKey() {
-		kh.getKeyList().addAll(singletonList(singletonMap("key", 1)));
+	void getKeyForSingleNumericKey() {
+		kh.getKeyList().add(singletonMap("key", 1));
 
-		assertThat(kh.getKey().intValue()).as("single key should be returned").isEqualTo(1);
+		assertThat(kh.getKey()).as("single key should be returned").isEqualTo(1);
 	}
 
 	@Test
-	public void singleKeyNonNumeric() {
-		kh.getKeyList().addAll(singletonList(singletonMap("key", "1")));
+	void getKeyForSingleNonNumericKey() {
+		kh.getKeyList().add(singletonMap("key", "ABC"));
 
-		assertThatExceptionOfType(DataRetrievalFailureException.class).isThrownBy(() ->
-				kh.getKey().intValue())
-			.withMessageStartingWith("The generated key is not of a supported numeric type.");
+		assertThatExceptionOfType(DataRetrievalFailureException.class)
+			.isThrownBy(() -> kh.getKey())
+			.withMessage("The generated key type is not supported. Unable to cast [java.lang.String] to [java.lang.Number].");
 	}
 
 	@Test
-	public void noKeyReturnedInMap() {
-		kh.getKeyList().addAll(singletonList(emptyMap()));
+	void getKeyWithNoKeysInMap() {
+		kh.getKeyList().add(emptyMap());
 
-		assertThatExceptionOfType(DataRetrievalFailureException.class).isThrownBy(() ->
-				kh.getKey())
+		assertThatExceptionOfType(DataRetrievalFailureException.class)
+			.isThrownBy(() -> kh.getKey())
 			.withMessageStartingWith("Unable to retrieve the generated key.");
 	}
 
 	@Test
-	public void multipleKeys() {
+	void getKeyWithMultipleKeysInMap() {
+		@SuppressWarnings("serial")
 		Map<String, Object> m = new HashMap<String, Object>() {{
 			put("key", 1);
 			put("seq", 2);
 		}};
-		kh.getKeyList().addAll(singletonList(m));
+		kh.getKeyList().add(m);
 
-		assertThat(kh.getKeys().size()).as("two keys should be in the map").isEqualTo(2);
-		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
-				kh.getKey())
+		assertThat(kh.getKeys()).as("two keys should be in the map").hasSize(2);
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
+			.isThrownBy(() -> kh.getKey())
 			.withMessageStartingWith("The getKey method should only be used when a single key is returned.");
 	}
 
 	@Test
-	public void multipleKeyRows() {
+	void getKeyAsStringForSingleKey() {
+		kh.getKeyList().add(singletonMap("key", "ABC"));
+
+		assertThat(kh.getKeyAs(String.class)).as("single key should be returned").isEqualTo("ABC");
+	}
+
+	@Test
+	void getKeyAsWrongType() {
+		kh.getKeyList().add(singletonMap("key", "ABC"));
+
+		assertThatExceptionOfType(DataRetrievalFailureException.class)
+			.isThrownBy(() -> kh.getKeyAs(Integer.class))
+			.withMessage("The generated key type is not supported. Unable to cast [java.lang.String] to [java.lang.Integer].");
+	}
+
+	@Test
+	void getKeyAsIntegerWithNullValue() {
+		kh.getKeyList().add(singletonMap("key", null));
+
+		assertThatExceptionOfType(DataRetrievalFailureException.class)
+			.isThrownBy(() -> kh.getKeyAs(Integer.class))
+			.withMessage("The generated key type is not supported. Unable to cast [null] to [java.lang.Integer].");
+	}
+
+	@Test
+	void getKeysWithMultipleKeyRows() {
+		@SuppressWarnings("serial")
 		Map<String, Object> m = new HashMap<String, Object>() {{
 			put("key", 1);
 			put("seq", 2);
 		}};
 		kh.getKeyList().addAll(asList(m, m));
 
-		assertThat(kh.getKeyList().size()).as("two rows should be in the list").isEqualTo(2);
-		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
-				kh.getKeys())
+		assertThat(kh.getKeyList()).as("two rows should be in the list").hasSize(2);
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
+			.isThrownBy(() -> kh.getKeys())
 			.withMessageStartingWith("The getKeys method should only be used when keys for a single row are returned.");
 	}
 

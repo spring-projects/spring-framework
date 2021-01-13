@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public abstract class AbstractBrokerMessageHandler
 	@Nullable
 	private ApplicationEventPublisher eventPublisher;
 
-	private AtomicBoolean brokerAvailable = new AtomicBoolean(false);
+	private AtomicBoolean brokerAvailable = new AtomicBoolean();
 
 	private final BrokerAvailabilityEvent availableEvent = new BrokerAvailabilityEvent(true, this);
 
@@ -71,7 +71,7 @@ public abstract class AbstractBrokerMessageHandler
 
 	private boolean autoStartup = true;
 
-	private volatile boolean running = false;
+	private volatile boolean running;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -125,6 +125,12 @@ public abstract class AbstractBrokerMessageHandler
 		return this.brokerChannel;
 	}
 
+	/**
+	 * Return destination prefixes prefixes to use to filter messages to forward
+	 * to the broker. Messages that have a destination and where the destination
+	 * doesn't match are ignored.
+	 * <p>By default this is not set.
+	 */
 	public Collection<String> getDestinationPrefixes() {
 		return this.destinationPrefixes;
 	}
@@ -142,7 +148,7 @@ public abstract class AbstractBrokerMessageHandler
 	 * @since 5.1
 	 */
 	public void setPreservePublishOrder(boolean preservePublishOrder) {
-		OrderedMessageSender.configureOutboundChannel(this.clientOutboundChannel, preservePublishOrder);
+		OrderedMessageChannelDecorator.configureInterceptor(this.clientOutboundChannel, preservePublishOrder);
 		this.preservePublishOrder = preservePublishOrder;
 	}
 
@@ -298,7 +304,7 @@ public abstract class AbstractBrokerMessageHandler
 	 */
 	protected MessageChannel getClientOutboundChannelForSession(String sessionId) {
 		return this.preservePublishOrder ?
-				new OrderedMessageSender(getClientOutboundChannel(), logger) : getClientOutboundChannel();
+				new OrderedMessageChannelDecorator(getClientOutboundChannel(), logger) : getClientOutboundChannel();
 	}
 
 

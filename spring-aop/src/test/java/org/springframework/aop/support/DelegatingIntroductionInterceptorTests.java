@@ -24,15 +24,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.tests.TimeStamped;
-import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
-import org.springframework.tests.sample.beans.INestedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.NestedTestBean;
-import org.springframework.tests.sample.beans.Person;
-import org.springframework.tests.sample.beans.SerializablePerson;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.aop.testfixture.interceptor.SerializableNopInterceptor;
+import org.springframework.beans.testfixture.beans.INestedTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.NestedTestBean;
+import org.springframework.beans.testfixture.beans.Person;
+import org.springframework.beans.testfixture.beans.SerializablePerson;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.testfixture.TimeStamped;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -239,7 +239,7 @@ public class DelegatingIntroductionInterceptorTests {
 		assertThat(p.getName()).isEqualTo(name);
 		assertThat(((TimeStamped) p).getTimeStamp()).isEqualTo(time);
 
-		Person p1 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		Person p1 = SerializationTestUtils.serializeAndDeserialize(p);
 		assertThat(p1.getName()).isEqualTo(name);
 		assertThat(((TimeStamped) p1).getTimeStamp()).isEqualTo(time);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,13 +87,12 @@ public class TrickyAspectJPointcutExpressionTests {
 		testAdvice(new DefaultPointcutAdvisor(pointcut, logAdvice), logAdvice, new TestServiceImpl(), "TestServiceImpl");
 
 		// Then try again with a different class loader on the target...
-		SimpleThrowawayClassLoader loader = new SimpleThrowawayClassLoader(new TestServiceImpl().getClass().getClassLoader());
+		SimpleThrowawayClassLoader loader = new SimpleThrowawayClassLoader(TestServiceImpl.class.getClassLoader());
 		// Make sure the interface is loaded from the  parent class loader
 		loader.excludeClass(TestService.class.getName());
 		loader.excludeClass(TestException.class.getName());
-		TestService other = (TestService) loader.loadClass(TestServiceImpl.class.getName()).newInstance();
+		TestService other = (TestService) loader.loadClass(TestServiceImpl.class.getName()).getDeclaredConstructor().newInstance();
 		testAdvice(new DefaultPointcutAdvisor(pointcut, logAdvice), logAdvice, other, "TestServiceImpl");
-
 	}
 
 	private void testAdvice(Advisor advisor, LogUserAdvice logAdvice, TestService target, String message)
@@ -127,7 +126,6 @@ public class TrickyAspectJPointcutExpressionTests {
 		public SimpleThrowawayClassLoader(ClassLoader parent) {
 			super(parent);
 		}
-
 	}
 
 

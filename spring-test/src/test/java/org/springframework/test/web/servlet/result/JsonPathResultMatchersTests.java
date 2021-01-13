@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,9 +64,17 @@ public class JsonPathResultMatchersTests {
 	}
 
 	@Test
-	public void valueWithMismatch() throws Exception {
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				new JsonPathResultMatchers("$.str").value("bogus").match(stubMvcResult));
+	public void valueWithValueMismatch() throws Exception {
+		assertThatExceptionOfType(AssertionError.class)
+			.isThrownBy(() -> new JsonPathResultMatchers("$.str").value("bogus").match(stubMvcResult))
+			.withMessage("JSON path \"$.str\" expected:<bogus> but was:<foo>");
+	}
+
+	@Test
+	public void valueWithTypeMismatch() throws Exception {
+		assertThatExceptionOfType(AssertionError.class)
+			.isThrownBy(() -> new JsonPathResultMatchers("$.str").value("bogus".getBytes()).match(stubMvcResult))
+			.withMessage("At JSON path \"$.str\", value <foo> of type <java.lang.String> cannot be converted to type <byte[]>");
 	}
 
 	@Test

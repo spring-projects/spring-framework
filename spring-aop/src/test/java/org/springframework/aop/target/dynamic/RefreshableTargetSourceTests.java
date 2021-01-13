@@ -18,10 +18,10 @@ package org.springframework.aop.target.dynamic;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.EnabledForTestGroups;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * @author Rob Harrop
@@ -77,7 +77,7 @@ public class RefreshableTargetSourceTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	public void testRefreshOverTime() throws Exception {
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource(true);
 		ts.setRefreshCheckDelay(100);

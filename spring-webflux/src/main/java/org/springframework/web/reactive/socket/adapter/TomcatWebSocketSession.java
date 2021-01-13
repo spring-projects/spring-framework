@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import javax.websocket.Session;
 
 import org.apache.tomcat.websocket.WsSession;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.web.reactive.socket.HandshakeInfo;
@@ -48,7 +48,15 @@ public class TomcatWebSocketSession extends StandardWebSocketSession {
 	}
 
 	public TomcatWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
-			MonoProcessor<Void> completionMono) {
+			Sinks.Empty<Void> completionSink) {
+
+		super(session, info, factory, completionSink);
+		suspendReceiving();
+	}
+
+	@Deprecated
+	public TomcatWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
+			reactor.core.publisher.MonoProcessor<Void> completionMono) {
 
 		super(session, info, factory, completionMono);
 		suspendReceiving();

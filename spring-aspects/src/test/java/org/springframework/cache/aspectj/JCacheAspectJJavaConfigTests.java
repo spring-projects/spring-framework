@@ -23,13 +23,13 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.config.AnnotatedJCacheableService;
-import org.springframework.cache.jcache.config.AbstractJCacheAnnotationTests;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.contextsupport.testfixture.jcache.AbstractJCacheAnnotationTests;
 
 /**
  * @author Stephane Nicoll

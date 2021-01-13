@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,16 @@ public class DefaultControllerSpecTests {
 		assertThat(codecsConsumer.getValue()).isNotNull();
 		assertThat(pathMatchingConsumer.getValue()).isNotNull();
 		assertThat(viewResolverConsumer.getValue()).isNotNull();
+	}
 
+	@Test // gh-25854
+	public void uriTemplate() {
+		new DefaultControllerSpec(new MyController()).build()
+				.get().uri("/")
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(String.class).isEqualTo("Success")
+				.consumeWith(result -> assertThat(result.getUriTemplate()).isEqualTo("/"));
 	}
 
 

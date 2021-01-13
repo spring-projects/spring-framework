@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,15 @@
 package org.springframework.http.converter.json;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonEncoding;
@@ -32,12 +37,12 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.http.HttpInputMessage;
@@ -50,13 +55,15 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.TypeUtils;
 
 /**
  * Abstract base class for Jackson based and content type independent
  * {@link HttpMessageConverter} implementations.
  *
- * <p>Compatible with Jackson 2.9 and higher, as of Spring 5.0.
+ * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
  *
  * @author Arjen Poutsma
  * @author Keith Donald
@@ -67,6 +74,17 @@ import org.springframework.util.TypeUtils;
  * @see MappingJackson2HttpMessageConverter
  */
 public abstract class AbstractJackson2HttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
+
+	private static final Map<String, JsonEncoding> ENCODINGS;
+
+	static {
+		ENCODINGS = CollectionUtils.newHashMap(JsonEncoding.values().length);
+		for (JsonEncoding encoding : JsonEncoding.values()) {
+			ENCODINGS.put(encoding.getJavaName(), encoding);
+		}
+		ENCODINGS.put("US-ASCII", JsonEncoding.UTF8);
+	}
+
 
 	/**
 	 * The default charset used by the converter.
@@ -172,6 +190,12 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		if (!canWrite(mediaType)) {
 			return false;
 		}
+		if (mediaType != null && mediaType.getCharset() != null) {
+			Charset charset = mediaType.getCharset();
+			if (!ENCODINGS.containsKey(charset.name())) {
+				return false;
+			}
+		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<>();
 		if (this.objectMapper.canSerialize(clazz, causeRef)) {
 			return true;
@@ -212,14 +236,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
-	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException {
-
-		JavaType javaType = getJavaType(clazz, null);
-		return readJavaType(javaType, inputMessage);
-	}
-
-	@Override
 	public Object read(Type type, @Nullable Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
@@ -227,16 +243,40 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		return readJavaType(javaType, inputMessage);
 	}
 
+	@Override
+	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
+		JavaType javaType = getJavaType(clazz, null);
+		return readJavaType(javaType, inputMessage);
+	}
+
 	private Object readJavaType(JavaType javaType, HttpInputMessage inputMessage) throws IOException {
+		MediaType contentType = inputMessage.getHeaders().getContentType();
+		Charset charset = getCharset(contentType);
+
+		boolean isUnicode = ENCODINGS.containsKey(charset.name());
 		try {
 			if (inputMessage instanceof MappingJacksonInputMessage) {
 				Class<?> deserializationView = ((MappingJacksonInputMessage) inputMessage).getDeserializationView();
 				if (deserializationView != null) {
-					return this.objectMapper.readerWithView(deserializationView).forType(javaType).
-							readValue(inputMessage.getBody());
+					ObjectReader objectReader = this.objectMapper.readerWithView(deserializationView).forType(javaType);
+					if (isUnicode) {
+						return objectReader.readValue(inputMessage.getBody());
+					}
+					else {
+						Reader reader = new InputStreamReader(inputMessage.getBody(), charset);
+						return objectReader.readValue(reader);
+					}
 				}
 			}
-			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
+			if (isUnicode) {
+				return this.objectMapper.readValue(inputMessage.getBody(), javaType);
+			}
+			else {
+				Reader reader = new InputStreamReader(inputMessage.getBody(), charset);
+				return this.objectMapper.readValue(reader, javaType);
+			}
 		}
 		catch (InvalidDefinitionException ex) {
 			throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
@@ -246,14 +286,32 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		}
 	}
 
+	/**
+	 * Determine the charset to use for JSON input.
+	 * <p>By default this is either the charset from the input {@code MediaType}
+	 * or otherwise falling back on {@code UTF-8}. Can be overridden in subclasses.
+	 * @param contentType the content type of the HTTP input message
+	 * @return the charset to use
+	 * @since 5.1.18
+	 */
+	protected Charset getCharset(@Nullable MediaType contentType) {
+		if (contentType != null && contentType.getCharset() != null) {
+			return contentType.getCharset();
+		}
+		else {
+			return StandardCharsets.UTF_8;
+		}
+	}
+
 	@Override
 	protected void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		JsonEncoding encoding = getJsonEncoding(contentType);
-		JsonGenerator generator = this.objectMapper.getFactory().createGenerator(outputMessage.getBody(), encoding);
-		try {
+
+		OutputStream outputStream = StreamUtils.nonClosing(outputMessage.getBody());
+		try (JsonGenerator generator = this.objectMapper.getFactory().createGenerator(outputStream, encoding)) {
 			writePrefix(generator, object);
 
 			Object value = object;
@@ -321,8 +379,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * @return the Jackson JavaType
 	 */
 	protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {
-		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
-		return typeFactory.constructType(GenericTypeResolver.resolveType(type, contextClass));
+		return this.objectMapper.constructType(GenericTypeResolver.resolveType(type, contextClass));
 	}
 
 	/**
@@ -333,10 +390,9 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	protected JsonEncoding getJsonEncoding(@Nullable MediaType contentType) {
 		if (contentType != null && contentType.getCharset() != null) {
 			Charset charset = contentType.getCharset();
-			for (JsonEncoding encoding : JsonEncoding.values()) {
-				if (charset.name().equals(encoding.getJavaName())) {
-					return encoding;
-				}
+			JsonEncoding encoding = ENCODINGS.get(charset.name());
+			if (encoding != null) {
+				return encoding;
 			}
 		}
 		return JsonEncoding.UTF8;

@@ -16,9 +16,9 @@
 
 package org.springframework.context.annotation6;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.tests.sample.beans.TestBean;
 
 @Configuration
 public class ConfigForScanning {

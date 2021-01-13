@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class JettyWebSocketHandlerAdapter {
 			this.wsSession.initializeNativeSession(session);
 			this.webSocketHandler.afterConnectionEstablished(this.wsSession);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
@@ -82,7 +82,7 @@ public class JettyWebSocketHandlerAdapter {
 		try {
 			this.webSocketHandler.handleMessage(this.wsSession, message);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
@@ -93,7 +93,7 @@ public class JettyWebSocketHandlerAdapter {
 		try {
 			this.webSocketHandler.handleMessage(this.wsSession, message);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
@@ -106,7 +106,7 @@ public class JettyWebSocketHandlerAdapter {
 			try {
 				this.webSocketHandler.handleMessage(this.wsSession, message);
 			}
-			catch (Throwable ex) {
+			catch (Exception ex) {
 				ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 			}
 		}
@@ -118,7 +118,7 @@ public class JettyWebSocketHandlerAdapter {
 		try {
 			this.webSocketHandler.afterConnectionClosed(this.wsSession, closeStatus);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Unhandled exception after connection closed for " + this, ex);
 			}
@@ -130,7 +130,7 @@ public class JettyWebSocketHandlerAdapter {
 		try {
 			this.webSocketHandler.handleTransportError(this.wsSession, cause);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}

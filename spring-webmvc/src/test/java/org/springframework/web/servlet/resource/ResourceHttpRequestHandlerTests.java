@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,21 +26,24 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -58,6 +61,7 @@ import static org.mockito.Mockito.mock;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
+@ExtendWith(GzipSupport.class)
 public class ResourceHttpRequestHandlerTests {
 
 	private ResourceHttpRequestHandler handler;
@@ -74,13 +78,15 @@ public class ResourceHttpRequestHandlerTests {
 		paths.add(new ClassPathResource("testalternatepath/", getClass()));
 		paths.add(new ClassPathResource("META-INF/resources/webjars/"));
 
+		TestServletContext servletContext = new TestServletContext();
+
 		this.handler = new ResourceHttpRequestHandler();
 		this.handler.setLocations(paths);
 		this.handler.setCacheSeconds(3600);
-		this.handler.setServletContext(new TestServletContext());
+		this.handler.setServletContext(servletContext);
 		this.handler.afterPropertiesSet();
 
-		this.request = new MockHttpServletRequest("GET", "");
+		this.request = new MockHttpServletRequest(servletContext, "GET", "");
 		this.response = new MockHttpServletResponse();
 	}
 
@@ -114,7 +120,6 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.getDateHeader("Last-Modified") / 1000).isEqualTo(resourceLastModified("test/foo.css") / 1000);
 		assertThat(this.response.getHeader("Accept-Ranges")).isEqualTo("bytes");
 		assertThat(this.response.getHeaders("Accept-Ranges").size()).isEqualTo(1);
-		assertThat(this.response.getContentAsByteArray().length).isEqualTo(0);
 	}
 
 	@Test
@@ -150,7 +155,7 @@ public class ResourceHttpRequestHandlerTests {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "versionString/foo.css");
 		this.handler.handleRequest(this.request, this.response);
 
-		assertThat(this.response.getHeader("ETag")).isEqualTo("\"versionString\"");
+		assertThat(this.response.getHeader("ETag")).isEqualTo("W/\"versionString\"");
 		assertThat(this.response.getHeader("Accept-Ranges")).isEqualTo("bytes");
 		assertThat(this.response.getHeaders("Accept-Ranges").size()).isEqualTo(1);
 	}
@@ -240,6 +245,7 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test  // SPR-13658
+	@SuppressWarnings("deprecation")
 	public void getResourceWithRegisteredMediaType() throws Exception {
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.addMediaType("bar", new MediaType("foo", "bar"));
@@ -261,6 +267,7 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test  // SPR-14577
+	@SuppressWarnings("deprecation")
 	public void getMediaTypeWithFavorPathExtensionOff() throws Exception {
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.setFavorPathExtension(false);
@@ -283,14 +290,11 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test  // SPR-14368
 	public void getResourceWithMediaTypeResolvedThroughServletContext() throws Exception {
+
 		MockServletContext servletContext = new MockServletContext() {
 			@Override
 			public String getMimeType(String filePath) {
 				return "foo/bar";
-			}
-			@Override
-			public String getVirtualServerName() {
-				return "";
 			}
 		};
 
@@ -300,8 +304,9 @@ public class ResourceHttpRequestHandlerTests {
 		handler.setLocations(paths);
 		handler.afterPropertiesSet();
 
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
-		handler.handleRequest(this.request, this.response);
+		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "");
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		handler.handleRequest(request, this.response);
 
 		assertThat(this.response.getContentType()).isEqualTo("foo/bar");
 		assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");
@@ -655,6 +660,49 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(ranges[11]).isEqualTo("t.");
 	}
 
+	@Test // gh-25976
+	public void partialContentByteRangeWithEncodedResource(GzipSupport.GzippedFiles gzippedFiles) throws Exception {
+		String path = "js/foo.js";
+		gzippedFiles.create(path);
+
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.setResourceResolvers(Arrays.asList(new EncodedResourceResolver(), new PathResourceResolver()));
+		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
+		handler.setServletContext(new MockServletContext());
+		handler.afterPropertiesSet();
+
+		this.request.addHeader("Accept-Encoding", "gzip");
+		this.request.addHeader("Range", "bytes=0-1");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, path);
+		handler.handleRequest(this.request, this.response);
+
+		assertThat(this.response.getStatus()).isEqualTo(206);
+		assertThat(this.response.getHeaderNames()).containsExactlyInAnyOrder(
+				"Content-Type", "Content-Length", "Content-Range", "Accept-Ranges",
+				"Last-Modified", "Content-Encoding", "Vary");
+
+		assertThat(this.response.getContentType()).isEqualTo("text/javascript");
+		assertThat(this.response.getContentLength()).isEqualTo(2);
+		assertThat(this.response.getHeader("Content-Range")).isEqualTo("bytes 0-1/66");
+		assertThat(this.response.getHeaderValues("Accept-Ranges")).containsExactly("bytes");
+		assertThat(this.response.getHeaderValues("Content-Encoding")).containsExactly("gzip");
+		assertThat(this.response.getHeaderValues("Vary")).containsExactly("Accept-Encoding");
+	}
+
+	@Test // gh-25976
+	public void partialContentWithHttpHead() throws Exception {
+		this.request.setMethod("HEAD");
+		this.request.addHeader("Range", "bytes=0-1");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertThat(this.response.getStatus()).isEqualTo(206);
+		assertThat(this.response.getContentType()).isEqualTo("text/plain");
+		assertThat(this.response.getContentLength()).isEqualTo(2);
+		assertThat(this.response.getHeader("Content-Range")).isEqualTo("bytes 0-1/10");
+		assertThat(this.response.getHeaderValues("Accept-Ranges")).containsExactly("bytes");
+	}
+
 	@Test  // SPR-14005
 	public void doOverwriteExistingCacheControlHeaders() throws Exception {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
@@ -663,6 +711,37 @@ public class ResourceHttpRequestHandlerTests {
 		this.handler.handleRequest(this.request, this.response);
 
 		assertThat(this.response.getHeader("Cache-Control")).isEqualTo("max-age=3600");
+	}
+
+	@Test
+	public void ignoreLastModified() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.setUseLastModified(false);
+		this.handler.handleRequest(this.request, this.response);
+
+		assertThat(this.response.getContentType()).isEqualTo("text/css");
+		assertThat(this.response.getContentLength()).isEqualTo(17);
+		assertThat(this.response.containsHeader("Last-Modified")).isFalse();
+		assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");
+	}
+
+	@Test
+	public void servletContextRootValidation() {
+		StaticWebApplicationContext context = new StaticWebApplicationContext() {
+			@Override
+			public Resource getResource(String location) {
+				return new FileSystemResource("/");
+			}
+		};
+
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.setLocationValues(Collections.singletonList("/"));
+		handler.setApplicationContext(context);
+
+		assertThatIllegalStateException().isThrownBy(handler::afterPropertiesSet)
+				.withMessage("The String-based location \"/\" should be relative to the web application root but " +
+						"resolved to a Resource of type: class org.springframework.core.io.FileSystemResource. " +
+						"If this is intentional, please pass it as a pre-configured Resource via setLocations.");
 	}
 
 
