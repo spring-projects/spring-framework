@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -49,6 +50,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
@@ -155,8 +157,10 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		Object[] hints = extractValidationHints(bodyParam);
 
 		if (mediaType.isCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED)) {
-			return Mono.error(new IllegalStateException(
-					"In a WebFlux application, form data is accessed via ServerWebExchange.getFormData()."));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Form data is accessed via ServerWebExchange.getFormData() in WebFlux.");
+			}
+			return Mono.error(new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE));
 		}
 
 		if (logger.isDebugEnabled()) {
