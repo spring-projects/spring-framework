@@ -500,4 +500,26 @@ public class ContentNegotiatingViewResolverTests {
 		assertThat(result).as("Invalid view").isNotNull();
 	}
 
+	@Test
+	public void resolveQualityValue() throws Exception {
+		request.addHeader("Accept", "text/html;q=0.9");
+
+		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
+
+		viewResolver.afterPropertiesSet();
+
+		View viewMock = mock(View.class, "text_html");
+
+		String viewName = "view";
+		Locale locale = Locale.ENGLISH;
+
+		given(viewResolverMock.resolveViewName(viewName, locale)).willReturn(viewMock);
+		given(viewMock.getContentType()).willReturn("text/html");
+
+		viewResolver.resolveViewName(viewName, locale);
+
+		assertThat(request.getAttribute(View.SELECTED_CONTENT_TYPE)).isEqualTo(MediaType.TEXT_HTML);
+	}
+
 }
