@@ -4993,6 +4993,7 @@ The same applies for typed collections, as the following example shows:
 	}
 ----
 
+[[beans-factory-ordered]]
 [TIP]
 ====
 Your target beans can implement the `org.springframework.core.Ordered` interface or use
