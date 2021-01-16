@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
+ * @author Vladislav Kisel
  * @since 4.2
  * @param <T> the converted object type
  */
@@ -84,8 +85,9 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 	public final void write(final T t, @Nullable final Type type, @Nullable MediaType contentType,
 			HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
 
+		final T unboxed = unboxIfNeeded(t);
 		final HttpHeaders headers = outputMessage.getHeaders();
-		addDefaultHeaders(headers, t, contentType);
+		addDefaultHeaders(headers, unboxed, contentType);
 
 		if (outputMessage instanceof StreamingHttpOutputMessage streamingOutputMessage) {
 			streamingOutputMessage.setBody(outputStream -> writeInternal(t, type, new HttpOutputMessage() {
@@ -100,7 +102,7 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 			}));
 		}
 		else {
-			writeInternal(t, type, outputMessage);
+			writeInternal(unboxed, type, outputMessage);
 			outputMessage.getBody().flush();
 		}
 	}

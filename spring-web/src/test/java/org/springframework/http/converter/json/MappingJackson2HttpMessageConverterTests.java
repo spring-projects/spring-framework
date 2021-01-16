@@ -24,8 +24,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
@@ -58,6 +62,7 @@ import static org.assertj.core.api.Assertions.within;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
+ * @author Vladislav Kisel
  */
 public class MappingJackson2HttpMessageConverterTests {
 
@@ -565,6 +570,22 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(result2.contains("\"property\":\"Value2\"")).isTrue();
 	}
 
+	@Test // issue #24498
+	public void writeAndReadWithOptionalAndBeanInheritance() throws IOException {
+		JacksonChildBean bean = new JacksonChildBean();
+		bean.firstName = "optionalTest";
+
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+
+		converter.write(Optional.of(bean), null, outputMessage);
+		String json = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
+		assertThat(json).isEqualTo("{\"@type\":\"MappingJackson2HttpMessageConverterTests$JacksonChildBean\",\"firstName\":\"optionalTest\"}");
+		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(MediaType.APPLICATION_JSON);
+
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(json.getBytes());
+		JacksonChildBean read = (JacksonChildBean) converter.read(JacksonChildBean.class, inputMessage);
+		assertThat(read.firstName).isEqualTo("optionalTest");
+	}
 
 	interface MyInterface {
 
@@ -784,6 +805,18 @@ public class MappingJackson2HttpMessageConverterTests {
 		protected ObjectWriter customizeWriter(ObjectWriter writer, JavaType javaType, MediaType contentType) {
 			return writer.with(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
 		}
+	}
+
+	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+	@JsonSubTypes({@JsonSubTypes.Type(JacksonChildBean.class)})
+	public interface JacksonParentBean {
+	}
+
+	public static class JacksonChildBean implements JacksonParentBean {
+
+		@JsonProperty
+		String firstName;
+
 	}
 
 }

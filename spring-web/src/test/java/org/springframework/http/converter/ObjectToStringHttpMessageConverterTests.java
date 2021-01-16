@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  *
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  * @author Rossen Stoyanchev
+ * @author Vladislav Kisel
  */
 public class ObjectToStringHttpMessageConverterTests {
 
@@ -171,6 +173,22 @@ public class ObjectToStringHttpMessageConverterTests {
 	public void testConversionServiceRequired() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ObjectToStringHttpMessageConverter(null));
+	}
+
+	@Test
+	public void testWriteAndReadOptional() throws IOException {
+		MediaType contentType = new MediaType("text", "plain");
+		String value = "stringValue";
+		this.converter.write(Optional.of(value), contentType, this.response);
+
+		assertThat(this.servletResponse.getContentAsString()).isEqualTo(value);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContentType(MediaType.TEXT_PLAIN_VALUE);
+		request.setCharacterEncoding("UTF-8");
+		request.setContent(value.getBytes());
+
+		assertThat(this.converter.read(String.class, new ServletServerHttpRequest(request))).isEqualTo(value);
 	}
 
 }

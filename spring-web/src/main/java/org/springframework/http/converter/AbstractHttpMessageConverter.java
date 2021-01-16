@@ -23,9 +23,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpLogging;
@@ -45,6 +47,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Vladislav Kisel
  * @since 3.0
  * @param <T> the converted object type
  */
@@ -53,17 +56,23 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	/** Logger available to subclasses. */
 	protected final Log logger = HttpLogging.forLogName(getClass());
 
+	/**
+	 * This converter type argument
+	 */
+	@Nullable
+	private Class<?> typeArgument;
+
 	private List<MediaType> supportedMediaTypes = Collections.emptyList();
 
 	@Nullable
 	private Charset defaultCharset;
-
 
 	/**
 	 * Construct an {@code AbstractHttpMessageConverter} with no supported media types.
 	 * @see #setSupportedMediaTypes
 	 */
 	protected AbstractHttpMessageConverter() {
+		resolveTypeArgument();
 	}
 
 	/**
@@ -72,6 +81,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 */
 	protected AbstractHttpMessageConverter(MediaType supportedMediaType) {
 		setSupportedMediaTypes(Collections.singletonList(supportedMediaType));
+		resolveTypeArgument();
 	}
 
 	/**
@@ -80,6 +90,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 */
 	protected AbstractHttpMessageConverter(MediaType... supportedMediaTypes) {
 		setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
+		resolveTypeArgument();
 	}
 
 	/**
@@ -92,6 +103,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	protected AbstractHttpMessageConverter(Charset defaultCharset, MediaType... supportedMediaTypes) {
 		this.defaultCharset = defaultCharset;
 		setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
+		resolveTypeArgument();
 	}
 
 
@@ -207,8 +219,9 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	public final void write(final T t, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
+		final T unboxed = unboxIfNeeded(t);
 		final HttpHeaders headers = outputMessage.getHeaders();
-		addDefaultHeaders(headers, t, contentType);
+		addDefaultHeaders(headers, unboxed, contentType);
 
 		if (outputMessage instanceof StreamingHttpOutputMessage streamingOutputMessage) {
 			streamingOutputMessage.setBody(outputStream -> writeInternal(t, new HttpOutputMessage() {
@@ -223,9 +236,24 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 			}));
 		}
 		else {
-			writeInternal(t, outputMessage);
+			writeInternal(unboxed, outputMessage);
 			outputMessage.getBody().flush();
 		}
+	}
+
+	/**
+	 * Unbox the given object if it is stored in a container (like {@link java.util.Optional}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected T unboxIfNeeded(T value) {
+		// Skip unboxing if the type is unknown to ensure type safety
+		if (typeArgument != null) {
+			if (value instanceof Optional && !typeArgument.equals(Optional.class)) {
+				return ((Optional<T>) value).orElse(value);
+			}
+		}
+
+		return value;
 	}
 
 	/**
@@ -318,5 +346,12 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 */
 	protected abstract void writeInternal(T t, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException;
+
+	/**
+	 * Resolve generic type of this converter and set it to {@link this#typeArgument}
+	 */
+	private void resolveTypeArgument() {
+		this.typeArgument = GenericTypeResolver.resolveTypeArgument(this.getClass(), AbstractHttpMessageConverter.class);
+	}
 
 }
