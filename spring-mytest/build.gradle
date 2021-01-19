@@ -1,0 +1,23 @@
+plugins {
+    id 'java'
+}
+
+group 'com.mytest.spring'
+version '5.1.21.BUILD-SNAPSHOT'
+
+repositories {
+    mavenLocal()
+    maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+    maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter'}
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    implementation(project(":spring-context"))
+}
+
+test {
+    useJUnitPlatform()
+}
