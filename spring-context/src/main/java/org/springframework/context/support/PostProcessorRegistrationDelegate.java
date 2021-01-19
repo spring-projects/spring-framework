@@ -202,6 +202,11 @@ final class PostProcessorRegistrationDelegate {
 
 		// Separate between BeanPostProcessors that implement PriorityOrdered,
 		// Ordered, and the rest.
+		// OrderedPostProcessor and nonOrderedPostProcessor shouldn't be initialize here.
+		// PriorityOrdered are ensured to initialize before others here,
+		// see doc of {@code PriorityOrdered}
+		// Initialize the BeanPostProcessors that implement PriorityOrdered
+		// and separate BeanPostProcessors.
 		List<BeanPostProcessor> priorityOrderedPostProcessors = new ArrayList<>();
 		List<BeanPostProcessor> internalPostProcessors = new ArrayList<>();
 		List<String> orderedPostProcessorNames = new ArrayList<>();
