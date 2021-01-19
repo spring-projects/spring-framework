@@ -64,7 +64,7 @@ import org.springframework.util.Assert;
  * @see #setMinEvictableIdleTimeMillis
  */
 @SuppressWarnings({"rawtypes", "unchecked", "serial"})
-public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implements PooledObjectFactory<Object> {
+public class CommonsPool2TargetSource<T> extends AbstractPoolingTargetSource implements PooledObjectFactory<T> {
 
 	private int maxIdle = GenericObjectPoolConfig.DEFAULT_MAX_IDLE;
 
@@ -273,26 +273,26 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 	//----------------------------------------------------------------------------
 
 	@Override
-	public PooledObject<Object> makeObject() throws Exception {
-		return new DefaultPooledObject<>(newPrototypeInstance());
+	public PooledObject<T> makeObject() throws Exception {
+		return new DefaultPooledObject<>((T) newPrototypeInstance());
 	}
 
 	@Override
-	public void destroyObject(PooledObject<Object> p) throws Exception {
+	public void destroyObject(PooledObject<T> p) throws Exception {
 		destroyPrototypeInstance(p.getObject());
 	}
 
 	@Override
-	public boolean validateObject(PooledObject<Object> p) {
+	public boolean validateObject(PooledObject<T> p) {
 		return true;
 	}
 
 	@Override
-	public void activateObject(PooledObject<Object> p) throws Exception {
+	public void activateObject(PooledObject<T> p) throws Exception {
 	}
 
 	@Override
-	public void passivateObject(PooledObject<Object> p) throws Exception {
+	public void passivateObject(PooledObject<T> p) throws Exception {
 	}
 
 }

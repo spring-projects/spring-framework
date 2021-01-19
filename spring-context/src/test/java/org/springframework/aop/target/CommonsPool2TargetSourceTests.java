@@ -46,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Chris Beams
  * @author Stephane Nicoll
  */
+@SuppressWarnings("unchecked")
 class CommonsPool2TargetSourceTests {
 
 	/**
@@ -111,7 +112,7 @@ class CommonsPool2TargetSourceTests {
 
 	@Test
 	void testTargetSourceSerializableWithoutConfigMixin() throws Exception {
-		CommonsPool2TargetSource cpts = (CommonsPool2TargetSource) beanFactory.getBean("personPoolTargetSource");
+		CommonsPool2TargetSource<Person> cpts = (CommonsPool2TargetSource<Person>) beanFactory.getBean("personPoolTargetSource");
 
 		SingletonTargetSource serialized = SerializationTestUtils.serializeAndDeserialize(cpts, SingletonTargetSource.class);
 		assertThat(serialized.getTarget()).isInstanceOf(Person.class);
@@ -136,7 +137,7 @@ class CommonsPool2TargetSourceTests {
 	void testHitMaxSize() throws Exception {
 		int maxSize = 10;
 
-		CommonsPool2TargetSource targetSource = new CommonsPool2TargetSource();
+		CommonsPool2TargetSource<Object> targetSource = new CommonsPool2TargetSource<>();
 		targetSource.setMaxSize(maxSize);
 		targetSource.setMaxWait(1);
 		prepareTargetSource(targetSource);
@@ -166,7 +167,7 @@ class CommonsPool2TargetSourceTests {
 	@Test
 	void testHitMaxSizeLoadedFromContext() throws Exception {
 		Advised person = (Advised) beanFactory.getBean("maxSizePooledPerson");
-		CommonsPool2TargetSource targetSource = (CommonsPool2TargetSource) person.getTargetSource();
+		CommonsPool2TargetSource<Object> targetSource = (CommonsPool2TargetSource<Object>) person.getTargetSource();
 
 		int maxSize = targetSource.getMaxSize();
 		Object[] pooledInstances = new Object[maxSize];
@@ -194,14 +195,14 @@ class CommonsPool2TargetSourceTests {
 
 	@Test
 	void testSetWhenExhaustedAction() {
-		CommonsPool2TargetSource targetSource = new CommonsPool2TargetSource();
+		CommonsPool2TargetSource<Object> targetSource = new CommonsPool2TargetSource<>();
 		targetSource.setBlockWhenExhausted(true);
 		assertThat(targetSource.isBlockWhenExhausted()).isEqualTo(true);
 	}
 
 	@Test
 	void referenceIdentityByDefault() throws Exception {
-		CommonsPool2TargetSource targetSource = new CommonsPool2TargetSource();
+		CommonsPool2TargetSource<SerializablePerson> targetSource = new CommonsPool2TargetSource<>();
 		targetSource.setMaxWait(1);
 		prepareTargetSource(targetSource);
 
@@ -217,7 +218,7 @@ class CommonsPool2TargetSourceTests {
 		targetSource.releaseTarget(second);
 	}
 
-	private void prepareTargetSource(CommonsPool2TargetSource targetSource) {
+	private void prepareTargetSource(CommonsPool2TargetSource<?> targetSource) {
 		String beanName = "target";
 
 		StaticApplicationContext applicationContext = new StaticApplicationContext();

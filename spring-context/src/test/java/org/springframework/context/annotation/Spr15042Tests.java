@@ -26,11 +26,11 @@ import org.springframework.aop.target.CommonsPool2TargetSource;
  */
 public class Spr15042Tests {
 
+	@SuppressWarnings("resource")
 	@Test
 	public void poolingTargetSource() {
 		new AnnotationConfigApplicationContext(PoolingTargetSourceConfig.class);
 	}
-
 
 	@Configuration
 	static class PoolingTargetSourceConfig {
@@ -44,8 +44,8 @@ public class Spr15042Tests {
 		}
 
 		@Bean
-		public CommonsPool2TargetSource poolTargetSource() {
-			CommonsPool2TargetSource pool = new CommonsPool2TargetSource();
+		public CommonsPool2TargetSource<Object> poolTargetSource() {
+			CommonsPool2TargetSource<Object> pool = new CommonsPool2TargetSource<>();
 			pool.setMaxSize(3);
 			pool.setTargetBeanName("myObjectTarget");
 			return pool;
