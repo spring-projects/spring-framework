@@ -113,7 +113,7 @@ public class SimpleUrlHandlerMappingTests {
 		assertThat(chain.getHandler()).isSameAs(otherBean);
 		assertThat(request.getAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).isEqualTo("welcome.x");
 		assertThat(request.getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(otherBean);
-		
+
 		request = PathPatternsTestUtils.initRequest("GET", "/welcome/", usePathPatterns);
 		chain = getHandler(hm, request);
 		assertThat(chain.getHandler()).isSameAs(otherBean);
