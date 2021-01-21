@@ -17,8 +17,10 @@
 package org.springframework.validation.beanvalidation;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -290,13 +292,17 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		if (this.parameterNameDiscoverer != null) {
 			configureParameterNameProvider(this.parameterNameDiscoverer, configuration);
 		}
-
+		List<InputStream> mappingStreams = null;
 		if (this.mappingLocations != null) {
+			mappingStreams = new ArrayList<>(mappingLocations.length);
 			for (Resource location : this.mappingLocations) {
 				try {
-					configuration.addMapping(location.getInputStream());
+					InputStream stream = location.getInputStream();
+					mappingStreams.add(stream);
+					configuration.addMapping(stream);
 				}
 				catch (IOException ex) {
+					closeMappingStreams(mappingStreams);
 					throw new IllegalStateException("Cannot read mapping resource: " + location);
 				}
 			}
@@ -307,8 +313,25 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		// Allow for custom post-processing before we actually build the ValidatorFactory.
 		postProcessConfiguration(configuration);
 
-		this.validatorFactory = configuration.buildValidatorFactory();
-		setTargetValidator(this.validatorFactory.getValidator());
+		try {
+			this.validatorFactory = configuration.buildValidatorFactory();
+			setTargetValidator(this.validatorFactory.getValidator());
+		}
+		finally {
+			closeMappingStreams(mappingStreams);
+		}
+	}
+
+	private void closeMappingStreams(@Nullable List<InputStream> mappingStreams){
+		if (!CollectionUtils.isEmpty(mappingStreams)) {
+			for (InputStream stream : mappingStreams) {
+				try {
+					stream.close();
+				}
+				catch (IOException ignored) {
+				}
+			}
+		}
 	}
 
 	private void configureParameterNameProvider(ParameterNameDiscoverer discoverer, Configuration<?> configuration) {
