@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,7 +186,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		// Pattern match?
 		List<PathPattern> matches = null;
 		for (PathPattern pattern : this.pathPatternHandlerMap.keySet()) {
-			if (pattern.matches(path)) {
+			if (pattern.matches(path.pathWithinApplication())) {
 				matches = (matches != null ? matches : new ArrayList<>());
 				matches.add(pattern);
 			}
@@ -207,7 +207,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 		validateHandler(handler, request);
-		PathContainer pathWithinMapping = pattern.extractPathWithinPattern(path);
+		PathContainer pathWithinMapping = pattern.extractPathWithinPattern(path.pathWithinApplication());
 		return buildPathExposingHandler(handler, pattern.getPatternString(), pathWithinMapping.value(), null);
 	}
 
