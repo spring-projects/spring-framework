@@ -46,6 +46,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
+import org.springframework.transaction.support.TransactionSynchronizationUtils;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -258,7 +259,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		else {
 			DataSource dataSourceFromTxMgr = getDataSourceFromTransactionManager(txMgr);
 			// Ensure user configured an appropriate DataSource/TransactionManager pair.
-			if (dataSource != null && dataSourceFromTxMgr != null && !dataSource.equals(dataSourceFromTxMgr)) {
+			if (dataSource != null && dataSourceFromTxMgr != null && !sameDataSource(dataSource, dataSourceFromTxMgr)) {
 				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: " +
 						"the configured DataSource [%s] (named '%s') is not the one associated with " +
 						"transaction manager [%s] (named '%s').", testContext, dataSource.getClass().getName(),
@@ -290,6 +291,17 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		populator.setContinueOnError(mergedSqlConfig.getErrorMode() == ErrorMode.CONTINUE_ON_ERROR);
 		populator.setIgnoreFailedDrops(mergedSqlConfig.getErrorMode() == ErrorMode.IGNORE_FAILED_DROPS);
 		return populator;
+	}
+
+	/**
+	 * Determine if the two data sources are effectively the same, unwrapping
+	 * proxies as necessary to compare the target instances.
+	 * @since 5.3.4
+	 * @see TransactionSynchronizationUtils#unwrapResourceIfNecessary(Object)
+	 */
+	private static boolean sameDataSource(DataSource ds1, DataSource ds2) {
+		return TransactionSynchronizationUtils.unwrapResourceIfNecessary(ds1)
+					.equals(TransactionSynchronizationUtils.unwrapResourceIfNecessary(ds2));
 	}
 
 	@Nullable
