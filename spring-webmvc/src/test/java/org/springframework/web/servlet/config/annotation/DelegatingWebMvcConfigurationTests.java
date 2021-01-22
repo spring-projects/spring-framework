@@ -274,7 +274,6 @@ public class DelegatingWebMvcConfigurationTests {
 
 	@Test
 	public void configurePathPatternParser() {
-
 		PathPatternParser patternParser = new PathPatternParser();
 		PathMatcher pathMatcher = mock(PathMatcher.class);
 		UrlPathHelper pathHelper = mock(UrlPathHelper.class);
@@ -313,7 +312,9 @@ public class DelegatingWebMvcConfigurationTests {
 				webMvcConfig.mvcResourceUrlProvider());
 
 		assertThat(annotationsMapping).isNotNull();
-		assertThat(annotationsMapping.getPatternParser()).isSameAs(patternParser);
+		assertThat(annotationsMapping.getPatternParser())
+				.isSameAs(patternParser)
+				.isSameAs(webMvcConfig.mvcPatternParser());
 		configAssertion.accept(annotationsMapping.getUrlPathHelper(), annotationsMapping.getPathMatcher());
 
 		SimpleUrlHandlerMapping mapping = (SimpleUrlHandlerMapping) webMvcConfig.viewControllerHandlerMapping(
@@ -344,4 +345,5 @@ public class DelegatingWebMvcConfigurationTests {
 		assertThat(webMvcConfig.mvcResourceUrlProvider().getUrlPathHelper()).isSameAs(pathHelper);
 		assertThat(webMvcConfig.mvcResourceUrlProvider().getPathMatcher()).isSameAs(pathMatcher);
 	}
+
 }
