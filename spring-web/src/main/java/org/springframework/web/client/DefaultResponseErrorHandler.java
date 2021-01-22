@@ -148,11 +148,12 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 			return preface + "[" + new String(responseBody, charset) + "]";
 		}
 
-		try {
-			Reader reader = new InputStreamReader(new ByteArrayInputStream(responseBody), charset);
+		try (Reader reader = new InputStreamReader(new ByteArrayInputStream(responseBody), charset)) {
 			CharBuffer buffer = CharBuffer.allocate(maxChars);
-			reader.read(buffer);
-			reader.close();
+			int r;
+			do {
+				r = reader.read(buffer);
+			} while (r > 0 && buffer.hasRemaining());
 			buffer.flip();
 			return preface + "[" + buffer.toString() + "... (" + responseBody.length + " bytes)]";
 		}
