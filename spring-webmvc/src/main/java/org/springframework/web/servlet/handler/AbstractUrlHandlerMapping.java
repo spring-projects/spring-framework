@@ -41,6 +41,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Abstract base class for URL-mapped {@link HandlerMapping} implementations.
@@ -73,6 +74,14 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 	private final Map<PathPattern, Object> pathPatternHandlerMap = new LinkedHashMap<>();
 
+
+	@Override
+	public void setPatternParser(PathPatternParser patternParser) {
+		Assert.state(this.handlerMap.isEmpty(),
+				"PathPatternParser must be set before the initialization of " +
+						"the handler map via ApplicationContextAware#setApplicationContext.");
+		super.setPatternParser(patternParser);
+	}
 
 	/**
 	 * Set the root handler for this handler mapping, that is,
