@@ -274,6 +274,16 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @see BeanCreationException#getRelatedCauses()
 	 */
 	protected void onSuppressedException(Exception ex) {
+		// never suppress unresolvable LinkageError during bean creation
+		if (BeanCreationException.class.equals(ex.getClass())) {
+			Throwable cause = ex.getCause();
+			while (cause != null) {
+				if (cause instanceof LinkageError) {
+					throw (BeanCreationException) ex;
+				}
+				cause = cause.getCause();
+			}
+		}
 		synchronized (this.singletonObjects) {
 			if (this.suppressedExceptions != null && this.suppressedExceptions.size() < SUPPRESSED_EXCEPTIONS_LIMIT) {
 				this.suppressedExceptions.add(ex);

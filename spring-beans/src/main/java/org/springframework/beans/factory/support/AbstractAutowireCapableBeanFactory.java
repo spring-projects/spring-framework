@@ -1022,14 +1022,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				throw ex;
 			}
 			catch (BeanCreationException ex) {
-				// LinkageError is unresolvable
-				Throwable cause = ex.getCause();
-				while (cause != null) {
-					if (cause instanceof LinkageError) {
-						throw ex;
-					}
-					cause = cause.getCause();
-				}
 				// Instantiation failure, maybe too early...
 				if (logger.isDebugEnabled()) {
 					logger.debug("Bean creation exception on singleton FactoryBean type check: " + ex);
