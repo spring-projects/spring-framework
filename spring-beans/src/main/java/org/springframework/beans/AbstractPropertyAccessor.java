@@ -116,6 +116,14 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 					// Otherwise, just ignore it and continue...
 				}
 				catch (PropertyAccessException ex) {
+					// never suppress unresolvable LinkageError
+					Throwable cause = ex.getCause();
+					while (cause != null) {
+						if (cause instanceof LinkageError) {
+							throw ex;
+						}
+						cause = cause.getCause();
+					}
 					if (propertyAccessExceptions == null) {
 						propertyAccessExceptions = new ArrayList<>();
 					}
