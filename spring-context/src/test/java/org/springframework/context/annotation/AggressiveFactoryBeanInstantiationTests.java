@@ -16,18 +16,11 @@
 
 package org.springframework.context.annotation;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Andy Wilkinson
@@ -56,23 +49,6 @@ public class AggressiveFactoryBeanInstantiationTests {
 		}
 	}
 
-	@Test
-	public void beanMethodFactoryBeanWithError() {
-		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
-			context.register(BeanMethodConfigurationWithError.class, StringTypeConfiguration.class);
-			try {
-				context.refresh();
-			} catch (BeanCreationException ex) {
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				PrintWriter pw = new PrintWriter(baos);
-				ex.printStackTrace(pw);
-				pw.flush();
-				String stackTrace = baos.toString();
-				assertThat(stackTrace.contains(SimpleLinkageErrorClass.class.getSimpleName() + ".<clinit>")).isTrue();
-			}
-		}
-	}
-
 
 	@Configuration
 	static class BeanMethodConfiguration {
@@ -81,33 +57,6 @@ public class AggressiveFactoryBeanInstantiationTests {
 		public SimpleFactoryBean simpleFactoryBean(ApplicationContext applicationContext) {
 			return new SimpleFactoryBean(applicationContext);
 		}
-	}
-
-
-	@Configuration
-	static class BeanMethodConfigurationWithError {
-
-		@Bean
-		public SimpleFactoryBean simpleFactoryBean(ApplicationContext applicationContext) {
-			SimpleFactoryBean simpleFactoryBean = new SimpleFactoryBean(applicationContext);
-			// cause a linkage error
-			new SimpleLinkageErrorClass();
-			return simpleFactoryBean;
-		}
-	}
-
-
-	@Configuration
-	static class StringTypeConfiguration {
-
-		@Autowired
-		private String foo;
-
-		@Bean
-		public String foo() {
-			return "foo";
-		}
-
 	}
 
 
@@ -124,19 +73,6 @@ public class AggressiveFactoryBeanInstantiationTests {
 		@Override
 		public Class<?> getObjectType() {
 			return Object.class;
-		}
-	}
-
-
-	static class SimpleLinkageErrorClass {
-
-		private static final int ERROR = checkError();
-
-		public SimpleLinkageErrorClass() {
-		}
-
-		private static int checkError() {
-			throw new NoSuchMethodError();
 		}
 	}
 
