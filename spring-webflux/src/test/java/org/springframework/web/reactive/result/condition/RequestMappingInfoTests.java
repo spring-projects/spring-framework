@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.web.util.pattern.PatternParseException;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
 
 /**
@@ -292,11 +293,10 @@ public class RequestMappingInfoTests {
 
 	@Test
 	@Disabled
-	public void preFlightRequest() throws Exception {
+	public void preFlightRequest() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("/foo")
 				.header("Origin", "https://domain.com")
-				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "POST")
-				);
+				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "POST"));
 
 		RequestMappingInfo info = paths("/foo").methods(RequestMethod.POST).build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);
@@ -305,6 +305,28 @@ public class RequestMappingInfoTests {
 		info = paths("/foo").methods(RequestMethod.OPTIONS).build();
 		match = info.getMatchingCondition(exchange);
 		assertThat(match).as("Pre-flight should match the ACCESS_CONTROL_REQUEST_METHOD").isNull();
+	}
+
+	@Test
+	void mutate() {
+		RequestMappingInfo.BuilderConfiguration options = new RequestMappingInfo.BuilderConfiguration();
+		options.setPatternParser(new PathPatternParser());
+
+		RequestMappingInfo info1 = RequestMappingInfo.paths("/foo")
+				.methods(GET).headers("h1=hv1").params("q1=qv1")
+				.consumes("application/json").produces("application/json")
+				.mappingName("testMapping").options(options)
+				.build();
+
+		RequestMappingInfo info2 = info1.mutate().produces("application/hal+json").build();
+
+		assertThat(info2.getName()).isEqualTo(info1.getName());
+		assertThat(info2.getPatternsCondition()).isEqualTo(info1.getPatternsCondition());
+		assertThat(info2.getHeadersCondition()).isEqualTo(info1.getHeadersCondition());
+		assertThat(info2.getParamsCondition()).isEqualTo(info1.getParamsCondition());
+		assertThat(info2.getConsumesCondition()).isEqualTo(info1.getConsumesCondition());
+		assertThat(info2.getProducesCondition().getProducibleMediaTypes())
+				.containsOnly(MediaType.parseMediaType("application/hal+json"));
 	}
 
 }
