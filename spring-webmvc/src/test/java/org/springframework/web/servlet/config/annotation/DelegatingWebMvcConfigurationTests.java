@@ -340,7 +340,7 @@ public class DelegatingWebMvcConfigurationTests {
 
 		assertThat(beanNameMapping).isNotNull();
 		assertThat(beanNameMapping.getPatternParser()).isSameAs(patternParser);
-		configAssertion.accept(beanNameMapping.getUrlPathHelper(), mapping.getPathMatcher());
+		configAssertion.accept(beanNameMapping.getUrlPathHelper(), beanNameMapping.getPathMatcher());
 
 		assertThat(webMvcConfig.mvcResourceUrlProvider().getUrlPathHelper()).isSameAs(pathHelper);
 		assertThat(webMvcConfig.mvcResourceUrlProvider().getPathMatcher()).isSameAs(pathMatcher);
