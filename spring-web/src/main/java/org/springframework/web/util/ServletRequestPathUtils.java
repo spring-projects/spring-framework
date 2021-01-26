@@ -184,7 +184,7 @@ public abstract class ServletRequestPathUtils {
 	 * supports a servletPath as an additional prefix to be omitted from
 	 * {@link #pathWithinApplication()}.
 	 */
-	private static class ServletRequestPath implements RequestPath {
+	private static final class ServletRequestPath implements RequestPath {
 
 		private final RequestPath requestPath;
 
