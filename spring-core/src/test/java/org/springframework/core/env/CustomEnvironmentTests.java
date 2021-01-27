@@ -18,6 +18,8 @@ package org.springframework.core.env;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -103,6 +105,30 @@ class CustomEnvironmentTests {
 		assertThat(env.acceptsProfiles(Profiles.of("rd1 | rd2"))).isFalse();
 		assertThat(env.acceptsProfiles(Profiles.of("d1"))).isFalse();
 		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2"))).isFalse();
+	}
+
+	@Test
+	public void withNoProfileProperties() {
+		ConfigurableEnvironment env = new AbstractEnvironment() {
+
+			@Override
+			protected String doGetActiveProfilesProperty() {
+				return null;
+			}
+
+			@Override
+			protected String doGetDefaultProfilesProperty() {
+				return null;
+			}
+
+		};
+		Map<String, Object> values = new LinkedHashMap<>();
+		values.put(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, "a,b,c");
+		values.put(AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME, "d,e,f");
+		PropertySource<?> propertySource = new MapPropertySource("test", values);
+		env.getPropertySources().addFirst(propertySource);
+		assertThat(env.getActiveProfiles()).isEmpty();
+		assertThat(env.getDefaultProfiles()).containsExactly(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME);
 	}
 
 	private Profiles defaultProfile() {

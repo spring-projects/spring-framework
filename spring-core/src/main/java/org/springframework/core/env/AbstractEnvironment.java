@@ -227,15 +227,15 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	/**
 	 * Return the set of active profiles as explicitly set through
 	 * {@link #setActiveProfiles} or if the current set of active profiles
-	 * is empty, check for the presence of the {@value #ACTIVE_PROFILES_PROPERTY_NAME}
-	 * property and assign its value to the set of active profiles.
+	 * is empty, check for the presence of {@link #doGetActiveProfilesProperty()}
+	 * and assign its value to the set of active profiles.
 	 * @see #getActiveProfiles()
-	 * @see #ACTIVE_PROFILES_PROPERTY_NAME
+	 * @see #doGetActiveProfilesProperty()
 	 */
 	protected Set<String> doGetActiveProfiles() {
 		synchronized (this.activeProfiles) {
 			if (this.activeProfiles.isEmpty()) {
-				String profiles = getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
+				String profiles = doGetActiveProfilesProperty();
 				if (StringUtils.hasText(profiles)) {
 					setActiveProfiles(StringUtils.commaDelimitedListToStringArray(
 							StringUtils.trimAllWhitespace(profiles)));
@@ -243,6 +243,15 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 			}
 			return this.activeProfiles;
 		}
+	}
+
+	/**
+	 * Return the property value for the active profiles.
+	 * @see #ACTIVE_PROFILES_PROPERTY_NAME
+	 * @since 5.3.4
+	 */
+	protected String doGetActiveProfilesProperty() {
+		return getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
 	@Override
@@ -282,18 +291,17 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * Return the set of default profiles explicitly set via
 	 * {@link #setDefaultProfiles(String...)} or if the current set of default profiles
 	 * consists only of {@linkplain #getReservedDefaultProfiles() reserved default
-	 * profiles}, then check for the presence of the
-	 * {@value #DEFAULT_PROFILES_PROPERTY_NAME} property and assign its value (if any)
-	 * to the set of default profiles.
+	 * profiles}, then check for the presence of {@link #doGetActiveProfilesProperty()}
+	 * and assign its value (if any) to the set of default profiles.
 	 * @see #AbstractEnvironment()
 	 * @see #getDefaultProfiles()
-	 * @see #DEFAULT_PROFILES_PROPERTY_NAME
 	 * @see #getReservedDefaultProfiles()
+	 * @see #doGetDefaultProfilesProperty()
 	 */
 	protected Set<String> doGetDefaultProfiles() {
 		synchronized (this.defaultProfiles) {
 			if (this.defaultProfiles.equals(getReservedDefaultProfiles())) {
-				String profiles = getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
+				String profiles = doGetDefaultProfilesProperty();
 				if (StringUtils.hasText(profiles)) {
 					setDefaultProfiles(StringUtils.commaDelimitedListToStringArray(
 							StringUtils.trimAllWhitespace(profiles)));
@@ -301,6 +309,15 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 			}
 			return this.defaultProfiles;
 		}
+	}
+
+	/**
+	 * Return the property value for the default profiles.
+	 * @see #DEFAULT_PROFILES_PROPERTY_NAME
+	 * @since 5.3.4
+	 */
+	protected String doGetDefaultProfilesProperty() {
+		return getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
 	}
 
 	/**
