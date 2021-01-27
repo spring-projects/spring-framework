@@ -58,6 +58,7 @@ public abstract class TransactionSynchronizationUtils {
 	 * Unwrap the given resource handle if necessary; otherwise return
 	 * the given handle as-is.
 	 * @see org.springframework.core.InfrastructureProxy#getWrappedObject()
+	 * @since 5.3.4
 	 */
 	public static Object unwrapResourceIfNecessary(Object resource) {
 		Assert.notNull(resource, "Resource must not be null");
