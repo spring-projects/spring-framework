@@ -17,17 +17,17 @@
 package org.springframework.core.env;
 
 import java.security.AccessControlException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import jdk.internal.joptsimple.internal.Strings;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.support.ConfigurableConversionService;
+import org.springframework.core.io.support.AdditionalProfileLoader;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -228,7 +228,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * Return the set of active profiles as explicitly set through
 	 * {@link #setActiveProfiles} or if the current set of active profiles
 	 * is empty, check for the presence of the {@value #ACTIVE_PROFILES_PROPERTY_NAME}
-	 * property and assign its value to the set of active profiles.
+	 * property or {@link AdditionalProfileLoader} from {@code spring.factories}
+	 * and assign its value to the set of active profiles.
 	 * @see #getActiveProfiles()
 	 * @see #ACTIVE_PROFILES_PROPERTY_NAME
 	 */
@@ -237,12 +238,23 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 			if (this.activeProfiles.isEmpty()) {
 				String profiles = getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 				if (StringUtils.hasText(profiles)) {
+					profiles = StringUtils.trimAllWhitespace(profiles);
+					String additionalProfiles = getAdditionalProfiles();
+					if (StringUtils.hasText(additionalProfiles)) {
+						profiles = profiles + "," + additionalProfiles;
+					}
 					setActiveProfiles(StringUtils.commaDelimitedListToStringArray(
 							StringUtils.trimAllWhitespace(profiles)));
 				}
 			}
 			return this.activeProfiles;
 		}
+	}
+
+	private String getAdditionalProfiles() {
+		List<AdditionalProfileLoader> additionalProfileLoader = SpringFactoriesLoader.loadFactories(AdditionalProfileLoader.class, null);
+		List<String> additionalProfiles = additionalProfileLoader.stream().map(AdditionalProfileLoader::useAdditionalProfile).collect(Collectors.toList());
+		return Strings.join(additionalProfiles, ",");
 	}
 
 	@Override
