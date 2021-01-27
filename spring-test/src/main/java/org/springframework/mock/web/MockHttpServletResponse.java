@@ -33,9 +33,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import javax.servlet.ServletOutputStream;
@@ -431,7 +434,14 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 */
 	@Override
 	public Collection<String> getHeaderNames() {
-		return this.headers.keySet();
+		Set<String> result = new HashSet<>(this.headers.size());
+		synchronized (this.headers) {
+			for (Iterator<String> iterator = headers.keySet().iterator(); iterator.hasNext(); ) {
+				String s = iterator.next();
+				result.add(s);
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -668,12 +678,14 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private void doAddHeaderValue(String name, Object value, boolean replace) {
 		Assert.notNull(value, "Header value must not be null");
-		HeaderValueHolder header = this.headers.computeIfAbsent(name, key -> new HeaderValueHolder());
-		if (replace) {
-			header.setValue(value);
-		}
-		else {
-			header.addValue(value);
+		synchronized (this.headers) {
+			HeaderValueHolder header = this.headers.computeIfAbsent(name, key -> new HeaderValueHolder());
+			if (replace) {
+				header.setValue(value);
+			}
+			else {
+				header.addValue(value);
+			}
 		}
 	}
 
