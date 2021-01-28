@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,7 +224,16 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		if (this.forwardedHeaderTransformer != null) {
-			request = this.forwardedHeaderTransformer.apply(request);
+			try {
+				request = this.forwardedHeaderTransformer.apply(request);
+			}
+			catch (Throwable ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to apply forwarded headers to " + formatRequest(request), ex);
+				}
+				response.setStatusCode(HttpStatus.BAD_REQUEST);
+				return response.setComplete();
+			}
 		}
 		ServerWebExchange exchange = createExchange(request, response);
 
