@@ -81,6 +81,18 @@ class ContentDispositionTests {
 	}
 
 	@Test
+	void parseBase64EncodedUTF8Filename() {
+		assertThat(parse("attachment; filename=\"=?UTF-8?B?5pel5pys6KqeLmNzdg==?=\"").getFilename())
+				.isEqualTo("日本語.csv");
+	}
+
+	@Test
+	void parseBase64EncodedShiftJISFilename() {
+		assertThat(parse("attachment; filename=\"=?SHIFT_JIS?B?k/qWe4zqLmNzdg==?=\"").getFilename())
+				.isEqualTo("日本語.csv");
+	}
+
+	@Test
 	void parseEncodedFilenameWithoutCharset() {
 		assertThat(parse("form-data; name=\"name\"; filename*=test.txt"))
 				.isEqualTo(ContentDisposition.formData()

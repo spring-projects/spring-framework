@@ -22,7 +22,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -320,6 +323,7 @@ public final class ContentDisposition {
 		return new ContentDisposition("", null, null, null, null, null, null, null);
 	}
 
+	private final static Pattern BASE64_ENCODED_PATTERN = Pattern.compile("=\\?([0-9a-zA-Z-_]+)\\?B\\?([+/0-9a-zA-Z]+=*)\\?=");
 	/**
 	 * Parse a {@literal Content-Disposition} header value as defined in RFC 2183.
 	 * @param contentDisposition the {@literal Content-Disposition} header value
@@ -362,7 +366,14 @@ public final class ContentDisposition {
 					}
 				}
 				else if (attribute.equals("filename") && (filename == null)) {
-					filename = value;
+					final Matcher matcher = BASE64_ENCODED_PATTERN.matcher(value);
+					if (matcher.find()) {
+						String charsetName = matcher.group(1);
+						String encoded = matcher.group(2);
+						filename = new String(Base64.getDecoder().decode(encoded), Charset.forName(charsetName));
+					} else {
+						filename = value;
+					}
 				}
 				else if (attribute.equals("size") ) {
 					size = Long.parseLong(value);
