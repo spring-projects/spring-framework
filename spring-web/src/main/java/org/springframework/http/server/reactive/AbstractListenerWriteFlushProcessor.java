@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,12 +186,13 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	protected abstract boolean isFlushPending();
 
 	/**
-	 * Invoked when an error happens while flushing. Sub-classes may choose
-	 * to ignore this if they know the underlying API will provide an error
-	 * notification in a container thread.
-	 * <p>Defaults to no-op.
+	 * Invoked when an error happens while flushing.
+	 * <p>The default implementation cancels the upstream  write publisher and
+	 * sends an onError downstream as the result of request handling.
 	 */
 	protected void flushingFailed(Throwable t) {
+		cancel();
+		onError(t);
 	}
 
 
