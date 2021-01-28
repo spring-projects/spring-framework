@@ -117,7 +117,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	@Override
 	public void flushBuffer() throws IOException {
-		// do not flush the underlying response as the content as not been copied to it yet
+		// do not flush the underlying response as the content has not been copied to it yet
 	}
 
 	@Override
