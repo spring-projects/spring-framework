@@ -107,10 +107,9 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	private final Set<String> defaultProfiles = new LinkedHashSet<>(getReservedDefaultProfiles());
 
-	private final MutablePropertySources propertySources = new MutablePropertySources();
+	private final MutablePropertySources propertySources;
 
-	private final ConfigurablePropertyResolver propertyResolver =
-			new PropertySourcesPropertyResolver(this.propertySources);
+	private final ConfigurablePropertyResolver propertyResolver;
 
 
 	/**
@@ -121,9 +120,44 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @see #customizePropertySources(MutablePropertySources)
 	 */
 	public AbstractEnvironment() {
-		customizePropertySources(this.propertySources);
+		this(new MutablePropertySources());
 	}
 
+	/**
+	 * Create a new {@code Environment} instance with a specific
+	 * {@link MutablePropertySources} instance, calling back to
+	 * {@link #customizePropertySources(MutablePropertySources)} during
+	 * construction to allow subclasses to contribute or manipulate
+	 * {@link PropertySource} instances as appropriate.
+	 * @see #customizePropertySources(MutablePropertySources)
+	 * @since 5.3.4
+	 */
+	protected AbstractEnvironment(MutablePropertySources propertySources) {
+		this.propertySources = propertySources;
+		this.propertyResolver = createPropertyResolver(propertySources);
+		customizePropertySources(propertySources);
+	}
+
+
+	/**
+	 * Factory method used to create the {@link ConfigurablePropertyResolver}
+	 * instance used by the Environment.
+	 * @see #getPropertyResolver()
+	 * @since 5.3.4
+	 */
+	protected ConfigurablePropertyResolver createPropertyResolver(
+			MutablePropertySources propertySources) {
+		return new PropertySourcesPropertyResolver(propertySources);
+	}
+
+	/**
+	 * Return the {@link ConfigurablePropertyResolver} being used by the
+	 * {@link Environment}.
+	 * @see #createPropertyResolver(MutablePropertySources)
+	 */
+	protected final ConfigurablePropertyResolver getPropertyResolver() {
+		return this.propertyResolver;
+	}
 
 	/**
 	 * Customize the set of {@link PropertySource} objects to be searched by this

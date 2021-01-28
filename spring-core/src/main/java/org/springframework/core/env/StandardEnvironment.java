@@ -60,6 +60,14 @@ public class StandardEnvironment extends AbstractEnvironment {
 	public static final String SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME = "systemProperties";
 
 
+	public StandardEnvironment() {
+	}
+
+	protected StandardEnvironment(MutablePropertySources propertySources) {
+		super(propertySources);
+	}
+
+
 	/**
 	 * Customize the set of property sources with those appropriate for any standard
 	 * Java environment:

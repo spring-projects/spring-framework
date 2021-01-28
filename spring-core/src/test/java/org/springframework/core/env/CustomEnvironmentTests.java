@@ -129,6 +129,47 @@ class CustomEnvironmentTests {
 		assertThat(env.getDefaultProfiles()).containsExactly(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME);
 	}
 
+	@Test
+	public void withCustomMutablePropertySources() {
+		class CustomMutablePropertySources extends MutablePropertySources {
+		}
+		MutablePropertySources propertySources = new CustomMutablePropertySources();
+		ConfigurableEnvironment env = new AbstractEnvironment(propertySources) {
+		};
+		assertThat(env.getPropertySources()).isInstanceOf(CustomMutablePropertySources.class);
+	}
+
+	@Test
+	void withCustomPropertyResolver() {
+		class CustomPropertySourcesPropertyResolver extends PropertySourcesPropertyResolver {
+
+			public CustomPropertySourcesPropertyResolver(
+					PropertySources propertySources) {
+				super(propertySources);
+			}
+
+			@Override
+			public String getProperty(String key) {
+				return super.getProperty(key)+"-test";
+			}
+
+		}
+		ConfigurableEnvironment env = new AbstractEnvironment() {
+
+			@Override
+			protected ConfigurablePropertyResolver createPropertyResolver(
+					MutablePropertySources propertySources) {
+				return new CustomPropertySourcesPropertyResolver(propertySources);
+			}
+
+		};
+		Map<String, Object> values = new LinkedHashMap<>();
+		values.put("spring", "framework");
+		PropertySource<?> propertySource = new MapPropertySource("test", values);
+		env.getPropertySources().addFirst(propertySource);
+		assertThat(env.getProperty("spring")).isEqualTo("framework-test");
+	}
+
 	private Profiles defaultProfile() {
 		return Profiles.of(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME);
 	}
