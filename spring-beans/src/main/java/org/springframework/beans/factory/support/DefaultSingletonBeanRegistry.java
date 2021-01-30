@@ -264,6 +264,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				}
 
 				//单例创建之前,判断bean是否正在创建中 （加入当前正在创建的bean名称 SET）
+				//设置当前bean正在创建中
 				beforeSingletonCreation(beanName);
 
 				boolean newSingleton = false;
@@ -273,6 +274,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				}
 				try {
 					// 这个过程其实是调用 createBean() 方法
+					/*
+					 *  调用外层
+					 * 	return createBean(beanName, mbd, args);
+					 */
 					singletonObject = singletonFactory.getObject();
 					newSingleton = true;
 				}
