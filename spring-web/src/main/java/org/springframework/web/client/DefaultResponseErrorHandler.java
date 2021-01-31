@@ -115,20 +115,22 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 */
 	@Override
 	public void handleError(ClientHttpResponse response) throws IOException {
-		HttpStatus statusCode = HttpStatus.resolve(response.getRawStatusCode());
-		if (statusCode == null) {
-			byte[] body = getResponseBody(response);
-			String message = getErrorMessage(response.getRawStatusCode(), response.getStatusText(), body, getCharset(response), null, null);
-			throw new UnknownHttpStatusCodeException(message,
-					response.getRawStatusCode(), response.getStatusText(),
-					response.getHeaders(), body, getCharset(response));
-		}
-		handleError(response, statusCode);
+		handleError(null, null, response);
 	}
 
 	/**
-	 * Delegates to {@link #handleError(URI, HttpMethod, ClientHttpResponse, HttpStatus)} with the
-	 * response status code.
+	 * Handle the error in the given response with the given resolved status code.
+	 * <p>The default implementation throws:
+	 * <ul>
+	 * <li>{@link HttpClientErrorException} if the status code is in the 4xx
+	 * series, or one of its sub-classes such as
+	 * {@link HttpClientErrorException.BadRequest} and others.
+	 * <li>{@link HttpServerErrorException} if the status code is in the 5xx
+	 * series, or one of its sub-classes such as
+	 * {@link HttpServerErrorException.InternalServerError} and others.
+	 * <li>{@link UnknownHttpStatusCodeException} for error status codes not in the
+	 * {@link HttpStatus} enum range.
+	 * </ul>
 	 * @throws UnknownHttpStatusCodeException in case of an unresolvable status code
 	 * @see #handleError(URI, HttpMethod, ClientHttpResponse, HttpStatus)
 	 */
@@ -209,12 +211,16 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 	/**
-	 * Handle the error in the given response with the given resolved status code.
-	 * <p>This default implementation throws a {@link HttpClientErrorException} if the response status code
-	 * is {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}, a {@link HttpServerErrorException}
-	 * if it is {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR},
-	 * and a {@link RestClientException} in other cases.
+	 * Handle the error based on the resolved status code.
+	 *
+	 * <p>The default implementation delegates to
+	 * {@link HttpClientErrorException#create} for errors in the 4xx range, to
+	 * {@link HttpServerErrorException#create} for errors in the 5xx range,
+	 * or otherwise raises {@link UnknownHttpStatusCodeException}.
+	 *
 	 * @since 5.0
+	 * @see HttpClientErrorException#create
+	 * @see HttpServerErrorException#create
 	 */
 	protected void handleError(@Nullable URI url, @Nullable HttpMethod method, ClientHttpResponse response,
 			HttpStatus statusCode) throws IOException {
