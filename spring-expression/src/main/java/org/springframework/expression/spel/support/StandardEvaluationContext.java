@@ -26,6 +26,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.BeanResolver;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.IndexAccessor;
 import org.springframework.expression.MethodFilter;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.OperatorOverloader;
@@ -65,6 +66,9 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	@Nullable
 	private volatile List<PropertyAccessor> propertyAccessors;
+
+	@Nullable
+	private volatile List<IndexAccessor> indexAccessors;
 
 	@Nullable
 	private volatile List<ConstructorResolver> constructorResolvers;
@@ -125,6 +129,10 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.propertyAccessors = propertyAccessors;
 	}
 
+	public void setIndexAccessors(List<IndexAccessor>indexAccessors){
+		this.indexAccessors=indexAccessors;
+	}
+
 	@Override
 	public List<PropertyAccessor> getPropertyAccessors() {
 		return initPropertyAccessors();
@@ -136,6 +144,14 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	public boolean removePropertyAccessor(PropertyAccessor accessor) {
 		return initPropertyAccessors().remove(accessor);
+	}
+
+	public void addIndexAccessor(IndexAccessor accessor){
+		initIndexAccessors().add(accessor);
+	}
+
+	public boolean removeIndexAccessor(IndexAccessor indexAccessor){
+		return initIndexAccessors().remove(indexAccessor);
 	}
 
 	public void setConstructorResolvers(List<ConstructorResolver> constructorResolvers) {
@@ -287,6 +303,15 @@ public class StandardEvaluationContext implements EvaluationContext {
 		return accessors;
 	}
 
+	private List<IndexAccessor>initIndexAccessors(){
+		List<IndexAccessor> accessors = this.indexAccessors;
+		if(accessors == null){
+			accessors = new ArrayList<>(5);
+			this.indexAccessors = accessors;
+		}
+		return accessors;
+	}
+
 	private List<ConstructorResolver> initConstructorResolvers() {
 		List<ConstructorResolver> resolvers = this.constructorResolvers;
 		if (resolvers == null) {
@@ -310,6 +335,11 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	private static <T> void addBeforeDefault(List<T> resolvers, T resolver) {
 		resolvers.add(resolvers.size() - 1, resolver);
+	}
+
+	@Override
+	public List<IndexAccessor> getIndexAccessors() {
+		return initIndexAccessors();
 	}
 
 }

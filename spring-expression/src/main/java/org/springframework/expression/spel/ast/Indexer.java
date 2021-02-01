@@ -21,9 +21,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.springframework.asm.MethodVisitor;
@@ -31,6 +33,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.IndexAccessor;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
@@ -187,9 +190,71 @@ public class Indexer extends SpelNodeImpl {
 			return new PropertyIndexingValueRef(
 					target, (String) index, state.getEvaluationContext(), targetDescriptor);
 		}
-
+		Optional<ValueRef> optional = tryIndexAccessor(state, index);
+		if (optional.isPresent()) {
+			return optional.get();
+		}
 		throw new SpelEvaluationException(
 				getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetDescriptor);
+	}
+
+	private Optional<ValueRef> tryIndexAccessor(ExpressionState state, Object index) {
+		EvaluationContext context = state.getEvaluationContext();
+		Object target = state.getActiveContextObject().getValue();
+		if (context != null) {
+			List<IndexAccessor> list = context.getIndexAccessors();
+			if (list != null) {
+				List<IndexAccessor> availableAccessors = getIndexAccessorsToTry(state.getActiveContextObject(), list);
+				try {
+					for (IndexAccessor indexAccessor : availableAccessors) {
+						if (indexAccessor.canRead(context, target, index)) {
+							ValueRef valueRef = indexAccessor.read(context, target, index);
+							return Optional.of(valueRef);
+						}
+					}
+				}
+				catch (Exception ex) {
+				}
+			}
+		}
+		return Optional.empty();
+	}
+
+	private List<IndexAccessor> getIndexAccessorsToTry(
+			@Nullable Object contextObject, List<IndexAccessor> propertyAccessors) {
+		
+		Class<?> targetType;
+		if (contextObject instanceof TypedValue) {
+			targetType = ((TypedValue) contextObject).getTypeDescriptor().getObjectType();
+		}
+		else {
+			targetType = (contextObject != null ? contextObject.getClass() : null);
+		}
+
+		List<IndexAccessor> specificAccessors = new ArrayList<>();
+		List<IndexAccessor> generalAccessors = new ArrayList<>();
+		for (IndexAccessor resolver : propertyAccessors) {
+			Class<?>[] targets = resolver.getSpecificTargetClasses();
+			if (targets == null) {
+				// generic resolver that says it can be used for any type
+				generalAccessors.add(resolver);
+			}
+			else if (targetType != null) {
+				for (Class<?> clazz : targets) {
+					if (clazz == targetType) {
+						specificAccessors.add(resolver);
+						break;
+					}
+					else if (clazz.isAssignableFrom(targetType)) {
+						generalAccessors.add(resolver);
+					}
+				}
+			}
+		}
+		List<IndexAccessor> resolvers = new ArrayList<>(specificAccessors);
+		generalAccessors.removeAll(specificAccessors);
+		resolvers.addAll(generalAccessors);
+		return resolvers;
 	}
 
 	@Override

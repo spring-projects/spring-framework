@@ -21,6 +21,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
@@ -28,8 +32,10 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
+import org.springframework.expression.IndexAccessor;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.ast.ValueRef;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
@@ -146,6 +152,25 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	public void testAddingRemovingIndexAccessors() {
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
+		List<IndexAccessor> indexAccessors = ctx.getIndexAccessors();
+		assertThat(indexAccessors.size()).isEqualTo(0);
+		JsonIndexAccessor jsonIndexAccessor=new JsonIndexAccessor();
+		ctx.addIndexAccessor(jsonIndexAccessor);
+		assertThat(indexAccessors.size()).isEqualTo(1);
+		JsonIndexAccessor jsonIndexAccessor1=new JsonIndexAccessor();
+		ctx.addIndexAccessor(jsonIndexAccessor1);
+		assertThat(indexAccessors.size()).isEqualTo(2);
+		List copy=new ArrayList(indexAccessors);
+		assertThat(ctx.removeIndexAccessor(jsonIndexAccessor)).isTrue();
+		assertThat(ctx.removeIndexAccessor(jsonIndexAccessor)).isFalse();
+		assertThat(indexAccessors.size()).isEqualTo(1);
+		ctx.setIndexAccessors(copy);
+		assertThat(ctx.getIndexAccessors().size()).isEqualTo(2);
+	}
+
+	@Test
 	public void testAccessingPropertyOfClass() {
 		Expression expression = parser.parseExpression("name");
 		Object value = expression.getValue(new StandardEvaluationContext(String.class));
@@ -224,6 +249,24 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		assertThat(target.getName()).isEqualTo("p4");
 		assertThat(expr.getValue(context, target)).isEqualTo("p4");
 	}
+	@Test
+	public void indexReadWrite(){
+		StandardEvaluationContext context=new StandardEvaluationContext();
+		JsonIndexAccessor indexAccessor=new JsonIndexAccessor();
+		context.addIndexAccessor(indexAccessor);
+		ArrayNode arrayNode=indexAccessor.objectMapper.createArrayNode();
+		arrayNode.add(new TextNode("node0"));
+		arrayNode.add(new TextNode("node1"));
+		Expression expr=parser.parseExpression("[0]");
+		assertThat(new TextNode("node0").equals(expr.getValue(context,arrayNode))).isTrue();
+		expr.setValue(context,arrayNode,new TextNode("nodeUpdate"));
+		assertThat(new TextNode("nodeUpdate").equals(expr.getValue(context,arrayNode))).isTrue();
+		Expression expr1=parser.parseExpression("[1]");
+		assertThat(new TextNode("node1").equals(expr1.getValue(context,arrayNode))).isTrue();
+
+
+	}
+
 
 	@Test
 	public void propertyReadWriteWithRootObject() {
@@ -361,6 +404,69 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 
 		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue) {
+		}
+	}
+
+	private static class JsonIndexAccessor implements IndexAccessor {
+		ObjectMapper objectMapper=new ObjectMapper();
+		public class ArrayValueRef implements ValueRef {
+			ArrayNode arrayNode;
+			Integer index;
+
+			@Override
+			public TypedValue getValue() {
+				return new TypedValue(arrayNode.get(index));
+			}
+
+			@Override
+			public void setValue(Object newValue) {
+				arrayNode.set(index,objectMapper.convertValue(newValue, JsonNode.class));
+			}
+			public void setArrayNode(ArrayNode arrayNode){
+				this.arrayNode=arrayNode;
+			}
+
+			public void setIndex(Object index) {
+				if (index instanceof Integer) {
+					this.index = (Integer) index;
+				}
+			}
+
+			@Override
+			public boolean isWritable() {
+				return false;
+			}
+		}
+
+		@Override
+		public Class<?>[] getSpecificTargetClasses() {
+			return new Class[]{
+					ArrayNode.class
+			};
+		}
+
+		@Override
+		public boolean canRead(EvaluationContext context, Object target, Object index) throws AccessException {
+			return true;
+		}
+
+		@Override
+		public ValueRef read(EvaluationContext context, Object target, Object index) throws AccessException {
+			ArrayValueRef valueRef = new ArrayValueRef();
+			valueRef.setArrayNode((ArrayNode) target);
+			valueRef.setIndex(index);
+			return valueRef;
+		}
+
+		@Override
+		public boolean canWrite(EvaluationContext context, Object target, Object index) throws AccessException {
+			return true;
+		}
+
+		@Override
+		public void write(EvaluationContext context, Object target, Object index, Object newValue) throws AccessException {
+			ValueRef valueRef=read(context,target,index);
+			valueRef.setValue(newValue);
 		}
 	}
 

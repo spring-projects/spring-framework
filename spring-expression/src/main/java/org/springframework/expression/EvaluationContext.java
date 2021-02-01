@@ -47,6 +47,11 @@ public interface EvaluationContext {
 	List<PropertyAccessor> getPropertyAccessors();
 
 	/**
+	 * Return a list of index accessors that will be asked in turn to read/write a property.
+	 */
+	List<IndexAccessor> getIndexAccessors();
+
+	/**
 	 * Return a list of resolvers that will be asked in turn to locate a constructor.
 	 */
 	List<ConstructorResolver> getConstructorResolvers();
