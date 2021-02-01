@@ -74,6 +74,27 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
+	public void canReadWithObjectMapperRegistrationForType() {
+		MediaType halJsonMediaType = MediaType.parseMediaType("application/hal+json");
+		MediaType halFormsJsonMediaType = MediaType.parseMediaType("application/prs.hal-forms+json");
+
+		assertThat(converter.canRead(MyBean.class, halJsonMediaType)).isTrue();
+		assertThat(converter.canRead(MyBean.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(converter.canRead(MyBean.class, halFormsJsonMediaType)).isTrue();
+		assertThat(converter.canRead(Map.class, MediaType.APPLICATION_JSON)).isTrue();
+
+		converter.registerObjectMappersForType(MyBean.class, map -> {
+			map.put(halJsonMediaType, new ObjectMapper());
+			map.put(MediaType.APPLICATION_JSON, new ObjectMapper());
+		});
+
+		assertThat(converter.canRead(MyBean.class, halJsonMediaType)).isTrue();
+		assertThat(converter.canRead(MyBean.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(converter.canRead(MyBean.class, halFormsJsonMediaType)).isFalse();
+		assertThat(converter.canRead(Map.class, MediaType.APPLICATION_JSON)).isTrue();
+	}
+
+	@Test
 	public void canWrite() {
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json"))).isTrue();
 		assertThat(converter.canWrite(Map.class, new MediaType("application", "json"))).isTrue();
