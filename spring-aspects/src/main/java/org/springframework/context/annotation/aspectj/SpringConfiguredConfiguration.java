@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Role;
 /**
  * {@code @Configuration} class that registers an {@code AnnotationBeanConfigurerAspect}
  * capable of performing dependency injection services for non-Spring managed objects
- * annotated with @{@link org.springframework.beans.factory.annotation.Configurable
+ * annotated with {@link org.springframework.beans.factory.annotation.Configurable
  * Configurable}.
  *
  * <p>This configuration class is automatically imported when using the

@@ -38,10 +38,10 @@ import org.springframework.web.multipart.MultipartResolver;
  * conjunction with Servlet 3.0 multipart requests, or otherwise for any other method
  * argument, the content of the part is passed through an {@link HttpMessageConverter}
  * taking into consideration the 'Content-Type' header of the request part. This is
- * analogous to what @{@link RequestBody} does to resolve an argument based on the
+ * analogous to what {@link RequestBody} does to resolve an argument based on the
  * content of a non-multipart regular request.
  *
- * <p>Note that @{@link RequestParam} annotation can also be used to associate the part
+ * <p>Note that {@link RequestParam} annotation can also be used to associate the part
  * of a "multipart/form-data" request with a method argument supporting the same method
  * argument types. The main difference is that when the method argument is not a String
  * or raw {@code MultipartFile} / {@code Part}, {@code @RequestParam} relies on type

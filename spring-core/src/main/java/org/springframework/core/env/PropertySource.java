@@ -42,9 +42,9 @@ import org.springframework.util.ObjectUtils;
  * objects when in collection contexts. See operations in {@link MutablePropertySources}
  * as well as the {@link #named(String)} and {@link #toString()} methods for details.
  *
- * <p>Note that when working with @{@link
+ * <p>Note that when working with {@link
  * org.springframework.context.annotation.Configuration Configuration} classes that
- * the @{@link org.springframework.context.annotation.PropertySource PropertySource}
+ * the {@link org.springframework.context.annotation.PropertySource PropertySource}
  * annotation provides a convenient and declarative way of adding property sources to the
  * enclosing {@code Environment}.
  *

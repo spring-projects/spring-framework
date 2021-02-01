@@ -30,7 +30,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
 /**
- * Resolves method arguments annotated with an @{@link RequestAttribute}.
+ * Resolves method arguments annotated with an {@link RequestAttribute}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

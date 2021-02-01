@@ -80,8 +80,8 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	}
 
 	/**
-	 * This implementation retrieves an @{@link javax.annotation.Priority}
-	 * value, allowing for additional semantics over the regular @{@link Order}
+	 * This implementation retrieves an {@link javax.annotation.Priority}
+	 * value, allowing for additional semantics over the regular {@link Order}
 	 * annotation: typically, selecting one object over another in case of
 	 * multiple matches but only one object to be returned.
 	 */

@@ -50,7 +50,7 @@ import org.springframework.web.multipart.support.MultipartResolutionDelegate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Resolves method arguments annotated with @{@link RequestParam}, arguments of
+ * Resolves method arguments annotated with {@link RequestParam}, arguments of
  * type {@link MultipartFile} in conjunction with Spring's {@link MultipartResolver}
  * abstraction, and arguments of type {@code javax.servlet.http.Part} in conjunction
  * with Servlet 3.0 multipart requests. This resolver can also be created in default
@@ -118,9 +118,9 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	 * <li>@RequestParam-annotated method arguments.
 	 * This excludes {@link Map} params where the annotation does not specify a name.
 	 * See {@link RequestParamMapMethodArgumentResolver} instead for such params.
-	 * <li>Arguments of type {@link MultipartFile} unless annotated with @{@link RequestPart}.
-	 * <li>Arguments of type {@code Part} unless annotated with @{@link RequestPart}.
-	 * <li>In default resolution mode, simple type arguments even if not with @{@link RequestParam}.
+	 * <li>Arguments of type {@link MultipartFile} unless annotated with {@link RequestPart}.
+	 * <li>Arguments of type {@code Part} unless annotated with {@link RequestPart}.
+	 * <li>In default resolution mode, simple type arguments even if not with {@link RequestParam}.
 	 * </ul>
 	 */
 	@Override

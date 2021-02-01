@@ -44,7 +44,7 @@ public abstract class TransactionManagementConfigUtils {
 			"org.springframework.transaction.aspectj.AnnotationTransactionAspect";
 
 	/**
-	 * The name of the AspectJ transaction management @{@code Configuration} class.
+	 * The name of the AspectJ transaction management {@code Configuration} class.
 	 */
 	public static final String TRANSACTION_ASPECT_CONFIGURATION_CLASS_NAME =
 			"org.springframework.transaction.aspectj.AspectJTransactionManagementConfiguration";
@@ -64,7 +64,7 @@ public abstract class TransactionManagementConfigUtils {
 			"org.springframework.transaction.aspectj.JtaAnnotationTransactionAspect";
 
 	/**
-	 * The name of the AspectJ transaction management @{@code Configuration} class for JTA.
+	 * The name of the AspectJ transaction management {@code Configuration} class for JTA.
 	 * @since 5.1
 	 */
 	public static final String JTA_TRANSACTION_ASPECT_CONFIGURATION_CLASS_NAME =

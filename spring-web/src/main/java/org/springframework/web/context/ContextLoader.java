@@ -411,7 +411,7 @@ public class ContextLoader {
 	 * {@linkplain ApplicationContextInitializer#initialize invokes each} with the
 	 * given web application context.
 	 * <p>Any {@code ApplicationContextInitializers} implementing
-	 * {@link org.springframework.core.Ordered Ordered} or marked with @{@link
+	 * {@link org.springframework.core.Ordered Ordered} or marked with {@link
 	 * org.springframework.core.annotation.Order Order} will be sorted appropriately.
 	 * @param sc the current servlet context
 	 * @param wac the newly created application context

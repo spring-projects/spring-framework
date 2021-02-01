@@ -116,7 +116,7 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	/**
 	 * Delegate the {@code ServletContext} to any {@link WebApplicationInitializer}
 	 * implementations present on the application classpath.
-	 * <p>Because this class declares @{@code HandlesTypes(WebApplicationInitializer.class)},
+	 * <p>Because this class declares {@code HandlesTypes(WebApplicationInitializer.class)},
 	 * Servlet 3.0+ containers will automatically scan the classpath for implementations
 	 * of Spring's {@code WebApplicationInitializer} interface and provide the set of all
 	 * such types to the {@code webAppInitializerClasses} parameter of this method.
@@ -125,7 +125,7 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	 * the user that the {@code ServletContainerInitializer} has indeed been invoked but that
 	 * no {@code WebApplicationInitializer} implementations were found.
 	 * <p>Assuming that one or more {@code WebApplicationInitializer} types are detected,
-	 * they will be instantiated (and <em>sorted</em> if the @{@link
+	 * they will be instantiated (and <em>sorted</em> if the {@link
 	 * org.springframework.core.annotation.Order @Order} annotation is present or
 	 * the {@link org.springframework.core.Ordered Ordered} interface has been
 	 * implemented). Then the {@link WebApplicationInitializer#onStartup(ServletContext)}

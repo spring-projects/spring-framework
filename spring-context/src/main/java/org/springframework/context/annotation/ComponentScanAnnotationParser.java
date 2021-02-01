@@ -43,7 +43,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Parser for the @{@link ComponentScan} annotation.
+ * Parser for the {@link ComponentScan} annotation.
  *
  * @author Chris Beams
  * @author Juergen Hoeller

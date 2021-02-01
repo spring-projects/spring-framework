@@ -34,9 +34,9 @@ import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Resolves method arguments annotated with @{@link PathVariable}.
+ * Resolves method arguments annotated with {@link PathVariable}.
  *
- * <p>An @{@link PathVariable} is a named value that gets resolved from a URI
+ * <p>An {@link PathVariable} is a named value that gets resolved from a URI
  * template variable. It is always required and does not have a default value
  * to fall back on. See the base class
  * {@link org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver}

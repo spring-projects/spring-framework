@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * {@code primary} attribute in Spring XML.
  *
  * <p>May be used on any class directly or indirectly annotated with
- * {@code @Component} or on methods annotated with @{@link Bean}.
+ * {@code @Component} or on methods annotated with {@link Bean}.
  *
  * <h2>Example</h2>
  * <pre class="code">

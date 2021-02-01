@@ -309,7 +309,7 @@ public abstract class AnnotationUtils {
 	 * <p>This method mimics the functionality of Java 8's
 	 * {@link java.lang.reflect.AnnotatedElement#getAnnotationsByType(Class)}
 	 * with support for automatic detection of a <em>container annotation</em>
-	 * declared via @{@link java.lang.annotation.Repeatable} (when running on
+	 * declared via {@link java.lang.annotation.Repeatable} (when running on
 	 * Java 8 or higher) and with additional support for meta-annotations.
 	 * <p>Handles both single annotations and annotations nested within a
 	 * <em>container annotation</em>.
@@ -354,7 +354,7 @@ public abstract class AnnotationUtils {
 	 * @param annotationType the annotation type to look for
 	 * @param containerAnnotationType the type of the container that holds
 	 * the annotations; may be {@code null} if a container is not supported
-	 * or if it should be looked up via @{@link java.lang.annotation.Repeatable}
+	 * or if it should be looked up via {@link java.lang.annotation.Repeatable}
 	 * when running on Java 8 or higher
 	 * @return the annotations found or an empty set (never {@code null})
 	 * @since 4.2
@@ -390,7 +390,7 @@ public abstract class AnnotationUtils {
 	 * <p>This method mimics the functionality of Java 8's
 	 * {@link java.lang.reflect.AnnotatedElement#getDeclaredAnnotationsByType(Class)}
 	 * with support for automatic detection of a <em>container annotation</em>
-	 * declared via @{@link java.lang.annotation.Repeatable} (when running on
+	 * declared via {@link java.lang.annotation.Repeatable} (when running on
 	 * Java 8 or higher) and with additional support for meta-annotations.
 	 * <p>Handles both single annotations and annotations nested within a
 	 * <em>container annotation</em>.
@@ -436,7 +436,7 @@ public abstract class AnnotationUtils {
 	 * @param annotationType the annotation type to look for
 	 * @param containerAnnotationType the type of the container that holds
 	 * the annotations; may be {@code null} if a container is not supported
-	 * or if it should be looked up via @{@link java.lang.annotation.Repeatable}
+	 * or if it should be looked up via {@link java.lang.annotation.Repeatable}
 	 * when running on Java 8 or higher
 	 * @return the annotations found or an empty set (never {@code null})
 	 * @since 4.2

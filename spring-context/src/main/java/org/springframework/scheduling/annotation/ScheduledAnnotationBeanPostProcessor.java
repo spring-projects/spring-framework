@@ -77,7 +77,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Bean post-processor that registers methods annotated with @{@link Scheduled}
+ * Bean post-processor that registers methods annotated with {@link Scheduled}
  * to be invoked by a {@link org.springframework.scheduling.TaskScheduler} according
  * to the "fixedRate", "fixedDelay", or "cron" expression provided via the annotation.
  *
@@ -88,7 +88,7 @@ import org.springframework.util.StringValueResolver;
  * <p>Autodetects any {@link SchedulingConfigurer} instances in the container,
  * allowing for customization of the scheduler to be used or for fine-grained
  * control over task registration (e.g. registration of {@link Trigger} tasks.
- * See the @{@link EnableScheduling} javadocs for complete usage details.
+ * See the {@link EnableScheduling} javadocs for complete usage details.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller

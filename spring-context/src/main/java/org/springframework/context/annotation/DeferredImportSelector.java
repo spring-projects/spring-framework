@@ -56,7 +56,7 @@ public interface DeferredImportSelector extends ImportSelector {
 	interface Group {
 
 		/**
-		 * Process the {@link AnnotationMetadata} of the importing @{@link Configuration}
+		 * Process the {@link AnnotationMetadata} of the importing {@link Configuration}
 		 * class using the specified {@link DeferredImportSelector}.
 		 */
 		void process(AnnotationMetadata metadata, DeferredImportSelector selector);

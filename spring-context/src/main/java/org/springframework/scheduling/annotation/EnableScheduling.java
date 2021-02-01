@@ -31,7 +31,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 /**
  * Enables Spring's scheduled task execution capability, similar to
  * functionality found in Spring's {@code <task:*>} XML namespace. To be used
- * on @{@link Configuration} classes as follows:
+ * on {@link Configuration} classes as follows:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -41,7 +41,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *     // various &#064;Bean definitions
  * }</pre>
  *
- * This enables detection of @{@link Scheduled} annotations on any Spring-managed
+ * This enables detection of {@link Scheduled} annotations on any Spring-managed
  * bean in the container. For example, given a class {@code MyTask}
  *
  * <pre class="code">

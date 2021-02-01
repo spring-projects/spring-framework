@@ -30,7 +30,7 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
  * a bean with the name "loadTimeWeaver", similar to the {@code <context:load-time-weaver>}
  * element in Spring XML.
  *
- * <p>To be used on @{@link org.springframework.context.annotation.Configuration Configuration} classes;
+ * <p>To be used on {@link org.springframework.context.annotation.Configuration Configuration} classes;
  * the simplest possible example of which follows:
  *
  * <pre class="code">

@@ -158,7 +158,7 @@ public @interface ContextConfiguration {
 	 * created by the {@link SmartContextLoader} in use.
 	 * <p>{@code SmartContextLoader} implementations typically detect whether
 	 * Spring's {@link org.springframework.core.Ordered Ordered} interface has been
-	 * implemented or if the @{@link org.springframework.core.annotation.Order Order}
+	 * implemented or if the {@link org.springframework.core.annotation.Order Order}
 	 * annotation is present and sort instances accordingly prior to invoking them.
 	 * @since 3.2
 	 * @see org.springframework.context.ApplicationContextInitializer

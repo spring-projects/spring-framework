@@ -476,7 +476,7 @@ class HandlerMethodAnnotationDetectionTests {
 
 	/**
 	 * SPR-8248
-	 * <p>Support class contains all annotations. Subclass has type-level @{@link RequestMapping}.
+	 * <p>Support class contains all annotations. Subclass has type-level {@link RequestMapping}.
 	 */
 	@Controller
 	static class MappingSupportClass {

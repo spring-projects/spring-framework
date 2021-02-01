@@ -171,7 +171,7 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <h3>Bootstrapping</h3>
  *
- * <p>See the @{@link Configuration} javadoc for further details including how to bootstrap
+ * <p>See the {@link Configuration} javadoc for further details including how to bootstrap
  * the container using {@link AnnotationConfigApplicationContext} and friends.
  *
  * <h3>{@code BeanFactoryPostProcessor}-returning {@code @Bean} methods</h3>

@@ -22,7 +22,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.Nullable;
 
 /**
- * Interface to be implemented by types that determine which @{@link Configuration}
+ * Interface to be implemented by types that determine which {@link Configuration}
  * class(es) should be imported based on a given selection criteria, usually one or
  * more annotation attributes.
  *
@@ -62,7 +62,7 @@ public interface ImportSelector {
 
 	/**
 	 * Select and return the names of which class(es) should be imported based on
-	 * the {@link AnnotationMetadata} of the importing @{@link Configuration} class.
+	 * the {@link AnnotationMetadata} of the importing {@link Configuration} class.
 	 * @return the class names, or an empty array if none
 	 */
 	String[] selectImports(AnnotationMetadata importingClassMetadata);

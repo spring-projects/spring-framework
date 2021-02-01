@@ -29,7 +29,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver;
 
 /**
- * Resolves method arguments annotated with an @{@link RequestAttribute}.
+ * Resolves method arguments annotated with an {@link RequestAttribute}.
  *
  * @author Rossen Stoyanchev
  * @since 4.3

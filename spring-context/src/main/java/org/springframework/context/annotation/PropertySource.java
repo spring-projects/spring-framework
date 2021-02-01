@@ -29,7 +29,7 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * Annotation providing a convenient and declarative mechanism for adding a
  * {@link org.springframework.core.env.PropertySource PropertySource} to Spring's
  * {@link org.springframework.core.env.Environment Environment}. To be used in
- * conjunction with @{@link Configuration} classes.
+ * conjunction with {@link Configuration} classes.
  *
  * <h3>Example usage</h3>
  *

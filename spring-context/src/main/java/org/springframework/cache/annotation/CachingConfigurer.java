@@ -23,13 +23,13 @@ import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.lang.Nullable;
 
 /**
- * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration
- * Configuration} classes annotated with @{@link EnableCaching} that wish or need to
+ * Interface to be implemented by {@link org.springframework.context.annotation.Configuration
+ * Configuration} classes annotated with {@link EnableCaching} that wish or need to
  * specify explicitly how caches are resolved and how keys are generated for annotation-driven
  * cache management. Consider extending {@link CachingConfigurerSupport}, which provides a
  * stub implementation of all interface methods.
  *
- * <p>See @{@link EnableCaching} for general examples and context; see
+ * <p>See {@link EnableCaching} for general examples and context; see
  * {@link #cacheManager()}, {@link #cacheResolver()} and {@link #keyGenerator()}
  * for detailed instructions.
  *
@@ -61,7 +61,7 @@ public interface CachingConfigurer {
 	 *     // ...
 	 * }
 	 * </pre>
-	 * See @{@link EnableCaching} for more complete examples.
+	 * See {@link EnableCaching} for more complete examples.
 	 */
 	@Nullable
 	CacheManager cacheManager();
@@ -107,7 +107,7 @@ public interface CachingConfigurer {
 	 *     // ...
 	 * }
 	 * </pre>
-	 * See @{@link EnableCaching} for more complete examples.
+	 * See {@link EnableCaching} for more complete examples.
 	 */
 	@Nullable
 	KeyGenerator keyGenerator();
@@ -130,7 +130,7 @@ public interface CachingConfigurer {
 	 *     // ...
 	 * }
 	 * </pre>
-	 * See @{@link EnableCaching} for more complete examples.
+	 * See {@link EnableCaching} for more complete examples.
 	 */
 	@Nullable
 	CacheErrorHandler errorHandler();

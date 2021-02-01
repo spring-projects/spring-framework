@@ -97,7 +97,7 @@ import javax.servlet.ServletException;
  * the form of a {@code WebApplicationInitializer}, but the actual
  * {@code dispatcher-config.xml} Spring configuration remained XML-based.
  * {@code WebApplicationInitializer} is a perfect fit for use with Spring's code-based
- * {@code @Configuration} classes. See @{@link
+ * {@code @Configuration} classes. See {@link
  * org.springframework.context.annotation.Configuration Configuration} Javadoc for
  * complete details, but the following example demonstrates refactoring to use Spring's
  * {@link org.springframework.web.context.support.AnnotationConfigWebApplicationContext
@@ -142,7 +142,7 @@ import javax.servlet.ServletException;
  *
  * <h2>Ordering {@code WebApplicationInitializer} execution</h2>
  * {@code WebApplicationInitializer} implementations may optionally be annotated at the
- * class level with Spring's @{@link org.springframework.core.annotation.Order Order}
+ * class level with Spring's {@link org.springframework.core.annotation.Order Order}
  * annotation or may implement Spring's {@link org.springframework.core.Ordered Ordered}
  * interface. If so, the initializers will be ordered prior to invocation. This provides
  * a mechanism for users to ensure the order in which servlet container initialization

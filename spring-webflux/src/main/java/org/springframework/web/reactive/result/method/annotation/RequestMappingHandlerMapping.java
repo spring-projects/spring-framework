@@ -129,7 +129,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * {@inheritDoc}
-	 * Expects a handler to have a type-level @{@link Controller} annotation.
+	 * Expects a handler to have a type-level {@link Controller} annotation.
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
@@ -138,7 +138,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Uses method and type-level @{@link RequestMapping} annotations to create
+	 * Uses method and type-level {@link RequestMapping} annotations to create
 	 * the RequestMappingInfo.
 	 * @return the created RequestMappingInfo, or {@code null} if the method
 	 * does not have a {@code @RequestMapping} annotation.

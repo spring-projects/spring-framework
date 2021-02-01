@@ -22,8 +22,8 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.lang.Nullable;
 
 /**
- * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration
- * Configuration} classes annotated with @{@link EnableAsync} that wish to customize the
+ * Interface to be implemented by {@link org.springframework.context.annotation.Configuration
+ * Configuration} classes annotated with {@link EnableAsync} that wish to customize the
  * {@link Executor} instance used when processing async method invocations or the
  * {@link AsyncUncaughtExceptionHandler} instance used to process exception thrown from
  * async method with {@code void} return type.
@@ -33,7 +33,7 @@ import org.springframework.lang.Nullable;
  * of this interface will be insured in case new customization options are introduced
  * in the future.
  *
- * <p>See @{@link EnableAsync} for usage examples.
+ * <p>See {@link EnableAsync} for usage examples.
  *
  * @author Chris Beams
  * @author Stephane Nicoll

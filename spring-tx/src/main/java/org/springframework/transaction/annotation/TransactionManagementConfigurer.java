@@ -19,15 +19,15 @@ package org.springframework.transaction.annotation;
 import org.springframework.transaction.TransactionManager;
 
 /**
- * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration
- * Configuration} classes annotated with @{@link EnableTransactionManagement} that wish to
+ * Interface to be implemented by {@link org.springframework.context.annotation.Configuration
+ * Configuration} classes annotated with {@link EnableTransactionManagement} that wish to
  * (or need to) explicitly specify the default {@code PlatformTransactionManager} bean
  * (or {@code ReactiveTransactionManager} bean) to be used for annotation-driven
  * transaction management, as opposed to the default approach of a by-type lookup.
  * One reason this might be necessary is if there are two {@code PlatformTransactionManager}
  * beans (or two {@code ReactiveTransactionManager} beans) present in the container.
  *
- * <p>See @{@link EnableTransactionManagement} for general examples and context;
+ * <p>See {@link EnableTransactionManagement} for general examples and context;
  * see {@link #annotationDrivenTransactionManager()} for detailed instructions.
  *
  * <p>Note that in by-type lookup disambiguation cases, an alternative approach to

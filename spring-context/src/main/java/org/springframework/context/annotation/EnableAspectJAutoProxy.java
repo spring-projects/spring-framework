@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 /**
  * Enables support for handling components marked with AspectJ's {@code @Aspect} annotation,
  * similar to functionality found in Spring's {@code <aop:aspectj-autoproxy>} XML element.
- * To be used on @{@link Configuration} classes as follows:
+ * To be used on {@link Configuration} classes as follows:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -90,7 +90,7 @@ import java.lang.annotation.Target;
  * &#064;Component
  * public class MyAspect { ... }</pre>
  *
- * Then use the @{@link ComponentScan} annotation to pick both up:
+ * Then use the {@link ComponentScan} annotation to pick both up:
  *
  * <pre class="code">
  * &#064;Configuration

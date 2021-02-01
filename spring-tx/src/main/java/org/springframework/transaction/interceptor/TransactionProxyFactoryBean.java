@@ -44,8 +44,8 @@ import org.springframework.transaction.PlatformTransactionManager;
  * section of the Spring reference documentation to understand modern options for managing
  * transactions in Spring applications. For these reasons, <strong>users should favor
  * the {@code tx:} XML namespace as well as
- * the @{@link org.springframework.transaction.annotation.Transactional Transactional}
- * and @{@link org.springframework.transaction.annotation.EnableTransactionManagement
+ * the {@link org.springframework.transaction.annotation.Transactional Transactional}
+ * and {@link org.springframework.transaction.annotation.EnableTransactionManagement
  * EnableTransactionManagement} annotations.</strong>
  *
  * <p>There are three main properties that need to be specified:

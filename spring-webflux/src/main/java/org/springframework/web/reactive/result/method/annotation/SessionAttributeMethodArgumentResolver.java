@@ -28,7 +28,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
 /**
- * Resolves method arguments annotated with an @{@link SessionAttribute}.
+ * Resolves method arguments annotated with an {@link SessionAttribute}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

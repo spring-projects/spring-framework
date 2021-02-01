@@ -37,7 +37,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * <p>Processing of {@code @Scheduled} annotations is performed by
  * registering a {@link ScheduledAnnotationBeanPostProcessor}. This can be
  * done manually or, more conveniently, through the {@code <task:annotation-driven/>}
- * element or @{@link EnableScheduling} annotation.
+ * element or {@link EnableScheduling} annotation.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.

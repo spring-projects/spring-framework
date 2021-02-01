@@ -29,7 +29,7 @@ import org.springframework.core.Ordered;
 /**
  * Enables Spring's annotation-driven cache management capability, similar to the
  * support found in Spring's {@code <cache:*>} XML namespace. To be used together
- * with @{@link org.springframework.context.annotation.Configuration Configuration}
+ * with {@link org.springframework.context.annotation.Configuration Configuration}
  * classes as follows:
  *
  * <pre class="code">

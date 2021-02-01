@@ -158,7 +158,7 @@ final class ConfigurationClass {
 	}
 
 	/**
-	 * Return whether this configuration class was registered via @{@link Import} or
+	 * Return whether this configuration class was registered via {@link Import} or
 	 * automatically registered due to being nested within another configuration class.
 	 * @since 3.1.1
 	 * @see #getImportedBy()

@@ -24,7 +24,7 @@ import org.springframework.core.type.AnnotationMetadata;
 /**
  * Registers an {@link org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator
  * AnnotationAwareAspectJAutoProxyCreator} against the current {@link BeanDefinitionRegistry}
- * as appropriate based on a given @{@link EnableAspectJAutoProxy} annotation.
+ * as appropriate based on a given {@link EnableAspectJAutoProxy} annotation.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -35,7 +35,7 @@ class AspectJAutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 
 	/**
 	 * Register, escalate, and configure the AspectJ auto proxy creator based on the value
-	 * of the @{@link EnableAspectJAutoProxy#proxyTargetClass()} attribute on the importing
+	 * of the {@link EnableAspectJAutoProxy#proxyTargetClass()} attribute on the importing
 	 * {@code @Configuration} class.
 	 */
 	@Override

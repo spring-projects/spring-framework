@@ -32,7 +32,7 @@ import org.springframework.core.Ordered;
  * Enables Spring's asynchronous method execution capability, similar to functionality
  * found in Spring's {@code <task:*>} XML namespace.
  *
- * <p>To be used together with @{@link Configuration Configuration} classes as follows,
+ * <p>To be used together with {@link Configuration Configuration} classes as follows,
  * enabling annotation-driven async processing for an entire Spring application context:
  *
  * <pre class="code">
@@ -165,7 +165,7 @@ public @interface EnableAsync {
 	/**
 	 * Indicate the 'async' annotation type to be detected at either class
 	 * or method level.
-	 * <p>By default, both Spring's @{@link Async} annotation and the EJB 3.1
+	 * <p>By default, both Spring's {@link Async} annotation and the EJB 3.1
 	 * {@code @javax.ejb.Asynchronous} annotation will be detected.
 	 * <p>This attribute exists so that developers can provide their own
 	 * custom annotation type to indicate that a method (or all methods of

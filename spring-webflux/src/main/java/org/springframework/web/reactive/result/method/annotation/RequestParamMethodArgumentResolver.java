@@ -32,11 +32,11 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
 /**
- * Resolver for method arguments annotated with @{@link RequestParam} from URI
+ * Resolver for method arguments annotated with {@link RequestParam} from URI
  * query string parameters.
  *
  * <p>This resolver can also be created in default resolution mode in which
- * simple types (int, long, etc.) not annotated with @{@link RequestParam} are
+ * simple types (int, long, etc.) not annotated with {@link RequestParam} are
  * also treated as request parameters with the parameter name derived from the
  * argument name.
  *
