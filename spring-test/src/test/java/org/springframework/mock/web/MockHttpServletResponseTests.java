@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.web.util.WebUtils;
 
@@ -56,6 +58,32 @@ class MockHttpServletResponseTests {
 
 	private MockHttpServletResponse response = new MockHttpServletResponse();
 
+
+	@ParameterizedTest  // gh-26488
+	@ValueSource(strings = {
+		CONTENT_TYPE,
+		CONTENT_LENGTH,
+		CONTENT_LANGUAGE,
+		SET_COOKIE,
+		"enigma"
+	})
+	void addHeaderWithNullValue(String headerName) {
+		response.addHeader(headerName, null);
+		assertThat(response.containsHeader(headerName)).isFalse();
+	}
+
+	@ParameterizedTest  // gh-26488
+	@ValueSource(strings = {
+		CONTENT_TYPE,
+		CONTENT_LENGTH,
+		CONTENT_LANGUAGE,
+		SET_COOKIE,
+		"enigma"
+	})
+	void setHeaderWithNullValue(String headerName) {
+		response.setHeader(headerName, null);
+		assertThat(response.containsHeader(headerName)).isFalse();
+	}
 
 	@Test
 	void setContentType() {
