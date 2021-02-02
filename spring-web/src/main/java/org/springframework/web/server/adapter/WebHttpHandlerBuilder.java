@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.HttpHandlerDecorator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -35,6 +36,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.WebHandlerDecorator;
 import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 import org.springframework.web.server.handler.FilteringWebHandler;
 import org.springframework.web.server.i18n.LocaleContextResolver;
@@ -77,6 +79,12 @@ public final class WebHttpHandlerBuilder {
 	/** Well-known name for the ForwardedHeaderTransformer in the bean factory. */
 	public static final String FORWARDED_HEADER_TRANSFORMER_BEAN_NAME = "forwardedHeaderTransformer";
 
+	/** Well-known name for the WebHandlerDecorator in the bean factory. */
+	public static final String WEB_HANDLER_DECORATOR_BEAN_NAME = "webHandlerDecorator";
+
+	/** Well-known name for the HttpHandlerDecorator in the bean factory. */
+	public static final String HTTP_HANDLER_DECORATOR_BEAN_NAME = "httpHandlerDecorator";
+
 
 	private final WebHandler webHandler;
 
@@ -98,6 +106,9 @@ public final class WebHttpHandlerBuilder {
 
 	@Nullable
 	private ForwardedHeaderTransformer forwardedHeaderTransformer;
+
+	@Nullable
+	private Function<WebHandler, WebHandler> webHandlerDecorator;
 
 	@Nullable
 	private Function<HttpHandler, HttpHandler> httpHandlerDecorator;
@@ -124,6 +135,7 @@ public final class WebHttpHandlerBuilder {
 		this.codecConfigurer = other.codecConfigurer;
 		this.localeContextResolver = other.localeContextResolver;
 		this.forwardedHeaderTransformer = other.forwardedHeaderTransformer;
+		this.webHandlerDecorator = other.webHandlerDecorator;
 		this.httpHandlerDecorator = other.httpHandlerDecorator;
 	}
 
@@ -199,6 +211,22 @@ public final class WebHttpHandlerBuilder {
 		try {
 			builder.forwardedHeaderTransformer(
 					context.getBean(FORWARDED_HEADER_TRANSFORMER_BEAN_NAME, ForwardedHeaderTransformer.class));
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Fall back on default
+		}
+
+		try {
+			builder.webHandlerDecorator(
+					context.getBean(WEB_HANDLER_DECORATOR_BEAN_NAME, WebHandlerDecorator.class));
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Fall back on default
+		}
+
+		try {
+			builder.httpHandlerDecorator(
+					context.getBean(HTTP_HANDLER_DECORATOR_BEAN_NAME, HttpHandlerDecorator.class));
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Fall back on default
@@ -374,11 +402,37 @@ public final class WebHttpHandlerBuilder {
 	}
 
 	/**
+	 * Configure a {@link Function} to decorate the {@link WebHandler} returned
+	 * by this builder which effectively wraps the entire
+	 * {@link WebExceptionHandler} - {@link WebFilter} - {@link WebHandler}
+	 * processing chain. This provides access to the request and response before
+	 * the entire chain and likewise the ability to observe the result of
+	 * the entire chain.
+	 * @param handlerDecorator the decorator to apply
+	 */
+	public WebHttpHandlerBuilder webHandlerDecorator(Function<WebHandler, WebHandler> handlerDecorator) {
+		this.webHandlerDecorator = (this.webHandlerDecorator != null ?
+				handlerDecorator.andThen(this.webHandlerDecorator) : handlerDecorator);
+		return this;
+	}
+
+	/**
+	 * Whether a decorator for {@link WebHandler} is configured or not via
+	 * {@link #webHandlerDecorator(Function)}.
+	 */
+	public boolean hasWebHandlerDecorator() {
+		return (this.webHandlerDecorator != null);
+	}
+
+	/**
 	 * Build the {@link HttpHandler}.
 	 */
 	public HttpHandler build() {
 		WebHandler decorated = new FilteringWebHandler(this.webHandler, this.filters);
 		decorated = new ExceptionHandlingWebHandler(decorated,  this.exceptionHandlers);
+		if (this.webHandlerDecorator != null) {
+			decorated = webHandlerDecorator.apply(decorated);
+		}
 
 		HttpWebHandlerAdapter adapted = new HttpWebHandlerAdapter(decorated);
 		if (this.sessionManager != null) {
