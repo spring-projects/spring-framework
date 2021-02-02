@@ -268,6 +268,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			//获取给定Bean的实例对象，主要是完成FactoryBean的相关处理
 			//注意：BeanFactory是管理容器中Bean的工厂，而FactoryBean是
 			//创建创建对象的工厂Bean，两者之间有区别
+
+			//不论哪种方式获得的bean都是原始的bean状态，并不是我们真正想要的。所以getObjectForBeanInstance
 			bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		}
 
@@ -1828,10 +1830,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
 
 		// Don't let calling code try to dereference the factory if the bean isn't a factory.
+		//若为工厂类引用（name 以 & 开头）
 		if (BeanFactoryUtils.isFactoryDereference(name)) {
 			if (beanInstance instanceof NullBean) {
 				return beanInstance;
 			}
+			// 如果 beanInstance 不是 FactoryBean 类型，则抛出异常
 			if (!(beanInstance instanceof FactoryBean)) {
 				throw new BeanIsNotAFactoryException(beanName, beanInstance.getClass());
 			}
@@ -1866,6 +1870,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (mbd == null && containsBeanDefinition(beanName)) {
 				mbd = getMergedLocalBeanDefinition(beanName);
 			}
+			// 是否是用户定义的，而不是应用程序本身定义的
 			boolean synthetic = (mbd != null && mbd.isSynthetic());
 			//调用FactoryBeanRegistrySupport类的getObjectFromFactoryBean方法，
 			//实现工厂Bean生产Bean对象实例的过程
