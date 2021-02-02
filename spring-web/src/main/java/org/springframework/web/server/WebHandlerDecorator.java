@@ -25,5 +25,9 @@ import java.util.function.UnaryOperator;
  * used by {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)};
  */
 public interface WebHandlerDecorator extends UnaryOperator<WebHandler> {
-	// java.util.function.Function#apply to be implemented
+
+	static WebHandlerDecorator identity() {
+		return x -> x;
+	}
+
 }

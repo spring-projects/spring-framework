@@ -19,6 +19,7 @@ package org.springframework.web.server.adapter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
@@ -33,11 +34,13 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.HttpHandlerDecorator;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.WebHandlerDecorator;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
@@ -139,10 +142,60 @@ public class WebHttpHandlerBuilderTests {
 		assertThat(success.get()).isTrue();
 	}
 
+	@Test
+	void webHandlerDecorator() {
+		AtomicReference<String> contextValue = new AtomicReference<>();
+		HttpHandler httpHandler = WebHttpHandlerBuilder
+				.webHandler(
+						exchange -> Mono
+								.deferContextual(Mono::just)
+								.doOnNext(context -> contextValue.set(context.getOrDefault(String.class, "failure")))
+								.then()
+				)
+				.webHandlerDecorator(
+						handler -> exchange -> handler
+								.handle(exchange)
+								.contextWrite(context -> context.put(String.class, "foobar"))
+				)
+				.build();
+		httpHandler.handle(MockServerHttpRequest.get("/").build(), new MockServerHttpResponse()).block();
+		assertThat(contextValue.get()).isEqualTo("foobar");
+	}
+
+	@Test
+	void handleDecoratorsAsBean() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(HandlerDecoratorsBeanConfig.class);
+		context.refresh();
+		WebHttpHandlerBuilder builder = WebHttpHandlerBuilder.applicationContext(context);
+		assertThat(builder.hasWebHandlerDecorator()).isTrue();
+		assertThat(builder.hasHttpHandlerDecorator()).isTrue();
+	}
+
 	private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
 		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
 		DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
 		return exchange.getResponse().writeWith(Flux.just(buffer));
+	}
+
+	@Configuration
+	static class HandlerDecoratorsBeanConfig {
+
+		@Bean
+		public WebHandler webHandler() {
+			return exchange -> Mono.empty();
+		}
+
+		@Bean
+		public WebHandlerDecorator webHandlerDecorator() {
+			return WebHandlerDecorator.identity();
+		}
+
+		@Bean
+		public HttpHandlerDecorator httpHandlerDecorator() {
+			return HttpHandlerDecorator.identity();
+		}
+
 	}
 
 

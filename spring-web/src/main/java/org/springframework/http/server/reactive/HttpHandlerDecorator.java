@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.web.server.WebHandlerDecorator;
 
 import java.util.function.UnaryOperator;
 
@@ -25,5 +26,9 @@ import java.util.function.UnaryOperator;
  * used by {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)};
  */
 public interface HttpHandlerDecorator extends UnaryOperator<HttpHandler> {
-	// java.util.function.Function#apply to be implemented
+
+	static HttpHandlerDecorator identity() {
+		return x -> x;
+	}
+
 }
