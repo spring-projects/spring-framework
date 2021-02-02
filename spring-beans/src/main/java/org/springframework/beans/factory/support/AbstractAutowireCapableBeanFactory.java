@@ -604,6 +604,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			 * 但是它还不是很完美（没有进行属性填充和初始化），但是对于其他依赖它的对象而言已经足够了（可以根据对象引用定位到堆中对象），
 			 * 能够被认出来了，所以 Spring 在这个时候选择将该对象提前曝光出来让大家认识认识
 			 */
+			//在普通的循环依赖的情况下，三级缓存没有任何作用。三级缓存实际上跟Spring中的AOP相关
 			//22222222222222222->创建单例工厂用于循环依赖创建对象 提供早期引用
 			addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
 		}
@@ -638,6 +639,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			Object earlySingletonReference = getSingleton(beanName, false);
 			if (earlySingletonReference != null) {
 				if (exposedObject == bean) {
+					//替换成代理对象添加到一级缓存中
 					exposedObject = earlySingletonReference;
 				}
 				//当前Bean依赖其他Bean，并且当发生循环引用时不允许新创建实例对象
