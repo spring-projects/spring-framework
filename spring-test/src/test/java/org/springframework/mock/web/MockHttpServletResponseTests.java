@@ -85,6 +85,13 @@ class MockHttpServletResponseTests {
 		assertThat(response.containsHeader(headerName)).isFalse();
 	}
 
+	@Test  // gh-26493
+	void setLocaleWithNullValue() {
+		assertThat(response.getLocale()).isEqualTo(Locale.getDefault());
+		response.setLocale(null);
+		assertThat(response.getLocale()).isEqualTo(Locale.getDefault());
+	}
+
 	@Test
 	void setContentType() {
 		String contentType = "test/plain";

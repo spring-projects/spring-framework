@@ -344,6 +344,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setLocale(Locale locale) {
+		if (locale == null) {
+			return;
+		}
 		this.locale = locale;
 		doAddHeaderValue(HttpHeaders.CONTENT_LANGUAGE, locale.toLanguageTag(), true);
 	}
