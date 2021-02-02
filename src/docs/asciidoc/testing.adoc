@@ -1826,7 +1826,9 @@ constructor takes precedence over both `@TestConstructor` and the default mode.
 =====
 The default _test constructor autowire mode_ can be changed by setting the
 `spring.test.constructor.autowire.mode` JVM system property to `all`. Alternatively, the
-default mode may be changed via the `SpringProperties` mechanism.
+default mode may be set via the
+https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/SpringProperties.html[`SpringProperties`]
+mechanism.
 
 If the `spring.test.constructor.autowire.mode` property is not set, test class
 constructors will not be automatically autowired.
@@ -4381,8 +4383,9 @@ The size of the context cache is bounded with a default maximum size of 32. When
 maximum size is reached, a least recently used (LRU) eviction policy is used to evict and
 close stale contexts. You can configure the maximum size from the command line or a build
 script by setting a JVM system property named `spring.test.context.cache.maxSize`. As an
-alternative, you can set the same property programmatically by using the
-`SpringProperties` API.
+alternative, you can set the same property via the
+https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/SpringProperties.html[`SpringProperties`]
+mechanism.
 
 Since having a large number of application contexts loaded within a given test suite can
 cause the suite to take an unnecessarily long time to run, it is often beneficial to
