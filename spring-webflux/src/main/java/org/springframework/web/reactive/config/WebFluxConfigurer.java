@@ -23,6 +23,7 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.reactive.socket.server.WebSocketService;
@@ -53,12 +54,16 @@ public interface WebFluxConfigurer {
 	}
 
 	/**
-	 * Configure "global" cross origin request processing.
-	 * <p>The configured readers and writers will apply to all requests including
-	 * annotated controllers and functional endpoints. Annotated controllers can
-	 * further declare more fine-grained configuration via
+	 * Configure "global" cross origin request processing. The configured CORS
+	 * mappings apply to annotated controllers, functional endpoints, and static
+	 * resources.
+	 * <p>Annotated controllers can further declare more fine-grained config via
 	 * {@link org.springframework.web.bind.annotation.CrossOrigin @CrossOrigin}.
+	 * In such cases "global" CORS configuration declared here is
+	 * {@link org.springframework.web.cors.CorsConfiguration#combine(CorsConfiguration) combined}
+	 * with local CORS configuration defined on a controller method.
 	 * @see CorsRegistry
+	 * @see CorsConfiguration#combine(CorsConfiguration)
 	 */
 	default void addCorsMappings(CorsRegistry registry) {
 	}

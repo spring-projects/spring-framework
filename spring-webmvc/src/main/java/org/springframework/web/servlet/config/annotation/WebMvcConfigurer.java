@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -104,8 +105,17 @@ public interface WebMvcConfigurer {
 	}
 
 	/**
-	 * Configure cross origin requests processing.
+	 * Configure "global" cross origin request processing. The configured CORS
+	 * mappings apply to annotated controllers, functional endpoints, and static
+	 * resources.
+	 * <p>Annotated controllers can further declare more fine-grained config via
+	 * {@link org.springframework.web.bind.annotation.CrossOrigin @CrossOrigin}.
+	 * In such cases "global" CORS configuration declared here is
+	 * {@link org.springframework.web.cors.CorsConfiguration#combine(CorsConfiguration) combined}
+	 * with local CORS configuration defined on a controller method.
 	 * @since 4.2
+	 * @see CorsRegistry
+	 * @see CorsConfiguration#combine(CorsConfiguration)
 	 */
 	default void addCorsMappings(CorsRegistry registry) {
 	}
