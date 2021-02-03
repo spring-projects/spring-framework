@@ -17,7 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.server.WebHandlerDecorator;
 
 import java.util.function.UnaryOperator;
 
