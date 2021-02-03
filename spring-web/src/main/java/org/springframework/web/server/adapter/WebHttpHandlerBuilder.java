@@ -108,9 +108,6 @@ public final class WebHttpHandlerBuilder {
 	private ForwardedHeaderTransformer forwardedHeaderTransformer;
 
 	@Nullable
-	private Function<WebHandler, WebHandler> webHandlerDecorator;
-
-	@Nullable
 	private Function<HttpHandler, HttpHandler> httpHandlerDecorator;
 
 
@@ -135,7 +132,6 @@ public final class WebHttpHandlerBuilder {
 		this.codecConfigurer = other.codecConfigurer;
 		this.localeContextResolver = other.localeContextResolver;
 		this.forwardedHeaderTransformer = other.forwardedHeaderTransformer;
-		this.webHandlerDecorator = other.webHandlerDecorator;
 		this.httpHandlerDecorator = other.httpHandlerDecorator;
 	}
 
@@ -211,14 +207,6 @@ public final class WebHttpHandlerBuilder {
 		try {
 			builder.forwardedHeaderTransformer(
 					context.getBean(FORWARDED_HEADER_TRANSFORMER_BEAN_NAME, ForwardedHeaderTransformer.class));
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Fall back on default
-		}
-
-		try {
-			builder.webHandlerDecorator(
-					context.getBean(WEB_HANDLER_DECORATOR_BEAN_NAME, WebHandlerDecorator.class));
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Fall back on default
@@ -402,37 +390,11 @@ public final class WebHttpHandlerBuilder {
 	}
 
 	/**
-	 * Configure a {@link Function} to decorate the {@link WebHandler} returned
-	 * by this builder which effectively wraps the entire
-	 * {@link WebExceptionHandler} - {@link WebFilter} - {@link WebHandler}
-	 * processing chain. This provides access to the request and response before
-	 * the entire chain and likewise the ability to observe the result of
-	 * the entire chain.
-	 * @param handlerDecorator the decorator to apply
-	 */
-	public WebHttpHandlerBuilder webHandlerDecorator(Function<WebHandler, WebHandler> handlerDecorator) {
-		this.webHandlerDecorator = (this.webHandlerDecorator != null ?
-				handlerDecorator.andThen(this.webHandlerDecorator) : handlerDecorator);
-		return this;
-	}
-
-	/**
-	 * Whether a decorator for {@link WebHandler} is configured or not via
-	 * {@link #webHandlerDecorator(Function)}.
-	 */
-	public boolean hasWebHandlerDecorator() {
-		return (this.webHandlerDecorator != null);
-	}
-
-	/**
 	 * Build the {@link HttpHandler}.
 	 */
 	public HttpHandler build() {
 		WebHandler decorated = new FilteringWebHandler(this.webHandler, this.filters);
 		decorated = new ExceptionHandlingWebHandler(decorated,  this.exceptionHandlers);
-		if (this.webHandlerDecorator != null) {
-			decorated = webHandlerDecorator.apply(decorated);
-		}
 
 		HttpWebHandlerAdapter adapted = new HttpWebHandlerAdapter(decorated);
 		if (this.sessionManager != null) {

@@ -19,7 +19,6 @@ package org.springframework.web.server.adapter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.WebHandlerDecorator;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
@@ -143,32 +141,11 @@ public class WebHttpHandlerBuilderTests {
 	}
 
 	@Test
-	void webHandlerDecorator() {
-		AtomicReference<String> contextValue = new AtomicReference<>();
-		HttpHandler httpHandler = WebHttpHandlerBuilder
-				.webHandler(
-						exchange -> Mono
-								.deferContextual(Mono::just)
-								.doOnNext(context -> contextValue.set(context.getOrDefault(String.class, "failure")))
-								.then()
-				)
-				.webHandlerDecorator(
-						handler -> exchange -> handler
-								.handle(exchange)
-								.contextWrite(context -> context.put(String.class, "foobar"))
-				)
-				.build();
-		httpHandler.handle(MockServerHttpRequest.get("/").build(), new MockServerHttpResponse()).block();
-		assertThat(contextValue.get()).isEqualTo("foobar");
-	}
-
-	@Test
-	void handleDecoratorsAsBean() {
+	void httpHandlerDecoratorBean() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(HandlerDecoratorsBeanConfig.class);
+		context.register(HttpHandlerDecoratorBeanConfig.class);
 		context.refresh();
 		WebHttpHandlerBuilder builder = WebHttpHandlerBuilder.applicationContext(context);
-		assertThat(builder.hasWebHandlerDecorator()).isTrue();
 		assertThat(builder.hasHttpHandlerDecorator()).isTrue();
 	}
 
@@ -179,16 +156,11 @@ public class WebHttpHandlerBuilderTests {
 	}
 
 	@Configuration
-	static class HandlerDecoratorsBeanConfig {
+	static class HttpHandlerDecoratorBeanConfig {
 
 		@Bean
 		public WebHandler webHandler() {
 			return exchange -> Mono.empty();
-		}
-
-		@Bean
-		public WebHandlerDecorator webHandlerDecorator() {
-			return WebHandlerDecorator.identity();
 		}
 
 		@Bean
