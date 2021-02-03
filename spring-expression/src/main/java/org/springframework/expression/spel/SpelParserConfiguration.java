@@ -30,10 +30,7 @@ import org.springframework.lang.Nullable;
  */
 public class SpelParserConfiguration {
 
-	/**
-	 * System property that is used to configure the default compiler mode for
-	 * SpEL expression parsers: {@value}
-	 */
+	/** System property to configure the default compiler mode for SpEL expression parsers: {@value}. */
 	public static final String SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME = "spring.expression.compiler.mode";
 
 
