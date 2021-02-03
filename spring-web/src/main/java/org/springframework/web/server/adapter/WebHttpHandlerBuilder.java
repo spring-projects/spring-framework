@@ -79,9 +79,6 @@ public final class WebHttpHandlerBuilder {
 	/** Well-known name for the ForwardedHeaderTransformer in the bean factory. */
 	public static final String FORWARDED_HEADER_TRANSFORMER_BEAN_NAME = "forwardedHeaderTransformer";
 
-	/** Well-known name for the WebHandlerDecorator in the bean factory. */
-	public static final String WEB_HANDLER_DECORATOR_BEAN_NAME = "webHandlerDecorator";
-
 	/** Well-known name for the HttpHandlerDecorator in the bean factory. */
 	public static final String HTTP_HANDLER_DECORATOR_BEAN_NAME = "httpHandlerDecorator";
 
