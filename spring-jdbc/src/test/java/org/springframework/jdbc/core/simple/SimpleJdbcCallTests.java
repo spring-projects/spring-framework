@@ -46,6 +46,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Thomas Risberg
  * @author Kiril Nugmanov
+ * @author Sam Brannen
  */
 class SimpleJdbcCallTests {
 
@@ -222,6 +223,44 @@ class SimpleJdbcCallTests {
 		SimpleJdbcCall adder = new SimpleJdbcCall(dataSource).withNamedBinding().withProcedureName("add_invoice");
 		adder.compile();
 		verifyStatement(adder, "{call ADD_INVOICE(AMOUNT => ?, CUSTID => ?, NEWID => ?)}");
+	}
+
+	/**
+	 * This test demonstrates that a CALL statement will still be generated if
+	 * an exception occurs while retrieving metadata, potentially resulting in
+	 * missing metadata and consequently a failure while invoking the stored
+	 * procedure.
+	 */
+	@Test  // gh-26486
+	void exceptionThrownWhileRetrievingColumnNamesFromMetadata() throws Exception {
+		ResultSet proceduresResultSet = mock(ResultSet.class);
+		ResultSet procedureColumnsResultSet = mock(ResultSet.class);
+
+		given(databaseMetaData.getDatabaseProductName()).willReturn("Oracle");
+		given(databaseMetaData.getUserName()).willReturn("ME");
+		given(databaseMetaData.storesUpperCaseIdentifiers()).willReturn(true);
+		given(databaseMetaData.getProcedures("", "ME", "ADD_INVOICE")).willReturn(proceduresResultSet);
+		given(databaseMetaData.getProcedureColumns("", "ME", "ADD_INVOICE", null)).willReturn(procedureColumnsResultSet);
+
+		given(proceduresResultSet.next()).willReturn(true, false);
+		given(proceduresResultSet.getString("PROCEDURE_NAME")).willReturn("add_invoice");
+
+		given(procedureColumnsResultSet.next()).willReturn(true, true, true, false);
+		given(procedureColumnsResultSet.getString("COLUMN_NAME")).willReturn("amount", "custid", "newid");
+		given(procedureColumnsResultSet.getInt("DATA_TYPE"))
+			// Return a valid data type for the first 2 columns.
+			.willReturn(Types.INTEGER, Types.INTEGER)
+			// 3rd time, simulate an error while retrieving metadata.
+			.willThrow(new SQLException("error with DATA_TYPE for column 3"));
+
+		SimpleJdbcCall adder = new SimpleJdbcCall(dataSource).withNamedBinding().withProcedureName("add_invoice");
+		adder.compile();
+		// If an exception were not thrown for column 3, we would expect:
+		// {call ADD_INVOICE(AMOUNT => ?, CUSTID => ?, NEWID => ?)}
+		verifyStatement(adder, "{call ADD_INVOICE(AMOUNT => ?, CUSTID => ?)}");
+
+		verify(proceduresResultSet).close();
+		verify(procedureColumnsResultSet).close();
 	}
 
 

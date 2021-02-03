@@ -19,6 +19,8 @@ package org.springframework.jdbc.core.simple;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Collections;
 
 import javax.sql.DataSource;
@@ -29,6 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -38,6 +41,7 @@ import static org.mockito.Mockito.verify;
  * Mock object based tests for {@link SimpleJdbcInsert}.
  *
  * @author Thomas Risberg
+ * @author Sam Brannen
  */
 class SimpleJdbcInsertTests {
 
@@ -78,6 +82,60 @@ class SimpleJdbcInsertTests {
 			.withMessageStartingWith("Unable to locate columns for table 'x' so an insert statement can't be generated");
 
 		verify(resultSet).close();
+	}
+
+	@Test  // gh-26486
+	void retrieveColumnNamesFromMetadata() throws Exception {
+		ResultSet tableResultSet = mock(ResultSet.class);
+		given(tableResultSet.next()).willReturn(true, false);
+
+		given(databaseMetaData.getUserName()).willReturn("me");
+		given(databaseMetaData.getTables(null, null, "me", null)).willReturn(tableResultSet);
+
+		ResultSet columnResultSet = mock(ResultSet.class);
+		given(databaseMetaData.getColumns(null, "me", null, null)).willReturn(columnResultSet);
+		given(columnResultSet.next()).willReturn(true, true, false);
+		given(columnResultSet.getString("COLUMN_NAME")).willReturn("col1", "col2");
+		given(columnResultSet.getInt("DATA_TYPE")).willReturn(Types.VARCHAR);
+		given(columnResultSet.getBoolean("NULLABLE")).willReturn(false);
+
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource).withTableName("me");
+		insert.compile();
+		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO me (col1, col2) VALUES(?, ?)");
+
+		verify(columnResultSet).close();
+		verify(tableResultSet).close();
+	}
+
+	@Test  // gh-26486
+	void exceptionThrownWhileRetrievingColumnNamesFromMetadata() throws Exception {
+		ResultSet tableResultSet = mock(ResultSet.class);
+		given(tableResultSet.next()).willReturn(true, false);
+
+		given(databaseMetaData.getUserName()).willReturn("me");
+		given(databaseMetaData.getTables(null, null, "me", null)).willReturn(tableResultSet);
+
+		ResultSet columnResultSet = mock(ResultSet.class);
+		given(databaseMetaData.getColumns(null, "me", null, null)).willReturn(columnResultSet);
+		// true, true, false --> simulates processing of two columns
+		given(columnResultSet.next()).willReturn(true, true, false);
+		given(columnResultSet.getString("COLUMN_NAME"))
+			// Return a column name the first time.
+			.willReturn("col1")
+			// Second time, simulate an error while retrieving metadata.
+			.willThrow(new SQLException("error with col2"));
+		given(columnResultSet.getInt("DATA_TYPE")).willReturn(Types.VARCHAR);
+		given(columnResultSet.getBoolean("NULLABLE")).willReturn(false);
+
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource).withTableName("me");
+
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
+			.isThrownBy(insert::compile)
+			.withMessage("Unable to locate columns for table 'me' so an insert statement can't be generated. " +
+						"Consider specifying explicit column names -- for example, via SimpleJdbcInsert#usingColumns().");
+
+		verify(columnResultSet).close();
+		verify(tableResultSet).close();
 	}
 
 }
