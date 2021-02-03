@@ -306,7 +306,7 @@ public class HandlerMethodMappingTests {
 			CrossOrigin crossOrigin = AnnotatedElementUtils.findMergedAnnotation(method, CrossOrigin.class);
 			if (crossOrigin != null) {
 				CorsConfiguration corsConfig = new CorsConfiguration();
-				corsConfig.setAllowedOrigins(Collections.singletonList("http://domain.com"));
+				corsConfig.setAllowedOrigins(Collections.singletonList("https://domain.com"));
 				return corsConfig;
 			}
 			return null;
