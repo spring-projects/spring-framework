@@ -138,7 +138,16 @@ inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlow(): Flow<T> =
  * @since 5.2
  */
 suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBody() : T =
-		bodyToMono<T>().awaitSingle()
+	when (T::class) {
+		Unit::class -> awaitBodilessEntity().let { Unit as T }
+		else -> bodyToMono<T>().awaitSingle()
+	}
+
+/**
+ * Coroutines variant of [WebClient.ResponseSpec.toBodilessEntity].
+ */
+suspend fun WebClient.ResponseSpec.awaitBodilessEntity() =
+	toBodilessEntity().awaitSingle()
 
 /**
  * Extension for [WebClient.ResponseSpec.toEntity] providing a `toEntity<Foo>()` variant
