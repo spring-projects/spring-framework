@@ -432,7 +432,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 
 	/**
-	 * Inner class representing table meta-data.
+	 * Class representing table meta-data.
 	 */
 	private static class TableMetaData {
 

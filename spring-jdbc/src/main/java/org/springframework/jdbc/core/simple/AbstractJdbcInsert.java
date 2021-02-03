@@ -70,7 +70,7 @@ public abstract class AbstractJdbcInsert {
 	/** Context used to retrieve and manage database meta-data. */
 	private final TableMetaDataContext tableMetaDataContext = new TableMetaDataContext();
 
-	/** List of columns objects to be used in insert statement. */
+	/** List of column names to be used in insert statement. */
 	private final List<String> declaredColumns = new ArrayList<>();
 
 	/** The names of the columns holding the generated key. */
