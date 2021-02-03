@@ -126,6 +126,24 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
+	fun `awaitBody of type Unit`() {
+		val spec = mockk<WebClient.ResponseSpec>()
+		every { spec.toBodilessEntity() } returns Mono.empty()
+		runBlocking {
+			assertThat(spec.awaitBody<Unit>()).isEqualTo(Unit)
+		}
+	}
+
+	@Test
+	fun awaitBodilessEntity() {
+		val spec = mockk<WebClient.ResponseSpec>()
+		every { spec.toBodilessEntity() } returns Mono.empty()
+		runBlocking {
+			assertThat(spec.awaitBodilessEntity()).isEqualTo(Unit)
+		}
+	}
+
+	@Test
 	fun `ResponseSpec#toEntity with reified type parameters`() {
 		responseSpec.toEntity<List<Foo>>()
 		verify { responseSpec.toEntity(object : ParameterizedTypeReference<List<Foo>>() {}) }
