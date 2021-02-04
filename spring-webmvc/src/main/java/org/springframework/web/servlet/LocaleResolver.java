@@ -59,6 +59,7 @@ public interface LocaleResolver {
 	 * @param request the request to resolve the locale for
 	 * @return the current locale (never {@code null})
 	 */
+	//从请求中，解析出要使用的语言。例如，请求头的 "Accept-Language"
 	Locale resolveLocale(HttpServletRequest request);
 
 	/**

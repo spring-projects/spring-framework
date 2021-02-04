@@ -91,6 +91,11 @@ public interface MultipartResolver {
 	 * @param request the servlet request to be evaluated
 	 * @return whether the request contains multipart content
 	 */
+	/**
+	 * 确定给定的请求是否包含多部分内容。
+	 * 通常将检查内容类型“ multipart / form-data”，但实际接受的请求可能取决于解析程序实现的功能
+	 * 其实是判断是否 multipart/ 开头
+	 */
 	boolean isMultipart(HttpServletRequest request);
 
 	/**
@@ -110,6 +115,10 @@ public interface MultipartResolver {
 	 * @see javax.servlet.http.HttpServletRequest#getParameterNames
 	 * @see javax.servlet.http.HttpServletRequest#getParameterMap
 	 */
+	/**
+	 * 将给定的HTTP请求解析为多部分文件和参数，并将请求包装在MultipartHttpServletRequest对象中，
+	 * 该对象提供对文件描述符的访问，并使包含的参数可通过标准ServletRequest方法进行访问
+	 */
 	MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException;
 
 	/**
@@ -117,6 +126,7 @@ public interface MultipartResolver {
 	 * like a storage for the uploaded files.
 	 * @param request the request to cleanup resources for
 	 */
+	//清理用于多部分处理的所有资源，例如上载文件的存储。
 	void cleanupMultipart(MultipartHttpServletRequest request);
 
 }
