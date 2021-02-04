@@ -259,6 +259,10 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		return getMimeTypes();
 	}
 
+	@Override
+	public List<MimeType> getDecodableMimeTypes(ResolvableType targetType) {
+		return getMimeTypes(targetType);
+	}
 
 	// Jackson2CodecSupport
 

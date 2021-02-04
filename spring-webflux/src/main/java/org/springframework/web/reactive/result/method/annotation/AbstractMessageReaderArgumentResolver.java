@@ -17,11 +17,11 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -76,8 +76,6 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 
 	private final List<HttpMessageReader<?>> messageReaders;
 
-	private final List<MediaType> supportedMediaTypes;
-
 
 	/**
 	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.
@@ -99,9 +97,6 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		Assert.notEmpty(messageReaders, "At least one HttpMessageReader is required");
 		Assert.notNull(adapterRegistry, "ReactiveAdapterRegistry is required");
 		this.messageReaders = messageReaders;
-		this.supportedMediaTypes = messageReaders.stream()
-				.flatMap(converter -> converter.getReadableMediaTypes().stream())
-				.collect(Collectors.toList());
 	}
 
 
@@ -212,8 +207,9 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		if (contentType == null && method != null && SUPPORTED_METHODS.contains(method)) {
 			Flux<DataBuffer> body = request.getBody().doOnNext(buffer -> {
 				DataBufferUtils.release(buffer);
-				// Body not empty, back to 415..
-				throw new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes, elementType);
+				// Body not empty, back toy 415..
+				throw new UnsupportedMediaTypeStatusException(
+						mediaType, getSupportedMediaTypes(elementType), elementType);
 			});
 			if (isBodyRequired) {
 				body = body.switchIfEmpty(Mono.error(() -> handleMissingBody(bodyParam)));
@@ -221,7 +217,8 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 			return (adapter != null ? Mono.just(adapter.fromPublisher(body)) : Mono.from(body));
 		}
 
-		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes, elementType));
+		return Mono.error(new UnsupportedMediaTypeStatusException(
+				mediaType, getSupportedMediaTypes(elementType), elementType));
 	}
 
 	private Throwable handleReadError(MethodParameter parameter, Throwable ex) {
@@ -261,6 +258,14 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		if (binder.getBindingResult().hasErrors()) {
 			throw new WebExchangeBindException(param, binder.getBindingResult());
 		}
+	}
+
+	private List<MediaType> getSupportedMediaTypes(ResolvableType elementType) {
+		List<MediaType> mediaTypes = new ArrayList<>();
+		for (HttpMessageReader<?> reader : this.messageReaders) {
+			mediaTypes.addAll(reader.getReadableMediaTypes(elementType));
+		}
+		return mediaTypes;
 	}
 
 }

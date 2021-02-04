@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.codec;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -90,8 +91,27 @@ public interface Encoder<T> {
 	}
 
 	/**
-	 * Return the list of mime types this encoder supports.
+	 * Return the list of MIME types supported by this Encoder. The list may not
+	 * apply to every possible target element type and calls to this method should
+	 * typically be guarded via {@link #canEncode(ResolvableType, MimeType)
+	 * canEncode(elementType, null)}. The list may also exclude MIME types
+	 * supported only for a specific element type. Alternatively, use
+	 * {@link #getEncodableMimeTypes(ResolvableType)} for a more precise list.
+	 * @return the list of supported MIME types
 	 */
 	List<MimeType> getEncodableMimeTypes();
+
+	/**
+	 * Return the list of MIME types supported by this Encoder for the given type
+	 * of element. This list may differ from the {@link #getEncodableMimeTypes()}
+	 * if the Encoder doesn't support the element type or if it supports it only
+	 * for a subset of MIME types.
+	 * @param elementType the type of element to check for encoding
+	 * @return the list of MIME types supported for the given element type
+	 * @since 5.3.4
+	 */
+	default List<MimeType> getEncodableMimeTypes(ResolvableType elementType) {
+		return (canEncode(elementType, null) ? getEncodableMimeTypes() : Collections.emptyList());
+	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,6 +79,9 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  * @author Rossen Stoyanchev
  */
 public class ResponseEntityResultHandlerTests {
+
+	private static final String NEWLINE_SYSTEM_PROPERTY = System.getProperty("line.separator");
+
 
 	private ResponseEntityResultHandler resultHandler;
 
@@ -393,6 +398,37 @@ public class ResponseEntityResultHandlerTests {
 				.verify();
 	}
 
+	@Test // gh-26212
+	public void handleWithObjectMapperByTypeRegistration() throws Exception {
+		MediaType halFormsMediaType = MediaType.parseMediaType("application/prs.hal-forms+json");
+		MediaType halMediaType = MediaType.parseMediaType("application/hal+json");
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+
+		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
+		encoder.registerObjectMappersForType(Person.class, map -> map.put(halMediaType, objectMapper));
+		EncoderHttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(encoder);
+
+		ResponseEntityResultHandler handler = new ResponseEntityResultHandler(
+				Collections.singletonList(writer), new RequestedContentTypeResolverBuilder().build());
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				get("/path").header("Accept", halFormsMediaType + "," + halMediaType));
+
+		ResponseEntity<Person> value = ResponseEntity.ok().body(new Person("Jason"));
+		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(Person.class));
+		HandlerResult result = handlerResult(value, returnType);
+
+		handler.handleResult(exchange, result).block();
+
+		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(halMediaType);
+		assertThat(exchange.getResponse().getBodyAsString().block()).isEqualTo(
+				"{" + NEWLINE_SYSTEM_PROPERTY +
+						"  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY +
+						"}");
+	}
+
 
 	private void testHandle(Object returnValue, MethodParameter returnType) {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
@@ -451,6 +487,8 @@ public class ResponseEntityResultHandlerTests {
 
 		ResponseEntity<Void> responseEntityVoid() { return null; }
 
+		ResponseEntity<Person> responseEntityPerson() { return null; }
+
 		HttpHeaders httpHeaders() { return null; }
 
 		Mono<ResponseEntity<String>> mono() { return null; }
@@ -468,6 +506,28 @@ public class ResponseEntityResultHandlerTests {
 		Flux<?> fluxWildcard() { return null; }
 
 		Object object() { return null; }
+	}
+
+
+	@SuppressWarnings("unused")
+	private static class Person {
+
+		private String name;
+
+		public Person() {
+		}
+
+		public Person(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
 	}
 
 }

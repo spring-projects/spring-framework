@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,6 +105,10 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		return this.mediaTypes;
 	}
 
+	@Override
+	public List<MediaType> getWritableMediaTypes(ResolvableType elementType) {
+		return MediaType.asMediaTypes(getEncoder().getEncodableMimeTypes(elementType));
+	}
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {

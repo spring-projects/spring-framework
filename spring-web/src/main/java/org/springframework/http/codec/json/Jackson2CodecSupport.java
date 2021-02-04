@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http.codec.json;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -148,7 +149,7 @@ public abstract class Jackson2CodecSupport {
 		return Collections.emptyMap();
 	}
 
-	private Map<Class<?>, Map<MimeType, ObjectMapper>> getObjectMapperRegistrations() {
+	protected Map<Class<?>, Map<MimeType, ObjectMapper>> getObjectMapperRegistrations() {
 		return (this.objectMapperRegistrations != null ? this.objectMapperRegistrations : Collections.emptyMap());
 	}
 
@@ -159,6 +160,17 @@ public abstract class Jackson2CodecSupport {
 		return this.mimeTypes;
 	}
 
+	protected List<MimeType> getMimeTypes(ResolvableType elementType) {
+		Class<?> elementClass = elementType.toClass();
+		List<MimeType> result = null;
+		for (Map.Entry<Class<?>, Map<MimeType, ObjectMapper>> entry : getObjectMapperRegistrations().entrySet()) {
+			if (entry.getKey().isAssignableFrom(elementClass)) {
+				result = (result != null ? result : new ArrayList<>(entry.getValue().size()));
+				result.addAll(entry.getValue().keySet());
+			}
+		}
+		return (CollectionUtils.isEmpty(result) ? getMimeTypes() : result);
+	}
 
 	protected boolean supportsMimeType(@Nullable MimeType mimeType) {
 		if (mimeType == null) {
