@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
@@ -885,7 +886,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			if (this.responseType != null) {
 				List<MediaType> allSupportedMediaTypes = getMessageConverters().stream()
 						.filter(converter -> canReadResponse(this.responseType, converter))
-						.flatMap(this::getSupportedMediaTypes)
+						.flatMap((HttpMessageConverter<?> converter) -> getSupportedMediaTypes(this.responseType, converter))
 						.distinct()
 						.sorted(MediaType.SPECIFICITY_COMPARATOR)
 						.collect(Collectors.toList());
@@ -908,8 +909,10 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			return false;
 		}
 
-		private Stream<MediaType> getSupportedMediaTypes(HttpMessageConverter<?> messageConverter) {
-			return messageConverter.getSupportedMediaTypes()
+		private Stream<MediaType> getSupportedMediaTypes(Type type, HttpMessageConverter<?> converter) {
+			Type rawType = (type instanceof ParameterizedType ? ((ParameterizedType) type).getRawType() : type);
+			Class<?> clazz = (rawType instanceof Class ? (Class<?>) rawType : null);
+			return (clazz != null ? converter.getSupportedMediaTypes(clazz) : converter.getSupportedMediaTypes())
 					.stream()
 					.map(mediaType -> {
 						if (mediaType.getCharset() != null) {

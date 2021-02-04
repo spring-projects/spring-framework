@@ -23,6 +23,7 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -192,6 +193,18 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			}
 		}
 		return Collections.emptyMap();
+	}
+
+	@Override
+	public List<MediaType> getSupportedMediaTypes(Class<?> clazz) {
+		List<MediaType> result = null;
+		for (Map.Entry<Class<?>, Map<MediaType, ObjectMapper>> entry : getObjectMapperRegistrations().entrySet()) {
+			if (entry.getKey().isAssignableFrom(clazz)) {
+				result = (result != null ? result : new ArrayList<>(entry.getValue().size()));
+				result.addAll(entry.getValue().keySet());
+			}
+		}
+		return (CollectionUtils.isEmpty(result) ? getSupportedMediaTypes() : result);
 	}
 
 	private Map<Class<?>, Map<MediaType, ObjectMapper>> getObjectMapperRegistrations() {

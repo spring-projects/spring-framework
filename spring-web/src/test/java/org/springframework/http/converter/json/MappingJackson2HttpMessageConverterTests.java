@@ -110,6 +110,22 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
+	public void getSupportedMediaTypes() {
+		MediaType[] defaultMediaTypes = {MediaType.APPLICATION_JSON, MediaType.parseMediaType("application/*+json")};
+		assertThat(converter.getSupportedMediaTypes()).containsExactly(defaultMediaTypes);
+		assertThat(converter.getSupportedMediaTypes(MyBean.class)).containsExactly(defaultMediaTypes);
+
+		MediaType halJson = MediaType.parseMediaType("application/hal+json");
+		converter.registerObjectMappersForType(MyBean.class, map -> {
+			map.put(halJson, new ObjectMapper());
+			map.put(MediaType.APPLICATION_JSON, new ObjectMapper());
+		});
+
+		assertThat(converter.getSupportedMediaTypes(MyBean.class)).containsExactly(halJson, MediaType.APPLICATION_JSON);
+		assertThat(converter.getSupportedMediaTypes(Map.class)).containsExactly(defaultMediaTypes);
+	}
+
+	@Test
 	public void readTyped() throws IOException {
 		String body = "{" +
 				"\"bytes\":\"AQI=\"," +

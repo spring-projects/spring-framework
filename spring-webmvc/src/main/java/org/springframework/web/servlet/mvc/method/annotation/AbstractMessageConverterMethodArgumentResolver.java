@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -80,8 +79,6 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 	protected final List<HttpMessageConverter<?>> messageConverters;
 
-	protected final List<MediaType> allSupportedMediaTypes;
-
 	private final RequestResponseBodyAdviceChain advice;
 
 
@@ -101,23 +98,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 		Assert.notEmpty(converters, "'messageConverters' must not be empty");
 		this.messageConverters = converters;
-		this.allSupportedMediaTypes = getAllSupportedMediaTypes(converters);
 		this.advice = new RequestResponseBodyAdviceChain(requestResponseBodyAdvice);
-	}
-
-
-	/**
-	 * Return the media types supported by all provided message converters sorted
-	 * by specificity via {@link MediaType#sortBySpecificity(List)}.
-	 */
-	private static List<MediaType> getAllSupportedMediaTypes(List<HttpMessageConverter<?>> messageConverters) {
-		Set<MediaType> allSupportedMediaTypes = new LinkedHashSet<>();
-		for (HttpMessageConverter<?> messageConverter : messageConverters) {
-			allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
-		}
-		List<MediaType> result = new ArrayList<>(allSupportedMediaTypes);
-		MediaType.sortBySpecificity(result);
-		return Collections.unmodifiableList(result);
 	}
 
 
@@ -222,7 +203,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 					(noContentType && !message.hasBody())) {
 				return null;
 			}
-			throw new HttpMediaTypeNotSupportedException(contentType, this.allSupportedMediaTypes);
+			throw new HttpMediaTypeNotSupportedException(contentType, getSupportedMediaTypes(targetClass));
 		}
 
 		MediaType selectedContentType = contentType;
@@ -281,6 +262,21 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		Class<?>[] paramTypes = parameter.getExecutable().getParameterTypes();
 		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));
 		return !hasBindingResult;
+	}
+
+	/**
+	 * Return the media types supported by all provided message converters sorted
+	 * by specificity via {@link MediaType#sortBySpecificity(List)}.
+	 * @since 5.3.4
+	 */
+	protected List<MediaType> getSupportedMediaTypes(Class<?> clazz) {
+		Set<MediaType> mediaTypeSet = new LinkedHashSet<>();
+		for (HttpMessageConverter<?> converter : this.messageConverters) {
+			mediaTypeSet.addAll(converter.getSupportedMediaTypes(clazz));
+		}
+		List<MediaType> result = new ArrayList<>(mediaTypeSet);
+		MediaType.sortBySpecificity(result);
+		return result;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -232,12 +232,10 @@ class RestTemplateTests {
 	void requestAvoidsDuplicateAcceptHeaderValues() throws Exception {
 		HttpMessageConverter<?> firstConverter = mock(HttpMessageConverter.class);
 		given(firstConverter.canRead(any(), any())).willReturn(true);
-		given(firstConverter.getSupportedMediaTypes())
-				.willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(firstConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		HttpMessageConverter<?> secondConverter = mock(HttpMessageConverter.class);
 		given(secondConverter.canRead(any(), any())).willReturn(true);
-		given(secondConverter.getSupportedMediaTypes())
-				.willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(secondConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 
 		HttpHeaders requestHeaders = new HttpHeaders();
 		mockSentRequest(GET, "https://example.com/", requestHeaders);
@@ -651,7 +649,7 @@ class RestTemplateTests {
 		template.setMessageConverters(Collections.<HttpMessageConverter<?>>singletonList(converter));
 		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<List<Integer>>() {};
 		given(converter.canRead(intList.getType(), null, null)).willReturn(true);
-		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(converter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		given(converter.canWrite(String.class, String.class, null)).willReturn(true);
 
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -774,8 +772,7 @@ class RestTemplateTests {
 	private void mockHttpMessageConverter(MediaType mediaType, Class<?> type) {
 		given(converter.canRead(type, null)).willReturn(true);
 		given(converter.canRead(type, mediaType)).willReturn(true);
-		given(converter.getSupportedMediaTypes())
-				.willReturn(Collections.singletonList(mediaType));
+		given(converter.getSupportedMediaTypes(type)).willReturn(Collections.singletonList(mediaType));
 		given(converter.canRead(type, mediaType)).willReturn(true);
 		given(converter.canWrite(type, null)).willReturn(true);
 		given(converter.canWrite(type, mediaType)).willReturn(true);
