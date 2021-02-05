@@ -271,6 +271,14 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
+	 * Create a new builder with a {@linkplain HttpStatus#CREATED CREATED} status.
+	 * @return the created builder
+	 */
+	public static BodyBuilder created() {
+		return status(HttpStatus.CREATED);
+	}
+
+	/**
 	 * Create a builder with an {@linkplain HttpStatus#ACCEPTED ACCEPTED} status.
 	 * @return the created builder
 	 * @since 4.1

@@ -106,6 +106,15 @@ public class ResponseEntityTests {
 	}
 
 	@Test
+	public void createNoBody() {
+		ResponseEntity<Void> responseEntity = ResponseEntity.created().build();
+
+		assertThat(responseEntity).isNotNull();
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		assertThat(responseEntity.getBody()).isNull();
+	}
+
+	@Test
 	public void acceptedNoBody() throws URISyntaxException {
 		ResponseEntity<Void> responseEntity = ResponseEntity.accepted().build();
 

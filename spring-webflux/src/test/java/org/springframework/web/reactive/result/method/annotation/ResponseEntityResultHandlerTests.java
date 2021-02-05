@@ -34,6 +34,7 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -195,6 +196,19 @@ public class ResponseEntityResultHandlerTests {
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(exchange.getResponse().getHeaders().size()).isEqualTo(1);
 		assertThat(exchange.getResponse().getHeaders().getLocation()).isEqualTo(location);
+		assertResponseBodyIsEmpty(exchange);
+	}
+
+	@Test
+	public void responseEntityHeadersWithNullBody() {
+		ResponseEntity<Void> value = ResponseEntity.created().build();
+		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(Void.class));
+		HandlerResult result = handlerResult(value, returnType);
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
+		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
+
+		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		assertThat(exchange.getResponse().getHeaders().size()).isEqualTo(0);
 		assertResponseBodyIsEmpty(exchange);
 	}
 
