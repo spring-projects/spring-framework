@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.HttpHandlerDecoratorFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -77,7 +78,6 @@ public final class WebHttpHandlerBuilder {
 	/** Well-known name for the ForwardedHeaderTransformer in the bean factory. */
 	public static final String FORWARDED_HEADER_TRANSFORMER_BEAN_NAME = "forwardedHeaderTransformer";
 
-
 	private final WebHandler webHandler;
 
 	@Nullable
@@ -86,6 +86,9 @@ public final class WebHttpHandlerBuilder {
 	private final List<WebFilter> filters = new ArrayList<>();
 
 	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
+
+	@Nullable
+	private Function<HttpHandler, HttpHandler> httpHandlerDecorator;
 
 	@Nullable
 	private WebSessionManager sessionManager;
@@ -98,9 +101,6 @@ public final class WebHttpHandlerBuilder {
 
 	@Nullable
 	private ForwardedHeaderTransformer forwardedHeaderTransformer;
-
-	@Nullable
-	private Function<HttpHandler, HttpHandler> httpHandlerDecorator;
 
 
 	/**
@@ -147,6 +147,8 @@ public final class WebHttpHandlerBuilder {
 	 * see {@link AnnotationAwareOrderComparator}.
 	 * <li>{@link WebExceptionHandler} [0..N] -- detected by type and
 	 * ordered.
+	 * <li>{@link HttpHandlerDecoratorFactory} [0..N] -- detected by type and
+	 * ordered.
 	 * <li>{@link WebSessionManager} [0..1] -- looked up by the name
 	 * {@link #WEB_SESSION_MANAGER_BEAN_NAME}.
 	 * <li>{@link ServerCodecConfigurer} [0..1] -- looked up by the name
@@ -158,6 +160,7 @@ public final class WebHttpHandlerBuilder {
 	 * @return the prepared builder
 	 */
 	public static WebHttpHandlerBuilder applicationContext(ApplicationContext context) {
+
 		WebHttpHandlerBuilder builder = new WebHttpHandlerBuilder(
 				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class), context);
 
@@ -166,11 +169,19 @@ public final class WebHttpHandlerBuilder {
 				.orderedStream()
 				.collect(Collectors.toList());
 		builder.filters(filters -> filters.addAll(webFilters));
+
 		List<WebExceptionHandler> exceptionHandlers = context
 				.getBeanProvider(WebExceptionHandler.class)
 				.orderedStream()
 				.collect(Collectors.toList());
 		builder.exceptionHandlers(handlers -> handlers.addAll(exceptionHandlers));
+
+		Function<HttpHandler, HttpHandler> httpHandlerDecorator = context
+				.getBeanProvider(HttpHandlerDecoratorFactory.class)
+				.orderedStream()
+				.map(HttpHandlerDecoratorFactory::toFunction)
+				.reduce(Function.identity(), Function::andThen);
+		builder.httpHandlerDecorator(httpHandlerDecorator);
 
 		try {
 			builder.sessionManager(

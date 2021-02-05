@@ -16,15 +16,7 @@
 
 package org.springframework.web.server.adapter;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiFunction;
-
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +25,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.HttpHandlerDecoratorFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
@@ -40,6 +33,14 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiFunction;
 
 import static java.time.Duration.ofMillis;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -139,10 +140,80 @@ public class WebHttpHandlerBuilderTests {
 		assertThat(success.get()).isTrue();
 	}
 
+	@Test
+	void httpHandlerDecoratorBeans() {
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(HttpHandlerDecoratorBeansConfig.class);
+		context.refresh();
+		HttpHandler builder = WebHttpHandlerBuilder.applicationContext(context).build();
+
+		builder.handle(MockServerHttpRequest.get("/").build(), new MockServerHttpResponse()).block();
+
+		AtomicLong decorator1NanoTime = context.getBean("decorator1NanoTime", AtomicLong.class);
+		AtomicLong decorator2NanoTime = context.getBean("decorator2NanoTime", AtomicLong.class);
+		AtomicLong decorator3NanoTime = context.getBean("decorator3NanoTime", AtomicLong.class);
+		assertThat(decorator1NanoTime).hasValueLessThan(decorator3NanoTime.get());
+		assertThat(decorator3NanoTime).hasValueLessThan(decorator2NanoTime.get());
+
+	}
+
 	private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
 		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
 		DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
 		return exchange.getResponse().writeWith(Flux.just(buffer));
+	}
+
+	@Configuration
+	static class HttpHandlerDecoratorBeansConfig {
+
+		@Bean
+		public WebHandler webHandler() {
+			return exchange -> Mono.empty();
+		}
+
+		@Bean
+		public AtomicLong decorator1NanoTime() {
+			return new AtomicLong();
+		}
+
+		@Bean
+		@Order(1)
+		public HttpHandlerDecoratorFactory decorator1() {
+			return handler -> {
+				decorator1NanoTime().set(System.nanoTime());
+				return handler;
+			};
+		}
+
+		@Bean
+		public AtomicLong decorator2NanoTime() {
+			return new AtomicLong();
+		}
+
+		@Bean
+		@Order(3)
+		public HttpHandlerDecoratorFactory decorator2() {
+			return handler -> {
+				decorator2NanoTime().set(System.nanoTime());
+				return handler;
+			};
+		}
+
+		@Bean
+		public AtomicLong decorator3NanoTime() {
+			return new AtomicLong();
+		}
+
+		@Bean
+		@Order(2)
+		public HttpHandlerDecoratorFactory decorator3() {
+			return handler -> {
+				decorator3NanoTime().set(System.nanoTime());
+				return handler;
+			};
+		}
+
 	}
 
 
