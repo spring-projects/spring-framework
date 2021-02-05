@@ -64,6 +64,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.PathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -346,14 +347,20 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (handler == null) {
 			return null;
 		}
-		updateUserDestinationResolver(handler, userDestinationResolver);
+		updateUserDestinationResolver(handler, userDestinationResolver, registry.getUserDestinationPrefix());
 		return handler;
 	}
 
-	private void updateUserDestinationResolver(AbstractBrokerMessageHandler handler, UserDestinationResolver userDestinationResolver) {
+	private void updateUserDestinationResolver(
+			AbstractBrokerMessageHandler handler, UserDestinationResolver userDestinationResolver,
+			@Nullable String userDestinationPrefix) {
+
 		Collection<String> prefixes = handler.getDestinationPrefixes();
 		if (!prefixes.isEmpty() && !prefixes.iterator().next().startsWith("/")) {
 			((DefaultUserDestinationResolver) userDestinationResolver).setRemoveLeadingSlash(true);
+		}
+		if (StringUtils.hasText(userDestinationPrefix)) {
+			handler.setUserDestinationPredicate(destination -> destination.startsWith(userDestinationPrefix));
 		}
 	}
 
@@ -379,7 +386,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			subscriptions.put(destination, userRegistryMessageHandler);
 		}
 		handler.setSystemSubscriptions(subscriptions);
-		updateUserDestinationResolver(handler, userDestinationResolver);
+		updateUserDestinationResolver(handler, userDestinationResolver, registry.getUserDestinationPrefix());
 		return handler;
 	}
 
