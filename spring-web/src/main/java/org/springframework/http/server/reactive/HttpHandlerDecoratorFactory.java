@@ -18,16 +18,21 @@ package org.springframework.http.server.reactive;
 
 import org.springframework.context.ApplicationContext;
 
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
  * Allows registering a bean that will decorate the instance of {@link HttpHandler},
  * used by {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)};
  */
-public interface HttpHandlerDecorator extends UnaryOperator<HttpHandler> {
+public interface HttpHandlerDecoratorFactory extends UnaryOperator<HttpHandler> {
 
-	static HttpHandlerDecorator identity() {
+	static HttpHandlerDecoratorFactory identity() {
 		return x -> x;
+	}
+
+	default Function<HttpHandler, HttpHandler> toFunction() {
+		return this;
 	}
 
 }
