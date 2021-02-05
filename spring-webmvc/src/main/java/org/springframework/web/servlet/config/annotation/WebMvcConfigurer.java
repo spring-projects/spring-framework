@@ -161,23 +161,28 @@ public interface WebMvcConfigurer {
 	}
 
 	/**
-	 * Configure the {@link HttpMessageConverter HttpMessageConverters} to use for reading or writing
-	 * to the body of the request or response. If no converters are added, a
-	 * default list of converters is registered.
-	 * <p><strong>Note</strong> that adding converters to the list, turns off
-	 * default converter registration. To simply add a converter without impacting
-	 * default registration, consider using the method
-	 * {@link #extendMessageConverters(java.util.List)} instead.
+	 * Configure the {@link HttpMessageConverter HttpMessageConverter}s for
+	 * reading from the request body and for writing to the response body.
+	 * <p>By default, all built-in converters are configured as long as the
+	 * corresponding 3rd party libraries such Jackson JSON, JAXB2, and others
+	 * are present on the classpath.
+	 * <p><strong>Note</strong> use of this method turns off default converter
+	 * registration. Alternatively, use
+	 * {@link #extendMessageConverters(java.util.List)} to modify that default
+	 * list of converters.
 	 * @param converters initially an empty list of converters
 	 */
 	default void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
 	/**
-	 * A hook for extending or modifying the list of converters after it has been
-	 * configured. This may be useful for example to allow default converters to
-	 * be registered and then insert a custom converter through this method.
-	 * @param converters the list of configured converters to extend.
+	 * Extend or modify the list of converters after it has been, either
+	 * {@link #configureMessageConverters(List) configured} or initialized with
+	 * a default list.
+	 * <p>Note that the order of converter registration is important. Especially
+	 * in cases where clients accept {@link org.springframework.http.MediaType#ALL}
+	 * the converters configured earlier will be preferred.
+	 * @param converters the list of configured converters to be extended
 	 * @since 4.1.3
 	 */
 	default void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
