@@ -24,6 +24,8 @@ import java.util.function.UnaryOperator;
 /**
  * Allows registering a bean that will decorate the instance of {@link HttpHandler},
  * used by {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)};
+ *
+ * @since 5.3.4
  */
 public interface HttpHandlerDecoratorFactory extends UnaryOperator<HttpHandler> {
 

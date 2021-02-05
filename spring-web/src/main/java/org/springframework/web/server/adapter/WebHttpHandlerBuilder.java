@@ -147,6 +147,8 @@ public final class WebHttpHandlerBuilder {
 	 * see {@link AnnotationAwareOrderComparator}.
 	 * <li>{@link WebExceptionHandler} [0..N] -- detected by type and
 	 * ordered.
+	 * <li>{@link HttpHandlerDecoratorFactory} [0..N] -- detected by type and
+	 * ordered.
 	 * <li>{@link WebSessionManager} [0..1] -- looked up by the name
 	 * {@link #WEB_SESSION_MANAGER_BEAN_NAME}.
 	 * <li>{@link ServerCodecConfigurer} [0..1] -- looked up by the name
