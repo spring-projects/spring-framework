@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	private CachedIntrospectionResults cachedIntrospectionResults;
 
 	/**
-	 * The security context used for invoking the property methods
+	 * The security context used for invoking the property methods.
 	 */
 	private AccessControlContext acc;
 
@@ -95,7 +95,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 
 	/**
 	 * Create a new BeanWrapperImpl for the given object.
-	 * @param object object wrapped by this BeanWrapper
+	 * @param object the object wrapped by this BeanWrapper
 	 */
 	public BeanWrapperImpl(Object object) {
 		super(object);
@@ -112,7 +112,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	/**
 	 * Create a new BeanWrapperImpl for the given object,
 	 * registering a nested path that the object is in.
-	 * @param object object wrapped by this BeanWrapper
+	 * @param object the object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
 	 * @param rootObject the root object at the top of the path
 	 */
@@ -123,7 +123,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	/**
 	 * Create a new BeanWrapperImpl for the given object,
 	 * registering a nested path that the object is in.
-	 * @param object object wrapped by this BeanWrapper
+	 * @param object the object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
 	 * @param parent the containing BeanWrapper (must not be {@code null})
 	 */
@@ -164,7 +164,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	}
 
 	/**
-	 * Obtain a lazily initializted CachedIntrospectionResults instance
+	 * Obtain a lazily initialized CachedIntrospectionResults instance
 	 * for the wrapped object.
 	 */
 	private CachedIntrospectionResults getCachedIntrospectionResults() {

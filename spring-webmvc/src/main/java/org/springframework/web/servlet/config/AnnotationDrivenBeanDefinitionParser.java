@@ -157,7 +157,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			ClassUtils.isPresent("javax.validation.Validator",
 					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
-	private static boolean romePresent =
+	private static final boolean romePresent =
 			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed",
 					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
@@ -197,7 +197,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 
 		if (element.hasAttribute("enable-matrix-variables")) {
-			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enable-matrix-variables"));
+			boolean enableMatrixVariables = Boolean.parseBoolean(element.getAttribute("enable-matrix-variables"));
 			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
 		}
 		else if (element.hasAttribute("enableMatrixVariables")) {
@@ -545,7 +545,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			}
 		}
 
-		if (convertersElement == null || Boolean.valueOf(convertersElement.getAttribute("register-defaults"))) {
+		if (convertersElement == null || Boolean.parseBoolean(convertersElement.getAttribute("register-defaults"))) {
 			messageConverters.setSource(source);
 			messageConverters.add(createConverterDefinition(ByteArrayHttpMessageConverter.class, source));
 

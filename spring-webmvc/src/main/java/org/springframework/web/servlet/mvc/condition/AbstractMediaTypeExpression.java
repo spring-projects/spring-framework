@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -31,8 +28,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @since 3.1
  */
 abstract class AbstractMediaTypeExpression implements MediaTypeExpression, Comparable<AbstractMediaTypeExpression> {
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final MediaType mediaType;
 
@@ -73,15 +68,15 @@ abstract class AbstractMediaTypeExpression implements MediaTypeExpression, Compa
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && getClass() == obj.getClass()) {
-			AbstractMediaTypeExpression other = (AbstractMediaTypeExpression) obj;
-			return (this.mediaType.equals(other.mediaType) && this.isNegated == other.isNegated);
+		if (other == null || getClass() != other.getClass()) {
+			return false;
 		}
-		return false;
+		AbstractMediaTypeExpression otherExpr = (AbstractMediaTypeExpression) other;
+		return (this.mediaType.equals(otherExpr.mediaType) && this.isNegated == otherExpr.isNegated);
 	}
 
 	@Override
@@ -91,12 +86,10 @@ abstract class AbstractMediaTypeExpression implements MediaTypeExpression, Compa
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
 		if (this.isNegated) {
-			builder.append('!');
+			return '!' + this.mediaType.toString();
 		}
-		builder.append(this.mediaType.toString());
-		return builder.toString();
+		return this.mediaType.toString();
 	}
 
 }

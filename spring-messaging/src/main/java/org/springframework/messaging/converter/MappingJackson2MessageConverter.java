@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,12 +140,13 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 		}
 	}
 
+
 	@Override
 	protected boolean canConvertFrom(Message<?> message, Class<?> targetClass) {
 		if (targetClass == null || !supportsMimeType(message.getHeaders())) {
 			return false;
 		}
-		JavaType javaType = this.objectMapper.constructType(targetClass);
+		JavaType javaType = this.objectMapper.getTypeFactory().constructType(targetClass);
 		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
 		if (this.objectMapper.canDeserialize(javaType, causeRef)) {
 			return true;
@@ -221,6 +222,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 				}
 			}
 			else {
+				// Assuming a text-based source payload
 				if (view != null) {
 					return this.objectMapper.readerWithView(view).forType(javaType).readValue(payload.toString());
 				}
@@ -243,10 +245,9 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			}
 			Type genericParameterType = param.getNestedGenericParameterType();
 			Class<?> contextClass = param.getContainingClass();
-			Type type = getJavaType(genericParameterType, contextClass);
-			return this.objectMapper.getTypeFactory().constructType(type);
+			return getJavaType(genericParameterType, contextClass);
 		}
-		return this.objectMapper.constructType(targetClass);
+		return this.objectMapper.getTypeFactory().constructType(targetClass);
 	}
 
 	private JavaType getJavaType(Type type, Class<?> contextClass) {
@@ -329,7 +330,8 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 				payload = out.toByteArray();
 			}
 			else {
-				Writer writer = new StringWriter();
+				// Assuming a text-based target payload
+				Writer writer = new StringWriter(1024);
 				if (view != null) {
 					this.objectMapper.writerWithView(view).writeValue(writer, payload);
 				}
@@ -387,7 +389,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 * @return the JSON encoding to use (never {@code null})
 	 */
 	protected JsonEncoding getJsonEncoding(MimeType contentType) {
-		if ((contentType != null) && (contentType.getCharset() != null)) {
+		if (contentType != null && contentType.getCharset() != null) {
 			Charset charset = contentType.getCharset();
 			for (JsonEncoding encoding : JsonEncoding.values()) {
 				if (charset.name().equals(encoding.getJavaName())) {
