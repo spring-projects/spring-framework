@@ -157,16 +157,20 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 				int startIndex = buffer.readPosition();
 				int length = (endIndex - startIndex + 1);
 				DataBuffer slice = buffer.retainedSlice(startIndex, length);
-				if (this.stripDelimiter) {
-					slice.writePosition(slice.writePosition() - matcher.delimiter().length);
-				}
 				result = (result != null ? result : new ArrayList<>());
 				if (chunks.isEmpty()) {
+					if (this.stripDelimiter) {
+						slice.writePosition(slice.writePosition() - matcher.delimiter().length);
+					}
 					result.add(slice);
 				}
 				else {
 					chunks.add(slice);
-					result.add(buffer.factory().join(chunks));
+					DataBuffer joined = buffer.factory().join(chunks);
+					if (this.stripDelimiter) {
+						joined.writePosition(joined.writePosition() - matcher.delimiter().length);
+					}
+					result.add(joined);
 					chunks.clear();
 				}
 				buffer.readPosition(endIndex + 1);
