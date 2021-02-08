@@ -268,10 +268,7 @@ public abstract class BeanUtils {
 	public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(clazz)) {
-			Constructor<T> kotlinPrimaryConstructor = KotlinDelegate.findPrimaryConstructor(clazz);
-			if (kotlinPrimaryConstructor != null) {
-				return kotlinPrimaryConstructor;
-			}
+			return KotlinDelegate.findPrimaryConstructor(clazz);
 		}
 		return null;
 	}
