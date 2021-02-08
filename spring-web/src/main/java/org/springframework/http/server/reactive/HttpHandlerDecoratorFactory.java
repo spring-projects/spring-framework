@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,12 @@
 
 package org.springframework.http.server.reactive;
 
-import org.springframework.context.ApplicationContext;
-
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 /**
- * Allows registering a bean that will decorate the instance of {@link HttpHandler},
- * used by {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)};
- *
+ * Contract for applying a decorator to an {@code HttpHandler}.
+ * @author Christophe Maillard
  * @since 5.3.4
  */
-public interface HttpHandlerDecoratorFactory extends UnaryOperator<HttpHandler> {
-
-	static HttpHandlerDecoratorFactory identity() {
-		return x -> x;
-	}
-
-	default Function<HttpHandler, HttpHandler> toFunction() {
-		return this;
-	}
-
+public interface HttpHandlerDecoratorFactory extends Function<HttpHandler, HttpHandler> {
 }

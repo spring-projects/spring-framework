@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,16 @@
 
 package org.springframework.web.server.adapter;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,14 +42,6 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiFunction;
 
 import static java.time.Duration.ofMillis;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -141,21 +142,16 @@ public class WebHttpHandlerBuilderTests {
 	}
 
 	@Test
-	void httpHandlerDecoratorBeans() {
+	void httpHandlerDecoratorFactoryBeans() {
+		HttpHandler handler = WebHttpHandlerBuilder.applicationContext(
+				new AnnotationConfigApplicationContext(HttpHandlerDecoratorFactoryBeansConfig.class)).build();
 
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(HttpHandlerDecoratorBeansConfig.class);
-		context.refresh();
-		HttpHandler builder = WebHttpHandlerBuilder.applicationContext(context).build();
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		handler.handle(MockServerHttpRequest.get("/").build(), response).block();
 
-		builder.handle(MockServerHttpRequest.get("/").build(), new MockServerHttpResponse()).block();
-
-		AtomicLong decorator1NanoTime = context.getBean("decorator1NanoTime", AtomicLong.class);
-		AtomicLong decorator2NanoTime = context.getBean("decorator2NanoTime", AtomicLong.class);
-		AtomicLong decorator3NanoTime = context.getBean("decorator3NanoTime", AtomicLong.class);
-		assertThat(decorator1NanoTime).hasValueLessThan(decorator3NanoTime.get());
-		assertThat(decorator3NanoTime).hasValueLessThan(decorator2NanoTime.get());
-
+		Function<String, Long> headerValue = name -> Long.valueOf(response.getHeaders().getFirst(name));
+		assertThat(headerValue.apply("decoratorA")).isLessThan(headerValue.apply("decoratorB"));
+		assertThat(headerValue.apply("decoratorC")).isLessThan(headerValue.apply("decoratorB"));
 	}
 
 	private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
@@ -164,56 +160,41 @@ public class WebHttpHandlerBuilderTests {
 		return exchange.getResponse().writeWith(Flux.just(buffer));
 	}
 
+
 	@Configuration
-	static class HttpHandlerDecoratorBeansConfig {
+	static class HttpHandlerDecoratorFactoryBeansConfig {
+
+		@Bean
+		@Order(1)
+		public HttpHandlerDecoratorFactory decoratorFactoryA() {
+			return delegate -> (HttpHandler) (request, response) -> {
+				response.getHeaders().set("decoratorA", String.valueOf(System.nanoTime()));
+				return delegate.handle(request, response);
+			};
+		}
+
+		@Bean
+		@Order(3)
+		public HttpHandlerDecoratorFactory decoratorFactoryB() {
+			return delegate -> (HttpHandler) (request, response) -> {
+				response.getHeaders().set("decoratorB", String.valueOf(System.nanoTime()));
+				return delegate.handle(request, response);
+			};
+		}
+
+		@Bean
+		@Order(2)
+		public HttpHandlerDecoratorFactory decoratorFactoryC() {
+			return delegate -> (HttpHandler) (request, response) -> {
+				response.getHeaders().set("decoratorC", String.valueOf(System.nanoTime()));
+				return delegate.handle(request, response);
+			};
+		}
 
 		@Bean
 		public WebHandler webHandler() {
 			return exchange -> Mono.empty();
 		}
-
-		@Bean
-		public AtomicLong decorator1NanoTime() {
-			return new AtomicLong();
-		}
-
-		@Bean
-		@Order(1)
-		public HttpHandlerDecoratorFactory decorator1() {
-			return handler -> {
-				decorator1NanoTime().set(System.nanoTime());
-				return handler;
-			};
-		}
-
-		@Bean
-		public AtomicLong decorator2NanoTime() {
-			return new AtomicLong();
-		}
-
-		@Bean
-		@Order(3)
-		public HttpHandlerDecoratorFactory decorator2() {
-			return handler -> {
-				decorator2NanoTime().set(System.nanoTime());
-				return handler;
-			};
-		}
-
-		@Bean
-		public AtomicLong decorator3NanoTime() {
-			return new AtomicLong();
-		}
-
-		@Bean
-		@Order(2)
-		public HttpHandlerDecoratorFactory decorator3() {
-			return handler -> {
-				decorator3NanoTime().set(System.nanoTime());
-				return handler;
-			};
-		}
-
 	}
 
 
