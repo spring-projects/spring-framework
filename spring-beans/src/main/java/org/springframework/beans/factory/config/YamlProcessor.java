@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import org.springframework.util.StringUtils;
  * @author Dave Syer
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 4.1
  */
 public abstract class YamlProcessor {
@@ -128,10 +129,11 @@ public abstract class YamlProcessor {
 
 	/**
 	 * Set the supported types that can be loaded from YAML documents.
-	 * <p>If no supported types are configured, all types encountered in YAML
-	 * documents will be supported. If an unsupported type is encountered, an
-	 * {@link IllegalStateException} will be thrown when the corresponding YAML
-	 * node is processed.
+	 * <p>If no supported types are configured, only Java standard classes
+	 * (as defined in {@link org.yaml.snakeyaml.constructor.SafeConstructor})
+	 * encountered in YAML documents will be supported.
+	 * If an unsupported type is encountered, an {@link IllegalStateException}
+	 * will be thrown when the corresponding YAML node is processed.
 	 * @param supportedTypes the supported types, or an empty array to clear the
 	 * supported types
 	 * @since 5.1.16
@@ -182,12 +184,8 @@ public abstract class YamlProcessor {
 	protected Yaml createYaml() {
 		LoaderOptions loaderOptions = new LoaderOptions();
 		loaderOptions.setAllowDuplicateKeys(false);
-
-		if (!this.supportedTypes.isEmpty()) {
-			return new Yaml(new FilteringConstructor(loaderOptions), new Representer(),
-					new DumperOptions(), loaderOptions);
-		}
-		return new Yaml(loaderOptions);
+		return new Yaml(new FilteringConstructor(loaderOptions), new Representer(),
+				new DumperOptions(), loaderOptions);
 	}
 
 	private boolean process(MatchCallback callback, Yaml yaml, Resource resource) {
