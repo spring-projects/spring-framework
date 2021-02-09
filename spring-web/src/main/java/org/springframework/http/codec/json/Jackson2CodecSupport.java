@@ -84,7 +84,7 @@ public abstract class Jackson2CodecSupport {
 
 	protected final Log logger = HttpLogging.forLogName(getClass());
 
-	private final ObjectMapper defaultObjectMapper;
+	private ObjectMapper defaultObjectMapper;
 
 	@Nullable
 	private Map<Class<?>, Map<MimeType, ObjectMapper>> objectMapperRegistrations;
@@ -103,6 +103,19 @@ public abstract class Jackson2CodecSupport {
 	}
 
 
+	/**
+	 * Configure the default ObjectMapper instance to use.
+	 * @param objectMapper the ObjectMapper instance
+	 * @since 5.3.4
+	 */
+	public void setObjectMapper(ObjectMapper objectMapper) {
+		Assert.notNull(objectMapper, "ObjectMapper must not be null");
+		this.defaultObjectMapper = objectMapper;
+	}
+
+	/**
+	 * Return the {@link #setObjectMapper configured} default ObjectMapper.
+	 */
 	public ObjectMapper getObjectMapper() {
 		return this.defaultObjectMapper;
 	}
