@@ -17,9 +17,9 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -212,7 +212,7 @@ public class StompEncoder  {
 	private StringBuilder getStringBuilder(@Nullable StringBuilder sb, String inString, int i) {
 		if (sb == null) {
 			sb = new StringBuilder(inString.length());
-			sb.append(inString.substring(0, i));
+			sb.append(inString, 0, i);
 		}
 		return sb;
 	}
@@ -228,14 +228,13 @@ public class StompEncoder  {
 		void add(byte b);
 
 		byte[] toByteArray();
-
 	}
 
+
 	@SuppressWarnings("serial")
-	private static class DefaultResult extends LinkedList<Object> implements Result {
+	private static class DefaultResult extends ArrayList<Object> implements Result {
 
 		private int size;
-
 
 		public void add(byte[] bytes) {
 			this.size += bytes.length;

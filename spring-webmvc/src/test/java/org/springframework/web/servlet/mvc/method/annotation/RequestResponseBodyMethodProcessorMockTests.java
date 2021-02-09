@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,10 +113,13 @@ public class RequestResponseBodyMethodProcessorMockTests {
 	public void setup() throws Exception {
 		stringMessageConverter = mock(HttpMessageConverter.class);
 		given(stringMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(stringMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		resourceMessageConverter = mock(HttpMessageConverter.class);
 		given(resourceMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
+		given(resourceMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.ALL));
 		resourceRegionMessageConverter = mock(HttpMessageConverter.class);
 		given(resourceRegionMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
+		given(resourceRegionMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.ALL));
 
 		processor = new RequestResponseBodyMethodProcessor(
 				Arrays.asList(stringMessageConverter, resourceMessageConverter, resourceRegionMessageConverter));
@@ -388,7 +391,7 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		servletRequest.addHeader("Accept", accepted);
 
 		given(stringMessageConverter.canWrite(String.class, null)).willReturn(true);
-		given(stringMessageConverter.getSupportedMediaTypes()).willReturn(supported);
+		given(stringMessageConverter.getSupportedMediaTypes(any())).willReturn(supported);
 		given(stringMessageConverter.canWrite(String.class, accepted)).willReturn(true);
 
 		processor.handleReturnValue(body, returnTypeStringProduces, mavContainer, webRequest);

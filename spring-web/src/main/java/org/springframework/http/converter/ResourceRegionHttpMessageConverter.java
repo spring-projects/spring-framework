@@ -148,7 +148,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 
 		long start = region.getPosition();
 		long end = start + region.getCount() - 1;
-		Long resourceLength = region.getResource().contentLength();
+		long resourceLength = region.getResource().contentLength();
 		end = Math.min(end, resourceLength - 1);
 		long rangeLength = end - start + 1;
 		responseHeaders.add("Content-Range", "bytes " + start + '-' + end + '/' + resourceLength);
@@ -201,10 +201,10 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 				print(out, "--" + boundaryString);
 				println(out);
 				if (contentType != null) {
-					print(out, "Content-Type: " + contentType.toString());
+					print(out, "Content-Type: " + contentType);
 					println(out);
 				}
-				Long resourceLength = region.getResource().contentLength();
+				long resourceLength = region.getResource().contentLength();
 				end = Math.min(end, resourceLength - inputStreamPosition - 1);
 				print(out, "Content-Range: bytes " +
 						region.getPosition() + '-' + (region.getPosition() + region.getCount() - 1) +

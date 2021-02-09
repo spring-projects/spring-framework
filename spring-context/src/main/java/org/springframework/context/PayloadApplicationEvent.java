@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.context;
 
+import java.util.function.Consumer;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.core.ResolvableTypeProvider;
 import org.springframework.util.Assert;
@@ -23,11 +25,12 @@ import org.springframework.util.Assert;
 /**
  * An {@link ApplicationEvent} that carries an arbitrary payload.
  *
- * <p>Mainly intended for internal use within the framework.
- *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.2
  * @param <T> the payload type of the event
+ * @see ApplicationEventPublisher#publishEvent(Object)
+ * @see ApplicationListener#forPayload(Consumer)
  */
 @SuppressWarnings("serial")
 public class PayloadApplicationEvent<T> extends ApplicationEvent implements ResolvableTypeProvider {

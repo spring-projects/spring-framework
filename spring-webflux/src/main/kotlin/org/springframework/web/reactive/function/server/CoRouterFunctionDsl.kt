@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.function.server
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpMethod
@@ -532,7 +532,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 		builder.filter { serverRequest, handlerFunction ->
 			mono(Dispatchers.Unconfined) {
 				filterFunction(serverRequest) {
-					handlerFunction.handle(serverRequest).awaitFirst()
+					handlerFunction.handle(serverRequest).awaitSingle()
 				}
 			}
 		}

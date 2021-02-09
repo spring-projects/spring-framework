@@ -26,11 +26,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
+import io.reactivex.rxjava3.core.Completable;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import rx.Completable;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.MethodParameter;
@@ -398,7 +398,7 @@ public class ViewResolutionResultHandlerTests {
 			model = new TreeMap<>(model);
 			String value = this.name + ": " + model.toString();
 			ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes(UTF_8));
-			DataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(byteBuffer);
+			DataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(byteBuffer);
 			return response.writeWith(Flux.just(dataBuffer));
 		}
 	}

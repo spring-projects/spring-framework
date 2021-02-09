@@ -1,6 +1,36 @@
 apply plugin: 'org.springframework.build.compile'
 apply plugin: 'org.springframework.build.optional-dependencies'
+// Uncomment the following for Shadow support in the jmhJar block.
+// Currently commented out due to ZipException: archive is not a ZIP archive
+// apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'me.champeau.gradle.jmh'
 apply from: "$rootDir/gradle/publications.gradle"
+
+dependencies {
+	jmh 'org.openjdk.jmh:jmh-core:1.25'
+	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.25'
+	jmh 'net.sf.jopt-simple:jopt-simple:4.6'
+}
+
+jmh {
+	duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+jmhJar {
+	// Uncomment the following for Shadow's Transformer support.
+	// mergeServiceFiles()
+	// append('META-INF/spring.handlers')
+	// append('META-INF/spring.schemas')
+	// append('META-INF/spring.tooling')
+	exclude 'LICENSE'
+	exclude 'THIRD-PARTY'
+	exclude 'META-INF/license.txt'
+	exclude 'META-INF/notice.txt'
+	exclude 'META-INF/DEPENDENCIES'
+	exclude 'META-INF/LICENSE*'
+	exclude 'META-INF/NOTICE'
+	exclude 'META-INF/THIRD-PARTY'
+}
 
 jar {
 	manifest.attributes["Implementation-Title"] = project.name
@@ -63,9 +93,5 @@ publishing {
 }
 
 // Disable publication of test fixture artifacts.
-//
-// Once we upgrade to Gradle 6.x, we will need to delete the following line ...
-components.java.variants.removeAll { it.outgoingConfiguration.name.startsWith("testFixtures") }
-// ... and uncomment the following two lines.
-// components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
-// components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }

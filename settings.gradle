@@ -4,14 +4,18 @@ pluginManagement {
 		maven { url 'https://repo.spring.io/plugins-release' }
 	}
 }
-apply from: "$rootDir/gradle/build-cache-settings.gradle"
+
+plugins {
+	id "com.gradle.enterprise" version "3.5.1"
+	id "io.spring.ge.conventions" version "0.0.7"
+}
 
 include "spring-aop"
 include "spring-aspects"
 include "spring-beans"
 include "spring-context"
-include "spring-context-support"
 include "spring-context-indexer"
+include "spring-context-support"
 include "spring-core"
 include "kotlin-coroutines"
 project(':kotlin-coroutines').projectDir = file('spring-core/kotlin-coroutines')
@@ -23,11 +27,12 @@ include "spring-jms"
 include "spring-messaging"
 include "spring-orm"
 include "spring-oxm"
+include "spring-r2dbc"
 include "spring-test"
 include "spring-tx"
 include "spring-web"
-include "spring-webmvc"
 include "spring-webflux"
+include "spring-webmvc"
 include "spring-websocket"
 include "framework-bom"
 include "integration-tests"
@@ -35,4 +40,25 @@ include "integration-tests"
 rootProject.name = "spring"
 rootProject.children.each {project ->
 	project.buildFileName = "${project.name}.gradle"
+}
+
+settings.gradle.projectsLoaded {
+	gradleEnterprise {
+		buildScan {
+			if (settings.gradle.rootProject.hasProperty('customJavaHome')) {
+				value("Custom JAVA_HOME", settings.gradle.rootProject.getProperty('customJavaHome'))
+			}
+			if (settings.gradle.rootProject.hasProperty('customJavaSourceVersion')) {
+				value("Custom Java Source Version", settings.gradle.rootProject.getProperty('customJavaSourceVersion'))
+			}
+			File buildDir = settings.gradle.rootProject.getBuildDir()
+			buildDir.mkdirs()
+			new File(buildDir, "build-scan-uri.txt").text = "(build scan not generated)"
+			buildScanPublished { scan ->
+				if (buildDir.exists()) {
+					new File(buildDir, "build-scan-uri.txt").text = "${scan.buildScanUri}\n"
+				} 
+			}
+		}
+	}
 }

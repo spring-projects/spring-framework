@@ -26,7 +26,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
@@ -55,8 +54,6 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 
 	private Flux<DataBuffer> body = Flux.empty();
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
 
 	public MockClientHttpResponse(HttpStatus status) {
 		Assert.notNull(status, "HttpStatus is required");
@@ -83,7 +80,7 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 	public HttpHeaders getHeaders() {
 		if (!getCookies().isEmpty() && this.headers.get(HttpHeaders.SET_COOKIE) == null) {
 			getCookies().values().stream().flatMap(Collection::stream)
-					.forEach(cookie -> getHeaders().add(HttpHeaders.SET_COOKIE, cookie.toString()));
+					.forEach(cookie -> this.headers.add(HttpHeaders.SET_COOKIE, cookie.toString()));
 		}
 		return this.headers;
 	}
@@ -109,7 +106,7 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 	private DataBuffer toDataBuffer(String body, Charset charset) {
 		byte[] bytes = body.getBytes(charset);
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-		return this.bufferFactory.wrap(byteBuffer);
+		return DefaultDataBufferFactory.sharedInstance.wrap(byteBuffer);
 	}
 
 	@Override

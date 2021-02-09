@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -84,6 +86,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 @SuppressWarnings("unused")
 public class RequestResponseBodyMethodProcessorTests {
+
+	protected static final String NEWLINE_SYSTEM_PROPERTY = System.getProperty("line.separator");
+
 
 	private ModelAndViewContainer container;
 
@@ -358,9 +363,37 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertThat(this.servletResponse.getHeader("Content-Type")).isEqualTo("image/jpeg");
 	}
 
-	// SPR-13135
+	@Test // gh-26212
+	public void handleReturnValueWithObjectMapperByTypeRegistration() throws Exception {
+		MediaType halFormsMediaType = MediaType.parseMediaType("application/prs.hal-forms+json");
+		MediaType halMediaType = MediaType.parseMediaType("application/hal+json");
 
-	@Test
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+
+		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+		converter.registerObjectMappersForType(SimpleBean.class, map -> map.put(halMediaType, objectMapper));
+
+		this.servletRequest.addHeader("Accept", halFormsMediaType + "," + halMediaType);
+
+		SimpleBean simpleBean = new SimpleBean();
+		simpleBean.setId(12L);
+		simpleBean.setName("Jason");
+
+		RequestResponseBodyMethodProcessor processor =
+				new RequestResponseBodyMethodProcessor(Collections.singletonList(converter));
+		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("getSimpleBean"), -1);
+		processor.writeWithMessageConverters(simpleBean, returnType, this.request);
+
+		assertThat(this.servletResponse.getHeader("Content-Type")).isEqualTo(halMediaType.toString());
+		assertThat(this.servletResponse.getContentAsString()).isEqualTo(
+				"{" + NEWLINE_SYSTEM_PROPERTY +
+				"  \"id\" : 12," + NEWLINE_SYSTEM_PROPERTY +
+				"  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY +
+				"}");
+	}
+
+	@Test // SPR-13135
 	public void handleReturnValueWithInvalidReturnType() throws Exception {
 		Method method = getClass().getDeclaredMethod("handleAndReturnOutputStream");
 		MethodParameter returnType = new MethodParameter(method, -1);
@@ -380,7 +413,7 @@ public class RequestResponseBodyMethodProcessorTests {
 				Collections.singletonList(new StringHttpMessageConverter()),
 				factory.getObject());
 
-		assertContentDisposition(processor, false, "/hello.json", "whitelisted extension");
+		assertContentDisposition(processor, false, "/hello.json", "safe extension");
 		assertContentDisposition(processor, false, "/hello.pdf", "registered extension");
 		assertContentDisposition(processor, true, "/hello.dataless", "unknown extension");
 
@@ -388,7 +421,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertContentDisposition(processor, false, "/hello.json;a=b", "path param shouldn't cause issue");
 		assertContentDisposition(processor, true, "/hello.json;a=b;setup.dataless", "unknown ext in path params");
 		assertContentDisposition(processor, true, "/hello.dataless;a=b;setup.json", "unknown ext in filename");
-		assertContentDisposition(processor, false, "/hello.json;a=b;setup.json", "whitelisted extensions");
+		assertContentDisposition(processor, false, "/hello.json;a=b;setup.json", "safe extensions");
+		assertContentDisposition(processor, true, "/hello.json;jsessionid=foo.bar", "jsessionid shouldn't cause issue");
 
 		// encoded dot
 		assertContentDisposition(processor, true, "/hello%2Edataless;a=b;setup.json", "encoded dot in filename");
@@ -398,6 +432,25 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE, "/hello.bat");
 		assertContentDisposition(processor, true, "/bonjour", "forwarded URL");
 		this.servletRequest.removeAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE);
+	}
+
+	@Test
+	public void addContentDispositionHeaderToErrorResponse() throws Exception {
+		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
+		factory.addMediaType("pdf", new MediaType("application", "pdf"));
+		factory.afterPropertiesSet();
+
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
+				Collections.singletonList(new StringHttpMessageConverter()),
+				factory.getObject());
+
+		this.servletRequest.setRequestURI("/hello.dataless");
+		this.servletResponse.setStatus(400);
+
+		processor.handleReturnValue("body", this.returnTypeString, this.container, this.request);
+
+		String header = servletResponse.getHeader("Content-Disposition");
+		assertThat(header).isEqualTo("inline;filename=f.txt");
 	}
 
 	@Test
@@ -724,10 +777,14 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		String header = servletResponse.getHeader("Content-Disposition");
 		if (expectContentDisposition) {
-			assertThat(header).as("Expected 'Content-Disposition' header. Use case: '" + comment + "'").isEqualTo("inline;filename=f.txt");
+			assertThat(header)
+					.as("Expected 'Content-Disposition' header. Use case: '" + comment + "'")
+					.isEqualTo("inline;filename=f.txt");
 		}
 		else {
-			assertThat(header).as("Did not expect 'Content-Disposition' header. Use case: '" + comment + "'").isNull();
+			assertThat(header)
+					.as("Did not expect 'Content-Disposition' header. Use case: '" + comment + "'")
+					.isNull();
 		}
 
 		this.servletRequest = new MockHttpServletRequest();
@@ -751,6 +808,10 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@RequestMapping
 	OutputStream handleAndReturnOutputStream() {
+		return null;
+	}
+
+	SimpleBean getSimpleBean() {
 		return null;
 	}
 

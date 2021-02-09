@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.util;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -65,29 +64,42 @@ public class WebUtilsTests {
 		MultiValueMap<String, String> variables;
 
 		variables = WebUtils.parseMatrixVariables(null);
-		assertThat(variables.size()).isEqualTo(0);
+		assertThat(variables).hasSize(0);
 
 		variables = WebUtils.parseMatrixVariables("year");
-		assertThat(variables.size()).isEqualTo(1);
+		assertThat(variables).hasSize(1);
 		assertThat(variables.getFirst("year")).isEqualTo("");
 
 		variables = WebUtils.parseMatrixVariables("year=2012");
-		assertThat(variables.size()).isEqualTo(1);
+		assertThat(variables).hasSize(1);
 		assertThat(variables.getFirst("year")).isEqualTo("2012");
 
 		variables = WebUtils.parseMatrixVariables("year=2012;colors=red,blue,green");
-		assertThat(variables.size()).isEqualTo(2);
-		assertThat(variables.get("colors")).isEqualTo(Arrays.asList("red", "blue", "green"));
+		assertThat(variables).hasSize(2);
+		assertThat(variables.get("colors")).containsExactly("red", "blue", "green");
 		assertThat(variables.getFirst("year")).isEqualTo("2012");
 
 		variables = WebUtils.parseMatrixVariables(";year=2012;colors=red,blue,green;");
-		assertThat(variables.size()).isEqualTo(2);
-		assertThat(variables.get("colors")).isEqualTo(Arrays.asList("red", "blue", "green"));
+		assertThat(variables).hasSize(2);
+		assertThat(variables.get("colors")).containsExactly("red", "blue", "green");
 		assertThat(variables.getFirst("year")).isEqualTo("2012");
 
 		variables = WebUtils.parseMatrixVariables("colors=red;colors=blue;colors=green");
-		assertThat(variables.size()).isEqualTo(1);
-		assertThat(variables.get("colors")).isEqualTo(Arrays.asList("red", "blue", "green"));
+		assertThat(variables).hasSize(1);
+		assertThat(variables.get("colors")).containsExactly("red", "blue", "green");
+
+		variables = WebUtils.parseMatrixVariables("jsessionid=c0o7fszeb1");
+		assertThat(variables).isEmpty();
+
+		variables = WebUtils.parseMatrixVariables("a=b;jsessionid=c0o7fszeb1;c=d");
+		assertThat(variables).hasSize(2);
+		assertThat(variables.get("a")).containsExactly("b");
+		assertThat(variables.get("c")).containsExactly("d");
+
+		variables = WebUtils.parseMatrixVariables("a=b;jsessionid=c0o7fszeb1;c=d");
+		assertThat(variables).hasSize(2);
+		assertThat(variables.get("a")).containsExactly("b");
+		assertThat(variables.get("c")).containsExactly("d");
 	}
 
 	@Test

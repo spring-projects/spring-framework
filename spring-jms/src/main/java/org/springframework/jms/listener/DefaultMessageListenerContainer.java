@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,9 +198,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private int registeredWithDestination = 0;
 
-	private volatile boolean recovering = false;
+	private volatile boolean recovering;
 
-	private volatile boolean interrupted = false;
+	private volatile boolean interrupted;
 
 	@Nullable
 	private Runnable stopCallback;
@@ -310,7 +310,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			int separatorIndex = concurrency.indexOf('-');
 			if (separatorIndex != -1) {
 				setConcurrentConsumers(Integer.parseInt(concurrency.substring(0, separatorIndex)));
-				setMaxConcurrentConsumers(Integer.parseInt(concurrency.substring(separatorIndex + 1, concurrency.length())));
+				setMaxConcurrentConsumers(Integer.parseInt(concurrency.substring(separatorIndex + 1)));
 			}
 			else {
 				setConcurrentConsumers(1);

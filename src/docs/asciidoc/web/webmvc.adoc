@@ -46,16 +46,15 @@ the `DispatcherServlet`, which is auto-detected by the Servlet container
 	public class MyWebApplicationInitializer implements WebApplicationInitializer {
 
 		@Override
-		public void onStartup(ServletContext servletCxt) {
+		public void onStartup(ServletContext servletContext) {
 
 			// Load Spring web application configuration
-			AnnotationConfigWebApplicationContext ac = new AnnotationConfigWebApplicationContext();
-			ac.register(AppConfig.class);
-			ac.refresh();
+			AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+			context.register(AppConfig.class);
 
 			// Create and register the DispatcherServlet
-			DispatcherServlet servlet = new DispatcherServlet(ac);
-			ServletRegistration.Dynamic registration = servletCxt.addServlet("app", servlet);
+			DispatcherServlet servlet = new DispatcherServlet(context);
+			ServletRegistration.Dynamic registration = servletContext.addServlet("app", servlet);
 			registration.setLoadOnStartup(1);
 			registration.addMapping("/app/*");
 		}
@@ -66,16 +65,15 @@ the `DispatcherServlet`, which is auto-detected by the Servlet container
 ----
 	class MyWebApplicationInitializer : WebApplicationInitializer {
 
-		override fun onStartup(servletCxt: ServletContext) {
+		override fun onStartup(servletContext: ServletContext) {
 
 			// Load Spring web application configuration
-			val ac = AnnotationConfigWebApplicationContext()
-			ac.register(AppConfig::class.java)
-			ac.refresh()
+			val context = AnnotationConfigWebApplicationContext()
+			context.register(AppConfig::class.java)
 
 			// Create and register the DispatcherServlet
-			val servlet = DispatcherServlet(ac)
-			val registration = servletCxt.addServlet("app", servlet)
+			val servlet = DispatcherServlet(context)
+			val registration = servletContext.addServlet("app", servlet)
 			registration.setLoadOnStartup(1)
 			registration.addMapping("/app/*")
 		}
@@ -518,7 +516,7 @@ The `DispatcherServlet` processes requests as follows:
   information about multipart handling.
 * An appropriate handler is searched for. If a handler is found, the execution chain
   associated with the handler (preprocessors, postprocessors, and controllers) is
-  executed in order to prepare a model or rendering. Alternatively, for annotated
+  run to prepare a model for rendering. Alternatively, for annotated
   controllers, the response can be rendered (within the `HandlerAdapter`) instead of
   returning a view.
 * If a model is returned, the view is rendered. If no model is returned (maybe due to
@@ -584,8 +582,8 @@ a principal. Interceptors must implement `HandlerInterceptor` from the
 `org.springframework.web.servlet` package with three methods that should provide enough
 flexibility to do all kinds of pre-processing and post-processing:
 
-* `preHandle(..)`: Before the actual handler is executed
-* `postHandle(..)`: After the handler is executed
+* `preHandle(..)`: Before the actual handler is run
+* `postHandle(..)`: After the handler is run
 * `afterCompletion(..)`: After the complete request has finished
 
 The `preHandle(..)` method returns a boolean value. You can use this method to break or
@@ -736,23 +734,11 @@ The following table provides more details on the `ViewResolver` hierarchy:
 | ViewResolver| Description
 
 | `AbstractCachingViewResolver`
-| Sub-classes of `AbstractCachingViewResolver` cache view instances that they resolve.
+| Subclasses of `AbstractCachingViewResolver` cache view instances that they resolve.
   Caching improves performance of certain view technologies. You can turn off the
-  cache by setting the `cache` property to `false`. Furthermore, if you must refresh a
-  certain view at runtime (for example, when a FreeMarker template is modified), you can use
-  the `removeFromCache(String viewName, Locale loc)` method.
-
-| `XmlViewResolver`
-| Implementation of `ViewResolver` that accepts a configuration file written in XML with
-  the same DTD as Spring's XML bean factories. The default configuration file is
-  `/WEB-INF/views.xml`.
-
-| `ResourceBundleViewResolver`
-| Implementation of `ViewResolver` that uses bean definitions in a `ResourceBundle`,
-  specified by the bundle base name. For each view it is supposed to resolve, it uses
-  the value of the property `[viewname].(class)` as the view class and the value of the
-  property `[viewname].url` as the view URL. You can find examples in the chapter on
-  <<mvc-view>>.
+  cache by setting the `cache` property to `false`. Furthermore, if you must refresh
+  a certain view at runtime (for example, when a FreeMarker template is modified),
+  you can use the `removeFromCache(String viewName, Locale loc)` method.
 
 | `UrlBasedViewResolver`
 | Simple implementation of the `ViewResolver` interface that affects the direct
@@ -774,6 +760,12 @@ The following table provides more details on the `ViewResolver` hierarchy:
 | `ContentNegotiatingViewResolver`
 | Implementation of the `ViewResolver` interface that resolves a view based on the
   request file name or `Accept` header. See <<mvc-multiple-representations>>.
+
+| `BeanNameViewResolver`
+| Implementation of the `ViewResolver` interface that interprets a view name as a
+  bean name in the current application context. This is a very flexible variant which
+  allows for mixing and matching different view types based on distinct view names.
+  Each such `View` can be defined as a bean e.g. in XML or in configuration classes.
 |===
 
 
@@ -955,7 +947,7 @@ The `SessionLocaleResolver` lets you retrieve `Locale` and `TimeZone` from the
 session that might be associated with the user's request. In contrast to
 `CookieLocaleResolver`, this strategy stores locally chosen locale settings in the
 Servlet container's `HttpSession`. As a consequence, those settings are temporary
-for each session and are, therefore, lost when each session terminates.
+for each session and are, therefore, lost when each session ends.
 
 Note that there is no direct relationship with external session management mechanisms,
 such as the Spring Session project. This `SessionLocaleResolver` evaluates and
@@ -1535,14 +1527,39 @@ The following example has type and method level mappings:
 ==== URI patterns
 [.small]#<<web-reactive.adoc#webflux-ann-requestmapping-uri-templates, WebFlux>>#
 
-You can map requests by using the following global patterns and wildcards:
+`@RequestMapping` methods can be mapped using URL patterns. There are two alternatives:
 
-* `?` matches one character
-* `*` matches zero or more characters within a path segment
-* `**` match zero or more path segments
+* `PathPattern` -- a pre-parsed pattern matched against the URL path also pre-parsed as
+`PathContainer`. Designed for web use, this solution deals effectively with encoding and
+path parameters, and matches efficiently.
+* `AntPathMatcher` -- match String patterns against a String path. This is the original
+solution also used in Spring configuration to select resources on the classpath, on the
+filesystem, and other locations. It is less efficient and the String path input is a
+challenge for dealing effectively with encoding and other issues with URLs.
 
-You can also declare URI variables and access their values with `@PathVariable`,
-as the following example shows:
+`PathPattern` is the recommended solution for web applications and it is the only choice in
+Spring WebFlux. Prior to version 5.3, `AntPathMatcher` was the only choice in Spring MVC
+and continues to be the default. However `PathPattern` can be enabled in the
+<<mvc-config-path-matching, MVC config>>.
+
+`PathPattern` supports the same pattern syntax as `AntPathMatcher`. In addition it also
+supports the capturing pattern, e.g. `+{*spring}+`, for matching 0 or more path segments
+at the end of a path. `PathPattern` also restricts the use of `+**+` for matching multiple
+path segments such that it's only allowed at the end of a pattern. This eliminates many
+cases of ambiguity when choosing the best matching pattern for a given request.
+For full pattern syntax please refer to
+{api-spring-framework}/web/util/pattern/PathPattern.html[PathPattern] and
+{api-spring-framework}/util/AntPathMatcher.html[AntPathMatcher].
+
+Some example patterns:
+
+* `+"/resources/ima?e.png"+` - match one character in a path segment
+* `+"/resources/*.png"+` - match zero or more characters in a path segment
+* `+"/resources/**"+` - match multiple path segments
+* `+"/projects/{project}/versions"+` - match a path segment and capture it as a variable
+* `+"/projects/{project:[a-z]+}/versions"+` - match and capture a variable with a regex
+
+Captured URI variables can be accessed with `@PathVariable`. For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1608,7 +1625,7 @@ extracts the name, version, and file extension:
 .Java
 ----
 	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
-	public void handle(@PathVariable String version, @PathVariable String ext) {
+	public void handle(@PathVariable String name, @PathVariable String version, @PathVariable String ext) {
 		// ...
 	}
 ----
@@ -1616,7 +1633,7 @@ extracts the name, version, and file extension:
 .Kotlin
 ----
 	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
-	fun handle(@PathVariable version: String, @PathVariable ext: String) {
+	fun handle(@PathVariable name: String, @PathVariable version: String, @PathVariable ext: String) {
 		// ...
 	}
 ----
@@ -1626,42 +1643,39 @@ by using `PropertyPlaceHolderConfigurer` against local, system, environment, and
 sources. You can use this, for example, to parameterize a base URL based on some external
 configuration.
 
-NOTE: Spring MVC uses the `PathMatcher` contract and the `AntPathMatcher` implementation from
-`spring-core` for URI path matching.
-
 
 
 [[mvc-ann-requestmapping-pattern-comparison]]
 ==== Pattern Comparison
 [.small]#<<web-reactive.adoc#webflux-ann-requestmapping-pattern-comparison, WebFlux>>#
 
-When multiple patterns match a URL, they must be compared to find the best match. This is done
-by using `AntPathMatcher.getPatternComparator(String path)`, which looks for patterns that are more
-specific.
+When multiple patterns match a URL, the best match must be selected. This is done with
+one of the following depending on whether parsed `PathPattern`'s are enabled for use or not:
 
-A pattern is less specific if it has a lower count of URI variables (counted as 1), single
-wildcards (counted as 1), and double wildcards (counted as 2). Given an equal score, the
-longer pattern is chosen. Given the same score and length, the pattern with more URI variables
-than wildcards is chosen.
+* {api-spring-framework}/web/util/pattern/PathPattern.html#SPECIFICITY_COMPARATOR[`PathPattern.SPECIFICITY_COMPARATOR`]
+* {api-spring-framework}/util/AntPathMatcher.html#getPatternComparator-java.lang.String-[`AntPathMatcher.getPatternComparator(String path)`]
+
+Both help to sorts patterns with more specific ones on top. A pattern is less specific if
+it has a lower count of URI variables (counted as 1), single wildcards (counted as 1),
+and double wildcards (counted as 2). Given an equal score, the longer pattern is chosen.
+Given the same score and length, the pattern with more URI variables than wildcards is
+chosen.
 
 The default mapping pattern (`/{asterisk}{asterisk}`) is excluded from scoring and always
 sorted last. Also, prefix patterns (such as `/public/{asterisk}{asterisk}`) are considered less
 specific than other pattern that do not have double wildcards.
 
-For the full details, see {api-spring-framework}/util/AntPathMatcher.AntPatternComparator.html[`AntPatternComparator`]
-in {api-spring-framework}/util/AntPathMatcher.html[`AntPathMatcher`] and also keep in mind that
-you can customize the {api-spring-framework}/util/PathMatcher.html[`PathMatcher`] implementation.
-See <<mvc-config-path-matching>> in the configuration section.
+For the full details, follow the above links to the pattern Comparators.
 
 
 [[mvc-ann-requestmapping-suffix-pattern-match]]
 ==== Suffix Match
 
-By default, Spring MVC performs `.{asterisk}` suffix pattern matching so that a
-controller mapped to `/person` is also implicitly mapped to `/person.{asterisk}`.
-The file extension is then used to interpret the requested content type to use for
-the response (that is, instead of the `Accept` header) -- for example, `/person.pdf`,
-`/person.xml`, and others.
+Starting in 5.3, by default Spring MVC no longer performs `.{asterisk}` suffix pattern
+matching where a controller mapped to `/person` is also implicitly mapped to
+`/person.{asterisk}`. As a consequence path extensions are no longer used to interpret
+the requested content type for the response -- for example, `/person.pdf`, `/person.xml`,
+and so on.
 
 Using file extensions in this way was necessary when browsers used to send `Accept` headers
 that were hard to interpret consistently. At present, that is no longer a necessity and
@@ -1672,28 +1686,16 @@ It can cause ambiguity when overlain with the use of URI variables, path paramet
 URI encoding. Reasoning about URL-based authorization
 and security (see next section for more details) also become more difficult.
 
-To completely disable the use of file extensions, you must set both of the following:
+To completely disable the use of path extensions in versions prior to 5.3, set the following:
 
 * `useSuffixPatternMatching(false)`, see <<mvc-config-path-matching, PathMatchConfigurer>>
 * `favorPathExtension(false)`, see <<mvc-config-content-negotiation, ContentNegotiationConfigurer>>
 
-URL-based content negotiation can still be useful (for example, when typing a URL in a
-browser). To enable that, we recommend a query parameter-based strategy to avoid most of
-the issues that come with file extensions. Alternatively, if you must use file extensions, consider
-restricting them to a list of explicitly registered extensions through the
-`mediaTypes` property of <<mvc-config-content-negotiation,ContentNegotiationConfigurer>>.
-
-[NOTE]
-====
-Starting in 5.2.4, path extension related options for request mapping in
-{api-spring-framework}/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.java[RequestMappingHandlerMapping]
-and for content negotiation in
-{api-spring-framework}/org.springframework.web.accept/ContentNegotiationManagerFactoryBean.java[ContentNegotiationManagerFactoryBean]
-are deprecated. See Spring Framework issue
-https://github.com/spring-projects/spring-framework/issues/24179[#24179] and related
-issues for further plans.
-====
-
+Having a way to request content types other than through the `"Accept"` header can still
+be useful, e.g. when typing a URL in a browser. A safe alternative to path extensions is
+to use the query parameter strategy. If you must use file extensions, consider restricting
+them to a list of explicitly registered extensions through the `mediaTypes` property of
+<<mvc-config-content-negotiation,ContentNegotiationConfigurer>>.
 
 
 [[mvc-ann-requestmapping-rfd]]
@@ -1711,11 +1713,11 @@ lower the risk but are not sufficient to prevent RFD attacks.
 
 To prevent RFD attacks, prior to rendering the response body, Spring MVC adds a
 `Content-Disposition:inline;filename=f.txt` header to suggest a fixed and safe download
-file. This is done only if the URL path contains a file extension that is neither whitelisted
-nor explicitly registered for content negotiation. However, it can potentially have
-side effects when URLs are typed directly into a browser.
+file. This is done only if the URL path contains a file extension that is neither
+allowed as safe nor explicitly registered for content negotiation. However, it can
+potentially have side effects when URLs are typed directly into a browser.
 
-Many common path extensions are whitelisted by default. Applications with custom
+Many common path extensions are allowed as safe by default. Applications with custom
 `HttpMessageConverter` implementations can explicitly register file extensions for content
 negotiation to avoid having a `Content-Disposition` header added for those extensions.
 See <<mvc-config-content-negotiation>>.
@@ -2081,7 +2083,7 @@ and others) and is equivalent to `required=false`.
 
 | `UriComponentsBuilder`
 | For preparing a URL relative to the current request's host, port, scheme, context path, and
-  the literal  part of the servlet mapping. See <<mvc-uri-building>>.
+  the literal part of the servlet mapping. See <<mvc-uri-building>>.
 
 | `@SessionAttribute`
 | For access to any session attribute, in contrast to model attributes stored in the session
@@ -2213,6 +2215,24 @@ By default, simple types (`int`, `long`, `Date`, and others) are supported. You 
 type conversion through a `WebDataBinder` (see <<mvc-ann-initbinder>>) or by registering
 `Formatters` with the `FormattingConversionService`.
 See <<core.adoc#format, Spring Field Formatting>>.
+
+A practical issue in type conversion is the treatment of an empty String source value.
+Such a value is treated as missing if it becomes `null` as a result of type conversion.
+This can be the case for `Long`, `UUID`, and other target types. If you want to allow `null`
+to be injected, either use the `required` flag on the argument annotation, or declare the
+argument as `@Nullable`.
+
+[NOTE]
+====
+As of 5.3, non-null arguments will be enforced even after type conversion. If your handler
+method intends to accept a null value as well, either declare your argument as `@Nullable`
+or mark it as `required=false` in the corresponding `@RequestParam` etc annotation. This is
+a best practice and the recommended solution for regressions encountered in a 5.3 upgrade.
+
+Alternatively, you may specifically handle e.g. the resulting `MissingPathVariableException`
+in the case of a required `@PathVariable`. A null value after conversion will be treated like
+an empty original value, so the corresponding `Missing...Exception` variants will be thrown.
+====
 
 
 [[mvc-ann-matrix-variables]]
@@ -3296,7 +3316,14 @@ See <<mvc-ann-jackson>> for details.
 
 Spring MVC supports using a single value <<mvc-ann-async-reactive-types, reactive type>>
 to produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive
-types for the body.
+types for the body. This allows the following types of async responses:
+
+* `ResponseEntity<Mono<T>>` or `ResponseEntity<Flux<T>>` make the response status and
+  headers known immediately while the body is provided asynchronously at a later point.
+  Use `Mono` if the body consists of 0..1 values or `Flux` if it can produce multiple values.
+* `Mono<ResponseEntity<T>>` provides all three -- response status, headers, and body,
+  asynchronously at a later point. This allows the response status and headers to vary
+  depending on the outcome of asynchronous request handling.
 
 
 [[mvc-ann-jackson]]
@@ -3376,6 +3403,39 @@ which allow rendering only a subset of all fields in an `Object`. To use it with
 
 NOTE: `@JsonView` allows an array of view classes, but you can specify only one per
 controller method. If you need to activate multiple views, you can use a composite interface.
+
+If you want to do the above programmatically, instead of declaring an `@JsonView` annotation,
+wrap the return value with `MappingJacksonValue` and use it to supply the serialization view:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@RestController
+	public class UserController {
+
+		@GetMapping("/user")
+		public MappingJacksonValue getUser() {
+			User user = new User("eric", "7!jd#h23");
+			MappingJacksonValue value = new MappingJacksonValue(user);
+			value.setSerializationView(User.WithoutPasswordView.class);
+			return value;
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@RestController
+	class UserController {
+
+		@GetMapping("/user")
+		fun getUser(): MappingJacksonValue {
+			val value = MappingJacksonValue(User("eric", "7!jd#h23"))
+			value.serializationView = User.WithoutPasswordView::class.java
+			return value
+		}
+	}
+----
 
 For controllers that rely on view resolution, you can add the serialization view class
 to the model, as the following example shows:
@@ -3523,7 +3583,7 @@ initialize instances of `WebDataBinder`, and those, in turn, can:
 headers, cookies, and others) to the target type of controller method arguments.
 * Format model object values as `String` values when rendering HTML forms.
 
-`@InitBinder` methods can register controller-specific `java.bean.PropertyEditor` or
+`@InitBinder` methods can register controller-specific `java.beans.PropertyEditor` or
 Spring `Converter` and `Formatter` components. In addition, you can use the
 <<mvc-config-conversion,MVC config>> to register `Converter` and `Formatter`
 types in a globally shared `FormattingConversionService`.
@@ -3641,14 +3701,15 @@ controller-specific `Formatter` implementations, as the following example shows:
 	}
 ----
 
-The exception may match against a top-level exception being propagated (that is, a direct
-`IOException` being thrown) or against the immediate cause within a top-level wrapper exception
-(for example, an `IOException` wrapped inside an `IllegalStateException`).
+The exception may match against a top-level exception being propagated (e.g. a direct
+`IOException` being thrown) or against a nested cause within a wrapper exception (e.g.
+an `IOException` wrapped inside an `IllegalStateException`). As of 5.3, this can match
+at arbitrary cause levels, whereas previously only an immediate cause was considered.
 
 For matching exception types, preferably declare the target exception as a method argument,
-as the preceding example shows. When multiple exception methods match, a root exception match is generally
-preferred to a cause exception match. More specifically, the `ExceptionDepthComparator` is
-used to sort exceptions based on their depth from the thrown exception type.
+as the preceding example shows. When multiple exception methods match, a root exception match is
+generally preferred to a cause exception match. More specifically, the `ExceptionDepthComparator`
+is used to sort exceptions based on their depth from the thrown exception type.
 
 Alternatively, the annotation declaration may narrow the exception types to match,
 as the following example shows:
@@ -4577,7 +4638,7 @@ Reactive return values are handled as follows:
 
 * A single-value promise is adapted to, similar to using `DeferredResult`. Examples
 include `Mono` (Reactor) or `Single` (RxJava).
-* A multi-value stream with a streaming media type (such as `application/stream+json`
+* A multi-value stream with a streaming media type (such as `application/x-ndjson`
 or `text/event-stream`) is adapted to, similar to using `ResponseBodyEmitter` or
 `SseEmitter`. Examples include `Flux` (Reactor) or `Observable` (RxJava).
 Applications can also return `Flux<ServerSentEvent>` or `Observable<ServerSentEvent>`.
@@ -4589,7 +4650,7 @@ TIP: Spring MVC supports Reactor and RxJava through the
 `spring-core`, which lets it adapt from multiple reactive libraries.
 
 For streaming to the response, reactive back pressure is supported, but writes to the
-response are still blocking and are executed on a separate thread through the
+response are still blocking and are run on a separate thread through the
 <<mvc-ann-async-configuration-spring-mvc, configured>> `TaskExecutor`, to avoid
 blocking the upstream source (such as a `Flux` returned from `WebClient`).
 By default, `SimpleAsyncTaskExecutor` is used for the blocking writes, but that is not
@@ -4809,7 +4870,7 @@ as the following example shows:
 .Java
 ----
 	@RequestMapping
-	public String myHandleMethod(WebRequest webRequest, Model model) {
+	public String myHandleMethod(WebRequest request, Model model) {
 
 		long eTag = ... // <1>
 
@@ -4829,7 +4890,7 @@ as the following example shows:
 .Kotlin
 ----
 	@RequestMapping
-	fun myHandleMethod(webRequest: WebRequest, model: Model): String? {
+	fun myHandleMethod(request: WebRequest, model: Model): String? {
 
 		val eTag: Long = ... // <1>
 
@@ -5406,7 +5467,7 @@ The following example shows how to achieve the same configuration in XML:
 
 This is a shortcut for defining a `ParameterizableViewController` that immediately
 forwards to a view when invoked. You can use it in static cases when there is no Java controller
-logic to execute before the view generates the response.
+logic to run before the view generates the response.
 
 The following example of Java configuration forwards a request for `/` to a view called `home`:
 
@@ -5584,8 +5645,8 @@ In the next example, given a request that starts with `/resources`, the relative
 used to find and serve static resources relative to `/public` under the web application
 root or on the classpath under `/static`. The resources are served with a one-year future
 expiration to ensure maximum use of the browser cache and a reduction in HTTP requests
-made by the browser. The `Last-Modified` header is also evaluated and, if present, a `304`
-status code is returned.
+made by the browser. The `Last-Modified` information is deduced from `Resource#lastModified`
+so that HTTP conditional requests are supported with `"Last-Modified"` headers.
 
 The following listing shows how to do so with Java configuration:
 
@@ -5600,7 +5661,7 @@ The following listing shows how to do so with Java configuration:
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("/public", "classpath:/static/")
-				.setCachePeriod(31556926);
+				.setCacheControl(CacheControl.maxAge(Duration.ofDays(365)));
 		}
 	}
 ----
@@ -5614,7 +5675,7 @@ The following listing shows how to do so with Java configuration:
 		override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
 			registry.addResourceHandler("/resources/**")
 					.addResourceLocations("/public", "classpath:/static/")
-					.setCachePeriod(31556926)
+					.setCacheControl(CacheControl.maxAge(Duration.ofDays(365)))
 		}
 	}
 ----
@@ -5824,21 +5885,12 @@ The following example shows how to customize path matching in Java configuration
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
 			configurer
-				.setUseTrailingSlashMatch(false)
-				.setUseRegisteredSuffixPatternMatch(true)
-				.setPathMatcher(antPathMatcher())
-				.setUrlPathHelper(urlPathHelper())
+				.setPatternParser(new PathPatternParser())
 				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 
-		@Bean
-		public UrlPathHelper urlPathHelper() {
-			//...
-		}
-
-		@Bean
-		public PathMatcher antPathMatcher() {
-			//...
+		private PathPatternParser patternParser() {
+			// ...
 		}
 	}
 ----
@@ -5851,21 +5903,11 @@ The following example shows how to customize path matching in Java configuration
 
 		override fun configurePathMatch(configurer: PathMatchConfigurer) {
 			configurer
-				.setUseSuffixPatternMatch(true)
-				.setUseTrailingSlashMatch(false)
-				.setUseRegisteredSuffixPatternMatch(true)
-				.setPathMatcher(antPathMatcher())
-				.setUrlPathHelper(urlPathHelper())
+				.setPatternParser(patternParser)
 				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
 		}
 
-		@Bean
-		fun urlPathHelper(): UrlPathHelper {
-			//...
-		}
-
-		@Bean
-		fun antPathMatcher(): PathMatcher {
+		fun patternParser(): PathPatternParser {
 			//...
 		}
 	}
@@ -5878,7 +5920,6 @@ The following example shows how to achieve the same configuration in XML:
 	<mvc:annotation-driven>
 		<mvc:path-matching
 			trailing-slash="false"
-			registered-suffixes-only="true"
 			path-helper="pathHelper"
 			path-matcher="pathMatcher"/>
 	</mvc:annotation-driven>
@@ -5950,7 +5991,7 @@ hook of the Spring `ApplicationContext`, as the following example shows:
 ----
 	@Component
 	class MyPostProcessor : BeanPostProcessor {
-		
+
 		override fun postProcessBeforeInitialization(bean: Any, name: String): Any {
 			// ...
 		}
@@ -5975,5 +6016,5 @@ For more details, see the
 https://github.com/spring-projects/spring-framework/wiki/HTTP-2-support[HTTP/2 wiki page].
 
 The Servlet API does expose one construct related to HTTP/2. You can use the
-`javax.servlet.http.PushBuilder` proactively push resources to clients, and it
+`javax.servlet.http.PushBuilder` to proactively push resources to clients, and it
 is supported as a <<mvc-ann-arguments, method argument>> to `@RequestMapping` methods.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -289,15 +289,15 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		@Override
 		@Nullable
 		public Object getValue() throws Exception {
-			final Method readMethod = this.pd.getReadMethod();
+			Method readMethod = this.pd.getReadMethod();
 			if (System.getSecurityManager() != null) {
 				AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
 					ReflectionUtils.makeAccessible(readMethod);
 					return null;
 				});
 				try {
-					return AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
-							readMethod.invoke(getWrappedInstance(), (Object[]) null), acc);
+					return AccessController.doPrivileged((PrivilegedExceptionAction<Object>)
+							() -> readMethod.invoke(getWrappedInstance(), (Object[]) null), acc);
 				}
 				catch (PrivilegedActionException pae) {
 					throw pae.getException();
@@ -310,8 +310,8 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		}
 
 		@Override
-		public void setValue(final @Nullable Object value) throws Exception {
-			final Method writeMethod = (this.pd instanceof GenericTypeAwarePropertyDescriptor ?
+		public void setValue(@Nullable Object value) throws Exception {
+			Method writeMethod = (this.pd instanceof GenericTypeAwarePropertyDescriptor ?
 					((GenericTypeAwarePropertyDescriptor) this.pd).getWriteMethodForActualAccess() :
 					this.pd.getWriteMethod());
 			if (System.getSecurityManager() != null) {
@@ -320,8 +320,8 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 					return null;
 				});
 				try {
-					AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
-							writeMethod.invoke(getWrappedInstance(), value), acc);
+					AccessController.doPrivileged((PrivilegedExceptionAction<Object>)
+							() -> writeMethod.invoke(getWrappedInstance(), value), acc);
 				}
 				catch (PrivilegedActionException ex) {
 					throw ex.getException();

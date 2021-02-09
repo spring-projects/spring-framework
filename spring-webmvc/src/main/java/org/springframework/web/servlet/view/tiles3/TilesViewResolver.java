@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.servlet.view.tiles3;
 import org.apache.tiles.request.render.Renderer;
 
 import org.springframework.lang.Nullable;
+import org.springframework.web.servlet.view.AbstractUrlBasedView;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 /**
@@ -40,18 +41,13 @@ public class TilesViewResolver extends UrlBasedViewResolver {
 	private Boolean alwaysInclude;
 
 
+	/**
+	 * This resolver requires {@link TilesView}.
+	 */
 	public TilesViewResolver() {
 		setViewClass(requiredViewClass());
 	}
 
-
-	/**
-	 * This resolver requires {@link TilesView}.
-	 */
-	@Override
-	protected Class<?> requiredViewClass() {
-		return TilesView.class;
-	}
 
 	/**
 	 * Set the {@link Renderer} to use. If not specified, a default
@@ -73,6 +69,16 @@ public class TilesViewResolver extends UrlBasedViewResolver {
 		this.alwaysInclude = alwaysInclude;
 	}
 
+
+	@Override
+	protected Class<?> requiredViewClass() {
+		return TilesView.class;
+	}
+
+	@Override
+	protected AbstractUrlBasedView instantiateView() {
+		return (getViewClass() == TilesView.class ? new TilesView() : super.instantiateView());
+	}
 
 	@Override
 	protected TilesView buildView(String viewName) throws Exception {

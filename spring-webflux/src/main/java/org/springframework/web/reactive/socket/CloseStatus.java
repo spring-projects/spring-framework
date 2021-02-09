@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.reactive.socket;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Representation of WebSocket "close" status codes and reasons. Status codes
@@ -184,10 +185,54 @@ public final class CloseStatus {
 		return new CloseStatus(this.code, reason);
 	}
 
-
+	/**
+	 * @deprecated as of 5.3 in favor of comparing codes directly
+	 */
+	@Deprecated
 	public boolean equalsCode(CloseStatus other) {
 		return (this.code == other.code);
 	}
+
+
+	/**
+	 * Return a constant for the given code, or create a new instance if the
+	 * code does not match or there is a reason.
+	 * @since 5.3
+	 */
+	public static CloseStatus create(int code, @Nullable String reason) {
+		if (!StringUtils.hasText(reason)) {
+			switch (code) {
+				case 1000:
+					return NORMAL;
+				case 1001:
+					return GOING_AWAY;
+				case 1002:
+					return PROTOCOL_ERROR;
+				case 1003:
+					return NOT_ACCEPTABLE;
+				case 1005:
+					return NO_STATUS_CODE;
+				case 1006:
+					return NO_CLOSE_FRAME;
+				case 1007:
+					return BAD_DATA;
+				case 1008:
+					return POLICY_VIOLATION;
+				case 1009:
+					return TOO_BIG_TO_PROCESS;
+				case 1010:
+					return REQUIRED_EXTENSION;
+				case 1011:
+					return SERVER_ERROR;
+				case 1012:
+					return SERVICE_RESTARTED;
+				case 1013:
+					return SERVICE_OVERLOAD;
+			}
+		}
+		return new CloseStatus(code, reason);
+	}
+
 
 	@Override
 	public boolean equals(@Nullable Object other) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,19 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.support.LiveBeansView;
 import org.springframework.util.Assert;
 
 /**
- * {@link LiveBeansView} subclass which looks for all ApplicationContexts
- * in the web application, as exposed in ServletContext attributes.
+ * {@link org.springframework.context.support.LiveBeansView} subclass
+ * which looks for all ApplicationContexts in the web application,
+ * as exposed in ServletContext attributes.
  *
  * @author Juergen Hoeller
  * @since 3.2
+ * @deprecated as of 5.3, in favor of using Spring Boot actuators for such needs
  */
-public class ServletContextLiveBeansView extends LiveBeansView {
+@Deprecated
+public class ServletContextLiveBeansView extends org.springframework.context.support.LiveBeansView {
 
 	private final ServletContext servletContext;
 

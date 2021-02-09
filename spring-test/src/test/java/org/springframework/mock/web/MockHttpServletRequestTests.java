@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.mock.web;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +38,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
@@ -295,8 +297,7 @@ class MockHttpServletRequestTests {
 
 		assertThat(cookieHeaders)
 				.describedAs("Cookies -> Header conversion works as expected per RFC6265")
-				.hasSize(1)
-				.hasOnlyOneElementSatisfying(header -> assertThat(header).isEqualTo("foo=bar; baz=qux"));
+				.singleElement().isEqualTo("foo=bar; baz=qux");
 	}
 
 	@Test
@@ -390,17 +391,24 @@ class MockHttpServletRequestTests {
 	}
 
 	@Test
+	void getServerNameWithInvalidIpv6AddressViaHostHeader() {
+		request.addHeader(HOST, "[::ffff:abcd:abcd"); // missing closing bracket
+		assertThatIllegalStateException()
+			.isThrownBy(() -> request.getServerName())
+			.withMessageStartingWith("Invalid Host header: ");
+	}
+
+	@Test
 	void getServerNameViaHostHeaderAsIpv6AddressWithoutPort() {
-		String ipv6Address = "[2001:db8:0:1]";
-		request.addHeader(HOST, ipv6Address);
-		assertThat(request.getServerName()).isEqualTo("2001:db8:0:1");
+		String host = "[2001:db8:0:1]";
+		request.addHeader(HOST, host);
+		assertThat(request.getServerName()).isEqualTo(host);
 	}
 
 	@Test
 	void getServerNameViaHostHeaderAsIpv6AddressWithPort() {
-		String ipv6Address = "[2001:db8:0:1]:8081";
-		request.addHeader(HOST, ipv6Address);
-		assertThat(request.getServerName()).isEqualTo("2001:db8:0:1");
+		request.addHeader(HOST, "[2001:db8:0:1]:8081");
+		assertThat(request.getServerName()).isEqualTo("[2001:db8:0:1]");
 	}
 
 	@Test
@@ -412,6 +420,22 @@ class MockHttpServletRequestTests {
 	void getServerPortWithCustomPort() {
 		request.setServerPort(8080);
 		assertThat(request.getServerPort()).isEqualTo(8080);
+	}
+
+	@Test
+	void getServerPortWithInvalidIpv6AddressViaHostHeader() {
+		request.addHeader(HOST, "[::ffff:abcd:abcd:8080"); // missing closing bracket
+		assertThatIllegalStateException()
+			.isThrownBy(() -> request.getServerPort())
+			.withMessageStartingWith("Invalid Host header: ");
+	}
+
+	@Test
+	void getServerPortWithIpv6AddressAndInvalidPortViaHostHeader() {
+		request.addHeader(HOST, "[::ffff:abcd:abcd]:bogus"); // "bogus" is not a port number
+		assertThatExceptionOfType(NumberFormatException.class)
+			.isThrownBy(() -> request.getServerPort())
+			.withMessageContaining("bogus");
 	}
 
 	@Test
@@ -476,6 +500,43 @@ class MockHttpServletRequestTests {
 		request.addHeader(HOST, testServer);
 		StringBuffer requestURL = request.getRequestURL();
 		assertThat(requestURL.toString()).isEqualTo(("http://" + testServer));
+	}
+
+	@Test
+	void getRequestURLWithIpv6AddressViaServerNameWithoutPort() throws Exception {
+		request.setServerName("[::ffff:abcd:abcd]");
+		URL url = new java.net.URL(request.getRequestURL().toString());
+		assertThat(url).asString().isEqualTo("http://[::ffff:abcd:abcd]");
+	}
+
+	@Test
+	void getRequestURLWithIpv6AddressViaServerNameWithPort() throws Exception {
+		request.setServerName("[::ffff:abcd:abcd]");
+		request.setServerPort(9999);
+		URL url = new java.net.URL(request.getRequestURL().toString());
+		assertThat(url).asString().isEqualTo("http://[::ffff:abcd:abcd]:9999");
+	}
+
+	@Test
+	void getRequestURLWithInvalidIpv6AddressViaHostHeader() {
+		request.addHeader(HOST, "[::ffff:abcd:abcd"); // missing closing bracket
+		assertThatIllegalStateException()
+			.isThrownBy(() -> request.getRequestURL())
+			.withMessageStartingWith("Invalid Host header: ");
+	}
+
+	@Test
+	void getRequestURLWithIpv6AddressViaHostHeaderWithoutPort() throws Exception {
+		request.addHeader(HOST, "[::ffff:abcd:abcd]");
+		URL url = new java.net.URL(request.getRequestURL().toString());
+		assertThat(url).asString().isEqualTo("http://[::ffff:abcd:abcd]");
+	}
+
+	@Test
+	void getRequestURLWithIpv6AddressViaHostHeaderWithPort() throws Exception {
+		request.addHeader(HOST, "[::ffff:abcd:abcd]:9999");
+		URL url = new java.net.URL(request.getRequestURL().toString());
+		assertThat(url).asString().isEqualTo("http://[::ffff:abcd:abcd]:9999");
 	}
 
 	@Test

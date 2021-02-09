@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,7 +255,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 		else if (DESTINATION_TYPE_TOPIC.equals(destinationType)) {
 			pubSubDomain = true;
 		}
-		else if ("".equals(destinationType) || DESTINATION_TYPE_QUEUE.equals(destinationType)) {
+		else if (!StringUtils.hasLength(destinationType) || DESTINATION_TYPE_QUEUE.equals(destinationType)) {
 			// the default: queue
 		}
 		else {

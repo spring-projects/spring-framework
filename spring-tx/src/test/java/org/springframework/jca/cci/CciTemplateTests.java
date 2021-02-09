@@ -51,6 +51,7 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
+@Deprecated
 public class CciTemplateTests {
 
 	@Test

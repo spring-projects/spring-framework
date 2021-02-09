@@ -16,7 +16,7 @@ the same <<web#mvc-servlet>>.
 
 In WebMvc.fn, an HTTP request is handled with a `HandlerFunction`: a function that takes
 `ServerRequest` and returns a `ServerResponse`.
-Both the request as the response object have immutable contracts that offer JDK 8-friendly
+Both the request and the response object have immutable contracts that offer JDK 8-friendly
 access to the HTTP request and response.
 `HandlerFunction` is the equivalent of the body of a `@RequestMapping` method in the
 annotation-based programming model.
@@ -103,7 +103,7 @@ as the following example shows:
 
 
 If you register the `RouterFunction` as a bean, for instance by exposing it in a
-@Configuration class, it will auto-detected by the servlet, as explained in <<webmvc-fn-running>>.
+@Configuration class, it will be auto-detected by the servlet, as explained in <<webmvc-fn-running>>.
 
 
 
@@ -117,7 +117,7 @@ access to the HTTP request and response, including headers, body, method, and st
 
 
 [[webmvc-fn-request]]
-=== `ServerRequest`
+=== ServerRequest
 
 `ServerRequest` provides access to the HTTP method, URI, headers, and query parameters,
 while access to the body is provided through the `body` methods.
@@ -165,7 +165,7 @@ val map = request.params()
 
 
 [[webmvc-fn-response]]
-=== `ServerResponse`
+=== ServerResponse
 
 `ServerResponse` provides access to the HTTP response and, since it is immutable, you can use
 a `build` method to create it. You can use the builder to set the response status, to add response
@@ -199,6 +199,89 @@ ServerResponse.created(location).build();
 val location: URI = ...
 ServerResponse.created(location).build()
 ----
+
+You can also use an asynchronous result as the body, in the form of a `CompletableFuture`,
+`Publisher`, or any other type supported by the `ReactiveAdapterRegistry`. For instance:
+
+[source,java,role="primary"]
+.Java
+----
+Mono<Person> person = webClient.get().retrieve().bodyToMono(Person.class);
+ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person);
+----
+[source,kotlin,role="secondary"]
+.Kotlin
+----
+val person = webClient.get().retrieve().awaitBody<Person>()
+ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person)
+----
+
+If not just the body, but also the status or headers are based on an asynchronous type,
+you can use the static `async` method on `ServerResponse`, which
+accepts `CompletableFuture<ServerResponse>`, `Publisher<ServerResponse>`, or
+any other asynchronous type supported by the `ReactiveAdapterRegistry`. For instance:
+
+[source,java,role="primary"]
+.Java
+----
+Mono<ServerResponse> asyncResponse = webClient.get().retrieve().bodyToMono(Person.class)
+  .map(p -> ServerResponse.ok().header("Name", p.name()).body(p));
+ServerResponse.async(asyncResponse);
+----
+
+https://www.w3.org/TR/eventsource/[Server-Sent Events] can be provided via the
+static `sse` method on `ServerResponse`. The builder provided by that method
+allows you to send Strings, or other objects as JSON. For example:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public RouterFunction<ServerResponse> sse() {
+        return route(GET("/sse"), request -> ServerResponse.sse(sseBuilder -> {
+                	// Save the sseBuilder object somewhere..
+                }));
+	}
+
+	// In some other thread, sending a String
+	sseBuilder.send("Hello world");
+
+	// Or an object, which will be transformed into JSON
+    Person person = ...
+	sseBuilder.send(person);
+
+    // Customize the event by using the other methods
+    sseBuilder.id("42")
+            .event("sse event")
+            .data(person);
+
+	// and done at some point
+	sseBuilder.complete();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+    fun sse(): RouterFunction<ServerResponse> = router {
+        GET("/sse") { request -> ServerResponse.sse { sseBuilder ->
+            // Save the sseBuilder object somewhere..
+        }
+    }
+
+	// In some other thread, sending a String
+	sseBuilder.send("Hello world")
+
+	// Or an object, which will be transformed into JSON
+    val person = ...
+	sseBuilder.send(person)
+
+    // Customize the event by using the other methods
+    sseBuilder.id("42")
+            .event("sse event")
+            .data(person)
+
+	// and done at some point
+	sseBuilder.complete()
+----
+
 
 
 [[webmvc-fn-handler-classes]]
@@ -254,7 +337,7 @@ public class PersonHandler {
 		int personId = Integer.parseInt(request.pathVariable("id"));
 		Person person = repository.getPerson(personId);
 		if (person != null) {
-			return ok().contentType(APPLICATION_JSON).body(person))
+			return ok().contentType(APPLICATION_JSON).body(person);
 		}
 		else {
 			return ServerResponse.notFound().build();
@@ -442,6 +525,8 @@ The example shown above also uses two request predicates, as the builder uses
 Router functions are evaluated in order: if the first route does not match, the
 second is evaluated, and so on.
 Therefore, it makes sense to declare more specific routes before general ones.
+This is also important when registering router functions as Spring beans, as will
+be described later.
 Note that this behavior is different from the annotation-based programming model, where the
 "most specific" controller method is picked automatically.
 
@@ -526,7 +611,7 @@ For instance, the last few lines of the example above can be improved in the fol
 RouterFunction<ServerResponse> route = route()
 	.path("/person", builder -> builder // <1>
 		.GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
-		.GET("", accept(APPLICATION_JSON), handler::listPeople)
+		.GET(accept(APPLICATION_JSON), handler::listPeople)
 		.POST("/person", handler::createPerson))
 	.build();
 ----
@@ -540,7 +625,7 @@ RouterFunction<ServerResponse> route = route()
 	val route = router {
 		"/person".nest {
 			GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
-			GET("", accept(APPLICATION_JSON), handler::listPeople)
+			GET(accept(APPLICATION_JSON), handler::listPeople)
 			POST("/person", handler::createPerson)
 		}
 	}
@@ -558,7 +643,7 @@ We can further improve by using the `nest` method together with `accept`:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople))
+				.GET(handler::listPeople))
 			.POST("/person", handler::createPerson))
 		.build();
 ----
@@ -589,8 +674,8 @@ components required to process requests. The MVC Java configuration declares the
 infrastructure components to support functional endpoints:
 
 * `RouterFunctionMapping`: Detects one or more `RouterFunction<?>` beans in the Spring
-configuration, combines them through `RouterFunction.andOther`, and routes requests to the
-resulting composed `RouterFunction`.
+configuration, <<core.adoc#beans-factory-ordered, orders them>>, combines them through
+`RouterFunction.andOther`, and routes requests to the resulting composed `RouterFunction`.
 * `HandlerFunctionAdapter`: Simple adapter that lets `DispatcherHandler` invoke
 a `HandlerFunction` that was mapped to a request.
 
@@ -690,7 +775,7 @@ For instance, consider the following example:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople)
+				.GET(handler::listPeople)
 				.before(request -> ServerRequest.from(request) // <1>
 					.header("X-RequestHeader", "Value")
 					.build()))
@@ -709,7 +794,7 @@ For instance, consider the following example:
 	val route = router {
 		"/person".nest {
 			GET("/{id}", handler::getPerson)
-			GET("", handler::listPeople)
+			GET(handler::listPeople)
 			before { // <1>
 				ServerRequest.from(it)
 						.header("X-RequestHeader", "Value").build()
@@ -744,7 +829,7 @@ The following example shows how to do so:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople))
+				.GET(handler::listPeople))
 			.POST("/person", handler::createPerson))
 		.filter((request, next) -> {
 			if (securityManager.allowAccessTo(request.path())) {
@@ -781,7 +866,7 @@ The following example shows how to do so:
 ----
 
 The preceding example demonstrates that invoking the `next.handle(ServerRequest)` is optional.
-We allow only the handler function to be executed when access is allowed.
+We only let the handler function be run when access is allowed.
 
 Besides using the `filter` method on the router function builder, it is possible to apply a
 filter to an existing router function via `RouterFunction.filter(HandlerFilterFunction)`.

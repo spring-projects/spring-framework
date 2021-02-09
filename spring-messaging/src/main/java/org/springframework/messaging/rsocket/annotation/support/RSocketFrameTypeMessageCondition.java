@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.messaging.rsocket.annotation.support;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +28,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.AbstractMessageCondition;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * A condition to assist with mapping onto handler methods based on the RSocket
@@ -88,7 +88,7 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	private static final Map<String, RSocketFrameTypeMessageCondition> frameTypeConditionCache;
 
 	static {
-		frameTypeConditionCache = new HashMap<>(FrameType.values().length);
+		frameTypeConditionCache = CollectionUtils.newHashMap(FrameType.values().length);
 		for (FrameType type : FrameType.values()) {
 			frameTypeConditionCache.put(type.name(), new RSocketFrameTypeMessageCondition(type));
 		}

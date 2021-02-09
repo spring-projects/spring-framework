@@ -42,8 +42,7 @@ set of Spring XML configuration files to load.
 
 Consider the following `<listener/>` configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
@@ -52,8 +51,7 @@ Consider the following `<listener/>` configuration:
 
 Further consider the following `<context-param/>` configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
@@ -74,8 +72,7 @@ created by the `ContextLoaderListener`.
 
 The following example shows how to get the `WebApplicationContext`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
 ----
@@ -128,8 +125,7 @@ default resolver of the underlying JSF implementation.
 Configuration-wise, you can define `SpringBeanFacesELResolver` in your JSF
 `faces-context.xml` file, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<faces-config>
 		<application>
@@ -152,8 +148,7 @@ it takes a `FacesContext` parameter rather than a `ServletContext` parameter.
 
 The following example shows how to use `FacesContextUtils`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx = FacesContextUtils.getWebApplicationContext(FacesContext.getCurrentInstance());
 ----

@@ -35,11 +35,14 @@ import org.springframework.util.ObjectUtils;
 /**
  * Spring's default implementation of the {@link ResponseErrorHandler} interface.
  *
- * <p>This error handler checks for the status code on the {@link ClientHttpResponse}:
- * Any code with series {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}
- * or {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR} is considered to be
- * an error; this behavior can be changed by overriding the {@link #hasError(HttpStatus)}
- * method. Unknown status codes will be ignored by {@link #hasError(ClientHttpResponse)}.
+ * <p>This error handler checks for the status code on the
+ * {@link ClientHttpResponse}. Any code in the 4xx or 5xx series is considered
+ * to be an error. This behavior can be changed by overriding
+ * {@link #hasError(HttpStatus)}. Unknown status codes will be ignored by
+ * {@link #hasError(ClientHttpResponse)}.
+ *
+ * <p>See {@link #handleError(ClientHttpResponse)} for more details on specific
+ * exception types.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -93,8 +96,18 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 	/**
-	 * Delegates to {@link #handleError(ClientHttpResponse, HttpStatus)} with the
-	 * response status code.
+	 * Handle the error in the given response with the given resolved status code.
+	 * <p>The default implementation throws:
+	 * <ul>
+	 * <li>{@link HttpClientErrorException} if the status code is in the 4xx
+	 * series, or one of its sub-classes such as
+	 * {@link HttpClientErrorException.BadRequest} and others.
+	 * <li>{@link HttpServerErrorException} if the status code is in the 5xx
+	 * series, or one of its sub-classes such as
+	 * {@link HttpServerErrorException.InternalServerError} and others.
+	 * <li>{@link UnknownHttpStatusCodeException} for error status codes not in the
+	 * {@link HttpStatus} enum range.
+	 * </ul>
 	 * @throws UnknownHttpStatusCodeException in case of an unresolvable status code
 	 * @see #handleError(ClientHttpResponse, HttpStatus)
 	 */
@@ -126,7 +139,9 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 			return preface + "[no body]";
 		}
 
-		charset = charset == null ? StandardCharsets.UTF_8 : charset;
+		if (charset == null) {
+			charset = StandardCharsets.UTF_8;
+		}
 		int maxChars = 200;
 
 		if (responseBody.length < maxChars * 2) {
@@ -148,12 +163,13 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 	/**
-	 * Handle the error in the given response with the given resolved status code.
-	 * <p>The default implementation throws an {@link HttpClientErrorException}
-	 * if the status code is {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR
-	 * CLIENT_ERROR}, an {@link HttpServerErrorException} if it is
-	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR SERVER_ERROR},
-	 * or an {@link UnknownHttpStatusCodeException} in other cases.
+	 * Handle the error based on the resolved status code.
+	 *
+	 * <p>The default implementation delegates to
+	 * {@link HttpClientErrorException#create} for errors in the 4xx range, to
+	 * {@link HttpServerErrorException#create} for errors in the 5xx range,
+	 * or otherwise raises {@link UnknownHttpStatusCodeException}.
+	 *
 	 * @since 5.0
 	 * @see HttpClientErrorException#create
 	 * @see HttpServerErrorException#create

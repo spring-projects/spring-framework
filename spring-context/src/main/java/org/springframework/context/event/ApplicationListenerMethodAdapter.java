@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.Ordered;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
@@ -95,6 +96,12 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	private EventExpressionEvaluator evaluator;
 
 
+	/**
+	 * Construct a new ApplicationListenerMethodAdapter.
+	 * @param beanName the name of the bean to invoke the listener method on
+	 * @param targetClass the target class that the method is declared on
+	 * @param method the listener method to invoke
+	 */
 	public ApplicationListenerMethodAdapter(String beanName, Class<?> targetClass, Method method) {
 		this.beanName = beanName;
 		this.method = BridgeMethodResolver.findBridgedMethod(method);
@@ -135,14 +142,14 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	private static int resolveOrder(Method method) {
 		Order ann = AnnotatedElementUtils.findMergedAnnotation(method, Order.class);
-		return (ann != null ? ann.value() : 0);
+		return (ann != null ? ann.value() : Ordered.LOWEST_PRECEDENCE);
 	}
 
 
 	/**
 	 * Initialize this instance.
 	 */
-	void init(ApplicationContext applicationContext, EventExpressionEvaluator evaluator) {
+	void init(ApplicationContext applicationContext, @Nullable EventExpressionEvaluator evaluator) {
 		this.applicationContext = applicationContext;
 		this.evaluator = evaluator;
 	}
@@ -330,6 +337,14 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	protected Object getTargetBean() {
 		Assert.notNull(this.applicationContext, "ApplicationContext must no be null");
 		return this.applicationContext.getBean(this.beanName);
+	}
+
+	/**
+	 * Return the target listener method.
+	 * @since 5.3
+	 */
+	protected Method getTargetMethod() {
+		return this.targetMethod;
 	}
 
 	/**

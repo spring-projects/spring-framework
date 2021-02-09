@@ -136,20 +136,20 @@ public class CustomizableTraceInterceptorTests {
 
 		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
 		given(methodInvocation.getThis()).willReturn(this);
-		given(methodInvocation.getArguments()).willReturn(new Object[]{"$ One \\$", new Long(2)});
+		given(methodInvocation.getArguments()).willReturn(new Object[]{"$ One \\$", 2L});
 		given(methodInvocation.proceed()).willReturn("Hello!");
 
 		Log log = mock(Log.class);
 		given(log.isTraceEnabled()).willReturn(true);
 
 		CustomizableTraceInterceptor interceptor = new StubCustomizableTraceInterceptor(log);
-		interceptor.setEnterMessage(new StringBuffer()
+		interceptor.setEnterMessage(new StringBuilder()
 			.append("Entering the '").append(CustomizableTraceInterceptor.PLACEHOLDER_METHOD_NAME)
 			.append("' method of the [").append(CustomizableTraceInterceptor.PLACEHOLDER_TARGET_CLASS_NAME)
 			.append("] class with the following args (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENTS)
 			.append(") and arg types (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENT_TYPES)
 			.append(").").toString());
-		interceptor.setExitMessage(new StringBuffer()
+		interceptor.setExitMessage(new StringBuilder()
 			.append("Exiting the '").append(CustomizableTraceInterceptor.PLACEHOLDER_METHOD_NAME)
 			.append("' method of the [").append(CustomizableTraceInterceptor.PLACEHOLDER_TARGET_CLASS_SHORT_NAME)
 			.append("] class with the following args (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENTS)

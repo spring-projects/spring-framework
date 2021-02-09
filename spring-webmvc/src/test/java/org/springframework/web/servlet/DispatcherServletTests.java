@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@
 package org.springframework.web.servlet;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.Map;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -35,14 +38,18 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.RequestPath;
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.ServletConfigAwareBean;
 import org.springframework.web.context.ServletContextAwareBean;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -56,7 +63,9 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletConfig;
 import org.springframework.web.testfixture.servlet.MockServletContext;
+import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.WebUtils;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -84,7 +93,7 @@ public class DispatcherServletTests {
 
 
 	@BeforeEach
-	public void setUp() throws ServletException {
+	public void setup() throws ServletException {
 		MockServletConfig complexConfig = new MockServletConfig(getServletContext(), "complex");
 		complexConfig.addInitParameter("publishContext", "false");
 		complexConfig.addInitParameter("class", "notWritable");
@@ -104,6 +113,7 @@ public class DispatcherServletTests {
 	private ServletContext getServletContext() {
 		return servletConfig.getServletContext();
 	}
+
 
 	@Test
 	public void configuredDispatcherServlets() {
@@ -699,6 +709,27 @@ public class DispatcherServletTests {
 				complexDispatcherServlet.service(request, response));
 	}
 
+	@Test // gh-26318
+	public void parsedRequestPathIsRestoredOnForward() throws Exception {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.register(PathPatternParserConfig.class);
+		DispatcherServlet servlet = new DispatcherServlet(context);
+		servlet.init(servletConfig);
+
+		RequestPath previousRequestPath = RequestPath.parse("/", null);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
+		request.setDispatcherType(DispatcherType.FORWARD);
+		request.setAttribute(ServletRequestPathUtils.PATH_ATTRIBUTE, previousRequestPath);
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+
+		assertThat(response.getStatus()).isEqualTo(200);
+		assertThat(response.getContentAsString()).isEqualTo("test-body");
+		assertThat(request.getAttribute(ServletRequestPathUtils.PATH_ATTRIBUTE)).isSameAs(previousRequestPath);
+	}
+
 	@Test
 	public void dispatcherServletRefresh() throws ServletException {
 		MockServletContext servletContext = new MockServletContext("org/springframework/web/context");
@@ -863,6 +894,24 @@ public class DispatcherServletTests {
 		@Override
 		public void initialize(ConfigurableWebApplicationContext applicationContext) {
 			applicationContext.getServletContext().setAttribute("otherInitialized", "true");
+		}
+	}
+
+
+	private static class PathPatternParserConfig {
+
+		@Bean
+		public SimpleUrlHandlerMapping handlerMapping() {
+			Map<String, Object> urlMap = Collections.singletonMap("/test",
+					(HttpRequestHandler) (request, response) -> {
+						response.setStatus(200);
+						response.getWriter().print("test-body");
+					});
+
+			SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+			mapping.setPatternParser(new PathPatternParser());
+			mapping.setUrlMap(urlMap);
+			return mapping;
 		}
 	}
 

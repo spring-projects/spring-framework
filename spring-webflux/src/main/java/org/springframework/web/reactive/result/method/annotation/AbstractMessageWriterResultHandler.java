@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,10 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import kotlin.reflect.KFunction;
-import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -131,9 +128,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		ResolvableType actualElementType;
 		if (adapter != null) {
 			publisher = adapter.toPublisher(body);
-			boolean isUnwrapped = KotlinDetector.isKotlinReflectPresent() &&
-					KotlinDetector.isKotlinType(bodyParameter.getContainingClass()) &&
-					KotlinDelegate.isSuspend(bodyParameter.getMethod()) &&
+			boolean isUnwrapped = KotlinDetector.isSuspendingFunction(bodyParameter.getMethod()) &&
 					!COROUTINES_FLOW_CLASS_NAME.equals(bodyType.toClass().getName());
 			ResolvableType genericType = isUnwrapped ? bodyType : bodyType.getGeneric();
 			elementType = getElementType(adapter, genericType);
@@ -197,22 +192,10 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		List<MediaType> writableMediaTypes = new ArrayList<>();
 		for (HttpMessageWriter<?> converter : getMessageWriters()) {
 			if (converter.canWrite(elementType, null)) {
-				writableMediaTypes.addAll(converter.getWritableMediaTypes());
+				writableMediaTypes.addAll(converter.getWritableMediaTypes(elementType));
 			}
 		}
 		return writableMediaTypes;
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Kotlin at runtime.
-	 */
-	private static class KotlinDelegate {
-
-		static private boolean isSuspend(Method method) {
-			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			return function != null && function.isSuspend();
-		}
 	}
 
 }

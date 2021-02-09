@@ -27,19 +27,12 @@
 // THE POSSIBILITY OF SUCH DAMAGE.
 package org.springframework.asm;
 
-@SuppressWarnings("deprecation")
 final class RecordComponentWriter extends RecordComponentVisitor {
   /** Where the constants used in this RecordComponentWriter must be stored. */
   private final SymbolTable symbolTable;
 
-  // Note: fields are ordered as in the component_info structure, and those related to attributes
-  // are ordered as in Section TODO of the JVMS.
-  // The field accessFlag doesn't exist in the component_info structure but is used to carry
-  // ACC_DEPRECATED which is represented by an attribute in the structure and as an access flag by
-  // ASM.
-
-  /** The access_flags field can only be {@link Opcodes#ACC_DEPRECATED}. */
-  private final int accessFlags;
+  // Note: fields are ordered as in the record_component_info structure, and those related to
+  // attributes are ordered as in Section 4.7 of the JVMS.
 
   /** The name_index field of the Record attribute. */
   private final int nameIndex;
@@ -82,10 +75,9 @@ final class RecordComponentWriter extends RecordComponentVisitor {
    * the {@link Attribute#nextAttribute} field. May be {@literal null}.
    *
    * <p><b>WARNING</b>: this list stores the attributes in the <i>reverse</i> order of their visit.
-   * firstAttribute is actually the last attribute visited in {@link
-   * #visitAttributeExperimental(Attribute)}. The {@link #putRecordComponentInfo(ByteVector)} method
-   * writes the attributes in the order defined by this list, i.e. in the reverse order specified by
-   * the user.
+   * firstAttribute is actually the last attribute visited in {@link #visitAttribute(Attribute)}.
+   * The {@link #putRecordComponentInfo(ByteVector)} method writes the attributes in the order
+   * defined by this list, i.e. in the reverse order specified by the user.
    */
   private Attribute firstAttribute;
 
@@ -93,20 +85,17 @@ final class RecordComponentWriter extends RecordComponentVisitor {
    * Constructs a new {@link RecordComponentWriter}.
    *
    * @param symbolTable where the constants used in this RecordComponentWriter must be stored.
-   * @param accessFlags the record component access flags, only synthetic and/or deprecated.
    * @param name the record component name.
    * @param descriptor the record component descriptor (see {@link Type}).
    * @param signature the record component signature. May be {@literal null}.
    */
   RecordComponentWriter(
       final SymbolTable symbolTable,
-      final int accessFlags,
       final String name,
       final String descriptor,
       final String signature) {
-    super(/* latest api = */ Opcodes.ASM7);
+    super(/* latest api = */ Opcodes.ASM9);
     this.symbolTable = symbolTable;
-    this.accessFlags = accessFlags;
     this.nameIndex = symbolTable.addConstantUtf8(name);
     this.descriptorIndex = symbolTable.addConstantUtf8(descriptor);
     if (signature != null) {
@@ -119,8 +108,7 @@ final class RecordComponentWriter extends RecordComponentVisitor {
   // -----------------------------------------------------------------------------------------------
 
   @Override
-  public AnnotationVisitor visitAnnotationExperimental(
-      final String descriptor, final boolean visible) {
+  public AnnotationVisitor visitAnnotation(final String descriptor, final boolean visible) {
     if (visible) {
       return lastRuntimeVisibleAnnotation =
           AnnotationWriter.create(symbolTable, descriptor, lastRuntimeVisibleAnnotation);
@@ -131,7 +119,7 @@ final class RecordComponentWriter extends RecordComponentVisitor {
   }
 
   @Override
-  public AnnotationVisitor visitTypeAnnotationExperimental(
+  public AnnotationVisitor visitTypeAnnotation(
       final int typeRef, final TypePath typePath, final String descriptor, final boolean visible) {
     if (visible) {
       return lastRuntimeVisibleTypeAnnotation =
@@ -145,14 +133,14 @@ final class RecordComponentWriter extends RecordComponentVisitor {
   }
 
   @Override
-  public void visitAttributeExperimental(final Attribute attribute) {
+  public void visitAttribute(final Attribute attribute) {
     // Store the attributes in the <i>reverse</i> order of their visit by this method.
     attribute.nextAttribute = firstAttribute;
     firstAttribute = attribute;
   }
 
   @Override
-  public void visitEndExperimental() {
+  public void visitEnd() {
     // Nothing to do.
   }
 
@@ -170,9 +158,7 @@ final class RecordComponentWriter extends RecordComponentVisitor {
   int computeRecordComponentInfoSize() {
     // name_index, descriptor_index and attributes_count fields use 6 bytes.
     int size = 6;
-    size +=
-        Attribute.computeAttributesSize(
-            symbolTable, accessFlags & Opcodes.ACC_DEPRECATED, signatureIndex);
+    size += Attribute.computeAttributesSize(symbolTable, 0, signatureIndex);
     size +=
         AnnotationWriter.computeAnnotationsSize(
             lastRuntimeVisibleAnnotation,
@@ -199,9 +185,6 @@ final class RecordComponentWriter extends RecordComponentVisitor {
     if (signatureIndex != 0) {
       ++attributesCount;
     }
-    if ((accessFlags & Opcodes.ACC_DEPRECATED) != 0) {
-      ++attributesCount;
-    }
     if (lastRuntimeVisibleAnnotation != null) {
       ++attributesCount;
     }
@@ -218,7 +201,7 @@ final class RecordComponentWriter extends RecordComponentVisitor {
       attributesCount += firstAttribute.getAttributeCount();
     }
     output.putShort(attributesCount);
-    Attribute.putAttributes(symbolTable, accessFlags, signatureIndex, output);
+    Attribute.putAttributes(symbolTable, 0, signatureIndex, output);
     AnnotationWriter.putAnnotations(
         symbolTable,
         lastRuntimeVisibleAnnotation,

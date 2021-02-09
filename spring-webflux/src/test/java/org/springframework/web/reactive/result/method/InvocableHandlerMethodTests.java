@@ -292,7 +292,8 @@ public class InvocableHandlerMethodTests {
 		}
 
 		private Flux<DataBuffer> getBody(String body) {
-			return Flux.just(new DefaultDataBufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8)));
+			byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+			return Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(bytes));
 		}
 	}
 

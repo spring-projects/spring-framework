@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -361,7 +360,7 @@ public class SpringValidatorAdapterTests {
 		private Set<Child> childSet = new LinkedHashSet<>();
 
 		@Valid
-		private List<Child> childList = new LinkedList<>();
+		private List<Child> childList = new ArrayList<>();
 
 		public Integer getId() {
 			return id;

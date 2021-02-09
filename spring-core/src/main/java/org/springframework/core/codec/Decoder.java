@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,15 @@
 
 package org.springframework.core.codec;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -58,7 +60,7 @@ public interface Decoder<T> {
 	 * this type must have been previously passed to the {@link #canDecode}
 	 * method and it must have returned {@code true}.
 	 * @param mimeType the MIME type associated with the input stream (optional)
-	 * @param hints additional information about how to do encode
+	 * @param hints additional information about how to do decode
 	 * @return the output stream with decoded elements
 	 */
 	Flux<T> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
@@ -71,7 +73,7 @@ public interface Decoder<T> {
 	 * this type must have been previously passed to the {@link #canDecode}
 	 * method and it must have returned {@code true}.
 	 * @param mimeType the MIME type associated with the input stream (optional)
-	 * @param hints additional information about how to do encode
+	 * @param hints additional information about how to do decode
 	 * @return the output stream with the decoded element
 	 */
 	Mono<T> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
@@ -84,7 +86,7 @@ public interface Decoder<T> {
 	 * @param buffer the {@code DataBuffer} to decode
 	 * @param targetType the expected output type
 	 * @param mimeType the MIME type associated with the data
-	 * @param hints additional information about how to do encode
+	 * @param hints additional information about how to do decode
 	 * @return the decoded value, possibly {@code null}
 	 * @since 5.2
 	 */
@@ -92,21 +94,45 @@ public interface Decoder<T> {
 	default T decode(DataBuffer buffer, ResolvableType targetType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
 
-		MonoProcessor<T> processor = MonoProcessor.create();
-		decodeToMono(Mono.just(buffer), targetType, mimeType, hints).subscribeWith(processor);
+		CompletableFuture<T> future = decodeToMono(Mono.just(buffer), targetType, mimeType, hints).toFuture();
+		Assert.state(future.isDone(), "DataBuffer decoding should have completed.");
 
-		Assert.state(processor.isTerminated(), "DataBuffer decoding should have completed.");
-		Throwable ex = processor.getError();
-		if (ex != null) {
-			throw (ex instanceof CodecException ? (CodecException) ex :
-					new DecodingException("Failed to decode: " + ex.getMessage(), ex));
+		Throwable failure;
+		try {
+			return future.get();
 		}
-		return processor.peek();
+		catch (ExecutionException ex) {
+			failure = ex.getCause();
+		}
+		catch (InterruptedException ex) {
+			failure = ex;
+		}
+		throw (failure instanceof CodecException ? (CodecException) failure :
+				new DecodingException("Failed to decode: " + failure.getMessage(), failure));
 	}
 
 	/**
-	 * Return the list of MIME types this decoder supports.
+	 * Return the list of MIME types supported by this Decoder. The list may not
+	 * apply to every possible target element type and calls to this method
+	 * should typically be guarded via {@link #canDecode(ResolvableType, MimeType)
+	 * canDecode(elementType, null)}. The list may also exclude MIME types
+	 * supported only for a specific element type. Alternatively, use
+	 * {@link #getDecodableMimeTypes(ResolvableType)} for a more precise list.
+	 * @return the list of supported MIME types
 	 */
 	List<MimeType> getDecodableMimeTypes();
+
+	/**
+	 * Return the list of MIME types supported by this Decoder for the given type
+	 * of element. This list may differ from {@link #getDecodableMimeTypes()}
+	 * if the Decoder doesn't support the given element type or if it supports
+	 * it only for a subset of MIME types.
+	 * @param targetType the type of element to check for decoding
+	 * @return the list of MIME types supported for the given target type
+	 * @since 5.3.4
+	 */
+	default List<MimeType> getDecodableMimeTypes(ResolvableType targetType) {
+		return (canDecode(targetType, null) ? getDecodableMimeTypes() : Collections.emptyList());
+	}
 
 }

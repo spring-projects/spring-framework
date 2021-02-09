@@ -43,6 +43,7 @@ public final class CallMetaDataProviderFactory {
 			"Apache Derby",
 			"DB2",
 			"Informix Dynamic Server",
+			"MariaDB",
 			"Microsoft SQL Server",
 			"MySQL",
 			"Oracle",
@@ -52,6 +53,7 @@ public final class CallMetaDataProviderFactory {
 
 	/** List of supported database products for function calls. */
 	public static final List<String> supportedDatabaseProductsForFunctions = Arrays.asList(
+			"MariaDB",
 			"Microsoft SQL Server",
 			"MySQL",
 			"Oracle",
@@ -73,7 +75,7 @@ public final class CallMetaDataProviderFactory {
 	 */
 	public static CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
 		try {
-			return (CallMetaDataProvider) JdbcUtils.extractDatabaseMetaData(dataSource, databaseMetaData -> {
+			return JdbcUtils.extractDatabaseMetaData(dataSource, databaseMetaData -> {
 				String databaseProductName = JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
 				boolean accessProcedureColumnMetaData = context.isAccessCallParameterMetaData();
 				if (context.isFunction()) {

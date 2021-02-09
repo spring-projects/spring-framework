@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,7 +153,7 @@ public class VersionResourceResolverTests {
 		assertThat(actual.getFilename()).isEqualTo(expected.getFilename());
 		verify(this.versionStrategy, times(1)).getResourceVersion(expected);
 		assertThat(actual).isInstanceOf(HttpResource.class);
-		assertThat(((HttpResource)actual).getResponseHeaders().getETag()).isEqualTo("\"" + version + "\"");
+		assertThat(((HttpResource)actual).getResponseHeaders().getETag()).isEqualTo("W/\"" + version + "\"");
 	}
 
 	@Test

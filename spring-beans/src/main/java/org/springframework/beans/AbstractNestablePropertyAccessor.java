@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -422,9 +422,12 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 				}
 				return;
 			}
-			else {
-				throw createNotWritablePropertyException(tokens.canonicalName);
+			if (this.suppressNotWritablePropertyException) {
+				// Optimization for common ignoreUnknown=true scenario since the
+				// exception would be caught and swallowed higher up anyway...
+				return;
 			}
+			throw createNotWritablePropertyException(tokens.canonicalName);
 		}
 
 		Object oldValue = null;
@@ -806,7 +809,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @param propertyPath property path, which may be nested
 	 * @return a property accessor for the target bean
 	 */
-	@SuppressWarnings("unchecked")  // avoid nested generic
 	protected AbstractNestablePropertyAccessor getPropertyAccessorForPropertyPath(String propertyPath) {
 		int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(propertyPath);
 		// Handle nested properties recursively.

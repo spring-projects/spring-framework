@@ -274,8 +274,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 
 		public void expectMessages(MessageExchange... messageExchanges) throws InterruptedException {
-			List<MessageExchange> expectedMessages =
-					new ArrayList<>(Arrays.<MessageExchange>asList(messageExchanges));
+			List<MessageExchange> expectedMessages = new ArrayList<>(Arrays.asList(messageExchanges));
 			while (expectedMessages.size() > 0) {
 				Message<?> message = this.queue.poll(10000, TimeUnit.MILLISECONDS);
 				assertThat(message).as("Timed out waiting for messages, expected [" + expectedMessages + "]").isNotNull();
@@ -451,7 +450,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		@Override
 		public final boolean match(Message<?> message) {
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-			if (!this.command.equals(headers.getCommand()) || (this.sessionId != headers.getSessionId())) {
+			if (!this.command.equals(headers.getCommand()) || !this.sessionId.equals(headers.getSessionId())) {
 				return false;
 			}
 			return matchInternal(headers, message.getPayload());

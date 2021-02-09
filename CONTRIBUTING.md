@@ -25,7 +25,7 @@ Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
 #### Discuss
 
 If you have a question, check Stack Overflow using
-[this list of tags](https://spring.io/questions), organized by Spring project.
+[this list of tags](https://stackoverflow.com/questions/tagged/spring+or+spring-mvc+or+spring-aop+or+spring-jdbc+or+spring-transactions+or+spring-annotations+or+spring-jms+or+spring-el+or+spring-test+or+spring+or+spring-remoting+or+spring-orm+or+spring-jmx+or+spring-cache+or+spring-webflux?tab=Newest).
 Find an existing discussion, or start a new one if necessary.
 
 If you believe there is an issue, search through

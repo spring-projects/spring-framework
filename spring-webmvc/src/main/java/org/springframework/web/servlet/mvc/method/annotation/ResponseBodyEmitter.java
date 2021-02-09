@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,18 +72,21 @@ public class ResponseBodyEmitter {
 	/** Store send data before handler is initialized. */
 	private final Set<DataWithMediaType> earlySendAttempts = new LinkedHashSet<>(8);
 
-	/** Store complete invocation before handler is initialized. */
+	/** Store successful completion before the handler is initialized. */
 	private boolean complete;
 
-	/** Store completeWithError invocation before handler is initialized. */
+	/** Store an error before the handler is initialized. */
 	@Nullable
 	private Throwable failure;
 
 	/**
-	 * After an IOException on send, the servlet container will provide an onError
-	 * callback that we'll handle as completeWithError (on container thread).
-	 * We use this flag to ignore competing attempts to completeWithError by
-	 * the application via try-catch. */
+	 * After an I/O error, we don't call {@link #completeWithError} directly but
+	 * wait for the Servlet container to call us via {@code AsyncListener#onError}
+	 * on a container thread at which point we call completeWithError.
+	 * This flag is used to ignore further calls to complete or completeWithError
+	 * that may come for example from an application try-catch block on the
+	 * thread of the I/O error.
+	 */
 	private boolean sendFailed;
 
 	private final DefaultCallback timeoutCallback = new DefaultCallback();
@@ -124,10 +127,14 @@ public class ResponseBodyEmitter {
 	synchronized void initialize(Handler handler) throws IOException {
 		this.handler = handler;
 
-		for (DataWithMediaType sendAttempt : this.earlySendAttempts) {
-			sendInternal(sendAttempt.getData(), sendAttempt.getMediaType());
+		try {
+			for (DataWithMediaType sendAttempt : this.earlySendAttempts) {
+				sendInternal(sendAttempt.getData(), sendAttempt.getMediaType());
+			}
 		}
-		this.earlySendAttempts.clear();
+		finally {
+			this.earlySendAttempts.clear();
+		}
 
 		if (this.complete) {
 			if (this.failure != null) {
@@ -142,6 +149,13 @@ public class ResponseBodyEmitter {
 			this.handler.onError(this.errorCallback);
 			this.handler.onCompletion(this.completionCallback);
 		}
+	}
+
+	synchronized void initializeWithError(Throwable ex) {
+		this.complete = true;
+		this.failure = ex;
+		this.earlySendAttempts.clear();
+		this.errorCallback.accept(ex);
 	}
 
 	/**
@@ -179,7 +193,9 @@ public class ResponseBodyEmitter {
 	 * @throws java.lang.IllegalStateException wraps any other errors
 	 */
 	public synchronized void send(Object object, @Nullable MediaType mediaType) throws IOException {
-		Assert.state(!this.complete, "ResponseBodyEmitter is already set complete");
+		Assert.state(!this.complete,
+				"ResponseBodyEmitter has already completed" +
+						(this.failure != null ? " with error: " + this.failure : ""));
 		sendInternal(object, mediaType);
 	}
 
@@ -280,7 +296,10 @@ public class ResponseBodyEmitter {
 
 
 	/**
-	 * Handle sent objects and complete request processing.
+	 * Contract to handle the sending of event data, the completion of event
+	 * sending, and the registration of callbacks to be invoked in case of
+	 * timeout, error, and completion for any reason (including from the
+	 * container side).
 	 */
 	interface Handler {
 

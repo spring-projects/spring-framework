@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,15 @@
 
 package org.springframework.transaction.interceptor;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Spring's common transaction attribute implementation.
@@ -26,16 +32,22 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Mark Paluch
  * @since 16.03.2003
  */
 @SuppressWarnings("serial")
 public class DefaultTransactionAttribute extends DefaultTransactionDefinition implements TransactionAttribute {
 
 	@Nullable
-	private String qualifier;
+	private String descriptor;
 
 	@Nullable
-	private String descriptor;
+	private String timeoutString;
+
+	@Nullable
+	private String qualifier;
+
+	private Collection<String> labels = Collections.emptyList();
 
 
 	/**
@@ -78,26 +90,6 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 
 
 	/**
-	 * Associate a qualifier value with this transaction attribute.
-	 * <p>This may be used for choosing a corresponding transaction manager
-	 * to process this specific transaction.
-	 * @since 3.0
-	 */
-	public void setQualifier(@Nullable String qualifier) {
-		this.qualifier = qualifier;
-	}
-
-	/**
-	 * Return a qualifier value associated with this transaction attribute.
-	 * @since 3.0
-	 */
-	@Override
-	@Nullable
-	public String getQualifier() {
-		return this.qualifier;
-	}
-
-	/**
 	 * Set a descriptor for this transaction attribute,
 	 * e.g. indicating where the attribute is applying.
 	 * @since 4.3.4
@@ -114,6 +106,66 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	@Nullable
 	public String getDescriptor() {
 		return this.descriptor;
+	}
+
+	/**
+	 * Set the timeout to apply, if any,
+	 * as a String value that resolves to a number of seconds.
+	 * @since 5.3
+	 * @see #setTimeout
+	 * @see #resolveAttributeStrings
+	 */
+	public void setTimeoutString(@Nullable String timeoutString) {
+		this.timeoutString = timeoutString;
+	}
+
+	/**
+	 * Return the timeout to apply, if any,
+	 * as a String value that resolves to a number of seconds.
+	 * @since 5.3
+	 * @see #getTimeout
+	 * @see #resolveAttributeStrings
+	 */
+	@Nullable
+	public String getTimeoutString() {
+		return this.timeoutString;
+	}
+
+	/**
+	 * Associate a qualifier value with this transaction attribute.
+	 * <p>This may be used for choosing a corresponding transaction manager
+	 * to process this specific transaction.
+	 * @since 3.0
+	 * @see #resolveAttributeStrings
+	 */
+	public void setQualifier(@Nullable String qualifier) {
+		this.qualifier = qualifier;
+	}
+
+	/**
+	 * Return a qualifier value associated with this transaction attribute.
+	 * @since 3.0
+	 */
+	@Override
+	@Nullable
+	public String getQualifier() {
+		return this.qualifier;
+	}
+
+	/**
+	 * Associate one or more labels with this transaction attribute.
+	 * <p>This may be used for applying specific transactional behavior
+	 * or follow a purely descriptive nature.
+	 * @since 5.3
+	 * @see #resolveAttributeStrings
+	 */
+	public void setLabels(Collection<String> labels) {
+		this.labels = labels;
+	}
+
+	@Override
+	public Collection<String> getLabels() {
+		return this.labels;
 	}
 
 	/**
@@ -137,6 +189,42 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 
 
 	/**
+	 * Resolve attribute values that are defined as resolvable Strings:
+	 * {@link #setTimeoutString}, {@link #setQualifier}, {@link #setLabels}.
+	 * This is typically used for resolving "${...}" placeholders.
+	 * @param resolver the embedded value resolver to apply, if any
+	 * @since 5.3
+	 */
+	public void resolveAttributeStrings(@Nullable StringValueResolver resolver) {
+		String timeoutString = this.timeoutString;
+		if (StringUtils.hasText(timeoutString)) {
+			if (resolver != null) {
+				timeoutString = resolver.resolveStringValue(timeoutString);
+			}
+			if (StringUtils.hasLength(timeoutString)) {
+				try {
+					setTimeout(Integer.parseInt(timeoutString));
+				}
+				catch (RuntimeException ex) {
+					throw new IllegalArgumentException(
+							"Invalid timeoutString value \"" + timeoutString + "\" - cannot parse into int");
+				}
+			}
+		}
+
+		if (resolver != null) {
+			if (this.qualifier != null) {
+				this.qualifier = resolver.resolveStringValue(this.qualifier);
+			}
+			Set<String> resolvedLabels = new LinkedHashSet<>(this.labels.size());
+			for (String label : this.labels) {
+				resolvedLabels.add(resolver.resolveStringValue(label));
+			}
+			this.labels = resolvedLabels;
+		}
+	}
+
+	/**
 	 * Return an identifying description for this transaction attribute.
 	 * <p>Available to subclasses, for inclusion in their {@code toString()} result.
 	 */
@@ -144,6 +232,9 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 		StringBuilder result = getDefinitionDescription();
 		if (StringUtils.hasText(this.qualifier)) {
 			result.append("; '").append(this.qualifier).append("'");
+		}
+		if (!this.labels.isEmpty()) {
+			result.append("; ").append(this.labels);
 		}
 		return result;
 	}

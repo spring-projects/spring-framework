@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,12 +140,12 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 	@Override
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationName) {
 		Set<MethodMetadata> annotatedMethods = null;
-		for (int i = 0; i < this.annotatedMethods.length; i++) {
-			if (this.annotatedMethods[i].isAnnotated(annotationName)) {
+		for (MethodMetadata annotatedMethod : this.annotatedMethods) {
+			if (annotatedMethod.isAnnotated(annotationName)) {
 				if (annotatedMethods == null) {
 					annotatedMethods = new LinkedHashSet<>(4);
 				}
-				annotatedMethods.add(this.annotatedMethods[i]);
+				annotatedMethods.add(annotatedMethod);
 			}
 		}
 		return annotatedMethods != null ? annotatedMethods : Collections.emptySet();

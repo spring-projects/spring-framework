@@ -70,8 +70,8 @@ public class TransactionalOperatorTests {
 				.thenAwait()
 				.thenCancel()
 				.verify();
-		assertThat(tm.commit).isTrue();
-		assertThat(tm.rollback).isFalse();
+		assertThat(tm.commit).isFalse();
+		assertThat(tm.rollback).isTrue();
 		assertThat(cancelled).isTrue();
 	}
 
@@ -84,8 +84,8 @@ public class TransactionalOperatorTests {
 				.thenAwait()
 				.thenCancel()
 				.verify();
-		assertThat(tm.commit).isTrue();
-		assertThat(tm.rollback).isFalse();
+		assertThat(tm.commit).isFalse();
+		assertThat(tm.rollback).isTrue();
 		assertThat(cancelled).isTrue();
 	}
 

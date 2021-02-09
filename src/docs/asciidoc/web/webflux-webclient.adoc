@@ -1,16 +1,20 @@
 [[webflux-client]]
 = WebClient
 
-Spring WebFlux includes a reactive, non-blocking `WebClient` for HTTP requests. The client
-has a functional, fluent API with reactive types for declarative composition, see
-<<web-reactive.adoc#webflux-reactive-libraries>>. WebFlux client and server rely on the
-same non-blocking <<web-reactive.adoc#webflux-codecs, codecs>> to encode and decode request
-and response content.
+Spring WebFlux includes a client to perform HTTP requests with. `WebClient` has a
+functional, fluent API based on Reactor, see <<web-reactive.adoc#webflux-reactive-libraries>>,
+which enables declarative composition of asynchronous logic without the need to deal with
+threads or concurrency. It is fully non-blocking, it supports streaming, and relies on
+the same <<web-reactive.adoc#webflux-codecs, codecs>> that are also used to encode and
+decode request and response content on the server side.
 
-Internally `WebClient` delegates to an HTTP client library. By default, it uses
-https://github.com/reactor/reactor-netty[Reactor Netty], there is built-in support for
-the Jetty https://github.com/jetty-project/jetty-reactive-httpclient[reactive HttpClient],
-and others can be plugged in through a `ClientHttpConnector`.
+`WebClient` needs an HTTP client library to perform requests with. There is built-in
+support for the following:
+
+* https://github.com/reactor/reactor-netty[Reactor Netty]
+* https://github.com/jetty-project/jetty-reactive-httpclient[Jetty Reactive HttpClient]
+* https://hc.apache.org/index.html[Apache HttpComponents]
+* Others can be plugged via `ClientHttpConnector`.
 
 
 
@@ -23,12 +27,10 @@ The simplest way to create a `WebClient` is through one of the static factory me
 * `WebClient.create()`
 * `WebClient.create(String baseUrl)`
 
-The above methods use the Reactor Netty `HttpClient` with default settings and expect
-`io.projectreactor.netty:reactor-netty` to be on the classpath.
-
 You can also use `WebClient.builder()` with further options:
 
 * `uriBuilderFactory`: Customized `UriBuilderFactory` to use as a base URL.
+* `defaultUriVariables`: default values to use when expanding URI templates.
 * `defaultHeader`: Headers for every request.
 * `defaultCookie`: Cookies for every request.
 * `defaultRequest`: `Consumer` to customize every request.
@@ -36,33 +38,25 @@ You can also use `WebClient.builder()` with further options:
 * `exchangeStrategies`: HTTP message reader/writer customizations.
 * `clientConnector`: HTTP client library settings.
 
-The following example configures <<web-reactive.adoc#webflux-codecs, HTTP codecs>>:
+For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	WebClient client = WebClient.builder()
-			.exchangeStrategies(builder -> {
-					return builder.codecs(codecConfigurer -> {
-						//...
-					});
-			})
+			.codecs(configurer -> ... )
 			.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val webClient = WebClient.builder()
-			.exchangeStrategies { strategies ->
-				strategies.codecs {
-					//...
-				}
-			}
+			.codecs { configurer -> ... }
 			.build()
 ----
 
-Once built, a `WebClient` instance is immutable. However, you can clone it and build a
-modified copy without affecting the original instance, as the following example shows:
+Once built, a `WebClient` is immutable. However, you can clone it and build a
+modified copy as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -94,37 +88,29 @@ modified copy without affecting the original instance, as the following example 
 [[webflux-client-builder-maxinmemorysize]]
 === MaxInMemorySize
 
-Spring WebFlux configures <<web-reactive.adoc#webflux-codecs-limits,limits>> for buffering
-data in-memory in codec to avoid application memory issues. By the default this is
-configured to 256KB and if that's not enough for your use case, you'll see the following:
+Codecs have <<web-reactive.adoc#webflux-codecs-limits,limits>> for buffering data in
+memory to avoid application memory issues. By the default those are set to 256KB.
+If that's not enough you'll get the following error:
 
 ----
 org.springframework.core.io.buffer.DataBufferLimitException: Exceeded limit on max bytes to buffer
 ----
 
-You can configure this limit on all default codecs with the following code sample:
+To change the limit for default codecs, use the following:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	WebClient webClient = WebClient.builder()
-			.exchangeStrategies(builder ->
-				builder.codecs(codecs ->
-					codecs.defaultCodecs().maxInMemorySize(2 * 1024 * 1024)
-				)
-			)
+			.codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024))
 			.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val webClient = WebClient.builder()
-		.exchangeStrategies { builder ->
-				builder.codecs {
-					it.defaultCodecs().maxInMemorySize(2 * 1024 * 1024)
-				}
-		}
-		.build()
+			.codecs { configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024) }
+			.build()
 ----
 
 
@@ -132,7 +118,7 @@ You can configure this limit on all default codecs with the following code sampl
 [[webflux-client-builder-reactor]]
 === Reactor Netty
 
-To customize Reactor Netty settings, simple provide a pre-configured `HttpClient`:
+To customize Reactor Netty settings, provide a pre-configured `HttpClient`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -251,8 +237,11 @@ To configure a connection timeout:
 	import io.netty.channel.ChannelOption;
 
 	HttpClient httpClient = HttpClient.create()
-			.tcpConfiguration(client ->
-					client.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000));
+			.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
+
+	WebClient webClient = WebClient.builder()
+			.clientConnector(new ReactorClientHttpConnector(httpClient))
+			.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -260,10 +249,14 @@ To configure a connection timeout:
 	import io.netty.channel.ChannelOption
 
 	val httpClient = HttpClient.create()
-			.tcpConfiguration { it.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)}
+			.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
+
+	val webClient = WebClient.builder()
+			.clientConnector(new ReactorClientHttpConnector(httpClient))
+			.build();
 ----
 
-To configure a read and/or write timeout values:
+To configure a read or write timeout:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -272,10 +265,12 @@ To configure a read and/or write timeout values:
 	import io.netty.handler.timeout.WriteTimeoutHandler;
 
 	HttpClient httpClient = HttpClient.create()
-			.tcpConfiguration(client ->
-					client.doOnConnected(conn -> conn
-							.addHandlerLast(new ReadTimeoutHandler(10))
-							.addHandlerLast(new WriteTimeoutHandler(10))));
+			.doOnConnected(conn -> conn
+					.addHandlerLast(new ReadTimeoutHandler(10))
+					.addHandlerLast(new WriteTimeoutHandler(10)));
+
+	// Create WebClient...
+
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -283,12 +278,59 @@ To configure a read and/or write timeout values:
 	import io.netty.handler.timeout.ReadTimeoutHandler
 	import io.netty.handler.timeout.WriteTimeoutHandler
 
-	val httpClient = HttpClient.create().tcpConfiguration {
-		it.doOnConnected { conn -> conn
-				.addHandlerLast(ReadTimeoutHandler(10))
-				.addHandlerLast(WriteTimeoutHandler(10))
-		}
-	}
+	val httpClient = HttpClient.create()
+			.doOnConnected { conn -> conn
+					.addHandlerLast(new ReadTimeoutHandler(10))
+					.addHandlerLast(new WriteTimeoutHandler(10))
+			}
+
+	// Create WebClient...
+----
+
+To configure a response timeout for all requests:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	HttpClient httpClient = HttpClient.create()
+			.responseTimeout(Duration.ofSeconds(2));
+
+	// Create WebClient...
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val httpClient = HttpClient.create()
+			.responseTimeout(Duration.ofSeconds(2));
+
+	// Create WebClient...
+----
+
+To configure a response timeout for a specific request:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	WebClient.create().get()
+			.uri("https://example.org/path")
+			.httpRequest(httpRequest -> {
+				HttpClientRequest reactorRequest = httpRequest.getNativeRequest();
+				reactorRequest.responseTimeout(Duration.ofSeconds(2));
+			})
+			.retrieve()
+			.bodyToMono(String.class);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	WebClient.create().get()
+			.uri("https://example.org/path")
+			.httpRequest { httpRequest: ClientHttpRequest ->
+				val reactorRequest = httpRequest.getNativeRequest<HttpClientRequest>()
+				reactorRequest.responseTimeout(Duration.ofSeconds(2))
+			}
+			.retrieve()
+			.bodyToMono(String::class.java)
 ----
 
 
@@ -303,18 +345,20 @@ The following example shows how to customize Jetty `HttpClient` settings:
 ----
 	HttpClient httpClient = new HttpClient();
 	httpClient.setCookieStore(...);
-	ClientHttpConnector connector = new JettyClientHttpConnector(httpClient);
 
-	WebClient webClient = WebClient.builder().clientConnector(connector).build();
+	WebClient webClient = WebClient.builder()
+			.clientConnector(new JettyClientHttpConnector(httpClient))
+			.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val httpClient = HttpClient()
 	httpClient.cookieStore = ...
-	val connector = JettyClientHttpConnector(httpClient)
 
-	val webClient = WebClient.builder().clientConnector(connector).build();
+	val webClient = WebClient.builder()
+			.clientConnector(new JettyClientHttpConnector(httpClient))
+			.build();
 ----
 
 By default, `HttpClient` creates its own resources (`Executor`, `ByteBufferPool`, `Scheduler`),
@@ -369,11 +413,60 @@ shows:
 <2> Plug the connector into the `WebClient.Builder`.
 
 
+
+[[webflux-client-builder-http-components]]
+=== HttpComponents
+
+The following example shows how to customize Apache HttpComponents `HttpClient` settings:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	HttpAsyncClientBuilder clientBuilder = HttpAsyncClients.custom();
+	clientBuilder.setDefaultRequestConfig(...);
+	CloseableHttpAsyncClient client = clientBuilder.build();
+	ClientHttpConnector connector = new HttpComponentsClientHttpConnector(client);
+
+	WebClient webClient = WebClient.builder().clientConnector(connector).build();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val client = HttpAsyncClients.custom().apply {
+		setDefaultRequestConfig(...)
+	}.build()
+	val connector = HttpComponentsClientHttpConnector(client)
+	val webClient = WebClient.builder().clientConnector(connector).build()
+----
+
+
 [[webflux-client-retrieve]]
 == `retrieve()`
 
-The `retrieve()` method is the easiest way to get a response body and decode it.
-The following example shows how to do so:
+The `retrieve()` method can be used to declare how to extract the response. For example:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	WebClient client = WebClient.create("https://example.org");
+
+	Mono<ResponseEntity<Person>> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.toEntity(Person.class);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val client = WebClient.create("https://example.org")
+
+	val result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.toEntity<Person>().awaitSingle()
+----
+
+Or to get only the body:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -396,7 +489,7 @@ The following example shows how to do so:
 			.awaitBody<Person>()
 ----
 
-You can also get a stream of objects decoded from the response, as the following example shows:
+To get a stream of decoded objects:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -415,11 +508,9 @@ You can also get a stream of objects decoded from the response, as the following
 			.bodyToFlow<Quote>()
 ----
 
-By default, responses with 4xx or 5xx status codes result in an
-`WebClientResponseException` or one of its HTTP status specific sub-classes, such as
-`WebClientResponseException.BadRequest`, `WebClientResponseException.NotFound`, and others.
-You can also use the `onStatus` method to customize the resulting exception,
-as the following example shows:
+By default, 4xx or 5xx responses result in an `WebClientResponseException`, including
+sub-classes for specific HTTP status codes. To customize the handling of error
+responses, use `onStatus` handlers as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -442,67 +533,60 @@ as the following example shows:
 			.awaitBody<Person>()
 ----
 
-When `onStatus` is used, if the response is expected to have content, then the `onStatus`
-callback should consume it. If not, the content will be automatically drained to ensure
-resources are released.
-
 
 
 
 [[webflux-client-exchange]]
-== `exchange()`
+== Exchange
 
-The `exchange()` method provides more control than the `retrieve` method. The following example is equivalent
-to `retrieve()` but also provides access to the `ClientResponse`:
-
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
-----
-	Mono<Person> result = client.get()
-			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
-			.exchange()
-			.flatMap(response -> response.bodyToMono(Person.class));
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	val result = client.get()
-			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
-			.awaitExchange()
-			.awaitBody<Person>()
-----
-
-At this level, you can also create a full `ResponseEntity`:
+The `exchangeToMono()` and `exchangeToFlux()` methods (or `awaitExchange { }` and `exchangeToFlow { }` in Kotlin)
+are useful for more advanced cases that require more control, such as to decode the response differently
+depending on the response status:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	Mono<ResponseEntity<Person>> result = client.get()
-			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
-			.exchange()
-			.flatMap(response -> response.toEntity(Person.class));
+	Mono<Object> entityMono = client.get()
+			.uri("/persons/1")
+			.accept(MediaType.APPLICATION_JSON)
+			.exchangeToMono(response -> {
+				if (response.statusCode().equals(HttpStatus.OK)) {
+					return response.bodyToMono(Person.class);
+				}
+				else if (response.statusCode().is4xxClientError()) {
+					// Suppress error status code
+					return response.bodyToMono(ErrorContainer.class);
+				}
+				else {
+					// Turn to error
+					return response.createException().flatMap(Mono::error);
+				}
+			});
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	val result = client.get()
-			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
-			.awaitExchange()
-			.toEntity<Person>()
+val entity = client.get()
+  .uri("/persons/1")
+  .accept(MediaType.APPLICATION_JSON)
+  .awaitExchange {
+		if (response.statusCode() == HttpStatus.OK) {
+			 return response.awaitBody<Person>()
+		}
+		else if (response.statusCode().is4xxClientError) {
+			 return response.awaitBody<ErrorContainer>()
+		}
+		else {
+			 throw response.createExceptionAndAwait()
+		}
+  }
 ----
 
-Note that (unlike `retrieve()`), with `exchange()`, there are no automatic error signals for
-4xx and 5xx responses. You have to check the status code and decide how to proceed.
+When using the above, after the returned `Mono` or `Flux` completes, the response body
+is checked and if not consumed it is released to prevent memory and connection leaks.
+Therefore the response cannot be decoded further downstream. It is up to the provided
+function to declare how to decode the response if needed.
 
-[CAUTION]
-====
-Unlike `retrieve()`, when using `exchange()`, it is the responsibility of the application
-to consume any response content regardless of the scenario (success, error, unexpected
-data, etc). Not doing so can cause a memory leak. The Javadoc for `ClientResponse` lists
-all the available options for consuming the body. Generally prefer using `retrieve()`
-unless you have a good reason for using `exchange()` which does allow to check the
-response status and headers before deciding how to or if to consume the response.
-====
 
 
 
@@ -749,7 +833,7 @@ inline-style, through the built-in `BodyInserters`, as the following example sho
 
 
 [[webflux-client-filter]]
-== Client Filters
+== Filters
 
 You can register a client filter (`ExchangeFilterFunction`) through the `WebClient.Builder`
 in order to intercept and modify requests, as the following example shows:
@@ -805,9 +889,36 @@ a filter for basic authentication through a static factory method:
 			.build()
 ----
 
-Filters apply globally to every request. To change a filter's behavior for a specific
-request, you can add request attributes to the `ClientRequest` that can then be accessed
-by all filters in the chain, as the following example shows:
+You can create a new `WebClient` instance by using another as a starting point. This allows
+insert or removing filters without affecting the original `WebClient`. Below is an example
+that inserts a basic authentication filter at index 0:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
+
+	WebClient client = webClient.mutate()
+			.filters(filterList -> {
+				filterList.add(0, basicAuthentication("user", "password"));
+			})
+			.build();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val client = webClient.mutate()
+			.filters { it.add(0, basicAuthentication("user", "password")) }
+			.build()
+----
+
+
+[[webflux-client-attributes]]
+== Attributes
+
+You can add attributes to a request. This is convenient if you want to pass information
+through the filter chain and influence the behavior of filters for a given request.
+For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -830,10 +941,11 @@ by all filters in the chain, as the following example shows:
 .Kotlin
 ----
 	val client = WebClient.builder()
-				.filter { request, _ ->
-			val usr = request.attributes()["myAttribute"];
-			// ...
-		}.build()
+			.filter { request, _ ->
+				val usr = request.attributes()["myAttribute"];
+				// ...
+			}
+			.build()
 
 		client.get().uri("https://example.org/")
 				.attribute("myAttribute", "...")
@@ -841,27 +953,41 @@ by all filters in the chain, as the following example shows:
 				.awaitBody<Unit>()
 ----
 
-You can also replicate an existing `WebClient`, insert new filters, or remove already
-registered filters. The following example, inserts a basic authentication filter at
-index 0:
+Note that you can configure a `defaultRequest` callback globally at the
+`WebClient.Builder` level which lets you insert attributes into all requests,
+which could be used for example in a Spring MVC application to populate
+request attributes based on `ThreadLocal` data.
+
+
+[[webflux-client-context]]
+== Context
+
+<<webflux-client-attributes>> provide a convenient way to pass information to the filter
+chain but they only influence the current request. If you want to pass information that
+propagates to additional requests that are nested, e.g. via `flatMap`, or executed after,
+e.g. via `concatMap`, then you'll need to use the Reactor `Context`.
+
+The Reactor `Context` needs to be populated at the end of a reactive chain in order to
+apply to all operations. For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
-
-	WebClient client = webClient.mutate()
-			.filters(filterList -> {
-				filterList.add(0, basicAuthentication("user", "password"));
-			})
+	WebClient client = WebClient.builder()
+			.filter((request, next) ->
+					Mono.deferContextual(contextView -> {
+						String value = contextView.get("foo");
+						// ...
+					}))
 			.build();
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	val client = webClient.mutate()
-			.filters { it.add(0, basicAuthentication("user", "password")) }
-			.build()
+
+	client.get().uri("https://example.org/")
+			.retrieve()
+			.bodyToMono(String.class)
+			.flatMap(body -> {
+					// perform nested request (context propagates automatically)...
+			})
+			.contextWrite(context -> context.put("foo", ...));
 ----
 
 

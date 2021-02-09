@@ -16,7 +16,7 @@ the same <<web-reactive.adoc#webflux-reactive-spring-web>> foundation.
 
 In WebFlux.fn, an HTTP request is handled with a `HandlerFunction`: a function that takes
 `ServerRequest` and returns a delayed `ServerResponse` (i.e. `Mono<ServerResponse>`).
-Both the request as the response object have immutable contracts that offer JDK 8-friendly
+Both the request and the response object have immutable contracts that offer JDK 8-friendly
 access to the HTTP request and response.
 `HandlerFunction` is the equivalent of the body of a `@RequestMapping` method in the
 annotation-based programming model.
@@ -125,7 +125,7 @@ For more on that, see <<web-reactive.adoc#webflux-reactive-libraries, Reactive L
 
 
 [[webflux-fn-request]]
-=== `ServerRequest`
+=== ServerRequest
 
 `ServerRequest` provides access to the HTTP method, URI, headers, and query parameters,
 while access to the body is provided through the `body` methods.
@@ -172,7 +172,7 @@ Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class));
 [source,kotlin,role="secondary"]
 .Kotlin
 ----
-	val string = request.body(BodyExtractors.toMono(String::class.java)).awaitFirst()
+	val string = request.body(BodyExtractors.toMono(String::class.java)).awaitSingle()
 	val people = request.body(BodyExtractors.toFlux(Person::class.java)).asFlow()
 ----
 
@@ -218,7 +218,7 @@ val parts = request.body(BodyExtractors.toParts()).asFlow()
 
 
 [[webflux-fn-response]]
-=== `ServerResponse`
+=== ServerResponse
 
 `ServerResponse` provides access to the HTTP response and, since it is immutable, you can use
 a `build` method to create it. You can use the builder to set the response status, to add response
@@ -505,6 +505,8 @@ The example shown above also uses two request predicates, as the builder uses
 Router functions are evaluated in order: if the first route does not match, the
 second is evaluated, and so on.
 Therefore, it makes sense to declare more specific routes before general ones.
+This is also important when registering router functions as Spring beans, as will
+be described later.
 Note that this behavior is different from the annotation-based programming model, where the
 "most specific" controller method is picked automatically.
 
@@ -573,14 +575,13 @@ RouterFunction<ServerResponse> route = route()
 
 === Nested Routes
 
-It is common for a group of router functions to have a shared predicate, for instance a shared
-path.
-In the example above, the shared predicate would be a path predicate that matches `/person`,
-used by three of the routes.
-When using annotations, you would remove this duplication by using a type-level `@RequestMapping`
- annotation that maps to `/person`.
-In WebFlux.fn, path predicates can be shared through the `path` method on the router function builder.
-For instance, the last few lines of the example above can be improved in the following way by using nested routes:
+It is common for a group of router functions to have a shared predicate, for instance a
+shared path. In the example above, the shared predicate would be a path predicate that
+matches `/person`, used by three of the routes. When using annotations, you would remove
+this duplication by using a type-level `@RequestMapping` annotation that maps to
+`/person`. In WebFlux.fn, path predicates can be shared through the `path` method on the
+router function builder. For instance, the last few lines of the example above can be
+improved in the following way by using nested routes:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -588,7 +589,7 @@ For instance, the last few lines of the example above can be improved in the fol
 RouterFunction<ServerResponse> route = route()
 	.path("/person", builder -> builder // <1>
 		.GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
-		.GET("", accept(APPLICATION_JSON), handler::listPeople)
+		.GET(accept(APPLICATION_JSON), handler::listPeople)
 		.POST("/person", handler::createPerson))
 	.build();
 ----
@@ -600,7 +601,7 @@ RouterFunction<ServerResponse> route = route()
 	val route = coRouter {
 		"/person".nest {
 			GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
-			GET("", accept(APPLICATION_JSON), handler::listPeople)
+			GET(accept(APPLICATION_JSON), handler::listPeople)
 			POST("/person", handler::createPerson)
 		}
 	}
@@ -618,7 +619,7 @@ We can further improve by using the `nest` method together with `accept`:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople))
+				.GET(handler::listPeople))
 			.POST("/person", handler::createPerson))
 		.build();
 ----
@@ -629,7 +630,7 @@ We can further improve by using the `nest` method together with `accept`:
 		"/person".nest {
 			accept(APPLICATION_JSON).nest {
 				GET("/{id}", handler::getPerson)
-				GET("", handler::listPeople)
+				GET(handler::listPeople)
 				POST("/person", handler::createPerson)
 			}
 		}
@@ -657,8 +658,8 @@ components required to process requests. The WebFlux Java configuration declares
 infrastructure components to support functional endpoints:
 
 * `RouterFunctionMapping`: Detects one or more `RouterFunction<?>` beans in the Spring
-configuration, combines them through `RouterFunction.andOther`, and routes requests to the
-resulting composed `RouterFunction`.
+configuration, <<core.adoc#beans-factory-ordered, orders them>>, combines them through
+`RouterFunction.andOther`, and routes requests to the resulting composed `RouterFunction`.
 * `HandlerFunctionAdapter`: Simple adapter that lets `DispatcherHandler` invoke
 a `HandlerFunction` that was mapped to a request.
 * `ServerResponseResultHandler`: Handles the result from the invocation of a
@@ -761,7 +762,7 @@ For instance, consider the following example:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople)
+				.GET(handler::listPeople)
 				.before(request -> ServerRequest.from(request) // <1>
 					.header("X-RequestHeader", "Value")
 					.build()))
@@ -813,7 +814,7 @@ The following example shows how to do so:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople))
+				.GET(handler::listPeople))
 			.POST("/person", handler::createPerson))
 		.filter((request, next) -> {
 			if (securityManager.allowAccessTo(request.path())) {
@@ -848,7 +849,7 @@ The following example shows how to do so:
 ----
 
 The preceding example demonstrates that invoking the `next.handle(ServerRequest)` is optional.
-We allow only the handler function to be executed when access is allowed.
+We only let the handler function be run when access is allowed.
 
 Besides using the `filter` method on the router function builder, it is possible to apply a
 filter to an existing router function via `RouterFunction.filter(HandlerFilterFunction)`.

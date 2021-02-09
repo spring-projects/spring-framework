@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public abstract class AbstractJdbcInsert {
 	/** Context used to retrieve and manage database meta-data. */
 	private final TableMetaDataContext tableMetaDataContext = new TableMetaDataContext();
 
-	/** List of columns objects to be used in insert statement. */
+	/** List of column names to be used in insert statement. */
 	private final List<String> declaredColumns = new ArrayList<>();
 
 	/** The names of the columns holding the generated key. */
@@ -80,7 +80,7 @@ public abstract class AbstractJdbcInsert {
 	 * Has this operation been compiled? Compilation means at least checking
 	 * that a DataSource or JdbcTemplate has been provided.
 	 */
-	private volatile boolean compiled = false;
+	private volatile boolean compiled;
 
 	/** The generated string used for insert statement. */
 	private String insertString = "";
@@ -301,7 +301,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Check whether this operation has been compiled already;
 	 * lazily compile it if not already compiled.
-	 * <p>Automatically called by {@code validateParameters}.
+	 * <p>Automatically called by all {@code doExecute*(...)} methods.
 	 */
 	protected void checkCompiled() {
 		if (!isCompiled()) {
@@ -312,7 +312,7 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Method to check whether we are allowed to make any configuration changes at this time.
-	 * If the class has been compiled, then no further changes to the configuration are allowed.
+	 * <p>If the class has been compiled, then no further changes to the configuration are allowed.
 	 */
 	protected void checkIfConfigurationModificationIsAllowed() {
 		if (isCompiled()) {
@@ -465,7 +465,7 @@ public abstract class AbstractJdbcInsert {
 
 			if (keyQuery.toUpperCase().startsWith("RETURNING")) {
 				Long key = getJdbcTemplate().queryForObject(
-						getInsertString() + " " + keyQuery, values.toArray(), Long.class);
+						getInsertString() + " " + keyQuery, Long.class, values.toArray());
 				Map<String, Object> keys = new HashMap<>(2);
 				keys.put(getGeneratedKeyNames()[0], key);
 				keyHolder.getKeyList().add(keys);

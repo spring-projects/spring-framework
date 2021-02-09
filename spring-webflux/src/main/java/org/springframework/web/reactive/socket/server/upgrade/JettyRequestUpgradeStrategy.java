@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
+import java.io.IOException;
 import java.util.function.Supplier;
 
 import javax.servlet.ServletContext;
@@ -29,8 +30,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.Lifecycle;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.http.server.reactive.AbstractServerHttpRequest;
-import org.springframework.http.server.reactive.AbstractServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -39,6 +38,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.adapter.ContextWebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
@@ -66,7 +66,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	@Nullable
 	private volatile ServletContext servletContext;
 
-	private volatile boolean running = false;
+	private volatile boolean running;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -146,14 +146,11 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
-		HttpServletRequest servletRequest = getNativeRequest(request);
-		HttpServletResponse servletResponse = getNativeResponse(response);
+		HttpServletRequest servletRequest = ServerHttpRequestDecorator.getNativeRequest(request);
+		HttpServletResponse servletResponse = ServerHttpResponseDecorator.getNativeResponse(response);
 
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		DataBufferFactory factory = response.bufferFactory();
-
-		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(
-				handler, session -> new JettyWebSocketSession(session, handshakeInfo, factory));
 
 		startLazily(servletRequest);
 
@@ -163,42 +160,23 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 		// Trigger WebFlux preCommit actions and upgrade
 		return exchange.getResponse().setComplete()
-				.then(Mono.fromCallable(() -> {
+				.then(Mono.deferContextual(contextView -> {
+					JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(
+							ContextWebSocketHandler.decorate(handler, contextView),
+							session -> new JettyWebSocketSession(session, handshakeInfo, factory));
+
 					try {
 						adapterHolder.set(new WebSocketHandlerContainer(adapter, subProtocol));
 						this.factory.acceptWebSocket(servletRequest, servletResponse);
 					}
+					catch (IOException ex) {
+						return Mono.error(ex);
+					}
 					finally {
 						adapterHolder.remove();
 					}
-					return null;
+					return Mono.empty();
 				}));
-	}
-
-	private static HttpServletRequest getNativeRequest(ServerHttpRequest request) {
-		if (request instanceof AbstractServerHttpRequest) {
-			return ((AbstractServerHttpRequest) request).getNativeRequest();
-		}
-		else if (request instanceof ServerHttpRequestDecorator) {
-			return getNativeRequest(((ServerHttpRequestDecorator) request).getDelegate());
-		}
-		else {
-			throw new IllegalArgumentException(
-					"Couldn't find HttpServletRequest in " + request.getClass().getName());
-		}
-	}
-
-	private static HttpServletResponse getNativeResponse(ServerHttpResponse response) {
-		if (response instanceof AbstractServerHttpResponse) {
-			return ((AbstractServerHttpResponse) response).getNativeResponse();
-		}
-		else if (response instanceof ServerHttpResponseDecorator) {
-			return getNativeResponse(((ServerHttpResponseDecorator) response).getDelegate());
-		}
-		else {
-			throw new IllegalArgumentException(
-					"Couldn't find HttpServletResponse in " + response.getClass().getName());
-		}
 	}
 
 	private void startLazily(HttpServletRequest request) {

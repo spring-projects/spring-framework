@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import java.util.*
  * Mock object based tests for [ServerRequest] Kotlin extensions.
  *
  * @author Sebastien Deleuze
+ * @author Igor Manushin
  */
 class ServerRequestExtensionsTests {
 
@@ -63,7 +64,13 @@ class ServerRequestExtensionsTests {
 	}
 
 	@Test
-	fun awaitBody() {
+	fun `bodyToFlow with KClass parameters`() {
+		request.bodyToFlow(String::class)
+		verify { request.bodyToFlux(String::class.java) }
+	}
+
+	@Test
+	fun `awaitBody with reified type parameters`() {
 		every { request.bodyToMono<String>() } returns Mono.just("foo")
 		runBlocking {
 			assertThat(request.awaitBody<String>()).isEqualTo("foo")
@@ -71,10 +78,26 @@ class ServerRequestExtensionsTests {
 	}
 
 	@Test
-	fun awaitBodyOrNull() {
+	fun `awaitBody with KClass parameters`() {
+		every { request.bodyToMono(String::class.java) } returns Mono.just("foo")
+		runBlocking {
+			assertThat(request.awaitBody(String::class)).isEqualTo("foo")
+		}
+	}
+
+	@Test
+	fun `awaitBodyOrNull with reified type parameters`() {
 		every { request.bodyToMono<String>() } returns Mono.empty()
 		runBlocking {
 			assertThat(request.awaitBodyOrNull<String>()).isNull()
+		}
+	}
+
+	@Test
+	fun `awaitBodyOrNull with KClass parameters`() {
+		every { request.bodyToMono(String::class.java) } returns Mono.empty()
+		runBlocking {
+			assertThat(request.awaitBodyOrNull(String::class)).isNull()
 		}
 	}
 

@@ -1,15 +1,11 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-plugins {
-	id "com.github.johnrengelman.shadow" version "5.2.0"
-}
-
 description = "Spring Core"
 
 apply plugin: "kotlin"
 
 // spring-core includes asm and repackages cglib, inlining both into the spring-core jar.
-// cglib itself depends on asm and is therefore further transformed by the JarJar task to
+// cglib itself depends on asm and is therefore further transformed by the ShadowJar task to
 // depend on org.springframework.asm; this avoids including two different copies of asm.
 def cglibVersion = "3.3.0"
 def objenesisVersion = "3.1"
@@ -21,16 +17,16 @@ configurations {
 }
 
 task cglibRepackJar(type: ShadowJar) {
-	baseName = 'spring-cglib-repack'
-	version = cglibVersion
+	archiveBaseName = 'spring-cglib-repack'
+	archiveVersion = cglibVersion
 	configurations = [project.configurations.cglib]
 	relocate 'net.sf.cglib', 'org.springframework.cglib'
 	relocate 'org.objectweb.asm', 'org.springframework.asm'
 }
 
 task objenesisRepackJar(type: ShadowJar) {
-	baseName = 'spring-objenesis-repack'
-	version = objenesisVersion
+	archiveBaseName = 'spring-objenesis-repack'
+	archiveVersion = objenesisVersion
 	configurations = [project.configurations.objenesis]
 	relocate 'org.objenesis', 'org.springframework.objenesis'
 }
@@ -52,26 +48,31 @@ dependencies {
 	optional("io.reactivex:rxjava")
 	optional("io.reactivex:rxjava-reactive-streams")
 	optional("io.reactivex.rxjava2:rxjava")
+	optional("io.reactivex.rxjava3:rxjava")
 	optional("io.netty:netty-buffer")
 	testCompile("io.projectreactor:reactor-test")
-	testCompile("javax.annotation:javax.annotation-api")
 	testCompile("com.google.code.findbugs:jsr305")
-	testCompile("org.xmlunit:xmlunit-assertj")
-	testCompile("org.xmlunit:xmlunit-matchers")
+	testCompile("javax.annotation:javax.annotation-api")
 	testCompile("javax.xml.bind:jaxb-api")
 	testCompile("com.fasterxml.woodstox:woodstox-core")
+	testCompile("org.xmlunit:xmlunit-assertj")
+	testCompile("org.xmlunit:xmlunit-matchers")
 	testCompile(project(":kotlin-coroutines"))
 	testCompile("io.projectreactor.tools:blockhound")
-	testFixturesImplementation("com.google.code.findbugs:jsr305")
 	testFixturesImplementation("io.projectreactor:reactor-test")
-	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("com.google.code.findbugs:jsr305")
 	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
 	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
 	testFixturesImplementation("org.junit.jupiter:junit-jupiter-params")
+	testFixturesImplementation("org.assertj:assertj-core")
 	testFixturesImplementation("org.xmlunit:xmlunit-assertj")
 }
 
 jar {
+	reproducibleFileOrder = true
+	preserveFileTimestamps = false // maybe not necessary here, but good for reproducibility
+	manifest.attributes["Dependencies"] = "jdk.unsupported" // JBoss modules
+
 	// Inline repackaged cglib classes directly into spring-core jar
 	dependsOn cglibRepackJar
 	from(zipTree(cglibRepackJar.archivePath)) {
@@ -91,4 +92,10 @@ jar {
 	}
 
 	from configurations.coroutines
+}
+
+test {
+	// Make sure the classes dir is used on the test classpath (required by ResourceTests)
+	// When test fixtures are involved, the JAR is used by default
+	classpath = sourceSets.main.output.classesDirs + classpath - files(jar.archiveFile)
 }

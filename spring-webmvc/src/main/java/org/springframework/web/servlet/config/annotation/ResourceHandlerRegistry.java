@@ -28,6 +28,7 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -36,18 +37,24 @@ import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.PathPattern;
 
 /**
- * Stores registrations of resource handlers for serving static resources such as images, css files and others
- * through Spring MVC including setting cache headers optimized for efficient loading in a web browser.
- * Resources can be served out of locations under web application root, from the classpath, and others.
+ * Stores registrations of resource handlers for serving static resources such
+ * as images, css files and others through Spring MVC including setting cache
+ * headers optimized for efficient loading in a web browser. Resources can be
+ * served out of locations under web application root, from the classpath, and
+ * others.
  *
- * <p>To create a resource handler, use {@link #addResourceHandler(String...)} providing the URL path patterns
- * for which the handler should be invoked to serve static resources (e.g. {@code "/resources/**"}).
+ * <p>To create a resource handler, use {@link #addResourceHandler(String...)}
+ * providing the URL path patterns for which the handler should be invoked to
+ * serve static resources (e.g. {@code "/resources/**"}).
  *
- * <p>Then use additional methods on the returned {@link ResourceHandlerRegistration} to add one or more
- * locations from which to serve static content from (e.g. {{@code "/"},
- * {@code "classpath:/META-INF/public-web-resources/"}}) or to specify a cache period for served resources.
+ * <p>Then use additional methods on the returned
+ * {@link ResourceHandlerRegistration} to add one or more locations from which
+ * to serve static content from (e.g. {{@code "/"},
+ * {@code "classpath:/META-INF/public-web-resources/"}}) or to specify a cache
+ * period for served resources.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -110,13 +117,14 @@ public class ResourceHandlerRegistry {
 
 
 	/**
-	 * Add a resource handler for serving static resources based on the specified URL path patterns.
-	 * The handler will be invoked for every incoming request that matches to one of the specified
-	 * path patterns.
-	 * <p>Patterns like {@code "/static/**"} or {@code "/css/{filename:\\w+\\.css}"} are allowed.
-	 * See {@link org.springframework.util.AntPathMatcher} for more details on the syntax.
-	 * @return a {@link ResourceHandlerRegistration} to use to further configure the
-	 * registered resource handler
+	 * Add a resource handler to serve static resources. The handler is invoked
+	 * for requests that match one of the specified URL path patterns.
+	 * <p>Patterns such as {@code "/static/**"} or {@code "/css/{filename:\\w+\\.css}"}
+	 * are supported.
+	 * <p>For pattern syntax see {@link PathPattern} when parsed patterns
+	 * are {@link PathMatchConfigurer#setPatternParser enabled} or
+	 * {@link AntPathMatcher} otherwise. The syntax is largely the same with
+	 * {@link PathPattern} more tailored for web usage and more efficient.
 	 */
 	public ResourceHandlerRegistration addResourceHandler(String... pathPatterns) {
 		ResourceHandlerRegistration registration = new ResourceHandlerRegistration(pathPatterns);

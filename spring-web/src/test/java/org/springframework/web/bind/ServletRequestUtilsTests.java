@@ -18,13 +18,10 @@ package org.springframework.web.bind;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.testfixture.EnabledForTestGroups;
-import org.springframework.util.StopWatch;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
@@ -268,84 +265,6 @@ class ServletRequestUtilsTests {
 
 		assertThat(ServletRequestUtils.getStringParameter(request, "paramEmpty")).isEmpty();
 		assertThat(ServletRequestUtils.getRequiredStringParameter(request, "paramEmpty")).isEmpty();
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	void testGetIntParameterWithDefaultValueHandlingIsFastEnough() {
-		StopWatch sw = new StopWatch();
-		sw.start();
-		for (int i = 0; i < 1000000; i++) {
-			ServletRequestUtils.getIntParameter(request, "nonExistingParam", 0);
-		}
-		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	void testGetLongParameterWithDefaultValueHandlingIsFastEnough() {
-		StopWatch sw = new StopWatch();
-		sw.start();
-		for (int i = 0; i < 1000000; i++) {
-			ServletRequestUtils.getLongParameter(request, "nonExistingParam", 0);
-		}
-		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	void testGetFloatParameterWithDefaultValueHandlingIsFastEnough() {
-		StopWatch sw = new StopWatch();
-		sw.start();
-		for (int i = 0; i < 1000000; i++) {
-			ServletRequestUtils.getFloatParameter(request, "nonExistingParam", 0f);
-		}
-		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	void testGetDoubleParameterWithDefaultValueHandlingIsFastEnough() {
-		StopWatch sw = new StopWatch();
-		sw.start();
-		for (int i = 0; i < 1000000; i++) {
-			ServletRequestUtils.getDoubleParameter(request, "nonExistingParam", 0d);
-		}
-		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	void testGetBooleanParameterWithDefaultValueHandlingIsFastEnough() {
-		StopWatch sw = new StopWatch();
-		sw.start();
-		for (int i = 0; i < 1000000; i++) {
-			ServletRequestUtils.getBooleanParameter(request, "nonExistingParam", false);
-		}
-		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	void testGetStringParameterWithDefaultValueHandlingIsFastEnough() {
-		StopWatch sw = new StopWatch();
-		sw.start();
-		for (int i = 0; i < 1000000; i++) {
-			ServletRequestUtils.getStringParameter(request, "nonExistingParam", "defaultValue");
-		}
-		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
 	}
 
 }

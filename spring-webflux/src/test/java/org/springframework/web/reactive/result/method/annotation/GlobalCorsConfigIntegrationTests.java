@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingIntegration
 
 	@Override
 	protected RestTemplate initRestTemplate() {
-		// JDK default HTTP client blacklists headers like Origin
+		// JDK default HTTP client disallowed headers like Origin
 		return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 	}
 
@@ -160,10 +160,9 @@ class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingIntegration
 		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		ResponseEntity<String> entity = performOptions("/ambiguous", this.headers, String.class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isEqualTo("http://localhost:9000");
-		assertThat(entity.getHeaders().getAccessControlAllowMethods())
-				.containsExactly(HttpMethod.GET);
-		assertThat(entity.getHeaders().getAccessControlAllowCredentials()).isEqualTo(true);
+		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isEqualTo("*");
+		assertThat(entity.getHeaders().getAccessControlAllowMethods()).containsExactly(HttpMethod.GET, HttpMethod.POST);
+		assertThat(entity.getHeaders().getAccessControlAllowCredentials()).isEqualTo(false);
 		assertThat(entity.getHeaders().get(HttpHeaders.VARY))
 				.containsExactly(HttpHeaders.ORIGIN, HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD,
 						HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
@@ -177,12 +176,9 @@ class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingIntegration
 
 		@Override
 		protected void addCorsMappings(CorsRegistry registry) {
-			registry.addMapping("/cors-restricted")
-					.allowedOrigins("https://foo")
-					.allowedMethods("GET", "POST");
+			registry.addMapping("/cors-restricted").allowedOrigins("https://foo").allowedMethods("GET", "POST");
 			registry.addMapping("/cors");
-			registry.addMapping("/ambiguous")
-					.allowedMethods("GET", "POST");
+			registry.addMapping("/ambiguous").allowedMethods("GET", "POST");
 		}
 	}
 

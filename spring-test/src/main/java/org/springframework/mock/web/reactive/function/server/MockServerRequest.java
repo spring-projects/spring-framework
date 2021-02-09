@@ -41,11 +41,9 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -63,18 +61,14 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Arjen Poutsma
  * @since 5.0
- * @deprecated as of 5.2.5 in favor of
- * {@link ServerRequest#create(ServerWebExchange, List)} combined with
- * {@link MockServerWebExchange}.
  */
-@Deprecated
 public final class MockServerRequest implements ServerRequest {
 
 	private final HttpMethod method;
 
 	private final URI uri;
 
-	private final RequestPath pathContainer;
+	private final RequestPath requestPath;
 
 	private final MockHeaders headers;
 
@@ -93,7 +87,7 @@ public final class MockServerRequest implements ServerRequest {
 	private final WebSession session;
 
 	@Nullable
-	private Principal principal;
+	private final Principal principal;
 
 	@Nullable
 	private final InetSocketAddress remoteAddress;
@@ -116,7 +110,7 @@ public final class MockServerRequest implements ServerRequest {
 
 		this.method = method;
 		this.uri = uri;
-		this.pathContainer = RequestPath.parse(uri, contextPath);
+		this.requestPath = RequestPath.parse(uri, contextPath);
 		this.headers = headers;
 		this.cookies = cookies;
 		this.body = body;
@@ -153,8 +147,8 @@ public final class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
-	public PathContainer pathContainer() {
-		return this.pathContainer;
+	public RequestPath requestPath() {
+		return this.requestPath;
 	}
 
 	@Override

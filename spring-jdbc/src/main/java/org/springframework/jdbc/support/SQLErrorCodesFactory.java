@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.support;
 
+import java.sql.DatabaseMetaData;
 import java.util.Collections;
 import java.util.Map;
 
@@ -159,6 +160,7 @@ public class SQLErrorCodesFactory {
 	 * <p>No need for a database meta-data lookup.
 	 * @param databaseName the database name (must not be {@code null})
 	 * @return the {@code SQLErrorCodes} instance for the given database
+	 * (never {@code null}; potentially empty)
 	 * @throws IllegalArgumentException if the supplied database name is {@code null}
 	 */
 	public SQLErrorCodes getErrorCodes(String databaseName) {
@@ -195,9 +197,27 @@ public class SQLErrorCodesFactory {
 	 * instance if no {@code SQLErrorCodes} were found.
 	 * @param dataSource the {@code DataSource} identifying the database
 	 * @return the corresponding {@code SQLErrorCodes} object
+	 * (never {@code null}; potentially empty)
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
 	 */
 	public SQLErrorCodes getErrorCodes(DataSource dataSource) {
+		SQLErrorCodes sec = resolveErrorCodes(dataSource);
+		return (sec != null ? sec : new SQLErrorCodes());
+	}
+
+	/**
+	 * Return {@link SQLErrorCodes} for the given {@link DataSource},
+	 * evaluating "databaseProductName" from the
+	 * {@link java.sql.DatabaseMetaData}, or {@code null} if case
+	 * of a JDBC meta-data access problem.
+	 * @param dataSource the {@code DataSource} identifying the database
+	 * @return the corresponding {@code SQLErrorCodes} object,
+	 * or {@code null} in case of a JDBC meta-data access problem
+	 * @since 5.2.9
+	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
+	 */
+	@Nullable
+	public SQLErrorCodes resolveErrorCodes(DataSource dataSource) {
 		Assert.notNull(dataSource, "DataSource must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking up default SQLErrorCodes for DataSource [" + identify(dataSource) + "]");
@@ -212,16 +232,16 @@ public class SQLErrorCodesFactory {
 				if (sec == null) {
 					// We could not find it - got to look it up.
 					try {
-						String name = JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
+						String name = JdbcUtils.extractDatabaseMetaData(dataSource,
+								DatabaseMetaData::getDatabaseProductName);
 						if (StringUtils.hasLength(name)) {
 							return registerDatabase(dataSource, name);
 						}
 					}
 					catch (MetaDataAccessException ex) {
-						logger.warn("Error while extracting database name - falling back to empty error codes", ex);
+						logger.warn("Error while extracting database name", ex);
 					}
-					// Fallback is to return an empty SQLErrorCodes instance.
-					return new SQLErrorCodes();
+					return null;
 				}
 			}
 		}

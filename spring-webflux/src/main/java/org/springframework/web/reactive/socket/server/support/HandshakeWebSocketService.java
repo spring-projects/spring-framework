@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,16 +68,19 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	private static final boolean jettyPresent;
 
+	private static final boolean jetty10Present;
+
 	private static final boolean undertowPresent;
 
 	private static final boolean reactorNettyPresent;
 
 	static {
-		ClassLoader classLoader = HandshakeWebSocketService.class.getClassLoader();
-		tomcatPresent = ClassUtils.isPresent("org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
-		jettyPresent = ClassUtils.isPresent("org.eclipse.jetty.websocket.server.WebSocketServerFactory", classLoader);
-		undertowPresent = ClassUtils.isPresent("io.undertow.websockets.WebSocketProtocolHandshakeHandler", classLoader);
-		reactorNettyPresent = ClassUtils.isPresent("reactor.netty.http.server.HttpServerResponse", classLoader);
+		ClassLoader loader = HandshakeWebSocketService.class.getClassLoader();
+		tomcatPresent = ClassUtils.isPresent("org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", loader);
+		jettyPresent = ClassUtils.isPresent("org.eclipse.jetty.websocket.server.WebSocketServerFactory", loader);
+		jetty10Present = ClassUtils.isPresent("org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer", loader);
+		undertowPresent = ClassUtils.isPresent("io.undertow.websockets.WebSocketProtocolHandshakeHandler", loader);
+		reactorNettyPresent = ClassUtils.isPresent("reactor.netty.http.server.HttpServerResponse", loader);
 	}
 
 
@@ -89,7 +92,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	@Nullable
 	private Predicate<String> sessionAttributePredicate;
 
-	private volatile boolean running = false;
+	private volatile boolean running;
 
 
 	/**
@@ -116,6 +119,9 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		}
 		else if (jettyPresent) {
 			className = "JettyRequestUpgradeStrategy";
+		}
+		else if (jetty10Present) {
+			className = "Jetty10RequestUpgradeStrategy";
 		}
 		else if (undertowPresent) {
 			className = "UndertowRequestUpgradeStrategy";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.server.adapter;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Locale;
@@ -27,6 +28,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -34,14 +36,19 @@ import org.springframework.web.util.UriComponentsBuilder;
  * the request URI (i.e. {@link ServerHttpRequest#getURI()}) so it reflects
  * the client-originated protocol and address.
  *
- * <p>Alternatively if {@link #setRemoveOnly removeOnly} is set to "true",
- * then "Forwarded" and "X-Forwarded-*" headers are only removed, and not used.
- *
  * <p>An instance of this class is typically declared as a bean with the name
  * "forwardedHeaderTransformer" and detected by
  * {@link WebHttpHandlerBuilder#applicationContext(ApplicationContext)}, or it
  * can also be registered directly via
  * {@link WebHttpHandlerBuilder#forwardedHeaderTransformer(ForwardedHeaderTransformer)}.
+ *
+ * <p>There are security considerations for forwarded headers since an application
+ * cannot know if the headers were added by a proxy, as intended, or by a malicious
+ * client. This is why a proxy at the boundary of trust should be configured to
+ * remove untrusted Forwarded headers that come from the outside.
+ *
+ * <p>You can also configure the ForwardedHeaderFilter with {@link #setRemoveOnly removeOnly},
+ * in which case it removes but does not use the headers.
  *
  * @author Rossen Stoyanchev
  * @since 5.1
@@ -50,7 +57,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, ServerHttpRequest> {
 
 	static final Set<String> FORWARDED_HEADER_NAMES =
-			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
+			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(10, Locale.ENGLISH));
 
 	static {
 		FORWARDED_HEADER_NAMES.add("Forwarded");
@@ -59,6 +66,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Proto");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Prefix");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Ssl");
+		FORWARDED_HEADER_NAMES.add("X-Forwarded-For");
 	}
 
 
@@ -99,6 +107,11 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 					builder.path(prefix + uri.getRawPath());
 					builder.contextPath(prefix);
 				}
+				InetSocketAddress remoteAddress = request.getRemoteAddress();
+				remoteAddress = UriComponentsBuilder.parseForwardedFor(request, remoteAddress);
+				if (remoteAddress != null) {
+					builder.remoteAddress(remoteAddress);
+				}
 			}
 			removeForwardedHeaders(builder);
 			request = builder.build();
@@ -128,15 +141,20 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 	@Nullable
 	private static String getForwardedPrefix(ServerHttpRequest request) {
 		HttpHeaders headers = request.getHeaders();
-		String prefix = headers.getFirst("X-Forwarded-Prefix");
-		if (prefix != null) {
-			int endIndex = prefix.length();
-			while (endIndex > 1 && prefix.charAt(endIndex - 1) == '/') {
+		String header = headers.getFirst("X-Forwarded-Prefix");
+		if (header == null) {
+			return null;
+		}
+		StringBuilder prefix = new StringBuilder(header.length());
+		String[] rawPrefixes = StringUtils.tokenizeToStringArray(header, ",");
+		for (String rawPrefix : rawPrefixes) {
+			int endIndex = rawPrefix.length();
+			while (endIndex > 1 && rawPrefix.charAt(endIndex - 1) == '/') {
 				endIndex--;
 			}
-			prefix = (endIndex != prefix.length() ? prefix.substring(0, endIndex) : prefix);
+			prefix.append((endIndex != rawPrefix.length() ? rawPrefix.substring(0, endIndex) : rawPrefix));
 		}
-		return prefix;
+		return prefix.toString();
 	}
 
 }

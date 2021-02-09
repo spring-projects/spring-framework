@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindingResult;
@@ -51,6 +52,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.testfixture.method.ResolvableMethod;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockMultipartFile;
@@ -309,6 +311,22 @@ public class RequestPartMethodArgumentResolverTests {
 	@Test
 	public void resolveRequestPartNotRequired() throws Exception {
 		testResolveArgument(new SimpleBean("foo"), paramValidRequestPart);
+	}
+
+	@Test // gh-26501
+	public void resolveRequestPartWithoutContentType() throws Exception {
+		MockMultipartHttpServletRequest servletRequest = new MockMultipartHttpServletRequest();
+		servletRequest.addPart(new MockPart("requestPartString", "part value".getBytes(StandardCharsets.UTF_8)));
+		ServletWebRequest webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
+
+		List<HttpMessageConverter<?>> converters = Collections.singletonList(new StringHttpMessageConverter());
+		RequestPartMethodArgumentResolver resolver = new RequestPartMethodArgumentResolver(converters);
+		MethodParameter parameter = ResolvableMethod.on(getClass()).named("handle").build().arg(String.class);
+
+		Object actualValue = resolver.resolveArgument(
+				parameter, new ModelAndViewContainer(), webRequest, new ValidatingBinderFactory());
+
+		assertThat(actualValue).isEqualTo("part value");
 	}
 
 	@Test
@@ -606,7 +624,8 @@ public class RequestPartMethodArgumentResolverTests {
 			@RequestPart("requestPart") Optional<List<MultipartFile>> optionalMultipartFileList,
 			Optional<Part> optionalPart,
 			@RequestPart("requestPart") Optional<List<Part>> optionalPartList,
-			@RequestPart("requestPart") Optional<SimpleBean> optionalRequestPart) {
+			@RequestPart("requestPart") Optional<SimpleBean> optionalRequestPart,
+			@RequestPart("requestPartString") String requestPartString) {
 	}
 
 }

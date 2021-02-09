@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@ public class TxNamespaceHandlerTests {
 		assertThat(ptm.begun).as("Should not have any started transactions").isEqualTo(0);
 		testBean.getName();
 		assertThat(ptm.lastDefinition.isReadOnly()).isTrue();
+		assertThat(ptm.lastDefinition.getTimeout()).isEqualTo(5);
 		assertThat(ptm.begun).as("Should have 1 started transaction").isEqualTo(1);
 		assertThat(ptm.commits).as("Should have 1 committed transaction").isEqualTo(1);
 

@@ -547,6 +547,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	private static Class<? extends Annotation> loadAnnotationType(String name) {
 		try {
 			return (Class<? extends Annotation>)

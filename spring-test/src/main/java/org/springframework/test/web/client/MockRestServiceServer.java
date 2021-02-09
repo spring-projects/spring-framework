@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.web.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
@@ -110,10 +111,23 @@ public final class MockRestServiceServer {
 	/**
 	 * Verify that all expected requests set up via
 	 * {@link #expect(RequestMatcher)} were indeed performed.
-	 * @throws AssertionError when some expectations were not met
+	 * @throws AssertionError if not all expectations are met
 	 */
 	public void verify() {
 		this.expectationManager.verify();
+	}
+
+	/**
+	 * Variant of {@link #verify()} that waits for up to the specified time for
+	 * all expectations to be fulfilled. This can be useful for tests that
+	 * involve asynchronous requests.
+	 * @param timeout how long to wait for all expecations to be met
+	 * @throws AssertionError if not all expectations are met by the specified
+	 * timeout, or if any expectation fails at any time before that.
+	 * @since 5.3.4
+	 */
+	public void verify(Duration timeout) {
+		this.expectationManager.verify(timeout);
 	}
 
 	/**

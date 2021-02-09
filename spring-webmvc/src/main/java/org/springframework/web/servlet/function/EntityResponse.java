@@ -52,7 +52,7 @@ public interface EntityResponse<T> extends ServerResponse {
 	/**
 	 * Create a builder with the given object.
 	 * @param t the object that represents the body of the response
-	 * @param <T> the type of element contained in the publisher
+	 * @param <T> the type of element contained in the entity
 	 * @return the created builder
 	 */
 	static <T> Builder<T> fromObject(T t) {
@@ -63,7 +63,7 @@ public interface EntityResponse<T> extends ServerResponse {
 	 * Create a builder with the given object and type reference.
 	 * @param t the object that represents the body of the response
 	 * @param entityType the type of the entity, used to capture the generic type
-	 * @param <T> the type of element contained in the publisher
+	 * @param <T> the type of element contained in the entity
 	 * @return the created builder
 	 */
 	static <T> Builder<T> fromObject(T t, ParameterizedTypeReference<T> entityType) {

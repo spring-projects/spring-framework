@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -37,6 +37,7 @@ import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -49,6 +50,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
@@ -74,8 +76,6 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 
 	private final List<HttpMessageReader<?>> messageReaders;
 
-	private final List<MediaType> supportedMediaTypes;
-
 
 	/**
 	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.
@@ -97,9 +97,6 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		Assert.notEmpty(messageReaders, "At least one HttpMessageReader is required");
 		Assert.notNull(adapterRegistry, "ReactiveAdapterRegistry is required");
 		this.messageReaders = messageReaders;
-		this.supportedMediaTypes = messageReaders.stream()
-				.flatMap(converter -> converter.getReadableMediaTypes().stream())
-				.collect(Collectors.toList());
 	}
 
 
@@ -155,8 +152,10 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		Object[] hints = extractValidationHints(bodyParam);
 
 		if (mediaType.isCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED)) {
-			return Mono.error(new IllegalStateException(
-					"In a WebFlux application, form data is accessed via ServerWebExchange.getFormData()."));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Form data is accessed via ServerWebExchange.getFormData() in WebFlux.");
+			}
+			return Mono.error(new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE));
 		}
 
 		if (logger.isDebugEnabled()) {
@@ -208,8 +207,9 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		if (contentType == null && method != null && SUPPORTED_METHODS.contains(method)) {
 			Flux<DataBuffer> body = request.getBody().doOnNext(buffer -> {
 				DataBufferUtils.release(buffer);
-				// Body not empty, back to 415..
-				throw new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes, elementType);
+				// Body not empty, back toy 415..
+				throw new UnsupportedMediaTypeStatusException(
+						mediaType, getSupportedMediaTypes(elementType), elementType);
 			});
 			if (isBodyRequired) {
 				body = body.switchIfEmpty(Mono.error(() -> handleMissingBody(bodyParam)));
@@ -217,7 +217,8 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 			return (adapter != null ? Mono.just(adapter.fromPublisher(body)) : Mono.from(body));
 		}
 
-		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes, elementType));
+		return Mono.error(new UnsupportedMediaTypeStatusException(
+				mediaType, getSupportedMediaTypes(elementType), elementType));
 	}
 
 	private Throwable handleReadError(MethodParameter parameter, Throwable ex) {
@@ -257,6 +258,14 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		if (binder.getBindingResult().hasErrors()) {
 			throw new WebExchangeBindException(param, binder.getBindingResult());
 		}
+	}
+
+	private List<MediaType> getSupportedMediaTypes(ResolvableType elementType) {
+		List<MediaType> mediaTypes = new ArrayList<>();
+		for (HttpMessageReader<?> reader : this.messageReaders) {
+			mediaTypes.addAll(reader.getReadableMediaTypes(elementType));
+		}
+		return mediaTypes;
 	}
 
 }

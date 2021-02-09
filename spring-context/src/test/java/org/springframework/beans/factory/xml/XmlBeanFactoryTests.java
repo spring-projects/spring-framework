@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,12 +173,8 @@ class XmlBeanFactoryTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
-		InputStream inputStream = getClass().getResourceAsStream(REFTYPES_CONTEXT.getPath());
-		try {
+		try (InputStream inputStream = getClass().getResourceAsStream(REFTYPES_CONTEXT.getPath())) {
 			reader.loadBeanDefinitions(new InputSource(inputStream));
-		}
-		finally {
-			inputStream.close();
 		}
 
 		// Let's create the outer bean named "innerBean",
@@ -1328,7 +1324,7 @@ class XmlBeanFactoryTests {
 
 		// Now test replace
 		String s = "this is not a palindrome";
-		String reverse = new StringBuffer(s).reverse().toString();
+		String reverse = new StringBuilder(s).reverse().toString();
 		assertThat(oom.replaceMe(s)).as("Should have overridden to reverse, not echo").isEqualTo(reverse);
 
 		assertThat(oom.replaceMe()).as("Should have overridden no-arg overloaded replaceMe method to return fixed value").isEqualTo(FixedMethodReplacer.VALUE);
@@ -1384,7 +1380,7 @@ class XmlBeanFactoryTests {
 		reader.loadBeanDefinitions(DELEGATION_OVERRIDES_CONTEXT);
 		SerializableMethodReplacerCandidate s = (SerializableMethodReplacerCandidate) xbf.getBean("serializableReplacer");
 		String forwards = "this is forwards";
-		String backwards = new StringBuffer(forwards).reverse().toString();
+		String backwards = new StringBuilder(forwards).reverse().toString();
 		assertThat(s.replaceMe(forwards)).isEqualTo(backwards);
 		// SPR-356: lookup methods & method replacers are not serializable.
 		assertThat(SerializationTestUtils.isSerializable(s)).as("Lookup methods and method replacers are not meant to be serializable.").isFalse();

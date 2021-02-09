@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -209,5 +210,45 @@ public class RouterFunctionBuilderTests {
 				.expectNext(500)
 				.verifyComplete();
 	}
+
+	@Test
+	public void multipleOnErrors() {
+		RouterFunction<ServerResponse> route = RouterFunctions.route()
+				.GET("/error", request -> Mono.error(new IOException()))
+				.onError(IOException.class, (t, r) -> ServerResponse.status(200).build())
+				.onError(Exception.class, (t, r) -> ServerResponse.status(201).build())
+				.build();
+
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com/error").build();
+		ServerRequest serverRequest = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<HttpStatus> responseStatus = route.route(serverRequest)
+				.flatMap(handlerFunction -> handlerFunction.handle(serverRequest))
+				.map(ServerResponse::statusCode);
+
+		StepVerifier.create(responseStatus)
+				.assertNext(status -> assertThat(status).isEqualTo(HttpStatus.OK))
+				.verifyComplete();
+
+	}
+
+	@Test
+	public void attributes() {
+		RouterFunction<ServerResponse> route = RouterFunctions.route()
+				.GET("/atts/1", request -> ServerResponse.ok().build())
+				.withAttribute("foo", "bar")
+				.withAttribute("baz", "qux")
+				.GET("/atts/2", request -> ServerResponse.ok().build())
+				.withAttributes(atts -> {
+					atts.put("foo", "bar");
+					atts.put("baz", "qux");
+				})
+				.build();
+
+		AttributesTestVisitor visitor = new AttributesTestVisitor();
+		route.accept(visitor);
+		assertThat(visitor.visitCount()).isEqualTo(2);
+	}
+
 
 }

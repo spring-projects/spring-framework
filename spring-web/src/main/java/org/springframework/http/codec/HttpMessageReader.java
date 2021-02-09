@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -43,9 +44,28 @@ import org.springframework.lang.Nullable;
 public interface HttpMessageReader<T> {
 
 	/**
-	 * Return the {@link MediaType}'s that this reader supports.
+	 * Return the list of media types supported by this reader. The list may not
+	 * apply to every possible target element type and calls to this method
+	 * should typically be guarded via {@link #canRead(ResolvableType, MediaType)
+	 * canWrite(elementType, null)}. The list may also exclude media types
+	 * supported only for a specific element type. Alternatively, use
+	 * {@link #getReadableMediaTypes(ResolvableType)} for a more precise list.
+	 * @return the general list of supported media types
 	 */
 	List<MediaType> getReadableMediaTypes();
+
+	/**
+	 * Return the list of media types supported by this Reader for the given type
+	 * of element. This list may differ from {@link #getReadableMediaTypes()}
+	 * if the Reader doesn't support the element type, or if it supports it
+	 * only for a subset of media types.
+	 * @param elementType the type of element to read
+	 * @return the list of media types supported for the given class
+	 * @since 5.3.4
+	 */
+	default List<MediaType> getReadableMediaTypes(ResolvableType elementType) {
+		return (canRead(elementType, null) ? getReadableMediaTypes() : Collections.emptyList());
+	}
 
 	/**
 	 * Whether the given object type is supported by this reader.
@@ -56,7 +76,7 @@ public interface HttpMessageReader<T> {
 	boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType);
 
 	/**
-	 * Read from the input message and encode to a stream of objects.
+	 * Read from the input message and decode to a stream of objects.
 	 * @param elementType the type of objects in the stream which must have been
 	 * previously checked via {@link #canRead(ResolvableType, MediaType)}
 	 * @param message the message to read from
@@ -66,7 +86,7 @@ public interface HttpMessageReader<T> {
 	Flux<T> read(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints);
 
 	/**
-	 * Read from the input message and encode to a single object.
+	 * Read from the input message and decode to a single object.
 	 * @param elementType the type of objects in the stream which must have been
 	 * previously checked via {@link #canRead(ResolvableType, MediaType)}
 	 * @param message the message to read from

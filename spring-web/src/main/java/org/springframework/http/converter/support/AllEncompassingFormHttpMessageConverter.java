@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
 
 package org.springframework.http.converter.support;
 
+import org.springframework.core.SpringProperties;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.JsonbHttpMessageConverter;
+import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
@@ -32,9 +34,17 @@ import org.springframework.util.ClassUtils;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 3.2
  */
 public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConverter {
+
+	/**
+	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
+	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
+	 * <p>The default is "false".
+	 */
+	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
 
 	private static final boolean jaxb2Present;
 
@@ -48,6 +58,8 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 
 	private static final boolean jsonbPresent;
 
+	private static final boolean kotlinSerializationJsonPresent;
+
 	static {
 		ClassLoader classLoader = AllEncompassingFormHttpMessageConverter.class.getClassLoader();
 		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
@@ -57,19 +69,22 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
+		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 	}
 
 
 	public AllEncompassingFormHttpMessageConverter() {
-		try {
-			addPartConverter(new SourceHttpMessageConverter<>());
-		}
-		catch (Error err) {
-			// Ignore when no TransformerFactory implementation is available
-		}
+		if (!shouldIgnoreXml) {
+			try {
+				addPartConverter(new SourceHttpMessageConverter<>());
+			}
+			catch (Error err) {
+				// Ignore when no TransformerFactory implementation is available
+			}
 
-		if (jaxb2Present && !jackson2XmlPresent) {
-			addPartConverter(new Jaxb2RootElementHttpMessageConverter());
+			if (jaxb2Present && !jackson2XmlPresent) {
+				addPartConverter(new Jaxb2RootElementHttpMessageConverter());
+			}
 		}
 
 		if (jackson2Present) {
@@ -81,8 +96,11 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 		else if (jsonbPresent) {
 			addPartConverter(new JsonbHttpMessageConverter());
 		}
+		else if (kotlinSerializationJsonPresent) {
+			addPartConverter(new KotlinSerializationJsonHttpMessageConverter());
+		}
 
-		if (jackson2XmlPresent) {
+		if (jackson2XmlPresent && !shouldIgnoreXml) {
 			addPartConverter(new MappingJackson2XmlHttpMessageConverter());
 		}
 

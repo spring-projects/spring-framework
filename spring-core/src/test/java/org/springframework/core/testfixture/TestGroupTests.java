@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,11 @@ import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
 
 import static java.util.stream.Collectors.joining;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Tests for {@link TestGroup}.
@@ -70,12 +68,6 @@ class TestGroupTests {
 	}
 
 	@Test
-	void assumeGroupWithNoMatchingActiveTestGroup() {
-		setTestGroups(PERFORMANCE);
-		assertThatExceptionOfType(TestAbortedException.class).isThrownBy(() -> assumeGroup(LONG_RUNNING));
-	}
-
-	@Test
 	void assumeGroupWithMatchingActiveTestGroup() {
 		setTestGroups(LONG_RUNNING);
 		assertThatCode(() -> assumeGroup(LONG_RUNNING))
@@ -104,11 +96,11 @@ class TestGroupTests {
 		assertThatIllegalStateException()
 			.isThrownBy(() -> assumeGroup(LONG_RUNNING))
 			.withMessageStartingWith("Failed to parse '" + TEST_GROUPS_SYSTEM_PROPERTY + "' system property: ")
-			.withCauseInstanceOf(IllegalArgumentException.class)
-			.satisfies(ex ->
-				assertThat(ex.getCause().getMessage()).isEqualTo(
-					"Unable to find test group 'bogus' when parsing testGroups value: '" + testGroups +
-					"'. Available groups include: [LONG_RUNNING,PERFORMANCE]"));
+			.havingCause()
+			.isInstanceOf(IllegalArgumentException.class)
+			.withMessage(
+				"Unable to find test group 'bogus' when parsing testGroups value: '" + testGroups +
+				"'. Available groups include: [LONG_RUNNING]");
 	}
 
 	private void setTestGroups(TestGroup... testGroups) {

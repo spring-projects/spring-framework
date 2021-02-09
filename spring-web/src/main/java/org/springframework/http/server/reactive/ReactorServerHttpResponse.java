@@ -20,6 +20,9 @@ import java.nio.file.Path;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelId;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,6 +30,7 @@ import reactor.netty.http.server.HttpServerResponse;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -42,6 +46,9 @@ import org.springframework.util.Assert;
  * @since 5.0
  */
 class ReactorServerHttpResponse extends AbstractServerHttpResponse implements ZeroCopyHttpOutputMessage {
+
+	private static final Log logger = LogFactory.getLog(ReactorServerHttpResponse.class);
+
 
 	private final HttpServerResponse response;
 
@@ -113,6 +120,16 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 		return dataBuffers instanceof Mono ?
 				Mono.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf) :
 				Flux.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf);
+	}
+
+	@Override
+	protected void touchDataBuffer(DataBuffer buffer) {
+		if (logger.isDebugEnabled()) {
+			this.response.withConnection(connection -> {
+				ChannelId id = connection.channel().id();
+				DataBufferUtils.touch(buffer, "Channel id: " + id.asShortText());
+			});
+		}
 	}
 
 }

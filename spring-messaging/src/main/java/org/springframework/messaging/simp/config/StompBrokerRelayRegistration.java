@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.tcp.TcpOperations;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 
 /**
@@ -54,6 +55,9 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 
 	@Nullable
 	private TcpOperations<byte[]> tcpClient;
+
+	@Nullable
+	private TaskScheduler taskScheduler;
 
 	private boolean autoStartup = true;
 
@@ -178,8 +182,27 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	 * specified are effectively ignored.
 	 * @since 4.3.15
 	 */
-	public void setTcpClient(TcpOperations<byte[]> tcpClient) {
+	public StompBrokerRelayRegistration setTcpClient(TcpOperations<byte[]> tcpClient) {
 		this.tcpClient = tcpClient;
+		return this;
+	}
+
+	/**
+	 * Some STOMP clients (e.g. stomp-js) always send heartbeats at a fixed rate
+	 * but others (Spring STOMP client) do so only when no other messages are
+	 * sent. However messages with a non-broker {@link #getDestinationPrefixes()
+	 * destination prefix} aren't forwarded and as a result the broker may deem
+	 * the connection inactive.
+	 * <p>When this {@link TaskScheduler} is set, it is used to reset a count of
+	 * the number of messages sent from client to broker since the beginning of
+	 * the current heartbeat period. This is then used to decide whether to send
+	 * a heartbeat to the broker when ignoring a message with a non-broker
+	 * destination prefix.
+	 * @since 5.3
+	 */
+	public StompBrokerRelayRegistration setTaskScheduler(@Nullable TaskScheduler taskScheduler) {
+		this.taskScheduler = taskScheduler;
+		return this;
 	}
 
 	/**
@@ -233,7 +256,6 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 
 	@Override
 	protected StompBrokerRelayMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
-
 		StompBrokerRelayMessageHandler handler = new StompBrokerRelayMessageHandler(
 				getClientInboundChannel(), getClientOutboundChannel(),
 				brokerChannel, getDestinationPrefixes());
@@ -258,6 +280,9 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 		}
 		if (this.tcpClient != null) {
 			handler.setTcpClient(this.tcpClient);
+		}
+		if (this.taskScheduler != null) {
+			handler.setTaskScheduler(this.taskScheduler);
 		}
 
 		handler.setAutoStartup(this.autoStartup);

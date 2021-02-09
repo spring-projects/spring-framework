@@ -71,11 +71,11 @@ public class SpelExpression implements Expression {
 
 	// Count of many times as the expression been interpreted - can trigger compilation
 	// when certain limit reached
-	private final AtomicInteger interpretedCount = new AtomicInteger(0);
+	private final AtomicInteger interpretedCount = new AtomicInteger();
 
 	// The number of times compilation was attempted and failed - enables us to eventually
 	// give up trying to compile it when it just doesn't seem to be possible.
-	private final AtomicInteger failedAttempts = new AtomicInteger(0);
+	private final AtomicInteger failedAttempts = new AtomicInteger();
 
 
 	/**

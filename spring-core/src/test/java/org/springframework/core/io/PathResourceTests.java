@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -291,18 +291,11 @@ class PathResourceTests {
 	@Test
 	void getReadableByteChannel() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
-		ReadableByteChannel channel = null;
-		try {
-			channel = resource.readableChannel();
+		try (ReadableByteChannel channel = resource.readableChannel()) {
 			ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
 			channel.read(buffer);
 			buffer.rewind();
 			assertThat(buffer.limit()).isGreaterThan(0);
-		}
-		finally {
-			if (channel != null) {
-				channel.close();
-			}
 		}
 	}
 
@@ -330,15 +323,8 @@ class PathResourceTests {
 		Files.createFile(testPath);
 		PathResource resource = new PathResource(testPath);
 		ByteBuffer buffer = ByteBuffer.wrap("test".getBytes(StandardCharsets.UTF_8));
-		WritableByteChannel channel = null;
-		try {
-			channel = resource.writableChannel();
+		try (WritableByteChannel channel = resource.writableChannel()) {
 			channel.write(buffer);
-		}
-		finally {
-			if (channel != null) {
-				channel.close();
-			}
 		}
 		assertThat(resource.contentLength()).isEqualTo(4L);
 	}
