@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.junit.jupiter.event;
 
-import java.lang.management.ManagementFactory;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
