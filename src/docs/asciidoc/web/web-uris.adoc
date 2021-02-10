@@ -214,8 +214,10 @@ TIP: Consider ";", which is legal in a path but has reserved meaning. The first 
 replaces ";", since it is a legal character in a path.
 
 For most cases, the first option is likely to give the expected result, because it treats URI
-variables as opaque data to be fully encoded, while option 2 is useful only if
-URI variables intentionally contain reserved characters.
+variables as opaque data to be fully encoded, while the second option is useful if URI
+variables do intentionally contain reserved characters. The second option is also useful
+when not expanding URI variables at all since that will also encode anything that
+incidentally looks like a URI variable.
 
 The following example uses the first option:
 

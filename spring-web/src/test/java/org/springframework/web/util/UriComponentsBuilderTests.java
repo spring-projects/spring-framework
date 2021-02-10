@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -1035,6 +1036,35 @@ class UriComponentsBuilderTests {
 		assertThat(result2.getQuery()).isEqualTo("q1");
 		assertThat(result2.getFragment()).isEqualTo("f1");
 		assertThat(result1.getSchemeSpecificPart()).isEqualTo(null);
+	}
+
+	@Test // gh-26466
+	void encodeTemplateWithInvalidPlaceholderSyntax() {
+
+		BiConsumer<String, String> tester = (in, out) ->
+				assertThat(UriComponentsBuilder.fromUriString(in).encode().toUriString()).isEqualTo(out);
+
+		// empty
+		tester.accept("{}", "%7B%7D");
+		tester.accept("{ \t}", "%7B%20%09%7D");
+		tester.accept("/a{}b", "/a%7B%7Db");
+		tester.accept("/a{ \t}b", "/a%7B%20%09%7Db");
+
+		// nested, matching
+		tester.accept("{foo{}}", "%7Bfoo%7B%7D%7D");
+		tester.accept("{foo{bar}baz}", "%7Bfoo%7Bbar%7Dbaz%7D");
+		tester.accept("/a{foo{}}b", "/a%7Bfoo%7B%7D%7Db");
+		tester.accept("/a{foo{bar}baz}b", "/a%7Bfoo%7Bbar%7Dbaz%7Db");
+
+		// mismatched
+		tester.accept("{foo{{}", "%7Bfoo%7B%7B%7D");
+		tester.accept("{foo}}", "{foo}%7D");
+		tester.accept("/a{foo{{}bar", "/a%7Bfoo%7B%7B%7Dbar");
+		tester.accept("/a{foo}}b", "/a{foo}%7Db");
+
+		// variable with regex
+		tester.accept("{year:\\d{1,4}}", "{year:\\d{1,4}}");
+		tester.accept("/a{year:\\d{1,4}}b", "/a{year:\\d{1,4}}b");
 	}
 
 	@Test  // SPR-11856
