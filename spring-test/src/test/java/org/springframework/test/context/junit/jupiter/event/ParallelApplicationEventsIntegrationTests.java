@@ -76,8 +76,9 @@ class ParallelApplicationEventsIntegrationTests {
 		assertThat(payloads).hasSize(10);
 		assertThat(testNames).hasSize(10);
 
-		// Skip the following assertion entirely if the thread count is too low.
-		if (ManagementFactory.getThreadMXBean().getThreadCount() >= 4) {
+		// Skip the following assertion entirely if too few processors are available
+		// to the current JVM.
+		if (Runtime.getRuntime().availableProcessors() >= 4) {
 			// There are probably 10 different thread names on a developer's machine,
 			// but we really just want to assert that at least two different threads
 			// were used, since the CI server often has fewer threads available.
