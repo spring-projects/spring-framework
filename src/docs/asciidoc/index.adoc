@@ -20,7 +20,7 @@ JDBC, R2DBC, O/R Mapping, XML Marshalling.
 <<web.adoc#spring-web, Web Servlet>> :: Spring MVC, WebSocket, SockJS,
 STOMP Messaging.
 <<web-reactive.adoc#spring-webflux, Web Reactive>> :: Spring WebFlux, WebClient,
-WebSocket.
+WebSocket, RSocket.
 <<integration.adoc#spring-integration, Integration>> :: Remoting, JMS, JCA, JMX,
 Email, Tasks, Scheduling, Caching.
 <<languages.adoc#languages, Languages>> :: Kotlin, Groovy, Dynamic Languages.
