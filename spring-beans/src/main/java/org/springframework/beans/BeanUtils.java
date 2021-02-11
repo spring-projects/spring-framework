@@ -776,7 +776,14 @@ public abstract class BeanUtils {
 					if (readMethod != null) {
 						ResolvableType sourceResolvableType = ResolvableType.forMethodReturnType(readMethod);
 						ResolvableType targetResolvableType = ResolvableType.forMethodParameter(writeMethod, 0);
-						if (targetResolvableType.isAssignableFrom(sourceResolvableType)) {
+
+						// Ignore generic types in assignable check if either ResolvableType has unresolvable generics.
+						boolean isAssignable =
+								(sourceResolvableType.hasUnresolvableGenerics() || targetResolvableType.hasUnresolvableGenerics() ?
+										ClassUtils.isAssignable(writeMethod.getParameterTypes()[0], readMethod.getReturnType()) :
+										targetResolvableType.isAssignableFrom(sourceResolvableType));
+
+						if (isAssignable) {
 							try {
 								if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
 									readMethod.setAccessible(true);
