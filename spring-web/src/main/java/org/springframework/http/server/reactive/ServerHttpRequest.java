@@ -52,7 +52,7 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	 * not including the {@link #getQueryParams() query}.
 	 * <p>The returned path is sub-divided into a
 	 * {@link RequestPath#contextPath()} portion and the remaining
-	 * {@link RequestPath#pathWithinApplication() pathwithinApplication} portion.
+	 * {@link RequestPath#pathWithinApplication() pathWithinApplication} portion.
 	 * The latter can be passed into methods of
 	 * {@link org.springframework.web.util.pattern.PathPattern} for path
 	 * matching purposes.

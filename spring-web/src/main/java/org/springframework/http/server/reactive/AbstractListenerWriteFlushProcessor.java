@@ -187,7 +187,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 
 	/**
 	 * Invoked when an error happens while flushing.
-	 * <p>The default implementation cancels the upstream  write publisher and
+	 * <p>The default implementation cancels the upstream write publisher and
 	 * sends an onError downstream as the result of request handling.
 	 */
 	protected void flushingFailed(Throwable t) {

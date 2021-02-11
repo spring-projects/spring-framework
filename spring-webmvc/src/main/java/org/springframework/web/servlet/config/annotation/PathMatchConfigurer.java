@@ -229,7 +229,7 @@ public class PathMatchConfigurer {
 	}
 
 	/**
-	 * Return the configure UrlPathHelper or a default, shared instance otherwise.
+	 * Return the configured UrlPathHelper or a default, shared instance otherwise.
 	 * @since 5.3
 	 */
 	protected UrlPathHelper getUrlPathHelperOrDefault() {
@@ -243,7 +243,7 @@ public class PathMatchConfigurer {
 	}
 
 	/**
-	 * Return the configure PathMatcher or a default, shared, instance otherwise.
+	 * Return the configured PathMatcher or a default, shared instance otherwise.
 	 * @since 5.3
 	 */
 	protected PathMatcher getPathMatcherOrDefault() {
@@ -257,7 +257,7 @@ public class PathMatchConfigurer {
 	}
 
 	/**
-	 * Return the configured PathPatternParser or a default, shared, instance otherwise.
+	 * Return the configured PathPatternParser or a default, shared instance otherwise.
 	 * @since 5.3.4
 	 */
 	public PathPatternParser getPatternParserOrDefault() {
