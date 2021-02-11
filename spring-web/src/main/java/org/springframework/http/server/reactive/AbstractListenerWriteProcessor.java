@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	private volatile T currentData;
 
 	/* Indicates "onComplete" was received during the (last) write. */
-	private volatile boolean subscriberCompleted;
+	private volatile boolean sourceCompleted;
 
 	/**
 	 * Indicates we're waiting for one last isReady-onWritePossible cycle
@@ -374,7 +374,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 						if (processor.write(data)) {
 							if (processor.changeState(WRITING, REQUESTED)) {
 								processor.currentData = null;
-								if (processor.subscriberCompleted) {
+								if (processor.sourceCompleted) {
 									processor.readyToCompleteAfterLastWrite = true;
 									processor.changeStateToReceived(REQUESTED);
 								}
@@ -397,7 +397,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
-				processor.subscriberCompleted = true;
+				processor.sourceCompleted = true;
 				// A competing write might have completed very quickly
 				if (processor.state.get().equals(State.REQUESTED)) {
 					processor.changeStateToComplete(State.REQUESTED);
@@ -408,7 +408,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 		WRITING {
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
-				processor.subscriberCompleted = true;
+				processor.sourceCompleted = true;
 				// A competing write might have completed very quickly
 				if (processor.state.get().equals(State.REQUESTED)) {
 					processor.changeStateToComplete(State.REQUESTED);

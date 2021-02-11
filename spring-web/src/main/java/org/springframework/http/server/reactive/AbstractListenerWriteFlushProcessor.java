@@ -58,7 +58,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	@Nullable
 	private Subscription subscription;
 
-	private volatile boolean subscriberCompleted;
+	private volatile boolean sourceCompleted;
 
 	private final WriteResultPublisher resultPublisher;
 
@@ -293,7 +293,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 					return;
 				}
 				if (processor.changeState(this, REQUESTED)) {
-					if (processor.subscriberCompleted) {
+					if (processor.sourceCompleted) {
 						handleSubscriberCompleted(processor);
 					}
 					else {
@@ -304,7 +304,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 			}
 			@Override
 			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
-				processor.subscriberCompleted = true;
+				processor.sourceCompleted = true;
 				// A competing write might have completed very quickly
 				if (processor.state.get().equals(State.REQUESTED)) {
 					handleSubscriberCompleted(processor);
