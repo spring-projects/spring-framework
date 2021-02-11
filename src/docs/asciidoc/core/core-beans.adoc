@@ -641,15 +641,13 @@ You can use the `Class` property in one of two ways:
 
 ****
 .Inner class names
-If you want to configure a bean definition for a `static` nested class, you have to use
-the binary name of the nested class.
+If you want to configure a bean definition for a `static` nested class, you may use
+either binary name of the nested class or separate it with dot.
 
 For example, if you have a class called `SomeThing` in the `com.example` package, and this
-`SomeThing` class has a `static` nested class called `OtherThing`, the value of the `class`
-attribute on a bean definition would be `com.example.SomeThing$OtherThing`.
-
-Notice the use of the `$` character in the name to separate the nested class name from
-the outer class name.
+`SomeThing` class has a `static` nested class called `OtherThing`, they can be separated
+by a dollar (`$`) or dot (`.`). So the value of the `class` attribute on a bean definition
+would be `com.example.SomeThing$OtherThing` or `com.example.SomeThing.OtherThing`.
 ****
 
 

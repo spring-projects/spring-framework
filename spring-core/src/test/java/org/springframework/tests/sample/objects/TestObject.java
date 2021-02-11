@@ -75,4 +75,7 @@ public class TestObject implements ITestObject, ITestInterface, Comparable<Objec
 			return 1;
 		}
 	}
+
+	public static class NestedObject {
+	}
 }
