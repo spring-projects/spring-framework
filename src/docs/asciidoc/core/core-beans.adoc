@@ -639,15 +639,16 @@ You can use the `Class` property in one of two ways:
   from the invocation of the `static` factory method may be the same class or another
   class entirely.
 
+.Nested class names
 ****
-.Inner class names
-If you want to configure a bean definition for a `static` nested class, you may use
-either binary name of the nested class or separate it with dot.
+If you want to configure a bean definition for a nested class, you may use either the
+binary name or the source name of the nested class.
 
-For example, if you have a class called `SomeThing` in the `com.example` package, and this
-`SomeThing` class has a `static` nested class called `OtherThing`, they can be separated
-by a dollar (`$`) or dot (`.`). So the value of the `class` attribute on a bean definition
-would be `com.example.SomeThing$OtherThing` or `com.example.SomeThing.OtherThing`.
+For example, if you have a class called `SomeThing` in the `com.example` package, and
+this `SomeThing` class has a `static` nested class called `OtherThing`, they can be
+separated by a dollar sign (`$`) or a dot (`.`). So the value of the `class` attribute in
+a bean definition would be `com.example.SomeThing$OtherThing` or
+`com.example.SomeThing.OtherThing`.
 ****
 
 
