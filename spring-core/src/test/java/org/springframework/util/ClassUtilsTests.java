@@ -86,6 +86,8 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.forName("org.springframework.tests.sample.objects.TestObject[][]", classLoader)).isEqualTo(TestObject[][].class);
 		assertThat(ClassUtils.forName(TestObject[][].class.getName(), classLoader)).isEqualTo(TestObject[][].class);
 		assertThat(ClassUtils.forName("[[[S", classLoader)).isEqualTo(short[][][].class);
+		assertThat(ClassUtils.forName("org.springframework.tests.sample.objects.TestObject$NestedObject", classLoader)).isEqualTo(TestObject.NestedObject.class);
+		assertThat(ClassUtils.forName("org.springframework.tests.sample.objects.TestObject.NestedObject", classLoader)).isEqualTo(TestObject.NestedObject.class);
 	}
 
 	@Test
