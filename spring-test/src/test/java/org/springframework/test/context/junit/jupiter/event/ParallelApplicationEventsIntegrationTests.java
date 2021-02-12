@@ -75,13 +75,16 @@ class ParallelApplicationEventsIntegrationTests {
 		assertThat(payloads).hasSize(10);
 		assertThat(testNames).hasSize(10);
 
+		int availableProcessors = Runtime.getRuntime().availableProcessors();
 		// Skip the following assertion entirely if too few processors are available
 		// to the current JVM.
-		if (Runtime.getRuntime().availableProcessors() >= 4) {
+		if (availableProcessors >= 6) {
 			// There are probably 10 different thread names on a developer's machine,
 			// but we really just want to assert that at least two different threads
 			// were used, since the CI server often has fewer threads available.
-			assertThat(threadNames).hasSizeGreaterThanOrEqualTo(2);
+			assertThat(threadNames)
+				.as("number of threads used with " + availableProcessors + " available processors")
+				.hasSizeGreaterThanOrEqualTo(2);
 		}
 	}
 
