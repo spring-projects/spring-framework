@@ -182,7 +182,7 @@ configure(allprojects) { project ->
 				exclude group: "dom4j", name: "dom4j"
 			}
 
-			dependency("junit:junit:4.13.1") {
+			dependency("junit:junit:4.13.2") {
 				exclude group: "org.hamcrest", name: "hamcrest-core"
 			}
 			dependency("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1") {
@@ -381,7 +381,7 @@ configure([rootProject] + javaProjects) { project ->
 			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.10/",
 			"https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
-			"https://junit.org/junit4/javadoc/4.13.1/",
+			"https://junit.org/junit4/javadoc/4.13.2/",
 			"https://junit.org/junit5/docs/5.7.1/api/"
 	] as String[]
 }
