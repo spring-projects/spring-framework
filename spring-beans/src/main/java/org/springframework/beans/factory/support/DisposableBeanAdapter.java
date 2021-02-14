@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,14 +119,16 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				}
 			}
 			else {
-				Class<?>[] paramTypes = destroyMethod.getParameterTypes();
-				if (paramTypes.length > 1) {
-					throw new BeanDefinitionValidationException("Method '" + destroyMethodName + "' of bean '" +
-							beanName + "' has more than one parameter - not supported as destroy method");
-				}
-				else if (paramTypes.length == 1 && boolean.class != paramTypes[0]) {
-					throw new BeanDefinitionValidationException("Method '" + destroyMethodName + "' of bean '" +
-							beanName + "' has a non-boolean parameter - not supported as destroy method");
+				if (destroyMethod.getParameterCount() > 0) {
+					Class<?>[] paramTypes = destroyMethod.getParameterTypes();
+					if (paramTypes.length > 1) {
+						throw new BeanDefinitionValidationException("Method '" + destroyMethodName + "' of bean '" +
+								beanName + "' has more than one parameter - not supported as destroy method");
+					}
+					else if (paramTypes.length == 1 && boolean.class != paramTypes[0]) {
+						throw new BeanDefinitionValidationException("Method '" + destroyMethodName + "' of bean '" +
+								beanName + "' has a non-boolean parameter - not supported as destroy method");
+					}
 				}
 				destroyMethod = ClassUtils.getInterfaceMethodIfPossible(destroyMethod);
 			}
@@ -167,66 +169,6 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		this.acc = null;
 		this.destroyMethodName = destroyMethodName;
 		this.beanPostProcessors = postProcessors;
-	}
-
-
-	/**
-	 * If the current value of the given beanDefinition's "destroyMethodName" property is
-	 * {@link AbstractBeanDefinition#INFER_METHOD}, then attempt to infer a destroy method.
-	 * Candidate methods are currently limited to public, no-arg methods named "close" or
-	 * "shutdown" (whether declared locally or inherited). The given BeanDefinition's
-	 * "destroyMethodName" is updated to be null if no such method is found, otherwise set
-	 * to the name of the inferred method. This constant serves as the default for the
-	 * {@code @Bean#destroyMethod} attribute and the value of the constant may also be
-	 * used in XML within the {@code <bean destroy-method="">} or {@code
-	 * <beans default-destroy-method="">} attributes.
-	 * <p>Also processes the {@link java.io.Closeable} and {@link java.lang.AutoCloseable}
-	 * interfaces, reflectively calling the "close" method on implementing beans as well.
-	 */
-	@Nullable
-	private String inferDestroyMethodIfNecessary(Object bean, RootBeanDefinition beanDefinition) {
-		String destroyMethodName = beanDefinition.getDestroyMethodName();
-		if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName) ||
-				(destroyMethodName == null && bean instanceof AutoCloseable)) {
-			// Only perform destroy method inference or Closeable detection
-			// in case of the bean not explicitly implementing DisposableBean
-			if (!(bean instanceof DisposableBean)) {
-				try {
-					return bean.getClass().getMethod(CLOSE_METHOD_NAME).getName();
-				}
-				catch (NoSuchMethodException ex) {
-					try {
-						return bean.getClass().getMethod(SHUTDOWN_METHOD_NAME).getName();
-					}
-					catch (NoSuchMethodException ex2) {
-						// no candidate destroy method found
-					}
-				}
-			}
-			return null;
-		}
-		return (StringUtils.hasLength(destroyMethodName) ? destroyMethodName : null);
-	}
-
-	/**
-	 * Search for all DestructionAwareBeanPostProcessors in the List.
-	 * @param processors the List to search
-	 * @return the filtered List of DestructionAwareBeanPostProcessors
-	 */
-	@Nullable
-	private List<DestructionAwareBeanPostProcessor> filterPostProcessors(
-			List<DestructionAwareBeanPostProcessor> processors, Object bean) {
-
-		List<DestructionAwareBeanPostProcessor> filteredPostProcessors = null;
-		if (!CollectionUtils.isEmpty(processors)) {
-			filteredPostProcessors = new ArrayList<>(processors.size());
-			for (DestructionAwareBeanPostProcessor processor : processors) {
-				if (processor.requiresDestruction(bean)) {
-					filteredPostProcessors.add(processor);
-				}
-			}
-		}
-		return filteredPostProcessors;
 	}
 
 
@@ -384,12 +326,50 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		if (bean instanceof DisposableBean || bean instanceof AutoCloseable) {
 			return true;
 		}
-		String destroyMethodName = beanDefinition.getDestroyMethodName();
-		if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName)) {
-			return (ClassUtils.hasMethod(bean.getClass(), CLOSE_METHOD_NAME) ||
-					ClassUtils.hasMethod(bean.getClass(), SHUTDOWN_METHOD_NAME));
+		return inferDestroyMethodIfNecessary(bean, beanDefinition) != null;
+	}
+
+
+	/**
+	 * If the current value of the given beanDefinition's "destroyMethodName" property is
+	 * {@link AbstractBeanDefinition#INFER_METHOD}, then attempt to infer a destroy method.
+	 * Candidate methods are currently limited to public, no-arg methods named "close" or
+	 * "shutdown" (whether declared locally or inherited). The given BeanDefinition's
+	 * "destroyMethodName" is updated to be null if no such method is found, otherwise set
+	 * to the name of the inferred method. This constant serves as the default for the
+	 * {@code @Bean#destroyMethod} attribute and the value of the constant may also be
+	 * used in XML within the {@code <bean destroy-method="">} or {@code
+	 * <beans default-destroy-method="">} attributes.
+	 * <p>Also processes the {@link java.io.Closeable} and {@link java.lang.AutoCloseable}
+	 * interfaces, reflectively calling the "close" method on implementing beans as well.
+	 */
+	@Nullable
+	private static String inferDestroyMethodIfNecessary(Object bean, RootBeanDefinition beanDefinition) {
+		String destroyMethodName = beanDefinition.resolvedDestroyMethodName;
+		if (destroyMethodName == null) {
+			destroyMethodName = beanDefinition.getDestroyMethodName();
+			if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName) ||
+					(destroyMethodName == null && bean instanceof AutoCloseable)) {
+				// Only perform destroy method inference or Closeable detection
+				// in case of the bean not explicitly implementing DisposableBean
+				destroyMethodName = null;
+				if (!(bean instanceof DisposableBean)) {
+					try {
+						destroyMethodName = bean.getClass().getMethod(CLOSE_METHOD_NAME).getName();
+					}
+					catch (NoSuchMethodException ex) {
+						try {
+							destroyMethodName = bean.getClass().getMethod(SHUTDOWN_METHOD_NAME).getName();
+						}
+						catch (NoSuchMethodException ex2) {
+							// no candidate destroy method found
+						}
+					}
+				}
+			}
+			beanDefinition.resolvedDestroyMethodName = (destroyMethodName != null ? destroyMethodName : "");
 		}
-		return StringUtils.hasLength(destroyMethodName);
+		return (StringUtils.hasLength(destroyMethodName) ? destroyMethodName : null);
 	}
 
 	/**
@@ -406,6 +386,27 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Search for all DestructionAwareBeanPostProcessors in the List.
+	 * @param processors the List to search
+	 * @return the filtered List of DestructionAwareBeanPostProcessors
+	 */
+	@Nullable
+	private static List<DestructionAwareBeanPostProcessor> filterPostProcessors(
+			List<DestructionAwareBeanPostProcessor> processors, Object bean) {
+
+		List<DestructionAwareBeanPostProcessor> filteredPostProcessors = null;
+		if (!CollectionUtils.isEmpty(processors)) {
+			filteredPostProcessors = new ArrayList<>(processors.size());
+			for (DestructionAwareBeanPostProcessor processor : processors) {
+				if (processor.requiresDestruction(bean)) {
+					filteredPostProcessors.add(processor);
+				}
+			}
+		}
+		return filteredPostProcessors;
 	}
 
 }
