@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,23 @@
 
 package org.springframework.context.annotation;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * @author Andy Wilkinson
+ * @author Liu Dongmiao
  */
 public class AggressiveFactoryBeanInstantiationTests {
 
@@ -49,14 +58,63 @@ public class AggressiveFactoryBeanInstantiationTests {
 		}
 	}
 
+	@Test
+	public void checkLinkageError() {
+		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
+			context.register(BeanMethodConfigurationWithExceptionInInitializer.class);
+			context.refresh();
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			PrintWriter pw = new PrintWriter(baos);
+			ex.printStackTrace(pw);
+			pw.flush();
+			String stackTrace = baos.toString();
+			assertThat(stackTrace.contains(".<clinit>")).isTrue();
+			assertThat(stackTrace.contains("java.lang.NoClassDefFoundError")).isFalse();
+		}
+	}
+
 
 	@Configuration
 	static class BeanMethodConfiguration {
 
 		@Bean
+		public String foo() {
+			return "foo";
+		}
+
+		@Bean
+		public AutowiredBean autowiredBean() {
+			return new AutowiredBean();
+		}
+
+		@Bean
+		@DependsOn("autowiredBean")
 		public SimpleFactoryBean simpleFactoryBean(ApplicationContext applicationContext) {
 			return new SimpleFactoryBean(applicationContext);
 		}
+	}
+
+
+	@Configuration
+	static class BeanMethodConfigurationWithExceptionInInitializer extends BeanMethodConfiguration {
+
+		@Bean
+		@DependsOn("autowiredBean")
+		@Override
+		public SimpleFactoryBean simpleFactoryBean(ApplicationContext applicationContext) {
+			new ExceptionInInitializer();
+			return new SimpleFactoryBean(applicationContext);
+		}
+	}
+
+
+	static class AutowiredBean {
+
+		@Autowired
+		String foo;
 	}
 
 
@@ -73,6 +131,16 @@ public class AggressiveFactoryBeanInstantiationTests {
 		@Override
 		public Class<?> getObjectType() {
 			return Object.class;
+		}
+	}
+
+
+	static class ExceptionInInitializer {
+
+		private static final int ERROR = callInClinit();
+
+		private static int callInClinit() {
+			throw new UnsupportedOperationException();
 		}
 	}
 
