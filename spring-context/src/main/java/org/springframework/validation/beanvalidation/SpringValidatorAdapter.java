@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,7 +179,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 						}
 					}
 					else {
-						// got no BindingResult - can only do standard rejectValue call
+						// Got no BindingResult - can only do standard rejectValue call
 						// with automatic extraction of the current field value
 						errors.rejectValue(field, errorCode, errorArgs, violation.getMessage());
 					}
@@ -386,7 +386,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 			return (type != null ? this.targetValidator.unwrap(type) : (T) this.targetValidator);
 		}
 		catch (ValidationException ex) {
-			// ignore if just being asked for plain Validator
+			// Ignore if just being asked for plain JSR-303 Validator
 			if (javax.validation.Validator.class == type) {
 				return (T) this.targetValidator;
 			}

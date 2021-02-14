@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -292,6 +292,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		if (this.parameterNameDiscoverer != null) {
 			configureParameterNameProvider(this.parameterNameDiscoverer, configuration);
 		}
+
 		List<InputStream> mappingStreams = null;
 		if (this.mappingLocations != null) {
 			mappingStreams = new ArrayList<>(this.mappingLocations.length);
@@ -322,18 +323,6 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		}
 	}
 
-	private void closeMappingStreams(@Nullable List<InputStream> mappingStreams){
-		if (!CollectionUtils.isEmpty(mappingStreams)) {
-			for (InputStream stream : mappingStreams) {
-				try {
-					stream.close();
-				}
-				catch (IOException ignored) {
-				}
-			}
-		}
-	}
-
 	private void configureParameterNameProvider(ParameterNameDiscoverer discoverer, Configuration<?> configuration) {
 		final ParameterNameProvider defaultProvider = configuration.getDefaultParameterNameProvider();
 		configuration.parameterNameProvider(new ParameterNameProvider() {
@@ -350,6 +339,18 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 						defaultProvider.getParameterNames(method));
 			}
 		});
+	}
+
+	private void closeMappingStreams(@Nullable List<InputStream> mappingStreams){
+		if (!CollectionUtils.isEmpty(mappingStreams)) {
+			for (InputStream stream : mappingStreams) {
+				try {
+					stream.close();
+				}
+				catch (IOException ignored) {
+				}
+			}
+		}
 	}
 
 	/**
@@ -420,7 +421,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 				return super.unwrap(type);
 			}
 			catch (ValidationException ex) {
-				// ignore - we'll try ValidatorFactory unwrapping next
+				// Ignore - we'll try ValidatorFactory unwrapping next
 			}
 		}
 		if (this.validatorFactory != null) {
@@ -428,7 +429,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 				return this.validatorFactory.unwrap(type);
 			}
 			catch (ValidationException ex) {
-				// ignore if just being asked for ValidatorFactory
+				// Ignore if just being asked for ValidatorFactory
 				if (ValidatorFactory.class == type) {
 					return (T) this.validatorFactory;
 				}
