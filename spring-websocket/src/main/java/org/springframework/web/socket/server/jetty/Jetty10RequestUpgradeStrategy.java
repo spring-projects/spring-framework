@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.socket.server.jetty;
 
 import java.lang.reflect.Method;
@@ -72,7 +73,9 @@ public class Jetty10RequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 			Class<?> type = loader.loadClass("org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer");
 			getContainerMethod = type.getMethod("getContainer", ServletContext.class);
-			upgradeMethod = ReflectionUtils.findMethod(type, "upgrade", (Class<?>[]) null);
+			Method upgrade = ReflectionUtils.findMethod(type, "upgrade", (Class<?>[]) null);
+			Assert.state(upgrade != null, "Upgrade method not found");
+			upgradeMethod = upgrade;
 
 			type = loader.loadClass("org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse");
 			setAcceptedSubProtocol = type.getMethod("setAcceptedSubProtocol", String.class);

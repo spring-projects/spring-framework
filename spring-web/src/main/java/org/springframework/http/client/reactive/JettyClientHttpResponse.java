@@ -32,6 +32,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -147,10 +148,12 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 			HttpHeaders headers = new HttpHeaders();
 			Iterable<?> iterator = (Iterable<?>)
 					ReflectionUtils.invokeMethod(getHeadersMethod, response.getResponse());
+			Assert.notNull(iterator, "Iterator must not be null");
 			for (Object field : iterator) {
-				headers.add(
-						(String) ReflectionUtils.invokeMethod(getNameMethod, field),
-						(String) ReflectionUtils.invokeMethod(getValueMethod, field));
+				String name = (String) ReflectionUtils.invokeMethod(getNameMethod, field);
+				Assert.notNull(name, "Header name must not be null");
+				String value = (String) ReflectionUtils.invokeMethod(getValueMethod, field);
+				headers.add(name, value);
 			}
 			return headers;
 		}

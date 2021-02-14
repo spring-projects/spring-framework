@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.lang.reflect.Method;
@@ -35,6 +36,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -67,7 +69,9 @@ public class Jetty10RequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 			Class<?> type = loader.loadClass("org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer");
 			getContainerMethod = type.getMethod("getContainer", ServletContext.class);
-			upgradeMethod = ReflectionUtils.findMethod(type, "upgrade", (Class<?>[]) null);
+			Method upgrade = ReflectionUtils.findMethod(type, "upgrade", (Class<?>[]) null);
+			Assert.state(upgrade != null, "Upgrade method not found");
+			upgradeMethod = upgrade;
 
 			type = loader.loadClass("org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse");
 			setAcceptedSubProtocol = type.getMethod("setAcceptedSubProtocol", String.class);

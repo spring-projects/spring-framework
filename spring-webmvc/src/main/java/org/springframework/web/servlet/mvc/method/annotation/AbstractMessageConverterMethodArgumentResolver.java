@@ -203,7 +203,8 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 					(noContentType && !message.hasBody())) {
 				return null;
 			}
-			throw new HttpMediaTypeNotSupportedException(contentType, getSupportedMediaTypes(targetClass));
+			throw new HttpMediaTypeNotSupportedException(contentType,
+					getSupportedMediaTypes(targetClass != null ? targetClass : Object.class));
 		}
 
 		MediaType selectedContentType = contentType;

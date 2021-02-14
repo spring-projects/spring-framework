@@ -30,6 +30,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 3.0
  * @param <T> the converted object type
  */
@@ -67,8 +68,8 @@ public interface HttpMessageConverter<T> {
 	/**
 	 * Return the list of media types supported by this converter for the given
 	 * class. The list may differ from {@link #getSupportedMediaTypes()} if the
-	 * converter doesn't support given Class or if it support it only for a
-	 * subset of media types.
+	 * converter does not support the given Class or if it supports it only for
+	 * a subset of media types.
 	 * @param clazz the type of class to check
 	 * @return the list of media types supported for the given class
 	 * @since 5.3.4

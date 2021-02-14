@@ -294,7 +294,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		}
 		List<InputStream> mappingStreams = null;
 		if (this.mappingLocations != null) {
-			mappingStreams = new ArrayList<>(mappingLocations.length);
+			mappingStreams = new ArrayList<>(this.mappingLocations.length);
 			for (Resource location : this.mappingLocations) {
 				try {
 					InputStream stream = location.getInputStream();
