@@ -27,7 +27,7 @@ configure(allprojects) { project ->
 	dependencyManagement {
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.1"
-			mavenBom "io.netty:netty-bom:4.1.58.Final"
+			mavenBom "io.netty:netty-bom:4.1.59.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.3"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR8"
 			mavenBom "io.rsocket:rsocket-bom:1.1.0"
@@ -64,8 +64,8 @@ configure(allprojects) { project ->
 
 			dependency "io.reactivex:rxjava:1.3.8"
 			dependency "io.reactivex:rxjava-reactive-streams:1.2.1"
-			dependency "io.reactivex.rxjava2:rxjava:2.2.20"
-			dependency "io.reactivex.rxjava3:rxjava:3.0.9"
+			dependency "io.reactivex.rxjava2:rxjava:2.2.21"
+			dependency "io.reactivex.rxjava3:rxjava:3.0.10"
 			dependency "io.projectreactor.tools:blockhound:1.0.4.RELEASE"
 
 			dependency "com.caucho:hessian:4.0.63"
@@ -129,18 +129,18 @@ configure(allprojects) { project ->
 			dependency "org.webjars:webjars-locator-core:0.46"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.41') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.43') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.41') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.43') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.2.3.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.4.Final') {
 				entry 'undertow-core'
 				entry('undertow-websockets-jsr') {
 					exclude group: "org.jboss.spec.javax.websocket", name: "jboss-websocket-api_1.1_spec"
@@ -198,7 +198,7 @@ configure(allprojects) { project ->
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '3.7.0') {
+			dependencySet(group: 'org.mockito', version: '3.7.7') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
@@ -206,10 +206,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.10.2"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.46.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.47.1") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.46.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.47.1") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
@@ -237,7 +237,7 @@ configure(allprojects) { project ->
 
 			dependency "com.ibm.websphere:uow:6.0.2.17"
 			dependency "com.jamonapi:jamon:2.82"
-			dependency "joda-time:joda-time:2.10.9"
+			dependency "joda-time:joda-time:2.10.10"
 			dependency "org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.8"
 			dependency "org.javamoney:moneta:1.3"
 
