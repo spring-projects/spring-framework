@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	boolean allowCaching = true;
 
-	boolean isFactoryMethodUnique = false;
+	boolean isFactoryMethodUnique;
 
 	@Nullable
 	volatile ResolvableType targetType;
@@ -85,6 +85,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/** Package-visible field for caching a unique factory method candidate for introspection. */
 	@Nullable
 	volatile Method factoryMethodToIntrospect;
+
+	/** Package-visible field for caching a resolved destroy method name (also for inferred). */
+	@Nullable
+	volatile String resolvedDestroyMethodName;
 
 	/** Common lock for the four constructor fields below. */
 	final Object constructorArgumentLock = new Object();
