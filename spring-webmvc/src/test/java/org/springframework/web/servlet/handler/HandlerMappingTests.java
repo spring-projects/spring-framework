@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
 
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -66,8 +67,23 @@ class HandlerMappingTests {
 		mapping.setApplicationContext(new StaticWebApplicationContext());
 
 		HandlerExecutionChain chain = mapping.getHandler(requestFactory.apply("/"));
+
 		assertThat(chain).isNotNull();
 		assertThat(chain.getInterceptorList()).contains(i1.getInterceptor(), i2, i3.getInterceptor(), i4);
+	}
+
+	@Test // gh-26546
+	void abstractHandlerMappingEnsuresCachedLookupPath() throws Exception {
+		MappedInterceptor interceptor = new MappedInterceptor(new String[] {"/**"}, mock(HandlerInterceptor.class));
+		TestHandlerMapping mapping = new TestHandlerMapping();
+		mapping.setInterceptors(interceptor);
+		mapping.setApplicationContext(new StaticWebApplicationContext());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		HandlerExecutionChain chain = mapping.getHandler(request);
+
+		assertThat(chain).isNotNull();
+		assertThat(chain.getInterceptorList()).contains(interceptor.getInterceptor());
 	}
 
 
@@ -75,7 +91,6 @@ class HandlerMappingTests {
 
 		@Override
 		protected Object getHandlerInternal(HttpServletRequest request) {
-			initLookupPath(request);
 			return new Object();
 		}
 	}

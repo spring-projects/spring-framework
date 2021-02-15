@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -499,6 +499,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		if (handler instanceof String) {
 			String handlerName = (String) handler;
 			handler = obtainApplicationContext().getBean(handlerName);
+		}
+
+		// Ensure presence of cached lookupPath for interceptors and others
+		if (!ServletRequestPathUtils.hasCachedPath(request)) {
+			initLookupPath(request);
 		}
 
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
