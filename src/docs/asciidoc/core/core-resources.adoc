@@ -150,6 +150,10 @@ Other methods let you obtain an actual `URL` or `File` object representing the
 resource (if the underlying implementation is compatible and supports that
 functionality).
 
+Some implementations of the `Resource` interface also implement the extended
+{api-spring-framework}/core/io/WritableResource.html[`WritableResource`] interface
+for a resource that supports writing to it.
+
 Spring itself uses the `Resource` abstraction extensively, as an argument type in
 many method signatures when a resource is needed. Other methods in some Spring APIs
 (such as the constructors to various `ApplicationContext` implementations) take a
@@ -174,11 +178,13 @@ work.
 [[resources-implementations]]
 == Built-in Resource Implementations
 
-Spring includes the following `Resource` implementations:
+Spring includes several built-in `Resource` implementations, including but not limited to
+the following:
 
 * <<resources-implementations-urlresource>>
 * <<resources-implementations-classpathresource>>
 * <<resources-implementations-filesystemresource>>
+* <<resources-implementations-pathresource>>
 * <<resources-implementations-servletcontextresource>>
 * <<resources-implementations-inputstreamresource>>
 * <<resources-implementations-bytearrayresource>>
@@ -229,8 +235,21 @@ creates a `ClassPathResource` in that case.
 [[resources-implementations-filesystemresource]]
 === `FileSystemResource`
 
-This is a `Resource` implementation for `java.io.File` and `java.nio.file.Path` handles.
-It supports resolution as a `File` and as a `URL`.
+This is a `Resource` implementation for `java.io.File` handles. It also supports
+`java.nio.file.Path` handles, applying Spring's standard String-based path
+transformations but performing all operations via the `java.nio.file.Files` API. For pure
+`java.nio.path.Path` based support use a `PathResource` instead. `FileSystemResource`
+supports resolution as a `File` and as a `URL`.
+
+
+[[resources-implementations-pathresource]]
+=== `PathResource`
+
+This is a `Resource` implementation for `java.nio.file.Path` handles, performing all
+operations and transformations via the `Path` API. It supports resolution as a `File` and
+as a `URL` and also implements the extended `WritableResource` interface. `PathResource`
+is effectively a pure `java.nio.path.Path` based alternative to `FileSystemResource` with
+different `createRelative` behavior.
 
 
 
