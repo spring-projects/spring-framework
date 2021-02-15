@@ -89,7 +89,7 @@ public abstract class MethodVisitor {
         && api != Opcodes.ASM10_EXPERIMENTAL) {
       throw new IllegalArgumentException("Unsupported api " + api);
     }
-    // SPRING PATCH: no preview mode check for ASM 9 experimental
+    // SPRING PATCH: no preview mode check for ASM experimental
     this.api = api;
     this.mv = methodVisitor;
   }
