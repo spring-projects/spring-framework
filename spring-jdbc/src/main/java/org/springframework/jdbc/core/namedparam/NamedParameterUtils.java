@@ -350,7 +350,7 @@ public abstract class NamedParameterUtils {
 				Object paramValue = paramSource.getValue(paramName);
 				if (paramValue instanceof SqlParameterValue) {
 					paramArray[i] = paramValue;
-				} 
+				}
 				else {
 					paramArray[i] = (param != null ? new SqlParameterValue(param, paramValue) :
 							SqlParameterSourceUtils.getTypedValue(paramSource, paramName));
