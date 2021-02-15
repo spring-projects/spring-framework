@@ -20,12 +20,15 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.SerializationException;
 import kotlinx.serialization.SerializersKt;
 import kotlinx.serialization.descriptors.PolymorphicKind;
+import kotlinx.serialization.descriptors.SerialDescriptor;
 import kotlinx.serialization.json.Json;
 
 import org.springframework.core.GenericTypeResolver;
@@ -185,12 +188,26 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractGeneric
 		KSerializer<Object> serializer = serializerCache.get(type);
 		if (serializer == null) {
 			serializer = SerializersKt.serializer(type);
-			if (serializer.getDescriptor().getKind().equals(PolymorphicKind.OPEN.INSTANCE)) {
+			if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
 				throw new UnsupportedOperationException("Open polymorphic serialization is not supported yet");
 			}
 			serializerCache.put(type, serializer);
 		}
 		return serializer;
+	}
+
+	private boolean hasPolymorphism(SerialDescriptor descriptor, Set<String> alreadyProcessed) {
+		alreadyProcessed.add(descriptor.getSerialName());
+		if (descriptor.getKind().equals(PolymorphicKind.OPEN.INSTANCE)) {
+			return true;
+		}
+		for (int i = 0 ; i < descriptor.getElementsCount() ; i++) {
+			SerialDescriptor elementDescriptor = descriptor.getElementDescriptor(i);
+			if (!alreadyProcessed.contains(elementDescriptor.getSerialName()) && hasPolymorphism(elementDescriptor, alreadyProcessed)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
