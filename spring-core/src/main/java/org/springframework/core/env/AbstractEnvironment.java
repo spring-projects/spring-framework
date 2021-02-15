@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,8 +247,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	/**
 	 * Return the property value for the active profiles.
-	 * @see #ACTIVE_PROFILES_PROPERTY_NAME
 	 * @since 5.3.4
+	 * @see #ACTIVE_PROFILES_PROPERTY_NAME
 	 */
 	protected String doGetActiveProfilesProperty() {
 		return getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
@@ -313,8 +313,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	/**
 	 * Return the property value for the default profiles.
-	 * @see #DEFAULT_PROFILES_PROPERTY_NAME
 	 * @since 5.3.4
+	 * @see #DEFAULT_PROFILES_PROPERTY_NAME
 	 */
 	protected String doGetDefaultProfilesProperty() {
 		return getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
