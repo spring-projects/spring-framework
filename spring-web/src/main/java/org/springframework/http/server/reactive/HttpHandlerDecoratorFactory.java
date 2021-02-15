@@ -20,8 +20,10 @@ import java.util.function.Function;
 
 /**
  * Contract for applying a decorator to an {@code HttpHandler}.
+ *
  * @author Christophe Maillard
  * @since 5.3.4
  */
 public interface HttpHandlerDecoratorFactory extends Function<HttpHandler, HttpHandler> {
+
 }
