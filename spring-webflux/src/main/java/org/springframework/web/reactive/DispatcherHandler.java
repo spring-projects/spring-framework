@@ -29,10 +29,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.cors.reactive.CorsUtils;
+import org.springframework.web.cors.reactive.PreFlightRequestHandler;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
@@ -53,9 +53,10 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  *
  * <p>{@code DispatcherHandler} is also designed to be a Spring bean itself and
  * implements {@link ApplicationContextAware} for access to the context it runs
- * in. If {@code DispatcherHandler} is declared with the bean name "webHandler"
- * it is discovered by {@link WebHttpHandlerBuilder#applicationContext} which
- * creates a processing chain together with {@code WebFilter},
+ * in. If {@code DispatcherHandler} is declared as a bean with the name
+ * "webHandler", it is discovered by
+ * {@link WebHttpHandlerBuilder#applicationContext(ApplicationContext)} which
+ * puts together a processing chain together with {@code WebFilter},
  * {@code WebExceptionHandler} and others.
  *
  * <p>A {@code DispatcherHandler} bean declaration is included in
@@ -68,7 +69,7 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  * @since 5.0
  * @see WebHttpHandlerBuilder#applicationContext(ApplicationContext)
  */
-public class DispatcherHandler implements WebHandler, ApplicationContextAware {
+public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, ApplicationContextAware {
 
 	@Nullable
 	private List<HandlerMapping> handlerMappings;
@@ -142,6 +143,9 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 		if (this.handlerMappings == null) {
 			return createNotFoundError();
 		}
+		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+			return handlePreFlight(exchange);
+		}
 		return Flux.fromIterable(this.handlerMappings)
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
@@ -158,11 +162,8 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	}
 
 	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {
-		// No handling for CORS rejected requests and pre-flight requests
-		ServerHttpRequest request = exchange.getRequest();
-		HttpStatus status = exchange.getResponse().getStatusCode();
-		if (ObjectUtils.nullSafeEquals(status, HttpStatus.FORBIDDEN) || CorsUtils.isPreFlightRequest(request)) {
-			return Mono.empty();
+		if (ObjectUtils.nullSafeEquals(exchange.getResponse().getStatusCode(), HttpStatus.FORBIDDEN)) {
+			return Mono.empty();  // CORS rejection
 		}
 		if (this.handlerAdapters != null) {
 			for (HandlerAdapter handlerAdapter : this.handlerAdapters) {
@@ -194,6 +195,15 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 			}
 		}
 		throw new IllegalStateException("No HandlerResultHandler for " + handlerResult.getReturnValue());
+	}
+
+	@Override
+	public Mono<Void> handlePreFlight(ServerWebExchange exchange) {
+		return Flux.fromIterable(this.handlerMappings != null ? this.handlerMappings : Collections.emptyList())
+				.concatMap(mapping -> mapping.getHandler(exchange))
+				.switchIfEmpty(Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN)))
+				.next()
+				.then();
 	}
 
 }
