@@ -3394,7 +3394,7 @@ definition to configure new `Account` instances.
 You can also use autowiring to avoid having to specify a dedicated bean definition at
 all. To have Spring apply autowiring, use the `autowire` property of the `@Configurable`
 annotation. You can specify either `@Configurable(autowire=Autowire.BY_TYPE)` or
-`@Configurable(autowire=Autowire.BY_NAME` for autowiring by type or by name,
+`@Configurable(autowire=Autowire.BY_NAME)` for autowiring by type or by name,
 respectively. As an alternative, it is preferable to specify explicit, annotation-driven
 dependency injection for your `@Configurable` beans through `@Autowired` or `@Inject`
 at the field or method level (see <<beans-annotation-config>> for further details).
