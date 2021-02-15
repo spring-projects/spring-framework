@@ -8,6 +8,7 @@ Spring. It includes the following topics:
 * <<resources-resource>>
 * <<resources-implementations>>
 * <<resources-resourceloader>>
+* <<resources-resourcepatternresolver>>
 * <<resources-resourceloaderaware>>
 * <<resources-as-dependencies>>
 * <<resources-app-ctx>>
@@ -31,7 +32,7 @@ such as a method to check for the existence of the resource being pointed to.
 
 
 [[resources-resource]]
-== The Resource Interface
+== The `Resource` Interface
 
 Spring's `Resource` interface located in the `org.springframework.core.io.` package is
 meant to be a more capable interface for abstracting access to low-level resources. The
@@ -176,7 +177,7 @@ work.
 
 
 [[resources-implementations]]
-== Built-in Resource Implementations
+== Built-in `Resource` Implementations
 
 Spring includes several built-in `Resource` implementations, including but not limited to
 the following:
@@ -242,6 +243,7 @@ transformations but performing all operations via the `java.nio.file.Files` API.
 supports resolution as a `File` and as a `URL`.
 
 
+
 [[resources-implementations-pathresource]]
 === `PathResource`
 
@@ -293,8 +295,9 @@ single-use `InputStreamResource`.
 
 
 
+
 [[resources-resourceloader]]
-== The `ResourceLoader`
+== The `ResourceLoader` Interface
 
 The `ResourceLoader` interface is meant to be implemented by objects that can return
 (that is, load) `Resource` instances. The following listing shows the `ResourceLoader`
@@ -416,8 +419,66 @@ objects:
 
 
 
+[[resources-resourcepatternresolver]]
+== The `ResourcePatternResolver` Interface
+
+The `ResourcePatternResolver` interface is an extension to the `ResourceLoader` interface
+which defines a strategy for resolving a location pattern (for example, an Ant-style path
+pattern) into  `Resource` objects.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public interface ResourcePatternResolver extends ResourceLoader {
+
+		String CLASSPATH_ALL_URL_PREFIX = "classpath*:";
+
+		Resource[] getResources(String locationPattern) throws IOException;
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface ResourcePatternResolver: ResourceLoader {
+
+		@JvmField
+		val CLASSPATH_ALL_URL_PREFIX: String = "classpath*:"
+
+		@Throws(IOException::class)
+		fun getResources(locationPattern: String): Resource[]
+
+	}
+----
+
+As can be seen above, this interface also defines a special `classpath*:` resource prefix
+for all matching resources from the class path. Note that the resource location is
+expected to be a path without placeholders in this case -- for example,
+`classpath*:/config/beans.xml`. JAR files or different directories in the class path can
+contain multiple files with the same path and the same name. See
+<<resources-app-ctx-wildcards-in-resource-paths>> and its subsections for further details
+on wildcard support with the `classpath*:` resource prefix.
+
+A passed-in `ResourceLoader` (for example, one supplied via
+<<resources-resourceloaderaware, `ResourceLoaderAware`>> semantics can be checked whether
+it implements this extended interface too.
+
+`PathMatchingResourcePatternResolver` is a standalone implementation that is usable
+outside an `ApplicationContext` and is also used by `ResourceArrayPropertyEditor` for
+populating `Resource[]` bean properties.
+
+[NOTE]
+====
+The default `ResourceLoader` in any standard `ApplicationContext` is in fact an instance
+of `PathMatchingResourcePatternResolver` which implements the `ResourcePatternResolver`
+interface. The same is true for the `ApplicationContext` instance itself which also
+implements the `ResourcePatternResolver` interface and delegates to the default
+`PathMatchingResourcePatternResolver`.
+====
+
+
 [[resources-resourceloaderaware]]
-== The `ResourceLoaderAware` interface
+== The `ResourceLoaderAware` Interface
 
 The `ResourceLoaderAware` interface is a special callback interface which identifies
 components that expect to be provided a `ResourceLoader` reference. The following listing
@@ -628,7 +689,7 @@ javadoc for details on the various constructors.
 
 The resource paths in application context constructor values may be simple paths (as
 shown earlier), each of which has a one-to-one mapping to a target `Resource` or,
-alternately, may contain the special "classpath*:" prefix or internal Ant-style patterns
+alternately, may contain the special `classpath*:` prefix or internal Ant-style patterns
 (matched by using Spring's `PathMatcher` utility). Both of the latter are effectively
 wildcards.
 
