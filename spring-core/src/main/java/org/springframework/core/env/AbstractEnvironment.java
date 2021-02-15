@@ -129,8 +129,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * {@link #customizePropertySources(MutablePropertySources)} during
 	 * construction to allow subclasses to contribute or manipulate
 	 * {@link PropertySource} instances as appropriate.
-	 * @see #customizePropertySources(MutablePropertySources)
 	 * @since 5.3.4
+	 * @see #customizePropertySources(MutablePropertySources)
 	 */
 	protected AbstractEnvironment(MutablePropertySources propertySources) {
 		this.propertySources = propertySources;
@@ -142,17 +142,17 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	/**
 	 * Factory method used to create the {@link ConfigurablePropertyResolver}
 	 * instance used by the Environment.
-	 * @see #getPropertyResolver()
 	 * @since 5.3.4
+	 * @see #getPropertyResolver()
 	 */
-	protected ConfigurablePropertyResolver createPropertyResolver(
-			MutablePropertySources propertySources) {
+	protected ConfigurablePropertyResolver createPropertyResolver(MutablePropertySources propertySources) {
 		return new PropertySourcesPropertyResolver(propertySources);
 	}
 
 	/**
 	 * Return the {@link ConfigurablePropertyResolver} being used by the
 	 * {@link Environment}.
+	 * @since 5.3.4
 	 * @see #createPropertyResolver(MutablePropertySources)
 	 */
 	protected final ConfigurablePropertyResolver getPropertyResolver() {

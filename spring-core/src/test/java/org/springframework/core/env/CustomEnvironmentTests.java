@@ -131,18 +131,15 @@ class CustomEnvironmentTests {
 
 	@Test
 	public void withCustomMutablePropertySources() {
-		class CustomMutablePropertySources extends MutablePropertySources {
-		}
+		class CustomMutablePropertySources extends MutablePropertySources {}
 		MutablePropertySources propertySources = new CustomMutablePropertySources();
-		ConfigurableEnvironment env = new AbstractEnvironment(propertySources) {
-		};
+		ConfigurableEnvironment env = new AbstractEnvironment(propertySources) {};
 		assertThat(env.getPropertySources()).isInstanceOf(CustomMutablePropertySources.class);
 	}
 
 	@Test
 	void withCustomPropertyResolver() {
 		class CustomPropertySourcesPropertyResolver extends PropertySourcesPropertyResolver {
-
 			public CustomPropertySourcesPropertyResolver(
 					PropertySources propertySources) {
 				super(propertySources);
@@ -152,16 +149,13 @@ class CustomEnvironmentTests {
 			public String getProperty(String key) {
 				return super.getProperty(key)+"-test";
 			}
-
 		}
 		ConfigurableEnvironment env = new AbstractEnvironment() {
-
 			@Override
 			protected ConfigurablePropertyResolver createPropertyResolver(
 					MutablePropertySources propertySources) {
 				return new CustomPropertySourcesPropertyResolver(propertySources);
 			}
-
 		};
 		Map<String, Object> values = new LinkedHashMap<>();
 		values.put("spring", "framework");
