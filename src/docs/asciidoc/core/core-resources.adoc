@@ -33,9 +33,11 @@ such as a method to check for the existence of the resource being pointed to.
 [[resources-resource]]
 == The Resource Interface
 
-Spring's `Resource` interface is meant to be a more capable interface for abstracting
-access to low-level resources. The following listing shows the `Resource` interface
-definition:
+Spring's `Resource` interface located in the `org.springframework.core.io.` package is
+meant to be a more capable interface for abstracting access to low-level resources. The
+following listing provides an overview of the `Resource` interface. See the
+{api-spring-framework}/core/io/Resource.html[`Resource`] javadoc for further details.
+
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -44,17 +46,30 @@ definition:
 
 		boolean exists();
 
+		boolean isReadable();
+
 		boolean isOpen();
+
+		boolean isFile();
 
 		URL getURL() throws IOException;
 
+		URI getURI() throws IOException;
+
 		File getFile() throws IOException;
+
+		ReadableByteChannel readableChannel() throws IOException;
+
+		long contentLength() throws IOException;
+
+		long lastModified() throws IOException;
 
 		Resource createRelative(String relativePath) throws IOException;
 
 		String getFilename();
 
 		String getDescription();
+
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -64,11 +79,27 @@ definition:
 
 		fun exists(): Boolean
 
-		val isOpen: Boolean
+		fun isReadable(): Boolean
 
-		val url: URL
+		fun isOpen(): Boolean
+
+		fun isFile(): Boolean
+
+		fun getURL(): URL
+
+		@Throws(IOException::class)
+		fun getURI(): URI
 
 		val file: File
+
+		@Throws(IOException::class)
+		fun readableChannel(): ReadableByteChannel
+
+		@Throws(IOException::class)
+		fun contentLength(): long
+
+		@Throws(IOException::class)
+		fun lastModified(): long
 
 		@Throws(IOException::class)
 		fun createRelative(relativePath: String): Resource
