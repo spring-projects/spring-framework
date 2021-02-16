@@ -41,7 +41,6 @@ following listing provides an overview of the `Resource` interface. See the
 
 
 [source,java,indent=0,subs="verbatim,quotes"]
-.Java
 ----
 	public interface Resource extends InputStreamSource {
 
@@ -78,7 +77,6 @@ interface. The following listing shows the definition of the `InputStreamSource`
 interface:
 
 [source,java,indent=0,subs="verbatim,quotes"]
-.Java
 ----
 	public interface InputStreamSource {
 
@@ -261,7 +259,6 @@ The `ResourceLoader` interface is meant to be implemented by objects that can re
 interface definition:
 
 [source,java,indent=0,subs="verbatim,quotes"]
-.Java
 ----
 	public interface ResourceLoader {
 
@@ -374,7 +371,6 @@ which defines a strategy for resolving a location pattern (for example, an Ant-s
 pattern) into  `Resource` objects.
 
 [source,java,indent=0,subs="verbatim,quotes"]
-.Java
 ----
 	public interface ResourcePatternResolver extends ResourceLoader {
 
@@ -426,7 +422,6 @@ components that expect to be provided a `ResourceLoader` reference. The followin
 shows the definition of the `ResourceLoaderAware` interface:
 
 [source,java,indent=0,subs="verbatim,quotes"]
-.Java
 ----
 	public interface ResourceLoaderAware {
 

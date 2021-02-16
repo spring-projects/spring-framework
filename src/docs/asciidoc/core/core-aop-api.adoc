@@ -25,26 +25,13 @@ target different advice with the same pointcut.
 The `org.springframework.aop.Pointcut` interface is the central interface, used to
 target advices to particular classes and methods. The complete interface follows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Pointcut {
 
 		ClassFilter getClassFilter();
 
 		MethodMatcher getMethodMatcher();
-
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Pointcut {
-
-		fun getClassFilter(): ClassFilter
-
-		fun getMethodMatcher(): MethodMatcher
-
 	}
 ----
 
@@ -56,27 +43,17 @@ The `ClassFilter` interface is used to restrict the pointcut to a given set of t
 classes. If the `matches()` method always returns true, all target classes are
 matched. The following listing shows the `ClassFilter` interface definition:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface ClassFilter {
 
 		boolean matches(Class clazz);
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface ClassFilter {
-
-		fun matches(clazz: Class<*>): Boolean
-	}
-----
 
 The `MethodMatcher` interface is normally more important. The complete interface follows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface MethodMatcher {
 
@@ -85,18 +62,6 @@ The `MethodMatcher` interface is normally more important. The complete interface
 		boolean isRuntime();
 
 		boolean matches(Method m, Class targetClass, Object[] args);
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface MethodMatcher {
-
-		val isRuntime: Boolean
-
-		fun matches(m: Method, targetClass: Class<*>): Boolean
-
-		fun matches(m: Method, targetClass: Class<*>, args: Array<Any>): Boolean
 	}
 ----
 
@@ -335,20 +300,11 @@ Spring is compliant with the AOP `Alliance` interface for around advice that use
 interception. Classes that implement `MethodInterceptor` and that implement around advice should also implement the
 following interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface MethodInterceptor extends Interceptor {
 
 		Object invoke(MethodInvocation invocation) throws Throwable;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface MethodInterceptor : Interceptor {
-
-		fun invoke(invocation: MethodInvocation) : Any
 	}
 ----
 
@@ -413,21 +369,12 @@ interceptor chain.
 
 The following listing shows the `MethodBeforeAdvice` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface MethodBeforeAdvice extends BeforeAdvice {
 
 		void before(Method m, Object[] args, Object target) throws Throwable;
 	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-interface MethodBeforeAdvice : BeforeAdvice {
-
-	fun before(m: Method, args: Array<Any>, target: Any)
-}
 ----
 
 (Spring's API design would allow for
@@ -591,21 +538,12 @@ TIP: Throws advice can be used with any pointcut.
 An after returning advice in Spring must implement the
 `org.springframework.aop.AfterReturningAdvice` interface, which the following listing shows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface AfterReturningAdvice extends Advice {
 
 		void afterReturning(Object returnValue, Method m, Object[] args, Object target)
 				throws Throwable;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface AfterReturningAdvice : Advice {
-
-		fun afterReturning(returnValue: Any, m: Method, args: Array<Any>, target: Any)
 	}
 ----
 
@@ -660,20 +598,11 @@ Spring treats introduction advice as a special kind of interception advice.
 Introduction requires an `IntroductionAdvisor` and an `IntroductionInterceptor` that
 implement the following interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface IntroductionInterceptor extends MethodInterceptor {
 
 		boolean implementsInterface(Class intf);
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface IntroductionInterceptor : MethodInterceptor {
-
-		fun implementsInterface(intf: Class<*>): Boolean
 	}
 ----
 
@@ -686,8 +615,7 @@ Introduction advice cannot be used with any pointcut, as it applies only at the 
 rather than the method, level. You can only use introduction advice with the
 `IntroductionAdvisor`, which has the following methods:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface IntroductionAdvisor extends Advisor, IntroductionInfo {
 
@@ -699,22 +627,6 @@ rather than the method, level. You can only use introduction advice with the
 	public interface IntroductionInfo {
 
 		Class<?>[] getInterfaces();
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface IntroductionAdvisor : Advisor, IntroductionInfo {
-
-		val classFilter: ClassFilter
-
-		@Throws(IllegalArgumentException::class)
-		fun validateInterfaces()
-	}
-
-	interface IntroductionInfo {
-
-		val interfaces: Array<Class<*>>
 	}
 ----
 

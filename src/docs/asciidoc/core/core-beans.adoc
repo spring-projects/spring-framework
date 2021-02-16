@@ -3406,15 +3406,9 @@ The `org.springframework.beans.factory.InitializingBean` interface lets a bean
 perform initialization work after the container has set all necessary properties on the
 bean. The `InitializingBean` interface specifies a single method:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	void afterPropertiesSet() throws Exception;
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	fun afterPropertiesSet()
 ----
 
 We recommend that you do not use the `InitializingBean` interface, because it
@@ -3491,15 +3485,9 @@ Implementing the `org.springframework.beans.factory.DisposableBean` interface le
 bean get a callback when the container that contains it is destroyed. The
 `DisposableBean` interface specifies a single method:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	void destroy() throws Exception;
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	fun destroy()
 ----
 
 We recommend that you do not use the `DisposableBean` callback interface, because it
@@ -3711,8 +3699,7 @@ Destroy methods are called in the same order:
 The `Lifecycle` interface defines the essential methods for any object that has its own
 lifecycle requirements (such as starting and stopping some background process):
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Lifecycle {
 
@@ -3723,18 +3710,6 @@ lifecycle requirements (such as starting and stopping some background process):
 		boolean isRunning();
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Lifecycle {
-
-		fun start()
-
-		fun stop()
-
-		val isRunning: Boolean
-	}
-----
 
 Any Spring-managed object may implement the `Lifecycle` interface. Then, when the
 `ApplicationContext` itself receives start and stop signals (for example, for a stop/restart
@@ -3742,24 +3717,13 @@ scenario at runtime), it cascades those calls to all `Lifecycle` implementations
 defined within that context. It does this by delegating to a `LifecycleProcessor`, shown
 in the following listing:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface LifecycleProcessor extends Lifecycle {
 
 		void onRefresh();
 
 		void onClose();
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface LifecycleProcessor : Lifecycle {
-
-		fun onRefresh()
-
-		fun onClose()
 	}
 ----
 
@@ -3788,43 +3752,23 @@ prior to objects of another type. In those cases, the `SmartLifecycle` interface
 another option, namely the `getPhase()` method as defined on its super-interface,
 `Phased`. The following listing shows the definition of the `Phased` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Phased {
 
 		int getPhase();
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Phased {
-
-		val phase: Int
-	}
-----
 
 The following listing shows the definition of the `SmartLifecycle` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface SmartLifecycle extends Lifecycle, Phased {
 
 		boolean isAutoStartup();
 
 		void stop(Runnable callback);
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface SmartLifecycle : Lifecycle, Phased {
-
-		val isAutoStartup: Boolean
-
-		fun stop(callback: Runnable)
 	}
 ----
 
@@ -3938,21 +3882,11 @@ When an `ApplicationContext` creates an object instance that implements the
 with a reference to that `ApplicationContext`. The following listing shows the definition
 of the `ApplicationContextAware` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface ApplicationContextAware {
 
 		void setApplicationContext(ApplicationContext applicationContext) throws BeansException;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface ApplicationContextAware {
-
-		@Throws(BeansException::class)
-		fun setApplicationContext(applicationContext: ApplicationContext)
 	}
 ----
 
@@ -3983,21 +3917,11 @@ When an `ApplicationContext` creates a class that implements the
 a reference to the name defined in its associated object definition. The following listing
 shows the definition of the BeanNameAware interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface BeanNameAware {
 
 		void setBeanName(String name) throws BeansException;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface BeanNameAware {
-
-		@Throws(BeansException::class)
-		fun setBeanName(name: String)
 	}
 ----
 
