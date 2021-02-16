@@ -404,11 +404,11 @@ objects:
 | Loaded from the classpath.
 
 | file:
-| `file:///data/config.xml`
+| `\file:///data/config.xml`
 | Loaded as a `URL` from the filesystem. See also <<resources-filesystemresource-caveats>>.
 
 | https:
-| `https://myserver/logo.png`
+| `\https://myserver/logo.png`
 | Loaded as a `URL`.
 
 | (none)
