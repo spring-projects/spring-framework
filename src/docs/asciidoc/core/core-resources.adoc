@@ -465,12 +465,12 @@ application components instead of `ResourceLoader`.
 == Resources as Dependencies
 
 If the bean itself is going to determine and supply the resource path through some sort
-of dynamic process, it probably makes sense for the bean to use the `ResourceLoader`
-interface to load resources. For example, consider the loading of a template of some
-sort, where the specific resource that is needed depends on the role of the user. If the
-resources are static, it makes sense to eliminate the use of the `ResourceLoader`
-interface completely, have the bean expose the `Resource` properties it needs,
-and expect them to be injected into it.
+of dynamic process, it probably makes sense for the bean to use the `ResourceLoader` or
+`ResourcePatternResolver` interface to load resources. For example, consider the loading
+of a template of some sort, where the specific resource that is needed depends on the
+role of the user. If the resources are static, it makes sense to eliminate the use of the
+`ResourceLoader` interface (or `ResourcePatternResolver` interface) completely, have the
+bean expose the `Resource` properties it needs, and expect them to be injected into it.
 
 What makes it trivial to then inject these properties is that all application contexts
 register and use a special JavaBeans `PropertyEditor`, which can convert `String` paths
@@ -484,14 +484,14 @@ be configured with a simple string for that resource, as the following example s
 	</bean>
 ----
 
-Note that the resource path has no prefix. Consequently, because the application context itself is
-going to be used as the `ResourceLoader`, the resource itself is loaded through a
-`ClassPathResource`, a `FileSystemResource`, or a `ServletContextResource`,
-depending on the exact type of the context.
+Note that the resource path has no prefix. Consequently, because the application context
+itself is going to be used as the `ResourceLoader`, the resource is loaded through a
+`ClassPathResource`, a `FileSystemResource`, or a `ServletContextResource`, depending on
+the exact type of the application context.
 
-If you need to force a specific `Resource` type to be used, you can use a prefix.
-The following two examples show how to force a `ClassPathResource` and a
-`UrlResource` (the latter being used to access a filesystem file):
+If you need to force a specific `Resource` type to be used, you can use a prefix. The
+following two examples show how to force a `ClassPathResource` and a `UrlResource` (the
+latter being used to access a file in the filesystem):
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -552,12 +552,12 @@ used. However, consider the following example, which creates a `FileSystemXmlApp
 	val ctx = FileSystemXmlApplicationContext("conf/appContext.xml")
 ----
 
-Now the bean definition is loaded from a filesystem location (in this case, relative to
+Now the bean definitions are loaded from a filesystem location (in this case, relative to
 the current working directory).
 
 Note that the use of the special `classpath` prefix or a standard URL prefix on the
-location path overrides the default type of `Resource` created to load the definition.
-Consider the following example:
+location path overrides the default type of `Resource` created to load the bean
+definitions. Consider the following example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -663,11 +663,11 @@ contents of the jar file to resolve the wildcards.
 [[resources-app-ctx-portability]]
 ===== Implications on Portability
 
-If the specified path is already a file URL (either implicitly because the base
+If the specified path is already a `file` URL (either implicitly because the base
 `ResourceLoader` is a filesystem one or explicitly), wildcarding is guaranteed to
 work in a completely portable fashion.
 
-If the specified path is a classpath location, the resolver must obtain the last
+If the specified path is a `classpath` location, the resolver must obtain the last
 non-wildcard path segment URL by making a `Classloader.getResource()` call. Since this
 is just a node of the path (not the file at the end), it is actually undefined (in the
 `ClassLoader` javadoc) exactly what sort of a URL is returned in this case. In practice,
@@ -754,7 +754,7 @@ avoiding the aforementioned portability problems with searching the jar file roo
 ====
 
 Ant-style patterns with `classpath:` resources are not guaranteed to find matching
-resources if the root package to search is available in multiple class path locations.
+resources if the root package to search is available in multiple classpath locations.
 Consider the following example of a resource location:
 
 [literal,subs="verbatim,quotes"]
@@ -769,12 +769,13 @@ Now consider an Ant-style path that someone might use to try to find that file:
 classpath:com/mycompany/**/service-context.xml
 ----
 
-Such a resource may be in only one location, but when a path such as the preceding example
-is used to try to resolve it, the resolver works off the (first) URL returned by
-`getResource("com/mycompany");`. If this base package node exists in multiple
-`ClassLoader` locations, the actual end resource may not be there. Therefore, in such a case
-you should prefer using `classpath*:` with the same Ant-style pattern, which
-searches all class path locations that contain the root package.
+Such a resource may exist in only one location in the classpath, but when a path such as
+the preceding example is used to try to resolve it, the resolver works off the (first)
+URL returned by `getResource("com/mycompany");`. If this base package node exists in
+multiple `ClassLoader` locations, the desired resource may not exist in the first
+location found. Therefore, in such cases you should prefer using `classpath*:` with the
+same Ant-style pattern, which searches all classpath locations that contain the
+`com.mycompany` base package: `classpath*:com/mycompany/**/service-context.xml`.
 
 
 
