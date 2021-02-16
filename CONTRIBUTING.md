@@ -127,8 +127,5 @@ edit source files, and submit directly from GitHub.
 When making changes locally, execute `./gradlew asciidoctor` and then browse the result under
 `build/docs/ref-docs/html5/index.html`.
 
-Asciidoctor also supports live editing. For more details read
-[Editing AsciiDoc with Live Preview](https://asciidoctor.org/docs/editing-asciidoc-with-live-preview/).
-Note that if you choose the
-[System Monitor](https://asciidoctor.org/docs/editing-asciidoc-with-live-preview/#using-a-system-monitor)
-option, you can find a Guardfile under `src/docs/asciidoc`.
+Asciidoctor also supports live editing. For more details see
+[AsciiDoc Tooling](https://docs.asciidoctor.org/asciidoctor/latest/tooling/).
