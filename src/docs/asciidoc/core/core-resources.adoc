@@ -460,12 +460,18 @@ contain multiple files with the same path and the same name. See
 on wildcard support with the `classpath*:` resource prefix.
 
 A passed-in `ResourceLoader` (for example, one supplied via
-<<resources-resourceloaderaware, `ResourceLoaderAware`>> semantics can be checked whether
+<<resources-resourceloaderaware,`ResourceLoaderAware`>> semantics) can be checked whether
 it implements this extended interface too.
 
 `PathMatchingResourcePatternResolver` is a standalone implementation that is usable
 outside an `ApplicationContext` and is also used by `ResourceArrayPropertyEditor` for
-populating `Resource[]` bean properties.
+populating `Resource[]` bean properties. `PathMatchingResourcePatternResolver` is able to
+resolve a specified resource location path into one or more matching `Resource` objects.
+The source path may be a simple path which has a one-to-one mapping to a target
+`Resource`, or alternatively may contain the special `classpath*:` prefix and/or internal
+Ant-style regular expressions (matched using Spring's
+`org.springframework.util.AntPathMatcher` utility). Both of the latter are effectively
+wildcards.
 
 [NOTE]
 ====
@@ -475,6 +481,8 @@ interface. The same is true for the `ApplicationContext` instance itself which a
 implements the `ResourcePatternResolver` interface and delegates to the default
 `PathMatchingResourcePatternResolver`.
 ====
+
+
 
 
 [[resources-resourceloaderaware]]
@@ -524,6 +532,11 @@ autowiring features. In that case, the `ResourceLoader` is autowired into a fiel
 constructor argument, or method parameter that expects the `ResourceLoader` type as long
 as the field, constructor, or method in question carries the `@Autowired` annotation.
 For more information, see <<beans-autowired-annotation>>.
+
+NOTE: To load one or more `Resource` objects for a resource path that contains wildcards
+or makes use of the special `classpath*:` resource prefix, consider having an instance of
+<<resources-resourcepatternresolver,`ResourcePatternResolver`>> autowired into your
+application components instead of `ResourceLoader`.
 
 
 
