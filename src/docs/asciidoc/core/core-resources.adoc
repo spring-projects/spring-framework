@@ -40,7 +40,7 @@ following listing provides an overview of the `Resource` interface. See the
 {api-spring-framework}/core/io/Resource.html[`Resource`] javadoc for further details.
 
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 .Java
 ----
 	public interface Resource extends InputStreamSource {
@@ -70,44 +70,6 @@ following listing provides an overview of the `Resource` interface. See the
 		String getFilename();
 
 		String getDescription();
-
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Resource : InputStreamSource {
-
-		fun exists(): Boolean
-
-		fun isReadable(): Boolean
-
-		fun isOpen(): Boolean
-
-		fun isFile(): Boolean
-
-		fun getURL(): URL
-
-		@Throws(IOException::class)
-		fun getURI(): URI
-
-		val file: File
-
-		@Throws(IOException::class)
-		fun readableChannel(): ReadableByteChannel
-
-		@Throws(IOException::class)
-		fun contentLength(): long
-
-		@Throws(IOException::class)
-		fun lastModified(): long
-
-		@Throws(IOException::class)
-		fun createRelative(relativePath: String): Resource
-
-		val filename: String
-
-		val description: String
 	}
 ----
 
@@ -115,20 +77,12 @@ As the definition of the `Resource` interface shows, it extends the `InputStream
 interface. The following listing shows the definition of the `InputStreamSource`
 interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 .Java
 ----
 	public interface InputStreamSource {
 
 		InputStream getInputStream() throws IOException;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface InputStreamSource {
-
-		val inputStream: InputStream
 	}
 ----
 
@@ -303,7 +257,7 @@ The `ResourceLoader` interface is meant to be implemented by objects that can re
 (that is, load) `Resource` instances. The following listing shows the `ResourceLoader`
 interface definition:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 .Java
 ----
 	public interface ResourceLoader {
@@ -311,16 +265,6 @@ interface definition:
 		Resource getResource(String location);
 
 		ClassLoader getClassLoader();
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface ResourceLoader {
-
-		fun getResource(location: String): Resource
-
-		fun getClassLoader(): ClassLoader
 	}
 ----
 
@@ -426,7 +370,7 @@ The `ResourcePatternResolver` interface is an extension to the `ResourceLoader` 
 which defines a strategy for resolving a location pattern (for example, an Ant-style path
 pattern) into  `Resource` objects.
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 .Java
 ----
 	public interface ResourcePatternResolver extends ResourceLoader {
@@ -434,20 +378,6 @@ pattern) into  `Resource` objects.
 		String CLASSPATH_ALL_URL_PREFIX = "classpath*:";
 
 		Resource[] getResources(String locationPattern) throws IOException;
-
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface ResourcePatternResolver: ResourceLoader {
-
-		@JvmField
-		val CLASSPATH_ALL_URL_PREFIX: String = "classpath*:"
-
-		@Throws(IOException::class)
-		fun getResources(locationPattern: String): Resource[]
-
 	}
 ----
 
@@ -492,20 +422,12 @@ The `ResourceLoaderAware` interface is a special callback interface which identi
 components that expect to be provided a `ResourceLoader` reference. The following listing
 shows the definition of the `ResourceLoaderAware` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 .Java
 ----
 	public interface ResourceLoaderAware {
 
 		void setResourceLoader(ResourceLoader resourceLoader);
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface ResourceLoaderAware {
-
-		fun setResourceLoader(resourceLoader: ResourceLoader)
 	}
 ----
 
