@@ -24,6 +24,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.lang.Nullable;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -33,8 +35,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 3.1
  */
 class CustomEnvironmentTests {
-
-	// -- tests relating to customizing reserved default profiles ----------------------
 
 	@Test
 	void control() {
@@ -111,11 +111,12 @@ class CustomEnvironmentTests {
 	public void withNoProfileProperties() {
 		ConfigurableEnvironment env = new AbstractEnvironment() {
 			@Override
+			@Nullable
 			protected String doGetActiveProfilesProperty() {
 				return null;
 			}
-
 			@Override
+			@Nullable
 			protected String doGetDefaultProfilesProperty() {
 				return null;
 			}
@@ -140,23 +141,23 @@ class CustomEnvironmentTests {
 	@Test
 	void withCustomPropertyResolver() {
 		class CustomPropertySourcesPropertyResolver extends PropertySourcesPropertyResolver {
-			public CustomPropertySourcesPropertyResolver(
-					PropertySources propertySources) {
+			public CustomPropertySourcesPropertyResolver(PropertySources propertySources) {
 				super(propertySources);
 			}
-
 			@Override
+			@Nullable
 			public String getProperty(String key) {
 				return super.getProperty(key)+"-test";
 			}
 		}
+
 		ConfigurableEnvironment env = new AbstractEnvironment() {
 			@Override
-			protected ConfigurablePropertyResolver createPropertyResolver(
-					MutablePropertySources propertySources) {
+			protected ConfigurablePropertyResolver createPropertyResolver(MutablePropertySources propertySources) {
 				return new CustomPropertySourcesPropertyResolver(propertySources);
 			}
 		};
+
 		Map<String, Object> values = new LinkedHashMap<>();
 		values.put("spring", "framework");
 		PropertySource<?> propertySource = new MapPropertySource("test", values);
@@ -168,6 +169,4 @@ class CustomEnvironmentTests {
 		return Profiles.of(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME);
 	}
 
-
-	// -- tests relating to customizing property sources -------------------------------
 }

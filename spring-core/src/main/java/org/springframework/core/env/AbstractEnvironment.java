@@ -284,6 +284,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @since 5.3.4
 	 * @see #ACTIVE_PROFILES_PROPERTY_NAME
 	 */
+	@Nullable
 	protected String doGetActiveProfilesProperty() {
 		return getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
@@ -350,6 +351,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @since 5.3.4
 	 * @see #DEFAULT_PROFILES_PROPERTY_NAME
 	 */
+	@Nullable
 	protected String doGetDefaultProfilesProperty() {
 		return getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
 	}
