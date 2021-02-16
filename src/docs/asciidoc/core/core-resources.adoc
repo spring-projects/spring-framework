@@ -133,8 +133,7 @@ work.
 [[resources-implementations]]
 == Built-in `Resource` Implementations
 
-Spring includes several built-in `Resource` implementations, including but not limited to
-the following:
+Spring includes several built-in `Resource` implementations:
 
 * <<resources-implementations-urlresource>>
 * <<resources-implementations-classpathresource>>
@@ -143,6 +142,10 @@ the following:
 * <<resources-implementations-servletcontextresource>>
 * <<resources-implementations-inputstreamresource>>
 * <<resources-implementations-bytearrayresource>>
+
+For a complete list of `Resource` implementations available in Spring, consult the
+"All Known Implementing Classes" section of the
+{api-spring-framework}/core/io/Resource.html[`Resource`] javadoc.
 
 
 
