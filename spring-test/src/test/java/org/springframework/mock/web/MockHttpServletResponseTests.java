@@ -18,6 +18,8 @@ package org.springframework.mock.web;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
@@ -415,12 +417,17 @@ class MockHttpServletResponseTests {
 	 * @since 5.1.11
 	 */
 	@Test
-	void setCookieHeaderWithExpiresAttribute() {
-		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=Tue, 8 Oct 2019 19:50:00 GMT; Secure; " +
-				"HttpOnly; SameSite=Lax";
+	void setCookieHeaderWithMaxAgeAndExpiresAttributes() {
+		String expiryDate = "Tue, 8 Oct 2019 19:50:00 GMT";
+		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=" + expiryDate + "; Secure; HttpOnly; SameSite=Lax";
 		response.setHeader(SET_COOKIE, cookieValue);
-		assertNumCookies(1);
 		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(cookieValue);
+
+		assertNumCookies(1);
+		assertThat(response.getCookies()[0]).isInstanceOf(MockCookie.class);
+		MockCookie mockCookie = (MockCookie) response.getCookies()[0];
+		assertThat(mockCookie.getMaxAge()).isEqualTo(100);
+		assertThat(mockCookie.getExpires()).isEqualTo(ZonedDateTime.parse(expiryDate, DateTimeFormatter.RFC_1123_DATE_TIME));
 	}
 
 	/**
@@ -454,18 +461,24 @@ class MockHttpServletResponseTests {
 	 * @since 5.1.11
 	 */
 	@Test
-	void addCookieHeaderWithExpiresAttribute() {
-		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=Tue, 8 Oct 2019 19:50:00 GMT; Secure; " +
-				"HttpOnly; SameSite=Lax";
+	void addCookieHeaderWithMaxAgeAndExpiresAttributes() {
+		String expiryDate = "Tue, 8 Oct 2019 19:50:00 GMT";
+		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=" + expiryDate + "; Secure; HttpOnly; SameSite=Lax";
 		response.addHeader(SET_COOKIE, cookieValue);
 		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(cookieValue);
+
+		assertNumCookies(1);
+		assertThat(response.getCookies()[0]).isInstanceOf(MockCookie.class);
+		MockCookie mockCookie = (MockCookie) response.getCookies()[0];
+		assertThat(mockCookie.getMaxAge()).isEqualTo(100);
+		assertThat(mockCookie.getExpires()).isEqualTo(ZonedDateTime.parse(expiryDate, DateTimeFormatter.RFC_1123_DATE_TIME));
 	}
 
 	/**
 	 * @since 5.1.12
 	 */
 	@Test
-	void addCookieHeaderWithZeroExpiresAttribute() {
+	void addCookieHeaderWithMaxAgeAndZeroExpiresAttributes() {
 		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=0";
 		response.addHeader(SET_COOKIE, cookieValue);
 		assertNumCookies(1);
@@ -476,14 +489,24 @@ class MockHttpServletResponseTests {
 	}
 
 	/**
-	 * @since 5.1.12
+	 * @since 5.2.14
 	 */
 	@Test
-	void addCookieHeaderWithOnlyExpiresAttribute() {
-		String cookieValue = "SESSION=123; Path=/; Expires=Tue, 8 Oct 2019 19:50:00 GMT";
+	void addCookieHeaderWithExpiresAttributeWithoutMaxAgeAttribute() {
+		String expiryDate = "Tue, 8 Oct 2019 19:50:00 GMT";
+		String cookieValue = "SESSION=123; Path=/; Expires=" + expiryDate;
 		response.addHeader(SET_COOKIE, cookieValue);
-		assertNumCookies(1);
+		System.err.println(response.getCookie("SESSION"));
 		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(cookieValue);
+
+		assertNumCookies(1);
+		assertThat(response.getCookies()[0]).isInstanceOf(MockCookie.class);
+		MockCookie mockCookie = (MockCookie) response.getCookies()[0];
+		assertThat(mockCookie.getName()).isEqualTo("SESSION");
+		assertThat(mockCookie.getValue()).isEqualTo("123");
+		assertThat(mockCookie.getPath()).isEqualTo("/");
+		assertThat(mockCookie.getMaxAge()).isEqualTo(-1);
+		assertThat(mockCookie.getExpires()).isEqualTo(ZonedDateTime.parse(expiryDate, DateTimeFormatter.RFC_1123_DATE_TIME));
 	}
 
 	@Test

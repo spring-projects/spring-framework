@@ -396,7 +396,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			buf.append(expires.format(DateTimeFormatter.RFC_1123_DATE_TIME));
 		}
 
-
 		if (cookie.getSecure()) {
 			buf.append("; Secure");
 		}
