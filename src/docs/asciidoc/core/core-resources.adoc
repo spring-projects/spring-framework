@@ -474,12 +474,37 @@ bean expose the `Resource` properties it needs, and expect them to be injected i
 
 What makes it trivial to then inject these properties is that all application contexts
 register and use a special JavaBeans `PropertyEditor`, which can convert `String` paths
-to `Resource` objects. So, if `myBean` has a template property of type `Resource`, it can
-be configured with a simple string for that resource, as the following example shows:
+to `Resource` objects. For example, the following `MyBean` class has a `template`
+property of type `Resource`.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	package example;
+
+	public class MyBean {
+
+		private Resource template;
+
+		public setTemplate(Resource template) {
+			this.template = template;
+		}
+
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class MyBean(var template: Resource)
+----
+
+In an XML configuration file, the `template` property can be configured with a simple
+string for that resource, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	<bean id="myBean" class="...">
+	<bean id="myBean" class="example.MyBean">
 		<property name="template" value="some/resource/path/myTemplate.txt"/>
 	</bean>
 ----
@@ -501,6 +526,66 @@ latter being used to access a file in the filesystem):
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<property name="template" value="file:///some/resource/path/myTemplate.txt"/>
+----
+
+If the `MyBean` class is refactored for use with annotation-driven configuration, the
+path to `myTemplate.txt` can be stored under a key named `template.path` -- for example,
+in a properties file made available to the Spring `Environment` (see
+<<beans-environment>>). The template path can then be referenced via the `@Value`
+annotation using a property placeholder (see <<beans-value-annotations>>). Spring will
+retrieve the value of the template path as a string, and a special `PropertyEditor` will
+convert the string to a `Resource` object to be injected into the `MyBean` constructor.
+The following example demonstrates how to achieve this.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Component
+	public class MyBean {
+
+		private final Resource template;
+
+		public MyBean(@Value("${template.path}") Resource template) {
+			this.template = template;
+		}
+
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Component
+	class MyBean(@Value("\${template.path}") private val template: Resource)
+----
+
+If we want to support multiple templates discovered under the same path in multiple
+locations in the classpath -- for example, in multiple jars in the classpath -- we can
+use the special `classpath*:` prefix and wildcarding to define a `templates.path` key as
+`classpath*:/config/templates/*.txt`. If we redefine the `MyBean` class as follows,
+Spring will convert the template path pattern into an array of `Resource` objects that
+can be injected into the `MyBean` constructor.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Component
+	public class MyBean {
+
+		private final Resource[] templates;
+
+		public MyBean(@Value("${templates.path}") Resource[] templates) {
+			this.templates = templates;
+		}
+
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Component
+	class MyBean(@Value("\${templates.path}") private val templates: Resource[])
 ----
 
 
