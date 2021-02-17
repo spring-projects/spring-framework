@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import static org.springframework.web.testfixture.http.server.reactive.MockServe
  * Unit tests for {@link ResourceUrlProvider}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
 public class ResourceUrlProviderTests {
 
@@ -62,7 +63,7 @@ public class ResourceUrlProviderTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.locations.add(new ClassPathResource("test/", getClass()));
 		this.locations.add(new ClassPathResource("testalternatepath/", getClass()));
 		this.handler.setLocations(this.locations);
@@ -73,7 +74,7 @@ public class ResourceUrlProviderTests {
 
 
 	@Test
-	public void getStaticResourceUrl() {
+	void getStaticResourceUrl() {
 		String expected = "/resources/foo.css";
 		String actual = this.urlProvider.getForUriString(expected, this.exchange).block(TIMEOUT);
 
@@ -81,7 +82,7 @@ public class ResourceUrlProviderTests {
 	}
 
 	@Test  // SPR-13374
-	public void getStaticResourceUrlRequestWithQueryOrHash() {
+	void getStaticResourceUrlRequestWithQueryOrHash() {
 
 		String url = "/resources/foo.css?foo=bar&url=https://example.org";
 		String resolvedUrl = this.urlProvider.getForUriString(url, this.exchange).block(TIMEOUT);
@@ -93,7 +94,7 @@ public class ResourceUrlProviderTests {
 	}
 
 	@Test
-	public void getVersionedResourceUrl() {
+	void getVersionedResourceUrl() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 		List<ResourceResolver> resolvers = new ArrayList<>();
@@ -108,7 +109,7 @@ public class ResourceUrlProviderTests {
 	}
 
 	@Test  // SPR-12647
-	public void bestPatternMatch() {
+	void bestPatternMatch() {
 		ResourceWebHandler otherHandler = new ResourceWebHandler();
 		otherHandler.setLocations(this.locations);
 
@@ -129,7 +130,7 @@ public class ResourceUrlProviderTests {
 
 	@Test  // SPR-12592
 	@SuppressWarnings("resource")
-	public void initializeOnce() {
+	void initializeOnce() {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new MockServletContext());
 		context.register(HandlerMappingConfiguration.class);
@@ -137,6 +138,26 @@ public class ResourceUrlProviderTests {
 
 		assertThat(context.getBean(ResourceUrlProvider.class).getHandlerMap())
 				.hasKeySatisfying(pathPatternStringOf("/resources/**"));
+	}
+
+	@Test
+	void initializeOnCurrentContext() {
+		AnnotationConfigWebApplicationContext parentContext = new AnnotationConfigWebApplicationContext();
+		parentContext.setServletContext(new MockServletContext());
+		parentContext.register(ParentHandlerMappingConfiguration.class);
+
+		AnnotationConfigWebApplicationContext childContext = new AnnotationConfigWebApplicationContext();
+		childContext.setParent(parentContext);
+		childContext.setServletContext(new MockServletContext());
+		childContext.register(HandlerMappingConfiguration.class);
+
+		parentContext.refresh();
+		childContext.refresh();
+
+		ResourceUrlProvider parentUrlProvider = parentContext.getBean(ResourceUrlProvider.class);
+		assertThat(parentUrlProvider.getHandlerMap()).isEmpty();
+		ResourceUrlProvider childUrlProvider = childContext.getBean(ResourceUrlProvider.class);
+		assertThat(childUrlProvider.getHandlerMap()).hasKeySatisfying(pathPatternStringOf("/resources/**"));
 	}
 
 
@@ -154,6 +175,16 @@ public class ResourceUrlProviderTests {
 		public SimpleUrlHandlerMapping simpleUrlHandlerMapping() {
 			return new SimpleUrlHandlerMapping(Collections.singletonMap("/resources/**", new ResourceWebHandler()));
 		}
+
+		@Bean
+		public ResourceUrlProvider resourceUrlProvider() {
+			return new ResourceUrlProvider();
+		}
+	}
+
+	@Configuration
+	@SuppressWarnings({"unused", "WeakerAccess"})
+	static class ParentHandlerMappingConfiguration {
 
 		@Bean
 		public ResourceUrlProvider resourceUrlProvider() {
