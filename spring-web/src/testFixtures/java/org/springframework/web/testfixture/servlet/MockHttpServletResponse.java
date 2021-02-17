@@ -378,10 +378,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			buf.append("; Domain=").append(cookie.getDomain());
 		}
 		int maxAge = cookie.getMaxAge();
+		ZonedDateTime expires = (cookie instanceof MockCookie ? ((MockCookie) cookie).getExpires() : null);
 		if (maxAge >= 0) {
 			buf.append("; Max-Age=").append(maxAge);
 			buf.append("; Expires=");
-			ZonedDateTime expires = (cookie instanceof MockCookie ? ((MockCookie) cookie).getExpires() : null);
 			if (expires != null) {
 				buf.append(expires.format(DateTimeFormatter.RFC_1123_DATE_TIME));
 			}
@@ -390,6 +390,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 				headers.setExpires(maxAge > 0 ? System.currentTimeMillis() + 1000L * maxAge : 0);
 				buf.append(headers.getFirst(HttpHeaders.EXPIRES));
 			}
+		}
+		else if (expires != null) {
+			buf.append("; Expires=");
+			buf.append(expires.format(DateTimeFormatter.RFC_1123_DATE_TIME));
 		}
 
 		if (cookie.getSecure()) {
