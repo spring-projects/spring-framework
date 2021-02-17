@@ -386,7 +386,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 				headers.setExpires(maxAge > 0 ? System.currentTimeMillis() + 1000L * maxAge : 0);
 				buf.append(headers.getFirst(HttpHeaders.EXPIRES));
 			}
-		} else if (expires != null) {
+		}
+		else if (expires != null) {
 			buf.append("; Expires=");
 			buf.append(expires.format(DateTimeFormatter.RFC_1123_DATE_TIME));
 		}
