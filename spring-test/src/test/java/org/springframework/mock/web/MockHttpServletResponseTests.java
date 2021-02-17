@@ -475,6 +475,17 @@ class MockHttpServletResponseTests {
 		assertThat(header).startsWith("SESSION=123; Path=/; Max-Age=100; Expires=");
 	}
 
+	/**
+	 * @since 5.1.12
+	 */
+	@Test
+	void addCookieHeaderWithOnlyExpiresAttribute() {
+		String cookieValue = "SESSION=123; Path=/; Expires=Tue, 8 Oct 2019 19:50:00 GMT";
+		response.addHeader(SET_COOKIE, cookieValue);
+		assertNumCookies(1);
+		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(cookieValue);
+	}
+
 	@Test
 	void addCookie() {
 		MockCookie mockCookie = new MockCookie("SESSION", "123");
