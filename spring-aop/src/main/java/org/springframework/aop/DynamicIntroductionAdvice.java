@@ -26,7 +26,7 @@ import org.aopalliance.aop.Advice;
  * <p>Introductions are often <b>mixins</b>, enabling the building of composite
  * objects that can achieve many of the goals of multiple inheritance in Java.
  *
- * <p>Compared to {qlink IntroductionInfo}, this interface allows an advice to
+ * <p>Compared to {@link IntroductionInfo}, this interface allows an advice to
  * implement a range of interfaces that is not necessarily known in advance.
  * Thus an {@link IntroductionAdvisor} can be used to specify which interfaces
  * will be exposed in an advised object.
