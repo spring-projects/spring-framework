@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.Nullable;
@@ -127,4 +128,19 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 		return rowMapper;
 	}
 
+	/**
+	 * Extract the values for all columns in the current row.
+	 * <p>Utilizes public setters and result set meta-data.
+	 * @see java.sql.ResultSetMetaData
+	 */
+	@Override
+	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
+		BeanWrapperImpl bw = new BeanWrapperImpl();
+		initBeanWrapper(bw);
+
+		T mappedObject = constructMappedInstance(rs, bw);
+		bw.setBeanInstance(mappedObject);
+
+		return mappedObject;
+	}
 }
