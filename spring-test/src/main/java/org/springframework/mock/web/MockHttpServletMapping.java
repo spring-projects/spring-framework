@@ -24,6 +24,10 @@ import org.springframework.lang.Nullable;
 /**
  * Mock implementation of {@link HttpServletMapping}.
  *
+ * <p>Currently not exposed in {@link MockHttpServletMapping} as a setter to
+ * avoid issues for Maven builds in applications with a Servlet 3.1 runtime
+ * requirement.
+ *
  * @author Rossen Stoyanchev
  * @since 5.3.4
  */

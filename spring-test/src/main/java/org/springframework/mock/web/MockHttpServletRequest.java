@@ -52,7 +52,6 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletMapping;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -274,8 +273,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private boolean requestedSessionIdFromURL = false;
 
 	private final MultiValueMap<String, Part> parts = new LinkedMultiValueMap<>();
-
-	private HttpServletMapping httpServletMapping = new MockHttpServletMapping("", "", "", null);
 
 
 	// ---------------------------------------------------------------------
@@ -1391,15 +1388,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			result.addAll(list);
 		}
 		return result;
-	}
-
-	public void setHttpServletMapping(HttpServletMapping httpServletMapping) {
-		this.httpServletMapping = httpServletMapping;
-	}
-
-	@Override
-	public HttpServletMapping getHttpServletMapping() {
-		return this.httpServletMapping;
 	}
 
 	@Override
