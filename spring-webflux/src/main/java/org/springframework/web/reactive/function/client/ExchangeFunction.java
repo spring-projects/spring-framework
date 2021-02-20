@@ -25,11 +25,11 @@ import reactor.core.publisher.Mono;
  * <p>For example:
  * <pre class="code">
  * ExchangeFunction exchangeFunction = ExchangeFunctions.create(new ReactorClientHttpConnector());
- * ClientRequest&lt;Void&gt; request = ClientRequest.method(HttpMethod.GET, "https://example.com/resource").build();
+ * ClientRequest request = ClientRequest.create(HttpMethod.GET, URI.create("https://example.com/resource")).build();
  *
  * Mono&lt;String&gt; result = exchangeFunction
  *     .exchange(request)
- *     .then(response -> response.bodyToMono(String.class));
+ *     .flatMap(response -> response.bodyToMono(String.class));
  * </pre>
  *
  * @author Arjen Poutsma
