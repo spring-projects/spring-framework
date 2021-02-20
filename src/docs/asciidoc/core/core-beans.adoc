@@ -4326,6 +4326,21 @@ container. An example is Spring's `RequiredAnnotationBeanPostProcessor` -- a
 that JavaBean properties on beans that are marked with an (arbitrary) annotation are
 actually (configured to be) dependency-injected with a value.
 
+[NOTE]
+====
+The `@RequiredAnnotationBeanPostProcessor` is formally deprecated as of Spring Framework 5.1,
+see NOTE in <<beans-required-annotation,`@Required`>> annotation for details.
+====
+
+[[beans-factory-extension-bpp-examples-aabpp]]
+==== Example: The `AutowiredAnnotationBeanPostProcessor`
+
+Using callback interfaces or annotations in conjunction with a custom
+`BeanPostProcessor` implementation is a common means of extending the Spring IoC
+container. An example is Spring's `AutowiredAnnotationBeanPostProcessor` -- a
+`BeanPostProcessor` implementation that ships with the Spring distribution and autowires
+annotated fields, setter methods, and arbitrary config methods.
+
 
 
 [[beans-factory-extension-factory-postprocessors]]
