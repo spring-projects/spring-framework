@@ -97,7 +97,7 @@ public class PathEditor extends PropertyEditorSupport {
 		if (resource == null) {
 			setValue(null);
 		}
-		else if (!resource.exists() && nioPathCandidate) {
+		else if (!resource.isFile() && !resource.exists() && nioPathCandidate) {
 			setValue(Paths.get(text).normalize());
 		}
 		else {
