@@ -599,6 +599,9 @@ public abstract class ScriptUtils {
 					stmtNumber++;
 					try {
 						stmt.execute(statement);
+						if(!connection.getAutoCommit()) {
+							connection.commit();
+						}
 						int rowsAffected = stmt.getUpdateCount();
 						if (logger.isDebugEnabled()) {
 							logger.debug(rowsAffected + " returned as update count for SQL: " + statement);
@@ -612,6 +615,15 @@ public abstract class ScriptUtils {
 						}
 					}
 					catch (SQLException ex) {
+						if (connection != null && !connection.getAutoCommit()) {
+							try {
+								connection.rollback();
+							} catch (SQLException exception) {
+								if (logger.isDebugEnabled()) {
+									logger.debug(String.format("Failed to rollback SQL script statement #%s of %s: %s", stmtNumber, resource, stmt), exception);
+								}
+							}
+						}
 						boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
 						if (continueOnError || (dropStatement && ignoreFailedDrops)) {
 							if (logger.isDebugEnabled()) {
