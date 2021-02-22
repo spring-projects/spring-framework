@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,14 +153,31 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 				(this.detectHandlerFunctionsInAncestorContexts ?
 						BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, RouterFunction.class) :
 						applicationContext.getBeansOfType(RouterFunction.class));
-
 		List<RouterFunction> routerFunctions = new ArrayList<>(beans.values());
-		if (!CollectionUtils.isEmpty(routerFunctions) && logger.isInfoEnabled()) {
-			routerFunctions.forEach(routerFunction -> logger.info("Mapped " + routerFunction));
+		this.routerFunction = routerFunctions.stream().reduce(RouterFunction::andOther).orElse(null);
+		logRouterFunctions(routerFunctions);
+	}
+
+	@SuppressWarnings("rawtypes")
+	private void logRouterFunctions(List<RouterFunction> routerFunctions) {
+		if (mappingsLogger.isDebugEnabled()) {
+			routerFunctions.forEach(function -> mappingsLogger.debug("Mapped " + function));
 		}
-		this.routerFunction = routerFunctions.stream()
-				.reduce(RouterFunction::andOther)
-				.orElse(null);
+		else if (logger.isDebugEnabled()) {
+			int total = routerFunctions.size();
+			String message = total + " RouterFunction(s) in " + formatMappingName();
+			if (logger.isTraceEnabled()) {
+				if (total > 0) {
+					routerFunctions.forEach(function -> logger.trace("Mapped " + function));
+				}
+				else {
+					logger.trace(message);
+				}
+			}
+			else if (total > 0) {
+				logger.debug(message);
+			}
+		}
 	}
 
 	/**

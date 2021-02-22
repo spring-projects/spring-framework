@@ -800,6 +800,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	@Override
 	public String toString() {
-		return "ResourceHttpRequestHandler " + getLocations();
+		return "ResourceHttpRequestHandler " +
+				getLocations().toString()
+						.replaceAll("class path resource", "Classpath")
+						.replaceAll("ServletContext resource", "ServletContext");
 	}
+
 }

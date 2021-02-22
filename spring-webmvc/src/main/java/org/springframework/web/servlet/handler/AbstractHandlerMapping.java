@@ -26,10 +26,13 @@ import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.core.Ordered;
+import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.http.server.RequestPath;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
@@ -74,6 +77,11 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		implements HandlerMapping, Ordered, BeanNameAware {
+
+	/** Dedicated "hidden" logger for request mappings. */
+	protected final Log mappingsLogger =
+			LogDelegateFactory.getHiddenLog(HandlerMapping.class.getName() + ".Mappings");
+
 
 	@Nullable
 	private Object defaultHandler;
@@ -358,7 +366,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	protected String formatMappingName() {
-		return this.beanName != null ? "'" + this.beanName + "'" : "<unknown>";
+		return this.beanName != null ? "'" + this.beanName + "'" : getClass().getName();
 	}
 
 

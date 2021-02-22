@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,6 +210,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					(MethodIntrospector.MetadataLookup<T>) method -> getMappingForMethod(method, userType));
 			if (logger.isTraceEnabled()) {
 				logger.trace(formatMappings(userType, methods));
+			}
+			else if (mappingsLogger.isDebugEnabled()) {
+				mappingsLogger.debug(formatMappings(userType, methods));
 			}
 			methods.forEach((method, mapping) -> {
 				Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
