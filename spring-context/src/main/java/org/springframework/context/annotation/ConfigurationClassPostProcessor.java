@@ -85,6 +85,7 @@ import org.springframework.util.ClassUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.0
  */
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
@@ -389,21 +390,30 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
 			Object configClassAttr = beanDef.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE);
+			AnnotationMetadata annotationMetadata = null;
 			MethodMetadata methodMetadata = null;
 			if (beanDef instanceof AnnotatedBeanDefinition) {
-				methodMetadata = ((AnnotatedBeanDefinition) beanDef).getFactoryMethodMetadata();
+				AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition) beanDef;
+				annotationMetadata = annotatedBeanDefinition.getMetadata();
+				methodMetadata = annotatedBeanDefinition.getFactoryMethodMetadata();
 			}
 			if ((configClassAttr != null || methodMetadata != null) && beanDef instanceof AbstractBeanDefinition) {
 				// Configuration class (full or lite) or a configuration-derived @Bean method
-				// -> resolve bean class at this point...
+				// -> eagerly resolve bean class at this point, unless it's a 'lite' configuration
+				// or component class without @Bean methods.
 				AbstractBeanDefinition abd = (AbstractBeanDefinition) beanDef;
 				if (!abd.hasBeanClass()) {
-					try {
-						abd.resolveBeanClass(this.beanClassLoader);
-					}
-					catch (Throwable ex) {
-						throw new IllegalStateException(
-								"Cannot load configuration class: " + beanDef.getBeanClassName(), ex);
+					boolean liteConfigurationCandidateWithoutBeanMethods =
+							(ConfigurationClassUtils.CONFIGURATION_CLASS_LITE.equals(configClassAttr) &&
+								annotationMetadata != null && !ConfigurationClassUtils.hasBeanMethods(annotationMetadata));
+					if (!liteConfigurationCandidateWithoutBeanMethods) {
+						try {
+							abd.resolveBeanClass(this.beanClassLoader);
+						}
+						catch (Throwable ex) {
+							throw new IllegalStateException(
+									"Cannot load configuration class: " + beanDef.getBeanClassName(), ex);
+						}
 					}
 				}
 			}
