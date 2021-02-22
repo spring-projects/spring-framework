@@ -4316,30 +4316,28 @@ org.springframework.scripting.groovy.GroovyMessenger@272961
 ----
 
 
-[[beans-factory-extension-bpp-examples-rabpp]]
-==== Example: The `RequiredAnnotationBeanPostProcessor`
-
-Using callback interfaces or annotations in conjunction with a custom
-`BeanPostProcessor` implementation is a common means of extending the Spring IoC
-container. An example is Spring's `RequiredAnnotationBeanPostProcessor` -- a
-`BeanPostProcessor` implementation that ships with the Spring distribution and that ensures
-that JavaBean properties on beans that are marked with an (arbitrary) annotation are
-actually (configured to be) dependency-injected with a value.
-
-[NOTE]
-====
-The `@RequiredAnnotationBeanPostProcessor` is formally deprecated as of Spring Framework 5.1,
-see NOTE in <<beans-required-annotation,`@Required`>> annotation for details.
-====
-
 [[beans-factory-extension-bpp-examples-aabpp]]
 ==== Example: The `AutowiredAnnotationBeanPostProcessor`
 
-Using callback interfaces or annotations in conjunction with a custom
-`BeanPostProcessor` implementation is a common means of extending the Spring IoC
-container. An example is Spring's `AutowiredAnnotationBeanPostProcessor` -- a
-`BeanPostProcessor` implementation that ships with the Spring distribution and autowires
-annotated fields, setter methods, and arbitrary config methods.
+Using callback interfaces or annotations in conjunction with a custom `BeanPostProcessor`
+implementation is a common means of extending the Spring IoC container. An example is
+Spring's `AutowiredAnnotationBeanPostProcessor` -- a `BeanPostProcessor` implementation
+that ships with the Spring distribution and autowires annotated fields, setter methods,
+and arbitrary config methods.
+
+[[beans-factory-extension-bpp-examples-rabpp]]
+==== Example: The `RequiredAnnotationBeanPostProcessor`
+
+Spring's `RequiredAnnotationBeanPostProcessor` is a `BeanPostProcessor` implementation
+that ships with the Spring distribution and that ensures that JavaBean properties on
+beans that are marked with an (arbitrary) annotation are actually (configured to be)
+dependency-injected with a value.
+
+[NOTE]
+====
+The `RequiredAnnotationBeanPostProcessor` is formally deprecated as of Spring Framework
+5.1. See note in the section on <<beans-required-annotation,`@Required`>> for details.
+====
 
 
 
@@ -4603,7 +4601,7 @@ An alternative to XML setup is provided by annotation-based configuration, which
 the bytecode metadata for wiring up components instead of angle-bracket declarations.
 Instead of using XML to describe a bean wiring, the developer moves the configuration
 into the component class itself by using annotations on the relevant class, method, or
-field declaration. As mentioned in <<beans-factory-extension-bpp-examples-rabpp>>, using
+field declaration. As mentioned in <<beans-factory-extension-bpp-examples-aabpp>>, using
 a `BeanPostProcessor` in conjunction with annotations is a common means of extending the
 Spring IoC container. For example, Spring 2.0 introduced the possibility of enforcing
 required properties with the <<beans-required-annotation,`@Required`>> annotation. Spring
@@ -4645,8 +4643,7 @@ configuration (notice the inclusion of the `context` namespace):
 (The implicitly registered post-processors include
 {api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`],
 {api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`],
-{api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`],
-and the aforementioned
+{api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`], and
 {api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`].)
 
 [NOTE]
@@ -4693,7 +4690,6 @@ example:
 }
 ----
 
-
 This annotation indicates that the affected bean property must be populated at
 configuration time, through an explicit property value in a bean definition or through
 autowiring. The container throws an exception if the affected bean property has not been
@@ -4704,9 +4700,10 @@ references and values even when you use the class outside of a container.
 
 [NOTE]
 ====
-The `@Required` annotation is formally deprecated as of Spring Framework 5.1, in favor
-of using constructor injection for required settings (or a custom implementation of
-`InitializingBean.afterPropertiesSet()` along with bean property setter methods).
+The `@Required` annotation is formally deprecated as of Spring Framework 5.1, in favor of
+using constructor injection for required settings (or a custom implementation of
+`InitializingBean.afterPropertiesSet()` or a custom `@PostConstruct` method along with
+bean property setter methods).
 ====
 
 
