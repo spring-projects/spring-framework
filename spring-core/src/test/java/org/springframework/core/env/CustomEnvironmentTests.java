@@ -108,7 +108,7 @@ class CustomEnvironmentTests {
 	}
 
 	@Test
-	public void withNoProfileProperties() {
+	void withNoProfileProperties() {
 		ConfigurableEnvironment env = new AbstractEnvironment() {
 			@Override
 			@Nullable
@@ -131,7 +131,7 @@ class CustomEnvironmentTests {
 	}
 
 	@Test
-	public void withCustomMutablePropertySources() {
+	void withCustomMutablePropertySources() {
 		class CustomMutablePropertySources extends MutablePropertySources {}
 		MutablePropertySources propertySources = new CustomMutablePropertySources();
 		ConfigurableEnvironment env = new AbstractEnvironment(propertySources) {};
