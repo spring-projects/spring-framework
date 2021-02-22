@@ -54,9 +54,17 @@ public class StandardServletEnvironment extends StandardEnvironment implements C
 	public static final String JNDI_PROPERTY_SOURCE_NAME = "jndiProperties";
 
 
+	/**
+	 * Create a new {@code StandardServletEnvironment} instance.
+	 */
 	public StandardServletEnvironment() {
 	}
 
+	/**
+	 * Create a new {@code StandardServletEnvironment} instance with a specific {@link MutablePropertySources} instance.
+	 * @param propertySources property sources to use
+	 * @since 5.3.4
+	 */
 	protected StandardServletEnvironment(MutablePropertySources propertySources) {
 		super(propertySources);
 	}
