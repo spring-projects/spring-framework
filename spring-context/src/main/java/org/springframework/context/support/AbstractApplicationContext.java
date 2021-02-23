@@ -46,6 +46,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.ApplicationStartupAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.EnvironmentAware;
@@ -692,7 +693,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
 		beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
 		beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
-		beanFactory.ignoreDependencyInterface(ApplicationStartup.class);
+		beanFactory.ignoreDependencyInterface(ApplicationStartupAware.class);
 
 		// BeanFactory interface not registered as resolvable type in a plain factory.
 		// MessageSource registered (and found for autowiring) as a bean.
