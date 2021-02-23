@@ -4325,20 +4325,6 @@ Spring's `AutowiredAnnotationBeanPostProcessor` -- a `BeanPostProcessor` impleme
 that ships with the Spring distribution and autowires annotated fields, setter methods,
 and arbitrary config methods.
 
-[[beans-factory-extension-bpp-examples-rabpp]]
-==== Example: The `RequiredAnnotationBeanPostProcessor`
-
-Spring's `RequiredAnnotationBeanPostProcessor` is a `BeanPostProcessor` implementation
-that ships with the Spring distribution and that ensures that JavaBean properties on
-beans that are marked with an (arbitrary) annotation are actually (configured to be)
-dependency-injected with a value.
-
-[NOTE]
-====
-The `RequiredAnnotationBeanPostProcessor` is formally deprecated as of Spring Framework
-5.1. See note in the section on <<beans-required-annotation,`@Required`>> for details.
-====
-
 
 
 [[beans-factory-extension-factory-postprocessors]]
@@ -4698,12 +4684,21 @@ instances or the like later on. We still recommend that you put assertions into 
 bean class itself (for example, into an init method). Doing so enforces those required
 references and values even when you use the class outside of a container.
 
+[TIP]
+====
+The {api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`]
+must be registered as a bean to enable support for the `@Required` annotation. Note,
+however, that a `RequiredAnnotationBeanPostProcessor` bean is registered automatically
+when using the `<context:annotation-config/>` or `<context:component-scan/>` XML
+namespace elements.
+====
+
 [NOTE]
 ====
-The `@Required` annotation is formally deprecated as of Spring Framework 5.1, in favor of
-using constructor injection for required settings (or a custom implementation of
-`InitializingBean.afterPropertiesSet()` or a custom `@PostConstruct` method along with
-bean property setter methods).
+The `@Required` annotation and `RequiredAnnotationBeanPostProcessor` are formally
+deprecated as of Spring Framework 5.1, in favor of using constructor injection for
+required settings (or a custom implementation of `InitializingBean.afterPropertiesSet()`
+or a custom `@PostConstruct` method along with bean property setter methods).
 ====
 
 
