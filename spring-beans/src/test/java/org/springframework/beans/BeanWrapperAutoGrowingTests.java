@@ -100,6 +100,12 @@ public class BeanWrapperAutoGrowingTests {
 	}
 
 	@Test
+	public void setPropertyValueAutoGrowMultiDimensionalArray() {
+		wrapper.setPropertyValue("multiArray[2][3]", new Bean());
+		assertThat(bean.getMultiArray()[2][3]).isInstanceOf(Bean.class);
+	}
+
+	@Test
 	public void getPropertyValueAutoGrowList() {
 		assertNotNull(wrapper.getPropertyValue("list[0]"));
 		assertThat(bean.getList().size()).isEqualTo(1);
