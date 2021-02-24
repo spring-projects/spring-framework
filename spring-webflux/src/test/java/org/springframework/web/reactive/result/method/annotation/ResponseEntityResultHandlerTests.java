@@ -57,6 +57,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -64,7 +65,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.notFound;
-import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 import static org.springframework.web.testfixture.method.ResolvableMethod.on;
@@ -199,7 +199,7 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 	@Test
-	public void handleResponseEntityWithNullBody() throws Exception {
+	public void handleResponseEntityWithNullBody() {
 		Object returnValue = Mono.just(notFound().build());
 		MethodParameter type = on(TestController.class).resolveReturnType(Mono.class, entity(String.class));
 		HandlerResult result = handlerResult(returnValue, type);
@@ -211,23 +211,23 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 	@Test
-	public void handleReturnTypes() throws Exception {
-		Object returnValue = ok("abc");
+	public void handleReturnTypes() {
+		Object returnValue = ResponseEntity.ok("abc");
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
 		testHandle(returnValue, returnType);
 
 		returnType = on(TestController.class).resolveReturnType(Object.class);
 		testHandle(returnValue, returnType);
 
-		returnValue = Mono.just(ok("abc"));
+		returnValue = Mono.just(ResponseEntity.ok("abc"));
 		returnType = on(TestController.class).resolveReturnType(Mono.class, entity(String.class));
 		testHandle(returnValue, returnType);
 
-		returnValue = Mono.just(ok("abc"));
+		returnValue = Mono.just(ResponseEntity.ok("abc"));
 		returnType = on(TestController.class).resolveReturnType(Single.class, entity(String.class));
 		testHandle(returnValue, returnType);
 
-		returnValue = Mono.just(ok("abc"));
+		returnValue = Mono.just(ResponseEntity.ok("abc"));
 		returnType = on(TestController.class).resolveReturnType(CompletableFuture.class, entity(String.class));
 		testHandle(returnValue, returnType);
 	}
@@ -239,7 +239,7 @@ public class ResponseEntityResultHandlerTests {
 		long timestamp = currentTime.toEpochMilli();
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path").ifModifiedSince(timestamp));
 
-		ResponseEntity<String> entity = ok().lastModified(oneMinAgo.toEpochMilli()).body("body");
+		ResponseEntity<String> entity = ResponseEntity.ok().lastModified(oneMinAgo.toEpochMilli()).body("body");
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
 		HandlerResult result = handlerResult(entity, returnType);
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
@@ -252,7 +252,7 @@ public class ResponseEntityResultHandlerTests {
 		String etagValue = "\"deadb33f8badf00d\"";
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path").ifNoneMatch(etagValue));
 
-		ResponseEntity<String> entity = ok().eTag(etagValue).body("body");
+		ResponseEntity<String> entity = ResponseEntity.ok().eTag(etagValue).body("body");
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
 		HandlerResult result = handlerResult(entity, returnType);
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
@@ -264,7 +264,7 @@ public class ResponseEntityResultHandlerTests {
 	public void handleReturnValueEtagInvalidIfNoneMatch() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path").ifNoneMatch("unquoted"));
 
-		ResponseEntity<String> entity = ok().eTag("\"deadb33f8badf00d\"").body("body");
+		ResponseEntity<String> entity = ResponseEntity.ok().eTag("\"deadb33f8badf00d\"").body("body");
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
 		HandlerResult result = handlerResult(entity, returnType);
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
@@ -285,7 +285,7 @@ public class ResponseEntityResultHandlerTests {
 				.ifModifiedSince(currentTime.toEpochMilli())
 				);
 
-		ResponseEntity<String> entity = ok().eTag(eTag).lastModified(oneMinAgo.toEpochMilli()).body("body");
+		ResponseEntity<String> entity = ResponseEntity.ok().eTag(eTag).lastModified(oneMinAgo.toEpochMilli()).body("body");
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
 		HandlerResult result = handlerResult(entity, returnType);
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
@@ -306,7 +306,7 @@ public class ResponseEntityResultHandlerTests {
 				.ifModifiedSince(currentTime.toEpochMilli())
 				);
 
-		ResponseEntity<String> entity = ok().eTag(newEtag).lastModified(oneMinAgo.toEpochMilli()).body("body");
+		ResponseEntity<String> entity = ResponseEntity.ok().eTag(newEtag).lastModified(oneMinAgo.toEpochMilli()).body("body");
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
 		HandlerResult result = handlerResult(entity, returnType);
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
@@ -320,7 +320,7 @@ public class ResponseEntityResultHandlerTests {
 		exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, Collections.singleton(APPLICATION_JSON));
 
 		MethodParameter type = on(TestController.class).resolveReturnType(Mono.class, ResponseEntity.class);
-		HandlerResult result = new HandlerResult(new TestController(), Mono.just(ok().body("body")), type);
+		HandlerResult result = new HandlerResult(new TestController(), Mono.just(ResponseEntity.ok().body("body")), type);
 
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
 
@@ -399,7 +399,7 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 	@Test // gh-26212
-	public void handleWithObjectMapperByTypeRegistration() throws Exception {
+	public void handleWithObjectMapperByTypeRegistration() {
 		MediaType halFormsMediaType = MediaType.parseMediaType("application/prs.hal-forms+json");
 		MediaType halMediaType = MediaType.parseMediaType("application/hal+json");
 
@@ -427,6 +427,22 @@ public class ResponseEntityResultHandlerTests {
 				"{" + NEWLINE_SYSTEM_PROPERTY +
 						"  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY +
 						"}");
+	}
+
+	@Test  // gh-24539
+	public void malformedAcceptHeader() {
+		ResponseEntity<String> value = ResponseEntity.badRequest().body("Foo");
+		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
+		HandlerResult result = handlerResult(value, returnType);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path").header("Accept", "null"));
+
+		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
+		MockServerHttpResponse response = exchange.getResponse();
+		response.setComplete().block();
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		assertThat(response.getHeaders().getContentType()).isNull();
+		assertResponseBodyIsEmpty(exchange);
 	}
 
 
