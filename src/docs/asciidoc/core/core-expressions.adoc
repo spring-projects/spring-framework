@@ -433,9 +433,9 @@ interpreter and only 3ms using the compiled version of the expression.
 
 The compiler is not turned on by default, but you can turn it on in either of two
 different ways. You can turn it on by using the parser configuration process
-(<<expressions-parser-configuration, discussed earlier>>) or by using a system
-property when SpEL usage is embedded inside another component. This section
-discusses both of these options.
+(<<expressions-parser-configuration, discussed earlier>>) or by using a Spring property
+when SpEL usage is embedded inside another component. This section discusses both of
+these options.
 
 The compiler can operate in one of three modes, which are captured in the
 `org.springframework.expression.spel.SpelCompilerMode` enum. The modes are as follows:
@@ -496,10 +496,12 @@ It is important to ensure that, if a classloader is specified, it can see all th
 the expression evaluation process. If you do not specify a classloader, a default classloader is used
 (typically the context classloader for the thread that is running during expression evaluation).
 
-The second way to configure the compiler is for use when SpEL is embedded inside some other
-component and it may not be possible to configure it through a configuration object. In these
-cases, it is possible to use a system property. You can set the `spring.expression.compiler.mode`
-property to one of the `SpelCompilerMode` enum values (`off`, `immediate`, or `mixed`).
+The second way to configure the compiler is for use when SpEL is embedded inside some
+other component and it may not be possible to configure it through a configuration
+object. In these cases, it is possible to set the `spring.expression.compiler.mode`
+property via a JVM system property (or via the
+<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism) to one of the
+`SpelCompilerMode` enum values (`off`, `immediate`, or `mixed`).
 
 
 [[expressions-compiler-limitations]]

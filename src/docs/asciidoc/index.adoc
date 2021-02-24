@@ -24,6 +24,7 @@ WebSocket, RSocket.
 <<integration.adoc#spring-integration, Integration>> :: Remoting, JMS, JCA, JMX,
 Email, Tasks, Scheduling, Caching.
 <<languages.adoc#languages, Languages>> :: Kotlin, Groovy, Dynamic Languages.
+<<appendix.adoc#appendix, Appendix>> :: miscellaneous topics.
 
 Rod Johnson, Juergen Hoeller, Keith Donald, Colin Sampaleanu, Rob Harrop, Thomas Risberg,
 Alef Arendsen, Darren Davison, Dmitriy Kopylenko, Mark Pollack, Thierry Templier, Erwin

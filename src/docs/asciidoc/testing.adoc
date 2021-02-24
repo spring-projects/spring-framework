@@ -1847,7 +1847,7 @@ constructor takes precedence over both `@TestConstructor` and the default mode.
 The default _test constructor autowire mode_ can be changed by setting the
 `spring.test.constructor.autowire.mode` JVM system property to `all`. Alternatively, the
 default mode may be set via the
-{api-spring-framework}/core/SpringProperties.html[`SpringProperties`] mechanism.
+<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism.
 
 As of Spring Framework 5.3, the default mode may also be configured as a
 https://junit.org/junit5/docs/current/user-guide/#running-tests-config-params[JUnit Platform configuration parameter].
@@ -1880,7 +1880,7 @@ change the default mode.
 The default _enclosing configuration inheritance mode_ is `INHERIT`, but it can be
 changed by setting the `spring.test.enclosing.configuration` JVM system property to
 `OVERRIDE`. Alternatively, the default mode may be set via the
-{api-spring-framework}/core/SpringProperties.html[`SpringProperties`] mechanism.
+<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism.
 =====
 
 The <<testcontext-framework>> honors `@NestedTestConfiguration` semantics for the
@@ -4567,7 +4567,7 @@ maximum size is reached, a least recently used (LRU) eviction policy is used to 
 close stale contexts. You can configure the maximum size from the command line or a build
 script by setting a JVM system property named `spring.test.context.cache.maxSize`. As an
 alternative, you can set the same property via the
-{api-spring-framework}/core/SpringProperties.html[`SpringProperties`] mechanism.
+<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism.
 
 Since having a large number of application contexts loaded within a given test suite can
 cause the suite to take an unnecessarily long time to run, it is often beneficial to
