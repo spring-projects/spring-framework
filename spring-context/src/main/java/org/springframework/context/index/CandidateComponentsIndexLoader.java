@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,13 +48,13 @@ public final class CandidateComponentsIndexLoader {
 	public static final String COMPONENTS_RESOURCE_LOCATION = "META-INF/spring.components";
 
 	/**
-	 * System property that instructs Spring to ignore the index, i.e.
+	 * System property that instructs Spring to ignore the components index, i.e.
 	 * to always return {@code null} from {@link #loadIndex(ClassLoader)}.
 	 * <p>The default is "false", allowing for regular use of the index. Switching this
 	 * flag to {@code true} fulfills a corner case scenario when an index is partially
 	 * available for some libraries (or use cases) but couldn't be built for the whole
 	 * application. In this case, the application context fallbacks to a regular
-	 * classpath arrangement (i.e. as no index was present at all).
+	 * classpath arrangement (i.e. as though no index were present at all).
 	 */
 	public static final String IGNORE_INDEX = "spring.index.ignore";
 
