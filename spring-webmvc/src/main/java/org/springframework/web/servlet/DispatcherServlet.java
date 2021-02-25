@@ -986,8 +986,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 			String queryString = request.getQueryString();
 			String queryClause = (StringUtils.hasLength(queryString) ? "?" + queryString : "");
-			String dispatchType = (!request.getDispatcherType().equals(DispatcherType.REQUEST) ?
-					"\"" + request.getDispatcherType().name() + "\" dispatch for " : "");
+			String dispatchType = (!DispatcherType.REQUEST.equals(request.getDispatcherType()) ?
+					"\"" + request.getDispatcherType() + "\" dispatch for " : "");
 			String message = (dispatchType + request.getMethod() + " \"" + getRequestUri(request) +
 					queryClause + "\", parameters={" + params + "}");
 
@@ -1185,7 +1185,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected HttpServletRequest checkMultipart(HttpServletRequest request) throws MultipartException {
 		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
 			if (WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class) != null) {
-				if (request.getDispatcherType().equals(DispatcherType.REQUEST)) {
+				if (DispatcherType.REQUEST.equals(request.getDispatcherType())) {
 					logger.trace("Request already resolved to MultipartHttpServletRequest, e.g. by MultipartFilter");
 				}
 			}
