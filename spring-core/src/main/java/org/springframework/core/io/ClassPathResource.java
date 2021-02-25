@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,6 +160,8 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 			}
 		}
 		catch (IllegalArgumentException ex) {
+			// Should not happen according to the JDK's contract:
+			// see https://github.com/openjdk/jdk/pull/2662
 			return null;
 		}
 	}
