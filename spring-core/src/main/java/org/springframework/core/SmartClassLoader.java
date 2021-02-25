@@ -48,6 +48,28 @@ public interface SmartClassLoader {
 	}
 
 	/**
+	 * Return the original ClassLoader for this SmartClassLoader, or potentially
+	 * the present loader itself if it is self-sufficient.
+	 * <p>The default implementation returns the local ClassLoader reference as-is.
+	 * In case of a reloadable or other selectively overriding ClassLoader which
+	 * commonly deals with unaffected classes from a base application class loader,
+	 * this should get implemented to return the original ClassLoader that the
+	 * present loader got derived from (e.g. through {@code return getParent();}).
+	 * <p>This gets specifically used in Spring's AOP framework to determine the
+	 * class loader for a specific proxy in case the target class has not been
+	 * defined in the present class loader. In case of a reloadable class loader,
+	 * we prefer the base application class loader for proxying general classes
+	 * not defined in the reloadable class loader itself.
+	 * @return the original ClassLoader (the same reference by default)
+	 * @since 5.3.5
+	 * @see ClassLoader#getParent()
+	 * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator
+	 */
+	default ClassLoader getOriginalClassLoader() {
+		return (ClassLoader) this;
+	}
+
+	/**
 	 * Define a custom class (typically a CGLIB proxy class) in this class loader.
 	 * <p>This is a public equivalent of the protected
 	 * {@code defineClass(String, byte[], int, int, ProtectionDomain)} method
