@@ -223,7 +223,6 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 					if (logger.isDebugEnabled()) {
 						logger.debug("Ignoring error response content (if any). " + ex);
 					}
-					logger.debug(ex.getMessage());
 					return;
 				}
 				throw ex;
