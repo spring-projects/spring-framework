@@ -1242,5 +1242,25 @@ class CronExpressionTests {
 		assertThat(actual).isEqualTo(expected);
 	}
 
+	@Test
+	public void sundayToFriday() {
+		CronExpression expression = CronExpression.parse("0 0 0 ? * SUN-FRI");
+
+		LocalDateTime last = LocalDateTime.of(2021, 2, 25, 15, 0);
+		LocalDateTime expected = LocalDateTime.of(2021, 2, 26, 0, 0);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual.getDayOfWeek()).isEqualTo(FRIDAY);
+
+		last = actual;
+		expected = LocalDateTime.of(2021, 2, 28, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual.getDayOfWeek()).isEqualTo(SUNDAY);
+	}
+
+
 
 }
