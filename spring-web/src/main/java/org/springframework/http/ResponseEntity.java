@@ -82,7 +82,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 
 	/**
-	 * Create an {@code ResponseEntity} with a status code only.
+	 * Create a {@code ResponseEntity} with a status code only.
 	 * @param status the status code
 	 */
 	public ResponseEntity(HttpStatus status) {
@@ -90,7 +90,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create an {@code ResponseEntity} with a body and status code.
+	 * Create a {@code ResponseEntity} with a body and status code.
 	 * @param body the entity body
 	 * @param status the status code
 	 */
@@ -99,7 +99,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create an {@code HttpEntity} with headers and a status code.
+	 * Create a {@code ResponseEntity} with headers and a status code.
 	 * @param headers the entity headers
 	 * @param status the status code
 	 */
@@ -108,7 +108,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create an {@code HttpEntity} with a body, headers, and a status code.
+	 * Create a {@code ResponseEntity} with a body, headers, and a status code.
 	 * @param body the entity body
 	 * @param headers the entity headers
 	 * @param status the status code
@@ -118,7 +118,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create an {@code HttpEntity} with a body, headers, and a raw status code.
+	 * Create a {@code ResponseEntity} with a body, headers, and a raw status code.
 	 * @param body the entity body
 	 * @param headers the entity headers
 	 * @param rawStatus the status code value
