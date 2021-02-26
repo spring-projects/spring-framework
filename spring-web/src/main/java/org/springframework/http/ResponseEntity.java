@@ -242,7 +242,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @return the created {@code ResponseEntity}
 	 * @since 4.1
 	 */
-	public static <T> ResponseEntity<T> ok(T body) {
+	public static <T> ResponseEntity<T> ok(@Nullable T body) {
 		return ok().body(body);
 	}
 
