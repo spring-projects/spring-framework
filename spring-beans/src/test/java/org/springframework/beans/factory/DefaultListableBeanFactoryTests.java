@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1976,6 +1976,35 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("spouse", bd2);
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
 				lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true))
+			.withCauseExactlyInstanceOf(NoUniqueBeanDefinitionException.class);
+	}
+
+	@Test
+	void autowireBeanByTypeWithTwoPrimaryCandidatesInOneAncestor() {
+		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setPrimary(true);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setPrimary(true);
+		parent.registerBeanDefinition("test", bd);
+		parent.registerBeanDefinition("spouse", bd2);
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory(parent);
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true))
+			.withCauseExactlyInstanceOf(NoUniqueBeanDefinitionException.class);
+	}
+
+	@Test
+	void autowireBeanByTypeWithTwoPrimaryFactoryBeans(){
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(LazyInitFactory.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(LazyInitFactory.class);
+		bd1.setPrimary(true);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				lbf.autowire(FactoryBeanDependentBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true))
 			.withCauseExactlyInstanceOf(NoUniqueBeanDefinitionException.class);
 	}
 

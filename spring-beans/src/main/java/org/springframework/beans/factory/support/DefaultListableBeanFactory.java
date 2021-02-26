@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1647,28 +1647,36 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * (or candidate classes if not created yet) that match the required type
 	 * @param requiredType the target dependency type to match against
 	 * @return the name of the primary candidate, or {@code null} if none found
-	 * @see #isPrimary(String, Object)
 	 */
 	@Nullable
 	protected String determinePrimaryCandidate(Map<String, Object> candidates, Class<?> requiredType) {
 		String primaryBeanName = null;
+		DefaultListableBeanFactory primaryBeanFactory = null;
 		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
 			String candidateBeanName = entry.getKey();
-			Object beanInstance = entry.getValue();
-			if (isPrimary(candidateBeanName, beanInstance)) {
-				if (primaryBeanName != null) {
-					boolean candidateLocal = containsBeanDefinition(candidateBeanName);
-					boolean primaryLocal = containsBeanDefinition(primaryBeanName);
-					if (candidateLocal && primaryLocal) {
-						throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
-								"more than one 'primary' bean found among candidates: " + candidates.keySet());
-					}
-					else if (candidateLocal) {
-						primaryBeanName = candidateBeanName;
-					}
+			DefaultListableBeanFactory beanFactory = this;
+			boolean isPrimary = false;
+			while (beanFactory != primaryBeanFactory) {
+				String transformedCandidateBeanName = beanFactory.transformedBeanName(candidateBeanName);
+				if (beanFactory.containsBeanDefinition(transformedCandidateBeanName)) {
+					isPrimary = beanFactory.getMergedLocalBeanDefinition(transformedCandidateBeanName).isPrimary();
+					break;
 				}
 				else {
-					primaryBeanName = candidateBeanName;
+					BeanFactory parent = beanFactory.getParentBeanFactory();
+					beanFactory = parent instanceof DefaultListableBeanFactory ? (DefaultListableBeanFactory) parent : null;
+				}
+			}
+			if (isPrimary) {
+				primaryBeanName = candidateBeanName;
+				primaryBeanFactory = beanFactory;
+			}
+			else if (beanFactory == primaryBeanFactory && null != beanFactory){
+				String transformedCandidateBeanName = beanFactory.transformedBeanName(candidateBeanName);
+				if(beanFactory.containsBeanDefinition(transformedCandidateBeanName) &&
+						beanFactory.getMergedLocalBeanDefinition(transformedCandidateBeanName).isPrimary()) {
+					throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
+							"more than one 'primary' bean found among candidates: " + candidates.keySet());
 				}
 			}
 		}
