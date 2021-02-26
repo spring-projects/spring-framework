@@ -185,10 +185,10 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		}
 
 		AtomicBoolean isCompleted = new AtomicBoolean();
-		HandlerResultAsyncListener listener = new HandlerResultAsyncListener(isCompleted, httpRequest);
-		asyncContext.addListener(listener);
-
 		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext, isCompleted, httpRequest);
+		HandlerResultAsyncListener listener = new HandlerResultAsyncListener(isCompleted, httpRequest, subscriber);
+
+		asyncContext.addListener(listener);
 		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
@@ -222,10 +222,6 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	}
 
 
-	/**
-	 * We cannot combine ERROR_LISTENER and HandlerResultSubscriber due to:
-	 * https://issues.jboss.org/browse/WFLY-8515.
-	 */
 	private static void runIfAsyncNotComplete(AsyncContext asyncContext, AtomicBoolean isCompleted, Runnable task) {
 		try {
 			if (asyncContext.getRequest().isAsyncStarted() && isCompleted.compareAndSet(false, true)) {
@@ -254,24 +250,41 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		private final String logPrefix;
 
-		public HandlerResultAsyncListener(AtomicBoolean isCompleted, ServletServerHttpRequest request) {
+	 	// We cannot have AsyncListener and HandlerResultSubscriber until WildFly 12+:
+		// https://issues.jboss.org/browse/WFLY-8515
+		private final Runnable handlerDisposeTask;
+
+		public HandlerResultAsyncListener(
+				AtomicBoolean isCompleted, ServletServerHttpRequest request, Runnable handlerDisposeTask) {
+
 			this.isCompleted = isCompleted;
 			this.logPrefix = request.getLogPrefix();
+			this.handlerDisposeTask = handlerDisposeTask;
 		}
 
 		@Override
 		public void onTimeout(AsyncEvent event) {
 			logger.debug(this.logPrefix + "Timeout notification");
-			AsyncContext context = event.getAsyncContext();
-			runIfAsyncNotComplete(context, this.isCompleted, context::complete);
+			handleTimeoutOrError(event);
 		}
 
 		@Override
 		public void onError(AsyncEvent event) {
 			Throwable ex = event.getThrowable();
 			logger.debug(this.logPrefix + "Error notification: " + (ex != null ? ex : "<no Throwable>"));
+			handleTimeoutOrError(event);
+		}
+
+		private void handleTimeoutOrError(AsyncEvent event) {
 			AsyncContext context = event.getAsyncContext();
-			runIfAsyncNotComplete(context, this.isCompleted, context::complete);
+			runIfAsyncNotComplete(context, this.isCompleted, () -> {
+				try {
+					this.handlerDisposeTask.run();
+				}
+				finally {
+					context.complete();
+				}
+			});
 		}
 
 		@Override
@@ -286,13 +299,16 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	}
 
 
-	private static class HandlerResultSubscriber implements Subscriber<Void> {
+	private static class HandlerResultSubscriber implements Subscriber<Void>, Runnable {
 
 		private final AsyncContext asyncContext;
 
 		private final AtomicBoolean isCompleted;
 
 		private final String logPrefix;
+
+		@Nullable
+		private volatile Subscription subscription;
 
 		public HandlerResultSubscriber(
 				AsyncContext asyncContext, AtomicBoolean isCompleted, ServletServerHttpRequest httpRequest) {
@@ -304,6 +320,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onSubscribe(Subscription subscription) {
+			this.subscription = subscription;
 			subscription.request(Long.MAX_VALUE);
 		}
 
@@ -338,6 +355,14 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		public void onComplete() {
 			logger.trace(this.logPrefix + "Handling completed");
 			runIfAsyncNotComplete(this.asyncContext, this.isCompleted, this.asyncContext::complete);
+		}
+
+		@Override
+		public void run() {
+			Subscription s = this.subscription;
+			if (s != null) {
+				s.cancel();
+			}
 		}
 	}
 
