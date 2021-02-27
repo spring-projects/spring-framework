@@ -40,6 +40,16 @@ public interface MetadataExtractor {
 	 */
 	String ROUTE_KEY = "route";
 
+	/**
+	 * Header content type key.
+	 **/
+	String CONTENT_TYPE= "content-type";
+
+	/**
+	 * Header accept key.
+	 **/
+	String ACCEPT ="accept";
+
 
 	/**
 	 * Extract a map of values from the given {@link Payload} metadata.

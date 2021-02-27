@@ -17,12 +17,14 @@
 package org.springframework.messaging.rsocket;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import io.rsocket.core.RSocketClient;
+import io.rsocket.metadata.WellKnownMimeType;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -135,7 +137,6 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		public DefaultRequestSpec(String route, Object... vars) {
 			this.metadataEncoder.route(route, vars);
 		}
-
 		public DefaultRequestSpec(Object metadata, @Nullable MimeType mimeType) {
 			this.metadataEncoder.metadata(metadata, mimeType);
 		}
@@ -150,6 +151,13 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		@Override
 		public RequestSpec metadata(Consumer<MetadataSpec<?>> configurer) {
 			configurer.accept(this);
+			return this;
+		}
+
+
+		@Override
+		public RequestSpec header(List<String> values, WellKnownMimeType type) {
+			this.metadataEncoder.header(values, type);
 			return this;
 		}
 
@@ -240,10 +248,18 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		private <T> DataBuffer encodeData(T value, ResolvableType elementType, @Nullable Encoder<?> encoder) {
 			if (encoder == null) {
 				elementType = ResolvableType.forInstance(value);
-				encoder = strategies.encoder(elementType, dataMimeType);
+				encoder = strategies.encoder(elementType, messageDataMime());
 			}
 			return ((Encoder<T>) encoder).encodeValue(
-					value, bufferFactory(), elementType, dataMimeType, EMPTY_HINTS);
+					value, bufferFactory(), elementType, messageDataMime(), EMPTY_HINTS);
+		}
+
+		/**
+		 * Compute message mime.
+		 **/
+		public MimeType messageDataMime(){
+			List<String> mimes = metadataEncoder.getHeaders().get(WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE);
+			return mimes == null || mimes.size() ==0 ? dataMimeType : MimeType.valueOf(mimes.get(0));
 		}
 
 		/**

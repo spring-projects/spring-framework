@@ -27,10 +27,12 @@ import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.plugins.RSocketInterceptor;
 import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
+import org.springframework.messaging.MessageHeaders;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
@@ -50,6 +52,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
+import static org.apache.activemq.transport.stomp.Stomp.TEXT_PLAIN;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -111,6 +114,33 @@ public class RSocketClientToServerIntegrationTests {
 				.expectNext("Hello 1")
 				.expectNext("Hello 2")
 				.expectNext("Hello 3")
+				.thenAwait(Duration.ofMillis(50))
+				.thenCancel()
+				.verify(Duration.ofSeconds(5));
+
+		assertThat(interceptor.getFireAndForgetCount())
+				.as("Fire and forget requests did not actually complete handling on the server side")
+				.isEqualTo(3);
+	}
+
+	@Test
+	public void fireAndForgetWithContentType() {
+		String customMime = "text/*";
+		Flux.range(1, 3)
+				.concatMap(i -> requester.route("messageContentType").header(Lists.newArrayList(customMime),
+						WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE).data("Hello " + i).send()).blockLast();
+
+		StepVerifier.create(context.getBean(ServerController.class).fireForgetPayloads.asFlux())
+				.expectNext("Hello 1")
+				.expectNext("Hello 2")
+				.expectNext("Hello 3")
+				.thenAwait(Duration.ofMillis(50))
+				.thenCancel()
+				.verify(Duration.ofSeconds(5));
+		StepVerifier.create(context.getBean(ServerController.class).contentTypes.asFlux())
+				.expectNext(customMime)
+				.expectNext(customMime)
+				.expectNext(customMime)
 				.thenAwait(Duration.ofMillis(50))
 				.thenCancel()
 				.verify(Duration.ofSeconds(5));
@@ -234,10 +264,17 @@ public class RSocketClientToServerIntegrationTests {
 
 		final Sinks.Many<String> metadataPushPayloads = Sinks.many().replay().all();
 
+		final Sinks.Many<String> contentTypes = Sinks.many().replay().all();
 
 		@MessageMapping("receive")
 		void receive(String payload) {
 			this.fireForgetPayloads.tryEmitNext(payload);
+		}
+
+		@MessageMapping("messageContentType")
+		void messageContentType(@Payload String payload, @Header(name = MessageHeaders.CONTENT_TYPE) MimeType contentType) {
+			this.fireForgetPayloads.tryEmitNext(payload);
+			this.contentTypes.tryEmitNext(contentType.toString());
 		}
 
 		@MessageMapping("echo")

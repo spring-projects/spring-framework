@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -41,6 +42,9 @@ import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
+
+import static io.rsocket.metadata.WellKnownMimeType.MESSAGE_RSOCKET_ACCEPT_MIMETYPES;
+import static io.rsocket.metadata.WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE;
 
 /**
  * Default {@link MetadataExtractor} implementation that relies on
@@ -132,7 +136,7 @@ public class DefaultMetadataExtractor implements MetadataExtractor, MetadataExtr
 	}
 
 	private void extractEntry(ByteBuf content, @Nullable String mimeType, Map<String, Object> result) {
-		if (content.readableBytes() == 0) {
+		if (content.readableBytes() == 0|| mimeType == null) {
 			return;
 		}
 		EntryExtractor<?> extractor = this.registrations.get(mimeType);
@@ -140,11 +144,25 @@ public class DefaultMetadataExtractor implements MetadataExtractor, MetadataExtr
 			extractor.extract(content, result);
 			return;
 		}
-		if (mimeType != null && mimeType.equals(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString())) {
+		if (mimeType.equals(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString())) {
 			Iterator<String> iterator = new RoutingMetadata(content).iterator();
 			if (iterator.hasNext()) {
 				result.put(MetadataExtractor.ROUTE_KEY, iterator.next());
 			}
+			return;
+		}
+		WellKnownMimeType wellKnownMimeType =  WellKnownMimeType.fromString(mimeType);
+		if(wellKnownMimeType == MESSAGE_RSOCKET_MIMETYPE || wellKnownMimeType == MESSAGE_RSOCKET_ACCEPT_MIMETYPES ){
+			List<MimeType> mimeTypes = MetadataMimeCodec.decodeMime(content).stream().map(MimeType::valueOf).collect(Collectors.toList());
+			switch (wellKnownMimeType) {
+				case MESSAGE_RSOCKET_MIMETYPE:
+					result.put(CONTENT_TYPE, mimeTypes);
+					break;
+				case MESSAGE_RSOCKET_ACCEPT_MIMETYPES:
+					result.put(ACCEPT, mimeTypes);
+					break;
+			}
+			return;
 		}
 	}
 

@@ -15,8 +15,10 @@
  */
 package org.springframework.messaging.rsocket;
 
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -64,6 +66,13 @@ final class MetadataEncoder {
 
 	@Nullable
 	private String route;
+	/**
+	 * Well known headers.
+	 * such as {@link WellKnownMimeType#MESSAGE_RSOCKET_MIMETYPE }
+	 *
+	 **/
+	@SuppressWarnings({ "rawtypes","unchecked"})
+	private Map<WellKnownMimeType, List<String>> headers =new HashMap();
 
 	private final List<MetadataEntry> metadataEntries = new ArrayList<>(4);
 
@@ -97,6 +106,15 @@ final class MetadataEncoder {
 		return this;
 	}
 
+
+	public MetadataEncoder header(List<String> values, WellKnownMimeType type){
+		if (this.isComposite) {
+			Assert.notNull(type, "MimeType is required for composite metadata entries.");
+		}
+		this.headers.put(type, values);
+		return this;
+	}
+
 	private static String expand(String route, Object... routeVars) {
 		if (ObjectUtils.isEmpty(routeVars)) {
 			return route;
@@ -113,6 +131,10 @@ final class MetadataEncoder {
 		}
 		matcher.appendTail(sb);
 		return sb.toString();
+	}
+
+	public Map<WellKnownMimeType, List<String>> getHeaders() {
+		return headers;
 	}
 
 	private void assertMetadataEntryCount() {
@@ -187,6 +209,14 @@ final class MetadataEncoder {
 					io.rsocket.metadata.CompositeMetadataCodec.encodeAndAddMetadata(composite, this.allocator,
 							WellKnownMimeType.MESSAGE_RSOCKET_ROUTING, encodeRoute());
 				}
+				// encode well headers
+				this.headers.forEach((type, values)-> {
+					if (values == null|| values.size() == 0) {
+						return;
+					}
+					io.rsocket.metadata.CompositeMetadataCodec.encodeAndAddMetadata(composite, this.allocator,
+							type, encodeMimes(values));
+				});
 				entries.forEach(entry -> {
 					Object value = entry.value();
 					io.rsocket.metadata.CompositeMetadataCodec.encodeAndAddMetadata(
@@ -222,6 +252,17 @@ final class MetadataEncoder {
 	private ByteBuf encodeRoute() {
 		return io.rsocket.metadata.TaggingMetadataCodec.createRoutingMetadata(
 				this.allocator, Collections.singletonList(this.route)).getContent();
+	}
+
+	private ByteBuf encodeMimes(List<String> mimes) {
+		CompositeByteBuf composite = this.allocator.compositeBuffer();
+		for(String m : mimes) {
+			if (m == null) {
+				continue;
+			}
+			MetadataMimeCodec.encodeMime(composite, this.allocator, m);
+		}
+		return composite;
 	}
 
 	private <T> DataBuffer encodeEntry(MetadataEntry entry) {
@@ -292,5 +333,6 @@ final class MetadataEncoder {
 			return this.mimeType;
 		}
 	}
+
 
 }

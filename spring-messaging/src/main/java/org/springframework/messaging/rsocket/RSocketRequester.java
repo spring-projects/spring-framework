@@ -26,6 +26,7 @@ import io.rsocket.RSocket;
 import io.rsocket.core.RSocketClient;
 import io.rsocket.loadbalance.LoadbalanceStrategy;
 import io.rsocket.loadbalance.LoadbalanceTarget;
+import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.client.WebsocketClientTransport;
@@ -324,6 +325,7 @@ public interface RSocketRequester {
 		 */
 		RequestSpec metadata(Consumer<MetadataSpec<?>> configurer);
 
+		RequestSpec header(List<String> value, WellKnownMimeType type);
 		/**
 		 * Perform a {@link RSocket#metadataPush(Payload) metadataPush}.
 		 * @since 5.3
