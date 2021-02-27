@@ -341,7 +341,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 					"or an empty string (\"\"): current value is [" + allowCredentials + "]");
 		}
 
-		if (annotation.maxAge() >= 0 && config.getMaxAge() == null) {
+		if (annotation.maxAge() >= 0) {
 			config.setMaxAge(annotation.maxAge());
 		}
 	}

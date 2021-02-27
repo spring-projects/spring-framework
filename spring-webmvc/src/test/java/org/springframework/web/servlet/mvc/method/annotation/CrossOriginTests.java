@@ -362,6 +362,27 @@ class CrossOriginTests {
 		assertThat(mapping.getHandler(request)).isNull();
 	}
 
+	@PathPatternsParameterizedTest
+	void maxAgeWithDefaultOrigin(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MaxAgeWithDefaultOriginController());
+
+		this.request.setRequestURI("/classAge");
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedMethods()).containsExactly("GET");
+		assertThat(config.getAllowedOrigins()).containsExactly("*");
+		assertThat(config.getMaxAge()).isEqualTo(10);
+
+		this.request.setRequestURI("/methodAge");
+		chain = mapping.getHandler(request);
+		config = getCorsConfiguration(chain, false);
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedMethods()).containsExactly("GET");
+		assertThat(config.getAllowedOrigins()).containsExactly("*");
+		assertThat(config.getMaxAge()).isEqualTo(100);
+	}
+
 
 	@Nullable
 	private CorsConfiguration getCorsConfiguration(@Nullable HandlerExecutionChain chain, boolean isPreFlightRequest) {
@@ -490,6 +511,20 @@ class CrossOriginTests {
 		}
 	}
 
+	@Controller
+	@CrossOrigin(maxAge = 10)
+	private static class MaxAgeWithDefaultOriginController {
+
+		@CrossOrigin
+		@RequestMapping(path = "/classAge", method = RequestMethod.GET)
+		public void classAge() {
+		}
+
+		@CrossOrigin(maxAge = 100)
+		@RequestMapping(path = "/methodAge", method = RequestMethod.GET)
+		public void methodAge() {
+		}
+	}
 
 	@Controller
 	@CrossOrigin(allowCredentials = "true")
