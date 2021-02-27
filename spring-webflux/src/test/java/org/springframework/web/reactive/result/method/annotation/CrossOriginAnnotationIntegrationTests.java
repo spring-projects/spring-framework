@@ -29,6 +29,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
@@ -278,6 +280,19 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		assertThat(entity.getHeaders().getAccessControlAllowCredentials()).isTrue();
 	}
 
+	@ParameterizedHttpServerTest
+	void maxAgeWithDefaultOrigin(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		ResponseEntity<String> entity = performOptions("/classAge", this.headers, String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getHeaders().getAccessControlMaxAge()).isEqualTo(10);
+
+		entity = performOptions("/methodAge", this.headers, String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getHeaders().getAccessControlMaxAge()).isEqualTo(100);
+	}
 
 	@Configuration
 	@EnableWebFlux
@@ -392,6 +407,23 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		@GetMapping("/baz")
 		public String baz() {
 			return "baz";
+		}
+	}
+
+	@RestController
+	@CrossOrigin(maxAge = 10)
+	private static class MaxAgeWithDefaultOriginController {
+
+		@CrossOrigin
+		@GetMapping(path = "/classAge")
+		public String classAge() {
+			return "classAge";
+		}
+
+		@CrossOrigin(maxAge = 100)
+		@GetMapping(path = "/methodAge")
+		public String methodAge() {
+			return "methodAge";
 		}
 	}
 
