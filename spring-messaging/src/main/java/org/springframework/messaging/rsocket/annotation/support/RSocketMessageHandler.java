@@ -300,7 +300,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	@Override
 	protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
-		handlers.add(new RSocketPayloadReturnValueHandler(this.encoders, getReactiveAdapterRegistry()));
+		handlers.add(new RSocketPayloadReturnValueHandler(this.strategies, getReactiveAdapterRegistry()));
 		handlers.addAll(getReturnValueHandlerConfigurer().getCustomHandlers());
 		return handlers;
 	}

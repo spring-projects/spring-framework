@@ -48,7 +48,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rossen Stoyanchev
  * @since 5.2
  */
-final class MetadataEncoder {
+public final class MetadataEncoder {
 
 	/** For route variable replacement. */
 	private static final Pattern VARS_PATTERN = Pattern.compile("\\{(.+?)}");
@@ -79,7 +79,7 @@ final class MetadataEncoder {
 	private boolean hasAsyncValues;
 
 
-	MetadataEncoder(MimeType metadataMimeType, RSocketStrategies strategies) {
+	public MetadataEncoder(MimeType metadataMimeType, RSocketStrategies strategies) {
 		Assert.notNull(metadataMimeType, "'metadataMimeType' is required");
 		Assert.notNull(strategies, "RSocketStrategies is required");
 		this.metadataMimeType = metadataMimeType;
@@ -134,7 +134,7 @@ final class MetadataEncoder {
 	}
 
 	public Map<WellKnownMimeType, List<String>> getHeaders() {
-		return headers;
+		return this.headers;
 	}
 
 	private void assertMetadataEntryCount() {

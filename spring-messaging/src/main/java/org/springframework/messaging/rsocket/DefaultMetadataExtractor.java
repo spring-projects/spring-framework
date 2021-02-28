@@ -41,6 +41,7 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.MimeType;
 
 import static io.rsocket.metadata.WellKnownMimeType.MESSAGE_RSOCKET_ACCEPT_MIMETYPES;
@@ -156,10 +157,10 @@ public class DefaultMetadataExtractor implements MetadataExtractor, MetadataExtr
 			List<MimeType> mimeTypes = MetadataMimeCodec.decodeMime(content).stream().map(MimeType::valueOf).collect(Collectors.toList());
 			switch (wellKnownMimeType) {
 				case MESSAGE_RSOCKET_MIMETYPE:
-					result.put(CONTENT_TYPE, mimeTypes);
+					result.put(MessageHeaders.CONTENT_TYPE, mimeTypes);
 					break;
 				case MESSAGE_RSOCKET_ACCEPT_MIMETYPES:
-					result.put(ACCEPT, mimeTypes);
+					result.put(MessageHeaders.ACCEPT, mimeTypes);
 					break;
 			}
 			return;

@@ -441,6 +441,16 @@ public class MessageHeaderAccessor {
 		return (value instanceof MimeType ? (MimeType) value : MimeType.valueOf(value.toString()));
 	}
 
+	@SuppressWarnings({"unchecked"})
+	@Nullable
+	public List<MimeType> accept() {
+		Object values = getHeader(MessageHeaders.ACCEPT);
+		if (!(values instanceof List)) {
+			return Collections.emptyList();
+		}
+		return  (List<MimeType>)values;
+	}
+
 	private Charset getCharset() {
 		MimeType contentType = getContentType();
 		Charset charset = (contentType != null ? contentType.getCharset() : null);

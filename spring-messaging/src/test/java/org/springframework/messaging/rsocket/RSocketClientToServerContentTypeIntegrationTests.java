@@ -27,6 +27,7 @@ import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.plugins.RSocketInterceptor;
 import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class RSocketClientToServerIntegrationTests {
+public class RSocketClientToServerContentTypeIntegrationTests {
 
 	private static final MimeType FOO_MIME_TYPE = MimeTypeUtils.parseMimeType("messaging/x.foo");
 
@@ -103,15 +104,23 @@ public class RSocketClientToServerIntegrationTests {
 
 
 	@Test
-	public void fireAndForget() {
+	public void fireAndForgetWithContentType() {
+		String customMime = "text/*";
 		Flux.range(1, 3)
-				.concatMap(i -> requester.route("receive").data("Hello " + i).send())
-				.blockLast();
+				.concatMap(i -> requester.route("messageContentType").header(Lists.newArrayList(customMime),
+						WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE).data("Hello " + i).send()).blockLast();
 
 		StepVerifier.create(context.getBean(ServerController.class).fireForgetPayloads.asFlux())
 				.expectNext("Hello 1")
 				.expectNext("Hello 2")
 				.expectNext("Hello 3")
+				.thenAwait(Duration.ofMillis(50))
+				.thenCancel()
+				.verify(Duration.ofSeconds(5));
+		StepVerifier.create(context.getBean(ServerController.class).contentTypes.asFlux())
+				.expectNext(customMime)
+				.expectNext(customMime)
+				.expectNext(customMime)
 				.thenAwait(Duration.ofMillis(50))
 				.thenCancel()
 				.verify(Duration.ofSeconds(5));
@@ -121,12 +130,14 @@ public class RSocketClientToServerIntegrationTests {
 				.isEqualTo(3);
 	}
 
-
-
 	@Test
-	public void echo() {
+	public void echoRetrieveMono() {
+		String customMime = "text/*";
+		String accept = "text/plain";
 		Flux<String> result = Flux.range(1, 3).concatMap(i ->
-				requester.route("echo").data("Hello " + i).retrieveMono(String.class));
+				requester.route("echo")
+						.header(Lists.newArrayList(customMime),WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE)
+						.header(Lists.newArrayList(accept),WellKnownMimeType.MESSAGE_RSOCKET_ACCEPT_MIMETYPES).data("Hello " + i).retrieveMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("Hello 1").expectNext("Hello 2").expectNext("Hello 3")
@@ -147,8 +158,11 @@ public class RSocketClientToServerIntegrationTests {
 
 	@Test
 	public void echoStream() {
-		Flux<String> result = requester.route("echo-stream").data("Hello").retrieveFlux(String.class);
-
+		String customMime = "text/*";
+		String accept = "text/plain";
+		Flux<String> result = requester.route("echo-stream")
+				.header(Lists.newArrayList(customMime), WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE)
+				.header(Lists.newArrayList(accept), WellKnownMimeType.MESSAGE_RSOCKET_ACCEPT_MIMETYPES).data("Hello").retrieveFlux(String.class);
 		StepVerifier.create(result)
 				.expectNext("Hello 0").expectNextCount(6).expectNext("Hello 7")
 				.thenCancel()
@@ -213,8 +227,26 @@ public class RSocketClientToServerIntegrationTests {
 	}
 
 	@Test
+	public void handleWithThrownExceptionFlux() {
+		Flux<String> result = requester.route("thrown-exception-flux").data("a").retrieveFlux(String.class);
+		StepVerifier.create(result)
+				.expectNext("Invalid input error handled")
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
 	public void handleWithErrorSignal() {
 		Mono<String> result = requester.route("error-signal").data("a").retrieveMono(String.class);
+		StepVerifier.create(result)
+				.expectNext("Invalid input error handled")
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
+	public void handleWithErrorSignalFLux() {
+		Flux<String> result = requester.route("error-signal-flux").data("a").retrieveFlux(String.class);
 		StepVerifier.create(result)
 				.expectNext("Invalid input error handled")
 				.expectComplete()
@@ -229,6 +261,14 @@ public class RSocketClientToServerIntegrationTests {
 				.verify(Duration.ofSeconds(5));
 	}
 
+	@Test
+	public void noMatchingFluxRoute() {
+		Flux<String> result = requester.route("invalid").data("anything").retrieveFlux(String.class);
+		StepVerifier.create(result)
+				.expectErrorMessage("No handler for destination 'invalid'")
+				.verify(Duration.ofSeconds(5));
+	}
+
 
 	@Controller
 	static class ServerController {
@@ -236,6 +276,8 @@ public class RSocketClientToServerIntegrationTests {
 		final Sinks.Many<String> fireForgetPayloads = Sinks.many().replay().all();
 
 		final Sinks.Many<String> metadataPushPayloads = Sinks.many().replay().all();
+
+		final Sinks.Many<String> contentTypes = Sinks.many().replay().all();
 
 		@MessageMapping("receive")
 		void receive(String payload) {
@@ -245,6 +287,7 @@ public class RSocketClientToServerIntegrationTests {
 		@MessageMapping("messageContentType")
 		void messageContentType(@Payload String payload, @Header(name = MessageHeaders.CONTENT_TYPE) MimeType contentType) {
 			this.fireForgetPayloads.tryEmitNext(payload);
+			this.contentTypes.tryEmitNext(contentType.toString());
 		}
 
 		@MessageMapping("echo")
@@ -277,9 +320,19 @@ public class RSocketClientToServerIntegrationTests {
 			throw new IllegalArgumentException("Invalid input error");
 		}
 
+		@MessageMapping("thrown-exception-flux")
+		Flux<String> handleAndThrowFlux(String payload) {
+			throw new IllegalArgumentException("Invalid input error");
+		}
+
 		@MessageMapping("error-signal")
 		Mono<String> handleAndReturnError(String payload) {
 			return Mono.error(new IllegalArgumentException("Invalid input error"));
+		}
+
+		@MessageMapping("error-signal-flux")
+		Flux<String> handleAndReturnErrorFLux(String payload) {
+			return Flux.error(new IllegalArgumentException("Invalid input error"));
 		}
 
 		@MessageMapping("void-return-value")

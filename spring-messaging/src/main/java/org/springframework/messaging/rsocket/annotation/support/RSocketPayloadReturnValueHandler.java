@@ -31,6 +31,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.reactive.AbstractEncoderMethodReturnValueHandler;
 import org.springframework.messaging.rsocket.PayloadUtils;
+import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.util.Assert;
 
 /**
@@ -49,10 +50,16 @@ public class RSocketPayloadReturnValueHandler extends AbstractEncoderMethodRetur
 	 * which will receive the {@code Flux<Payload>} that represents the response.
 	 */
 	public static final String RESPONSE_HEADER = "rsocketResponse";
-
+	/**
+	 * Message header name of response metadata.
+	 **/
+	public static final String METADATA_HEADER = "rsocketMetadata";
 
 	public RSocketPayloadReturnValueHandler(List<Encoder<?>> encoders, ReactiveAdapterRegistry registry) {
 		super(encoders, registry);
+	}
+	public RSocketPayloadReturnValueHandler(RSocketStrategies strategies, ReactiveAdapterRegistry registry) {
+		super(strategies, registry);
 	}
 
 
@@ -61,9 +68,24 @@ public class RSocketPayloadReturnValueHandler extends AbstractEncoderMethodRetur
 			Flux<DataBuffer> encodedContent, MethodParameter returnType, Message<?> message) {
 
 		AtomicReference<Flux<Payload>> responseRef = getResponseReference(message);
+		AtomicReference<Mono<DataBuffer>> metadata = getResponseMetadata(message);
 		Assert.notNull(responseRef, "Missing '" + RESPONSE_HEADER + "'");
-		responseRef.set(encodedContent.map(PayloadUtils::createPayload));
+		responseRef.set(encodedContent.switchOnFirst((signal, inner) -> {
+			DataBuffer data = signal.get();
+			if (data != null && metadata.get() != null ) {
+				return firstPayload(Mono.fromCallable(() -> data), metadata.get())
+						.concatWith(inner.skip(1).map(PayloadUtils::createPayload));
+			}
+			else {
+				return inner.map(PayloadUtils::createPayload);
+			}
+		}));
 		return Mono.empty();
+	}
+
+	private Mono<Payload> firstPayload(Mono<DataBuffer> encodedData,Mono<DataBuffer> metadata) {
+		return Mono.zip(encodedData, metadata)
+				.map(tuple -> PayloadUtils.createPayload(tuple.getT1(), tuple.getT2()));
 	}
 
 	@Override
@@ -82,5 +104,6 @@ public class RSocketPayloadReturnValueHandler extends AbstractEncoderMethodRetur
 		Assert.state(headerValue == null || headerValue instanceof AtomicReference, "Expected AtomicReference");
 		return (AtomicReference<Flux<Payload>>) headerValue;
 	}
+
 
 }

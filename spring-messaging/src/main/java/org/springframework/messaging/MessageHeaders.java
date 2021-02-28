@@ -96,6 +96,11 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	public static final String CONTENT_TYPE = "contentType";
 
 	/**
+	 * The key for the accept type.
+	 */
+	public static final String ACCEPT = "accept";
+
+	/**
 	 * The key for the message reply channel.
 	 */
 	public static final String REPLY_CHANNEL = "replyChannel";
