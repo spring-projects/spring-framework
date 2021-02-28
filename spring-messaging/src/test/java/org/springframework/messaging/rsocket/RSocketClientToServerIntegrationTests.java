@@ -39,7 +39,6 @@ import reactor.test.StepVerifier;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -120,8 +119,6 @@ public class RSocketClientToServerIntegrationTests {
 				.as("Fire and forget requests did not actually complete handling on the server side")
 				.isEqualTo(3);
 	}
-
-
 
 	@Test
 	public void echo() {
@@ -237,13 +234,9 @@ public class RSocketClientToServerIntegrationTests {
 
 		final Sinks.Many<String> metadataPushPayloads = Sinks.many().replay().all();
 
+
 		@MessageMapping("receive")
 		void receive(String payload) {
-			this.fireForgetPayloads.tryEmitNext(payload);
-		}
-
-		@MessageMapping("messageContentType")
-		void messageContentType(@Payload String payload, @Header(name = MessageHeaders.CONTENT_TYPE) MimeType contentType) {
 			this.fireForgetPayloads.tryEmitNext(payload);
 		}
 

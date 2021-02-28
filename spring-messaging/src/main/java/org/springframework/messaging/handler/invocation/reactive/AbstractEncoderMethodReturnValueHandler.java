@@ -175,12 +175,6 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 				encodeValue(value, elementType, encoder, bufferFactory, contentMime, hints));
 	}
 
-
-
-
-
-
-
 	private ResolvableType getElementType(ReactiveAdapter adapter, ResolvableType type) {
 		if (adapter.isNoValue()) {
 			return VOID_RESOLVABLE_TYPE;

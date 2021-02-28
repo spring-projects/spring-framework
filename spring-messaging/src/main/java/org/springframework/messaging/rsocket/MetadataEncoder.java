@@ -107,6 +107,9 @@ public final class MetadataEncoder {
 	}
 
 
+	/**
+	 * Add WellKnownMimeType header into metadata
+	 **/
 	public MetadataEncoder header(List<String> values, WellKnownMimeType type){
 		if (this.isComposite) {
 			Assert.notNull(type, "MimeType is required for composite metadata entries.");
@@ -333,6 +336,4 @@ public final class MetadataEncoder {
 			return this.mimeType;
 		}
 	}
-
-
 }
