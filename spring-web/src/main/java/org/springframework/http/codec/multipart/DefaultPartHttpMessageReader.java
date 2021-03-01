@@ -227,6 +227,10 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 		if (contentType != null) {
 			String boundary = contentType.getParameter("boundary");
 			if (boundary != null) {
+				int len = boundary.length();
+				if (len > 2 && boundary.charAt(0) == '"' && boundary.charAt(len - 1) == '"') {
+					boundary = boundary.substring(1, len - 1);
+				}
 				return boundary.getBytes(StandardCharsets.ISO_8859_1);
 			}
 		}
