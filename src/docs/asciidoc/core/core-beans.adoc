@@ -10724,7 +10724,7 @@ The following example shows how our notifier can be rewritten to be invoked only
 .Java
 ----
 	@EventListener(condition = "#blEvent.content == 'my-event'")
-	public void processBlockedListEvent(BlockedListEvent blockedListEvent) {
+	public void processBlockedListEvent(BlockedListEvent blEvent) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----
@@ -10732,7 +10732,7 @@ The following example shows how our notifier can be rewritten to be invoked only
 .Kotlin
 ----
 	@EventListener(condition = "#blEvent.content == 'my-event'")
-	fun processBlockedListEvent(blockedListEvent: BlockedListEvent) {
+	fun processBlockedListEvent(blEvent: BlockedListEvent) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----
