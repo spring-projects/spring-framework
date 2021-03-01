@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.testfixture.servlet.DelegatingServletInputStream;
 import org.springframework.web.testfixture.servlet.MockAsyncContext;
@@ -46,6 +47,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Brian Clozel
  */
 public class ServerHttpRequestTests {
 
@@ -164,6 +166,18 @@ public class ServerHttpRequestTests {
 
 		request = request.mutate().header(headerName, headerValue3).build();
 		assertThat(request.getHeaders().get(headerName)).containsExactly(headerValue3);
+	}
+
+	@Test // gh-26615
+	void mutateContentTypeHeaderValue() throws Exception {
+		ServerHttpRequest request = createRequest("/path").mutate()
+				.headers(headers -> headers.setContentType(MediaType.APPLICATION_JSON)).build();
+
+		assertThat(request.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+
+		ServerHttpRequest mutated = request.mutate()
+				.headers(headers -> headers.setContentType(MediaType.APPLICATION_CBOR)).build();
+		assertThat(mutated.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_CBOR);
 	}
 
 	@Test
