@@ -796,10 +796,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			this.registration = registration;
 		}
 
-		public T getMapping() {
-			return this.mapping;
-		}
-
 		public HandlerMethod getHandlerMethod() {
 			return this.registration.getHandlerMethod();
 		}
