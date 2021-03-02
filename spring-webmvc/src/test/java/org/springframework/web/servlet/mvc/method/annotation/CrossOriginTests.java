@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Test fixture for {@link CrossOrigin @CrossOrigin} annotated methods.
+ * Tests for {@link CrossOrigin @CrossOrigin} annotated methods.
  *
  * @author Sebastien Deleuze
  * @author Sam Brannen
@@ -516,13 +516,13 @@ class CrossOriginTests {
 	private static class MaxAgeWithDefaultOriginController {
 
 		@CrossOrigin
-		@RequestMapping(path = "/classAge", method = RequestMethod.GET)
-		public void classAge() {
+		@GetMapping("/classAge")
+		void classAge() {
 		}
 
 		@CrossOrigin(maxAge = 100)
-		@RequestMapping(path = "/methodAge", method = RequestMethod.GET)
-		public void methodAge() {
+		@GetMapping("/methodAge")
+		void methodAge() {
 		}
 	}
 
