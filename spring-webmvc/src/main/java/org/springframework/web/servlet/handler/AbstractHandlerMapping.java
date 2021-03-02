@@ -397,7 +397,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Override
 	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
-		//模板方法之类实现
+		//模板方法之类实现,通常是HandlerMethod对象
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
 			//获得不到，则使用默认处理器
@@ -472,11 +472,13 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
 
-		// 创建 HandlerExecutionChain 对象
+		// 创建 HandlerExecutionChain 对象，如果是HandlerMethod或者其他，需要包装为HandlerExecutionChain
 		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
 				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
 		// 获得请求路径
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request, LOOKUP_PATH);
+
+		//为chain对象加入拦截器
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
 			if (interceptor instanceof MappedInterceptor) {
 				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;

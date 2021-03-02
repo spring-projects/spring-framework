@@ -261,8 +261,11 @@ public class UrlPathHelper {
 	 * @see #getLookupPathForRequest
 	 */
 	public String getPathWithinApplication(HttpServletRequest request) {
+		//获取contextPath
 		String contextPath = getContextPath(request);
+		//获取requestUri
 		String requestUri = getRequestUri(request);
+		//拼接成请求地址,比如：/user/testReturnPage
 		String path = getRemainingPath(requestUri, contextPath, true);
 		if (path != null) {
 			// Normal case: URI contains context path.

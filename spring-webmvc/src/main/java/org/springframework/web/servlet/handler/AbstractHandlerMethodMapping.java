@@ -202,6 +202,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	public void afterPropertiesSet() {
+		//初始化handler方法
 		initHandlerMethods();
 	}
 
@@ -217,6 +218,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				processCandidateBean(beanName);
 			}
 		}
+		//controller方法初始化完成，此处计算映射数量，传入的映射map
 		handlerMethodsInitialized(getHandlerMethods());
 	}
 
@@ -254,6 +256,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				logger.trace("Could not resolve type for bean '" + beanName + "'", ex);
 			}
 		}
+		//判断是否是handler，是否有@Controller和@RequestMapping注解
 		if (beanType != null && isHandler(beanType)) {
 			detectHandlerMethods(beanName);
 		}
@@ -265,11 +268,16 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #getMappingForMethod
 	 */
 	protected void detectHandlerMethods(Object handler) {
+
+		//获取controller class
 		Class<?> handlerType = (handler instanceof String ?
 				obtainApplicationContext().getType((String) handler) : handler.getClass());
 
 		if (handlerType != null) {
+			//获取controller class 如果是cglib的代理类，返回原始
 			Class<?> userType = ClassUtils.getUserClass(handlerType);
+
+			//获取controller 方法，key为Method value为 RequestMappingInfo
 			Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
 					(MethodIntrospector.MetadataLookup<T>) method -> {
 						try {
@@ -283,8 +291,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			if (logger.isTraceEnabled()) {
 				logger.trace(formatMappings(userType, methods));
 			}
+			//循环
 			methods.forEach((method, mapping) -> {
 				Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
+				//注册controller 方法
 				registerHandlerMethod(handler, invocableMethod, mapping);
 			});
 		}
@@ -315,6 +325,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * under the same mapping
 	 */
 	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
+		//private final MappingRegistry mappingRegistry = new MappingRegistry();
 		this.mappingRegistry.register(mapping, handler, method);
 	}
 
@@ -360,6 +371,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		request.setAttribute(LOOKUP_PATH, lookupPath);
 		this.mappingRegistry.acquireReadLock();
@@ -384,6 +396,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	@Nullable
 	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
 		List<Match> matches = new ArrayList<>();
+		//通过请求地址获取 RequestMappingInfo
 		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
 		if (directPathMatches != null) {
 			addMatchingMappings(directPathMatches, matches, request);
@@ -597,9 +610,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			this.readWriteLock.writeLock().lock();
 			try {
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
+				//验证方法是否已经存在，如果存在则抛出异常
 				validateMethodMapping(handlerMethod, mapping);
+				//加入到映射查找map中，key:RequestMappingInfo value:HandlerMethod
 				this.mappingLookup.put(mapping, handlerMethod);
 
+				//请求地址集合，例如：/comms/oauth/token
 				List<String> directUrls = getDirectUrls(mapping);
 				for (String url : directUrls) {
 					this.urlLookup.add(url, mapping);
@@ -615,7 +631,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				if (corsConfig != null) {
 					this.corsLookup.put(handlerMethod, corsConfig);
 				}
-
+				//加入到registry中
 				this.registry.put(mapping, new MappingRegistration<>(mapping, handlerMethod, directUrls, name));
 			}
 			finally {
