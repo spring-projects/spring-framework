@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,9 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	private final ServletServerHttpRequest request;
 
+	private final AsyncListener asyncListener;
+
+
 	public ServletServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
 			DataBufferFactory bufferFactory, int bufferSize, ServletServerHttpRequest request) throws IOException {
 
@@ -85,7 +88,7 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 		this.bufferSize = bufferSize;
 		this.request = request;
 
-		asyncContext.addListener(new ResponseAsyncListener());
+		this.asyncListener = new ResponseAsyncListener();
 
 		// Tomcat expects WriteListener registration on initial thread
 		response.getOutputStream().setWriteListener(new ResponseBodyWriteListener());
@@ -163,6 +166,16 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 				this.response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 			}
 		}
+	}
+
+	/**
+	 * Return an {@link ResponseAsyncListener} that notifies the response
+	 * body Publisher and Subscriber of Servlet container events. The listener
+	 * is not actually registered but is rather exposed for
+	 * {@link ServletHttpHandlerAdapter} to ensure events are delegated.
+	 */
+	AsyncListener getAsyncListener() {
+		return this.asyncListener;
 	}
 
 	@Override
