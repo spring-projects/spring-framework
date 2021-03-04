@@ -279,7 +279,10 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onTimeout(AsyncEvent event) {
-			logger.debug(this.logPrefix + "Timeout notification");
+			// Should never happen since we call asyncContext.setTimeout(-1)
+			if (logger.isDebugEnabled()) {
+				logger.debug(this.logPrefix + "AsyncEvent onTimeout");
+			}
 			delegateTimeout(this.requestAsyncListener, event);
 			delegateTimeout(this.responseAsyncListener, event);
 			handleTimeoutOrError(event);
@@ -288,7 +291,9 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		@Override
 		public void onError(AsyncEvent event) {
 			Throwable ex = event.getThrowable();
-			logger.debug(this.logPrefix + "Error notification: " + (ex != null ? ex : "<no Throwable>"));
+			if (logger.isDebugEnabled()) {
+				logger.debug(this.logPrefix + "AsyncEvent onError: " + (ex != null ? ex : "<no Throwable>"));
+			}
 			delegateError(this.requestAsyncListener, event);
 			delegateError(this.responseAsyncListener, event);
 			handleTimeoutOrError(event);
@@ -378,7 +383,9 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.trace(this.logPrefix + "Failed to complete: " + ex.getMessage());
+			if (logger.isTraceEnabled()) {
+				logger.trace(this.logPrefix + "onError: " + ex.getMessage());
+			}
 			runIfAsyncNotComplete(this.asyncContext, this.completionFlag, () -> {
 				if (this.asyncContext.getResponse().isCommitted()) {
 					logger.trace(this.logPrefix + "Dispatch to container, to raise the error on servlet thread");
@@ -400,7 +407,9 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onComplete() {
-			logger.trace(this.logPrefix + "Handling completed");
+			if (logger.isTraceEnabled()) {
+				logger.trace(this.logPrefix + "onComplete");
+			}
 			runIfAsyncNotComplete(this.asyncContext, this.completionFlag, this.asyncContext::complete);
 		}
 

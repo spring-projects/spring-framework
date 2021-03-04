@@ -324,7 +324,7 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 		@Override
 		protected void flush() throws IOException {
 			if (rsWriteFlushLogger.isTraceEnabled()) {
-				rsWriteFlushLogger.trace(getLogPrefix() + "Flush attempt");
+				rsWriteFlushLogger.trace(getLogPrefix() + "flushing");
 			}
 			ServletServerHttpResponse.this.flush();
 		}
@@ -362,7 +362,7 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 		protected boolean write(DataBuffer dataBuffer) throws IOException {
 			if (ServletServerHttpResponse.this.flushOnNext) {
 				if (rsWriteLogger.isTraceEnabled()) {
-					rsWriteLogger.trace(getLogPrefix() + "Flush attempt");
+					rsWriteLogger.trace(getLogPrefix() + "flushing");
 				}
 				flush();
 			}
