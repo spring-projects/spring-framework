@@ -91,14 +91,15 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 			public boolean isStatic() {
 				return false;
 			}
+			@Nullable
 			@Override
 			public synchronized Object getTarget() {
-				if (target != null) {
-					return target;
+				if (this.target != null) {
+					return this.target;
 				}
 				Set<String> autowiredBeanNames = (beanName != null ? new LinkedHashSet<>(1) : null);
-				target = dlbf.doResolveDependency(descriptor, beanName, autowiredBeanNames, null);
-				if (target == null) {
+				this.target = dlbf.doResolveDependency(descriptor, beanName, autowiredBeanNames, null);
+				if (this.target == null) {
 					Class<?> type = getTargetClass();
 					if (Map.class == type) {
 						return Collections.emptyMap();
@@ -119,7 +120,7 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 						}
 					}
 				}
-				return target;
+				return this.target;
 			}
 			@Override
 			public void releaseTarget(Object target) {
