@@ -384,7 +384,7 @@ public abstract class ReflectionUtils {
 	 * @throws IllegalStateException if introspection fails
 	 */
 	public static Method[] getAllDeclaredMethods(Class<?> leafClass) {
-		final List<Method> methods = new ArrayList<>(32);
+		final List<Method> methods = new ArrayList<>(20);
 		doWithMethods(leafClass, methods::add);
 		return methods.toArray(EMPTY_METHOD_ARRAY);
 	}
@@ -410,7 +410,7 @@ public abstract class ReflectionUtils {
 	 * @since 5.2
 	 */
 	public static Method[] getUniqueDeclaredMethods(Class<?> leafClass, @Nullable MethodFilter mf) {
-		final List<Method> methods = new ArrayList<>(32);
+		final List<Method> methods = new ArrayList<>(20);
 		doWithMethods(leafClass, method -> {
 			boolean knownSignature = false;
 			Method methodBeingOverriddenWithCovariantReturnType = null;
