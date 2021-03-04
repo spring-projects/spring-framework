@@ -65,7 +65,7 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	private final ServletServerHttpRequest request;
 
-	private final AsyncListener asyncListener;
+	private final ResponseAsyncListener asyncListener;
 
 
 	public ServletServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
@@ -243,32 +243,34 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 			handleError(event.getThrowable());
 		}
 
-		void handleError(Throwable ex) {
-			ResponseBodyFlushProcessor flushProcessor = bodyFlushProcessor;
-			if (flushProcessor != null) {
-				flushProcessor.cancel();
-				flushProcessor.onError(ex);
-			}
-
+		public void handleError(Throwable ex) {
 			ResponseBodyProcessor processor = bodyProcessor;
 			if (processor != null) {
 				processor.cancel();
 				processor.onError(ex);
 			}
+			else {
+				ResponseBodyFlushProcessor flushProcessor = bodyFlushProcessor;
+				if (flushProcessor != null) {
+					flushProcessor.cancel();
+					flushProcessor.onError(ex);
+				}
+			}
 		}
 
 		@Override
 		public void onComplete(AsyncEvent event) {
-			ResponseBodyFlushProcessor flushProcessor = bodyFlushProcessor;
-			if (flushProcessor != null) {
-				flushProcessor.cancel();
-				flushProcessor.onComplete();
-			}
-
 			ResponseBodyProcessor processor = bodyProcessor;
 			if (processor != null) {
 				processor.cancel();
 				processor.onComplete();
+			}
+			else {
+				ResponseBodyFlushProcessor flushProcessor = bodyFlushProcessor;
+				if (flushProcessor != null) {
+					flushProcessor.cancel();
+					flushProcessor.onComplete();
+				}
 			}
 		}
 	}
@@ -277,7 +279,7 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 	private class ResponseBodyWriteListener implements WriteListener {
 
 		@Override
-		public void onWritePossible() throws IOException {
+		public void onWritePossible() {
 			ResponseBodyProcessor processor = bodyProcessor;
 			if (processor != null) {
 				processor.onWritePossible();
@@ -292,18 +294,7 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 		@Override
 		public void onError(Throwable ex) {
-			ResponseBodyProcessor processor = bodyProcessor;
-			if (processor != null) {
-				processor.cancel();
-				processor.onError(ex);
-			}
-			else {
-				ResponseBodyFlushProcessor flushProcessor = bodyFlushProcessor;
-				if (flushProcessor != null) {
-					flushProcessor.cancel();
-					flushProcessor.onError(ex);
-				}
-			}
+			ServletServerHttpResponse.this.asyncListener.handleError(ex);
 		}
 	}
 
