@@ -4463,13 +4463,14 @@ While this usually works well, there is a potential for issues (for example, wit
 `null` values). Spring, by default, calls `ParameterMetaData.getParameterType` in such a
 case, which can be expensive with your JDBC driver. You should use a recent driver
 version and consider setting the `spring.jdbc.getParameterType.ignore` property to `true`
-(as a JVM system property or in a `spring.properties` file in the root of your classpath)
-if you encounter a performance issue (as reported on Oracle 12c, JBoss and PostgreSQL).
+(as a JVM system property or via the
+<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism) if you encounter
+a performance issue (as reported on Oracle 12c, JBoss, and PostgreSQL).
 
 Alternatively, you might consider specifying the corresponding JDBC types explicitly,
-either through a 'BatchPreparedStatementSetter' (as shown earlier), through an explicit type
-array given to a 'List<Object[]>' based call, through 'registerSqlType' calls on a
-custom 'MapSqlParameterSource' instance, or through a 'BeanPropertySqlParameterSource'
+either through a `BatchPreparedStatementSetter` (as shown earlier), through an explicit type
+array given to a `List<Object[]>` based call, through `registerSqlType` calls on a
+custom `MapSqlParameterSource` instance, or through a `BeanPropertySqlParameterSource`
 that derives the SQL type from the Java-declared property type even for a null value.
 ====
 

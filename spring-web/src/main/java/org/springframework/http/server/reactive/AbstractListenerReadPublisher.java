@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,18 +123,22 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 * all data has been read.
 	 */
 	public void onAllDataRead() {
-		rsReadLogger.trace(getLogPrefix() + "onAllDataRead");
-		this.state.get().onAllDataRead(this);
+		State state = this.state.get();
+		if (rsReadLogger.isTraceEnabled()) {
+			rsReadLogger.trace(getLogPrefix() + "onAllDataRead [" + state + "]");
+		}
+		state.onAllDataRead(this);
 	}
 
 	/**
 	 * Sub-classes can call this to delegate container error notifications.
 	 */
 	public final void onError(Throwable ex) {
+		State state = this.state.get();
 		if (rsReadLogger.isTraceEnabled()) {
-			rsReadLogger.trace(getLogPrefix() + "Connection error: " + ex);
+			rsReadLogger.trace(getLogPrefix() + "onError: " + ex + " [" + state + "]");
 		}
-		this.state.get().onError(this, ex);
+		state.onError(this, ex);
 	}
 
 
@@ -191,13 +195,13 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 				Subscriber<? super T> subscriber = this.subscriber;
 				Assert.state(subscriber != null, "No subscriber");
 				if (rsReadLogger.isTraceEnabled()) {
-					rsReadLogger.trace(getLogPrefix() + "Publishing data read");
+					rsReadLogger.trace(getLogPrefix() + "Publishing " + data.getClass().getSimpleName());
 				}
 				subscriber.onNext(data);
 			}
 			else {
 				if (rsReadLogger.isTraceEnabled()) {
-					rsReadLogger.trace(getLogPrefix() + "No more data to read");
+					rsReadLogger.trace(getLogPrefix() + "No more to read");
 				}
 				return true;
 			}
@@ -255,17 +259,18 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		@Override
 		public final void request(long n) {
 			if (rsReadLogger.isTraceEnabled()) {
-				rsReadLogger.trace(getLogPrefix() + n + " requested");
+				rsReadLogger.trace(getLogPrefix() + "request " + (n != Long.MAX_VALUE ? n : "Long.MAX_VALUE"));
 			}
 			state.get().request(AbstractListenerReadPublisher.this, n);
 		}
 
 		@Override
 		public final void cancel() {
+			State state = AbstractListenerReadPublisher.this.state.get();
 			if (rsReadLogger.isTraceEnabled()) {
-				rsReadLogger.trace(getLogPrefix() + "Cancellation");
+				rsReadLogger.trace(getLogPrefix() + "cancel [" + state + "]");
 			}
-			state.get().cancel(AbstractListenerReadPublisher.this);
+			state.cancel(AbstractListenerReadPublisher.this);
 		}
 	}
 

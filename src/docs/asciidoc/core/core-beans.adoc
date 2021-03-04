@@ -4325,20 +4325,6 @@ Spring's `AutowiredAnnotationBeanPostProcessor` -- a `BeanPostProcessor` impleme
 that ships with the Spring distribution and autowires annotated fields, setter methods,
 and arbitrary config methods.
 
-[[beans-factory-extension-bpp-examples-rabpp]]
-==== Example: The `RequiredAnnotationBeanPostProcessor`
-
-Spring's `RequiredAnnotationBeanPostProcessor` is a `BeanPostProcessor` implementation
-that ships with the Spring distribution and that ensures that JavaBean properties on
-beans that are marked with an (arbitrary) annotation are actually (configured to be)
-dependency-injected with a value.
-
-[NOTE]
-====
-The `RequiredAnnotationBeanPostProcessor` is formally deprecated as of Spring Framework
-5.1. See note in the section on <<beans-required-annotation,`@Required`>> for details.
-====
-
 
 
 [[beans-factory-extension-factory-postprocessors]]
@@ -4698,12 +4684,21 @@ instances or the like later on. We still recommend that you put assertions into 
 bean class itself (for example, into an init method). Doing so enforces those required
 references and values even when you use the class outside of a container.
 
+[TIP]
+====
+The {api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`]
+must be registered as a bean to enable support for the `@Required` annotation. Note,
+however, that a `RequiredAnnotationBeanPostProcessor` bean is registered automatically
+when using the `<context:annotation-config/>` or `<context:component-scan/>` XML
+namespace elements.
+====
+
 [NOTE]
 ====
-The `@Required` annotation is formally deprecated as of Spring Framework 5.1, in favor of
-using constructor injection for required settings (or a custom implementation of
-`InitializingBean.afterPropertiesSet()` or a custom `@PostConstruct` method along with
-bean property setter methods).
+The `@Required` annotation and `RequiredAnnotationBeanPostProcessor` are formally
+deprecated as of Spring Framework 5.1, in favor of using constructor injection for
+required settings (or a custom implementation of `InitializingBean.afterPropertiesSet()`
+or a custom `@PostConstruct` method along with bean property setter methods).
 ====
 
 
@@ -7125,10 +7120,10 @@ metadata is provided per-instance rather than per-class.
 
 While classpath scanning is very fast, it is possible to improve the startup performance
 of large applications by creating a static list of candidates at compilation time. In this
-mode, all modules that are target of component scan must use this mechanism.
+mode, all modules that are targets of component scanning must use this mechanism.
 
-NOTE: Your existing `@ComponentScan` or `<context:component-scan` directives must stay as
-is to request the context to scan candidates in certain packages. When the
+NOTE: Your existing `@ComponentScan` or `<context:component-scan/>` directives must remain
+unchanged to request the context to scan candidates in certain packages. When the
 `ApplicationContext` detects such an index, it automatically uses it rather than scanning
 the classpath.
 
@@ -7157,12 +7152,10 @@ configuration, as shown in the following example:
 		compileOnly "org.springframework:spring-context-indexer:{spring-version}"
 	}
 ----
-====
 
 With Gradle 4.6 and later, the dependency should be declared in the `annotationProcessor`
 configuration, as shown in the following example:
 
-====
 [source,groovy,indent=0subs="verbatim,quotes,attributes"]
 ----
 	dependencies {
@@ -7170,19 +7163,20 @@ configuration, as shown in the following example:
 	}
 ----
 
-That process generates a `META-INF/spring.components` file that is
-included in the jar file.
+The `spring-context-indexer` artifact generates a `META-INF/spring.components` file that
+is included in the jar file.
 
 NOTE: When working with this mode in your IDE, the `spring-context-indexer` must be
 registered as an annotation processor to make sure the index is up-to-date when
 candidate components are updated.
 
-TIP: The index is enabled automatically when a `META-INF/spring.components` is found
+TIP: The index is enabled automatically when a `META-INF/spring.components` file is found
 on the classpath. If an index is partially available for some libraries (or use cases)
-but could not be built for the whole application, you can fallback to a regular classpath
-arrangement (as though no index was present at all) by setting `spring.index.ignore` to
-`true`, either as a system property or in a `spring.properties` file at the root of the
-classpath.
+but could not be built for the whole application, you can fall back to a regular classpath
+arrangement (as though no index were present at all) by setting `spring.index.ignore` to
+`true`, either as a JVM system property or via the
+<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism.
+
 
 
 
@@ -10730,7 +10724,7 @@ The following example shows how our notifier can be rewritten to be invoked only
 .Java
 ----
 	@EventListener(condition = "#blEvent.content == 'my-event'")
-	public void processBlockedListEvent(BlockedListEvent blockedListEvent) {
+	public void processBlockedListEvent(BlockedListEvent blEvent) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----
@@ -10738,7 +10732,7 @@ The following example shows how our notifier can be rewritten to be invoked only
 .Kotlin
 ----
 	@EventListener(condition = "#blEvent.content == 'my-event'")
-	fun processBlockedListEvent(blockedListEvent: BlockedListEvent) {
+	fun processBlockedListEvent(blEvent: BlockedListEvent) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----

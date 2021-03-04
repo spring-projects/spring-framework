@@ -233,6 +233,25 @@ public class DefaultPartHttpMessageReaderTests  {
 		latch.await();
 	}
 
+	@ParameterizedDefaultPartHttpMessageReaderTest
+	public void quotedBoundary(String displayName, DefaultPartHttpMessageReader reader) throws InterruptedException {
+		MockServerHttpRequest request = createRequest(
+				new ClassPathResource("simple.multipart", getClass()), "\"simple-boundary\"");
+
+		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
+
+		CountDownLatch latch = new CountDownLatch(2);
+		StepVerifier.create(result)
+				.consumeNextWith(part -> testPart(part, null,
+						"This is implicitly typed plain ASCII text.\r\nIt does NOT end with a linebreak.", latch)).as("Part 1")
+				.consumeNextWith(part -> testPart(part, null,
+						"This is explicitly typed plain ASCII text.\r\nIt DOES end with a linebreak.\r\n", latch)).as("Part 2")
+				.verifyComplete();
+
+		latch.await();
+	}
+
+
 	private void testBrowser(DefaultPartHttpMessageReader reader, Resource resource, String boundary)
 			throws InterruptedException {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,17 +161,31 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 				}
 				registerHandler(url, handler);
 			});
-			if (logger.isDebugEnabled()) {
-				List<String> patterns = new ArrayList<>();
-				if (getRootHandler() != null) {
-					patterns.add("/");
-				}
-				if (getDefaultHandler() != null) {
-					patterns.add("/**");
-				}
-				patterns.addAll(getHandlerMap().keySet());
-				logger.debug("Patterns " + patterns + " in " + formatMappingName());
+			logMappings();
+		}
+	}
+
+	private void logMappings() {
+		if (mappingsLogger.isDebugEnabled()) {
+			Map<String, Object> map = new LinkedHashMap<>(getHandlerMap());
+			if (getRootHandler() != null) {
+				map.put("/", getRootHandler());
 			}
+			if (getDefaultHandler() != null) {
+				map.put("/**", getDefaultHandler());
+			}
+			mappingsLogger.debug(formatMappingName() + " " + map);
+		}
+		else if (logger.isDebugEnabled()) {
+			List<String> patterns = new ArrayList<>();
+			if (getRootHandler() != null) {
+				patterns.add("/");
+			}
+			if (getDefaultHandler() != null) {
+				patterns.add("/**");
+			}
+			patterns.addAll(getHandlerMap().keySet());
+			logger.debug("Patterns " + patterns + " in " + formatMappingName());
 		}
 	}
 

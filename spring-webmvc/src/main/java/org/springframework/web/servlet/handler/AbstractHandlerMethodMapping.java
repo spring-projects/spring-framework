@@ -290,6 +290,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			if (logger.isTraceEnabled()) {
 				logger.trace(formatMappings(userType, methods));
 			}
+			else if (mappingsLogger.isDebugEnabled()) {
+				mappingsLogger.debug(formatMappings(userType, methods));
+			}
 			methods.forEach((method, mapping) -> {
 				Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
 				registerHandlerMethod(handler, invocableMethod, mapping);
@@ -791,10 +794,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		public Match(T mapping, MappingRegistration<T> registration) {
 			this.mapping = mapping;
 			this.registration = registration;
-		}
-
-		public T getMapping() {
-			return this.mapping;
 		}
 
 		public HandlerMethod getHandlerMethod() {

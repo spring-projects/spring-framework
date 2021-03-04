@@ -206,7 +206,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		if (matches.size() > 1) {
 			matches.sort(PathPattern.SPECIFICITY_COMPARATOR);
 			if (logger.isTraceEnabled()) {
-				logger.debug("Matching patterns " + matches);
+				logger.trace("Matching patterns " + matches);
 			}
 		}
 		PathPattern pattern = matches.get(0);

@@ -89,7 +89,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 */
 	public AbstractListenerWriteProcessor(String logPrefix) {
 		this.logPrefix = (StringUtils.hasText(logPrefix) ? logPrefix : "");
-		this.resultPublisher = new WriteResultPublisher(logPrefix);
+		this.resultPublisher = new WriteResultPublisher(logPrefix + "[WP] ");
 	}
 
 
@@ -112,7 +112,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	@Override
 	public final void onNext(T data) {
 		if (rsWriteLogger.isTraceEnabled()) {
-			rsWriteLogger.trace(getLogPrefix() + "Item to write");
+			rsWriteLogger.trace(getLogPrefix() + "onNext: " + data.getClass().getSimpleName());
 		}
 		this.state.get().onNext(this, data);
 	}
@@ -123,10 +123,11 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 */
 	@Override
 	public final void onError(Throwable ex) {
+		State state = this.state.get();
 		if (rsWriteLogger.isTraceEnabled()) {
-			rsWriteLogger.trace(getLogPrefix() + "Write source error: " + ex);
+			rsWriteLogger.trace(getLogPrefix() + "onError: " + ex + " [" + state + "]");
 		}
-		this.state.get().onError(this, ex);
+		state.onError(this, ex);
 	}
 
 	/**
@@ -135,10 +136,11 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 */
 	@Override
 	public final void onComplete() {
+		State state = this.state.get();
 		if (rsWriteLogger.isTraceEnabled()) {
-			rsWriteLogger.trace(getLogPrefix() + "No more items to write");
+			rsWriteLogger.trace(getLogPrefix() + "onComplete [" + state + "]");
 		}
-		this.state.get().onComplete(this);
+		state.onComplete(this);
 	}
 
 	/**
@@ -158,7 +160,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * container to cancel the upstream subscription.
 	 */
 	public void cancel() {
-		rsWriteLogger.trace(getLogPrefix() + "Cancellation");
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "cancel [" + this.state + "]");
+		}
 		if (this.subscription != null) {
 			this.subscription.cancel();
 		}
@@ -287,7 +291,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	private void writeIfPossible() {
 		boolean result = isWritePossible();
 		if (!result && rsWriteLogger.isTraceEnabled()) {
-			rsWriteLogger.trace(getLogPrefix() + "isWritePossible: false");
+			rsWriteLogger.trace(getLogPrefix() + "isWritePossible false");
 		}
 		if (result) {
 			onWritePossible();

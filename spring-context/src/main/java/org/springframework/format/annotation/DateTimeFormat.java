@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,14 +36,17 @@ import java.lang.annotation.Target;
  *
  * <p>For ISO-based formatting, set the {@link #iso} attribute to be the desired {@link ISO} format,
  * such as {@link ISO#DATE}. For custom formatting, set the {@link #pattern} attribute to be the
- * DateTime pattern, such as {@code yyyy/MM/dd hh:mm:ss a}.
+ * DateTime pattern, such as {@code "yyyy/MM/dd hh:mm:ss a"}.
  *
  * <p>Each attribute is mutually exclusive, so only set one attribute per annotation instance
- * (the one most convenient one for your formatting needs).
- * When the pattern attribute is specified, it takes precedence over both the style and ISO attribute.
- * When the {@link #iso} attribute is specified, it takes precedence over the style attribute.
- * When no annotation attributes are specified, the default format applied is style-based
- * with a style code of 'SS' (short date, short time).
+ * (the one most convenient for your formatting needs).
+ *
+ * <ul>
+ * <li>When the pattern attribute is specified, it takes precedence over both the style and ISO attribute.</li>
+ * <li>When the {@link #iso} attribute is specified, it takes precedence over the style attribute.</li>
+ * <li>When no annotation attributes are specified, the default format applied is style-based
+ * with a style code of 'SS' (short date, short time).</li>
+ * </ul>
  *
  * @author Keith Donald
  * @author Juergen Hoeller

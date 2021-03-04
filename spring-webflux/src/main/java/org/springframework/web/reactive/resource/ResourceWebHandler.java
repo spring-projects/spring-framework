@@ -619,7 +619,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			return this.locationValues.stream().collect(Collectors.joining("\", \"", "[\"", "\"]"));
 		}
 		else if (!this.locations.isEmpty()) {
-			return "[" + this.locations + "]";
+			return "[" + this.locations.toString()
+					.replaceAll("class path resource", "Classpath")
+					.replaceAll("ServletContext resource", "ServletContext") + "]";
 		}
 		return Collections.emptyList();
 	}

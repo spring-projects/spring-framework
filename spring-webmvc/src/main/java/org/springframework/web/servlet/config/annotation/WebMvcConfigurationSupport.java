@@ -129,6 +129,8 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * ordered at 1 to map URL paths directly to view names.
  * <li>{@link BeanNameUrlHandlerMapping}
  * ordered at 2 to map URL paths to controller bean names.
+ * <li>{@link RouterFunctionMapping}
+ * ordered at 3 to map {@linkplain org.springframework.web.servlet.function.RouterFunction router functions}.
  * <li>{@link HandlerMapping}
  * ordered at {@code Integer.MAX_VALUE-1} to serve static resource requests.
  * <li>{@link HandlerMapping}

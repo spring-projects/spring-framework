@@ -165,6 +165,10 @@ final class BitsCronField extends CronField {
 				int max = Integer.parseInt(value.substring(hyphenPos + 1));
 				min = type.checkValidValue(min);
 				max = type.checkValidValue(max);
+				if (type == Type.DAY_OF_WEEK && min == 7) {
+					// If used as a minimum in a range, Sunday means 0 (not 7)
+					min = 0;
+				}
 				return ValueRange.of(min, max);
 			}
 		}

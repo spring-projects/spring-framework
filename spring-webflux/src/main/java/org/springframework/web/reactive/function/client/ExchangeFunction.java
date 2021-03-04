@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,15 @@ import reactor.core.publisher.Mono;
  *
  * <p>For example:
  * <pre class="code">
- * ExchangeFunction exchangeFunction = ExchangeFunctions.create(new ReactorClientHttpConnector());
- * ClientRequest&lt;Void&gt; request = ClientRequest.method(HttpMethod.GET, "https://example.com/resource").build();
+ * ExchangeFunction exchangeFunction =
+ *         ExchangeFunctions.create(new ReactorClientHttpConnector());
  *
- * Mono&lt;String&gt; result = exchangeFunction
+ * URI url = URI.create("https://example.com/resource");
+ * ClientRequest request = ClientRequest.create(HttpMethod.GET, url).build();
+ *
+ * Mono&lt;String&gt; bodyMono = exchangeFunction
  *     .exchange(request)
- *     .then(response -> response.bodyToMono(String.class));
+ *     .flatMap(response -> response.bodyToMono(String.class));
  * </pre>
  *
  * @author Arjen Poutsma
@@ -39,15 +42,15 @@ import reactor.core.publisher.Mono;
 public interface ExchangeFunction {
 
 	/**
-	 * Exchange the given request for a response mono.
+	 * Exchange the given request for a {@link ClientResponse} promise.
 	 * @param request the request to exchange
 	 * @return the delayed response
 	 */
 	Mono<ClientResponse> exchange(ClientRequest request);
 
 	/**
-	 * Filters this exchange function with the given {@code ExchangeFilterFunction}, resulting in a
-	 * filtered {@code ExchangeFunction}.
+	 * Filter the exchange function with the given {@code ExchangeFilterFunction},
+	 * resulting in a filtered {@code ExchangeFunction}.
 	 * @param filter the filter to apply to this exchange
 	 * @return the filtered exchange
 	 * @see ExchangeFilterFunction#apply(ExchangeFunction)

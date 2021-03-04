@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,9 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final byte[] buffer;
 
+	private final AsyncListener asyncListener;
+
+
 	public ServletServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
 			String servletPath, DataBufferFactory bufferFactory, int bufferSize)
 			throws IOException, URISyntaxException {
@@ -93,7 +96,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		this.bufferFactory = bufferFactory;
 		this.buffer = new byte[bufferSize];
 
-		asyncContext.addListener(new RequestAsyncListener());
+		this.asyncListener = new RequestAsyncListener();
 
 		// Tomcat expects ReadListener registration on initial thread
 		ServletInputStream inputStream = request.getInputStream();
@@ -214,6 +217,22 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return Flux.from(this.bodyPublisher);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeRequest() {
+		return (T) this.request;
+	}
+
+	/**
+	 * Return an {@link RequestAsyncListener} that completes the request body
+	 * Publisher when the Servlet container notifies that request input has ended.
+	 * The listener is not actually registered but is rather exposed for
+	 * {@link ServletHttpHandlerAdapter} to ensure events are delegated.
+	 */
+	AsyncListener getAsyncListener() {
+		return this.asyncListener;
+	}
+
 	/**
 	 * Read from the request body InputStream and return a DataBuffer.
 	 * Invoked only when {@link ServletInputStream#isReady()} returns "true".
@@ -243,12 +262,6 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		if (rsReadLogger.isTraceEnabled()) {
 			rsReadLogger.trace(getLogPrefix() + "Read " + read + (read != -1 ? " bytes" : ""));
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T getNativeRequest() {
-		return (T) this.request;
 	}
 
 

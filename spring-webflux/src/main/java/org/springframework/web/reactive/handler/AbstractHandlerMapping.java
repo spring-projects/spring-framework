@@ -18,11 +18,13 @@ package org.springframework.web.reactive.handler;
 
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
+import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -50,6 +52,10 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 		implements HandlerMapping, Ordered, BeanNameAware {
 
 	private static final WebHandler NO_OP_HANDLER = exchange -> Mono.empty();
+
+	/** Dedicated "hidden" logger for request mappings. */
+	protected final Log mappingsLogger =
+			LogDelegateFactory.getHiddenLog(HandlerMapping.class.getName() + ".Mappings");
 
 
 	private final PathPatternParser patternParser;

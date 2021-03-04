@@ -357,7 +357,9 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		ObjectMapper objectMapper = selectObjectMapper(javaType.getRawClass(), contentType);
 		Assert.state(objectMapper != null, "No ObjectMapper for " + javaType);
 
-		boolean isUnicode = ENCODINGS.containsKey(charset.name());
+		boolean isUnicode = ENCODINGS.containsKey(charset.name()) ||
+				"UTF-16".equals(charset.name()) ||
+				"UTF-32".equals(charset.name());
 		try {
 			if (inputMessage instanceof MappingJacksonInputMessage) {
 				Class<?> deserializationView = ((MappingJacksonInputMessage) inputMessage).getDeserializationView();

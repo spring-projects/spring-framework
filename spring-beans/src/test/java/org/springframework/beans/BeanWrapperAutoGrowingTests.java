@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class BeanWrapperAutoGrowingTests {
 
@@ -66,11 +67,6 @@ public class BeanWrapperAutoGrowingTests {
 		assertThat(bean.getArray()[0]).isInstanceOf(Bean.class);
 	}
 
-	private void assertNotNull(Object propertyValue) {
-		assertThat(propertyValue).isNotNull();
-	}
-
-
 	@Test
 	public void setPropertyValueAutoGrowArray() {
 		wrapper.setPropertyValue("array[0].prop", "test");
@@ -93,10 +89,37 @@ public class BeanWrapperAutoGrowingTests {
 	}
 
 	@Test
-	public void getPropertyValueAutoGrowMultiDimensionalArray() {
+	public void getPropertyValueAutoGrow2dArray() {
 		assertNotNull(wrapper.getPropertyValue("multiArray[0][0]"));
 		assertThat(bean.getMultiArray()[0].length).isEqualTo(1);
 		assertThat(bean.getMultiArray()[0][0]).isInstanceOf(Bean.class);
+	}
+
+	@Test
+	public void getPropertyValueAutoGrow3dArray() {
+		assertNotNull(wrapper.getPropertyValue("threeDimensionalArray[1][2][3]"));
+		assertThat(bean.getThreeDimensionalArray()[1].length).isEqualTo(3);
+		assertThat(bean.getThreeDimensionalArray()[1][2][3]).isInstanceOf(Bean.class);
+	}
+
+	@Test
+	public void setPropertyValueAutoGrow2dArray() {
+		Bean newBean = new Bean();
+		newBean.setProp("enigma");
+		wrapper.setPropertyValue("multiArray[2][3]", newBean);
+		assertThat(bean.getMultiArray()[2][3])
+			.isInstanceOf(Bean.class)
+			.extracting(Bean::getProp).isEqualTo("enigma");
+	}
+
+	@Test
+	public void setPropertyValueAutoGrow3dArray() {
+		Bean newBean = new Bean();
+		newBean.setProp("enigma");
+		wrapper.setPropertyValue("threeDimensionalArray[2][3][4]", newBean);
+		assertThat(bean.getThreeDimensionalArray()[2][3][4])
+			.isInstanceOf(Bean.class)
+			.extracting(Bean::getProp).isEqualTo("enigma");
 	}
 
 	@Test
@@ -131,7 +154,7 @@ public class BeanWrapperAutoGrowingTests {
 	public void getPropertyValueAutoGrowListFailsAgainstLimit() {
 		wrapper.setAutoGrowCollectionLimit(2);
 		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
-				assertNotNull(wrapper.getPropertyValue("list[4]")))
+				wrapper.getPropertyValue("list[4]"))
 			.withRootCauseInstanceOf(IndexOutOfBoundsException.class);
 	}
 
@@ -161,6 +184,11 @@ public class BeanWrapperAutoGrowingTests {
 	}
 
 
+	private static void assertNotNull(Object propertyValue) {
+		assertThat(propertyValue).isNotNull();
+	}
+
+
 	@SuppressWarnings("rawtypes")
 	public static class Bean {
 
@@ -173,6 +201,8 @@ public class BeanWrapperAutoGrowingTests {
 		private Bean[] array;
 
 		private Bean[][] multiArray;
+
+		private Bean[][][] threeDimensionalArray;
 
 		private List<Bean> list;
 
@@ -212,6 +242,14 @@ public class BeanWrapperAutoGrowingTests {
 
 		public void setMultiArray(Bean[][] multiArray) {
 			this.multiArray = multiArray;
+		}
+
+		public Bean[][][] getThreeDimensionalArray() {
+			return threeDimensionalArray;
+		}
+
+		public void setThreeDimensionalArray(Bean[][][] threeDimensionalArray) {
+			this.threeDimensionalArray = threeDimensionalArray;
 		}
 
 		public List<Bean> getList() {
