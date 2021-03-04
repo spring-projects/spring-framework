@@ -50,6 +50,8 @@ class WriteResultPublisher implements Publisher<Void> {
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
+	private final Runnable cancelTask;
+
 	@Nullable
 	private volatile Subscriber<? super Void> subscriber;
 
@@ -61,7 +63,8 @@ class WriteResultPublisher implements Publisher<Void> {
 	private final String logPrefix;
 
 
-	public WriteResultPublisher(String logPrefix) {
+	public WriteResultPublisher(String logPrefix, Runnable cancelTask) {
+		this.cancelTask = cancelTask;
 		this.logPrefix = logPrefix;
 	}
 
@@ -248,7 +251,10 @@ class WriteResultPublisher implements Publisher<Void> {
 		}
 
 		void cancel(WriteResultPublisher publisher) {
-			if (!publisher.changeState(this, COMPLETED)) {
+			if (publisher.changeState(this, COMPLETED)) {
+				publisher.cancelTask.run();
+			}
+			else {
 				publisher.state.get().cancel(publisher);
 			}
 		}

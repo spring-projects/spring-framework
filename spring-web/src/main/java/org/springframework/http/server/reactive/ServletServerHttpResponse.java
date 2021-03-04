@@ -244,33 +244,35 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 		}
 
 		public void handleError(Throwable ex) {
+			ResponseBodyFlushProcessor flushProcessor = bodyFlushProcessor;
 			ResponseBodyProcessor processor = bodyProcessor;
-			if (processor != null) {
-				processor.cancel();
-				processor.onError(ex);
-			}
-			else {
-				ResponseBodyFlushProcessor flushProcessor = bodyFlushProcessor;
-				if (flushProcessor != null) {
-					flushProcessor.cancel();
-					flushProcessor.onError(ex);
+			if (flushProcessor != null) {
+				// Cancel the upstream source of "write" Publishers
+				flushProcessor.cancel();
+				// Cancel the current "write" Publisher and propagate onComplete downstream
+				if (processor != null) {
+					processor.cancel();
+					processor.onError(ex);
 				}
+				// This is a no-op if processor was connected and onError propagated all the way
+				flushProcessor.onError(ex);
 			}
 		}
 
 		@Override
 		public void onComplete(AsyncEvent event) {
+			ResponseBodyFlushProcessor flushProcessor = bodyFlushProcessor;
 			ResponseBodyProcessor processor = bodyProcessor;
-			if (processor != null) {
-				processor.cancel();
-				processor.onComplete();
-			}
-			else {
-				ResponseBodyFlushProcessor flushProcessor = bodyFlushProcessor;
-				if (flushProcessor != null) {
-					flushProcessor.cancel();
-					flushProcessor.onComplete();
+			if (flushProcessor != null) {
+				// Cancel the upstream source of "write" Publishers
+				flushProcessor.cancel();
+				// Cancel the current "write" Publisher and propagate onComplete downstream
+				if (processor != null) {
+					processor.cancel();
+					processor.onComplete();
 				}
+				// This is a no-op if processor was connected and onComplete propagated all the way
+				flushProcessor.onComplete();
 			}
 		}
 	}

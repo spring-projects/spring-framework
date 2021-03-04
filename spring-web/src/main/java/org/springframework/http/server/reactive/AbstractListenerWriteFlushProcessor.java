@@ -60,6 +60,9 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 
 	private volatile boolean sourceCompleted;
 
+	@Nullable
+	private volatile AbstractListenerWriteProcessor<?> currentWriteProcessor;
+
 	private final WriteResultPublisher resultPublisher;
 
 	private final String logPrefix;
@@ -75,7 +78,21 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	 */
 	public AbstractListenerWriteFlushProcessor(String logPrefix) {
 		this.logPrefix = logPrefix;
-		this.resultPublisher = new WriteResultPublisher(logPrefix + "[WFP] ");
+		this.resultPublisher = new WriteResultPublisher(logPrefix + "[WFP] ",
+				() -> {
+					cancel();
+					// Complete immediately
+					State oldState = this.state.getAndSet(State.COMPLETED);
+					if (rsWriteFlushLogger.isTraceEnabled()) {
+						rsWriteFlushLogger.trace(getLogPrefix() + oldState + " -> " + this.state);
+					}
+					// Propagate to current "write" Processor
+					AbstractListenerWriteProcessor<?> writeProcessor = this.currentWriteProcessor;
+					if (writeProcessor != null) {
+						writeProcessor.cancelAndSetCompleted();
+					}
+					this.currentWriteProcessor = null;
+				});
 	}
 
 
@@ -139,8 +156,11 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	}
 
 	/**
-	 * Invoked during an error or completion callback from the underlying
-	 * container to cancel the upstream subscription.
+	 * Cancel the upstream chain of "write" Publishers only, for example due to
+	 * Servlet container error/completion notifications. This should usually
+	 * be followed up with a call to either {@link #onError(Throwable)} or
+	 * {@link #onComplete()} to notify the downstream chain, that is unless
+	 * cancellation came from downstream.
 	 */
 	protected void cancel() {
 		if (rsWriteFlushLogger.isTraceEnabled()) {
@@ -268,9 +288,10 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 					Publisher<? extends T> currentPublisher) {
 
 				if (processor.changeState(this, RECEIVED)) {
-					Processor<? super T, Void> currentProcessor = processor.createWriteProcessor();
-					currentPublisher.subscribe(currentProcessor);
-					currentProcessor.subscribe(new WriteResultSubscriber(processor));
+					Processor<? super T, Void> writeProcessor = processor.createWriteProcessor();
+					processor.currentWriteProcessor = (AbstractListenerWriteProcessor<?>) writeProcessor;
+					currentPublisher.subscribe(writeProcessor);
+					writeProcessor.subscribe(new WriteResultSubscriber(processor));
 				}
 			}
 			@Override
@@ -429,6 +450,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 					rsWriteFlushLogger.trace(
 							this.processor.getLogPrefix() + "current \"write\" Publisher failed: " + ex);
 				}
+				this.processor.currentWriteProcessor = null;
 				this.processor.cancel();
 				this.processor.onError(ex);
 			}
@@ -439,6 +461,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 					rsWriteFlushLogger.trace(
 							this.processor.getLogPrefix() + "current \"write\" Publisher completed");
 				}
+				this.processor.currentWriteProcessor = null;
 				this.processor.state.get().writeComplete(this.processor);
 			}
 
