@@ -384,7 +384,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		@Override
 		public void onError(Throwable ex) {
 			if (logger.isTraceEnabled()) {
-				logger.trace(this.logPrefix + "onError: " + ex.getMessage());
+				logger.trace(this.logPrefix + "onError: " + ex);
 			}
 			runIfAsyncNotComplete(this.asyncContext, this.completionFlag, () -> {
 				if (this.asyncContext.getResponse().isCommitted()) {
