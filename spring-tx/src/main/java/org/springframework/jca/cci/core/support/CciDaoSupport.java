@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,9 +21,8 @@ import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.ConnectionSpec;
 
 import org.springframework.dao.support.DaoSupport;
-import org.springframework.jca.cci.CannotGetCciConnectionException;
-import org.springframework.jca.cci.connection.ConnectionFactoryUtils;
-import org.springframework.jca.cci.core.CciTemplate;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Convenient super class for CCI-based data access objects.
@@ -42,10 +41,14 @@ import org.springframework.jca.cci.core.CciTemplate;
  * @see #setConnectionFactory
  * @see #getCciTemplate
  * @see org.springframework.jca.cci.core.CciTemplate
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 public abstract class CciDaoSupport extends DaoSupport {
 
-	private CciTemplate cciTemplate;
+	@Nullable
+	private org.springframework.jca.cci.core.CciTemplate cciTemplate;
 
 
 	/**
@@ -53,7 +56,7 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 */
 	public final void setConnectionFactory(ConnectionFactory connectionFactory) {
 		if (this.cciTemplate == null || connectionFactory != this.cciTemplate.getConnectionFactory()) {
-		  this.cciTemplate = createCciTemplate(connectionFactory);
+			this.cciTemplate = createCciTemplate(connectionFactory);
 		}
 	}
 
@@ -66,22 +69,23 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 * @return the new CciTemplate instance
 	 * @see #setConnectionFactory(javax.resource.cci.ConnectionFactory)
 	 */
-	protected CciTemplate createCciTemplate(ConnectionFactory connectionFactory) {
-		return new CciTemplate(connectionFactory);
+	protected org.springframework.jca.cci.core.CciTemplate createCciTemplate(ConnectionFactory connectionFactory) {
+		return new org.springframework.jca.cci.core.CciTemplate(connectionFactory);
 	}
 
 	/**
 	 * Return the ConnectionFactory used by this DAO.
 	 */
+	@Nullable
 	public final ConnectionFactory getConnectionFactory() {
-		return this.cciTemplate.getConnectionFactory();
+		return (this.cciTemplate != null ? this.cciTemplate.getConnectionFactory() : null);
 	}
 
 	/**
 	 * Set the CciTemplate for this DAO explicitly,
 	 * as an alternative to specifying a ConnectionFactory.
 	 */
-	public final void setCciTemplate(CciTemplate cciTemplate) {
+	public final void setCciTemplate(org.springframework.jca.cci.core.CciTemplate cciTemplate) {
 		this.cciTemplate = cciTemplate;
 	}
 
@@ -89,8 +93,9 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 * Return the CciTemplate for this DAO,
 	 * pre-initialized with the ConnectionFactory or set explicitly.
 	 */
-	public final CciTemplate getCciTemplate() {
-	  return this.cciTemplate;
+	@Nullable
+	public final org.springframework.jca.cci.core.CciTemplate getCciTemplate() {
+		return this.cciTemplate;
 	}
 
 	@Override
@@ -110,8 +115,10 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 * @return the derived template instance
 	 * @see org.springframework.jca.cci.core.CciTemplate#getDerivedTemplate(javax.resource.cci.ConnectionSpec)
 	 */
-	protected final CciTemplate getCciTemplate(ConnectionSpec connectionSpec) {
-		return getCciTemplate().getDerivedTemplate(connectionSpec);
+	protected final org.springframework.jca.cci.core.CciTemplate getCciTemplate(ConnectionSpec connectionSpec) {
+		org.springframework.jca.cci.core.CciTemplate cciTemplate = getCciTemplate();
+		Assert.state(cciTemplate != null, "No CciTemplate set");
+		return cciTemplate.getDerivedTemplate(connectionSpec);
 	}
 
 	/**
@@ -121,18 +128,20 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 * if the attempt to get a Connection failed
 	 * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#getConnection(javax.resource.cci.ConnectionFactory)
 	 */
-	protected final Connection getConnection() throws CannotGetCciConnectionException {
-		return ConnectionFactoryUtils.getConnection(getConnectionFactory());
+	protected final Connection getConnection() throws org.springframework.jca.cci.CannotGetCciConnectionException {
+		ConnectionFactory connectionFactory = getConnectionFactory();
+		Assert.state(connectionFactory != null, "No ConnectionFactory set");
+		return org.springframework.jca.cci.connection.ConnectionFactoryUtils.getConnection(connectionFactory);
 	}
 
 	/**
 	 * Close the given CCI Connection, created via this bean's ConnectionFactory,
 	 * if it isn't bound to the thread.
-	 * @param con Connection to close
+	 * @param con the Connection to close
 	 * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#releaseConnection
 	 */
 	protected final void releaseConnection(Connection con) {
-		ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
+		org.springframework.jca.cci.connection.ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
 	}
 
 }

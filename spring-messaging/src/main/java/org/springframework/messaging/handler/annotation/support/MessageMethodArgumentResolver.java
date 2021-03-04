@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,13 +20,13 @@ import java.lang.reflect.Type;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -38,20 +38,28 @@ import org.springframework.util.StringUtils;
  *
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class MessageMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+	@Nullable
 	private final MessageConverter converter;
 
 
 	/**
-	 * Create a new instance with the given {@link MessageConverter}.
-	 * @param converter the MessageConverter to use (required)
-	 * @since 4.1
+	 * Create a default resolver instance without message conversion.
 	 */
-	public MessageMethodArgumentResolver(MessageConverter converter) {
-		Assert.notNull(converter, "MessageConverter must not be null");
+	public MessageMethodArgumentResolver() {
+		this(null);
+	}
+
+	/**
+	 * Create a resolver instance with the given {@link MessageConverter}.
+	 * @param converter the MessageConverter to use (may be {@code null})
+	 * @since 4.3
+	 */
+	public MessageMethodArgumentResolver(@Nullable MessageConverter converter) {
 		this.converter = converter;
 	}
 
@@ -63,45 +71,53 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-
 		Class<?> targetMessageType = parameter.getParameterType();
-		Class<?> targetPayloadType = getPayloadType(parameter);
+		Class<?> targetPayloadType = getPayloadType(parameter, message);
 
 		if (!targetMessageType.isAssignableFrom(message.getClass())) {
-			String actual = ClassUtils.getQualifiedName(message.getClass());
-			String expected = ClassUtils.getQualifiedName(targetMessageType);
-			throw new MethodArgumentTypeMismatchException(message, parameter, "The actual message type " +
-					"[" + actual + "] does not match the expected type [" + expected + "]");
+			throw new MethodArgumentTypeMismatchException(message, parameter, "Actual message type '" +
+					ClassUtils.getDescriptiveType(message) + "' does not match expected type '" +
+					ClassUtils.getQualifiedName(targetMessageType) + "'");
 		}
 
 		Object payload = message.getPayload();
-		if (payload == null || targetPayloadType.isInstance(payload)) {
+		if (targetPayloadType.isInstance(payload)) {
 			return message;
 		}
 
 		if (isEmptyPayload(payload)) {
-			String actual = ClassUtils.getQualifiedName(payload.getClass());
-			String expected = ClassUtils.getQualifiedName(targetPayloadType);
-			throw new MessageConversionException(message, "Cannot convert from the " +
-					"expected payload type [" + expected + "] to the " +
-					"actual payload type [" + actual + "] when the payload is empty.");
+			throw new MessageConversionException(message, "Cannot convert from actual payload type '" +
+					ClassUtils.getDescriptiveType(payload) + "' to expected payload type '" +
+					ClassUtils.getQualifiedName(targetPayloadType) + "' when payload is empty");
 		}
 
 		payload = convertPayload(message, parameter, targetPayloadType);
 		return MessageBuilder.createMessage(payload, message.getHeaders());
 	}
 
-	private Class<?> getPayloadType(MethodParameter parameter) {
+	/**
+	 * Resolve the target class to convert the payload to.
+	 * <p>By default this is the generic type declared in the {@code Message}
+	 * method parameter but that can be overridden to select a more specific
+	 * target type after also taking into account the "Content-Type", e.g.
+	 * return {@code String} if target type is {@code Object} and
+	 * {@code "Content-Type:text/**"}.
+	 * @param parameter the target method parameter
+	 * @param message the message being processed
+	 * @return the target type to use
+	 * @since 5.2
+	 */
+	protected Class<?> getPayloadType(MethodParameter parameter, Message<?> message) {
 		Type genericParamType = parameter.getGenericParameterType();
 		ResolvableType resolvableType = ResolvableType.forType(genericParamType).as(Message.class);
-		return resolvableType.getGeneric(0).resolve(Object.class);
+		return resolvableType.getGeneric().toClass();
 	}
 
 	/**
 	 * Check if the given {@code payload} is empty.
 	 * @param payload the payload to check (can be {@code null})
 	 */
-	protected boolean isEmptyPayload(Object payload) {
+	protected boolean isEmptyPayload(@Nullable Object payload) {
 		if (payload == null) {
 			return true;
 		}
@@ -117,20 +133,19 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 	}
 
 	private Object convertPayload(Message<?> message, MethodParameter parameter, Class<?> targetPayloadType) {
-		Object result;
+		Object result = null;
 		if (this.converter instanceof SmartMessageConverter) {
 			SmartMessageConverter smartConverter = (SmartMessageConverter) this.converter;
 			result = smartConverter.fromMessage(message, targetPayloadType, parameter);
 		}
-		else {
+		else if (this.converter != null) {
 			result = this.converter.fromMessage(message, targetPayloadType);
 		}
 
 		if (result == null) {
-			String actual = ClassUtils.getQualifiedName(targetPayloadType);
-			String expected = ClassUtils.getQualifiedName(message.getPayload().getClass());
-			throw new MessageConversionException(message, "No converter found to convert payload " +
-					"type [" + actual + "] to expected payload type [" + expected + "].");
+			throw new MessageConversionException(message, "No converter found from actual payload type '" +
+					ClassUtils.getDescriptiveType(message.getPayload()) + "' to expected payload type '" +
+					ClassUtils.getQualifiedName(targetPayloadType) + "'");
 		}
 		return result;
 	}

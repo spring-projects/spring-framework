@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 package org.springframework.aop.framework.autoproxy.target;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -31,10 +30,10 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.lang.Nullable;
 
 /**
  * Convenient superclass for
@@ -61,9 +60,9 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	private ConfigurableBeanFactory beanFactory;
 
-	/** Internally used DefaultListableBeanFactory instances, keyed by bean name */
+	/** Internally used DefaultListableBeanFactory instances, keyed by bean name. */
 	private final Map<String, DefaultListableBeanFactory> internalBeanFactories =
-			new HashMap<String, DefaultListableBeanFactory>();
+			new HashMap<>();
 
 
 	@Override
@@ -88,6 +87,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	//---------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public final TargetSource getTargetSource(Class<?> beanClass, String beanName) {
 		AbstractBeanFactoryBasedTargetSource targetSource =
 				createBeanFactoryBasedTargetSource(beanClass, beanName);
@@ -148,11 +148,8 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 		// Filter out BeanPostProcessors that are part of the AOP infrastructure,
 		// since those are only meant to apply to beans defined in the original factory.
-		for (Iterator<BeanPostProcessor> it = internalBeanFactory.getBeanPostProcessors().iterator(); it.hasNext();) {
-			if (it.next() instanceof AopInfrastructureBean) {
-				it.remove();
-			}
-		}
+		internalBeanFactory.getBeanPostProcessors().removeIf(beanPostProcessor ->
+				beanPostProcessor instanceof AopInfrastructureBean);
 
 		return internalBeanFactory;
 	}
@@ -196,6 +193,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	 * @param beanName the name of the bean
 	 * @return the AbstractPrototypeBasedTargetSource, or {@code null} if we don't match this
 	 */
+	@Nullable
 	protected abstract AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
 			Class<?> beanClass, String beanName);
 

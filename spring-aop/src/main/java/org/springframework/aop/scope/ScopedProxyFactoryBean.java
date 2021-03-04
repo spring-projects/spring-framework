@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -50,15 +52,18 @@ import org.springframework.util.ClassUtils;
  * @see #setProxyTargetClass
  */
 @SuppressWarnings("serial")
-public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean<Object>, BeanFactoryAware {
+public class ScopedProxyFactoryBean extends ProxyConfig
+		implements FactoryBean<Object>, BeanFactoryAware, AopInfrastructureBean {
 
-	/** The TargetSource that manages scoping */
+	/** The TargetSource that manages scoping. */
 	private final SimpleBeanTargetSource scopedTargetSource = new SimpleBeanTargetSource();
 
-	/** The name of the target bean */
+	/** The name of the target bean. */
+	@Nullable
 	private String targetBeanName;
 
-	/** The cached singleton proxy */
+	/** The cached singleton proxy. */
+	@Nullable
 	private Object proxy;
 
 
@@ -91,6 +96,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean<O
 		pf.copyFrom(this);
 		pf.setTargetSource(this.scopedTargetSource);
 
+		Assert.notNull(this.targetBeanName, "Property 'targetBeanName' is required");
 		Class<?> beanType = beanFactory.getType(this.targetBeanName);
 		if (beanType == null) {
 			throw new IllegalStateException("Cannot create scoped proxy for bean '" + this.targetBeanName +

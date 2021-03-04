@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.web.accept;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.MediaType;
@@ -28,15 +29,23 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
+@FunctionalInterface
 public interface ContentNegotiationStrategy {
+
+	/**
+	 * A singleton list with {@link MediaType#ALL} that is returned from
+	 * {@link #resolveMediaTypes} when no specific media types are requested.
+	 * @since 5.0.5
+	 */
+	List<MediaType> MEDIA_TYPE_ALL_LIST = Collections.singletonList(MediaType.ALL);
+
 
 	/**
 	 * Resolve the given request to a list of media types. The returned list is
 	 * ordered by specificity first and by quality parameter second.
-	 *
 	 * @param webRequest the current request
-	 * @return the requested media types or an empty list, never {@code null}
-	 *
+	 * @return the requested media types, or {@link #MEDIA_TYPE_ALL_LIST} if none
+	 * were requested.
 	 * @throws HttpMediaTypeNotAcceptableException if the requested media
 	 * types cannot be parsed
 	 */

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -57,8 +58,10 @@ import org.springframework.util.StringUtils;
  */
 public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBeanInfoAssembler {
 
+	@Nullable
 	private Set<String> ignoredMethods;
 
+	@Nullable
 	private Map<String, Set<String>> ignoredMethodMappings;
 
 
@@ -69,7 +72,7 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBean
 	 * @see #setIgnoredMethodMappings(java.util.Properties)
 	 */
 	public void setIgnoredMethods(String... ignoredMethodNames) {
-		this.ignoredMethods = new HashSet<String>(Arrays.asList(ignoredMethodNames));
+		this.ignoredMethods = new HashSet<>(Arrays.asList(ignoredMethodNames));
 	}
 
 	/**
@@ -80,11 +83,11 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBean
 	 * Spring will check these mappings first.
 	 */
 	public void setIgnoredMethodMappings(Properties mappings) {
-		this.ignoredMethodMappings = new HashMap<String, Set<String>>();
+		this.ignoredMethodMappings = new HashMap<>();
 		for (Enumeration<?> en = mappings.keys(); en.hasMoreElements();) {
 			String beanKey = (String) en.nextElement();
 			String[] methodNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));
-			this.ignoredMethodMappings.put(beanKey, new HashSet<String>(Arrays.asList(methodNames)));
+			this.ignoredMethodMappings.put(beanKey, new HashSet<>(Arrays.asList(methodNames)));
 		}
 	}
 

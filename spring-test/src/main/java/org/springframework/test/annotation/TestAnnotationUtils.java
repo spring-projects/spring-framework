@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,6 @@ package org.springframework.test.annotation;
 import java.lang.reflect.Method;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * Collection of utility methods for working with Spring's core testing annotations.
@@ -27,7 +26,7 @@ import org.springframework.core.annotation.AnnotationUtils;
  * @author Sam Brannen
  * @since 4.2
  */
-public class TestAnnotationUtils {
+public abstract class TestAnnotationUtils {
 
 	/**
 	 * Get the {@code timeout} configured via the {@link Timed @Timed}
@@ -38,10 +37,7 @@ public class TestAnnotationUtils {
 	 */
 	public static long getTimeout(Method method) {
 		Timed timed = AnnotatedElementUtils.findMergedAnnotation(method, Timed.class);
-		if (timed == null) {
-			return 0;
-		}
-		return Math.max(0, timed.millis());
+		return (timed == null ? 0 : Math.max(0, timed.millis()));
 	}
 
 	/**
@@ -52,7 +48,7 @@ public class TestAnnotationUtils {
 	 * not annotated with {@code @Repeat}
 	 */
 	public static int getRepeatCount(Method method) {
-		Repeat repeat = AnnotationUtils.findAnnotation(method, Repeat.class);
+		Repeat repeat = AnnotatedElementUtils.findMergedAnnotation(method, Repeat.class);
 		if (repeat == null) {
 			return 1;
 		}

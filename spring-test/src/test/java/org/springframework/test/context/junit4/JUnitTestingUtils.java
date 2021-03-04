@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,8 @@ package org.springframework.test.context.junit4;
 
 import java.lang.reflect.Constructor;
 
+import org.junit.experimental.ParallelComputer;
+import org.junit.runner.Computer;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
 import org.junit.runner.Runner;
@@ -25,10 +27,10 @@ import org.junit.runner.notification.RunNotifier;
 
 import org.springframework.beans.BeanUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 /**
- * Collection of utilities for testing the execution of JUnit tests.
+ * Collection of utilities for testing the execution of JUnit 4 based tests.
  *
  * @author Sam Brannen
  * @since 4.2
@@ -38,8 +40,8 @@ public class JUnitTestingUtils {
 
 	/**
 	 * Run the tests in the supplied {@code testClass}, using the {@link Runner}
-	 * it is configured with (i.e., via {@link RunWith @RunWith}) or the default
-	 * JUnit runner, and assert the expectations of the test execution.
+	 * configured via {@link RunWith @RunWith} or the default JUnit runner, and
+	 * assert the expectations of the test execution.
 	 *
 	 * @param testClass the test class to run with JUnit
 	 * @param expectedStartedCount the expected number of tests that started
@@ -65,7 +67,7 @@ public class JUnitTestingUtils {
 	 * (i.e., via {@link RunWith @RunWith}) or the default JUnit runner.
 	 *
 	 * @param runnerClass the explicit runner class to use or {@code null}
-	 * if the implicit runner should be used
+	 * if the default JUnit runner should be used
 	 * @param testClass the test class to run with JUnit
 	 * @param expectedStartedCount the expected number of tests that started
 	 * @param expectedFailedCount the expected number of tests that failed
@@ -93,11 +95,55 @@ public class JUnitTestingUtils {
 			junit.run(testClass);
 		}
 
-		assertEquals("tests started for [" + testClass + "]:", expectedStartedCount, listener.getTestStartedCount());
-		assertEquals("tests failed for [" + testClass + "]:", expectedFailedCount, listener.getTestFailureCount());
-		assertEquals("tests finished for [" + testClass + "]:", expectedFinishedCount, listener.getTestFinishedCount());
-		assertEquals("tests ignored for [" + testClass + "]:", expectedIgnoredCount, listener.getTestIgnoredCount());
-		assertEquals("failed assumptions for [" + testClass + "]:", expectedAssumptionFailedCount, listener.getTestAssumptionFailureCount());
+		assertSoftly(softly -> {
+			softly.assertThat(listener.getTestStartedCount()).as("tests started for [%s]", testClass)
+				.isEqualTo(expectedStartedCount);
+			softly.assertThat(listener.getTestFailureCount()).as("tests failed for [%s]", testClass)
+				.isEqualTo(expectedFailedCount);
+			softly.assertThat(listener.getTestFinishedCount()).as("tests finished for [%s]", testClass)
+				.isEqualTo(expectedFinishedCount);
+			softly.assertThat(listener.getTestIgnoredCount()).as("tests ignored for [%s]", testClass)
+				.isEqualTo(expectedIgnoredCount);
+			softly.assertThat(listener.getTestAssumptionFailureCount()).as("failed assumptions for [%s]", testClass)
+				.isEqualTo(expectedAssumptionFailedCount);
+		});
+	}
+
+	/**
+	 * Run all tests in the supplied test classes according to the policies of
+	 * the supplied {@link Computer}, using the {@link Runner} configured via
+	 * {@link RunWith @RunWith} or the default JUnit runner, and assert the
+	 * expectations of the test execution.
+	 *
+	 * <p>To have all tests executed in parallel, supply {@link ParallelComputer#methods()}
+	 * as the {@code Computer}. To have all tests executed serially, supply
+	 * {@link Computer#serial()} as the {@code Computer}.
+	 *
+	 * @param computer the JUnit {@code Computer} to use
+	 * @param expectedStartedCount the expected number of tests that started
+	 * @param expectedFailedCount the expected number of tests that failed
+	 * @param expectedFinishedCount the expected number of tests that finished
+	 * @param expectedIgnoredCount the expected number of tests that were ignored
+	 * @param expectedAssumptionFailedCount the expected number of tests that
+	 * resulted in a failed assumption
+	 * @param testClasses one or more test classes to run
+	 */
+	public static void runTestsAndAssertCounters(Computer computer, int expectedStartedCount, int expectedFailedCount,
+			int expectedFinishedCount, int expectedIgnoredCount, int expectedAssumptionFailedCount,
+			Class<?>... testClasses) throws Exception {
+
+		JUnitCore junit = new JUnitCore();
+		TrackingRunListener listener = new TrackingRunListener();
+		junit.addListener(listener);
+		junit.run(computer, testClasses);
+
+		assertSoftly(softly -> {
+			softly.assertThat(listener.getTestStartedCount()).as("tests started]").isEqualTo(expectedStartedCount);
+			softly.assertThat(listener.getTestFailureCount()).as("tests failed]").isEqualTo(expectedFailedCount);
+			softly.assertThat(listener.getTestFinishedCount()).as("tests finished]").isEqualTo(expectedFinishedCount);
+			softly.assertThat(listener.getTestIgnoredCount()).as("tests ignored]").isEqualTo(expectedIgnoredCount);
+			softly.assertThat(listener.getTestAssumptionFailureCount()).as("failed assumptions]").isEqualTo(expectedAssumptionFailedCount);
+		});
 	}
 
 }

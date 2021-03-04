@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,11 +18,11 @@ package org.springframework.context.support;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Keith Donald
@@ -34,9 +34,9 @@ public class Spr7816Tests {
 	public void spr7816() {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("spr7816.xml", getClass());
 		FilterAdapter adapter = ctx.getBean(FilterAdapter.class);
-		assertEquals(Building.class, adapter.getSupportedTypes().get("Building"));
-		assertEquals(Entrance.class, adapter.getSupportedTypes().get("Entrance"));
-		assertEquals(Dwelling.class, adapter.getSupportedTypes().get("Dwelling"));
+		assertThat(adapter.getSupportedTypes().get("Building")).isEqualTo(Building.class);
+		assertThat(adapter.getSupportedTypes().get("Entrance")).isEqualTo(Entrance.class);
+		assertThat(adapter.getSupportedTypes().get("Dwelling")).isEqualTo(Dwelling.class);
 	}
 
 	public static class FilterAdapter {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,10 @@
 package org.springframework.messaging.simp.user;
 
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.context.ApplicationListener;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
@@ -31,10 +33,11 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 
 /**
- * A MessageHandler that is subscribed to listen to broadcasts of user registry
- * information from other application servers as well as to periodically
- * broadcast the content of the local user registry. The aggregated information
- * is maintained in a {@link MultiServerUserRegistry}.
+ * {@code MessageHandler} that handles user registry broadcasts from other
+ * application servers and periodically broadcasts the content of the local
+ * user registry.
+ *
+ * <p>The aggregated information is maintained in a {@link MultiServerUserRegistry}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -51,21 +54,28 @@ public class UserRegistryMessageHandler implements MessageHandler, ApplicationLi
 
 	private final UserRegistryTask schedulerTask = new UserRegistryTask();
 
+	@Nullable
 	private volatile ScheduledFuture<?> scheduledFuture;
 
-	private long registryExpirationPeriod = 20 * 1000;
+	private long registryExpirationPeriod = TimeUnit.SECONDS.toMillis(20);
 
 
-	public UserRegistryMessageHandler(SimpUserRegistry userRegistry, SimpMessagingTemplate brokerTemplate,
-			String broadcastDestination, TaskScheduler scheduler) {
+	/**
+	 * Constructor.
+	 * @param userRegistry the registry with local and remote user registry information
+	 * @param brokerTemplate template for broadcasting local registry information
+	 * @param broadcastDestination the destination to broadcast to
+	 * @param scheduler the task scheduler to use
+	 */
+	public UserRegistryMessageHandler(MultiServerUserRegistry userRegistry,
+			SimpMessagingTemplate brokerTemplate, String broadcastDestination, TaskScheduler scheduler) {
 
 		Assert.notNull(userRegistry, "'userRegistry' is required");
-		Assert.isInstanceOf(MultiServerUserRegistry.class, userRegistry);
 		Assert.notNull(brokerTemplate, "'brokerTemplate' is required");
 		Assert.hasText(broadcastDestination, "'broadcastDestination' is required");
 		Assert.notNull(scheduler, "'scheduler' is required");
 
-		this.userRegistry = (MultiServerUserRegistry) userRegistry;
+		this.userRegistry = userRegistry;
 		this.brokerTemplate = brokerTemplate;
 		this.broadcastDestination = broadcastDestination;
 		this.scheduler = scheduler;
@@ -73,20 +83,21 @@ public class UserRegistryMessageHandler implements MessageHandler, ApplicationLi
 
 
 	/**
-	 * Return the destination for broadcasting user registry information to.
+	 * Return the configured destination for broadcasting UserRegistry information.
 	 */
 	public String getBroadcastDestination() {
 		return this.broadcastDestination;
 	}
 
 	/**
-	 * Configure how long before a remote registry snapshot expires.
-	 * <p>By default this is set to 20000 (20 seconds).
-	 * @param expirationPeriod the expiration period in milliseconds
+	 * Configure the amount of time (in milliseconds) before a remote user
+	 * registry snapshot is considered expired.
+	 * <p>By default this is set to 20 seconds (value of 20000).
+	 * @param milliseconds the expiration period in milliseconds
 	 */
 	@SuppressWarnings("unused")
-	public void setRegistryExpirationPeriod(long expirationPeriod) {
-		this.registryExpirationPeriod = expirationPeriod;
+	public void setRegistryExpirationPeriod(long milliseconds) {
+		this.registryExpirationPeriod = milliseconds;
 	}
 
 	/**
@@ -103,9 +114,12 @@ public class UserRegistryMessageHandler implements MessageHandler, ApplicationLi
 			long delay = getRegistryExpirationPeriod() / 2;
 			this.scheduledFuture = this.scheduler.scheduleWithFixedDelay(this.schedulerTask, delay);
 		}
-		else if (this.scheduledFuture != null ){
-			this.scheduledFuture.cancel(true);
-			this.scheduledFuture = null;
+		else {
+			ScheduledFuture<?> future = this.scheduledFuture;
+			if (future != null ){
+				future.cancel(true);
+				this.scheduledFuture = null;
+			}
 		}
 	}
 

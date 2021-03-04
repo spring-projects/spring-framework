@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,14 +19,16 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -77,7 +79,10 @@ public abstract class DataSourceUtils {
 			return doGetConnection(dataSource);
 		}
 		catch (SQLException ex) {
-			throw new CannotGetJdbcConnectionException("Could not get JDBC Connection", ex);
+			throw new CannotGetJdbcConnectionException("Failed to obtain JDBC Connection", ex);
+		}
+		catch (IllegalStateException ex) {
+			throw new CannotGetJdbcConnectionException("Failed to obtain JDBC Connection: " + ex.getMessage());
 		}
 	}
 
@@ -101,35 +106,59 @@ public abstract class DataSourceUtils {
 			conHolder.requested();
 			if (!conHolder.hasConnection()) {
 				logger.debug("Fetching resumed JDBC Connection from DataSource");
-				conHolder.setConnection(dataSource.getConnection());
+				conHolder.setConnection(fetchConnection(dataSource));
 			}
 			return conHolder.getConnection();
 		}
 		// Else we either got no holder or an empty thread-bound holder here.
 
 		logger.debug("Fetching JDBC Connection from DataSource");
-		Connection con = dataSource.getConnection();
+		Connection con = fetchConnection(dataSource);
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			logger.debug("Registering transaction synchronization for JDBC Connection");
-			// Use same Connection for further JDBC actions within the transaction.
-			// Thread-bound object will get removed by synchronization at transaction completion.
-			ConnectionHolder holderToUse = conHolder;
-			if (holderToUse == null) {
-				holderToUse = new ConnectionHolder(con);
+			try {
+				// Use same Connection for further JDBC actions within the transaction.
+				// Thread-bound object will get removed by synchronization at transaction completion.
+				ConnectionHolder holderToUse = conHolder;
+				if (holderToUse == null) {
+					holderToUse = new ConnectionHolder(con);
+				}
+				else {
+					holderToUse.setConnection(con);
+				}
+				holderToUse.requested();
+				TransactionSynchronizationManager.registerSynchronization(
+						new ConnectionSynchronization(holderToUse, dataSource));
+				holderToUse.setSynchronizedWithTransaction(true);
+				if (holderToUse != conHolder) {
+					TransactionSynchronizationManager.bindResource(dataSource, holderToUse);
+				}
 			}
-			else {
-				holderToUse.setConnection(con);
-			}
-			holderToUse.requested();
-			TransactionSynchronizationManager.registerSynchronization(
-					new ConnectionSynchronization(holderToUse, dataSource));
-			holderToUse.setSynchronizedWithTransaction(true);
-			if (holderToUse != conHolder) {
-				TransactionSynchronizationManager.bindResource(dataSource, holderToUse);
+			catch (RuntimeException ex) {
+				// Unexpected exception from external delegation call -> close Connection and rethrow.
+				releaseConnection(con, dataSource);
+				throw ex;
 			}
 		}
 
+		return con;
+	}
+
+	/**
+	 * Actually fetch a {@link Connection} from the given {@link DataSource},
+	 * defensively turning an unexpected {@code null} return value from
+	 * {@link DataSource#getConnection()} into an {@link IllegalStateException}.
+	 * @param dataSource the DataSource to obtain Connections from
+	 * @return a JDBC Connection from the given DataSource (never {@code null})
+	 * @throws SQLException if thrown by JDBC methods
+	 * @throws IllegalStateException if the DataSource returned a null value
+	 * @see DataSource#getConnection()
+	 */
+	private static Connection fetchConnection(DataSource dataSource) throws SQLException {
+		Connection con = dataSource.getConnection();
+		if (con == null) {
+			throw new IllegalStateException("DataSource returned null from getConnection(): " + dataSource);
+		}
 		return con;
 	}
 
@@ -140,21 +169,25 @@ public abstract class DataSourceUtils {
 	 * @return the previous isolation level, if any
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #resetConnectionAfterTransaction
+	 * @see Connection#setTransactionIsolation
+	 * @see Connection#setReadOnly
 	 */
-	public static Integer prepareConnectionForTransaction(Connection con, TransactionDefinition definition)
+	@Nullable
+	public static Integer prepareConnectionForTransaction(Connection con, @Nullable TransactionDefinition definition)
 			throws SQLException {
 
 		Assert.notNull(con, "No Connection specified");
 
+		boolean debugEnabled = logger.isDebugEnabled();
 		// Set read-only flag.
 		if (definition != null && definition.isReadOnly()) {
 			try {
-				if (logger.isDebugEnabled()) {
+				if (debugEnabled) {
 					logger.debug("Setting JDBC Connection [" + con + "] read-only");
 				}
 				con.setReadOnly(true);
 			}
-			catch (SQLException ex) {
+			catch (SQLException | RuntimeException ex) {
 				Throwable exToCheck = ex;
 				while (exToCheck != null) {
 					if (exToCheck.getClass().getSimpleName().contains("Timeout")) {
@@ -166,24 +199,12 @@ public abstract class DataSourceUtils {
 				// "read-only not supported" SQLException -> ignore, it's just a hint anyway
 				logger.debug("Could not set JDBC Connection read-only", ex);
 			}
-			catch (RuntimeException ex) {
-				Throwable exToCheck = ex;
-				while (exToCheck != null) {
-					if (exToCheck.getClass().getSimpleName().contains("Timeout")) {
-						// Assume it's a connection timeout that would otherwise get lost: e.g. from Hibernate
-						throw ex;
-					}
-					exToCheck = exToCheck.getCause();
-				}
-				// "read-only not supported" UnsupportedOperationException -> ignore, it's just a hint anyway
-				logger.debug("Could not set JDBC Connection read-only", ex);
-			}
 		}
 
 		// Apply specific isolation level, if any.
 		Integer previousIsolationLevel = null;
 		if (definition != null && definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-			if (logger.isDebugEnabled()) {
+			if (debugEnabled) {
 				logger.debug("Changing isolation level of JDBC Connection [" + con + "] to " +
 						definition.getIsolationLevel());
 			}
@@ -202,9 +223,50 @@ public abstract class DataSourceUtils {
 	 * regarding read-only flag and isolation level.
 	 * @param con the Connection to reset
 	 * @param previousIsolationLevel the isolation level to restore, if any
+	 * @param resetReadOnly whether to reset the connection's read-only flag
+	 * @since 5.2.1
 	 * @see #prepareConnectionForTransaction
+	 * @see Connection#setTransactionIsolation
+	 * @see Connection#setReadOnly
 	 */
-	public static void resetConnectionAfterTransaction(Connection con, Integer previousIsolationLevel) {
+	public static void resetConnectionAfterTransaction(
+			Connection con, @Nullable Integer previousIsolationLevel, boolean resetReadOnly) {
+
+		Assert.notNull(con, "No Connection specified");
+		boolean debugEnabled = logger.isDebugEnabled();
+		try {
+			// Reset transaction isolation to previous value, if changed for the transaction.
+			if (previousIsolationLevel != null) {
+				if (debugEnabled) {
+					logger.debug("Resetting isolation level of JDBC Connection [" +
+							con + "] to " + previousIsolationLevel);
+				}
+				con.setTransactionIsolation(previousIsolationLevel);
+			}
+
+			// Reset read-only flag if we originally switched it to true on transaction begin.
+			if (resetReadOnly) {
+				if (debugEnabled) {
+					logger.debug("Resetting read-only flag of JDBC Connection [" + con + "]");
+				}
+				con.setReadOnly(false);
+			}
+		}
+		catch (Throwable ex) {
+			logger.debug("Could not reset JDBC Connection after transaction", ex);
+		}
+	}
+
+	/**
+	 * Reset the given Connection after a transaction,
+	 * regarding read-only flag and isolation level.
+	 * @param con the Connection to reset
+	 * @param previousIsolationLevel the isolation level to restore, if any
+	 * @deprecated as of 5.1.11, in favor of
+	 * {@link #resetConnectionAfterTransaction(Connection, Integer, boolean)}
+	 */
+	@Deprecated
+	public static void resetConnectionAfterTransaction(Connection con, @Nullable Integer previousIsolationLevel) {
 		Assert.notNull(con, "No Connection specified");
 		try {
 			// Reset transaction isolation to previous value, if changed for the transaction.
@@ -237,7 +299,7 @@ public abstract class DataSourceUtils {
 	 * (may be {@code null})
 	 * @return whether the Connection is transactional
 	 */
-	public static boolean isConnectionTransactional(Connection con, DataSource dataSource) {
+	public static boolean isConnectionTransactional(Connection con, @Nullable DataSource dataSource) {
 		if (dataSource == null) {
 			return false;
 		}
@@ -253,7 +315,7 @@ public abstract class DataSourceUtils {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.Statement#setQueryTimeout
 	 */
-	public static void applyTransactionTimeout(Statement stmt, DataSource dataSource) throws SQLException {
+	public static void applyTransactionTimeout(Statement stmt, @Nullable DataSource dataSource) throws SQLException {
 		applyTimeout(stmt, dataSource, -1);
 	}
 
@@ -266,10 +328,12 @@ public abstract class DataSourceUtils {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.Statement#setQueryTimeout
 	 */
-	public static void applyTimeout(Statement stmt, DataSource dataSource, int timeout) throws SQLException {
+	public static void applyTimeout(Statement stmt, @Nullable DataSource dataSource, int timeout) throws SQLException {
 		Assert.notNull(stmt, "No Statement specified");
-		Assert.notNull(dataSource, "No DataSource specified");
-		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
+		ConnectionHolder holder = null;
+		if (dataSource != null) {
+			holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
+		}
 		if (holder != null && holder.hasTimeout()) {
 			// Remaining transaction timeout overrides specified value.
 			stmt.setQueryTimeout(holder.getTimeToLiveInSeconds());
@@ -289,7 +353,7 @@ public abstract class DataSourceUtils {
 	 * (may be {@code null})
 	 * @see #getConnection
 	 */
-	public static void releaseConnection(Connection con, DataSource dataSource) {
+	public static void releaseConnection(@Nullable Connection con, @Nullable DataSource dataSource) {
 		try {
 			doReleaseConnection(con, dataSource);
 		}
@@ -312,7 +376,7 @@ public abstract class DataSourceUtils {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #doGetConnection
 	 */
-	public static void doReleaseConnection(Connection con, DataSource dataSource) throws SQLException {
+	public static void doReleaseConnection(@Nullable Connection con, @Nullable DataSource dataSource) throws SQLException {
 		if (con == null) {
 			return;
 		}
@@ -324,7 +388,6 @@ public abstract class DataSourceUtils {
 				return;
 			}
 		}
-		logger.debug("Returning JDBC Connection to DataSource");
 		doCloseConnection(con, dataSource);
 	}
 
@@ -336,7 +399,7 @@ public abstract class DataSourceUtils {
 	 * @see Connection#close()
 	 * @see SmartDataSource#shouldClose(Connection)
 	 */
-	public static void doCloseConnection(Connection con, DataSource dataSource) throws SQLException {
+	public static void doCloseConnection(Connection con, @Nullable DataSource dataSource) throws SQLException {
 		if (!(dataSource instanceof SmartDataSource) || ((SmartDataSource) dataSource).shouldClose(con)) {
 			con.close();
 		}
@@ -403,7 +466,7 @@ public abstract class DataSourceUtils {
 	 * (e.g. when participating in a JtaTransactionManager transaction).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	private static class ConnectionSynchronization extends TransactionSynchronizationAdapter {
+	private static class ConnectionSynchronization implements TransactionSynchronization {
 
 		private final ConnectionHolder connectionHolder;
 

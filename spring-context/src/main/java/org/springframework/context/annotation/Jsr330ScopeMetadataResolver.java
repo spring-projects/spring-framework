@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple {@link ScopeMetadataResolver} implementation that follows JSR-330 scoping rules:
@@ -41,7 +42,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  */
 public class Jsr330ScopeMetadataResolver implements ScopeMetadataResolver {
 
-	private final Map<String, String> scopeMap = new HashMap<String, String>();
+	private final Map<String, String> scopeMap = new HashMap<>();
 
 
 	public Jsr330ScopeMetadataResolver() {
@@ -76,6 +77,7 @@ public class Jsr330ScopeMetadataResolver implements ScopeMetadataResolver {
 	 * @param annotationType the JSR-330 annotation type
 	 * @return the Spring scope name
 	 */
+	@Nullable
 	protected String resolveScopeName(String annotationType) {
 		return this.scopeMap.get(annotationType);
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,63 +18,60 @@ package org.springframework.orm.jpa;
 
 import java.lang.reflect.Proxy;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TransactionRequiredException;
 
+import org.junit.jupiter.api.Test;
+
 import org.springframework.orm.jpa.domain.Person;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * An application-managed entity manager can join an existing transaction,
  * but such joining must be made programmatically, not transactionally.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
-@SuppressWarnings("deprecation")
 public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
 
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void testEntityManagerIsProxy() {
-		assertTrue("EntityManagerFactory is proxied", Proxy.isProxyClass(entityManagerFactory.getClass()));
-	}
-
-	@Transactional(readOnly = true)
+	@Test
 	@SuppressWarnings("unchecked")
 	public void testEntityManagerProxyIsProxy() {
 		EntityManager em = entityManagerFactory.createEntityManager();
-		assertTrue(Proxy.isProxyClass(em.getClass()));
+		assertThat(Proxy.isProxyClass(em.getClass())).isTrue();
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-		assertNotNull(people);
+		assertThat(people).isNotNull();
 
-		assertTrue("Should be open to start with", em.isOpen());
+		assertThat(em.isOpen()).as("Should be open to start with").isTrue();
 		em.close();
-		assertFalse("Close should work on application managed EM", em.isOpen());
+		assertThat(em.isOpen()).as("Close should work on application managed EM").isFalse();
 	}
 
+	@Test
 	public void testEntityManagerProxyAcceptsProgrammaticTxJoining() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
 	}
 
+	@Test
 	public void testInstantiateAndSave() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
 		doInstantiateAndSave(em);
 	}
 
+	@Test
 	public void testCannotFlushWithoutGettingTransaction() {
 		EntityManager em = entityManagerFactory.createEntityManager();
-		try {
-			doInstantiateAndSave(em);
-			fail("Should have thrown TransactionRequiredException");
-		}
-		catch (TransactionRequiredException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(TransactionRequiredException.class).isThrownBy(() ->
+				doInstantiateAndSave(em));
 
 		// TODO following lines are a workaround for Hibernate bug
 		// If Hibernate throws an exception due to flush(),
@@ -84,7 +81,7 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		setComplete();
 	}
 
-	public void doInstantiateAndSave(EntityManager em) {
+	protected void doInstantiateAndSave(EntityManager em) {
 		testStateClean();
 		Person p = new Person();
 
@@ -93,13 +90,15 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		em.persist(p);
 
 		em.flush();
-		assertEquals("1 row must have been inserted", 1, countRowsInTable(em, "person"));
+		assertThat(countRowsInTable(em, "person")).as("1 row must have been inserted").isEqualTo(1);
 	}
 
+	@Test
 	public void testStateClean() {
-		assertEquals("Should be no people from previous transactions", 0, countRowsInTable("person"));
+		assertThat(countRowsInTable("person")).as("Should be no people from previous transactions").isEqualTo(0);
 	}
 
+	@Test
 	public void testReuseInNewTransaction() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
@@ -107,42 +106,44 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		doInstantiateAndSave(em);
 		endTransaction();
 
-		assertFalse(em.getTransaction().isActive());
+		assertThat(em.getTransaction().isActive()).isFalse();
 
 		startNewTransaction();
 		// Call any method: should cause automatic tx invocation
-		assertFalse(em.contains(new Person()));
+		assertThat(em.contains(new Person())).isFalse();
 
-		assertFalse(em.getTransaction().isActive());
+		assertThat(em.getTransaction().isActive()).isFalse();
 		em.joinTransaction();
 
-		assertTrue(em.getTransaction().isActive());
+		assertThat(em.getTransaction().isActive()).isTrue();
 
 		doInstantiateAndSave(em);
 		setComplete();
 		endTransaction();	// Should rollback
-		assertEquals("Tx must have committed back", 1, countRowsInTable(em, "person"));
+		assertThat(countRowsInTable(em, "person")).as("Tx must have committed back").isEqualTo(1);
 
 		// Now clean up the database
 		startNewTransaction();
 		em.joinTransaction();
 		deleteAllPeopleUsingEntityManager(em);
-		assertEquals("People have been killed", 0, countRowsInTable(em, "person"));
+		assertThat(countRowsInTable(em, "person")).as("People have been killed").isEqualTo(0);
 		setComplete();
 	}
 
-	public static void deleteAllPeopleUsingEntityManager(EntityManager em) {
+	protected void deleteAllPeopleUsingEntityManager(EntityManager em) {
 		em.createQuery("delete from Person p").executeUpdate();
 	}
 
+	@Test
 	public void testRollbackOccurs() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
 		doInstantiateAndSave(em);
 		endTransaction();	// Should rollback
-		assertEquals("Tx must have been rolled back", 0, countRowsInTable(em, "person"));
+		assertThat(countRowsInTable(em, "person")).as("Tx must have been rolled back").isEqualTo(0);
 	}
 
+	@Test
 	public void testCommitOccurs() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
@@ -150,7 +151,7 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 
 		setComplete();
 		endTransaction();	// Should rollback
-		assertEquals("Tx must have committed back", 1, countRowsInTable(em, "person"));
+		assertThat(countRowsInTable(em, "person")).as("Tx must have committed back").isEqualTo(1);
 
 		// Now clean up the database
 		deleteFromTables("person");

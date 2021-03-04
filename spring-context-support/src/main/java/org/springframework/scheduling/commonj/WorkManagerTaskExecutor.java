@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+
 import javax.naming.NamingException;
 
 import commonj.work.Work;
@@ -34,6 +35,7 @@ import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.jndi.JndiLocatorSupport;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
@@ -56,22 +58,29 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * <p>The CommonJ WorkManager will usually be retrieved from the application
  * server's JNDI environment, as defined in the server's management console.
  *
- * <p>Note: On the upcoming EE 7 compliant versions of WebLogic and WebSphere, a
+ * <p>Note: On EE 7/8 compliant versions of WebLogic and WebSphere, a
  * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskExecutor}
- * should be preferred, following JSR-236 support in Java EE 7.
+ * should be preferred, following JSR-236 support in Java EE 7/8.
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @deprecated as of 5.1, in favor of the EE 7/8 based
+ * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskExecutor}
  */
+@Deprecated
 public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, WorkManager, InitializingBean {
 
+	@Nullable
 	private WorkManager workManager;
 
+	@Nullable
 	private String workManagerName;
 
+	@Nullable
 	private WorkListener workListener;
 
+	@Nullable
 	private TaskDecorator taskDecorator;
 
 
@@ -112,6 +121,11 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 	 * execution callback (which may be a wrapper around the user-supplied task).
 	 * <p>The primary use case is to set some execution context around the task's
 	 * invocation, or to provide some monitoring/statistics for task execution.
+	 * <p><b>NOTE:</b> Exception handling in {@code TaskDecorator} implementations
+	 * is limited to plain {@code Runnable} execution via {@code execute} calls.
+	 * In case of {@code #submit} calls, the exposed {@code Runnable} will be a
+	 * {@code FutureTask} which does not propagate any exceptions; you might
+	 * have to cast it and call {@code Future#get} to evaluate exceptions.
 	 * @since 4.3
 	 */
 	public void setTaskDecorator(TaskDecorator taskDecorator) {
@@ -128,6 +142,11 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		}
 	}
 
+	private WorkManager obtainWorkManager() {
+		Assert.state(this.workManager != null, "No WorkManager specified");
+		return this.workManager;
+	}
+
 
 	//-------------------------------------------------------------------------
 	// Implementation of the Spring SchedulingTaskExecutor interface
@@ -135,14 +154,13 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 
 	@Override
 	public void execute(Runnable task) {
-		Assert.state(this.workManager != null, "No WorkManager specified");
 		Work work = new DelegatingWork(this.taskDecorator != null ? this.taskDecorator.decorate(task) : task);
 		try {
 			if (this.workListener != null) {
-				this.workManager.schedule(work, this.workListener);
+				obtainWorkManager().schedule(work, this.workListener);
 			}
 			else {
-				this.workManager.schedule(work);
+				obtainWorkManager().schedule(work);
 			}
 		}
 		catch (WorkRejectedException ex) {
@@ -160,38 +178,30 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 
 	@Override
 	public Future<?> submit(Runnable task) {
-		FutureTask<Object> future = new FutureTask<Object>(task, null);
+		FutureTask<Object> future = new FutureTask<>(task, null);
 		execute(future);
 		return future;
 	}
 
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
-		FutureTask<T> future = new FutureTask<T>(task);
+		FutureTask<T> future = new FutureTask<>(task);
 		execute(future);
 		return future;
 	}
 
 	@Override
 	public ListenableFuture<?> submitListenable(Runnable task) {
-		ListenableFutureTask<Object> future = new ListenableFutureTask<Object>(task, null);
+		ListenableFutureTask<Object> future = new ListenableFutureTask<>(task, null);
 		execute(future);
 		return future;
 	}
 
 	@Override
 	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
-		ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+		ListenableFutureTask<T> future = new ListenableFutureTask<>(task);
 		execute(future);
 		return future;
-	}
-
-	/**
-	 * This task executor prefers short-lived work units.
-	 */
-	@Override
-	public boolean prefersShortLivedTasks() {
-		return true;
 	}
 
 
@@ -201,24 +211,24 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 
 	@Override
 	public WorkItem schedule(Work work) throws WorkException, IllegalArgumentException {
-		return this.workManager.schedule(work);
+		return obtainWorkManager().schedule(work);
 	}
 
 	@Override
 	public WorkItem schedule(Work work, WorkListener workListener) throws WorkException {
-		return this.workManager.schedule(work, workListener);
+		return obtainWorkManager().schedule(work, workListener);
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
 	public boolean waitForAll(Collection workItems, long timeout) throws InterruptedException {
-		return this.workManager.waitForAll(workItems, timeout);
+		return obtainWorkManager().waitForAll(workItems, timeout);
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
 	public Collection waitForAny(Collection workItems, long timeout) throws InterruptedException {
-		return this.workManager.waitForAny(workItems, timeout);
+		return obtainWorkManager().waitForAny(workItems, timeout);
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,20 +29,17 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stax.StAXResult;
 import javax.xml.transform.stream.StreamResult;
 
-import org.custommonkey.xmlunit.XMLUnit;
-
-import org.junit.Before;
-import org.junit.Test;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
+import org.springframework.core.testfixture.xml.XmlContent;
 import org.springframework.util.xml.StaxUtils;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -58,11 +55,10 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 
 	protected Object flights;
 
-	@Before
+	@BeforeEach
 	public final void setUp() throws Exception {
 		marshaller = createMarshaller();
 		flights = createFlights();
-		XMLUnit.setIgnoreWhitespace(true);
 	}
 
 	protected abstract M createMarshaller() throws Exception;
@@ -89,7 +85,7 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 		flightElement.appendChild(numberElement);
 		Text text = expected.createTextNode("42");
 		numberElement.appendChild(text);
-		assertXMLEqual("Marshaller writes invalid DOMResult", expected, result);
+		assertThat(XmlContent.of(result)).isSimilarToIgnoringWhitespace(expected);
 	}
 
 	@Test
@@ -99,7 +95,8 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 		DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
 		DOMResult domResult = new DOMResult();
 		marshaller.marshal(flights, domResult);
-		assertTrue("DOMResult does not contain a Document", domResult.getNode() instanceof Document);
+		boolean condition = domResult.getNode() instanceof Document;
+		assertThat(condition).as("DOMResult does not contain a Document").isTrue();
 		Document result = (Document) domResult.getNode();
 		Document expected = builder.newDocument();
 		Element flightsElement = expected.createElementNS("http://samples.springframework.org/flight", "tns:flights");
@@ -113,7 +110,7 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 		flightElement.appendChild(numberElement);
 		Text text = expected.createTextNode("42");
 		numberElement.appendChild(text);
-		assertXMLEqual("Marshaller writes invalid DOMResult", expected, result);
+		assertThat(XmlContent.of(result)).isSimilarToIgnoringWhitespace(expected);
 	}
 
 	@Test
@@ -121,7 +118,7 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 		StringWriter writer = new StringWriter();
 		StreamResult result = new StreamResult(writer);
 		marshaller.marshal(flights, result);
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+		assertThat(XmlContent.of(writer)).isSimilarToIgnoringWhitespace(EXPECTED_STRING);
 	}
 
 	@Test
@@ -129,8 +126,7 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		StreamResult result = new StreamResult(os);
 		marshaller.marshal(flights, result);
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING,
-				new String(os.toByteArray(), "UTF-8"));
+		assertThat(XmlContent.of(new String(os.toByteArray(), "UTF-8"))).isSimilarToIgnoringWhitespace(EXPECTED_STRING);
 	}
 
 	@Test
@@ -140,7 +136,7 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 		XMLStreamWriter streamWriter = outputFactory.createXMLStreamWriter(writer);
 		Result result = StaxUtils.createStaxResult(streamWriter);
 		marshaller.marshal(flights, result);
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarToIgnoringWhitespace(EXPECTED_STRING);
 	}
 
 	@Test
@@ -150,7 +146,7 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 		XMLEventWriter eventWriter = outputFactory.createXMLEventWriter(writer);
 		Result result = StaxUtils.createStaxResult(eventWriter);
 		marshaller.marshal(flights, result);
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarToIgnoringWhitespace(EXPECTED_STRING);
 	}
 
 	@Test
@@ -160,7 +156,7 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 		XMLStreamWriter streamWriter = outputFactory.createXMLStreamWriter(writer);
 		StAXResult result = new StAXResult(streamWriter);
 		marshaller.marshal(flights, result);
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarToIgnoringWhitespace(EXPECTED_STRING);
 	}
 
 	@Test
@@ -170,7 +166,6 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 		XMLEventWriter eventWriter = outputFactory.createXMLEventWriter(writer);
 		StAXResult result = new StAXResult(eventWriter);
 		marshaller.marshal(flights, result);
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+		assertThat(XmlContent.from(writer)).isSimilarToIgnoringWhitespace(EXPECTED_STRING);
 	}
-
 }

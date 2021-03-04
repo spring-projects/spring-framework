@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,12 +27,15 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionManager;
 
 /**
  * AOP Alliance MethodInterceptor for declarative transaction
  * management using the common Spring transaction infrastructure
- * ({@link org.springframework.transaction.PlatformTransactionManager}).
+ * ({@link org.springframework.transaction.PlatformTransactionManager}/
+ * {@link org.springframework.transaction.ReactiveTransactionManager}).
  *
  * <p>Derives from the {@link TransactionAspectSupport} class which
  * contains the integration with Spring's underlying transaction API.
@@ -43,6 +46,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @see TransactionProxyFactoryBean
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see org.springframework.aop.framework.ProxyFactory
@@ -63,13 +67,14 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	/**
 	 * Create a new TransactionInterceptor.
 	 * @param ptm the default transaction manager to perform the actual transaction management
-	 * @param attributes the transaction attributes in properties format
+	 * @param tas the attribute source to be used to find transaction attributes
+	 * @since 5.2.5
 	 * @see #setTransactionManager
-	 * @see #setTransactionAttributes(java.util.Properties)
+	 * @see #setTransactionAttributeSource
 	 */
-	public TransactionInterceptor(PlatformTransactionManager ptm, Properties attributes) {
+	public TransactionInterceptor(TransactionManager ptm, TransactionAttributeSource tas) {
 		setTransactionManager(ptm);
-		setTransactionAttributes(attributes);
+		setTransactionAttributeSource(tas);
 	}
 
 	/**
@@ -77,26 +82,53 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	 * @param ptm the default transaction manager to perform the actual transaction management
 	 * @param tas the attribute source to be used to find transaction attributes
 	 * @see #setTransactionManager
-	 * @see #setTransactionAttributeSource(TransactionAttributeSource)
+	 * @see #setTransactionAttributeSource
+	 * @deprecated as of 5.2.5, in favor of
+	 * {@link #TransactionInterceptor(TransactionManager, TransactionAttributeSource)}
 	 */
+	@Deprecated
 	public TransactionInterceptor(PlatformTransactionManager ptm, TransactionAttributeSource tas) {
 		setTransactionManager(ptm);
 		setTransactionAttributeSource(tas);
 	}
 
+	/**
+	 * Create a new TransactionInterceptor.
+	 * @param ptm the default transaction manager to perform the actual transaction management
+	 * @param attributes the transaction attributes in properties format
+	 * @see #setTransactionManager
+	 * @see #setTransactionAttributes(java.util.Properties)
+	 * @deprecated as of 5.2.5, in favor of {@link #setTransactionAttributes(Properties)}
+	 */
+	@Deprecated
+	public TransactionInterceptor(PlatformTransactionManager ptm, Properties attributes) {
+		setTransactionManager(ptm);
+		setTransactionAttributes(attributes);
+	}
+
 
 	@Override
-	public Object invoke(final MethodInvocation invocation) throws Throwable {
+	@Nullable
+	public Object invoke(MethodInvocation invocation) throws Throwable {
 		// Work out the target class: may be {@code null}.
 		// The TransactionAttributeSource should be passed the target class
 		// as well as the method, which may be from an interface.
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 
 		// Adapt to TransactionAspectSupport's invokeWithinTransaction...
-		return invokeWithinTransaction(invocation.getMethod(), targetClass, new InvocationCallback() {
+		return invokeWithinTransaction(invocation.getMethod(), targetClass, new CoroutinesInvocationCallback() {
 			@Override
+			@Nullable
 			public Object proceedWithInvocation() throws Throwable {
 				return invocation.proceed();
+			}
+			@Override
+			public Object getTarget() {
+				return invocation.getThis();
+			}
+			@Override
+			public Object[] getArguments() {
+				return invocation.getArguments();
 			}
 		});
 	}

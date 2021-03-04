@@ -17,4 +17,9 @@
  * <p>Spring AOP can be used programmatically or (preferably)
  * integrated with the Spring IoC container.
  */
+@NonNullApi
+@NonNullFields
 package org.springframework.aop;
+
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

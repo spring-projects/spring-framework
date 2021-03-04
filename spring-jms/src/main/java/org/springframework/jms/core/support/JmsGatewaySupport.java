@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.lang.Nullable;
 
 /**
  * Convenient super class for application classes that need JMS access.
@@ -42,9 +43,10 @@ import org.springframework.jms.core.JmsTemplate;
  */
 public abstract class JmsGatewaySupport implements InitializingBean {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private JmsTemplate jmsTemplate;
 
 
@@ -74,6 +76,7 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	/**
 	 * Return the JMS ConnectionFactory used by the gateway.
 	 */
+	@Nullable
 	public final ConnectionFactory getConnectionFactory() {
 		return (this.jmsTemplate != null ? this.jmsTemplate.getConnectionFactory() : null);
 	}
@@ -82,13 +85,14 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	 * Set the JmsTemplate for the gateway.
 	 * @see #setConnectionFactory(javax.jms.ConnectionFactory)
 	 */
-	public final void setJmsTemplate(JmsTemplate jmsTemplate) {
+	public final void setJmsTemplate(@Nullable JmsTemplate jmsTemplate) {
 		this.jmsTemplate = jmsTemplate;
 	}
 
 	/**
 	 * Return the JmsTemplate for the gateway.
 	 */
+	@Nullable
 	public final JmsTemplate getJmsTemplate() {
 		return this.jmsTemplate;
 	}

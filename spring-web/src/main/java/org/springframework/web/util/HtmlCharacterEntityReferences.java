@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -30,7 +31,7 @@ import org.springframework.util.Assert;
  * HTML 4.0 standard.
  *
  * <p>A complete description of the HTML 4.0 character set can be found
- * at http://www.w3.org/TR/html4/charset.html.
+ * at https://www.w3.org/TR/html4/charset.html.
  *
  * @author Juergen Hoeller
  * @author Martin Kersten
@@ -54,7 +55,7 @@ class HtmlCharacterEntityReferences {
 
 	private final String[] characterToEntityReferenceMap = new String[3000];
 
-	private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<String, Character>(252);
+	private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<>(512);
 
 
 	/**
@@ -88,7 +89,7 @@ class HtmlCharacterEntityReferences {
 			String key = (String) keys.nextElement();
 			int referredChar = Integer.parseInt(key);
 			Assert.isTrue((referredChar < 1000 || (referredChar >= 8000 && referredChar < 10000)),
-					"Invalid reference to special HTML entity: " + referredChar);
+					() -> "Invalid reference to special HTML entity: " + referredChar);
 			int index = (referredChar < 1000 ? referredChar : referredChar - 7000);
 			String reference = entityReferences.getProperty(key);
 			this.characterToEntityReferenceMap[index] = REFERENCE_START + reference + REFERENCE_END;
@@ -119,16 +120,18 @@ class HtmlCharacterEntityReferences {
 	}
 
 	/**
-	 * Return the reference mapped to the given character or {@code null}.
+	 * Return the reference mapped to the given character, or {@code null} if none found.
 	 */
+	@Nullable
 	public String convertToReference(char character) {
-	   return convertToReference(character, WebUtils.DEFAULT_CHARACTER_ENCODING);
+		return convertToReference(character, WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
 
 	/**
-	 * Return the reference mapped to the given character or {@code null}.
+	 * Return the reference mapped to the given character, or {@code null} if none found.
 	 * @since 4.1.2
 	 */
+	@Nullable
 	public String convertToReference(char character, String encoding) {
 		if (encoding.startsWith("UTF-")){
 			switch (character){

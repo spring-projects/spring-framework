@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,8 +29,13 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.jms.listener.MessageListenerContainer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -39,12 +44,13 @@ import org.springframework.util.Assert;
  * lifecycle of the listener containers, in particular within the lifecycle
  * of the application context.
  *
- * <p>Contrary to {@link MessageListenerContainer}s created manually, listener
- * containers managed by registry are not beans in the application context and
- * are not candidates for autowiring. Use {@link #getListenerContainers()} if
- * you need to access this registry's listener containers for management purposes.
- * If you need to access to a specific message listener container, use
- * {@link #getListenerContainer(String)} with the id of the endpoint.
+ * <p>Contrary to {@link MessageListenerContainer MessageListenerContainers}
+ * created manually, listener containers managed by registry are not beans
+ * in the application context and are not candidates for autowiring.
+ * Use {@link #getListenerContainers()} if you need to access this registry's
+ * listener containers for management purposes. If you need to access to a
+ * specific message listener container, use {@link #getListenerContainer(String)}
+ * with the id of the endpoint.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
@@ -53,14 +59,33 @@ import org.springframework.util.Assert;
  * @see MessageListenerContainer
  * @see JmsListenerContainerFactory
  */
-public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecycle {
+public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecycle,
+		ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final Map<String, MessageListenerContainer> listenerContainers =
-			new ConcurrentHashMap<String, MessageListenerContainer>();
+			new ConcurrentHashMap<>();
 
-	private int phase = Integer.MAX_VALUE;
+	private int phase = DEFAULT_PHASE;
+
+	@Nullable
+	private ApplicationContext applicationContext;
+
+	private boolean contextRefreshed;
+
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent event) {
+		if (event.getApplicationContext() == this.applicationContext) {
+			this.contextRefreshed = true;
+		}
+	}
 
 
 	/**
@@ -71,6 +96,7 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	 * @see JmsListenerEndpoint#getId()
 	 * @see #getListenerContainerIds()
 	 */
+	@Nullable
 	public MessageListenerContainer getListenerContainer(String id) {
 		Assert.notNull(id, "Container identifier must not be null");
 		return this.listenerContainers.get(id);
@@ -78,8 +104,8 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 
 	/**
 	 * Return the ids of the managed {@link MessageListenerContainer} instance(s).
-	 * @see #getListenerContainer(String)
 	 * @since 4.2.3
+	 * @see #getListenerContainer(String)
 	 */
 	public Set<String> getListenerContainerIds() {
 		return Collections.unmodifiableSet(this.listenerContainers.keySet());
@@ -91,7 +117,6 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	public Collection<MessageListenerContainer> getListenerContainers() {
 		return Collections.unmodifiableCollection(this.listenerContainers.values());
 	}
-
 
 	/**
 	 * Create a message listener container for the given {@link JmsListenerEndpoint}.
@@ -110,12 +135,13 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 
 		Assert.notNull(endpoint, "Endpoint must not be null");
 		Assert.notNull(factory, "Factory must not be null");
-
 		String id = endpoint.getId();
-		Assert.notNull(id, "Endpoint id must not be null");
+		Assert.hasText(id, "Endpoint id must be set");
+
 		synchronized (this.listenerContainers) {
-			Assert.state(!this.listenerContainers.containsKey(id),
-					"Another endpoint is already registered with id '" + id + "'");
+			if (this.listenerContainers.containsKey(id)) {
+				throw new IllegalStateException("Another endpoint is already registered with id '" + id + "'");
+			}
 			MessageListenerContainer container = createListenerContainer(endpoint, factory);
 			this.listenerContainers.put(id, container);
 			if (startImmediately) {
@@ -166,31 +192,11 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	}
 
 
-	@Override
-	public void destroy() {
-		for (MessageListenerContainer listenerContainer : getListenerContainers()) {
-			if (listenerContainer instanceof DisposableBean) {
-				try {
-					((DisposableBean) listenerContainer).destroy();
-				}
-				catch (Throwable ex) {
-					logger.warn("Failed to destroy message listener container", ex);
-				}
-			}
-		}
-	}
-
-
 	// Delegating implementation of SmartLifecycle
 
 	@Override
 	public int getPhase() {
 		return this.phase;
-	}
-
-	@Override
-	public boolean isAutoStartup() {
-		return true;
 	}
 
 	@Override
@@ -228,12 +234,26 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 
 	/**
 	 * Start the specified {@link MessageListenerContainer} if it should be started
-	 * on startup.
+	 * on startup or when start is called explicitly after startup.
 	 * @see MessageListenerContainer#isAutoStartup()
 	 */
-	private static void startIfNecessary(MessageListenerContainer listenerContainer) {
-		if (listenerContainer.isAutoStartup()) {
+	private void startIfNecessary(MessageListenerContainer listenerContainer) {
+		if (this.contextRefreshed || listenerContainer.isAutoStartup()) {
 			listenerContainer.start();
+		}
+	}
+
+	@Override
+	public void destroy() {
+		for (MessageListenerContainer listenerContainer : getListenerContainers()) {
+			if (listenerContainer instanceof DisposableBean) {
+				try {
+					((DisposableBean) listenerContainer).destroy();
+				}
+				catch (Throwable ex) {
+					logger.warn("Failed to destroy message listener container", ex);
+				}
+			}
 		}
 	}
 

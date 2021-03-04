@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.core.convert.support;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +27,7 @@ import java.util.stream.Stream;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.lang.UsesJava8;
+import org.springframework.lang.Nullable;
 
 /**
  * Converts a {@link Stream} to and from a collection or array, converting the
@@ -35,7 +36,6 @@ import org.springframework.lang.UsesJava8;
  * @author Stephane Nicoll
  * @since 4.2
  */
-@UsesJava8
 class StreamConverter implements ConditionalGenericConverter {
 
 	private static final TypeDescriptor STREAM_TYPE = TypeDescriptor.valueOf(Stream.class);
@@ -72,7 +72,7 @@ class StreamConverter implements ConditionalGenericConverter {
 	 * @param elementType the type of the stream elements
 	 * @param targetType the type to convert to
 	 */
-	public boolean matchesFromStream(TypeDescriptor elementType, TypeDescriptor targetType) {
+	public boolean matchesFromStream(@Nullable TypeDescriptor elementType, TypeDescriptor targetType) {
 		TypeDescriptor collectionOfElement = TypeDescriptor.collection(Collection.class, elementType);
 		return this.conversionService.canConvert(collectionOfElement, targetType);
 	}
@@ -83,13 +83,14 @@ class StreamConverter implements ConditionalGenericConverter {
 	 * @param elementType the type of the stream elements
 	 * @param sourceType the type to convert from
 	 */
-	public boolean matchesToStream(TypeDescriptor elementType, TypeDescriptor sourceType) {
+	public boolean matchesToStream(@Nullable TypeDescriptor elementType, TypeDescriptor sourceType) {
 		TypeDescriptor collectionOfElement = TypeDescriptor.collection(Collection.class, elementType);
 		return this.conversionService.canConvert(sourceType, collectionOfElement);
 	}
 
 	@Override
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	@Nullable
+	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (sourceType.isAssignableTo(STREAM_TYPE)) {
 			return convertFromStream((Stream<?>) source, sourceType, targetType);
 		}
@@ -100,21 +101,25 @@ class StreamConverter implements ConditionalGenericConverter {
 		throw new IllegalStateException("Unexpected source/target types");
 	}
 
-	private Object convertFromStream(Stream<?> source, TypeDescriptor streamType, TypeDescriptor targetType) {
-		List<Object> content = source.collect(Collectors.<Object>toList());
+	@Nullable
+	private Object convertFromStream(@Nullable Stream<?> source, TypeDescriptor streamType, TypeDescriptor targetType) {
+		List<Object> content = (source != null ? source.collect(Collectors.<Object>toList()) : Collections.emptyList());
 		TypeDescriptor listType = TypeDescriptor.collection(List.class, streamType.getElementTypeDescriptor());
 		return this.conversionService.convert(content, listType, targetType);
 	}
 
-	private Object convertToStream(Object source, TypeDescriptor sourceType, TypeDescriptor streamType) {
+	private Object convertToStream(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor streamType) {
 		TypeDescriptor targetCollection = TypeDescriptor.collection(List.class, streamType.getElementTypeDescriptor());
 		List<?> target = (List<?>) this.conversionService.convert(source, sourceType, targetCollection);
+		if (target == null) {
+			target = Collections.emptyList();
+		}
 		return target.stream();
 	}
 
 
 	private static Set<ConvertiblePair> createConvertibleTypes() {
-		Set<ConvertiblePair> convertiblePairs = new HashSet<ConvertiblePair>();
+		Set<ConvertiblePair> convertiblePairs = new HashSet<>();
 		convertiblePairs.add(new ConvertiblePair(Stream.class, Collection.class));
 		convertiblePairs.add(new ConvertiblePair(Stream.class, Object[].class));
 		convertiblePairs.add(new ConvertiblePair(Collection.class, Stream.class));

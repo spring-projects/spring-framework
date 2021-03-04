@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.support;
 import java.util.Collection;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.FlashMap;
 
@@ -60,7 +61,7 @@ import org.springframework.web.servlet.FlashMap;
 public interface RedirectAttributes extends Model {
 
 	@Override
-	RedirectAttributes addAttribute(String attributeName, Object attributeValue);
+	RedirectAttributes addAttribute(String attributeName, @Nullable Object attributeValue);
 
 	@Override
 	RedirectAttributes addAttribute(Object attributeValue);
@@ -76,7 +77,7 @@ public interface RedirectAttributes extends Model {
 	 * @param attributeName the attribute name; never {@code null}
 	 * @param attributeValue the attribute value; may be {@code null}
 	 */
-	RedirectAttributes addFlashAttribute(String attributeName, Object attributeValue);
+	RedirectAttributes addFlashAttribute(String attributeName, @Nullable Object attributeValue);
 
 	/**
 	 * Add the given flash storage using a

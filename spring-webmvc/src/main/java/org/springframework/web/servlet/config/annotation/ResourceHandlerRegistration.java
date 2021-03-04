@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,13 +17,14 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.cache.Cache;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.Assert;
 import org.springframework.http.CacheControl;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
@@ -37,44 +38,67 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
  */
 public class ResourceHandlerRegistration {
 
-	private final ResourceLoader resourceLoader;
-
 	private final String[] pathPatterns;
 
-	private final List<Resource> locations = new ArrayList<Resource>();
+	private final List<String> locationValues = new ArrayList<>();
 
+	private final List<Resource> locationsResources = new ArrayList<>();
+
+	@Nullable
 	private Integer cachePeriod;
 
+	@Nullable
 	private CacheControl cacheControl;
 
+	@Nullable
 	private ResourceChainRegistration resourceChainRegistration;
+
+	private boolean useLastModified = true;
 
 
 	/**
 	 * Create a {@link ResourceHandlerRegistration} instance.
-	 * @param resourceLoader a resource loader for turning a String location into a {@link Resource}
 	 * @param pathPatterns one or more resource URL path patterns
 	 */
-	public ResourceHandlerRegistration(ResourceLoader resourceLoader, String... pathPatterns) {
+	public ResourceHandlerRegistration(String... pathPatterns) {
 		Assert.notEmpty(pathPatterns, "At least one path pattern is required for resource handling.");
-		this.resourceLoader = resourceLoader;
 		this.pathPatterns = pathPatterns;
 	}
 
 
 	/**
-	 * Add one or more resource locations from which to serve static content. Each location must point to a valid
-	 * directory. Multiple locations may be specified as a comma-separated list, and the locations will be checked
+	 * Add one or more resource locations from which to serve static content.
+	 * Each location must point to a valid directory. Multiple locations may
+	 * be specified as a comma-separated list, and the locations will be checked
 	 * for a given resource in the order specified.
-	 * <p>For example, {{@code "/"}, {@code "classpath:/META-INF/public-web-resources/"}} allows resources to
-	 * be served both from the web application root and from any JAR on the classpath that contains a
-	 * {@code /META-INF/public-web-resources/} directory, with resources in the web application root taking precedence.
-	 * @return the same {@link ResourceHandlerRegistration} instance, for chained method invocation
+	 * <p>For example, {{@code "/"}, {@code "classpath:/META-INF/public-web-resources/"}}
+	 * allows resources to be served both from the web application root and
+	 * from any JAR on the classpath that contains a
+	 * {@code /META-INF/public-web-resources/} directory, with resources in the
+	 * web application root taking precedence.
+	 * <p>For {@link org.springframework.core.io.UrlResource URL-based resources}
+	 * (e.g. files, HTTP URLs, etc) this method supports a special prefix to
+	 * indicate the charset associated with the URL so that relative paths
+	 * appended to it can be encoded correctly, e.g.
+	 * {@code [charset=Windows-31J]https://example.org/path}.
+	 * @return the same {@link ResourceHandlerRegistration} instance, for
+	 * chained method invocation
 	 */
-	public ResourceHandlerRegistration addResourceLocations(String... resourceLocations) {
-		for (String location : resourceLocations) {
-			this.locations.add(resourceLoader.getResource(location));
-		}
+	public ResourceHandlerRegistration addResourceLocations(String... locations) {
+		this.locationValues.addAll(Arrays.asList(locations));
+		return this;
+	}
+
+	/**
+	 * Configure locations to serve static resources from based on pre-resolved
+	 * {@code Resource} references.
+	 * @param locations the resource locations to use
+	 * @return the same {@link ResourceHandlerRegistration} instance, for
+	 * chained method invocation
+	 * @since 5.3.3
+	 */
+	public ResourceHandlerRegistration addResourceLocations(Resource... locations) {
+		this.locationsResources.addAll(Arrays.asList(locations));
 		return this;
 	}
 
@@ -93,9 +117,7 @@ public class ResourceHandlerRegistration {
 	/**
 	 * Specify the {@link org.springframework.http.CacheControl} which should be used
 	 * by the resource handler.
-	 *
 	 * <p>Setting a custom value here will override the configuration set with {@link #setCachePeriod}.
-	 *
 	 * @param cacheControl the CacheControl configuration to use
 	 * @return the same {@link ResourceHandlerRegistration} instance, for chained method invocation
 	 * @since 4.2
@@ -106,13 +128,23 @@ public class ResourceHandlerRegistration {
 	}
 
 	/**
+	 * Set whether the {@link Resource#lastModified()} information should be used to drive HTTP responses.
+	 * <p>This configuration is set to {@code true} by default.
+	 * @param useLastModified whether the "last modified" resource information should be used.
+	 * @return the same {@link ResourceHandlerRegistration} instance, for chained method invocation
+	 * @since 5.3
+	 */
+	public ResourceHandlerRegistration setUseLastModified(boolean useLastModified) {
+		this.useLastModified = useLastModified;
+		return this;
+	}
+
+	/**
 	 * Configure a chain of resource resolvers and transformers to use. This
 	 * can be useful, for example, to apply a version strategy to resource URLs.
-	 *
 	 * <p>If this method is not invoked, by default only a simple
 	 * {@link PathResourceResolver} is used in order to match URL paths to
 	 * resources under the configured locations.
-	 *
 	 * @param cacheResources whether to cache the result of resource resolution;
 	 * setting this to "true" is recommended for production (and "false" for
 	 * development, especially when applying a version strategy)
@@ -127,11 +159,9 @@ public class ResourceHandlerRegistration {
 	/**
 	 * Configure a chain of resource resolvers and transformers to use. This
 	 * can be useful, for example, to apply a version strategy to resource URLs.
-	 *
 	 * <p>If this method is not invoked, by default only a simple
 	 * {@link PathResourceResolver} is used in order to match URL paths to
 	 * resources under the configured locations.
-	 *
 	 * @param cacheResources whether to cache the result of resource resolution;
 	 * setting this to "true" is recommended for production (and "false" for
 	 * development, especially when applying a version strategy
@@ -148,15 +178,16 @@ public class ResourceHandlerRegistration {
 		return this.resourceChainRegistration;
 	}
 
+
 	/**
-	 * Returns the URL path patterns for the resource handler.
+	 * Return the URL path patterns for the resource handler.
 	 */
 	protected String[] getPathPatterns() {
 		return this.pathPatterns;
 	}
 
 	/**
-	 * Returns a {@link ResourceHttpRequestHandler} instance.
+	 * Return a {@link ResourceHttpRequestHandler} instance.
 	 */
 	protected ResourceHttpRequestHandler getRequestHandler() {
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
@@ -164,13 +195,15 @@ public class ResourceHandlerRegistration {
 			handler.setResourceResolvers(this.resourceChainRegistration.getResourceResolvers());
 			handler.setResourceTransformers(this.resourceChainRegistration.getResourceTransformers());
 		}
-		handler.setLocations(this.locations);
+		handler.setLocationValues(this.locationValues);
+		handler.setLocations(this.locationsResources);
 		if (this.cacheControl != null) {
 			handler.setCacheControl(this.cacheControl);
 		}
 		else if (this.cachePeriod != null) {
 			handler.setCacheSeconds(this.cachePeriod);
 		}
+		handler.setUseLastModified(this.useLastModified);
 		return handler;
 	}
 

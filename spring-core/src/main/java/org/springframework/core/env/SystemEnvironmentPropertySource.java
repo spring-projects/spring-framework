@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.core.env;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -87,11 +88,12 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 * any underscore/uppercase variant thereof exists in this property source.
 	 */
 	@Override
+	@Nullable
 	public Object getProperty(String name) {
 		String actualName = resolvePropertyName(name);
 		if (logger.isDebugEnabled() && !name.equals(actualName)) {
-			logger.debug(String.format("PropertySource [%s] does not contain '%s', but found equivalent '%s'",
-					getName(), name, actualName));
+			logger.debug("PropertySource '" + getName() + "' does not contain property '" + name +
+					"', but found equivalent '" + actualName + "'");
 		}
 		return super.getProperty(actualName);
 	}
@@ -101,7 +103,7 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 * any underscore / uppercase variation thereof. Return the resolved name if one is
 	 * found or otherwise the original name. Never returns {@code null}.
 	 */
-	private String resolvePropertyName(String name) {
+	protected final String resolvePropertyName(String name) {
 		Assert.notNull(name, "Property name must not be null");
 		String resolvedName = checkPropertyName(name);
 		if (resolvedName != null) {
@@ -117,6 +119,7 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 		return name;
 	}
 
+	@Nullable
 	private String checkPropertyName(String name) {
 		// Check name as-is
 		if (containsKey(name)) {

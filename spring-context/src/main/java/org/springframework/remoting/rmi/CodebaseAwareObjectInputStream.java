@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.rmi.server.RMIClassLoader;
 
 import org.springframework.core.ConfigurableObjectInputStream;
+import org.springframework.lang.Nullable;
 
 /**
  * Special ObjectInputStream subclass that falls back to a specified codebase
@@ -49,7 +50,9 @@ import org.springframework.core.ConfigurableObjectInputStream;
  * @see java.rmi.server.RMIClassLoader
  * @see RemoteInvocationSerializingExporter#createObjectInputStream
  * @see org.springframework.remoting.httpinvoker.HttpInvokerClientInterceptor#setCodebaseUrl
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public class CodebaseAwareObjectInputStream extends ConfigurableObjectInputStream {
 
 	private final String codebaseUrl;
@@ -76,7 +79,7 @@ public class CodebaseAwareObjectInputStream extends ConfigurableObjectInputStrea
 	 * @see java.io.ObjectInputStream#ObjectInputStream(java.io.InputStream)
 	 */
 	public CodebaseAwareObjectInputStream(
-			InputStream in, ClassLoader classLoader, String codebaseUrl) throws IOException {
+			InputStream in, @Nullable ClassLoader classLoader, String codebaseUrl) throws IOException {
 
 		super(in, classLoader);
 		this.codebaseUrl = codebaseUrl;
@@ -92,7 +95,7 @@ public class CodebaseAwareObjectInputStream extends ConfigurableObjectInputStrea
 	 * @see java.io.ObjectInputStream#ObjectInputStream(java.io.InputStream)
 	 */
 	public CodebaseAwareObjectInputStream(
-			InputStream in, ClassLoader classLoader, boolean acceptProxyClasses) throws IOException {
+			InputStream in, @Nullable ClassLoader classLoader, boolean acceptProxyClasses) throws IOException {
 
 		super(in, classLoader, acceptProxyClasses);
 		this.codebaseUrl = null;

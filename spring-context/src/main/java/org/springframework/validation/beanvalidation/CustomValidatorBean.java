@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import javax.validation.ValidatorContext;
 import javax.validation.ValidatorFactory;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * Configurable bean class that exposes a specific JSR-303 Validator
@@ -35,10 +36,13 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class CustomValidatorBean extends SpringValidatorAdapter implements Validator, InitializingBean {
 
+	@Nullable
 	private ValidatorFactory validatorFactory;
 
+	@Nullable
 	private MessageInterpolator messageInterpolator;
 
+	@Nullable
 	private TraversableResolver traversableResolver;
 
 

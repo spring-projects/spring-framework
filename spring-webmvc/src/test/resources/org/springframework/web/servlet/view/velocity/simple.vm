@@ -1,6 +1,0 @@
-##
-## test template for Velocity view
-##
-
-NAME
-$command.name

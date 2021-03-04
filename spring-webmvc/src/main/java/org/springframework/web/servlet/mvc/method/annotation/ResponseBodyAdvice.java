@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,19 +21,21 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 
 /**
  * Allows customizing the response after the execution of an {@code @ResponseBody}
  * or a {@code ResponseEntity} controller method but before the body is written
  * with an {@code HttpMessageConverter}.
  *
- * <p>Implementations may be may be registered directly with
+ * <p>Implementations may be registered directly with
  * {@code RequestMappingHandlerAdapter} and {@code ExceptionHandlerExceptionResolver}
  * or more likely annotated with {@code @ControllerAdvice} in which case they
  * will be auto-detected by both.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
+ * @param <T> the body type
  */
 public interface ResponseBodyAdvice<T> {
 
@@ -42,7 +44,8 @@ public interface ResponseBodyAdvice<T> {
 	 * and the selected {@code HttpMessageConverter} type.
 	 * @param returnType the return type
 	 * @param converterType the selected converter type
-	 * @return {@code true} if {@link #beforeBodyWrite} should be invoked, {@code false} otherwise
+	 * @return {@code true} if {@link #beforeBodyWrite} should be invoked;
+	 * {@code false} otherwise
 	 */
 	boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType);
 
@@ -55,9 +58,10 @@ public interface ResponseBodyAdvice<T> {
 	 * @param selectedConverterType the converter type selected to write to the response
 	 * @param request the current request
 	 * @param response the current response
-	 * @return the body that was passed in or a modified, possibly new instance
+	 * @return the body that was passed in or a modified (possibly new) instance
 	 */
-	T beforeBodyWrite(T body, MethodParameter returnType, MediaType selectedContentType,
+	@Nullable
+	T beforeBodyWrite(@Nullable T body, MethodParameter returnType, MediaType selectedContentType,
 			Class<? extends HttpMessageConverter<?>> selectedConverterType,
 			ServerHttpRequest request, ServerHttpResponse response);
 

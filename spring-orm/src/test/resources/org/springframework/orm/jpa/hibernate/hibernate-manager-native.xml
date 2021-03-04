@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<bean id="entityManagerFactory" name="Person" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean" primary="true">
+		<property name="annotatedClasses">
+			<list>
+				<value>org.springframework.orm.jpa.domain.DriversLicense</value>
+				<value>org.springframework.orm.jpa.domain.Person</value>
+			</list>
+		</property>
+		<property name="dataSource" ref="dataSource"/>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="entityManagerFactory"/>
+	</bean>
+
+	<bean id="hibernateStatistics" factory-bean="entityManagerFactory" factory-method="getStatistics"/>
+
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+
+	<bean id="invalid" class="javax.persistence.AttributeConverter" lazy-init="true"/>
+
+</beans>

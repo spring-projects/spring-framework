@@ -1,11 +1,11 @@
-/**
- * Copyright 2002-2012 the original author or authors.
+/*
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj.autoproxy.spr3064;
 
 import java.lang.annotation.Retention;
@@ -21,19 +22,20 @@ import java.lang.annotation.RetentionPolicy;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class SPR3064Tests {
+public class SPR3064Tests {
 
 	private Service service;
+
 
 	@Test
 	public void testServiceIsAdvised() {
@@ -41,14 +43,9 @@ public final class SPR3064Tests {
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		service = (Service) ctx.getBean("service");
-
-		try {
-			this.service.serveMe();
-			fail("service operation has not been advised by transaction interceptor");
-		}
-		catch(RuntimeException ex) {
-			assertEquals("advice invoked",ex.getMessage());
-		}
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(
+				this.service::serveMe)
+			.withMessageContaining("advice invoked");
 	}
 
 }
@@ -56,7 +53,6 @@ public final class SPR3064Tests {
 
 @Retention(RetentionPolicy.RUNTIME)
 @interface Transaction {
-
 }
 
 
@@ -68,14 +64,12 @@ class TransactionInterceptor {
 		throw new RuntimeException("advice invoked");
 		//return pjp.proceed();
 	}
-
 }
 
 
 interface Service {
 
 	void serveMe();
-
 }
 
 
@@ -85,5 +79,4 @@ class ServiceImpl implements Service {
 	@Transaction
 	public void serveMe() {
 	}
-
 }

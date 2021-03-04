@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -38,6 +37,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -77,20 +77,27 @@ public class FreeMarkerConfigurationFactory {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Resource configLocation;
 
+	@Nullable
 	private Properties freemarkerSettings;
 
+	@Nullable
 	private Map<String, Object> freemarkerVariables;
 
+	@Nullable
 	private String defaultEncoding;
 
-	private final List<TemplateLoader> templateLoaders = new ArrayList<TemplateLoader>();
+	private final List<TemplateLoader> templateLoaders = new ArrayList<>();
 
+	@Nullable
 	private List<TemplateLoader> preTemplateLoaders;
 
+	@Nullable
 	private List<TemplateLoader> postTemplateLoaders;
 
+	@Nullable
 	private String[] templateLoaderPaths;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
@@ -105,7 +112,7 @@ public class FreeMarkerConfigurationFactory {
 	 * @see #setTemplateLoaderPath
 	 */
 	public void setConfigLocation(Resource resource) {
-		configLocation = resource;
+		this.configLocation = resource;
 	}
 
 	/**
@@ -252,8 +259,8 @@ public class FreeMarkerConfigurationFactory {
 
 		// Load config file if specified.
 		if (this.configLocation != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Loading FreeMarker configuration from " + this.configLocation);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loading FreeMarker configuration from " + this.configLocation);
 			}
 			PropertiesLoaderUtils.fillProperties(props, this.configLocation);
 		}
@@ -277,7 +284,7 @@ public class FreeMarkerConfigurationFactory {
 			config.setDefaultEncoding(this.defaultEncoding);
 		}
 
-		List<TemplateLoader> templateLoaders = new LinkedList<TemplateLoader>(this.templateLoaders);
+		List<TemplateLoader> templateLoaders = new ArrayList<>(this.templateLoaders);
 
 		// Register template loaders that are supposed to kick in early.
 		if (this.preTemplateLoaders != null) {
@@ -342,7 +349,7 @@ public class FreeMarkerConfigurationFactory {
 				}
 				return new FileTemplateLoader(file);
 			}
-			catch (IOException ex) {
+			catch (Exception ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Cannot resolve template loader path [" + templateLoaderPath +
 							"] to [java.io.File]: using SpringTemplateLoader as fallback", ex);
@@ -358,12 +365,12 @@ public class FreeMarkerConfigurationFactory {
 	}
 
 	/**
-	 * To be overridden by subclasses that want to to register custom
+	 * To be overridden by subclasses that want to register custom
 	 * TemplateLoader instances after this factory created its default
 	 * template loaders.
 	 * <p>Called by {@code createConfiguration()}. Note that specified
 	 * "postTemplateLoaders" will be registered <i>after</i> any loaders
-	 * registered by this callback; as a consequence, they are are <i>not</i>
+	 * registered by this callback; as a consequence, they are <i>not</i>
 	 * included in the given List.
 	 * @param templateLoaders the current List of TemplateLoader instances,
 	 * to be modified by a subclass
@@ -380,22 +387,22 @@ public class FreeMarkerConfigurationFactory {
 	 * @param templateLoaders the final List of TemplateLoader instances
 	 * @return the aggregate TemplateLoader
 	 */
+	@Nullable
 	protected TemplateLoader getAggregateTemplateLoader(List<TemplateLoader> templateLoaders) {
-		int loaderCount = templateLoaders.size();
-		switch (loaderCount) {
+		switch (templateLoaders.size()) {
 			case 0:
-				logger.info("No FreeMarker TemplateLoaders specified");
+				logger.debug("No FreeMarker TemplateLoaders specified");
 				return null;
 			case 1:
 				return templateLoaders.get(0);
 			default:
-				TemplateLoader[] loaders = templateLoaders.toArray(new TemplateLoader[loaderCount]);
+				TemplateLoader[] loaders = templateLoaders.toArray(new TemplateLoader[0]);
 				return new MultiTemplateLoader(loaders);
 		}
 	}
 
 	/**
-	 * To be overridden by subclasses that want to to perform custom
+	 * To be overridden by subclasses that want to perform custom
 	 * post-processing of the Configuration object after this factory
 	 * performed its default initialization.
 	 * <p>Called by {@code createConfiguration()}.

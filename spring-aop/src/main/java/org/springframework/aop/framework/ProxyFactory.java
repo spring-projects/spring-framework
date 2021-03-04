@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,12 +19,13 @@ package org.springframework.aop.framework;
 import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * Factory for AOP proxies for programmatic use, rather than via a bean
- * factory. This class provides a simple way of obtaining and configuring
- * AOP proxies in code.
+ * Factory for AOP proxies for programmatic use, rather than via declarative
+ * setup in a bean factory. This class provides a simple way of obtaining
+ * and configuring AOP proxy instances in custom user code.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -105,7 +106,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * (or {@code null} for the low-level proxy facility's default)
 	 * @return the proxy object
 	 */
-	public Object getProxy(ClassLoader classLoader) {
+	public Object getProxy(@Nullable ClassLoader classLoader) {
 		return createAopProxy().getProxy(classLoader);
 	}
 

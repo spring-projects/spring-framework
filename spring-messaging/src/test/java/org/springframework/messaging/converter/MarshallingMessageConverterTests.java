@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,31 +17,35 @@
 package org.springframework.messaging.converter;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.xmlunit.diff.DifferenceEvaluator;
 
+import org.springframework.core.testfixture.xml.XmlContent;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.xmlunit.diff.ComparisonType.XML_STANDALONE;
+import static org.xmlunit.diff.DifferenceEvaluators.Default;
+import static org.xmlunit.diff.DifferenceEvaluators.chain;
+import static org.xmlunit.diff.DifferenceEvaluators.downgradeDifferencesToEqual;
 
 /**
  * @author Arjen Poutsma
  */
 public class MarshallingMessageConverterTests {
 
-	private static Charset UTF_8 = Charset.forName("UTF-8");
-
-
 	private MarshallingMessageConverter converter;
 
 
-	@Before
+	@BeforeEach
 	public void createMarshaller() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(MyBean.class);
@@ -50,28 +54,31 @@ public class MarshallingMessageConverterTests {
 		this.converter = new MarshallingMessageConverter(marshaller);
 	}
 
+
 	@Test
 	public void fromMessage() throws Exception {
 		String payload = "<myBean><name>Foo</name></myBean>";
-		Message<?> message = MessageBuilder.withPayload(payload.getBytes(UTF_8)).build();
+		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		MyBean actual = (MyBean) this.converter.fromMessage(message, MyBean.class);
 
-		assertNotNull(actual);
-		assertEquals("Foo", actual.getName());
+		assertThat(actual).isNotNull();
+		assertThat(actual.getName()).isEqualTo("Foo");
 	}
 
-	@Test(expected = MessageConversionException.class)
+	@Test
 	public void fromMessageInvalidXml() throws Exception {
 		String payload = "<myBean><name>Foo</name><myBean>";
-		Message<?> message = MessageBuilder.withPayload(payload.getBytes(UTF_8)).build();
-		this.converter.fromMessage(message, MyBean.class);
+		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
+		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
+				this.converter.fromMessage(message, MyBean.class));
 	}
 
-	@Test(expected = MessageConversionException.class)
+	@Test
 	public void fromMessageValidXmlWithUnknownProperty() throws IOException {
 		String payload = "<myBean><age>42</age><myBean>";
-		Message<?> message = MessageBuilder.withPayload(payload.getBytes(UTF_8)).build();
-		this.converter.fromMessage(message, MyBean.class);
+		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
+		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
+				this.converter.fromMessage(message, MyBean.class));
 	}
 
 	@Test
@@ -80,10 +87,11 @@ public class MarshallingMessageConverterTests {
 		payload.setName("Foo");
 
 		Message<?> message = this.converter.toMessage(payload, null);
-		assertNotNull(message);
-		String actual = new String((byte[]) message.getPayload(), UTF_8);
+		assertThat(message).isNotNull();
+		String actual = new String((byte[]) message.getPayload(), StandardCharsets.UTF_8);
 
-		assertXMLEqual("<myBean><name>Foo</name></myBean>", actual);
+		DifferenceEvaluator ev = chain(Default, downgradeDifferencesToEqual(XML_STANDALONE));
+		assertThat(XmlContent.of(actual)).isSimilarTo("<myBean><name>Foo</name></myBean>", ev);
 	}
 
 

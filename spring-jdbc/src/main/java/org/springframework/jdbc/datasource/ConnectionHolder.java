@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,13 +20,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
 
 /**
- * Connection holder, wrapping a JDBC Connection.
+ * Resource holder wrapping a JDBC {@link Connection}.
  * {@link DataSourceTransactionManager} binds instances of this class
- * to the thread, for a specific DataSource.
+ * to the thread, for a specific {@link javax.sql.DataSource}.
  *
  * <p>Inherits rollback-only support for nested JDBC transactions
  * and reference count functionality from the base class.
@@ -40,15 +41,21 @@ import org.springframework.util.Assert;
  */
 public class ConnectionHolder extends ResourceHolderSupport {
 
+	/**
+	 * Prefix for savepoint names.
+	 */
 	public static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
 
 
+	@Nullable
 	private ConnectionHandle connectionHandle;
 
+	@Nullable
 	private Connection currentConnection;
 
 	private boolean transactionActive = false;
 
+	@Nullable
 	private Boolean savepointsSupported;
 
 	private int savepointCounter = 0;
@@ -92,6 +99,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	/**
 	 * Return the ConnectionHandle held by this ConnectionHolder.
 	 */
+	@Nullable
 	public ConnectionHandle getConnectionHandle() {
 		return this.connectionHandle;
 	}
@@ -125,9 +133,11 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 * <p>Used for releasing the Connection on suspend (with a {@code null}
 	 * argument) and setting a fresh Connection on resume.
 	 */
-	protected void setConnection(Connection connection) {
+	protected void setConnection(@Nullable Connection connection) {
 		if (this.currentConnection != null) {
-			this.connectionHandle.releaseConnection(this.currentConnection);
+			if (this.connectionHandle != null) {
+				this.connectionHandle.releaseConnection(this.currentConnection);
+			}
 			this.currentConnection = null;
 		}
 		if (connection != null) {
@@ -161,9 +171,9 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 */
 	public boolean supportsSavepoints() throws SQLException {
 		if (this.savepointsSupported == null) {
-			this.savepointsSupported = new Boolean(getConnection().getMetaData().supportsSavepoints());
+			this.savepointsSupported = getConnection().getMetaData().supportsSavepoints();
 		}
-		return this.savepointsSupported.booleanValue();
+		return this.savepointsSupported;
 	}
 
 	/**
@@ -182,15 +192,15 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 * <p>This is necessary for ConnectionHandles that expect "Connection borrowing",
 	 * where each returned Connection is only temporarily leased and needs to be
 	 * returned once the data operation is done, to make the Connection available
-	 * for other operations within the same transaction. This is the case with
-	 * JDO 2.0 DataStoreConnections, for example.
-	 * @see org.springframework.orm.jdo.DefaultJdoDialect#getJdbcConnection
+	 * for other operations within the same transaction.
 	 */
 	@Override
 	public void released() {
 		super.released();
 		if (!isOpen() && this.currentConnection != null) {
-			this.connectionHandle.releaseConnection(this.currentConnection);
+			if (this.connectionHandle != null) {
+				this.connectionHandle.releaseConnection(this.currentConnection);
+			}
 			this.currentConnection = null;
 		}
 	}

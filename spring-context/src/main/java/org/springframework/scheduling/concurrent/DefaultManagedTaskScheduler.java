@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,11 +18,13 @@ package org.springframework.scheduling.concurrent;
 
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
+
 import javax.naming.NamingException;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiTemplate;
+import org.springframework.lang.Nullable;
 
 /**
  * JNDI-based variant of {@link ConcurrentTaskScheduler}, performing a default lookup for
@@ -35,11 +37,13 @@ import org.springframework.jndi.JndiTemplate;
  *
  * @author Juergen Hoeller
  * @since 4.0
+ * @see javax.enterprise.concurrent.ManagedScheduledExecutorService
  */
 public class DefaultManagedTaskScheduler extends ConcurrentTaskScheduler implements InitializingBean {
 
-	private JndiLocatorDelegate jndiLocator = new JndiLocatorDelegate();
+	private final JndiLocatorDelegate jndiLocator = new JndiLocatorDelegate();
 
+	@Nullable
 	private String jndiName = "java:comp/DefaultManagedScheduledExecutorService";
 
 
@@ -60,7 +64,7 @@ public class DefaultManagedTaskScheduler extends ConcurrentTaskScheduler impleme
 	}
 
 	/**
-	 * Set whether the lookup occurs in a J2EE container, i.e. if the prefix
+	 * Set whether the lookup occurs in a Java EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
 	 * contain it. PersistenceAnnotationBeanPostProcessor's default is "true".
 	 * @see org.springframework.jndi.JndiLocatorSupport#setResourceRef

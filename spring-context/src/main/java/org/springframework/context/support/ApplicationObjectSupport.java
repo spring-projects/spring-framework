@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Convenient superclass for application objects that want to be aware of
@@ -46,18 +48,20 @@ import org.springframework.context.ApplicationContextException;
  */
 public abstract class ApplicationObjectSupport implements ApplicationContextAware {
 
-	/** Logger that is available to subclasses */
+	/** Logger that is available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** ApplicationContext this object runs in */
+	/** ApplicationContext this object runs in. */
+	@Nullable
 	private ApplicationContext applicationContext;
 
-	/** MessageSourceAccessor for easy message access */
+	/** MessageSourceAccessor for easy message access. */
+	@Nullable
 	private MessageSourceAccessor messageSourceAccessor;
 
 
 	@Override
-	public final void setApplicationContext(ApplicationContext context) throws BeansException {
+	public final void setApplicationContext(@Nullable ApplicationContext context) throws BeansException {
 		if (context == null && !isContextRequired()) {
 			// Reset internal context state.
 			this.applicationContext = null;
@@ -107,7 +111,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	/**
 	 * Subclasses can override this for custom initialization behavior.
 	 * Gets called by {@code setApplicationContext} after setting the context instance.
-	 * <p>Note: Does </i>not</i> get called on reinitialization of the context
+	 * <p>Note: Does <i>not</i> get called on re-initialization of the context
 	 * but rather just on first initialization of this object's context reference.
 	 * <p>The default implementation calls the overloaded {@link #initApplicationContext()}
 	 * method without ApplicationContext reference.
@@ -136,6 +140,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	 * Return the ApplicationContext that this object is associated with.
 	 * @throws IllegalStateException if not running in an ApplicationContext
 	 */
+	@Nullable
 	public final ApplicationContext getApplicationContext() throws IllegalStateException {
 		if (this.applicationContext == null && isContextRequired()) {
 			throw new IllegalStateException(
@@ -145,10 +150,23 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	}
 
 	/**
+	 * Obtain the ApplicationContext for actual use.
+	 * @return the ApplicationContext (never {@code null})
+	 * @throws IllegalStateException in case of no ApplicationContext set
+	 * @since 5.0
+	 */
+	protected final ApplicationContext obtainApplicationContext() {
+		ApplicationContext applicationContext = getApplicationContext();
+		Assert.state(applicationContext != null, "No ApplicationContext");
+		return applicationContext;
+	}
+
+	/**
 	 * Return a MessageSourceAccessor for the application context
 	 * used by this object, for easy message access.
 	 * @throws IllegalStateException if not running in an ApplicationContext
 	 */
+	@Nullable
 	protected final MessageSourceAccessor getMessageSourceAccessor() throws IllegalStateException {
 		if (this.messageSourceAccessor == null && isContextRequired()) {
 			throw new IllegalStateException(

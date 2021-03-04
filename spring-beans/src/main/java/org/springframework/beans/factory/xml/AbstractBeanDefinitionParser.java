@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -49,14 +50,15 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractBeanDefinitionParser implements BeanDefinitionParser {
 
-	/** Constant for the "id" attribute */
+	/** Constant for the "id" attribute. */
 	public static final String ID_ATTRIBUTE = "id";
 
-	/** Constant for the "name" attribute */
+	/** Constant for the "name" attribute. */
 	public static final String NAME_ATTRIBUTE = "name";
 
 
 	@Override
+	@Nullable
 	public final BeanDefinition parse(Element element, ParserContext parserContext) {
 		AbstractBeanDefinition definition = parseInternal(element, parserContext);
 		if (definition != null && !parserContext.isNested()) {
@@ -83,7 +85,8 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 				}
 			}
 			catch (BeanDefinitionStoreException ex) {
-				parserContext.getReaderContext().error(ex.getMessage(), element);
+				String msg = ex.getMessage();
+				parserContext.getReaderContext().error((msg != null ? msg : ex.toString()), element);
 				return null;
 			}
 		}
@@ -140,13 +143,14 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	/**
 	 * Central template method to actually parse the supplied {@link Element}
 	 * into one or more {@link BeanDefinition BeanDefinitions}.
-	 * @param element	the element that is to be parsed into one or more {@link BeanDefinition BeanDefinitions}
+	 * @param element the element that is to be parsed into one or more {@link BeanDefinition BeanDefinitions}
 	 * @param parserContext the object encapsulating the current state of the parsing process;
 	 * provides access to a {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
 	 * @return the primary {@link BeanDefinition} resulting from the parsing of the supplied {@link Element}
 	 * @see #parse(org.w3c.dom.Element, ParserContext)
 	 * @see #postProcessComponentDefinition(org.springframework.beans.factory.parsing.BeanComponentDefinition)
 	 */
+	@Nullable
 	protected abstract AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext);
 
 	/**

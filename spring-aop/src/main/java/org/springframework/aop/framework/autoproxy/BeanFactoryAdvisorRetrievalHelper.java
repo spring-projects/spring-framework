@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -43,7 +44,8 @@ public class BeanFactoryAdvisorRetrievalHelper {
 
 	private final ConfigurableListableBeanFactory beanFactory;
 
-	private String[] cachedAdvisorBeanNames;
+	@Nullable
+	private volatile String[] cachedAdvisorBeanNames;
 
 
 	/**
@@ -64,27 +66,24 @@ public class BeanFactoryAdvisorRetrievalHelper {
 	 */
 	public List<Advisor> findAdvisorBeans() {
 		// Determine list of advisor bean names, if not cached already.
-		String[] advisorNames = null;
-		synchronized (this) {
-			advisorNames = this.cachedAdvisorBeanNames;
-			if (advisorNames == null) {
-				// Do not initialize FactoryBeans here: We need to leave all regular beans
-				// uninitialized to let the auto-proxy creator apply to them!
-				advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
-						this.beanFactory, Advisor.class, true, false);
-				this.cachedAdvisorBeanNames = advisorNames;
-			}
+		String[] advisorNames = this.cachedAdvisorBeanNames;
+		if (advisorNames == null) {
+			// Do not initialize FactoryBeans here: We need to leave all regular beans
+			// uninitialized to let the auto-proxy creator apply to them!
+			advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+					this.beanFactory, Advisor.class, true, false);
+			this.cachedAdvisorBeanNames = advisorNames;
 		}
 		if (advisorNames.length == 0) {
-			return new LinkedList<Advisor>();
+			return new ArrayList<>();
 		}
 
-		List<Advisor> advisors = new LinkedList<Advisor>();
+		List<Advisor> advisors = new ArrayList<>();
 		for (String name : advisorNames) {
 			if (isEligibleBean(name)) {
 				if (this.beanFactory.isCurrentlyInCreation(name)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Skipping currently created advisor '" + name + "'");
+					if (logger.isTraceEnabled()) {
+						logger.trace("Skipping currently created advisor '" + name + "'");
 					}
 				}
 				else {
@@ -95,9 +94,10 @@ public class BeanFactoryAdvisorRetrievalHelper {
 						Throwable rootCause = ex.getMostSpecificCause();
 						if (rootCause instanceof BeanCurrentlyInCreationException) {
 							BeanCreationException bce = (BeanCreationException) rootCause;
-							if (this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
-								if (logger.isDebugEnabled()) {
-									logger.debug("Skipping advisor '" + name +
+							String bceBeanName = bce.getBeanName();
+							if (bceBeanName != null && this.beanFactory.isCurrentlyInCreation(bceBeanName)) {
+								if (logger.isTraceEnabled()) {
+									logger.trace("Skipping advisor '" + name +
 											"' with dependency on currently created bean: " + ex.getMessage());
 								}
 								// Ignore: indicates a reference back to the bean we're trying to advise.

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,8 @@ import net.sf.ehcache.Status;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * CacheManager backed by an EhCache {@link net.sf.ehcache.CacheManager}.
@@ -32,9 +34,11 @@ import org.springframework.cache.transaction.AbstractTransactionSupportingCacheM
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @since 3.1
+ * @see EhCacheCache
  */
 public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManager {
 
+	@Nullable
 	private net.sf.ehcache.CacheManager cacheManager;
 
 
@@ -57,13 +61,14 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 	/**
 	 * Set the backing EhCache {@link net.sf.ehcache.CacheManager}.
 	 */
-	public void setCacheManager(net.sf.ehcache.CacheManager cacheManager) {
+	public void setCacheManager(@Nullable net.sf.ehcache.CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
 	}
 
 	/**
 	 * Return the backing EhCache {@link net.sf.ehcache.CacheManager}.
 	 */
+	@Nullable
 	public net.sf.ehcache.CacheManager getCacheManager() {
 		return this.cacheManager;
 	}
@@ -79,14 +84,17 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 
 	@Override
 	protected Collection<Cache> loadCaches() {
-		Status status = getCacheManager().getStatus();
+		net.sf.ehcache.CacheManager cacheManager = getCacheManager();
+		Assert.state(cacheManager != null, "No CacheManager set");
+
+		Status status = cacheManager.getStatus();
 		if (!Status.STATUS_ALIVE.equals(status)) {
 			throw new IllegalStateException(
 					"An 'alive' EhCache CacheManager is required - current cache is " + status.toString());
 		}
 
 		String[] names = getCacheManager().getCacheNames();
-		Collection<Cache> caches = new LinkedHashSet<Cache>(names.length);
+		Collection<Cache> caches = new LinkedHashSet<>(names.length);
 		for (String name : names) {
 			caches.add(new EhCacheCache(getCacheManager().getEhcache(name)));
 		}
@@ -95,8 +103,11 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 
 	@Override
 	protected Cache getMissingCache(String name) {
+		net.sf.ehcache.CacheManager cacheManager = getCacheManager();
+		Assert.state(cacheManager != null, "No CacheManager set");
+
 		// Check the EhCache cache again (in case the cache was added at runtime)
-		Ehcache ehcache = getCacheManager().getEhcache(name);
+		Ehcache ehcache = cacheManager.getEhcache(name);
 		if (ehcache != null) {
 			return new EhCacheCache(ehcache);
 		}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,9 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -25,36 +27,70 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerMapping}
- * interface to map from URLs to request handler beans. Supports both mapping to bean
+ * interface that maps from URLs to request handler beans. Supports both mapping to bean
  * instances and mapping to bean names; the latter is required for non-singleton handlers.
  *
  * <p>The "urlMap" property is suitable for populating the handler map with
  * bean references, e.g. via the map element in XML bean definitions.
  *
  * <p>Mappings to bean names can be set via the "mappings" property, in a form
- * accepted by the {@code java.util.Properties} class, like as follows:<br>
- * {@code
- * /welcome.html=ticketController
- * /show.html=ticketController
- * }<br>
- * The syntax is {@code PATH=HANDLER_BEAN_NAME}.
- * If the path doesn't begin with a slash, one is prepended.
+ * accepted by the {@code java.util.Properties} class, as follows:
  *
- * <p>Supports direct matches (given "/test" -> registered "/test") and "*"
- * pattern matches (given "/test" -> registered "/t*"). Note that the default
+ * <pre class="code">
+ * /welcome.html=ticketController
+ * /show.html=ticketController</pre>
+ *
+ * <p>The syntax is {@code PATH=HANDLER_BEAN_NAME}. If the path doesn't begin
+ * with a slash, one is prepended.
+ *
+ * <p>Supports direct matches (given "/test" -&gt; registered "/test") and "*"
+ * pattern matches (given "/test" -&gt; registered "/t*"). Note that the default
  * is to map within the current servlet mapping if applicable; see the
  * {@link #setAlwaysUseFullPath "alwaysUseFullPath"} property. For details on the
  * pattern options, see the {@link org.springframework.util.AntPathMatcher} javadoc.
 
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @see #setMappings
  * @see #setUrlMap
  * @see BeanNameUrlHandlerMapping
  */
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 
-	private final Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> urlMap = new LinkedHashMap<>();
+
+
+	/**
+	 * Create a {@code SimpleUrlHandlerMapping} with default settings.
+	 */
+	public SimpleUrlHandlerMapping() {
+	}
+
+	/**
+	 * Create a {@code SimpleUrlHandlerMapping} using the supplied URL map.
+	 * @param urlMap map with URL paths as keys and handler beans (or handler
+	 * bean names) as values
+	 * @since 5.2
+	 * @see #setUrlMap(Map)
+	 */
+	public SimpleUrlHandlerMapping(Map<String, ?> urlMap) {
+		setUrlMap(urlMap);
+	}
+
+	/**
+	 * Create a {@code SimpleUrlHandlerMapping} using the supplied URL map and order.
+	 * @param urlMap map with URL paths as keys and handler beans (or handler
+	 * bean names) as values
+	 * @param order the order value for this {@code SimpleUrlHandlerMapping}
+	 * @since 5.2
+	 * @see #setUrlMap(Map)
+	 * @see #setOrder(int)
+	 */
+	public SimpleUrlHandlerMapping(Map<String, ?> urlMap, int order) {
+		setUrlMap(urlMap);
+		setOrder(order);
+	}
 
 
 	/**
@@ -105,18 +141,16 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 
 	/**
 	 * Register all handlers specified in the URL map for the corresponding paths.
-	 * @param urlMap Map with URL paths as keys and handler beans or bean names as values
+	 * @param urlMap a Map with URL paths as keys and handler beans or bean names as values
 	 * @throws BeansException if a handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
 	protected void registerHandlers(Map<String, Object> urlMap) throws BeansException {
 		if (urlMap.isEmpty()) {
-			logger.warn("Neither 'urlMap' nor 'mappings' set on SimpleUrlHandlerMapping");
+			logger.trace("No patterns in " + formatMappingName());
 		}
 		else {
-			for (Map.Entry<String, Object> entry : urlMap.entrySet()) {
-				String url = entry.getKey();
-				Object handler = entry.getValue();
+			urlMap.forEach((url, handler) -> {
 				// Prepend with slash if not already present.
 				if (!url.startsWith("/")) {
 					url = "/" + url;
@@ -126,7 +160,32 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 					handler = ((String) handler).trim();
 				}
 				registerHandler(url, handler);
+			});
+			logMappings();
+		}
+	}
+
+	private void logMappings() {
+		if (mappingsLogger.isDebugEnabled()) {
+			Map<String, Object> map = new LinkedHashMap<>(getHandlerMap());
+			if (getRootHandler() != null) {
+				map.put("/", getRootHandler());
 			}
+			if (getDefaultHandler() != null) {
+				map.put("/**", getDefaultHandler());
+			}
+			mappingsLogger.debug(formatMappingName() + " " + map);
+		}
+		else if (logger.isDebugEnabled()) {
+			List<String> patterns = new ArrayList<>();
+			if (getRootHandler() != null) {
+				patterns.add("/");
+			}
+			if (getDefaultHandler() != null) {
+				patterns.add("/**");
+			}
+			patterns.addAll(getHandlerMap().keySet());
+			logger.debug("Patterns " + patterns + " in " + formatMappingName());
 		}
 	}
 

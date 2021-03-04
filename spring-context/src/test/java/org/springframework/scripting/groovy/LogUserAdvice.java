@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.ThrowsAdvice;
+import org.springframework.lang.Nullable;
 
 public class LogUserAdvice implements MethodBeforeAdvice, ThrowsAdvice {
 
@@ -28,7 +29,7 @@ public class LogUserAdvice implements MethodBeforeAdvice, ThrowsAdvice {
 	private int countThrows = 0;
 
 	@Override
-	public void before(Method method, Object[] objects, Object o) throws Throwable {
+	public void before(Method method, Object[] objects, @Nullable Object o) throws Throwable {
 		countBefore++;
 		// System.out.println("Method:" + method.getName());
 	}

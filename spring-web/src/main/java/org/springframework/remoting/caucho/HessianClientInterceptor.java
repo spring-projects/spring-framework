@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,7 @@ import com.caucho.hessian.io.SerializerFactory;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
@@ -44,7 +45,7 @@ import org.springframework.util.Assert;
  *
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
- * <a href="http://www.caucho.com/hessian">Hessian website</a>
+ * <a href="http://hessian.caucho.com">Hessian website</a>
  * <b>Note: As of Spring 4.0, this client requires Hessian 4.0 or above.</b>
  *
  * <p>Note: There is no requirement for services accessed with this proxy factory
@@ -62,11 +63,14 @@ import org.springframework.util.Assert;
  * @see HessianProxyFactoryBean
  * @see com.caucho.hessian.client.HessianProxyFactory
  * @see com.caucho.hessian.server.HessianServlet
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor {
 
 	private HessianProxyFactory proxyFactory = new HessianProxyFactory();
 
+	@Nullable
 	private Object hessianProxy;
 
 
@@ -76,7 +80,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 	 * <p>Allows to use an externally configured factory instance,
 	 * in particular a custom HessianProxyFactory subclass.
 	 */
-	public void setProxyFactory(HessianProxyFactory proxyFactory) {
+	public void setProxyFactory(@Nullable HessianProxyFactory proxyFactory) {
 		this.proxyFactory = (proxyFactory != null ? proxyFactory : new HessianProxyFactory());
 	}
 
@@ -237,6 +241,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 
 
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (this.hessianProxy == null) {
 			throw new IllegalStateException("HessianClientInterceptor is not properly initialized - " +

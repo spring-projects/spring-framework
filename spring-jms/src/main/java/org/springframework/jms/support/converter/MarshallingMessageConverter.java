@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -32,6 +33,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.XmlMappingException;
@@ -46,13 +48,13 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
- * @see org.springframework.jms.core.JmsTemplate#convertAndSend
- * @see org.springframework.jms.core.JmsTemplate#receiveAndConvert
  */
 public class MarshallingMessageConverter implements MessageConverter, InitializingBean {
 
+	@Nullable
 	private Marshaller marshaller;
 
+	@Nullable
 	private Unmarshaller unmarshaller;
 
 	private MessageType targetType = MessageType.BYTES;
@@ -108,6 +110,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	 * Set the {@link Marshaller} to be used by this message converter.
 	 */
 	public void setMarshaller(Marshaller marshaller) {
+		Assert.notNull(marshaller, "Marshaller must not be null");
 		this.marshaller = marshaller;
 	}
 
@@ -115,6 +118,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	 * Set the {@link Unmarshaller} to be used by this message converter.
 	 */
 	public void setUnmarshaller(Unmarshaller unmarshaller) {
+		Assert.notNull(unmarshaller, "Unmarshaller must not be null");
 		this.unmarshaller = unmarshaller;
 	}
 
@@ -148,6 +152,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	 */
 	@Override
 	public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
+		Assert.state(this.marshaller != null, "No Marshaller set");
 		try {
 			switch (this.targetType) {
 				case TEXT:
@@ -158,10 +163,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 					return marshalToMessage(object, session, this.marshaller, this.targetType);
 			}
 		}
-		catch (XmlMappingException ex) {
-			throw new MessageConversionException("Could not marshal [" + object + "]", ex);
-		}
-		catch (IOException ex) {
+		catch (XmlMappingException | IOException ex) {
 			throw new MessageConversionException("Could not marshal [" + object + "]", ex);
 		}
 	}
@@ -173,6 +175,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	 */
 	@Override
 	public Object fromMessage(Message message) throws JMSException, MessageConversionException {
+		Assert.state(this.unmarshaller != null, "No Unmarshaller set");
 		try {
 			if (message instanceof TextMessage) {
 				TextMessage textMessage = (TextMessage) message;
@@ -210,7 +213,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	protected TextMessage marshalToTextMessage(Object object, Session session, Marshaller marshaller)
 			throws JMSException, IOException, XmlMappingException {
 
-		StringWriter writer = new StringWriter();
+		StringWriter writer = new StringWriter(1024);
 		Result result = new StreamResult(writer);
 		marshaller.marshal(object, result);
 		return session.createTextMessage(writer.toString());

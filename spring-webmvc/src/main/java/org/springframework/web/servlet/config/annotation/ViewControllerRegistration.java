@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.config.annotation;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
@@ -44,7 +45,6 @@ public class ViewControllerRegistration {
 
 	/**
 	 * Set the status code to set on the response. Optional.
-	 *
 	 * <p>If not set the response status will be 200 (OK).
 	 */
 	public ViewControllerRegistration setStatusCode(HttpStatus statusCode) {
@@ -54,19 +54,17 @@ public class ViewControllerRegistration {
 
 	/**
 	 * Set the view name to return. Optional.
-	 *
 	 * <p>If not specified, the view controller will return {@code null} as the
 	 * view name in which case the configured {@link RequestToViewNameTranslator}
 	 * will select the view name. The {@code DefaultRequestToViewNameTranslator}
 	 * for example translates "/foo/bar" to "foo/bar".
-	 *
 	 * @see org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator
 	 */
 	public void setViewName(String viewName) {
 		this.controller.setViewName(viewName);
 	}
 
-	protected void setApplicationContext(ApplicationContext applicationContext) {
+	protected void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.controller.setApplicationContext(applicationContext);
 	}
 

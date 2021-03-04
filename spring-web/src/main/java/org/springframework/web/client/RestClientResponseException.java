@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,24 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.client;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 
 /**
- * Abstract base class for exceptions that contain actual HTTP response data.
+ * Common base class for exceptions that contain actual HTTP response data.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
  */
-public abstract class RestClientResponseException extends RestClientException {
+public class RestClientResponseException extends RestClientException {
 
 	private static final long serialVersionUID = -8803556342728481792L;
 
-	private static final String DEFAULT_CHARSET = "ISO-8859-1";
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
 	private final int rawStatusCode;
@@ -39,8 +42,10 @@ public abstract class RestClientResponseException extends RestClientException {
 
 	private final byte[] responseBody;
 
+	@Nullable
 	private final HttpHeaders responseHeaders;
 
+	@Nullable
 	private final String responseCharset;
 
 
@@ -53,14 +58,14 @@ public abstract class RestClientResponseException extends RestClientException {
 	 * @param responseCharset the response body charset (may be {@code null})
 	 */
 	public RestClientResponseException(String message, int statusCode, String statusText,
-			HttpHeaders responseHeaders, byte[] responseBody, Charset responseCharset) {
+			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
 		super(message);
 		this.rawStatusCode = statusCode;
 		this.statusText = statusText;
 		this.responseHeaders = responseHeaders;
 		this.responseBody = (responseBody != null ? responseBody : new byte[0]);
-		this.responseCharset = (responseCharset != null ? responseCharset.name() : DEFAULT_CHARSET);
+		this.responseCharset = (responseCharset != null ? responseCharset.name() : null);
 	}
 
 
@@ -81,6 +86,7 @@ public abstract class RestClientResponseException extends RestClientException {
 	/**
 	 * Return the HTTP response headers.
 	 */
+	@Nullable
 	public HttpHeaders getResponseHeaders() {
 		return this.responseHeaders;
 	}
@@ -93,9 +99,23 @@ public abstract class RestClientResponseException extends RestClientException {
 	}
 
 	/**
-	 * Return the response body as a string.
+	 * Return the response body converted to String. The charset used is that
+	 * of the response "Content-Type" or otherwise {@code "UTF-8"}.
 	 */
 	public String getResponseBodyAsString() {
+		return getResponseBodyAsString(DEFAULT_CHARSET);
+	}
+
+	/**
+	 * Return the response body converted to String. The charset used is that
+	 * of the response "Content-Type" or otherwise the one given.
+	 * @param fallbackCharset the charset to use on if the response doesn't specify.
+	 * @since 5.1.11
+	 */
+	public String getResponseBodyAsString(Charset fallbackCharset) {
+		if (this.responseCharset == null) {
+			return new String(this.responseBody, fallbackCharset);
+		}
 		try {
 			return new String(this.responseBody, this.responseCharset);
 		}

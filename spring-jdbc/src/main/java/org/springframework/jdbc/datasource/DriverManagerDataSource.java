@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,7 +34,7 @@ import org.springframework.util.ClassUtils;
  * connection pool, implementing the same standard interface, but creating new
  * Connections on every call.
  *
- * <p>Useful for test or standalone environments outside of a J2EE container, either
+ * <p>Useful for test or standalone environments outside of a Java EE container, either
  * as a DataSource bean in a corresponding ApplicationContext or in conjunction with
  * a simple JNDI environment. Pool-assuming {@code Connection.close()} calls will
  * simply close the Connection, so any DataSource-aware persistence code should work.
@@ -44,7 +44,7 @@ import org.springframework.util.ClassUtils;
  * loading issues with the JDBC DriverManager that be resolved through direct Driver
  * usage (which is exactly what SimpleDriverDataSource does).</b>
  *
- * <p>In a J2EE container, it is recommended to use a JNDI DataSource provided by
+ * <p>In a Java EE container, it is recommended to use a JNDI DataSource provided by
  * the container. Such a DataSource can be exposed as a DataSource bean in a Spring
  * ApplicationContext via {@link org.springframework.jndi.JndiObjectFactoryBean},
  * for seamless switching to and from a local DataSource bean like this class.
@@ -52,12 +52,13 @@ import org.springframework.util.ClassUtils;
  * {@link org.springframework.mock.jndi.SimpleNamingContextBuilder}, or switch the
  * bean definition to a local DataSource (which is simpler and thus recommended).
  *
- * <p>If you need a "real" connection pool outside of a J2EE container, consider
- * <a href="http://commons.apache.org/proper/commons-dbcp">Apache Commons DBCP</a>
- * or <a href="http://sourceforge.net/projects/c3p0">C3P0</a>.
- * Commons DBCP's BasicDataSource and C3P0's ComboPooledDataSource are full
- * connection pool beans, supporting the same basic properties as this class
- * plus specific settings (such as minimal/maximal pool size etc).
+ * <p>This {@code DriverManagerDataSource} class was originally designed alongside
+ * <a href="https://commons.apache.org/proper/commons-dbcp">Apache Commons DBCP</a>
+ * and <a href="https://sourceforge.net/projects/c3p0">C3P0</a>, featuring bean-style
+ * {@code BasicDataSource}/{@code ComboPooledDataSource} classes with configuration
+ * properties for local resource setups. For a modern JDBC connection pool, consider
+ * <a href="https://github.com/brettwooldridge/HikariCP">HikariCP</a> instead,
+ * exposing a corresponding {@code HikariDataSource} instance to the application.
  *
  * @author Juergen Hoeller
  * @since 14.03.2003
@@ -99,7 +100,7 @@ public class DriverManagerDataSource extends AbstractDriverBasedDataSource {
 	 * Create a new DriverManagerDataSource with the given JDBC URL,
 	 * not specifying a username or password for JDBC access.
 	 * @param url the JDBC URL to use for accessing the DriverManager
-	 * @param conProps JDBC connection properties
+	 * @param conProps the JDBC connection properties
 	 * @see java.sql.DriverManager#getConnection(String)
 	 */
 	public DriverManagerDataSource(String url, Properties conProps) {
@@ -129,8 +130,8 @@ public class DriverManagerDataSource extends AbstractDriverBasedDataSource {
 		catch (ClassNotFoundException ex) {
 			throw new IllegalStateException("Could not load JDBC driver class [" + driverClassNameToUse + "]", ex);
 		}
-		if (logger.isInfoEnabled()) {
-			logger.info("Loaded JDBC driver: " + driverClassNameToUse);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Loaded JDBC driver: " + driverClassNameToUse);
 		}
 	}
 
@@ -138,6 +139,7 @@ public class DriverManagerDataSource extends AbstractDriverBasedDataSource {
 	@Override
 	protected Connection getConnectionFromDriver(Properties props) throws SQLException {
 		String url = getUrl();
+		Assert.state(url != null, "'url' not set");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating new JDBC DriverManager Connection to [" + url + "]");
 		}

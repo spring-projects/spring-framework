@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,13 +31,13 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
+import org.springframework.lang.Nullable;
 
 /**
- * {@link ClientHttpRequest} implementation that uses Apache HttpComponents
- * HttpClient to execute requests.
+ * {@link ClientHttpRequest} implementation based on
+ * Apache HttpComponents HttpClient in streaming mode.
  *
  * <p>Created via the {@link HttpComponentsClientHttpRequestFactory}.
  *
@@ -45,7 +45,8 @@ import org.springframework.http.StreamingHttpOutputMessage;
  * @since 4.0
  * @see HttpComponentsClientHttpRequestFactory#createRequest(java.net.URI, org.springframework.http.HttpMethod)
  */
-final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpRequest implements StreamingHttpOutputMessage {
+final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpRequest
+		implements StreamingHttpOutputMessage {
 
 	private final HttpClient httpClient;
 
@@ -53,19 +54,20 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 
 	private final HttpContext httpContext;
 
+	@Nullable
 	private Body body;
 
 
-	HttpComponentsStreamingClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
-		this.httpClient = httpClient;
-		this.httpRequest = httpRequest;
-		this.httpContext = httpContext;
+	HttpComponentsStreamingClientHttpRequest(HttpClient client, HttpUriRequest request, HttpContext context) {
+		this.httpClient = client;
+		this.httpRequest = request;
+		this.httpContext = context;
 	}
 
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.httpRequest.getMethod());
+	public String getMethodValue() {
+		return this.httpRequest.getMethod();
 	}
 
 	@Override
@@ -88,9 +90,9 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 	protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
 		HttpComponentsClientHttpRequest.addHeaders(this.httpRequest, headers);
 
-		if (this.httpRequest instanceof HttpEntityEnclosingRequest && body != null) {
+		if (this.httpRequest instanceof HttpEntityEnclosingRequest && this.body != null) {
 			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) this.httpRequest;
-			HttpEntity requestEntity = new StreamingHttpEntity(getHeaders(), body);
+			HttpEntity requestEntity = new StreamingHttpEntity(getHeaders(), this.body);
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 
@@ -126,12 +128,14 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 		}
 
 		@Override
+		@Nullable
 		public Header getContentType() {
 			MediaType contentType = this.headers.getContentType();
 			return (contentType != null ? new BasicHeader("Content-Type", contentType.toString()) : null);
 		}
 
 		@Override
+		@Nullable
 		public Header getContentEncoding() {
 			String contentEncoding = this.headers.getFirst("Content-Encoding");
 			return (contentEncoding != null ? new BasicHeader("Content-Encoding", contentEncoding) : null);

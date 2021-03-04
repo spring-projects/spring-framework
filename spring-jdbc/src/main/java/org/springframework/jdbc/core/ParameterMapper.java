@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,17 +30,18 @@ import java.util.Map;
  * @see CallableStatementCreatorFactory#newCallableStatementCreator(ParameterMapper)
  * @see org.springframework.jdbc.object.StoredProcedure#execute(ParameterMapper)
  */
+@FunctionalInterface
 public interface ParameterMapper {
 
 	/**
 	 * Create a Map of input parameters, keyed by name.
-	 * @param con JDBC connection. This is useful (and the purpose of this interface)
+	 * @param con a JDBC connection. This is useful (and the purpose of this interface)
 	 * if we need to do something RDBMS-specific with a proprietary Connection
 	 * implementation class. This class conceals such proprietary details. However,
 	 * it is best to avoid using such proprietary RDBMS features if possible.
-	 * @throws SQLException if a SQLException is encountered setting
+	 * @return a Map of input parameters, keyed by name (never {@code null})
+	 * @throws SQLException if an SQLException is encountered setting
 	 * parameter values (that is, there's no need to catch SQLException)
-	 * @return Map of input parameters, keyed by name (never {@code null})
 	 */
 	Map<String, ?> createMap(Connection con) throws SQLException;
 

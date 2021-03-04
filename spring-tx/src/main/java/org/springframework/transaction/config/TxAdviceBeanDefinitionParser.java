@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.transaction.config;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.w3c.dom.Element;
@@ -96,7 +96,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 	private RootBeanDefinition parseAttributeSource(Element attrEle, ParserContext parserContext) {
 		List<Element> methods = DomUtils.getChildElementsByTagName(attrEle, METHOD_ELEMENT);
 		ManagedMap<TypedStringValue, RuleBasedTransactionAttribute> transactionAttributeMap =
-			new ManagedMap<TypedStringValue, RuleBasedTransactionAttribute>(methods.size());
+				new ManagedMap<>(methods.size());
 		transactionAttributeMap.setSource(parserContext.extractSource(attrEle));
 
 		for (Element methodEle : methods) {
@@ -116,25 +116,20 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 				attribute.setIsolationLevelName(RuleBasedTransactionAttribute.PREFIX_ISOLATION + isolation);
 			}
 			if (StringUtils.hasText(timeout)) {
-				try {
-					attribute.setTimeout(Integer.parseInt(timeout));
-				}
-				catch (NumberFormatException ex) {
-					parserContext.getReaderContext().error("Timeout must be an integer value: [" + timeout + "]", methodEle);
-				}
+				attribute.setTimeoutString(timeout);
 			}
 			if (StringUtils.hasText(readOnly)) {
-				attribute.setReadOnly(Boolean.valueOf(methodEle.getAttribute(READ_ONLY_ATTRIBUTE)));
+				attribute.setReadOnly(Boolean.parseBoolean(methodEle.getAttribute(READ_ONLY_ATTRIBUTE)));
 			}
 
-			List<RollbackRuleAttribute> rollbackRules = new LinkedList<RollbackRuleAttribute>();
+			List<RollbackRuleAttribute> rollbackRules = new ArrayList<>(1);
 			if (methodEle.hasAttribute(ROLLBACK_FOR_ATTRIBUTE)) {
 				String rollbackForValue = methodEle.getAttribute(ROLLBACK_FOR_ATTRIBUTE);
-				addRollbackRuleAttributesTo(rollbackRules,rollbackForValue);
+				addRollbackRuleAttributesTo(rollbackRules, rollbackForValue);
 			}
 			if (methodEle.hasAttribute(NO_ROLLBACK_FOR_ATTRIBUTE)) {
 				String noRollbackForValue = methodEle.getAttribute(NO_ROLLBACK_FOR_ATTRIBUTE);
-				addNoRollbackRuleAttributesTo(rollbackRules,noRollbackForValue);
+				addNoRollbackRuleAttributesTo(rollbackRules, noRollbackForValue);
 			}
 			attribute.setRollbackRules(rollbackRules);
 

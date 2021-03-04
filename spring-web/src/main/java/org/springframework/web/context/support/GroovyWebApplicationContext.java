@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,11 +28,12 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.web.context.WebApplicationContext} implementation which takes
  * its configuration from Groovy bean definition scripts and/or XML files, as understood by
- * an {@link org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader}.
+ * a {@link org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader}.
  * This is essentially the equivalent of
  * {@link org.springframework.context.support.GenericGroovyApplicationContext}
  * for a web environment.
@@ -68,13 +69,13 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
  */
 public class GroovyWebApplicationContext extends AbstractRefreshableWebApplicationContext implements GroovyObject {
 
-	/** Default config location for the root context */
+	/** Default config location for the root context. */
 	public static final String DEFAULT_CONFIG_LOCATION = "/WEB-INF/applicationContext.groovy";
 
-	/** Default prefix for building a config location for a namespace */
+	/** Default prefix for building a config location for a namespace. */
 	public static final String DEFAULT_CONFIG_LOCATION_PREFIX = "/WEB-INF/";
 
-	/** Default suffix for building a config location for a namespace */
+	/** Default suffix for building a config location for a namespace. */
 	public static final String DEFAULT_CONFIG_LOCATION_SUFFIX = ".groovy";
 
 
@@ -153,22 +154,28 @@ public class GroovyWebApplicationContext extends AbstractRefreshableWebApplicati
 
 	// Implementation of the GroovyObject interface
 
+	@Override
 	public void setMetaClass(MetaClass metaClass) {
 		this.metaClass = metaClass;
 	}
 
+	@Override
 	public MetaClass getMetaClass() {
 		return this.metaClass;
 	}
 
+	@Override
 	public Object invokeMethod(String name, Object args) {
 		return this.metaClass.invokeMethod(this, name, args);
 	}
 
+	@Override
 	public void setProperty(String property, Object newValue) {
 		this.metaClass.setProperty(this, property, newValue);
 	}
 
+	@Override
+	@Nullable
 	public Object getProperty(String property) {
 		if (containsBean(property)) {
 			return getBean(property);

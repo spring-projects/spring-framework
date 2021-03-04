@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -41,15 +42,21 @@ import org.springframework.util.StringUtils;
  * @see #setStyle
  * @see #setIso
  * @see DateTimeFormatterFactoryBean
+ * @deprecated as of 5.3, in favor of standard JSR-310 support
  */
+@Deprecated
 public class DateTimeFormatterFactory {
 
+	@Nullable
 	private String pattern;
 
+	@Nullable
 	private ISO iso;
 
+	@Nullable
 	private String style;
 
+	@Nullable
 	private TimeZone timeZone;
 
 
@@ -125,8 +132,8 @@ public class DateTimeFormatterFactory {
 	 * Create a new {@code DateTimeFormatter} using this factory.
 	 * <p>If no specific pattern or style has been defined,
 	 * the supplied {@code fallbackFormatter} will be used.
-	 * @param fallbackFormatter the fall-back formatter to use when no specific
-	 * factory properties have been set (can be {@code null}).
+	 * @param fallbackFormatter the fall-back formatter to use
+	 * when no specific factory properties have been set
 	 * @return a new date time formatter
 	 */
 	public DateTimeFormatter createDateTimeFormatter(DateTimeFormatter fallbackFormatter) {
@@ -144,9 +151,6 @@ public class DateTimeFormatterFactory {
 					break;
 				case DATE_TIME:
 					dateTimeFormatter = ISODateTimeFormat.dateTime();
-					break;
-				case NONE:
-					/* no-op */
 					break;
 				default:
 					throw new IllegalStateException("Unsupported ISO format: " + this.iso);

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,7 +42,7 @@ import java.lang.annotation.Target;
  * the one for the child context (i.e., the lowest context in the hierarchy).
  *
  * <pre class="code">
- * &#064;RunWith(SpringJUnit4ClassRunner.class)
+ * &#064;RunWith(SpringRunner.class)
  * &#064;WebAppConfiguration
  * &#064;ContextHierarchy({
  *     &#064;ContextConfiguration(classes = TestAppConfig.class),
@@ -71,15 +71,15 @@ import java.lang.annotation.Target;
  * the parent context for each of the contexts loaded for the concrete subclasses.
  *
  * <pre class="code">
- * &#064;RunWith(SpringJUnit4ClassRunner.class)
+ * &#064;RunWith(SpringRunner.class)
  * &#064;WebAppConfiguration
  * &#064;ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
  * public abstract class AbstractWebTests {}
  *
- * &#064;ContextHierarchy(&#064;ContextConfiguration("/spring/soap-ws-config.xml")
+ * &#064;ContextHierarchy(&#064;ContextConfiguration("/spring/soap-ws-config.xml"))
  * public class SoapWebServiceTests extends AbstractWebTests {}
  *
- * &#064;ContextHierarchy(&#064;ContextConfiguration("/spring/rest-ws-config.xml")
+ * &#064;ContextHierarchy(&#064;ContextConfiguration("/spring/rest-ws-config.xml"))
  * public class RestWebServiceTests extends AbstractWebTests {}</pre>
  *
  * <h4>Class Hierarchy with Merged Context Hierarchy Configuration</h4>
@@ -98,7 +98,7 @@ import java.lang.annotation.Target;
  * "/order-config.xml"}</code>.
  *
  * <pre class="code">
- * &#064;RunWith(SpringJUnit4ClassRunner.class)
+ * &#064;RunWith(SpringRunner.class)
  * &#064;ContextHierarchy({
  *     &#064;ContextConfiguration(name = "parent", locations = "/app-config.xml"),
  *     &#064;ContextConfiguration(name = "child",  locations = "/user-config.xml")
@@ -119,7 +119,7 @@ import java.lang.annotation.Target;
  * context loaded from {@code "/app-config.xml"}.
  *
  * <pre class="code">
- * &#064;RunWith(SpringJUnit4ClassRunner.class)
+ * &#064;RunWith(SpringRunner.class)
  * &#064;ContextHierarchy({
  *     &#064;ContextConfiguration(name = "parent", locations = "/app-config.xml"),
  *     &#064;ContextConfiguration(name = "child",  locations = "/user-config.xml")
@@ -127,22 +127,26 @@ import java.lang.annotation.Target;
  * public class BaseTests {}
  *
  * &#064;ContextHierarchy(
- *     &#064;ContextConfiguration(name = "child",  locations = "/test-user-config.xml", inheritLocations=false)
+ *     &#064;ContextConfiguration(name = "child",  locations = "/test-user-config.xml", inheritLocations = false)
  * )
  * public class ExtendedTests extends BaseTests {}</pre>
  *
- * <p>As of Spring Framework 4.0, this annotation may be used as a
- * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em>.
+ *
+ * <p>As of Spring Framework 5.3, this annotation will be inherited from an
+ * enclosing test class by default. See
+ * {@link NestedTestConfiguration @NestedTestConfiguration} for details.
  *
  * @author Sam Brannen
  * @since 3.2.2
  * @see ContextConfiguration
  * @see org.springframework.context.ApplicationContext
  */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
 public @interface ContextHierarchy {
 
 	/**

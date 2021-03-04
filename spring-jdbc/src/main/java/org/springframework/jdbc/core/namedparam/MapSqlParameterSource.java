@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link SqlParameterSource} implementation that holds a given Map of parameters.
@@ -43,7 +46,7 @@ import org.springframework.util.Assert;
  */
 public class MapSqlParameterSource extends AbstractSqlParameterSource {
 
-	private final Map<String, Object> values = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> values = new LinkedHashMap<>();
 
 
 	/**
@@ -61,7 +64,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	 * @param value the value of the parameter
 	 * @see #addValue(String, Object)
 	 */
-	public MapSqlParameterSource(String paramName, Object value) {
+	public MapSqlParameterSource(String paramName, @Nullable Object value) {
 		addValue(paramName, value);
 	}
 
@@ -69,7 +72,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	 * Create a new MapSqlParameterSource based on a Map.
 	 * @param values a Map holding existing parameter values (can be {@code null})
 	 */
-	public MapSqlParameterSource(Map<String, ?> values) {
+	public MapSqlParameterSource(@Nullable Map<String, ?> values) {
 		addValues(values);
 	}
 
@@ -81,7 +84,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	 * @return a reference to this parameter source,
 	 * so it's possible to chain several calls together
 	 */
-	public MapSqlParameterSource addValue(String paramName, Object value) {
+	public MapSqlParameterSource addValue(String paramName, @Nullable Object value) {
 		Assert.notNull(paramName, "Parameter name must not be null");
 		this.values.put(paramName, value);
 		if (value instanceof SqlParameterValue) {
@@ -98,7 +101,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	 * @return a reference to this parameter source,
 	 * so it's possible to chain several calls together
 	 */
-	public MapSqlParameterSource addValue(String paramName, Object value, int sqlType) {
+	public MapSqlParameterSource addValue(String paramName, @Nullable Object value, int sqlType) {
 		Assert.notNull(paramName, "Parameter name must not be null");
 		this.values.put(paramName, value);
 		registerSqlType(paramName, sqlType);
@@ -114,7 +117,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	 * @return a reference to this parameter source,
 	 * so it's possible to chain several calls together
 	 */
-	public MapSqlParameterSource addValue(String paramName, Object value, int sqlType, String typeName) {
+	public MapSqlParameterSource addValue(String paramName, @Nullable Object value, int sqlType, String typeName) {
 		Assert.notNull(paramName, "Parameter name must not be null");
 		this.values.put(paramName, value);
 		registerSqlType(paramName, sqlType);
@@ -128,15 +131,14 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	 * @return a reference to this parameter source,
 	 * so it's possible to chain several calls together
 	 */
-	public MapSqlParameterSource addValues(Map<String, ?> values) {
+	public MapSqlParameterSource addValues(@Nullable Map<String, ?> values) {
 		if (values != null) {
-			for (Map.Entry<String, ?> entry : values.entrySet()) {
-				this.values.put(entry.getKey(), entry.getValue());
-				if (entry.getValue() instanceof SqlParameterValue) {
-					SqlParameterValue value = (SqlParameterValue) entry.getValue();
-					registerSqlType(entry.getKey(), value.getSqlType());
+			values.forEach((key, value) -> {
+				this.values.put(key, value);
+				if (value instanceof SqlParameterValue) {
+					registerSqlType(key, ((SqlParameterValue) value).getSqlType());
 				}
-			}
+			});
 		}
 		return this;
 	}
@@ -155,11 +157,18 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	}
 
 	@Override
+	@Nullable
 	public Object getValue(String paramName) {
 		if (!hasValue(paramName)) {
 			throw new IllegalArgumentException("No value registered for key '" + paramName + "'");
 		}
 		return this.values.get(paramName);
+	}
+
+	@Override
+	@NonNull
+	public String[] getParameterNames() {
+		return StringUtils.toStringArray(this.values.keySet());
 	}
 
 }

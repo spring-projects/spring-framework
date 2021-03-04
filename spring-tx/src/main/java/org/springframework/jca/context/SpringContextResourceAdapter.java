@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,11 +33,12 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * JCA 1.5 {@link javax.resource.spi.ResourceAdapter} implementation
+ * JCA 1.7 {@link javax.resource.spi.ResourceAdapter} implementation
  * that loads a Spring {@link org.springframework.context.ApplicationContext},
  * starting and stopping Spring-managed beans as part of the ResourceAdapter's
  * lifecycle.
@@ -64,13 +65,13 @@ import org.springframework.util.StringUtils;
  * to such components.
  *
  * <p>This ResourceAdapter is to be defined in a "META-INF/ra.xml" file
- * within a J2EE ".rar" deployment unit like as follows:
+ * within a Java EE ".rar" deployment unit like as follows:
  *
  * <pre class="code">
  * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
  * &lt;connector xmlns="http://java.sun.com/xml/ns/j2ee"
  *		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- *		 xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/connector_1_5.xsd"
+ *		 xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee https://java.sun.com/xml/ns/j2ee/connector_1_5.xsd"
  *		 version="1.5"&gt;
  *	 &lt;vendor-name&gt;Spring Framework&lt;/vendor-name&gt;
  *	 &lt;eis-type&gt;Spring Connector&lt;/eis-type&gt;
@@ -114,6 +115,9 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 */
 	public static final String CONFIG_LOCATION_DELIMITERS = ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS;
 
+	/**
+	 * The default {@code applicationContext.xml} location.
+	 */
 	public static final String DEFAULT_CONTEXT_CONFIG_LOCATION = "META-INF/applicationContext.xml";
 
 
@@ -121,6 +125,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 
 	private String contextConfigLocation = DEFAULT_CONTEXT_CONFIG_LOCATION;
 
+	@Nullable
 	private ConfigurableApplicationContext applicationContext;
 
 
@@ -159,8 +164,8 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 */
 	@Override
 	public void start(BootstrapContext bootstrapContext) throws ResourceAdapterInternalException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Starting SpringContextResourceAdapter with BootstrapContext: " + bootstrapContext);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Starting SpringContextResourceAdapter with BootstrapContext: " + bootstrapContext);
 		}
 		this.applicationContext = createApplicationContext(bootstrapContext);
 	}
@@ -176,15 +181,17 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	protected ConfigurableApplicationContext createApplicationContext(BootstrapContext bootstrapContext) {
 		ResourceAdapterApplicationContext applicationContext =
 				new ResourceAdapterApplicationContext(bootstrapContext);
+
 		// Set ResourceAdapter's ClassLoader as bean class loader.
 		applicationContext.setClassLoader(getClass().getClassLoader());
+
 		// Extract individual config locations.
 		String[] configLocations =
 				StringUtils.tokenizeToStringArray(getContextConfigLocation(), CONFIG_LOCATION_DELIMITERS);
-		if (configLocations != null) {
-			loadBeanDefinitions(applicationContext, configLocations);
-		}
+
+		loadBeanDefinitions(applicationContext, configLocations);
 		applicationContext.refresh();
+
 		return applicationContext;
 	}
 
@@ -204,8 +211,10 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 */
 	@Override
 	public void stop() {
-		logger.info("Stopping SpringContextResourceAdapter");
-		this.applicationContext.close();
+		logger.debug("Stopping SpringContextResourceAdapter");
+		if (this.applicationContext != null) {
+			this.applicationContext.close();
+		}
 	}
 
 
@@ -230,16 +239,17 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 * This implementation always returns {@code null}.
 	 */
 	@Override
+	@Nullable
 	public XAResource[] getXAResources(ActivationSpec[] activationSpecs) throws ResourceException {
 		return null;
 	}
 
 
 	@Override
-	public boolean equals(Object obj) {
-		return (obj instanceof SpringContextResourceAdapter &&
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof SpringContextResourceAdapter &&
 				ObjectUtils.nullSafeEquals(getContextConfigLocation(),
-						((SpringContextResourceAdapter) obj).getContextConfigLocation()));
+						((SpringContextResourceAdapter) other).getContextConfigLocation())));
 	}
 
 	@Override

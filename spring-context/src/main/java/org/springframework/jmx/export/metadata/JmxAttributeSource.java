@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,8 @@
 package org.springframework.jmx.export.metadata;
 
 import java.lang.reflect.Method;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Interface used by the {@code MetadataMBeanInfoAssembler} to
@@ -38,6 +40,7 @@ public interface JmxAttributeSource {
 	 * @return the attribute, or {@code null} if not found
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
+	@Nullable
 	ManagedResource getManagedResource(Class<?> clazz) throws InvalidMetadataException;
 
 	/**
@@ -48,6 +51,7 @@ public interface JmxAttributeSource {
 	 * @return the attribute, or {@code null} if not found
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
+	@Nullable
 	ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException;
 
 	/**
@@ -58,6 +62,7 @@ public interface JmxAttributeSource {
 	 * @return the metric, or {@code null} if not found
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
+	@Nullable
 	ManagedMetric getManagedMetric(Method method) throws InvalidMetadataException;
 
 	/**
@@ -68,6 +73,7 @@ public interface JmxAttributeSource {
 	 * @return the attribute, or {@code null} if not found
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
+	@Nullable
 	ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException;
 
 	/**

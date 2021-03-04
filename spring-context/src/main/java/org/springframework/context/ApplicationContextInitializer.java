@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,16 +28,18 @@ package org.springframework.context;
  *
  * <p>{@code ApplicationContextInitializer} processors are encouraged to detect
  * whether Spring's {@link org.springframework.core.Ordered Ordered} interface has been
- * implemented or if the @{@link org.springframework.core.annotation.Order Order}
+ * implemented or if the {@link org.springframework.core.annotation.Order @Order}
  * annotation is present and to sort instances accordingly if so prior to invocation.
  *
  * @author Chris Beams
  * @since 3.1
+ * @param <C> the application context type
  * @see org.springframework.web.context.ContextLoader#customizeContext
  * @see org.springframework.web.context.ContextLoader#CONTEXT_INITIALIZER_CLASSES_PARAM
  * @see org.springframework.web.servlet.FrameworkServlet#setContextInitializerClasses
  * @see org.springframework.web.servlet.FrameworkServlet#applyInitializers
  */
+@FunctionalInterface
 public interface ApplicationContextInitializer<C extends ConfigurableApplicationContext> {
 
 	/**

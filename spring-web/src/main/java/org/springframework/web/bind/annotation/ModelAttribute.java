@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -77,12 +77,12 @@ public @interface ModelAttribute {
 	String name() default "";
 
 	/**
-	 * Allows declaring data binding disabled directly on an
-	 * {@code @ModelAttribute} method parameter or on the attribute returned from
-	 * an {@code @ModelAttribute} method, both of which would prevent data
-	 * binding for that attribute.
-	 * <p>By default this is set to "true" in which case data binding applies.
-	 * Set this to "false" to disable data binding.
+	 * Allows declaring data binding disabled directly on an {@code @ModelAttribute}
+	 * method parameter or on the attribute returned from an {@code @ModelAttribute}
+	 * method, both of which would prevent data binding for that attribute.
+	 * <p>By default this is set to {@code true} in which case data binding applies.
+	 * Set this to {@code false} to disable data binding.
+	 * @since 4.3
 	 */
 	boolean binding() default true;
 

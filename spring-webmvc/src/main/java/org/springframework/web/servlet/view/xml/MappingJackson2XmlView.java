@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,13 +22,15 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.json.AbstractJackson2View;
 
 /**
  * Spring MVC {@link View} that renders XML content by serializing the model for the current request
- * using <a href="http://wiki.fasterxml.com/JacksonHome">Jackson 2's</a> {@link XmlMapper}.
+ * using <a href="https://github.com/FasterXML/jackson">Jackson 2's</a> {@link XmlMapper}.
  *
  * <p>The Object to be serialized is supplied as a parameter in the model. The first serializable
  * entry is used. Users can either specify a specific entry in the model via the
@@ -36,16 +38,21 @@ import org.springframework.web.servlet.view.json.AbstractJackson2View;
  *
  * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
  *
- * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
+ * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
  *
  * @author Sebastien Deleuze
  * @since 4.1
+ * @see org.springframework.web.servlet.view.json.MappingJackson2JsonView
  */
 public class MappingJackson2XmlView extends AbstractJackson2View {
 
+	/**
+	 * The default content type for the view.
+	 */
 	public static final String DEFAULT_CONTENT_TYPE = "application/xml";
 
 
+	@Nullable
 	private String modelKey;
 
 
@@ -67,20 +74,12 @@ public class MappingJackson2XmlView extends AbstractJackson2View {
 		super(xmlMapper, DEFAULT_CONTENT_TYPE);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+
 	@Override
 	public void setModelKey(String modelKey) {
 		this.modelKey = modelKey;
 	}
 
-	/**
-	 * Filter out undesired attributes from the given model.
-	 * The return value can be either another {@link Map} or a single value object.
-	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
-	 * @return the value to be rendered
-	 */
 	@Override
 	protected Object filterModel(Map<String, Object> model) {
 		Object value = null;
@@ -101,6 +100,7 @@ public class MappingJackson2XmlView extends AbstractJackson2View {
 				}
 			}
 		}
+		Assert.state(value != null, "Model contains no object to render");
 		return value;
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,10 +17,10 @@
 package org.springframework.beans.factory;
 
 /**
- * Counterpart of BeanNameAware. Returns the bean name of an object.
+ * Counterpart of {@link BeanNameAware}. Returns the bean name of an object.
  *
- * <p>This interface can be introduced to avoid a brittle dependence
- * on bean name in objects used with Spring IoC and Spring AOP.
+ * <p>This interface can be introduced to avoid a brittle dependence on
+ * bean name in objects used with Spring IoC and Spring AOP.
  *
  * @author Rod Johnson
  * @since 2.0
@@ -29,7 +29,7 @@ package org.springframework.beans.factory;
 public interface NamedBean {
 
 	/**
-	 * Return the name of this bean in a Spring bean factory.
+	 * Return the name of this bean in a Spring bean factory, if known.
 	 */
 	String getBeanName();
 

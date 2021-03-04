@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,13 @@
 
 package org.springframework.web.servlet.view;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
+import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -70,14 +72,12 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 
 	private boolean stripExtension = true;
 
-	private UrlPathHelper urlPathHelper = new UrlPathHelper();
-
 
 	/**
 	 * Set the prefix to prepend to generated view names.
 	 * @param prefix the prefix to prepend to generated view names
 	 */
-	public void setPrefix(String prefix) {
+	public void setPrefix(@Nullable String prefix) {
 		this.prefix = (prefix != null ? prefix : "");
 	}
 
@@ -85,7 +85,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * Set the suffix to append to generated view names.
 	 * @param suffix the suffix to append to generated view names
 	 */
-	public void setSuffix(String suffix) {
+	public void setSuffix(@Nullable String suffix) {
 		this.suffix = (suffix != null ? suffix : "");
 	}
 
@@ -123,34 +123,33 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Set if URL lookup should always use the full path within the current servlet
-	 * context. Else, the path within the current servlet mapping is used
-	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
-	 * Default is "false".
+	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
 	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
+	 * @deprecated as of 5.3, the path is resolved externally and obtained with
+	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
 	 */
+	@Deprecated
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
-		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
 	}
 
 	/**
-	 * Set if the context path and request URI should be URL-decoded.
-	 * Both are returned <i>undecoded</i> by the Servlet API,
-	 * in contrast to the servlet path.
-	 * <p>Uses either the request encoding or the default encoding according
-	 * to the Servlet spec (ISO-8859-1).
+	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
 	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
+	 * @deprecated as of 5.3, the path is resolved externally and obtained with
+	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
 	 */
+	@Deprecated
 	public void setUrlDecode(boolean urlDecode) {
-		this.urlPathHelper.setUrlDecode(urlDecode);
 	}
 
 	/**
 	 * Set if ";" (semicolon) content should be stripped from the request URI.
 	 * @see org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)
+	 * @deprecated as of 5.3, the path is resolved externally and obtained with
+	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
 	 */
+	@Deprecated
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
-		this.urlPathHelper.setRemoveSemicolonContent(removeSemicolonContent);
 	}
 
 	/**
@@ -158,23 +157,26 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * the resolution of lookup paths.
 	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
 	 * or to share common UrlPathHelper settings across multiple web components.
+	 * @deprecated as of 5.3, the path is resolved externally and obtained with
+	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
 	 */
+	@Deprecated
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
-		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
-		this.urlPathHelper = urlPathHelper;
 	}
 
 
 	/**
 	 * Translates the request URI of the incoming {@link HttpServletRequest}
 	 * into the view name based on the configured parameters.
-	 * @see org.springframework.web.util.UrlPathHelper#getLookupPathForRequest
+	 * @see ServletRequestPathUtils#getCachedPath(ServletRequest)
 	 * @see #transformPath
+	 * @throws IllegalArgumentException if neither a parsed RequestPath, nor a
+	 * String lookupPath have been resolved and cached as a request attribute.
 	 */
 	@Override
 	public String getViewName(HttpServletRequest request) {
-		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
-		return (this.prefix + transformPath(lookupPath) + this.suffix);
+		String path = ServletRequestPathUtils.getCachedPathValue(request);
+		return (this.prefix + transformPath(path) + this.suffix);
 	}
 
 	/**
@@ -185,6 +187,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * @return the transformed path, with slashes and extensions stripped
 	 * if desired
 	 */
+	@Nullable
 	protected String transformPath(String lookupPath) {
 		String path = lookupPath;
 		if (this.stripLeadingSlash && path.startsWith(SLASH)) {

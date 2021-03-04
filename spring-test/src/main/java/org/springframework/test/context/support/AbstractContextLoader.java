@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +33,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfigurationAttributes;
+import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
@@ -56,10 +57,13 @@ import org.springframework.util.ResourceUtils;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 2.5
  * @see #generateDefaultLocations
  * @see #getResourceSuffixes
  * @see #modifyLocations
+ * @see #prepareContext
+ * @see #customizeContext
  */
 public abstract class AbstractContextLoader implements SmartContextLoader {
 
@@ -68,7 +72,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	private static final Log logger = LogFactory.getLog(AbstractContextLoader.class);
 
 
-	// --- SmartContextLoader -----------------------------------------------
+	// SmartContextLoader
 
 	/**
 	 * For backwards compatibility with the {@link ContextLoader} SPI, the
@@ -110,12 +114,13 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * <li>Determines what (if any) context initializer classes have been supplied
 	 * via the {@code MergedContextConfiguration} and instantiates and
 	 * {@linkplain ApplicationContextInitializer#initialize invokes} each with the
-	 * given application context.</li>
+	 * given application context.
 	 * <ul>
 	 * <li>Any {@code ApplicationContextInitializers} implementing
 	 * {@link org.springframework.core.Ordered Ordered} or annotated with {@link
 	 * org.springframework.core.annotation.Order @Order} will be sorted appropriately.</li>
 	 * </ul>
+	 * </li>
 	 * </ul>
 	 * @param context the newly created application context
 	 * @param mergedConfig the merged context configuration
@@ -137,17 +142,17 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	private void invokeApplicationContextInitializers(ConfigurableApplicationContext context,
 			MergedContextConfiguration mergedConfig) {
 
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses =
+		Set<Class<? extends ApplicationContextInitializer<?>>> initializerClasses =
 				mergedConfig.getContextInitializerClasses();
 		if (initializerClasses.isEmpty()) {
 			// no ApplicationContextInitializers have been declared -> nothing to do
 			return;
 		}
 
-		List<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances = new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
+		List<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances = new ArrayList<>();
 		Class<?> contextClass = context.getClass();
 
-		for (Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>> initializerClass : initializerClasses) {
+		for (Class<? extends ApplicationContextInitializer<?>> initializerClass : initializerClasses) {
 			Class<?> initializerContextClass =
 					GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
 			if (initializerContextClass != null && !initializerContextClass.isInstance(context)) {
@@ -166,8 +171,25 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 		}
 	}
 
+	/**
+	 * Customize the {@link ConfigurableApplicationContext} created by this
+	 * {@code ContextLoader} <em>after</em> bean definitions have been loaded
+	 * into the context but <em>before</em> the context has been refreshed.
+	 * <p>The default implementation delegates to all
+	 * {@link MergedContextConfiguration#getContextCustomizers context customizers}
+	 * that have been registered with the supplied {@code mergedConfig}.
+	 * @param context the newly created application context
+	 * @param mergedConfig the merged context configuration
+	 * @since 4.3
+	 */
+	protected void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
+		for (ContextCustomizer contextCustomizer : mergedConfig.getContextCustomizers()) {
+			contextCustomizer.customizeContext(context, mergedConfig);
+		}
+	}
 
-	// --- ContextLoader -------------------------------------------------------
+
+	// ContextLoader
 
 	/**
 	 * If the supplied {@code locations} are {@code null} or <em>empty</em>
@@ -223,9 +245,9 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 		for (String suffix : suffixes) {
 			Assert.hasText(suffix, "Resource suffix must not be empty");
 			String resourcePath = ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix;
-			String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
 			ClassPathResource classPathResource = new ClassPathResource(resourcePath);
 			if (classPathResource.exists()) {
+				String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
 				if (logger.isInfoEnabled()) {
 					logger.info(String.format("Detected default resource location \"%s\" for test class [%s]",
 							prefixedResourcePath, clazz.getName()));

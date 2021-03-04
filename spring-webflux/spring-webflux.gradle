@@ -1,0 +1,63 @@
+description = "Spring WebFlux"
+
+apply plugin: "kotlin"
+
+dependencies {
+	compile(project(":spring-beans"))
+	compile(project(":spring-core"))
+	compile(project(":spring-web"))
+	compile("io.projectreactor:reactor-core")
+	compileOnly(project(":kotlin-coroutines"))
+	optional(project(":spring-context"))
+	optional(project(":spring-context-support"))  // for FreeMarker support
+	optional("javax.servlet:javax.servlet-api")
+	optional("javax.websocket:javax.websocket-api")
+	optional("org.webjars:webjars-locator-core")
+	optional("org.freemarker:freemarker")
+	optional("com.fasterxml.jackson.core:jackson-databind")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile")
+	optional("io.projectreactor.netty:reactor-netty-http")
+	optional("org.apache.tomcat:tomcat-websocket")
+	optional("org.eclipse.jetty.websocket:websocket-server") {
+		exclude group: "javax.servlet", module: "javax.servlet"
+	}
+	optional("io.undertow:undertow-websockets-jsr")
+	optional("org.apache.httpcomponents:httpclient")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("com.google.protobuf:protobuf-java-util")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testCompile(project(":kotlin-coroutines"))
+	testCompile(testFixtures(project(":spring-beans")))
+	testCompile(testFixtures(project(":spring-core")))
+	testCompile(testFixtures(project(":spring-web")))
+	testCompile("javax.xml.bind:jaxb-api")
+	testCompile("com.fasterxml:aalto-xml")
+	testCompile("org.hibernate:hibernate-validator")
+	testCompile("javax.validation:validation-api")
+	testCompile("io.reactivex.rxjava3:rxjava")
+	testCompile("io.projectreactor:reactor-test")
+	testCompile("io.undertow:undertow-core")
+	testCompile("org.apache.tomcat.embed:tomcat-embed-core")
+	testCompile("org.apache.tomcat:tomcat-util")
+	testCompile("org.eclipse.jetty:jetty-server")
+	testCompile("org.eclipse.jetty:jetty-servlet")
+	testCompile("org.eclipse.jetty:jetty-reactive-httpclient")
+	testCompile('org.apache.httpcomponents.client5:httpclient5')
+	testCompile('org.apache.httpcomponents.core5:httpcore5-reactive')
+	testCompile("com.squareup.okhttp3:mockwebserver")
+	testCompile("org.jetbrains.kotlin:kotlin-script-runtime")
+	testRuntime("org.jetbrains.kotlin:kotlin-scripting-jsr223")
+	testRuntime("org.jruby:jruby")
+	testRuntime("org.python:jython-standalone")
+	testRuntime("org.synchronoss.cloud:nio-multipart-parser")
+	testRuntime("org.webjars:underscorejs")
+	testRuntime("org.glassfish:javax.el")
+	testRuntime("com.sun.xml.bind:jaxb-core")
+	testRuntime("com.sun.xml.bind:jaxb-impl")
+	testRuntime("com.sun.activation:javax.activation")
+}
+
+test {
+	maxParallelForks = 4
+}

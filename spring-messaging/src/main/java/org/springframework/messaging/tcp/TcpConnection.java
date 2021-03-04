@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,7 @@ import org.springframework.util.concurrent.ListenableFuture;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- * @param <P> the type of payload for outbound {@link Message}s
+ * @param <P> the type of payload for outbound {@link Message Messages}
  */
 public interface TcpConnection<P> extends Closeable {
 
@@ -39,14 +39,14 @@ public interface TcpConnection<P> extends Closeable {
 	ListenableFuture<Void> send(Message<P> message);
 
 	/**
-	 * Register a task to invoke after a period of of read inactivity.
+	 * Register a task to invoke after a period of read inactivity.
 	 * @param runnable the task to invoke
 	 * @param duration the amount of inactive time in milliseconds
 	 */
 	void onReadInactivity(Runnable runnable, long duration);
 
 	/**
-	 * Register a task to invoke after a period of of write inactivity.
+	 * Register a task to invoke after a period of write inactivity.
 	 * @param runnable the task to invoke
 	 * @param duration the amount of inactive time in milliseconds
 	 */

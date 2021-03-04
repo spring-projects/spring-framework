@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.lang.Nullable;
 
 /**
  * Context that gets passed along a bean definition parsing process,
@@ -42,9 +44,10 @@ public final class ParserContext {
 
 	private final BeanDefinitionParserDelegate delegate;
 
+	@Nullable
 	private BeanDefinition containingBeanDefinition;
 
-	private final Stack<ComponentDefinition> containingComponents = new Stack<ComponentDefinition>();
+	private final Deque<CompositeComponentDefinition> containingComponents = new ArrayDeque<>();
 
 
 	public ParserContext(XmlReaderContext readerContext, BeanDefinitionParserDelegate delegate) {
@@ -53,7 +56,7 @@ public final class ParserContext {
 	}
 
 	public ParserContext(XmlReaderContext readerContext, BeanDefinitionParserDelegate delegate,
-			BeanDefinition containingBeanDefinition) {
+			@Nullable BeanDefinition containingBeanDefinition) {
 
 		this.readerContext = readerContext;
 		this.delegate = delegate;
@@ -73,6 +76,7 @@ public final class ParserContext {
 		return this.delegate;
 	}
 
+	@Nullable
 	public final BeanDefinition getContainingBeanDefinition() {
 		return this.containingBeanDefinition;
 	}
@@ -85,13 +89,14 @@ public final class ParserContext {
 		return BeanDefinitionParserDelegate.TRUE_VALUE.equals(this.delegate.getDefaults().getLazyInit());
 	}
 
+	@Nullable
 	public Object extractSource(Object sourceCandidate) {
 		return this.readerContext.extractSource(sourceCandidate);
 	}
 
+	@Nullable
 	public CompositeComponentDefinition getContainingComponent() {
-		return (!this.containingComponents.isEmpty() ?
-				(CompositeComponentDefinition) this.containingComponents.lastElement() : null);
+		return this.containingComponents.peek();
 	}
 
 	public void pushContainingComponent(CompositeComponentDefinition containingComponent) {
@@ -99,7 +104,7 @@ public final class ParserContext {
 	}
 
 	public CompositeComponentDefinition popContainingComponent() {
-		return (CompositeComponentDefinition) this.containingComponents.pop();
+		return this.containingComponents.pop();
 	}
 
 	public void popAndRegisterContainingComponent() {

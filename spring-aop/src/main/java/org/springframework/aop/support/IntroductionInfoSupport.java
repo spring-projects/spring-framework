@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,9 +43,9 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("serial")
 public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 
-	protected final Set<Class<?>> publishedInterfaces = new LinkedHashSet<Class<?>>();
+	protected final Set<Class<?>> publishedInterfaces = new LinkedHashSet<>();
 
-	private transient Map<Method, Boolean> rememberedMethods = new ConcurrentHashMap<Method, Boolean>(32);
+	private transient Map<Method, Boolean> rememberedMethods = new ConcurrentHashMap<>(32);
 
 
 	/**
@@ -53,15 +53,15 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 	 * due to the delegate implementing it. Call this method to exclude
 	 * internal interfaces from being visible at the proxy level.
 	 * <p>Does nothing if the interface is not implemented by the delegate.
-	 * @param intf the interface to suppress
+	 * @param ifc the interface to suppress
 	 */
-	public void suppressInterface(Class<?> intf) {
-		this.publishedInterfaces.remove(intf);
+	public void suppressInterface(Class<?> ifc) {
+		this.publishedInterfaces.remove(ifc);
 	}
 
 	@Override
 	public Class<?>[] getInterfaces() {
-		return this.publishedInterfaces.toArray(new Class<?>[this.publishedInterfaces.size()]);
+		return ClassUtils.toClassArray(this.publishedInterfaces);
 	}
 
 	/**
@@ -118,7 +118,7 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 		// Rely on default serialization; just initialize state after deserialization.
 		ois.defaultReadObject();
 		// Initialize transient fields.
-		this.rememberedMethods = new ConcurrentHashMap<Method, Boolean>(32);
+		this.rememberedMethods = new ConcurrentHashMap<>(32);
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,13 +28,15 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -47,7 +49,6 @@ import javax.xml.ws.WebServiceRef;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
@@ -64,7 +65,9 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -132,6 +135,7 @@ import org.springframework.util.StringValueResolver;
  * both approaches.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  * @see #setAlwaysUseJndiLookup
  * @see #setResourceFactory
@@ -142,36 +146,29 @@ import org.springframework.util.StringValueResolver;
 public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Serializable {
 
-	// Common Annotations 1.1 Resource.lookup() available? Not present on JDK 6...
-	private static final Method lookupAttribute = ClassUtils.getMethodIfAvailable(Resource.class, "lookup");
+	@Nullable
+	private static final Class<? extends Annotation> webServiceRefClass;
 
-	private static Class<? extends Annotation> webServiceRefClass = null;
+	@Nullable
+	private static final Class<? extends Annotation> ejbClass;
 
-	private static Class<? extends Annotation> ejbRefClass = null;
+	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = new LinkedHashSet<>(4);
 
 	static {
-		try {
-			@SuppressWarnings("unchecked")
-			Class<? extends Annotation> clazz = (Class<? extends Annotation>)
-					ClassUtils.forName("javax.xml.ws.WebServiceRef", CommonAnnotationBeanPostProcessor.class.getClassLoader());
-			webServiceRefClass = clazz;
+		webServiceRefClass = loadAnnotationType("javax.xml.ws.WebServiceRef");
+		ejbClass = loadAnnotationType("javax.ejb.EJB");
+
+		resourceAnnotationTypes.add(Resource.class);
+		if (webServiceRefClass != null) {
+			resourceAnnotationTypes.add(webServiceRefClass);
 		}
-		catch (ClassNotFoundException ex) {
-			webServiceRefClass = null;
-		}
-		try {
-			@SuppressWarnings("unchecked")
-			Class<? extends Annotation> clazz = (Class<? extends Annotation>)
-					ClassUtils.forName("javax.ejb.EJB", CommonAnnotationBeanPostProcessor.class.getClassLoader());
-			ejbRefClass = clazz;
-		}
-		catch (ClassNotFoundException ex) {
-			ejbRefClass = null;
+		if (ejbClass != null) {
+			resourceAnnotationTypes.add(ejbClass);
 		}
 	}
 
 
-	private final Set<String> ignoredResourceTypes = new HashSet<String>(1);
+	private final Set<String> ignoredResourceTypes = new HashSet<>(1);
 
 	private boolean fallbackToDefaultTypeMatch = true;
 
@@ -179,14 +176,16 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	private transient BeanFactory jndiFactory = new SimpleJndiBeanFactory();
 
+	@Nullable
 	private transient BeanFactory resourceFactory;
 
+	@Nullable
 	private transient BeanFactory beanFactory;
 
+	@Nullable
 	private transient StringValueResolver embeddedValueResolver;
 
-	private transient final Map<String, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<String, InjectionMetadata>(256);
+	private final transient Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
 
 
 	/**
@@ -293,26 +292,27 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		super.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName);
-		if (beanType != null) {
-			InjectionMetadata metadata = findResourceMetadata(beanName, beanType, null);
-			metadata.checkConfigMembers(beanDefinition);
-		}
+		InjectionMetadata metadata = findResourceMetadata(beanName, beanType, null);
+		metadata.checkConfigMembers(beanDefinition);
 	}
 
 	@Override
-	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+	public void resetBeanDefinition(String beanName) {
+		this.injectionMetadataCache.remove(beanName);
+	}
+
+	@Override
+	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		return null;
 	}
 
 	@Override
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
+	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
 		return true;
 	}
 
 	@Override
-	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
-
+	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
 		InjectionMetadata metadata = findResourceMetadata(beanName, bean.getClass(), pvs);
 		try {
 			metadata.inject(bean, beanName, pvs);
@@ -323,8 +323,16 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		return pvs;
 	}
 
+	@Deprecated
+	@Override
+	public PropertyValues postProcessPropertyValues(
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
 
-	private InjectionMetadata findResourceMetadata(String beanName, final Class<?> clazz, PropertyValues pvs) {
+		return postProcessProperties(pvs, bean, beanName);
+	}
+
+
+	private InjectionMetadata findResourceMetadata(String beanName, final Class<?> clazz, @Nullable PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
 		// Quick check on the concurrent map first, with minimal locking.
@@ -336,14 +344,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					if (metadata != null) {
 						metadata.clear(pvs);
 					}
-					try {
-						metadata = buildResourceMetadata(clazz);
-						this.injectionMetadataCache.put(cacheKey, metadata);
-					}
-					catch (NoClassDefFoundError err) {
-						throw new IllegalStateException("Failed to introspect bean class [" + clazz.getName() +
-								"] for resource metadata: could not find class that it depends on", err);
-					}
+					metadata = buildResourceMetadata(clazz);
+					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
 			}
 		}
@@ -351,79 +353,76 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	private InjectionMetadata buildResourceMetadata(final Class<?> clazz) {
-		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
+		if (!AnnotationUtils.isCandidateClass(clazz, resourceAnnotationTypes)) {
+			return InjectionMetadata.EMPTY;
+		}
+
+		List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
 		Class<?> targetClass = clazz;
 
 		do {
-			final LinkedList<InjectionMetadata.InjectedElement> currElements =
-					new LinkedList<InjectionMetadata.InjectedElement>();
+			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
-			ReflectionUtils.doWithLocalFields(targetClass, new ReflectionUtils.FieldCallback() {
-				@Override
-				public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
-					if (webServiceRefClass != null && field.isAnnotationPresent(webServiceRefClass)) {
-						if (Modifier.isStatic(field.getModifiers())) {
-							throw new IllegalStateException("@WebServiceRef annotation is not supported on static fields");
-						}
-						currElements.add(new WebServiceRefElement(field, field, null));
+			ReflectionUtils.doWithLocalFields(targetClass, field -> {
+				if (webServiceRefClass != null && field.isAnnotationPresent(webServiceRefClass)) {
+					if (Modifier.isStatic(field.getModifiers())) {
+						throw new IllegalStateException("@WebServiceRef annotation is not supported on static fields");
 					}
-					else if (ejbRefClass != null && field.isAnnotationPresent(ejbRefClass)) {
-						if (Modifier.isStatic(field.getModifiers())) {
-							throw new IllegalStateException("@EJB annotation is not supported on static fields");
-						}
-						currElements.add(new EjbRefElement(field, field, null));
+					currElements.add(new WebServiceRefElement(field, field, null));
+				}
+				else if (ejbClass != null && field.isAnnotationPresent(ejbClass)) {
+					if (Modifier.isStatic(field.getModifiers())) {
+						throw new IllegalStateException("@EJB annotation is not supported on static fields");
 					}
-					else if (field.isAnnotationPresent(Resource.class)) {
-						if (Modifier.isStatic(field.getModifiers())) {
-							throw new IllegalStateException("@Resource annotation is not supported on static fields");
-						}
-						if (!ignoredResourceTypes.contains(field.getType().getName())) {
-							currElements.add(new ResourceElement(field, field, null));
-						}
+					currElements.add(new EjbRefElement(field, field, null));
+				}
+				else if (field.isAnnotationPresent(Resource.class)) {
+					if (Modifier.isStatic(field.getModifiers())) {
+						throw new IllegalStateException("@Resource annotation is not supported on static fields");
+					}
+					if (!this.ignoredResourceTypes.contains(field.getType().getName())) {
+						currElements.add(new ResourceElement(field, field, null));
 					}
 				}
 			});
 
-			ReflectionUtils.doWithLocalMethods(targetClass, new ReflectionUtils.MethodCallback() {
-				@Override
-				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-					Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
-					if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
-						return;
+			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
+				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
+					return;
+				}
+				if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+					if (webServiceRefClass != null && bridgedMethod.isAnnotationPresent(webServiceRefClass)) {
+						if (Modifier.isStatic(method.getModifiers())) {
+							throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");
+						}
+						if (method.getParameterCount() != 1) {
+							throw new IllegalStateException("@WebServiceRef annotation requires a single-arg method: " + method);
+						}
+						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
+						currElements.add(new WebServiceRefElement(method, bridgedMethod, pd));
 					}
-					if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-						if (webServiceRefClass != null && bridgedMethod.isAnnotationPresent(webServiceRefClass)) {
-							if (Modifier.isStatic(method.getModifiers())) {
-								throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");
-							}
-							if (method.getParameterTypes().length != 1) {
-								throw new IllegalStateException("@WebServiceRef annotation requires a single-arg method: " + method);
-							}
-							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-							currElements.add(new WebServiceRefElement(method, bridgedMethod, pd));
+					else if (ejbClass != null && bridgedMethod.isAnnotationPresent(ejbClass)) {
+						if (Modifier.isStatic(method.getModifiers())) {
+							throw new IllegalStateException("@EJB annotation is not supported on static methods");
 						}
-						else if (ejbRefClass != null && bridgedMethod.isAnnotationPresent(ejbRefClass)) {
-							if (Modifier.isStatic(method.getModifiers())) {
-								throw new IllegalStateException("@EJB annotation is not supported on static methods");
-							}
-							if (method.getParameterTypes().length != 1) {
-								throw new IllegalStateException("@EJB annotation requires a single-arg method: " + method);
-							}
-							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-							currElements.add(new EjbRefElement(method, bridgedMethod, pd));
+						if (method.getParameterCount() != 1) {
+							throw new IllegalStateException("@EJB annotation requires a single-arg method: " + method);
 						}
-						else if (bridgedMethod.isAnnotationPresent(Resource.class)) {
-							if (Modifier.isStatic(method.getModifiers())) {
-								throw new IllegalStateException("@Resource annotation is not supported on static methods");
-							}
-							Class<?>[] paramTypes = method.getParameterTypes();
-							if (paramTypes.length != 1) {
-								throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
-							}
-							if (!ignoredResourceTypes.contains(paramTypes[0].getName())) {
-								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-								currElements.add(new ResourceElement(method, bridgedMethod, pd));
-							}
+						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
+						currElements.add(new EjbRefElement(method, bridgedMethod, pd));
+					}
+					else if (bridgedMethod.isAnnotationPresent(Resource.class)) {
+						if (Modifier.isStatic(method.getModifiers())) {
+							throw new IllegalStateException("@Resource annotation is not supported on static methods");
+						}
+						Class<?>[] paramTypes = method.getParameterTypes();
+						if (paramTypes.length != 1) {
+							throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
+						}
+						if (!this.ignoredResourceTypes.contains(paramTypes[0].getName())) {
+							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
+							currElements.add(new ResourceElement(method, bridgedMethod, pd));
 						}
 					}
 				}
@@ -434,7 +433,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 		while (targetClass != null && targetClass != Object.class);
 
-		return new InjectionMetadata(clazz, elements);
+		return InjectionMetadata.forElements(elements, clazz);
 	}
 
 	/**
@@ -447,7 +446,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * @see #getResource
 	 * @see Lazy
 	 */
-	protected Object buildLazyResourceProxy(final LookupElement element, final String requestingBeanName) {
+	protected Object buildLazyResourceProxy(final LookupElement element, final @Nullable String requestingBeanName) {
 		TargetSource ts = new TargetSource() {
 			@Override
 			public Class<?> getTargetClass() {
@@ -480,9 +479,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * @param element the descriptor for the annotated field/method
 	 * @param requestingBeanName the name of the requesting bean
 	 * @return the resource object (never {@code null})
-	 * @throws BeansException if we failed to obtain the target resource
+	 * @throws NoSuchBeanDefinitionException if no corresponding target resource found
 	 */
-	protected Object getResource(LookupElement element, String requestingBeanName) throws BeansException {
+	protected Object getResource(LookupElement element, @Nullable String requestingBeanName)
+			throws NoSuchBeanDefinitionException {
+
 		if (StringUtils.hasLength(element.mappedName)) {
 			return this.jndiFactory.getBean(element.mappedName, element.lookupType);
 		}
@@ -503,20 +504,29 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * @param element the descriptor for the annotated field/method
 	 * @param requestingBeanName the name of the requesting bean
 	 * @return the resource object (never {@code null})
-	 * @throws BeansException if we failed to obtain the target resource
+	 * @throws NoSuchBeanDefinitionException if no corresponding target resource found
 	 */
-	protected Object autowireResource(BeanFactory factory, LookupElement element, String requestingBeanName)
-			throws BeansException {
+	protected Object autowireResource(BeanFactory factory, LookupElement element, @Nullable String requestingBeanName)
+			throws NoSuchBeanDefinitionException {
 
 		Object resource;
 		Set<String> autowiredBeanNames;
 		String name = element.name;
 
-		if (this.fallbackToDefaultTypeMatch && element.isDefaultName &&
-				factory instanceof AutowireCapableBeanFactory && !factory.containsBean(name)) {
-			autowiredBeanNames = new LinkedHashSet<String>();
-			resource = ((AutowireCapableBeanFactory) factory).resolveDependency(
-					element.getDependencyDescriptor(), requestingBeanName, autowiredBeanNames, null);
+		if (factory instanceof AutowireCapableBeanFactory) {
+			AutowireCapableBeanFactory beanFactory = (AutowireCapableBeanFactory) factory;
+			DependencyDescriptor descriptor = element.getDependencyDescriptor();
+			if (this.fallbackToDefaultTypeMatch && element.isDefaultName && !factory.containsBean(name)) {
+				autowiredBeanNames = new LinkedHashSet<>();
+				resource = beanFactory.resolveDependency(descriptor, requestingBeanName, autowiredBeanNames, null);
+				if (resource == null) {
+					throw new NoSuchBeanDefinitionException(element.getLookupType(), "No resolvable resource object");
+				}
+			}
+			else {
+				resource = beanFactory.resolveBeanByName(name, descriptor);
+				autowiredBeanNames = Collections.singleton(name);
+			}
 		}
 		else {
 			resource = factory.getBean(name, element.lookupType);
@@ -526,7 +536,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		if (factory instanceof ConfigurableBeanFactory) {
 			ConfigurableBeanFactory beanFactory = (ConfigurableBeanFactory) factory;
 			for (String autowiredBeanName : autowiredBeanNames) {
-				if (beanFactory.containsBean(autowiredBeanName)) {
+				if (requestingBeanName != null && beanFactory.containsBean(autowiredBeanName)) {
 					beanFactory.registerDependentBean(autowiredBeanName, requestingBeanName);
 				}
 			}
@@ -536,21 +546,35 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private static Class<? extends Annotation> loadAnnotationType(String name) {
+		try {
+			return (Class<? extends Annotation>)
+					ClassUtils.forName(name, CommonAnnotationBeanPostProcessor.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			return null;
+		}
+	}
+
+
 	/**
 	 * Class representing generic injection information about an annotated field
 	 * or setter method, supporting @Resource and related annotations.
 	 */
-	protected abstract class LookupElement extends InjectionMetadata.InjectedElement {
+	protected abstract static class LookupElement extends InjectionMetadata.InjectedElement {
 
-		protected String name;
+		protected String name = "";
 
 		protected boolean isDefaultName = false;
 
-		protected Class<?> lookupType;
+		protected Class<?> lookupType = Object.class;
 
+		@Nullable
 		protected String mappedName;
 
-		public LookupElement(Member member, PropertyDescriptor pd) {
+		public LookupElement(Member member, @Nullable PropertyDescriptor pd) {
 			super(member, pd);
 		}
 
@@ -590,7 +614,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		private final boolean lazyLookup;
 
-		public ResourceElement(Member member, AnnotatedElement ae, PropertyDescriptor pd) {
+		public ResourceElement(Member member, AnnotatedElement ae, @Nullable PropertyDescriptor pd) {
 			super(member, pd);
 			Resource resource = ae.getAnnotation(Resource.class);
 			String resourceName = resource.name();
@@ -605,24 +629,23 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			else if (embeddedValueResolver != null) {
 				resourceName = embeddedValueResolver.resolveStringValue(resourceName);
 			}
-			if (resourceType != null && Object.class != resourceType) {
+			if (Object.class != resourceType) {
 				checkResourceType(resourceType);
 			}
 			else {
 				// No resource type specified... check field/method.
 				resourceType = getResourceType();
 			}
-			this.name = resourceName;
+			this.name = (resourceName != null ? resourceName : "");
 			this.lookupType = resourceType;
-			String lookupValue = (lookupAttribute != null ?
-					(String) ReflectionUtils.invokeMethod(lookupAttribute, resource) : null);
+			String lookupValue = resource.lookup();
 			this.mappedName = (StringUtils.hasLength(lookupValue) ? lookupValue : resource.mappedName());
 			Lazy lazy = ae.getAnnotation(Lazy.class);
 			this.lazyLookup = (lazy != null && lazy.value());
 		}
 
 		@Override
-		protected Object getResourceToInject(Object target, String requestingBeanName) {
+		protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
 			return (this.lazyLookup ? buildLazyResourceProxy(this, requestingBeanName) :
 					getResource(this, requestingBeanName));
 		}
@@ -639,7 +662,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		private final String wsdlLocation;
 
-		public WebServiceRefElement(Member member, AnnotatedElement ae, PropertyDescriptor pd) {
+		public WebServiceRefElement(Member member, AnnotatedElement ae, @Nullable PropertyDescriptor pd) {
 			super(member, pd);
 			WebServiceRef resource = ae.getAnnotation(WebServiceRef.class);
 			String resourceName = resource.name();
@@ -651,7 +674,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					resourceName = Introspector.decapitalize(resourceName.substring(3));
 				}
 			}
-			if (resourceType != null && Object.class != resourceType) {
+			if (Object.class != resourceType) {
 				checkResourceType(resourceType);
 			}
 			else {
@@ -671,7 +694,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 
 		@Override
-		protected Object getResourceToInject(Object target, String requestingBeanName) {
+		protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
 			Service service;
 			try {
 				service = (Service) getResource(this, requestingBeanName);
@@ -722,7 +745,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		private final String beanName;
 
-		public EjbRefElement(Member member, AnnotatedElement ae, PropertyDescriptor pd) {
+		public EjbRefElement(Member member, AnnotatedElement ae, @Nullable PropertyDescriptor pd) {
 			super(member, pd);
 			EJB resource = ae.getAnnotation(EJB.class);
 			String resourceBeanName = resource.beanName();
@@ -735,7 +758,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				}
 			}
 			Class<?> resourceType = resource.beanInterface();
-			if (resourceType != null && Object.class != resourceType) {
+			if (Object.class != resourceType) {
 				checkResourceType(resourceType);
 			}
 			else {
@@ -749,12 +772,12 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 
 		@Override
-		protected Object getResourceToInject(Object target, String requestingBeanName) {
+		protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
 			if (StringUtils.hasLength(this.beanName)) {
 				if (beanFactory != null && beanFactory.containsBean(this.beanName)) {
 					// Local match found for explicitly specified local bean name.
 					Object bean = beanFactory.getBean(this.beanName, this.lookupType);
-					if (beanFactory instanceof ConfigurableBeanFactory) {
+					if (requestingBeanName != null && beanFactory instanceof ConfigurableBeanFactory) {
 						((ConfigurableBeanFactory) beanFactory).registerDependentBean(this.beanName, requestingBeanName);
 					}
 					return bean;

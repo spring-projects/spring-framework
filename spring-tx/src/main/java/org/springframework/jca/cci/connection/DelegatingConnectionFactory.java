@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,8 @@ import javax.resource.cci.RecordFactory;
 import javax.resource.cci.ResourceAdapterMetaData;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * CCI {@link ConnectionFactory} implementation that delegates all calls
@@ -38,25 +40,40 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Juergen Hoeller
  * @since 1.2
  * @see #getConnection
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class DelegatingConnectionFactory implements ConnectionFactory, InitializingBean {
 
+	@Nullable
 	private ConnectionFactory targetConnectionFactory;
 
 
 	/**
 	 * Set the target ConnectionFactory that this ConnectionFactory should delegate to.
 	 */
-	public void setTargetConnectionFactory(ConnectionFactory targetConnectionFactory) {
+	public void setTargetConnectionFactory(@Nullable ConnectionFactory targetConnectionFactory) {
 		this.targetConnectionFactory = targetConnectionFactory;
 	}
 
 	/**
 	 * Return the target ConnectionFactory that this ConnectionFactory should delegate to.
 	 */
+	@Nullable
 	public ConnectionFactory getTargetConnectionFactory() {
 		return this.targetConnectionFactory;
+	}
+
+	/**
+	 * Obtain the target {@code ConnectionFactory} for actual use (never {@code null}).
+	 * @since 5.0
+	 */
+	protected ConnectionFactory obtainTargetConnectionFactory() {
+		ConnectionFactory connectionFactory = getTargetConnectionFactory();
+		Assert.state(connectionFactory != null, "No 'targetConnectionFactory' set");
+		return connectionFactory;
 	}
 
 
@@ -70,32 +87,32 @@ public class DelegatingConnectionFactory implements ConnectionFactory, Initializ
 
 	@Override
 	public Connection getConnection() throws ResourceException {
-		return getTargetConnectionFactory().getConnection();
+		return obtainTargetConnectionFactory().getConnection();
 	}
 
 	@Override
 	public Connection getConnection(ConnectionSpec connectionSpec) throws ResourceException {
-		return getTargetConnectionFactory().getConnection(connectionSpec);
+		return obtainTargetConnectionFactory().getConnection(connectionSpec);
 	}
 
 	@Override
 	public RecordFactory getRecordFactory() throws ResourceException {
-		return getTargetConnectionFactory().getRecordFactory();
+		return obtainTargetConnectionFactory().getRecordFactory();
 	}
 
 	@Override
 	public ResourceAdapterMetaData getMetaData() throws ResourceException {
-		return getTargetConnectionFactory().getMetaData();
+		return obtainTargetConnectionFactory().getMetaData();
 	}
 
 	@Override
 	public Reference getReference() throws NamingException {
-		return getTargetConnectionFactory().getReference();
+		return obtainTargetConnectionFactory().getReference();
 	}
 
 	@Override
 	public void setReference(Reference reference) {
-		getTargetConnectionFactory().setReference(reference);
+		obtainTargetConnectionFactory().setReference(reference);
 	}
 
 }

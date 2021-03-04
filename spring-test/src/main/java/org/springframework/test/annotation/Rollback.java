@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,11 +17,11 @@
 package org.springframework.test.annotation;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
 
 /**
  * {@code @Rollback} is a test annotation that is used to indicate whether
@@ -49,14 +49,20 @@ import static java.lang.annotation.RetentionPolicy.*;
  * custom <em>composed annotations</em>. Consult the source code for
  * {@link Commit @Commit} for a concrete example.
  *
+ * <p>As of Spring Framework 5.3, this annotation will be inherited from an
+ * enclosing test class by default. See
+ * {@link org.springframework.test.context.NestedTestConfiguration @NestedTestConfiguration}
+ * for details.
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see Commit
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
  */
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Retention(RUNTIME)
-@Target({ TYPE, METHOD })
+@Inherited
 public @interface Rollback {
 
 	/**

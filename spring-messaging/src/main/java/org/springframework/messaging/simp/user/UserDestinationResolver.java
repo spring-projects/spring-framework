@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.user;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**
@@ -34,6 +35,7 @@ import org.springframework.messaging.Message;
  * @see org.springframework.messaging.simp.user.DefaultUserDestinationResolver
  * @see UserDestinationMessageHandler
  */
+@FunctionalInterface
 public interface UserDestinationResolver {
 
 	/**
@@ -43,6 +45,7 @@ public interface UserDestinationResolver {
 	 * @return 0 or more target messages (one for each active session), or
 	 * {@code null} if the source message does not contain a user destination.
 	 */
+	@Nullable
 	UserDestinationResult resolveDestination(Message<?> message);
 
 }

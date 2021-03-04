@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,13 @@
 
 package org.springframework.core.type.classreading;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -47,7 +49,7 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 	 * @param resourceLoader the Spring ResourceLoader to use
 	 * (also determines the ClassLoader to use)
 	 */
-	public SimpleMetadataReaderFactory(ResourceLoader resourceLoader) {
+	public SimpleMetadataReaderFactory(@Nullable ResourceLoader resourceLoader) {
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 	}
 
@@ -55,7 +57,7 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 	 * Create a new SimpleMetadataReaderFactory for the given class loader.
 	 * @param classLoader the ClassLoader to use
 	 */
-	public SimpleMetadataReaderFactory(ClassLoader classLoader) {
+	public SimpleMetadataReaderFactory(@Nullable ClassLoader classLoader) {
 		this.resourceLoader =
 				(classLoader != null ? new DefaultResourceLoader(classLoader) : new DefaultResourceLoader());
 	}
@@ -72,10 +74,13 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 
 	@Override
 	public MetadataReader getMetadataReader(String className) throws IOException {
-		String resourcePath = ResourceLoader.CLASSPATH_URL_PREFIX +
-				ClassUtils.convertClassNameToResourcePath(className) + ClassUtils.CLASS_FILE_SUFFIX;
-		Resource resource = this.resourceLoader.getResource(resourcePath);
-		if (!resource.exists()) {
+		try {
+			String resourcePath = ResourceLoader.CLASSPATH_URL_PREFIX +
+					ClassUtils.convertClassNameToResourcePath(className) + ClassUtils.CLASS_FILE_SUFFIX;
+			Resource resource = this.resourceLoader.getResource(resourcePath);
+			return getMetadataReader(resource);
+		}
+		catch (FileNotFoundException ex) {
 			// Maybe an inner class name using the dot name syntax? Need to use the dollar syntax here...
 			// ClassUtils.forName has an equivalent check for resolution into Class references later on.
 			int lastDotIndex = className.lastIndexOf('.');
@@ -86,11 +91,11 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 						ClassUtils.convertClassNameToResourcePath(innerClassName) + ClassUtils.CLASS_FILE_SUFFIX;
 				Resource innerClassResource = this.resourceLoader.getResource(innerClassResourcePath);
 				if (innerClassResource.exists()) {
-					resource = innerClassResource;
+					return getMetadataReader(innerClassResource);
 				}
 			}
+			throw ex;
 		}
-		return getMetadataReader(resource);
 	}
 
 	@Override

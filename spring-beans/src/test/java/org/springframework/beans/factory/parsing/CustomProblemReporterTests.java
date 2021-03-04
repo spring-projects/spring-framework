@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,25 +19,22 @@ package org.springframework.beans.factory.parsing;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.Resource;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Rob Harrop
  * @author Chris Beams
  * @since 2.0
  */
-public final class CustomProblemReporterTests {
-
-	private static final Resource CONTEXT = qualifiedResource(CustomProblemReporterTests.class, "context.xml");
+public class CustomProblemReporterTests {
 
 	private CollatingProblemReporter problemReporter;
 
@@ -46,30 +43,30 @@ public final class CustomProblemReporterTests {
 	private XmlBeanDefinitionReader reader;
 
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	public void setup() {
 		this.problemReporter = new CollatingProblemReporter();
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.reader = new XmlBeanDefinitionReader(this.beanFactory);
 		this.reader.setProblemReporter(this.problemReporter);
 	}
 
+
 	@Test
 	public void testErrorsAreCollated() {
-		this.reader.loadBeanDefinitions(CONTEXT);
-		assertEquals("Incorrect number of errors collated", 4, this.problemReporter.getErrors().length);
+		this.reader.loadBeanDefinitions(qualifiedResource(CustomProblemReporterTests.class, "context.xml"));
+		assertThat(this.problemReporter.getErrors().length).as("Incorrect number of errors collated").isEqualTo(4);
 
 		TestBean bean = (TestBean) this.beanFactory.getBean("validBean");
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 	}
 
 
 	private static class CollatingProblemReporter implements ProblemReporter {
 
-		private List<Problem> errors = new ArrayList<Problem>();
+		private final List<Problem> errors = new ArrayList<>();
 
-		private List<Problem> warnings = new ArrayList<Problem>();
-
+		private final List<Problem> warnings = new ArrayList<>();
 
 		@Override
 		public void fatal(Problem problem) {

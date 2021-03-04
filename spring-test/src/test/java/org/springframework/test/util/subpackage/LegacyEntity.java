@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,17 +31,41 @@ public class LegacyEntity {
 
 		@Override
 		public String toString() {
-			throw new RuntimeException(
+			throw new LegacyEntityException(
 				"Invoking toString() on the default collaborator causes an undesirable side effect");
-		};
+		}
 	};
 
+	private Integer number;
+	private String text;
+
+
+	public void configure(Integer number, String text) {
+		this.number = number;
+		this.text = text;
+	}
+
+	public Integer getNumber() {
+		return this.number;
+	}
+
+	public String getText() {
+		return this.text;
+	}
+
+	public Object getCollaborator() {
+		return this.collaborator;
+	}
+
+	public void setCollaborator(Object collaborator) {
+		this.collaborator = collaborator;
+	}
 
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)//
-		.append("collaborator", this.collaborator)//
-		.toString();
+				.append("collaborator", this.collaborator)//
+				.toString();
 	}
 
 }

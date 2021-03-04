@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.jca.cci.object;
 
 import java.sql.SQLException;
+
 import javax.resource.ResourceException;
 import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.InteractionSpec;
@@ -24,8 +25,8 @@ import javax.resource.cci.Record;
 import javax.resource.cci.RecordFactory;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.jca.cci.core.RecordCreator;
-import org.springframework.jca.cci.core.RecordExtractor;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * EIS operation object that expects mapped input and output objects,
@@ -42,7 +43,10 @@ import org.springframework.jca.cci.core.RecordExtractor;
  * @since 1.2
  * @see #createInputRecord(javax.resource.cci.RecordFactory, Object)
  * @see #extractOutputData(javax.resource.cci.Record)
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 public abstract class MappingRecordOperation extends EisOperation {
 
 	/**
@@ -54,7 +58,7 @@ public abstract class MappingRecordOperation extends EisOperation {
 	/**
 	 * Convenient constructor with ConnectionFactory and specifications
 	 * (connection and interaction).
-	 * @param connectionFactory ConnectionFactory to use to obtain connections
+	 * @param connectionFactory the ConnectionFactory to use to obtain connections
 	 */
 	public MappingRecordOperation(ConnectionFactory connectionFactory, InteractionSpec interactionSpec) {
 		getCciTemplate().setConnectionFactory(connectionFactory);
@@ -72,7 +76,7 @@ public abstract class MappingRecordOperation extends EisOperation {
 	 * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, Record, Record)
 	 * @see org.springframework.jca.cci.core.CciTemplate#setOutputRecordCreator
 	 */
-	public void setOutputRecordCreator(RecordCreator creator) {
+	public void setOutputRecordCreator(org.springframework.jca.cci.core.RecordCreator creator) {
 		getCciTemplate().setOutputRecordCreator(creator);
 	}
 
@@ -85,9 +89,12 @@ public abstract class MappingRecordOperation extends EisOperation {
 	 * @see #createInputRecord
 	 * @see #extractOutputData
 	 */
+	@Nullable
 	public Object execute(Object inputObject) throws DataAccessException {
+		InteractionSpec interactionSpec = getInteractionSpec();
+		Assert.state(interactionSpec != null, "No InteractionSpec set");
 		return getCciTemplate().execute(
-				getInteractionSpec(), new RecordCreatorImpl(inputObject), new RecordExtractorImpl());
+				interactionSpec, new RecordCreatorImpl(inputObject), new RecordExtractorImpl());
 	}
 
 
@@ -120,7 +127,7 @@ public abstract class MappingRecordOperation extends EisOperation {
 	 * Implementation of RecordCreator that calls the enclosing
 	 * class's {@code createInputRecord} method.
 	 */
-	protected class RecordCreatorImpl implements RecordCreator {
+	protected class RecordCreatorImpl implements org.springframework.jca.cci.core.RecordCreator {
 
 		private final Object inputObject;
 
@@ -139,7 +146,7 @@ public abstract class MappingRecordOperation extends EisOperation {
 	 * Implementation of RecordExtractor that calls the enclosing
 	 * class's {@code extractOutputData} method.
 	 */
-	protected class RecordExtractorImpl implements RecordExtractor<Object> {
+	protected class RecordExtractorImpl implements org.springframework.jca.cci.core.RecordExtractor<Object> {
 
 		@Override
 		public Object extractData(Record record) throws ResourceException, SQLException, DataAccessException {

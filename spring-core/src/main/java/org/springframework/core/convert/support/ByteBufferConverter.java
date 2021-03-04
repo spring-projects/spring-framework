@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,9 +25,10 @@ import java.util.Set;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.lang.Nullable;
 
 /**
- * Converts a {@link ByteBuffer} directly to and from {@code byte[]}s and indirectly
+ * Converts a {@link ByteBuffer} directly to and from {@code byte[] ByteBuffer} directly to and from {@code byte[]s} and indirectly
  * to any type that the {@link ConversionService} support via {@code byte[]}.
  *
  * @author Phillip Webb
@@ -43,7 +44,7 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 	private static final Set<ConvertiblePair> CONVERTIBLE_PAIRS;
 
 	static {
-		Set<ConvertiblePair> convertiblePairs = new HashSet<ConvertiblePair>(4);
+		Set<ConvertiblePair> convertiblePairs = new HashSet<>(4);
 		convertiblePairs.add(new ConvertiblePair(ByteBuffer.class, byte[].class));
 		convertiblePairs.add(new ConvertiblePair(byte[].class, ByteBuffer.class));
 		convertiblePairs.add(new ConvertiblePair(ByteBuffer.class, Object.class));
@@ -85,7 +86,8 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 	}
 
 	@Override
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	@Nullable
+	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		boolean byteBufferTarget = targetType.isAssignableTo(BYTE_BUFFER_TYPE);
 		if (source instanceof ByteBuffer) {
 			ByteBuffer buffer = (ByteBuffer) source;
@@ -98,6 +100,7 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 		throw new IllegalStateException("Unexpected source/target types");
 	}
 
+	@Nullable
 	private Object convertFromByteBuffer(ByteBuffer source, TypeDescriptor targetType) {
 		byte[] bytes = new byte[source.remaining()];
 		source.get(bytes);
@@ -108,9 +111,13 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 		return this.conversionService.convert(bytes, BYTE_ARRAY_TYPE, targetType);
 	}
 
-	private Object convertToByteBuffer(Object source, TypeDescriptor sourceType) {
+	private Object convertToByteBuffer(@Nullable Object source, TypeDescriptor sourceType) {
 		byte[] bytes = (byte[]) (source instanceof byte[] ? source :
 				this.conversionService.convert(source, sourceType, BYTE_ARRAY_TYPE));
+
+		if (bytes == null) {
+			return ByteBuffer.wrap(new byte[0]);
+		}
 
 		ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
 		byteBuffer.put(bytes);

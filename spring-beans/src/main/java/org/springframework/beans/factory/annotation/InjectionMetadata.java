@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,15 +22,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -46,56 +45,90 @@ import org.springframework.util.ReflectionUtils;
  */
 public class InjectionMetadata {
 
-	private static final Log logger = LogFactory.getLog(InjectionMetadata.class);
+	/**
+	 * An empty {@code InjectionMetadata} instance with no-op callbacks.
+	 * @since 5.2
+	 */
+	public static final InjectionMetadata EMPTY = new InjectionMetadata(Object.class, Collections.emptyList()) {
+		@Override
+		protected boolean needsRefresh(Class<?> clazz) {
+			return false;
+		}
+		@Override
+		public void checkConfigMembers(RootBeanDefinition beanDefinition) {
+		}
+		@Override
+		public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) {
+		}
+		@Override
+		public void clear(@Nullable PropertyValues pvs) {
+		}
+	};
+
 
 	private final Class<?> targetClass;
 
 	private final Collection<InjectedElement> injectedElements;
 
+	@Nullable
 	private volatile Set<InjectedElement> checkedElements;
 
 
+	/**
+	 * Create a new {@code InjectionMetadata instance}.
+	 * <p>Preferably use {@link #forElements} for reusing the {@link #EMPTY}
+	 * instance in case of no elements.
+	 * @param targetClass the target class
+	 * @param elements the associated elements to inject
+	 * @see #forElements
+	 */
 	public InjectionMetadata(Class<?> targetClass, Collection<InjectedElement> elements) {
 		this.targetClass = targetClass;
 		this.injectedElements = elements;
 	}
 
 
+	/**
+	 * Determine whether this metadata instance needs to be refreshed.
+	 * @param clazz the current target class
+	 * @return {@code true} indicating a refresh, {@code false} otherwise
+	 * @since 5.2.4
+	 */
+	protected boolean needsRefresh(Class<?> clazz) {
+		return this.targetClass != clazz;
+	}
+
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
-		Set<InjectedElement> checkedElements = new LinkedHashSet<InjectedElement>(this.injectedElements.size());
+		Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size());
 		for (InjectedElement element : this.injectedElements) {
 			Member member = element.getMember();
 			if (!beanDefinition.isExternallyManagedConfigMember(member)) {
 				beanDefinition.registerExternallyManagedConfigMember(member);
 				checkedElements.add(element);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Registered injected element on class [" + this.targetClass.getName() + "]: " + element);
-				}
 			}
 		}
 		this.checkedElements = checkedElements;
 	}
 
-	public void inject(Object target, String beanName, PropertyValues pvs) throws Throwable {
+	public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
+		Collection<InjectedElement> checkedElements = this.checkedElements;
 		Collection<InjectedElement> elementsToIterate =
-				(this.checkedElements != null ? this.checkedElements : this.injectedElements);
+				(checkedElements != null ? checkedElements : this.injectedElements);
 		if (!elementsToIterate.isEmpty()) {
-			boolean debug = logger.isDebugEnabled();
 			for (InjectedElement element : elementsToIterate) {
-				if (debug) {
-					logger.debug("Processing injected element of bean '" + beanName + "': " + element);
-				}
 				element.inject(target, beanName, pvs);
 			}
 		}
 	}
 
 	/**
+	 * Clear property skipping for the contained elements.
 	 * @since 3.2.13
 	 */
-	public void clear(PropertyValues pvs) {
+	public void clear(@Nullable PropertyValues pvs) {
+		Collection<InjectedElement> checkedElements = this.checkedElements;
 		Collection<InjectedElement> elementsToIterate =
-				(this.checkedElements != null ? this.checkedElements : this.injectedElements);
+				(checkedElements != null ? checkedElements : this.injectedElements);
 		if (!elementsToIterate.isEmpty()) {
 			for (InjectedElement element : elementsToIterate) {
 				element.clearPropertySkipping(pvs);
@@ -104,22 +137,46 @@ public class InjectionMetadata {
 	}
 
 
-	public static boolean needsRefresh(InjectionMetadata metadata, Class<?> clazz) {
-		return (metadata == null || metadata.targetClass != clazz);
+	/**
+	 * Return an {@code InjectionMetadata} instance, possibly for empty elements.
+	 * @param elements the elements to inject (possibly empty)
+	 * @param clazz the target class
+	 * @return a new {@link #InjectionMetadata(Class, Collection)} instance
+	 * @since 5.2
+	 */
+	public static InjectionMetadata forElements(Collection<InjectedElement> elements, Class<?> clazz) {
+		return (elements.isEmpty() ? new InjectionMetadata(clazz, Collections.emptyList()) :
+				new InjectionMetadata(clazz, elements));
+	}
+
+	/**
+	 * Check whether the given injection metadata needs to be refreshed.
+	 * @param metadata the existing metadata instance
+	 * @param clazz the current target class
+	 * @return {@code true} indicating a refresh, {@code false} otherwise
+	 * @see #needsRefresh(Class)
+	 */
+	public static boolean needsRefresh(@Nullable InjectionMetadata metadata, Class<?> clazz) {
+		return (metadata == null || metadata.needsRefresh(clazz));
 	}
 
 
-	public static abstract class InjectedElement {
+	/**
+	 * A single injected element.
+	 */
+	public abstract static class InjectedElement {
 
 		protected final Member member;
 
 		protected final boolean isField;
 
+		@Nullable
 		protected final PropertyDescriptor pd;
 
+		@Nullable
 		protected volatile Boolean skip;
 
-		protected InjectedElement(Member member, PropertyDescriptor pd) {
+		protected InjectedElement(Member member, @Nullable PropertyDescriptor pd) {
 			this.member = member;
 			this.isField = (member instanceof Field);
 			this.pd = pd;
@@ -162,7 +219,9 @@ public class InjectionMetadata {
 		/**
 		 * Either this or {@link #getResourceToInject} needs to be overridden.
 		 */
-		protected void inject(Object target, String requestingBeanName, PropertyValues pvs) throws Throwable {
+		protected void inject(Object target, @Nullable String requestingBeanName, @Nullable PropertyValues pvs)
+				throws Throwable {
+
 			if (this.isField) {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
@@ -188,17 +247,19 @@ public class InjectionMetadata {
 		 * an explicit property value having been specified. Also marks the
 		 * affected property as processed for other processors to ignore it.
 		 */
-		protected boolean checkPropertySkipping(PropertyValues pvs) {
-			if (this.skip != null) {
-				return this.skip;
+		protected boolean checkPropertySkipping(@Nullable PropertyValues pvs) {
+			Boolean skip = this.skip;
+			if (skip != null) {
+				return skip;
 			}
 			if (pvs == null) {
 				this.skip = false;
 				return false;
 			}
 			synchronized (pvs) {
-				if (this.skip != null) {
-					return this.skip;
+				skip = this.skip;
+				if (skip != null) {
+					return skip;
 				}
 				if (this.pd != null) {
 					if (pvs.contains(this.pd.getName())) {
@@ -216,9 +277,10 @@ public class InjectionMetadata {
 		}
 
 		/**
+		 * Clear property skipping for this element.
 		 * @since 3.2.13
 		 */
-		protected void clearPropertySkipping(PropertyValues pvs) {
+		protected void clearPropertySkipping(@Nullable PropertyValues pvs) {
 			if (pvs == null) {
 				return;
 			}
@@ -232,12 +294,13 @@ public class InjectionMetadata {
 		/**
 		 * Either this or {@link #inject} needs to be overridden.
 		 */
-		protected Object getResourceToInject(Object target, String requestingBeanName) {
+		@Nullable
+		protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
 			return null;
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

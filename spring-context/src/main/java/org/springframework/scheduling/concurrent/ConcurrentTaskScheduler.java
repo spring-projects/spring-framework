@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.time.Clock;
 import java.util.Date;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -23,10 +24,12 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
 import javax.enterprise.concurrent.LastExecution;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 
 import org.springframework.core.task.TaskRejectedException;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.SimpleTriggerContext;
@@ -64,6 +67,7 @@ import org.springframework.util.ErrorHandler;
  */
 public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements TaskScheduler {
 
+	@Nullable
 	private static Class<?> managedScheduledExecutorServiceClass;
 
 	static {
@@ -78,11 +82,15 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
+
 	private ScheduledExecutorService scheduledExecutor;
 
 	private boolean enterpriseConcurrentScheduler = false;
 
+	@Nullable
 	private ErrorHandler errorHandler;
+
+	private Clock clock = Clock.systemDefaultZone();
 
 
 	/**
@@ -92,7 +100,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	 */
 	public ConcurrentTaskScheduler() {
 		super();
-		setScheduledExecutor(null);
+		this.scheduledExecutor = initScheduledExecutor(null);
 	}
 
 	/**
@@ -107,7 +115,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	 */
 	public ConcurrentTaskScheduler(ScheduledExecutorService scheduledExecutor) {
 		super(scheduledExecutor);
-		setScheduledExecutor(scheduledExecutor);
+		this.scheduledExecutor = initScheduledExecutor(scheduledExecutor);
 	}
 
 	/**
@@ -123,9 +131,22 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	 */
 	public ConcurrentTaskScheduler(Executor concurrentExecutor, ScheduledExecutorService scheduledExecutor) {
 		super(concurrentExecutor);
-		setScheduledExecutor(scheduledExecutor);
+		this.scheduledExecutor = initScheduledExecutor(scheduledExecutor);
 	}
 
+
+	private ScheduledExecutorService initScheduledExecutor(@Nullable ScheduledExecutorService scheduledExecutor) {
+		if (scheduledExecutor != null) {
+			this.scheduledExecutor = scheduledExecutor;
+			this.enterpriseConcurrentScheduler = (managedScheduledExecutorServiceClass != null &&
+					managedScheduledExecutorServiceClass.isInstance(scheduledExecutor));
+		}
+		else {
+			this.scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+			this.enterpriseConcurrentScheduler = false;
+		}
+		return this.scheduledExecutor;
+	}
 
 	/**
 	 * Specify the {@link java.util.concurrent.ScheduledExecutorService} to delegate to.
@@ -138,36 +159,45 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	 * as well, pass the same executor reference to {@link #setConcurrentExecutor}.
 	 * @see #setConcurrentExecutor
 	 */
-	public final void setScheduledExecutor(ScheduledExecutorService scheduledExecutor) {
-		if (scheduledExecutor != null) {
-			this.scheduledExecutor = scheduledExecutor;
-			this.enterpriseConcurrentScheduler = (managedScheduledExecutorServiceClass != null &&
-					managedScheduledExecutorServiceClass.isInstance(scheduledExecutor));
-		}
-		else {
-			this.scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-			this.enterpriseConcurrentScheduler = false;
-		}
+	public void setScheduledExecutor(@Nullable ScheduledExecutorService scheduledExecutor) {
+		initScheduledExecutor(scheduledExecutor);
 	}
 
 	/**
 	 * Provide an {@link ErrorHandler} strategy.
 	 */
 	public void setErrorHandler(ErrorHandler errorHandler) {
-		Assert.notNull(errorHandler, "'errorHandler' must not be null");
+		Assert.notNull(errorHandler, "ErrorHandler must not be null");
 		this.errorHandler = errorHandler;
+	}
+
+	/**
+	 * Set the clock to use for scheduling purposes.
+	 * <p>The default clock is the system clock for the default time zone.
+	 * @since 5.3
+	 * @see Clock#systemDefaultZone()
+	 */
+	public void setClock(Clock clock) {
+		this.clock = clock;
+	}
+
+	@Override
+	public Clock getClock() {
+		return this.clock;
 	}
 
 
 	@Override
+	@Nullable
 	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		try {
 			if (this.enterpriseConcurrentScheduler) {
 				return new EnterpriseConcurrentTriggerScheduler().schedule(decorateTask(task, true), trigger);
 			}
 			else {
-				ErrorHandler errorHandler = (this.errorHandler != null ? this.errorHandler : TaskUtils.getDefaultErrorHandler(true));
-				return new ReschedulingRunnable(task, trigger, this.scheduledExecutor, errorHandler).schedule();
+				ErrorHandler errorHandler =
+						(this.errorHandler != null ? this.errorHandler : TaskUtils.getDefaultErrorHandler(true));
+				return new ReschedulingRunnable(task, trigger, this.clock, this.scheduledExecutor, errorHandler).schedule();
 			}
 		}
 		catch (RejectedExecutionException ex) {
@@ -177,7 +207,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 
 	@Override
 	public ScheduledFuture<?> schedule(Runnable task, Date startTime) {
-		long initialDelay = startTime.getTime() - System.currentTimeMillis();
+		long initialDelay = startTime.getTime() - this.clock.millis();
 		try {
 			return this.scheduledExecutor.schedule(decorateTask(task, false), initialDelay, TimeUnit.MILLISECONDS);
 		}
@@ -188,7 +218,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 
 	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period) {
-		long initialDelay = startTime.getTime() - System.currentTimeMillis();
+		long initialDelay = startTime.getTime() - this.clock.millis();
 		try {
 			return this.scheduledExecutor.scheduleAtFixedRate(decorateTask(task, true), initialDelay, period, TimeUnit.MILLISECONDS);
 		}
@@ -209,7 +239,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 
 	@Override
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
-		long initialDelay = startTime.getTime() - System.currentTimeMillis();
+		long initialDelay = startTime.getTime() - this.clock.millis();
 		try {
 			return this.scheduledExecutor.scheduleWithFixedDelay(decorateTask(task, true), initialDelay, delay, TimeUnit.MILLISECONDS);
 		}
@@ -247,10 +277,11 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 			ManagedScheduledExecutorService executor = (ManagedScheduledExecutorService) scheduledExecutor;
 			return executor.schedule(task, new javax.enterprise.concurrent.Trigger() {
 				@Override
-				public Date getNextRunTime(LastExecution le, Date taskScheduledTime) {
-					return trigger.nextExecutionTime(le != null ?
+				@Nullable
+				public Date getNextRunTime(@Nullable LastExecution le, Date taskScheduledTime) {
+					return (trigger.nextExecutionTime(le != null ?
 							new SimpleTriggerContext(le.getScheduledStart(), le.getRunStart(), le.getRunEnd()) :
-							new SimpleTriggerContext());
+							new SimpleTriggerContext()));
 				}
 				@Override
 				public boolean skipRun(LastExecution lastExecution, Date scheduledRunTime) {

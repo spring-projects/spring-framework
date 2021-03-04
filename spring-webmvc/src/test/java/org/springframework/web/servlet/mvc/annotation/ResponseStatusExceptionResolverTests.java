@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,28 +18,35 @@ package org.springframework.web.servlet.mvc.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.Locale;
 
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link ResponseStatusExceptionResolver}.
  *
  * @author Arjen Poutsma
  * @author Sam Brannen
+ * @author Rossen Stoyanchev
  */
 public class ResponseStatusExceptionResolverTests {
 
@@ -49,35 +56,32 @@ public class ResponseStatusExceptionResolverTests {
 
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
+
+	@BeforeEach
+	public void setup() {
+		exceptionResolver.setWarnLogCategory(exceptionResolver.getClass().getName());
+	}
+
+
 	@Test
 	public void statusCode() {
 		StatusCodeException ex = new StatusCodeException();
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
-		assertNotNull("No ModelAndView returned", mav);
-		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
-		assertEquals("Invalid status code", 400, response.getStatus());
-		assertTrue("Response has not been committed", response.isCommitted());
+		assertResolved(mav, 400, null);
 	}
 
 	@Test
 	public void statusCodeFromComposedResponseStatus() {
 		StatusCodeFromComposedResponseStatusException ex = new StatusCodeFromComposedResponseStatusException();
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
-		assertNotNull("No ModelAndView returned", mav);
-		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
-		assertEquals("Invalid status code", 400, response.getStatus());
-		assertTrue("Response has not been committed", response.isCommitted());
+		assertResolved(mav, 400, null);
 	}
 
 	@Test
 	public void statusCodeAndReason() {
 		StatusCodeAndReasonException ex = new StatusCodeAndReasonException();
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
-		assertNotNull("No ModelAndView returned", mav);
-		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
-		assertEquals("Invalid status code", 410, response.getStatus());
-		assertEquals("Invalid status reason", "You suck!", response.getErrorMessage());
-		assertTrue("Response has not been committed", response.isCommitted());
+		assertResolved(mav, 410, "You suck!");
 	}
 
 	@Test
@@ -91,7 +95,7 @@ public class ResponseStatusExceptionResolverTests {
 
 			StatusCodeAndReasonMessageException ex = new StatusCodeAndReasonMessageException();
 			exceptionResolver.resolveException(request, response, null, ex);
-			assertEquals("Invalid status reason", "Gone reason message", response.getErrorMessage());
+			assertThat(response.getErrorMessage()).as("Invalid status reason").isEqualTo("Gone reason message");
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();
@@ -103,19 +107,47 @@ public class ResponseStatusExceptionResolverTests {
 		Exception ex = new Exception();
 		exceptionResolver.resolveException(request, response, null, ex);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
-		assertNull("ModelAndView returned", mav);
+		assertThat(mav).as("ModelAndView returned").isNull();
 	}
 
-	// SPR-12903
-
-	@Test
+	@Test // SPR-12903
 	public void nestedException() throws Exception {
 		Exception cause = new StatusCodeAndReasonMessageException();
 		TypeMismatchException ex = new TypeMismatchException("value", ITestBean.class, cause);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
-		assertNotNull("No ModelAndView returned", mav);
-		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
-		assertEquals("Invalid status code", 410, response.getStatus());
+		assertResolved(mav, 410, "gone.reason");
+	}
+
+	@Test
+	public void responseStatusException() throws Exception {
+		ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertResolved(mav, 400, null);
+	}
+
+	@Test  // SPR-15524
+	public void responseStatusExceptionWithReason() throws Exception {
+		ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "The reason");
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertResolved(mav, 400, "The reason");
+	}
+
+	@Test
+	void responseStatusExceptionWithHeaders() {
+		Exception ex = new MethodNotAllowedException(
+				HttpMethod.GET, Arrays.asList(HttpMethod.POST, HttpMethod.PUT));
+
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+
+		assertResolved(mav, 405, "Request method 'GET' not supported");
+		assertThat(response.getHeader(HttpHeaders.ALLOW)).isEqualTo("POST,PUT");
+	}
+
+	private void assertResolved(ModelAndView mav, int status, String reason) {
+		assertThat(mav != null && mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
+		assertThat(response.getStatus()).isEqualTo(status);
+		assertThat(response.getErrorMessage()).isEqualTo(reason);
+		assertThat(response.isCommitted()).isTrue();
 	}
 
 
@@ -136,6 +168,7 @@ public class ResponseStatusExceptionResolverTests {
 
 	@ResponseStatus
 	@Retention(RetentionPolicy.RUNTIME)
+	@SuppressWarnings("unused")
 	@interface ComposedResponseStatus {
 
 		@AliasFor(annotation = ResponseStatus.class, attribute = "code")

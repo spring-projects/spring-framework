@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,30 +27,49 @@ import org.springframework.core.annotation.AliasFor;
 
 /**
  * An {@link EventListener} that is invoked according to a {@link TransactionPhase}.
+ * This is an an annotation-based equivalent of {@link TransactionalApplicationListener}.
  *
- * <p>If the event is not published within the boundaries of a managed transaction, the event
- * is discarded unless the {@link #fallbackExecution} flag is explicitly set. If a
- * transaction is running, the event is processed according to its {@code TransactionPhase}.
+ * <p>If the event is not published within an active transaction, the event is discarded
+ * unless the {@link #fallbackExecution} flag is explicitly set. If a transaction is
+ * running, the event is processed according to its {@code TransactionPhase}.
  *
- * <p>Adding {@link org.springframework.core.annotation.Order @Order} on your annotated method
- * allows you to prioritize that listener amongst other listeners running in the same phase.
+ * <p>Adding {@link org.springframework.core.annotation.Order @Order} to your annotated
+ * method allows you to prioritize that listener amongst other listeners running before
+ * or after transaction completion.
+ *
+ * <p><b>NOTE: Transactional event listeners only work with thread-bound transactions
+ * managed by {@link org.springframework.transaction.PlatformTransactionManager}.</b>
+ * A reactive transaction managed by {@link org.springframework.transaction.ReactiveTransactionManager}
+ * uses the Reactor context instead of thread-local attributes, so from the perspective of
+ * an event listener, there is no compatible active transaction that it can participate in.
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author Oliver Drotbohm
  * @since 4.2
+ * @see TransactionalApplicationListener
+ * @see TransactionalApplicationListenerMethodAdapter
  */
-@EventListener
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@EventListener
 public @interface TransactionalEventListener {
 
 	/**
 	 * Phase to bind the handling of an event to.
+	 * <p>The default phase is {@link TransactionPhase#AFTER_COMMIT}.
 	 * <p>If no transaction is in progress, the event is not processed at
 	 * all unless {@link #fallbackExecution} has been enabled explicitly.
 	 */
 	TransactionPhase phase() default TransactionPhase.AFTER_COMMIT;
+
+	/**
+	 * An optional identifier to uniquely reference the listener.
+	 * @since 5.3
+	 * @see TransactionalApplicationListener#getListenerId()
+	 */
+	String id() default "";
 
 	/**
 	 * Whether the event should be processed if no transaction is running.
@@ -76,7 +95,7 @@ public @interface TransactionalEventListener {
 	/**
 	 * Spring Expression Language (SpEL) attribute used for making the event
 	 * handling conditional.
-	 * <p>Default is {@code ""}, meaning the event is always handled.
+	 * <p>The default is {@code ""}, meaning the event is always handled.
 	 * @see EventListener#condition
 	 */
 	String condition() default "";

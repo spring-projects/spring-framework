@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,12 +17,15 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.ServletContextAware;
@@ -50,24 +53,26 @@ import org.springframework.web.context.ServletContextAware;
  */
 public class DefaultServletHttpRequestHandler implements HttpRequestHandler, ServletContextAware {
 
-	/** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish */
+	/** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish. */
 	private static final String COMMON_DEFAULT_SERVLET_NAME = "default";
 
-	/** Default Servlet name used by Google App Engine */
+	/** Default Servlet name used by Google App Engine. */
 	private static final String GAE_DEFAULT_SERVLET_NAME = "_ah_default";
 
-	/** Default Servlet name used by Resin */
+	/** Default Servlet name used by Resin. */
 	private static final String RESIN_DEFAULT_SERVLET_NAME = "resin-file";
 
-	/** Default Servlet name used by WebLogic */
+	/** Default Servlet name used by WebLogic. */
 	private static final String WEBLOGIC_DEFAULT_SERVLET_NAME = "FileServlet";
 
-	/** Default Servlet name used by WebSphere */
+	/** Default Servlet name used by WebSphere. */
 	private static final String WEBSPHERE_DEFAULT_SERVLET_NAME = "SimpleFileServlet";
 
 
+	@Nullable
 	private String defaultServletName;
 
+	@Nullable
 	private ServletContext servletContext;
 
 
@@ -114,6 +119,7 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
+		Assert.state(this.servletContext != null, "No ServletContext set");
 		RequestDispatcher rd = this.servletContext.getNamedDispatcher(this.defaultServletName);
 		if (rd == null) {
 			throw new IllegalStateException("A RequestDispatcher could not be located for the default servlet '" +

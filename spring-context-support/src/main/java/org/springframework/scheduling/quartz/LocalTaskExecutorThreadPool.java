@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,9 +24,12 @@ import org.apache.commons.logging.LogFactory;
 import org.quartz.SchedulerConfigException;
 import org.quartz.spi.ThreadPool;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 /**
- * Quartz ThreadPool adapter that delegates to a Spring-managed
- * TaskExecutor instance, specified on SchedulerFactoryBean.
+ * Quartz {@link ThreadPool} adapter that delegates to a Spring-managed
+ * {@link Executor} instance, specified on {@link SchedulerFactoryBean}.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -34,9 +37,10 @@ import org.quartz.spi.ThreadPool;
  */
 public class LocalTaskExecutorThreadPool implements ThreadPool {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Executor taskExecutor;
 
 
@@ -51,12 +55,11 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 
 	@Override
 	public void initialize() throws SchedulerConfigException {
-		// Absolutely needs thread-bound TaskExecutor to initialize.
+		// Absolutely needs thread-bound Executor to initialize.
 		this.taskExecutor = SchedulerFactoryBean.getConfigTimeTaskExecutor();
 		if (this.taskExecutor == null) {
-			throw new SchedulerConfigException(
-				"No local TaskExecutor found for configuration - " +
-				"'taskExecutor' property must be set on SchedulerFactoryBean");
+			throw new SchedulerConfigException("No local Executor found for configuration - " +
+					"'taskExecutor' property must be set on SchedulerFactoryBean");
 		}
 	}
 
@@ -72,9 +75,7 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 
 	@Override
 	public boolean runInThread(Runnable runnable) {
-		if (runnable == null) {
-			return false;
-		}
+		Assert.state(this.taskExecutor != null, "No TaskExecutor available");
 		try {
 			this.taskExecutor.execute(runnable);
 			return true;

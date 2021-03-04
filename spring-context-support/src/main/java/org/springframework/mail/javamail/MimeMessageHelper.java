@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
@@ -39,6 +40,7 @@ import javax.mail.internet.MimeUtility;
 
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -157,18 +159,21 @@ public class MimeMessageHelper {
 
 	private static final String HEADER_PRIORITY = "X-Priority";
 
-	private static final String HEADER_CONTENT_ID = "Content-ID";
-
 
 	private final MimeMessage mimeMessage;
 
+	@Nullable
 	private MimeMultipart rootMimeMultipart;
 
+	@Nullable
 	private MimeMultipart mimeMultipart;
 
+	@Nullable
 	private final String encoding;
 
 	private FileTypeMap fileTypeMap;
+
+	private boolean encodeFilenames = false;
 
 	private boolean validateAddresses = false;
 
@@ -180,7 +185,7 @@ public class MimeMessageHelper {
 	 * <p>The character encoding for the message will be taken from
 	 * the passed-in MimeMessage object, if carried there. Else,
 	 * JavaMail's default encoding will be used.
-	 * @param mimeMessage MimeMessage to work on
+	 * @param mimeMessage the mime message to work on
 	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, boolean)
 	 * @see #getDefaultEncoding(javax.mail.internet.MimeMessage)
 	 * @see JavaMailSenderImpl#setDefaultEncoding
@@ -193,11 +198,11 @@ public class MimeMessageHelper {
 	 * Create a new MimeMessageHelper for the given MimeMessage,
 	 * assuming a simple text message (no multipart content,
 	 * i.e. no alternative texts and no inline elements or attachments).
-	 * @param mimeMessage MimeMessage to work on
+	 * @param mimeMessage the mime message to work on
 	 * @param encoding the character encoding to use for the message
 	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, boolean)
 	 */
-	public MimeMessageHelper(MimeMessage mimeMessage, String encoding) {
+	public MimeMessageHelper(MimeMessage mimeMessage, @Nullable String encoding) {
 		this.mimeMessage = mimeMessage;
 		this.encoding = (encoding != null ? encoding : getDefaultEncoding(mimeMessage));
 		this.fileTypeMap = getDefaultFileTypeMap(mimeMessage);
@@ -213,7 +218,7 @@ public class MimeMessageHelper {
 	 * <p>The character encoding for the message will be taken from
 	 * the passed-in MimeMessage object, if carried there. Else,
 	 * JavaMail's default encoding will be used.
-	 * @param mimeMessage MimeMessage to work on
+	 * @param mimeMessage the mime message to work on
 	 * @param multipart whether to create a multipart message that
 	 * supports alternative texts, inline elements and attachments
 	 * (corresponds to MULTIPART_MODE_MIXED_RELATED)
@@ -233,7 +238,7 @@ public class MimeMessageHelper {
 	 * <p>Consider using the MimeMessageHelper constructor that
 	 * takes a multipartMode argument to choose a specific multipart
 	 * mode other than MULTIPART_MODE_MIXED_RELATED.
-	 * @param mimeMessage MimeMessage to work on
+	 * @param mimeMessage the mime message to work on
 	 * @param multipart whether to create a multipart message that
 	 * supports alternative texts, inline elements and attachments
 	 * (corresponds to MULTIPART_MODE_MIXED_RELATED)
@@ -241,7 +246,7 @@ public class MimeMessageHelper {
 	 * @throws MessagingException if multipart creation failed
 	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, int, String)
 	 */
-	public MimeMessageHelper(MimeMessage mimeMessage, boolean multipart, String encoding)
+	public MimeMessageHelper(MimeMessage mimeMessage, boolean multipart, @Nullable String encoding)
 			throws MessagingException {
 
 		this(mimeMessage, (multipart ? MULTIPART_MODE_MIXED_RELATED : MULTIPART_MODE_NO), encoding);
@@ -254,7 +259,7 @@ public class MimeMessageHelper {
 	 * <p>The character encoding for the message will be taken from
 	 * the passed-in MimeMessage object, if carried there. Else,
 	 * JavaMail's default encoding will be used.
-	 * @param mimeMessage MimeMessage to work on
+	 * @param mimeMessage the mime message to work on
 	 * @param multipartMode which kind of multipart message to create
 	 * (MIXED, RELATED, MIXED_RELATED, or NO)
 	 * @throws MessagingException if multipart creation failed
@@ -273,7 +278,7 @@ public class MimeMessageHelper {
 	 * Create a new MimeMessageHelper for the given MimeMessage,
 	 * in multipart mode (supporting alternative texts, inline
 	 * elements and attachments) if requested.
-	 * @param mimeMessage MimeMessage to work on
+	 * @param mimeMessage the mime message to work on
 	 * @param multipartMode which kind of multipart message to create
 	 * (MIXED, RELATED, MIXED_RELATED, or NO)
 	 * @param encoding the character encoding to use for the message
@@ -283,7 +288,7 @@ public class MimeMessageHelper {
 	 * @see #MULTIPART_MODE_RELATED
 	 * @see #MULTIPART_MODE_MIXED_RELATED
 	 */
-	public MimeMessageHelper(MimeMessage mimeMessage, int multipartMode, String encoding)
+	public MimeMessageHelper(MimeMessage mimeMessage, int multipartMode, @Nullable String encoding)
 			throws MessagingException {
 
 		this.mimeMessage = mimeMessage;
@@ -361,7 +366,7 @@ public class MimeMessageHelper {
 	 * will be added to (can be the same as the root multipart object, or an element
 	 * nested underneath the root multipart element)
 	 */
-	protected final void setMimeMultiparts(MimeMultipart root, MimeMultipart main) {
+	protected final void setMimeMultiparts(@Nullable MimeMultipart root, @Nullable MimeMultipart main) {
 		this.rootMimeMultipart = root;
 		this.mimeMultipart = main;
 	}
@@ -376,17 +381,6 @@ public class MimeMessageHelper {
 	}
 
 	/**
-	 * Throw an IllegalStateException if this helper is not in multipart mode.
-	 */
-	private void checkMultipart() throws IllegalStateException {
-		if (!isMultipart()) {
-			throw new IllegalStateException("Not in multipart mode - " +
-				"create an appropriate MimeMessageHelper via a constructor that takes a 'multipart' flag " +
-				"if you need to set alternative texts or add inline elements or attachments.");
-		}
-	}
-
-	/**
 	 * Return the root MIME "multipart/mixed" object, if any.
 	 * Can be used to manually add attachments.
 	 * <p>This will be the direct content of the MimeMessage,
@@ -397,7 +391,11 @@ public class MimeMessageHelper {
 	 * @see javax.mail.internet.MimeMultipart#addBodyPart
 	 */
 	public final MimeMultipart getRootMimeMultipart() throws IllegalStateException {
-		checkMultipart();
+		if (this.rootMimeMultipart == null) {
+			throw new IllegalStateException("Not in multipart mode - " +
+					"create an appropriate MimeMessageHelper via a constructor that takes a 'multipart' flag " +
+					"if you need to set alternative texts or add inline elements or attachments.");
+		}
 		return this.rootMimeMultipart;
 	}
 
@@ -412,7 +410,11 @@ public class MimeMessageHelper {
 	 * @see javax.mail.internet.MimeMultipart#addBodyPart
 	 */
 	public final MimeMultipart getMimeMultipart() throws IllegalStateException {
-		checkMultipart();
+		if (this.mimeMultipart == null) {
+			throw new IllegalStateException("Not in multipart mode - " +
+					"create an appropriate MimeMessageHelper via a constructor that takes a 'multipart' flag " +
+					"if you need to set alternative texts or add inline elements or attachments.");
+		}
 		return this.mimeMultipart;
 	}
 
@@ -423,6 +425,7 @@ public class MimeMessageHelper {
 	 * @return the default encoding associated with the MimeMessage,
 	 * or {@code null} if none found
 	 */
+	@Nullable
 	protected String getDefaultEncoding(MimeMessage mimeMessage) {
 		if (mimeMessage instanceof SmartMimeMessage) {
 			return ((SmartMimeMessage) mimeMessage).getDefaultEncoding();
@@ -433,6 +436,7 @@ public class MimeMessageHelper {
 	/**
 	 * Return the specific character encoding used for this message, if any.
 	 */
+	@Nullable
 	public String getEncoding() {
 		return this.encoding;
 	}
@@ -460,7 +464,7 @@ public class MimeMessageHelper {
 	 * Set the Java Activation Framework {@code FileTypeMap} to use
 	 * for determining the content type of inline content and attachments
 	 * that get added to the message.
-	 * <p>Default is the {@code FileTypeMap} that the underlying
+	 * <p>The default is the {@code FileTypeMap} that the underlying
 	 * MimeMessage carries, if any, or the Activation Framework's default
 	 * {@code FileTypeMap} instance else.
 	 * @see #addInline
@@ -470,12 +474,13 @@ public class MimeMessageHelper {
 	 * @see javax.activation.FileTypeMap#getDefaultFileTypeMap
 	 * @see ConfigurableMimeFileTypeMap
 	 */
-	public void setFileTypeMap(FileTypeMap fileTypeMap) {
+	public void setFileTypeMap(@Nullable FileTypeMap fileTypeMap) {
 		this.fileTypeMap = (fileTypeMap != null ? fileTypeMap : getDefaultFileTypeMap(getMimeMessage()));
 	}
 
 	/**
 	 * Return the {@code FileTypeMap} used by this MimeMessageHelper.
+	 * @see #setFileTypeMap
 	 */
 	public FileTypeMap getFileTypeMap() {
 		return this.fileTypeMap;
@@ -483,11 +488,34 @@ public class MimeMessageHelper {
 
 
 	/**
+	 * Set whether to encode attachment filenames passed to this helper's
+	 * {@code #addAttachment} methods.
+	 * <p>The default is {@code false} for standard MIME behavior; turn this to
+	 * {@code true} for compatibility with older email clients. On a related note,
+	 * check out JavaMail's {@code mail.mime.encodefilename} system property.
+	 * <p><b>NOTE:</b> The default changed to {@code false} in 5.3, in favor of
+	 * JavaMail's standard {@code mail.mime.encodefilename} system property.
+	 * @since 5.2.9
+	 * @see #addAttachment(String, DataSource)
+	 * @see MimeBodyPart#setFileName(String)
+	 */
+	public void setEncodeFilenames(boolean encodeFilenames) {
+		this.encodeFilenames = encodeFilenames;
+	}
+
+	/**
+	 * Return whether to encode attachment filenames passed to this helper's
+	 * {@code #addAttachment} methods.
+	 * @since 5.2.9
+	 * @see #setEncodeFilenames
+	 */
+	public boolean isEncodeFilenames() {
+		return this.encodeFilenames;
+	}
+
+	/**
 	 * Set whether to validate all addresses which get passed to this helper.
-	 * Default is "false".
-	 * <p>Note that this is by default just available for JavaMail >= 1.3.
-	 * You can override the default {@code validateAddress method} for
-	 * validation on older JavaMail versions (or for custom validation).
+	 * <p>The default is {@code false}.
 	 * @see #validateAddress
 	 */
 	public void setValidateAddresses(boolean validateAddresses) {
@@ -496,6 +524,7 @@ public class MimeMessageHelper {
 
 	/**
 	 * Return whether this helper will validate all addresses passed to it.
+	 * @see #setValidateAddresses
 	 */
 	public boolean isValidateAddresses() {
 		return this.validateAddresses;
@@ -504,10 +533,8 @@ public class MimeMessageHelper {
 	/**
 	 * Validate the given mail address.
 	 * Called by all of MimeMessageHelper's address setters and adders.
-	 * <p>Default implementation invokes {@code InternetAddress.validate()},
+	 * <p>The default implementation invokes {@link InternetAddress#validate()},
 	 * provided that address validation is activated for the helper instance.
-	 * <p>Note that this method will just work on JavaMail >= 1.3. You can override
-	 * it for validation on older JavaMail versions or for custom validation.
 	 * @param address the address to validate
 	 * @throws AddressException if validation failed
 	 * @see #isValidateAddresses()
@@ -521,7 +548,8 @@ public class MimeMessageHelper {
 
 	/**
 	 * Validate all given mail addresses.
-	 * Default implementation simply delegates to validateAddress for each address.
+	 * <p>The default implementation simply delegates to {@link #validateAddress}
+	 * for each address.
 	 * @param addresses the addresses to validate
 	 * @throws AddressException if validation failed
 	 * @see #validateAddress(InternetAddress)
@@ -881,9 +909,7 @@ public class MimeMessageHelper {
 		Assert.notNull(dataSource, "DataSource must not be null");
 		MimeBodyPart mimeBodyPart = new MimeBodyPart();
 		mimeBodyPart.setDisposition(MimeBodyPart.INLINE);
-		// We're using setHeader here to remain compatible with JavaMail 1.2,
-		// rather than JavaMail 1.3's setContentID.
-		mimeBodyPart.setHeader(HEADER_CONTENT_ID, "<" + contentId + ">");
+		mimeBodyPart.setContentID("<" + contentId + ">");
 		mimeBodyPart.setDataHandler(new DataHandler(dataSource));
 		getMimeMultipart().addBodyPart(mimeBodyPart);
 	}
@@ -993,7 +1019,8 @@ public class MimeMessageHelper {
 		try {
 			MimeBodyPart mimeBodyPart = new MimeBodyPart();
 			mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
-			mimeBodyPart.setFileName(MimeUtility.encodeText(attachmentFilename));
+			mimeBodyPart.setFileName(isEncodeFilenames() ?
+					MimeUtility.encodeText(attachmentFilename) : attachmentFilename);
 			mimeBodyPart.setDataHandler(new DataHandler(dataSource));
 			getRootMimeMultipart().addBodyPart(mimeBodyPart);
 		}

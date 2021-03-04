@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.util.xml;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventFactory;
@@ -28,8 +29,6 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
-
-import org.springframework.util.Assert;
 
 /**
  * Implementation of the {@link javax.xml.stream.XMLStreamWriter} interface
@@ -47,14 +46,12 @@ class XMLEventStreamWriter implements XMLStreamWriter {
 
 	private final XMLEventFactory eventFactory;
 
-	private final List<EndElement> endElements = new ArrayList<EndElement>();
+	private final List<EndElement> endElements = new ArrayList<>();
 
 	private boolean emptyElement = false;
 
 
 	public XMLEventStreamWriter(XMLEventWriter eventWriter, XMLEventFactory eventFactory) {
-		Assert.notNull(eventWriter, "'eventWriter' must not be null");
-		Assert.notNull(eventFactory, "'eventFactory' must not be null");
 		this.eventWriter = eventWriter;
 		this.eventFactory = eventFactory;
 	}
@@ -164,9 +161,8 @@ class XMLEventStreamWriter implements XMLStreamWriter {
 	public void writeEndElement() throws XMLStreamException {
 		closeEmptyElementIfNecessary();
 		int last = this.endElements.size() - 1;
-		EndElement lastEndElement = this.endElements.get(last);
+		EndElement lastEndElement = this.endElements.remove(last);
 		this.eventWriter.add(lastEndElement);
-		this.endElements.remove(last);
 	}
 
 	@Override
@@ -201,7 +197,7 @@ class XMLEventStreamWriter implements XMLStreamWriter {
 		int last = this.endElements.size() - 1;
 		EndElement oldEndElement = this.endElements.get(last);
 		Iterator oldNamespaces = oldEndElement.getNamespaces();
-		List<Namespace> newNamespaces = new ArrayList<Namespace>();
+		List<Namespace> newNamespaces = new ArrayList<>();
 		while (oldNamespaces.hasNext()) {
 			Namespace oldNamespace = (Namespace) oldNamespaces.next();
 			newNamespaces.add(oldNamespace);

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,25 +16,23 @@
 
 package org.springframework.test.web.servlet;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.hamcrest.Matchers.nullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 /**
  * Integration tests that verify that {@link MockMvc} can be reused multiple
@@ -46,29 +44,25 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
  * @author Rob Winch
  * @since 4.2
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
-@WebAppConfiguration
-public class MockMvcReuseTests {
+@SpringJUnitWebConfig
+@TestInstance(Lifecycle.PER_CLASS)
+class MockMvcReuseTests {
 
 	private static final String HELLO = "hello";
 	private static final String ENIGMA = "enigma";
 	private static final String FOO = "foo";
 	private static final String BAR = "bar";
 
-	@Autowired
-	private WebApplicationContext wac;
-
-	private MockMvc mvc;
+	private final MockMvc mvc;
 
 
-	@Before
-	public void setUp() {
-		this.mvc = webAppContextSetup(this.wac).build();
+	MockMvcReuseTests(WebApplicationContext wac) {
+		this.mvc = webAppContextSetup(wac).build();
 	}
 
+
 	@Test
-	public void sessionAttributesAreClearedBetweenInvocations() throws Exception {
+	void sessionAttributesAreClearedBetweenInvocations() throws Exception {
 
 		this.mvc.perform(get("/"))
 			.andExpect(content().string(HELLO))
@@ -84,7 +78,7 @@ public class MockMvcReuseTests {
 	}
 
 	@Test
-	public void requestParametersAreClearedBetweenInvocations() throws Exception {
+	void requestParametersAreClearedBetweenInvocations() throws Exception {
 		this.mvc.perform(get("/"))
 			.andExpect(content().string(HELLO));
 
@@ -101,7 +95,7 @@ public class MockMvcReuseTests {
 	static class Config {
 
 		@Bean
-		public MyController myController() {
+		MyController myController() {
 			return new MyController();
 		}
 	}
@@ -109,13 +103,13 @@ public class MockMvcReuseTests {
 	@RestController
 	static class MyController {
 
-		@RequestMapping("/")
-		public String hello() {
+		@GetMapping("/")
+		String hello() {
 			return HELLO;
 		}
 
-		@RequestMapping(path = "/", params = ENIGMA)
-		public String enigma() {
+		@GetMapping(path = "/", params = ENIGMA)
+		String enigma() {
 			return ENIGMA;
 		}
 	}

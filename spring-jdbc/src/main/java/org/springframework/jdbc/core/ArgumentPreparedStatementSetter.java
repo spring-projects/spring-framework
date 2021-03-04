@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,8 @@ package org.springframework.jdbc.core;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple adapter for {@link PreparedStatementSetter} that applies a given array of arguments.
  *
@@ -27,6 +29,7 @@ import java.sql.SQLException;
  */
 public class ArgumentPreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
 
+	@Nullable
 	private final Object[] args;
 
 
@@ -34,7 +37,7 @@ public class ArgumentPreparedStatementSetter implements PreparedStatementSetter,
 	 * Create a new ArgPreparedStatementSetter for the given arguments.
 	 * @param args the arguments to set
 	 */
-	public ArgumentPreparedStatementSetter(Object[] args) {
+	public ArgumentPreparedStatementSetter(@Nullable Object[] args) {
 		this.args = args;
 	}
 
@@ -55,7 +58,7 @@ public class ArgumentPreparedStatementSetter implements PreparedStatementSetter,
 	 * @param ps the PreparedStatement
 	 * @param parameterPosition index of the parameter position
 	 * @param argValue the value to set
-	 * @throws SQLException
+	 * @throws SQLException if thrown by PreparedStatement methods
 	 */
 	protected void doSetValue(PreparedStatement ps, int parameterPosition, Object argValue) throws SQLException {
 		if (argValue instanceof SqlParameterValue) {

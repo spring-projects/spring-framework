@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,17 +17,15 @@
 package org.springframework.web.context.annotation;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.AliasFor;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.springframework.web.context.WebApplicationContext.SCOPE_REQUEST;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * {@code @RequestScope} is a specialization of {@link Scope @Scope} for a
@@ -50,10 +48,10 @@ import static org.springframework.web.context.WebApplicationContext.SCOPE_REQUES
  * @see org.springframework.stereotype.Component
  * @see org.springframework.context.annotation.Bean
  */
-@Scope(SCOPE_REQUEST)
-@Target({ TYPE, METHOD })
-@Retention(RUNTIME)
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Scope(WebApplicationContext.SCOPE_REQUEST)
 public @interface RequestScope {
 
 	/**

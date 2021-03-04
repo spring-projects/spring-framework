@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,13 +17,16 @@
 package org.springframework.jms.config;
 
 import javax.jms.ConnectionFactory;
+import javax.jms.ExceptionListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 
 /**
@@ -31,6 +34,7 @@ import org.springframework.util.ErrorHandler;
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @param <C> the container type
  * @see AbstractMessageListenerContainer
  */
 public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMessageListenerContainer>
@@ -38,30 +42,49 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private ConnectionFactory connectionFactory;
 
+	@Nullable
 	private DestinationResolver destinationResolver;
 
-	private ErrorHandler errorHandler;
-
+	@Nullable
 	private MessageConverter messageConverter;
 
+	@Nullable
+	private ExceptionListener exceptionListener;
+
+	@Nullable
+	private ErrorHandler errorHandler;
+
+	@Nullable
 	private Boolean sessionTransacted;
 
+	@Nullable
 	private Integer sessionAcknowledgeMode;
 
+	@Nullable
 	private Boolean pubSubDomain;
 
+	@Nullable
 	private Boolean replyPubSubDomain;
 
+	@Nullable
+	private QosSettings replyQosSettings;
+
+	@Nullable
 	private Boolean subscriptionDurable;
 
+	@Nullable
 	private Boolean subscriptionShared;
 
+	@Nullable
 	private String clientId;
 
+	@Nullable
 	private Integer phase;
 
+	@Nullable
 	private Boolean autoStartup;
 
 
@@ -80,17 +103,25 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	}
 
 	/**
-	 * @see AbstractMessageListenerContainer#setErrorHandler(ErrorHandler)
-	 */
-	public void setErrorHandler(ErrorHandler errorHandler) {
-		this.errorHandler = errorHandler;
-	}
-
-	/**
 	 * @see AbstractMessageListenerContainer#setMessageConverter(MessageConverter)
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
 		this.messageConverter = messageConverter;
+	}
+
+	/**
+	 * @since 5.2.8
+	 * @see AbstractMessageListenerContainer#setExceptionListener(ExceptionListener)
+	 */
+	public void setExceptionListener(ExceptionListener exceptionListener) {
+		this.exceptionListener = exceptionListener;
+	}
+
+	/**
+	 * @see AbstractMessageListenerContainer#setErrorHandler(ErrorHandler)
+	 */
+	public void setErrorHandler(ErrorHandler errorHandler) {
+		this.errorHandler = errorHandler;
 	}
 
 	/**
@@ -119,6 +150,13 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	 */
 	public void setReplyPubSubDomain(Boolean replyPubSubDomain) {
 		this.replyPubSubDomain = replyPubSubDomain;
+	}
+
+	/**
+	 * @see AbstractMessageListenerContainer#setReplyQosSettings(QosSettings)
+	 */
+	public void setReplyQosSettings(QosSettings replyQosSettings) {
+		this.replyQosSettings = replyQosSettings;
 	}
 
 	/**
@@ -156,6 +194,7 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		this.autoStartup = autoStartup;
 	}
 
+
 	@Override
 	public C createListenerContainer(JmsListenerEndpoint endpoint) {
 		C instance = createContainerInstance();
@@ -166,11 +205,14 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		if (this.destinationResolver != null) {
 			instance.setDestinationResolver(this.destinationResolver);
 		}
-		if (this.errorHandler != null) {
-			instance.setErrorHandler(this.errorHandler);
-		}
 		if (this.messageConverter != null) {
 			instance.setMessageConverter(this.messageConverter);
+		}
+		if (this.exceptionListener != null) {
+			instance.setExceptionListener(this.exceptionListener);
+		}
+		if (this.errorHandler != null) {
+			instance.setErrorHandler(this.errorHandler);
 		}
 		if (this.sessionTransacted != null) {
 			instance.setSessionTransacted(this.sessionTransacted);
@@ -183,6 +225,9 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		}
 		if (this.replyPubSubDomain != null) {
 			instance.setReplyPubSubDomain(this.replyPubSubDomain);
+		}
+		if (this.replyQosSettings != null) {
+			instance.setReplyQosSettings(this.replyQosSettings);
 		}
 		if (this.subscriptionDurable != null) {
 			instance.setSubscriptionDurable(this.subscriptionDurable);
@@ -200,8 +245,8 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 			instance.setAutoStartup(this.autoStartup);
 		}
 
-		endpoint.setupListenerContainer(instance);
 		initializeContainer(instance);
+		endpoint.setupListenerContainer(instance);
 
 		return instance;
 	}

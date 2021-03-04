@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,70 +16,67 @@
 
 package org.springframework.beans.factory.parsing;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+
+import org.springframework.lang.Nullable;
 
 /**
- * Simple {@link Stack}-based structure for tracking the logical position during
- * a parsing process. {@link Entry entries} are added to the stack at
- * each point during the parse phase in a reader-specific manner.
+ * Simple {@link ArrayDeque}-based structure for tracking the logical position during
+ * a parsing process. {@link Entry entries} are added to the ArrayDeque at each point
+ * during the parse phase in a reader-specific manner.
  *
  * <p>Calling {@link #toString()} will render a tree-style view of the current logical
- * position in the parse phase. This representation is intended for use in
- * error messages.
+ * position in the parse phase. This representation is intended for use in error messages.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public final class ParseState {
 
 	/**
-	 * Tab character used when rendering the tree-style representation.
+	 * Internal {@link ArrayDeque} storage.
 	 */
-	private static final char TAB = '\t';
-
-	/**
-	 * Internal {@link Stack} storage.
-	 */
-	private final Stack<Entry> state;
+	private final ArrayDeque<Entry> state;
 
 
 	/**
-	 * Create a new {@code ParseState} with an empty {@link Stack}.
+	 * Create a new {@code ParseState} with an empty {@link ArrayDeque}.
 	 */
 	public ParseState() {
-		this.state = new Stack<Entry>();
+		this.state = new ArrayDeque<>();
 	}
 
 	/**
-	 * Create a new {@code ParseState} whose {@link Stack} is a {@link Object#clone clone}
-	 * of that of the passed in {@code ParseState}.
+	 * Create a new {@code ParseState} whose {@link ArrayDeque} is a clone
+	 * of the state in the passed-in {@code ParseState}.
 	 */
-	@SuppressWarnings("unchecked")
 	private ParseState(ParseState other) {
-		this.state = (Stack<Entry>) other.state.clone();
+		this.state = other.state.clone();
 	}
 
 
 	/**
-	 * Add a new {@link Entry} to the {@link Stack}.
+	 * Add a new {@link Entry} to the {@link ArrayDeque}.
 	 */
 	public void push(Entry entry) {
 		this.state.push(entry);
 	}
 
 	/**
-	 * Remove an {@link Entry} from the {@link Stack}.
+	 * Remove an {@link Entry} from the {@link ArrayDeque}.
 	 */
 	public void pop() {
 		this.state.pop();
 	}
 
 	/**
-	 * Return the {@link Entry} currently at the top of the {@link Stack} or
-	 * {@code null} if the {@link Stack} is empty.
+	 * Return the {@link Entry} currently at the top of the {@link ArrayDeque} or
+	 * {@code null} if the {@link ArrayDeque} is empty.
 	 */
+	@Nullable
 	public Entry peek() {
-		return this.state.empty() ? null : this.state.peek();
+		return this.state.peek();
 	}
 
 	/**
@@ -96,16 +93,18 @@ public final class ParseState {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		for (int x = 0; x < this.state.size(); x++) {
-			if (x > 0) {
+		StringBuilder sb = new StringBuilder(64);
+		int i = 0;
+		for (ParseState.Entry entry : this.state) {
+			if (i > 0) {
 				sb.append('\n');
-				for (int y = 0; y < x; y++) {
-					sb.append(TAB);
+				for (int j = 0; j < i; j++) {
+					sb.append('\t');
 				}
 				sb.append("-> ");
 			}
-			sb.append(this.state.get(x));
+			sb.append(entry);
+			i++;
 		}
 		return sb.toString();
 	}
@@ -115,7 +114,6 @@ public final class ParseState {
 	 * Marker interface for entries into the {@link ParseState}.
 	 */
 	public interface Entry {
-
 	}
 
 }
