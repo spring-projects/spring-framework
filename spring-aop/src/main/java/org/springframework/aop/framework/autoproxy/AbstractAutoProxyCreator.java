@@ -508,7 +508,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 		List<Object> allInterceptors = new ArrayList<>();
 		if (specificInterceptors != null) {
-			allInterceptors.addAll(Arrays.asList(specificInterceptors));
+			if (specificInterceptors.length > 0) {
+				// specificInterceptors may equals PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
+				allInterceptors.addAll(Arrays.asList(specificInterceptors));
+			}
 			if (commonInterceptors.length > 0) {
 				if (this.applyCommonInterceptorsFirst) {
 					allInterceptors.addAll(0, Arrays.asList(commonInterceptors));
