@@ -26,12 +26,12 @@ configure(allprojects) { project ->
 
 	dependencyManagement {
 		imports {
-			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.1"
+			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.2"
 			mavenBom "io.netty:netty-bom:4.1.59.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.4"
-			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR8"
+			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR9"
 			mavenBom "io.rsocket:rsocket-bom:1.1.0"
-			mavenBom "org.eclipse.jetty:jetty-bom:9.4.37.v20210219"
+			mavenBom "org.eclipse.jetty:jetty-bom:9.4.38.v20210224"
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.4.30"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.4.2"
 			mavenBom "org.junit:junit-bom:5.7.1"
@@ -89,7 +89,7 @@ configure(allprojects) { project ->
 				entry 'jibx-run'
 			}
 			dependency "org.ogce:xpp3:1.1.6"
-			dependency "org.yaml:snakeyaml:1.27"
+			dependency "org.yaml:snakeyaml:1.28"
 			dependencySet(group: 'org.jetbrains.kotlinx', version: '1.0.0') {
 				entry 'kotlinx-serialization-core'
 				entry 'kotlinx-serialization-json'
@@ -124,7 +124,7 @@ configure(allprojects) { project ->
 			dependency "net.sf.ehcache:ehcache:2.10.6"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core:5.4.28.Final"
+			dependency "org.hibernate:hibernate-core:5.4.29.Final"
 			dependency "org.hibernate:hibernate-validator:6.2.0.Final"
 			dependency "org.webjars:webjars-locator-core:0.46"
 			dependency "org.webjars:underscorejs:1.8.3"
@@ -163,9 +163,9 @@ configure(allprojects) { project ->
 			}
 			dependency 'org.apache.httpcomponents.client5:httpclient5:5.0.3'
 			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.0.3'
-			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.1.5"
+			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.1.6"
 
-			dependency "org.jruby:jruby:9.2.13.0"
+			dependency "org.jruby:jruby:9.2.16.0"
 			dependency "org.python:jython-standalone:2.7.1"
 			dependency "org.mozilla:rhino:1.7.11"
 
@@ -340,7 +340,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.40"
+		toolVersion = "8.41"
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
