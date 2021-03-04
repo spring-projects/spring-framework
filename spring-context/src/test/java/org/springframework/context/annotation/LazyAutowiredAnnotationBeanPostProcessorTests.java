@@ -89,6 +89,23 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	public void testLazyPrototypeResourceInjectionWithField() {
+		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
+		RootBeanDefinition abd = new RootBeanDefinition(FieldResourceInjectionBean.class);
+		abd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		ac.registerBeanDefinition("annotatedBean", abd);
+		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
+		tbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		ac.registerBeanDefinition("testBean", tbd);
+		ac.refresh();
+
+		FieldResourceInjectionBean bean = ac.getBean("annotatedBean", FieldResourceInjectionBean.class);
+		TestBean tb = bean.getTestBean();
+		tb.setName("tb");
+		assertThat(tb.getName()).isSameAs("tb");
+	}
+
+	@Test
 	public void testLazyResourceInjectionWithFieldAndCustomAnnotation() {
 		doTestLazyResourceInjection(FieldResourceInjectionBeanWithCompositeAnnotation.class);
 	}

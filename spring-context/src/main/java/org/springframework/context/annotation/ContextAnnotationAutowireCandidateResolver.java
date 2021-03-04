@@ -81,6 +81,8 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 		final DefaultListableBeanFactory dlbf = (DefaultListableBeanFactory) beanFactory;
 
 		TargetSource ts = new TargetSource() {
+			@Nullable
+			private Object target;
 			@Override
 			public Class<?> getTargetClass() {
 				return descriptor.getDependencyType();
@@ -90,9 +92,12 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 				return false;
 			}
 			@Override
-			public Object getTarget() {
+			public synchronized Object getTarget() {
+				if (target != null) {
+					return target;
+				}
 				Set<String> autowiredBeanNames = (beanName != null ? new LinkedHashSet<>(1) : null);
-				Object target = dlbf.doResolveDependency(descriptor, beanName, autowiredBeanNames, null);
+				target = dlbf.doResolveDependency(descriptor, beanName, autowiredBeanNames, null);
 				if (target == null) {
 					Class<?> type = getTargetClass();
 					if (Map.class == type) {
