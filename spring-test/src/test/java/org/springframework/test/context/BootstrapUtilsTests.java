@@ -140,6 +140,14 @@ class BootstrapUtilsTests {
 		assertBootstrapper(LocalDeclarationAndMetaAnnotatedBootstrapWithAnnotationClass.class, EnigmaBootstrapper.class);
 	}
 
+	/**
+	 * @since XXX
+	 */
+	@Test
+	void resolveTestContextBootstrapperWithInheritedLocalDeclarationThatOverridesMetaBootstrapWithAnnotations() {
+		assertBootstrapper(InheritedLocalDeclarationAndMetaAnnotatedBootstrapWithAnnotationClass.class, EnigmaBootstrapper.class);
+	}
+
 	private void assertBootstrapper(Class<?> testClass, Class<?> expectedBootstrapper) {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(testClass, delegate);
 		TestContextBootstrapper bootstrapper = resolveTestContextBootstrapper(bootstrapContext);
@@ -194,6 +202,9 @@ class BootstrapUtilsTests {
 	@BootWithBar
 	@BootstrapWith(EnigmaBootstrapper.class)
 	static class LocalDeclarationAndMetaAnnotatedBootstrapWithAnnotationClass {}
+
+	static class InheritedLocalDeclarationAndMetaAnnotatedBootstrapWithAnnotationClass
+			extends LocalDeclarationAndMetaAnnotatedBootstrapWithAnnotationClass {}
 
 	@org.springframework.test.context.web.WebAppConfiguration
 	static class WebAppConfigClass {

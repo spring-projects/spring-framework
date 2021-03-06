@@ -167,8 +167,8 @@ abstract class BootstrapUtils {
 			return annotations.iterator().next().value();
 		}
 
-		// Allow directly-present annotation to override annotations that are meta-present.
-		BootstrapWith bootstrapWith = testClass.getDeclaredAnnotation(BootstrapWith.class);
+		// Allow annotation to override annotations that are meta-present.
+		BootstrapWith bootstrapWith = testClass.getAnnotation(BootstrapWith.class);
 		if (bootstrapWith != null) {
 			return bootstrapWith.value();
 		}
