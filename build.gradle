@@ -70,11 +70,11 @@ configure(allprojects) { project ->
 
 			dependency "com.caucho:hessian:4.0.63"
 			dependency "com.fasterxml:aalto-xml:1.2.2"
-			dependency("com.fasterxml.woodstox:woodstox-core:6.2.3") {
+			dependency("com.fasterxml.woodstox:woodstox-core:6.2.4") {
 				exclude group: "stax", name: "stax-api"
 			}
 			dependency "com.google.code.gson:gson:2.8.6"
-			dependency "com.google.protobuf:protobuf-java-util:3.14.0"
+			dependency "com.google.protobuf:protobuf-java-util:3.15.5"
 			dependency "com.googlecode.protobuf-java-format:protobuf-java-format:1.4"
 			dependency("com.thoughtworks.xstream:xstream:1.4.15") {
 				exclude group: "xpp3", name: "xpp3_min"
@@ -140,7 +140,7 @@ configure(allprojects) { project ->
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.2.4.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.5.Final') {
 				entry 'undertow-core'
 				entry('undertow-websockets-jsr') {
 					exclude group: "org.jboss.spec.javax.websocket", name: "jboss-websocket-api_1.1_spec"
