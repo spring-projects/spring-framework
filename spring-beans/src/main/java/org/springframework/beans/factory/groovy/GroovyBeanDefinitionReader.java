@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -489,8 +489,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 						resolveConstructorArguments(args, 2, hasClosureArgument ? args.length - 1 : args.length);
 				this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, (Class<?>) args[1], constructorArgs);
 				Map<?, ?> namedArgs = (Map<?, ?>) args[0];
-				for (Object o : namedArgs.keySet()) {
-					String propName = (String) o;
+				for (Object key : namedArgs.keySet()) {
+					String propName = (String) key;
 					setProperty(propName, namedArgs.get(propName));
 				}
 			}

@@ -68,6 +68,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	private boolean autodetect = true;
 
+
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
@@ -135,6 +136,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		return this.autodetect;
 	}
 
+
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		if (event.getApplicationContext() == this.applicationContext && isAutodetect()) {
@@ -145,7 +147,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 			}
 		}
 	}
-
 
 	protected void detectResourceHandlers(ApplicationContext appContext) {
 		Map<String, SimpleUrlHandlerMapping> beans = appContext.getBeansOfType(SimpleUrlHandlerMapping.class);
@@ -223,7 +224,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 */
 	@Nullable
 	public final String getForLookupPath(String lookupPath) {
-
 		// Clean duplicate slashes or pathWithinPattern won't match lookupPath
 		String previous;
 		do {
