@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.context;
 
 import java.util.EventListener;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Interface to be implemented by application event listeners.
@@ -45,6 +46,17 @@ public interface ApplicationListener<E extends ApplicationEvent> extends EventLi
 	 * @param event the event to respond to
 	 */
 	void onApplicationEvent(E event);
+
+	/**
+	 * Return an optional identifier for the listener.
+	 * <p>The default value is an empty String.
+	 * @since 5.3.5
+	 * @see org.springframework.context.event.EventListener#id
+	 * @see org.springframework.context.event.ApplicationEventMulticaster#removeApplicationListeners(Predicate)
+	 */
+	default String getListenerId() {
+		return "";
+	}
 
 
 	/**

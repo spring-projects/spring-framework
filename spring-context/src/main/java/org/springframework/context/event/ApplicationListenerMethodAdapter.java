@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.concurrent.CompletionStage;
 
 import org.apache.commons.logging.Log;
@@ -90,6 +91,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	private final int order;
 
 	@Nullable
+	private volatile String listenerId;
+
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	@Nullable
@@ -113,6 +117,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		this.declaredEventTypes = resolveDeclaredEventTypes(method, ann);
 		this.condition = (ann != null ? ann.condition() : null);
 		this.order = resolveOrder(this.targetMethod);
+		String id = (ann != null ? ann.id() : "");
+		this.listenerId = (!id.isEmpty() ? id : null);
 	}
 
 	private static List<ResolvableType> resolveDeclaredEventTypes(Method method, @Nullable EventListener ann) {
@@ -184,6 +190,32 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	@Override
 	public int getOrder() {
 		return this.order;
+	}
+
+	@Override
+	public String getListenerId() {
+		String id = this.listenerId;
+		if (id == null) {
+			id = getDefaultListenerId();
+			this.listenerId = id;
+		}
+		return id;
+	}
+
+	/**
+	 * Determine the default id for the target listener, to be applied in case of
+	 * no {@link EventListener#id() annotation-specified id value}.
+	 * <p>The default implementation builds a method name with parameter types.
+	 * @since 5.3.5
+	 * @see #getListenerId()
+	 */
+	protected String getDefaultListenerId() {
+		Method method = getTargetMethod();
+		StringJoiner sj = new StringJoiner(",", "(", ")");
+		for (Class<?> paramType : method.getParameterTypes()) {
+			sj.add(paramType.getName());
+		}
+		return ClassUtils.getQualifiedMethodName(method) + sj.toString();
 	}
 
 
