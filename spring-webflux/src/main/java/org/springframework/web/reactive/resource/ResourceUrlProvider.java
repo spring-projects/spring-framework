@@ -57,11 +57,11 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	private static final Log logger = LogFactory.getLog(ResourceUrlProvider.class);
 
-
 	private final Map<PathPattern, ResourceWebHandler> handlerMap = new LinkedHashMap<>();
 
 	@Nullable
 	private ApplicationContext applicationContext;
+
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
