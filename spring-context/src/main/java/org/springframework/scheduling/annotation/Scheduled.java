@@ -85,7 +85,7 @@ public @interface Scheduled {
 	 * trigger, primarily meant for externally specified values resolved by a
 	 * <code>${...}</code> placeholder.
 	 * @return an expression that can be parsed to a cron schedule
-	 * @see org.springframework.scheduling.support.CronSequenceGenerator
+	 * @see org.springframework.scheduling.support.CronExpression#parse(String)
 	 */
 	String cron() default "";
 
