@@ -1085,8 +1085,8 @@ on the target field, or you might want to run a `Converter` only if a specific m
 	interface ConditionalGenericConverter : GenericConverter, ConditionalConverter
 ----
 
-A good example of a `ConditionalGenericConverter` is an `EntityConverter` that converts
-between a persistent entity identifier and an entity reference. Such an `EntityConverter`
+A good example of a `ConditionalGenericConverter` is an `IdToEntityConverter` that converts
+between a persistent entity identifier and an entity reference. Such an `IdToEntityConverter`
 might match only if the target entity type declares a static finder method (for example,
 `findAccount(Long)`). You might perform such a finder method check in the implementation of
 `matches(TypeDescriptor, TypeDescriptor)`.
