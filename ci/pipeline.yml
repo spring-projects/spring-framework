@@ -3,11 +3,6 @@ anchors:
     ARTIFACTORY_SERVER: ((artifactory-server))
     ARTIFACTORY_USERNAME: ((artifactory-username))
     ARTIFACTORY_PASSWORD: ((artifactory-password))
-  bintray-task-params: &bintray-task-params
-    BINTRAY_SUBJECT: ((bintray-subject))
-    BINTRAY_REPO: ((bintray-repo))
-    BINTRAY_USERNAME: ((bintray-username))
-    BINTRAY_API_KEY: ((bintray-api-key))
   docker-resource-source: &docker-resource-source
     username: ((docker-hub-username))
     password: ((docker-hub-password))
@@ -27,6 +22,8 @@ anchors:
   sonatype-task-params: &sonatype-task-params
     SONATYPE_USER_TOKEN: ((sonatype-user-token))
     SONATYPE_PASSWORD_TOKEN: ((sonatype-user-token-password))
+    SONATYPE_URL: ((sonatype-url))
+    SONATYPE_STAGING_PROFILE_ID: ((sonatype-staging-profile-id))
   changelog-task-params: &changelog-task-params
     name: generated-changelog/tag
     tag: generated-changelog/tag
@@ -40,7 +37,7 @@ resource_types:
   type: registry-image
   source:
     repository: springio/artifactory-resource
-    tag: 0.0.12
+    tag: 0.0.13
 - name: github-status-resource
   type: registry-image
   source:
@@ -195,6 +192,8 @@ jobs:
     params: { state: "success", commit: "git-repo" }
   - put: artifactory-repo
     params: &artifactory-params
+      signing_key: ((signing-key))
+      signing_passphrase: ((signing-passphrase))
       repo: libs-snapshot-local
       folder: distribution-repository
       build_uri: "https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
@@ -405,8 +404,8 @@ jobs:
       params:
         RELEASE_TYPE: RELEASE
         <<: *artifactory-task-params
-        <<: *bintray-task-params
-- name: sync-to-maven-central
+        <<: *sonatype-task-params
+- name: create-github-release
   serial: true
   plan:
     - get: spring-framework-ci-image
@@ -417,12 +416,6 @@ jobs:
       params:
         download_artifacts: false
         save_build_info: true
-    - task: sync-to-maven-central
-      image: spring-framework-ci-image
-      file: git-repo/ci/tasks/sync-to-maven-central.yml
-      params:
-        <<: *bintray-task-params
-        <<: *sonatype-task-params
     - task: generate-changelog
       file: git-repo/ci/tasks/generate-changelog.yml
       params:
@@ -436,6 +429,6 @@ groups:
 - name: "builds"
   jobs: ["build", "jdk11-build", "jdk15-build"]
 - name: "releases"
-  jobs: ["stage-milestone", "stage-rc", "stage-release", "promote-milestone","promote-rc", "promote-release", "sync-to-maven-central"]
+  jobs: ["stage-milestone", "stage-rc", "stage-release", "promote-milestone","promote-rc", "promote-release", "create-github-release"]
 - name: "ci-images"
   jobs: ["build-spring-framework-ci-images"]

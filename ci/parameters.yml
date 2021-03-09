@@ -9,6 +9,4 @@ branch: "master"
 build-name: "spring-framework"
 pipeline-name: "spring-framework"
 concourse-url: "https://ci.spring.io"
-bintray-subject: "spring"
-bintray-repo: "jars"
 task-timeout: 1h00m
