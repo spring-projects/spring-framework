@@ -78,7 +78,7 @@ public interface ApplicationEventMulticaster {
 	 * <p>Note: This just applies to instance registrations, not to listeners
 	 * registered by bean name.
 	 * @param predicate the predicate to identify listener instances to remove,
-	 * e.g. checking {@link ApplicationListener#getListenerId()}
+	 * e.g. checking {@link SmartApplicationListener#getListenerId()}
 	 * @since 5.3.5
 	 * @see #addApplicationListener(ApplicationListener)
 	 * @see #removeApplicationListener(ApplicationListener)

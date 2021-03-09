@@ -112,8 +112,8 @@ public class AnnotationDrivenEventListenerTests {
 		this.eventCollector.assertEvent(listener, event);
 		this.eventCollector.assertTotalEventsCount(1);
 
-		context.getBean(ApplicationEventMulticaster.class).removeApplicationListeners(
-				l -> l.getListenerId().contains("TestEvent"));
+		context.getBean(ApplicationEventMulticaster.class).removeApplicationListeners(l ->
+				l instanceof SmartApplicationListener && ((SmartApplicationListener) l).getListenerId().contains("TestEvent"));
 		this.eventCollector.clear();
 		this.context.publishEvent(event);
 		this.eventCollector.assertNoEventReceived(listener);
@@ -133,8 +133,8 @@ public class AnnotationDrivenEventListenerTests {
 		this.eventCollector.assertEvent(listener, event);
 		this.eventCollector.assertTotalEventsCount(1);
 
-		context.getBean(ApplicationEventMulticaster.class).removeApplicationListeners(
-				l -> l.getListenerId().contains("TestEvent"));
+		context.getBean(ApplicationEventMulticaster.class).removeApplicationListeners(l ->
+				l instanceof SmartApplicationListener && ((SmartApplicationListener) l).getListenerId().contains("TestEvent"));
 		this.eventCollector.clear();
 		this.context.publishEvent(event);
 		this.eventCollector.assertNoEventReceived(listener);
@@ -151,8 +151,8 @@ public class AnnotationDrivenEventListenerTests {
 		this.eventCollector.assertEvent(bean, event);
 		this.eventCollector.assertTotalEventsCount(1);
 
-		context.getBean(ApplicationEventMulticaster.class).removeApplicationListeners(
-				l -> l.getListenerId().equals("foo"));
+		context.getBean(ApplicationEventMulticaster.class).removeApplicationListeners(l ->
+				l instanceof SmartApplicationListener && ((SmartApplicationListener) l).getListenerId().equals("foo"));
 		this.eventCollector.clear();
 		this.context.publishEvent(event);
 		this.eventCollector.assertNoEventReceived(bean);

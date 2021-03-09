@@ -18,7 +18,6 @@ package org.springframework.context;
 
 import java.util.EventListener;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * Interface to be implemented by application event listeners.
@@ -36,6 +35,8 @@ import java.util.function.Predicate;
  * @param <E> the specific {@code ApplicationEvent} subclass to listen to
  * @see org.springframework.context.ApplicationEvent
  * @see org.springframework.context.event.ApplicationEventMulticaster
+ * @see org.springframework.context.event.SmartApplicationListener
+ * @see org.springframework.context.event.GenericApplicationListener
  * @see org.springframework.context.event.EventListener
  */
 @FunctionalInterface
@@ -46,17 +47,6 @@ public interface ApplicationListener<E extends ApplicationEvent> extends EventLi
 	 * @param event the event to respond to
 	 */
 	void onApplicationEvent(E event);
-
-	/**
-	 * Return an optional identifier for the listener.
-	 * <p>The default value is an empty String.
-	 * @since 5.3.5
-	 * @see org.springframework.context.event.EventListener#id
-	 * @see org.springframework.context.event.ApplicationEventMulticaster#removeApplicationListeners(Predicate)
-	 */
-	default String getListenerId() {
-		return "";
-	}
 
 
 	/**

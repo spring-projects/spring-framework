@@ -64,11 +64,10 @@ public interface TransactionalApplicationListener<E extends ApplicationEvent>
 	 * <p>It might be necessary for specific completion callback implementations
 	 * to provide a specific id, whereas for other scenarios an empty String
 	 * (as the common default value) is acceptable as well.
-	 * @see ApplicationListener#getListenerId()
+	 * @see org.springframework.context.event.SmartApplicationListener#getListenerId()
 	 * @see TransactionalEventListener#id
 	 * @see #addCallback
 	 */
-	@Override
 	default String getListenerId() {
 		return "";
 	}
