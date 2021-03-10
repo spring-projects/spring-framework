@@ -1,9 +1,9 @@
-spring:
-  main:
-    banner-mode: off
 logging:
   level:
     io.spring.concourse: DEBUG
+spring:
+  main:
+    banner-mode: off
 sonatype:
   exclude:
     - 'build-info\.json'

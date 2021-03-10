@@ -1,16 +1,32 @@
 anchors:
-  artifactory-task-params: &artifactory-task-params
-    ARTIFACTORY_SERVER: ((artifactory-server))
-    ARTIFACTORY_USERNAME: ((artifactory-username))
-    ARTIFACTORY_PASSWORD: ((artifactory-password))
-  docker-resource-source: &docker-resource-source
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    tag: 5.3.x
+  git-repo-resource-source: &git-repo-resource-source
+    uri: ((github-repo))
+    username: ((github-username))
+    password: ((github-password))
+    branch: ((branch))
   gradle-enterprise-task-params: &gradle-enterprise-task-params
     GRADLE_ENTERPRISE_ACCESS_KEY: ((gradle_enterprise_secret_access_key))
     GRADLE_ENTERPRISE_CACHE_USERNAME: ((gradle_enterprise_cache_user.username))
     GRADLE_ENTERPRISE_CACHE_PASSWORD: ((gradle_enterprise_cache_user.password))
+  sonatype-task-params: &sonatype-task-params
+    SONATYPE_USER_TOKEN: ((sonatype-user-token))
+    SONATYPE_PASSWORD_TOKEN: ((sonatype-user-token-password))
+    SONATYPE_URL: ((sonatype-url))
+    SONATYPE_STAGING_PROFILE_ID: ((sonatype-staging-profile-id))
+  artifactory-task-params: &artifactory-task-params
+    ARTIFACTORY_SERVER: ((artifactory-server))
+    ARTIFACTORY_USERNAME: ((artifactory-username))
+    ARTIFACTORY_PASSWORD: ((artifactory-password))
+  build-project-task-params: &build-project-task-params
+    privileged: true
+    timeout: ((task-timeout))
+    params:
+      BRANCH: ((branch))
+      <<: *gradle-enterprise-task-params
+  docker-resource-source: &docker-resource-source
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    tag: ((milestone))
   slack-fail-params: &slack-fail-params
     text: >
       :concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>
@@ -19,11 +35,6 @@ anchors:
     silent: true
     icon_emoji: ":concourse:"
     username: concourse-ci
-  sonatype-task-params: &sonatype-task-params
-    SONATYPE_USER_TOKEN: ((sonatype-user-token))
-    SONATYPE_PASSWORD_TOKEN: ((sonatype-user-token-password))
-    SONATYPE_URL: ((sonatype-url))
-    SONATYPE_STAGING_PROFILE_ID: ((sonatype-staging-profile-id))
   changelog-task-params: &changelog-task-params
     name: generated-changelog/tag
     tag: generated-changelog/tag
@@ -48,16 +59,12 @@ resource_types:
   source:
     repository: cfcommunity/slack-notification-resource
     tag: latest
-
 resources:
 - name: git-repo
   type: git
   icon: github
   source:
-    uri: ((github-repo))
-    username: ((github-username))
-    password: ((github-password))
-    branch: ((branch))
+    <<: *git-repo-resource-source
 - name: every-morning
   type: time
   icon: alarm
@@ -72,24 +79,24 @@ resources:
     uri: ((github-repo))
     branch: ((branch))
     paths: ["ci/images/*"]
-- name: spring-framework-ci-image
+- name: ci-image
   type: docker-image
   icon: docker
   source:
     <<: *docker-resource-source
-    repository: ((docker-hub-organization))/spring-framework-ci-image
-- name: spring-framework-jdk11-ci-image
+    repository: ((docker-hub-organization))/spring-framework-ci
+- name: ci-image-jdk11
   type: docker-image
   icon: docker
   source:
     <<: *docker-resource-source
-    repository: ((docker-hub-organization))/spring-framework-jdk11-ci-image
-- name: spring-framework-jdk15-ci-image
+    repository: ((docker-hub-organization))/spring-framework-ci-jdk11
+- name: ci-image-jdk15
   type: docker-image
   icon: docker
   source:
     <<: *docker-resource-source
-    repository: ((docker-hub-organization))/spring-framework-jdk15-ci-image
+    repository: ((docker-hub-organization))/spring-framework-ci-jdk15
 - name: artifactory-repo
   type: artifactory-resource
   icon: package-variant
@@ -144,43 +151,38 @@ resources:
     repository: spring-framework
     access_token: ((github-ci-release-token))
     pre_release: false
-
 jobs:
-- name: build-spring-framework-ci-images
+- name: build-ci-images
   plan:
   - get: ci-images-git-repo
     trigger: true
   - in_parallel:
-    - put: spring-framework-ci-image
+    - put: ci-image
       params:
         build: ci-images-git-repo/ci/images
-        dockerfile: ci-images-git-repo/ci/images/spring-framework-ci-image/Dockerfile
-    - put: spring-framework-jdk11-ci-image
+        dockerfile: ci-images-git-repo/ci/images/ci-image/Dockerfile
+    - put: ci-image-jdk11
       params:
         build: ci-images-git-repo/ci/images
-        dockerfile: ci-images-git-repo/ci/images/spring-framework-jdk11-ci-image/Dockerfile
-    - put: spring-framework-jdk15-ci-image
+        dockerfile: ci-images-git-repo/ci/images/ci-image-jdk11/Dockerfile
+    - put: ci-image-jdk15
       params:
         build: ci-images-git-repo/ci/images
-        dockerfile: ci-images-git-repo/ci/images/spring-framework-jdk15-ci-image/Dockerfile
+        dockerfile: ci-images-git-repo/ci/images/ci-image-jdk15/Dockerfile
 - name: build
   serial: true
   public: true
   plan:
-  - get: spring-framework-ci-image
+  - get: ci-image
   - get: git-repo
     trigger: true
   - put: repo-status-build
     params: { state: "pending", commit: "git-repo" }
   - do:
     - task: build-project
-      privileged: true
-      timeout: ((task-timeout))
-      image: spring-framework-ci-image
+      image: ci-image
       file: git-repo/ci/tasks/build-project.yml
-      params:
-        BRANCH: ((branch))
-        <<: *gradle-enterprise-task-params
+      <<: *build-project-task-params
     on_failure:
       do:
       - put: repo-status-build
@@ -225,7 +227,7 @@ jobs:
   serial: true
   public: true
   plan:
-  - get: spring-framework-jdk11-ci-image
+  - get: ci-image-jdk11
   - get: git-repo
   - get: every-morning
     trigger: true
@@ -233,13 +235,9 @@ jobs:
     params: { state: "pending", commit: "git-repo" }
   - do:
     - task: check-project
-      privileged: true
-      timeout: ((task-timeout))
-      image: spring-framework-jdk11-ci-image
+      image: ci-image-jdk11
       file: git-repo/ci/tasks/check-project.yml
-      params:
-        BRANCH: ((branch))
-        <<: *gradle-enterprise-task-params
+      <<: *build-project-task-params
     on_failure:
       do:
       - put: repo-status-jdk11-build
@@ -253,21 +251,17 @@ jobs:
   serial: true
   public: true
   plan:
-    - get: spring-framework-jdk15-ci-image
+    - get: ci-image-jdk15
     - get: git-repo
     - get: every-morning
       trigger: true
     - put: repo-status-jdk15-build
       params: { state: "pending", commit: "git-repo" }
     - do:
-        - task: check-project
-          privileged: true
-          timeout: ((task-timeout))
-          image: spring-framework-jdk15-ci-image
-          file: git-repo/ci/tasks/check-project.yml
-          params:
-            BRANCH: ((branch))
-            <<: *gradle-enterprise-task-params
+      - task: check-project
+        image: ci-image-jdk11
+        file: git-repo/ci/tasks/check-project.yml
+        <<: *build-project-task-params
       on_failure:
         do:
           - put: repo-status-jdk15-build
@@ -280,11 +274,11 @@ jobs:
 - name: stage-milestone
   serial: true
   plan:
-    - get: spring-framework-ci-image
+    - get: ci-image
     - get: git-repo
       trigger: false
     - task: stage
-      image: spring-framework-ci-image
+      image: ci-image
       file: git-repo/ci/tasks/stage-version.yml
       params:
         RELEASE_TYPE: M
@@ -299,7 +293,7 @@ jobs:
 - name: promote-milestone
   serial: true
   plan:
-    - get: spring-framework-ci-image
+    - get: ci-image
     - get: git-repo
       trigger: false
     - get: artifactory-repo
@@ -309,7 +303,7 @@ jobs:
         download_artifacts: false
         save_build_info: true
     - task: promote
-      image: spring-framework-ci-image
+      image: ci-image
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: M
@@ -325,11 +319,11 @@ jobs:
 - name: stage-rc
   serial: true
   plan:
-    - get: spring-framework-ci-image
+    - get: ci-image
     - get: git-repo
       trigger: false
     - task: stage
-      image: spring-framework-ci-image
+      image: ci-image
       file: git-repo/ci/tasks/stage-version.yml
       params:
         RELEASE_TYPE: RC
@@ -344,7 +338,7 @@ jobs:
 - name: promote-rc
   serial: true
   plan:
-    - get: spring-framework-ci-image
+    - get: ci-image
     - get: git-repo
       trigger: false
     - get: artifactory-repo
@@ -354,7 +348,7 @@ jobs:
         download_artifacts: false
         save_build_info: true
     - task: promote
-      image: spring-framework-ci-image
+      image: ci-image
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: RC
@@ -370,11 +364,11 @@ jobs:
 - name: stage-release
   serial: true
   plan:
-    - get: spring-framework-ci-image
+    - get: ci-image
     - get: git-repo
       trigger: false
     - task: stage
-      image: spring-framework-ci-image
+      image: ci-image
       file: git-repo/ci/tasks/stage-version.yml
       params:
         RELEASE_TYPE: RELEASE
@@ -389,7 +383,7 @@ jobs:
 - name: promote-release
   serial: true
   plan:
-    - get: spring-framework-ci-image
+    - get: ci-image
     - get: git-repo
       trigger: false
     - get: artifactory-repo
@@ -399,7 +393,7 @@ jobs:
         download_artifacts: false
         save_build_info: true
     - task: promote
-      image: spring-framework-ci-image
+      image: ci-image
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: RELEASE
@@ -408,7 +402,7 @@ jobs:
 - name: create-github-release
   serial: true
   plan:
-    - get: spring-framework-ci-image
+    - get: ci-image
     - get: git-repo
     - get: artifactory-repo
       trigger: true
@@ -429,6 +423,6 @@ groups:
 - name: "builds"
   jobs: ["build", "jdk11-build", "jdk15-build"]
 - name: "releases"
-  jobs: ["stage-milestone", "stage-rc", "stage-release", "promote-milestone","promote-rc", "promote-release", "create-github-release"]
+  jobs: ["stage-milestone", "stage-rc", "stage-release", "promote-milestone", "promote-rc", "promote-release", "create-github-release"]
 - name: "ci-images"
-  jobs: ["build-spring-framework-ci-images"]
+  jobs: ["build-ci-images"]
