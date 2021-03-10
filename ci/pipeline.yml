@@ -259,7 +259,7 @@ jobs:
       params: { state: "pending", commit: "git-repo" }
     - do:
       - task: check-project
-        image: ci-image-jdk11
+        image: ci-image-jdk15
         file: git-repo/ci/tasks/check-project.yml
         <<: *build-project-task-params
       on_failure:
