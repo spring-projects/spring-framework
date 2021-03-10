@@ -147,6 +147,10 @@ class StatusAssertionTests {
 				assertions.value(equalTo(200)));
 	}
 
+	@Test
+	void matchesWithCustomStatus() {
+		statusAssertions(600).value(equalTo(600));
+	}
 
 	private StatusAssertions statusAssertions(HttpStatus status) {
 		return statusAssertions(status.value());

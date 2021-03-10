@@ -205,7 +205,7 @@ public class StatusAssertions {
 	 * @since 5.1
 	 */
 	public WebTestClient.ResponseSpec value(Matcher<? super Integer> matcher) {
-		int value = this.exchangeResult.getStatus().value();
+		int value = this.exchangeResult.getRawStatusCode();
 		this.exchangeResult.assertWithDiagnostics(() -> MatcherAssert.assertThat("Response status", value, matcher));
 		return this.responseSpec;
 	}
@@ -216,7 +216,7 @@ public class StatusAssertions {
 	 * @since 5.1
 	 */
 	public WebTestClient.ResponseSpec value(Consumer<Integer> consumer) {
-		int value = this.exchangeResult.getStatus().value();
+		int value = this.exchangeResult.getRawStatusCode();
 		this.exchangeResult.assertWithDiagnostics(() -> consumer.accept(value));
 		return this.responseSpec;
 	}
