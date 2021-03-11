@@ -310,14 +310,21 @@ public class ClassReader {
     if (inputStream == null) {
       throw new IOException("Class not found");
     }
+    int expectedLength = inputStream.available();
+    //some implementations can return 0 while holding available data
+    int bufferSize = expectedLength == 0
+            ? INPUT_STREAM_DATA_CHUNK_SIZE
+            : expectedLength;
     try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-      byte[] data = new byte[INPUT_STREAM_DATA_CHUNK_SIZE];
+      byte[] data = new byte[bufferSize];
       int bytesRead;
-      while ((bytesRead = inputStream.read(data, 0, data.length)) != -1) {
+      int readCount = 0;
+      while ((bytesRead = inputStream.read(data, 0, bufferSize)) != -1) {
         outputStream.write(data, 0, bytesRead);
+        readCount++;
       }
       outputStream.flush();
-      return outputStream.toByteArray();
+      return readCount == 1 ? data : outputStream.toByteArray();
     } finally {
       if (close) {
         inputStream.close();
