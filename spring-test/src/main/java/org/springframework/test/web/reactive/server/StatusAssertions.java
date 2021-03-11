@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,8 +158,8 @@ public class StatusAssertions {
 	 */
 	public WebTestClient.ResponseSpec reasonEquals(String reason) {
 		String actual = this.exchangeResult.getStatus().getReasonPhrase();
-		String message = "Response status reason";
-		this.exchangeResult.assertWithDiagnostics(() -> AssertionErrors.assertEquals(message, reason, actual));
+		this.exchangeResult.assertWithDiagnostics(() ->
+				AssertionErrors.assertEquals("Response status reason", reason, actual));
 		return this.responseSpec;
 	}
 
@@ -230,10 +230,8 @@ public class StatusAssertions {
 
 	private WebTestClient.ResponseSpec assertSeriesAndReturn(HttpStatus.Series expected) {
 		HttpStatus status = this.exchangeResult.getStatus();
-		this.exchangeResult.assertWithDiagnostics(() -> {
-			String message = "Range for response status value " + status;
-			AssertionErrors.assertEquals(message, expected, status.series());
-		});
+		this.exchangeResult.assertWithDiagnostics(() ->
+				AssertionErrors.assertEquals("Range for response status value " + status, expected, status.series()));
 		return this.responseSpec;
 	}
 
