@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link StatusAssertions}.
+ *
  * @author Rossen Stoyanchev
  */
 public class StatusAssertionTests {
@@ -73,20 +74,19 @@ public class StatusAssertionTests {
 	}
 
 	@Test
-	public void statusSerius1xx() {
+	public void statusSeries1xx() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.CONTINUE);
 
 		// Success
 		assertions.is1xxInformational();
 
 		// Wrong series
-
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				assertions.is2xxSuccessful());
 	}
 
 	@Test
-	public void statusSerius2xx() {
+	public void statusSeries2xx() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.OK);
 
 		// Success
@@ -98,7 +98,7 @@ public class StatusAssertionTests {
 	}
 
 	@Test
-	public void statusSerius3xx() {
+	public void statusSeries3xx() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.PERMANENT_REDIRECT);
 
 		// Success
@@ -110,7 +110,7 @@ public class StatusAssertionTests {
 	}
 
 	@Test
-	public void statusSerius4xx() {
+	public void statusSeries4xx() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.BAD_REQUEST);
 
 		// Success
@@ -122,7 +122,7 @@ public class StatusAssertionTests {
 	}
 
 	@Test
-	public void statusSerius5xx() {
+	public void statusSeries5xx() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.INTERNAL_SERVER_ERROR);
 
 		// Success
@@ -134,7 +134,7 @@ public class StatusAssertionTests {
 	}
 
 	@Test
-	public void matches() {
+	public void matchesStatusValue() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.CONFLICT);
 
 		// Success
@@ -144,6 +144,11 @@ public class StatusAssertionTests {
 		// Wrong status
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				assertions.value(equalTo(200)));
+	}
+
+	@Test
+	public void matchesCustomStatus() {
+		statusAssertions(600).value(equalTo(600));
 	}
 
 
