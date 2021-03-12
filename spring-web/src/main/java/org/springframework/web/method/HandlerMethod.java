@@ -330,11 +330,13 @@ public class HandlerMethod {
 	 */
 	public HandlerMethod createWithResolvedBean() {
 		Object handler = this.bean;
+		// 如果是 bean 是 String类型，则获取对应的 handler 对象。例如，bean = userController 字符串，获取后，handler = UserController 对象
 		if (this.bean instanceof String) {
 			Assert.state(this.beanFactory != null, "Cannot resolve bean name without BeanFactory");
 			String beanName = (String) this.bean;
 			handler = this.beanFactory.getBean(beanName);
 		}
+		// 创建 HandlerMethod 对象
 		return new HandlerMethod(this, handler);
 	}
 
