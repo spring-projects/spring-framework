@@ -88,11 +88,11 @@ public class JmsNamespaceHandlerTests {
 		assertThat(containers.size()).as("Context should contain 3 JCA endpoint containers").isEqualTo(3);
 
 		assertThat(context.getBeansOfType(JmsListenerContainerFactory.class))
-			.as("Context should contain 3 JmsListenerContainerFactory instances").hasSize(3);
+				.as("Context should contain 3 JmsListenerContainerFactory instances").hasSize(3);
 	}
 
 	@Test
-	public void testContainerConfiguration() throws Exception {
+	public void testContainerConfiguration() {
 		Map<String, DefaultMessageListenerContainer> containers = context.getBeansOfType(DefaultMessageListenerContainer.class);
 		ConnectionFactory defaultConnectionFactory = context.getBean(DEFAULT_CONNECTION_FACTORY, ConnectionFactory.class);
 		ConnectionFactory explicitConnectionFactory = context.getBean(EXPLICIT_CONNECTION_FACTORY, ConnectionFactory.class);
@@ -114,7 +114,7 @@ public class JmsNamespaceHandlerTests {
 	}
 
 	@Test
-	public void testJcaContainerConfiguration() throws Exception {
+	public void testJcaContainerConfiguration() {
 		Map<String, JmsMessageEndpointManager> containers = context.getBeansOfType(JmsMessageEndpointManager.class);
 
 		assertThat(containers.containsKey("listener3")).as("listener3 not found").isTrue();
