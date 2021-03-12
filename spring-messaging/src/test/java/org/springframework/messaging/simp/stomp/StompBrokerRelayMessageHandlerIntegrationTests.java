@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 
 	@BeforeEach
-	public void setUp(TestInfo testInfo) throws Exception {
+	public void setup(TestInfo testInfo) throws Exception {
 		logger.debug("Setting up before '" + testInfo.getTestMethod().get().getName() + "'");
 
 		this.port = SocketUtils.findAvailableTcpPort(61613);
@@ -83,11 +83,11 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.responseHandler = new TestMessageHandler();
 		this.responseChannel.subscribe(this.responseHandler);
 		this.eventPublisher = new TestEventPublisher();
-		startActiveMqBroker();
+		startActiveMQBroker();
 		createAndStartRelay();
 	}
 
-	private void startActiveMqBroker() throws Exception {
+	private void startActiveMQBroker() throws Exception {
 		this.activeMQBroker = new BrokerService();
 		this.activeMQBroker.addConnector("stomp://localhost:" + this.port);
 		this.activeMQBroker.setStartAsync(false);
@@ -217,7 +217,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		this.eventPublisher.expectBrokerAvailabilityEvent(false);
 
-		startActiveMqBroker();
+		startActiveMQBroker();
 		this.eventPublisher.expectBrokerAvailabilityEvent(true);
 	}
 
@@ -274,8 +274,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 
 		public void expectMessages(MessageExchange... messageExchanges) throws InterruptedException {
-			List<MessageExchange> expectedMessages =
-					new ArrayList<>(Arrays.<MessageExchange>asList(messageExchanges));
+			List<MessageExchange> expectedMessages = new ArrayList<>(Arrays.asList(messageExchanges));
 			while (expectedMessages.size() > 0) {
 				Message<?> message = this.queue.poll(10000, TimeUnit.MILLISECONDS);
 				assertThat(message).as("Timed out waiting for messages, expected [" + expectedMessages + "]").isNotNull();
@@ -451,7 +450,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		@Override
 		public final boolean match(Message<?> message) {
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-			if (!this.command.equals(headers.getCommand()) || (this.sessionId != headers.getSessionId())) {
+			if (!this.command.equals(headers.getCommand()) || !this.sessionId.equals(headers.getSessionId())) {
 				return false;
 			}
 			return matchInternal(headers, message.getPayload());

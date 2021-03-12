@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,12 +69,12 @@ public class JmsNamespaceHandlerTests {
 
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	public void setup() {
 		this.context = new ToolingTestApplicationContext("jmsNamespaceHandlerTests.xml", getClass());
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	public void shutdown() {
 		this.context.close();
 	}
 
@@ -87,13 +87,12 @@ public class JmsNamespaceHandlerTests {
 		containers = context.getBeansOfType(GenericMessageEndpointManager.class);
 		assertThat(containers.size()).as("Context should contain 3 JCA endpoint containers").isEqualTo(3);
 
-		Map<String, JmsListenerContainerFactory> containerFactories =
-				context.getBeansOfType(JmsListenerContainerFactory.class);
-		assertThat(containerFactories.size()).as("Context should contain 3 JmsListenerContainerFactory instances").isEqualTo(3);
+		assertThat(context.getBeansOfType(JmsListenerContainerFactory.class))
+				.as("Context should contain 3 JmsListenerContainerFactory instances").hasSize(3);
 	}
 
 	@Test
-	public void testContainerConfiguration() throws Exception {
+	public void testContainerConfiguration() {
 		Map<String, DefaultMessageListenerContainer> containers = context.getBeansOfType(DefaultMessageListenerContainer.class);
 		ConnectionFactory defaultConnectionFactory = context.getBean(DEFAULT_CONNECTION_FACTORY, ConnectionFactory.class);
 		ConnectionFactory explicitConnectionFactory = context.getBean(EXPLICIT_CONNECTION_FACTORY, ConnectionFactory.class);
@@ -115,7 +114,7 @@ public class JmsNamespaceHandlerTests {
 	}
 
 	@Test
-	public void testJcaContainerConfiguration() throws Exception {
+	public void testJcaContainerConfiguration() {
 		Map<String, JmsMessageEndpointManager> containers = context.getBeansOfType(JmsMessageEndpointManager.class);
 
 		assertThat(containers.containsKey("listener3")).as("listener3 not found").isTrue();

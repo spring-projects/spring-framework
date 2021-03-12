@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,9 +198,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private int registeredWithDestination = 0;
 
-	private volatile boolean recovering = false;
+	private volatile boolean recovering;
 
-	private volatile boolean interrupted = false;
+	private volatile boolean interrupted;
 
 	@Nullable
 	private Runnable stopCallback;
@@ -963,11 +963,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				}
 			}
 			if (!applyBackOffTime(execution)) {
-				StringBuilder msg = new StringBuilder();
-				msg.append("Stopping container for destination '")
-						.append(getDestinationDescription())
-						.append("': back-off policy does not allow ").append("for further attempts.");
-				logger.error(msg.toString());
+				logger.error("Stopping container for destination '" + getDestinationDescription() +
+						"': back-off policy does not allow for further attempts.");
 				stop();
 			}
 		}

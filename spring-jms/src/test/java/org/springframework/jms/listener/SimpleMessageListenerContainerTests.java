@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,8 +75,7 @@ public class SimpleMessageListenerContainerTests {
 	@Test
 	public void testSessionTransactedModeReallyDoesDefaultToFalse() {
 		assertThat(this.container.isPubSubNoLocal()).as("The [pubSubLocal] property of SimpleMessageListenerContainer " +
-				"must default to false. Change this test (and the " +
-				"attendant Javadoc) if you have changed the default.").isFalse();
+				"must default to false. Change this test (and the attendant javadoc) if you have changed the default.").isFalse();
 	}
 
 	@Test
@@ -121,6 +120,7 @@ public class SimpleMessageListenerContainerTests {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.getBeanFactory().registerSingleton("messageListenerContainer", this.container);
 		context.refresh();
+		context.close();
 
 		verify(connection).setExceptionListener(this.container);
 	}
@@ -151,6 +151,7 @@ public class SimpleMessageListenerContainerTests {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.getBeanFactory().registerSingleton("messageListenerContainer", this.container);
 		context.refresh();
+		context.close();
 
 		verify(connection).setExceptionListener(this.container);
 		verify(connection).start();
