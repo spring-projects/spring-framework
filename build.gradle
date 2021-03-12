@@ -102,7 +102,7 @@ configure(allprojects) { project ->
 			dependency "commons-io:commons-io:2.5"
 			dependency "io.vavr:vavr:0.10.3"
 			dependency "net.sf.jopt-simple:jopt-simple:5.0.4"
-			dependencySet(group: 'org.apache.activemq', version: '5.16.0') {
+			dependencySet(group: 'org.apache.activemq', version: '5.16.1') {
 				entry 'activemq-broker'
 				entry('activemq-kahadb-store') {
 					exclude group: "org.springframework", name: "spring-context"
