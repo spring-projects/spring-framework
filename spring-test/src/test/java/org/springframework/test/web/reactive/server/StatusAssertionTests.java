@@ -56,7 +56,7 @@ public class StatusAssertionTests {
 				assertions.isEqualTo(408));
 	}
 
-	@Test // gh-23630
+	@Test  // gh-23630
 	public void isEqualToWithCustomStatus() {
 		statusAssertions(600).isEqualTo(600);
 	}
@@ -146,8 +146,8 @@ public class StatusAssertionTests {
 				assertions.value(equalTo(200)));
 	}
 
-	@Test
-	public void matchesCustomStatus() {
+	@Test  // gh-26658
+	public void matchesCustomStatusValue() {
 		statusAssertions(600).value(equalTo(600));
 	}
 
