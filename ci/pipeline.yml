@@ -85,18 +85,6 @@ resources:
   source:
     <<: *docker-resource-source
     repository: ((docker-hub-organization))/spring-framework-ci
-- name: ci-image-jdk11
-  type: docker-image
-  icon: docker
-  source:
-    <<: *docker-resource-source
-    repository: ((docker-hub-organization))/spring-framework-ci-jdk11
-- name: ci-image-jdk15
-  type: docker-image
-  icon: docker
-  source:
-    <<: *docker-resource-source
-    repository: ((docker-hub-organization))/spring-framework-ci-jdk15
 - name: artifactory-repo
   type: artifactory-resource
   icon: package-variant
@@ -161,14 +149,6 @@ jobs:
       params:
         build: ci-images-git-repo/ci/images
         dockerfile: ci-images-git-repo/ci/images/ci-image/Dockerfile
-    - put: ci-image-jdk11
-      params:
-        build: ci-images-git-repo/ci/images
-        dockerfile: ci-images-git-repo/ci/images/ci-image-jdk11/Dockerfile
-    - put: ci-image-jdk15
-      params:
-        build: ci-images-git-repo/ci/images
-        dockerfile: ci-images-git-repo/ci/images/ci-image-jdk15/Dockerfile
 - name: build
   serial: true
   public: true
@@ -227,7 +207,7 @@ jobs:
   serial: true
   public: true
   plan:
-  - get: ci-image-jdk11
+  - get: ci-image
   - get: git-repo
   - get: every-morning
     trigger: true
@@ -235,8 +215,11 @@ jobs:
     params: { state: "pending", commit: "git-repo" }
   - do:
     - task: check-project
-      image: ci-image-jdk11
+      image: ci-image
       file: git-repo/ci/tasks/check-project.yml
+      params:
+        MAIN_TOOLCHAIN: 8
+        TEST_TOOLCHAIN: 11
       <<: *build-project-task-params
     on_failure:
       do:
@@ -251,7 +234,7 @@ jobs:
   serial: true
   public: true
   plan:
-    - get: ci-image-jdk15
+    - get: ci-image
     - get: git-repo
     - get: every-morning
       trigger: true
@@ -259,8 +242,11 @@ jobs:
       params: { state: "pending", commit: "git-repo" }
     - do:
       - task: check-project
-        image: ci-image-jdk15
+        image: ci-image
         file: git-repo/ci/tasks/check-project.yml
+        params:
+          MAIN_TOOLCHAIN: 8
+          TEST_TOOLCHAIN: 15
         <<: *build-project-task-params
       on_failure:
         do:

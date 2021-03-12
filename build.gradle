@@ -310,14 +310,13 @@ configure([rootProject] + javaProjects) { project ->
 	apply plugin: "java-test-fixtures"
 	apply plugin: "checkstyle"
 	apply plugin: 'org.springframework.build.compile'
-	apply from: "${rootDir}/gradle/custom-java-home.gradle"
+	apply from: "${rootDir}/gradle/toolchains.gradle"
 	apply from: "${rootDir}/gradle/ide.gradle"
 
 	pluginManager.withPlugin("kotlin") {
 		apply plugin: "org.jetbrains.dokka"
 		compileKotlin {
 			kotlinOptions {
-				jvmTarget = "1.8"
 				languageVersion = "1.3"
 				apiVersion = "1.3"
 				freeCompilerArgs = ["-Xjsr305=strict"]
@@ -326,7 +325,6 @@ configure([rootProject] + javaProjects) { project ->
 		}
 		compileTestKotlin {
 			kotlinOptions {
-				jvmTarget = "1.8"
 				freeCompilerArgs = ["-Xjsr305=strict"]
 			}
 		}
