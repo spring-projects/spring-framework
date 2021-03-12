@@ -71,8 +71,7 @@ public class StatusAssertions {
 	 * Assert the response status code is {@code HttpStatus.CREATED} (201).
 	 */
 	public WebTestClient.ResponseSpec isCreated() {
-		HttpStatus expected = HttpStatus.CREATED;
-		return assertStatusAndReturn(expected);
+		return assertStatusAndReturn(HttpStatus.CREATED);
 	}
 
 	/**
@@ -195,8 +194,7 @@ public class StatusAssertions {
 	 * Assert the response status code is in the 5xx range.
 	 */
 	public WebTestClient.ResponseSpec is5xxServerError() {
-		HttpStatus.Series expected = HttpStatus.Series.SERVER_ERROR;
-		return assertSeriesAndReturn(expected);
+		return assertSeriesAndReturn(HttpStatus.Series.SERVER_ERROR);
 	}
 
 	/**
@@ -205,8 +203,8 @@ public class StatusAssertions {
 	 * @since 5.1
 	 */
 	public WebTestClient.ResponseSpec value(Matcher<? super Integer> matcher) {
-		int value = this.exchangeResult.getRawStatusCode();
-		this.exchangeResult.assertWithDiagnostics(() -> MatcherAssert.assertThat("Response status", value, matcher));
+		int actual = this.exchangeResult.getRawStatusCode();
+		this.exchangeResult.assertWithDiagnostics(() -> MatcherAssert.assertThat("Response status", actual, matcher));
 		return this.responseSpec;
 	}
 
@@ -216,8 +214,8 @@ public class StatusAssertions {
 	 * @since 5.1
 	 */
 	public WebTestClient.ResponseSpec value(Consumer<Integer> consumer) {
-		int value = this.exchangeResult.getRawStatusCode();
-		this.exchangeResult.assertWithDiagnostics(() -> consumer.accept(value));
+		int actual = this.exchangeResult.getRawStatusCode();
+		this.exchangeResult.assertWithDiagnostics(() -> consumer.accept(actual));
 		return this.responseSpec;
 	}
 
