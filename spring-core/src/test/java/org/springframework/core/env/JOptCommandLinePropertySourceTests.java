@@ -181,7 +181,7 @@ class JOptCommandLinePropertySourceTests {
 	}
 
 	public enum OptionEnum {
-		VAL_1;
+		VAL_1
 	}
 
 }
