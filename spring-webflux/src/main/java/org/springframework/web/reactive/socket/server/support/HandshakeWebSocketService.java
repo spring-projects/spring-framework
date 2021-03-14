@@ -32,12 +32,15 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
@@ -282,10 +285,12 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		// the server implementation once the handshake HTTP exchange is done.
 		HttpHeaders headers = new HttpHeaders();
 		headers.addAll(request.getHeaders());
+		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
+		cookies.addAll(request.getCookies());
 		Mono<Principal> principal = exchange.getPrincipal();
 		String logPrefix = exchange.getLogPrefix();
 		InetSocketAddress remoteAddress = request.getRemoteAddress();
-		return new HandshakeInfo(uri, headers, principal, protocol, remoteAddress, attributes, logPrefix);
+		return new HandshakeInfo(uri, headers, cookies, principal, protocol, remoteAddress, attributes, logPrefix);
 	}
 
 }

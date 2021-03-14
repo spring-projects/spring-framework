@@ -22,6 +22,9 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.Map;
 
+import org.springframework.http.HttpCookie;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
@@ -43,6 +46,8 @@ public class HandshakeInfo {
 	private final Mono<Principal> principalMono;
 
 	private final HttpHeaders headers;
+
+	private final MultiValueMap<String, HttpCookie> cookies;
 
 	@Nullable
 	private final String protocol;
@@ -67,6 +72,7 @@ public class HandshakeInfo {
 		this(uri, headers, principal, protocol, null, Collections.emptyMap(), null);
 	}
 
+
 	/**
 	 * Constructor targetting server-side use with extra information about the
 	 * handshake, the remote address, and a pre-existing log prefix for
@@ -81,10 +87,31 @@ public class HandshakeInfo {
 	 * messages, if any.
 	 * @since 5.1
 	 */
+	@Deprecated
 	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal,
-			@Nullable String protocol, @Nullable InetSocketAddress remoteAddress,
-			Map<String, Object> attributes, @Nullable String logPrefix) {
+				@Nullable String protocol, @Nullable InetSocketAddress remoteAddress,
+				Map<String, Object> attributes, @Nullable String logPrefix) {
+		this(uri, headers, CollectionUtils.toMultiValueMap(Collections.emptyMap()), principal, protocol, remoteAddress, attributes, logPrefix);
+	}
 
+	/**
+	 * Constructor targetting server-side use with extra information about the
+	 * handshake, the remote address, and a pre-existing log prefix for
+	 * correlation.
+	 * @param uri the endpoint URL
+	 * @param headers request headers for server or response headers or client
+	 * @param cookies request cookies for server
+	 * @param principal the principal for the session
+	 * @param protocol the negotiated sub-protocol (may be {@code null})
+	 * @param remoteAddress the remote address where the handshake came from
+	 * @param attributes initial attributes to use for the WebSocket session
+	 * @param logPrefix log prefix used during the handshake for correlating log
+	 * messages, if any.
+	 * @since 5.4
+	 */
+	public HandshakeInfo(URI uri, HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
+				Mono<Principal> principal, @Nullable String protocol, @Nullable InetSocketAddress remoteAddress,
+				Map<String, Object> attributes, @Nullable String logPrefix) {
 		Assert.notNull(uri, "URI is required");
 		Assert.notNull(headers, "HttpHeaders are required");
 		Assert.notNull(principal, "Principal is required");
@@ -92,6 +119,7 @@ public class HandshakeInfo {
 
 		this.uri = uri;
 		this.headers = headers;
+		this.cookies = cookies;
 		this.principalMono = principal;
 		this.protocol = protocol;
 		this.remoteAddress = remoteAddress;
@@ -113,6 +141,13 @@ public class HandshakeInfo {
 	 */
 	public HttpHeaders getHeaders() {
 		return this.headers;
+	}
+
+	/**
+	 * Return the handshake HTTP cookies.
+	 */
+	public MultiValueMap<String, HttpCookie> getCookies() {
+		return this.cookies;
 	}
 
 	/**
