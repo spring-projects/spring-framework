@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.endpoint.JmsActivationSpecConfig;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * Base model for a JMS listener endpoint.
@@ -50,10 +51,16 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	private String concurrency;
 
 
+	/**
+	 * Set a custom id for this endpoint.
+	 */
 	public void setId(String id) {
 		this.id = id;
 	}
 
+	/**
+	 * Return the id of this endpoint (possibly generated).
+	 */
 	@Override
 	public String getId() {
 		return this.id;
@@ -136,6 +143,9 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	}
 
 	private void setupJmsListenerContainer(AbstractMessageListenerContainer listenerContainer) {
+		if (StringUtils.hasText(getId())) {
+			listenerContainer.setBeanName(getId());
+		}
 		if (getDestination() != null) {
 			listenerContainer.setDestinationName(getDestination());
 		}
