@@ -118,10 +118,10 @@ public final class BindMarkersFactoryResolver {
 
 		static {
 			BUILTIN.put("H2", BindMarkersFactory.indexed("$", 1));
+			BUILTIN.put("MariaDB", BindMarkersFactory.anonymous("?"));
 			BUILTIN.put("Microsoft SQL Server", BindMarkersFactory.named("@", "P", 32,
 					BuiltInBindMarkersFactoryProvider::filterBindMarker));
 			BUILTIN.put("MySQL", BindMarkersFactory.anonymous("?"));
-			BUILTIN.put("MariaDB", BindMarkersFactory.anonymous("?"));
 			BUILTIN.put("Oracle", BindMarkersFactory.named(":", "P", 32,
 					BuiltInBindMarkersFactoryProvider::filterBindMarker));
 			BUILTIN.put("PostgreSQL", BindMarkersFactory.indexed("$", 1));

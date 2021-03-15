@@ -32,12 +32,57 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BindMarkersFactoryResolverUnitTests {
 
 	@Test
+	void shouldReturnBindMarkersFactoryForH2() {
+
+		BindMarkers bindMarkers = BindMarkersFactoryResolver
+				.resolve(new MockConnectionFactory("H2")).create();
+
+		assertThat(bindMarkers.next().getPlaceholder()).isEqualTo("$1");
+	}
+
+	@Test
+	void shouldReturnBindMarkersFactoryForMariaDB() {
+
+		BindMarkers bindMarkers = BindMarkersFactoryResolver
+				.resolve(new MockConnectionFactory("MariaDB")).create();
+
+		assertThat(bindMarkers.next().getPlaceholder()).isEqualTo("?");
+	}
+
+	@Test
+	void shouldReturnBindMarkersFactoryForMicrosoftSQLServer() {
+
+		BindMarkers bindMarkers = BindMarkersFactoryResolver
+				.resolve(new MockConnectionFactory("Microsoft SQL Server")).create();
+
+		assertThat(bindMarkers.next("foo").getPlaceholder()).isEqualTo("@P0_foo");
+	}
+
+	@Test
+	void shouldReturnBindMarkersFactoryForMySQL() {
+
+		BindMarkers bindMarkers = BindMarkersFactoryResolver
+				.resolve(new MockConnectionFactory("MySQL")).create();
+
+		assertThat(bindMarkers.next().getPlaceholder()).isEqualTo("?");
+	}
+
+	@Test
 	void shouldReturnBindMarkersFactoryForOracle() {
 
 		BindMarkers bindMarkers = BindMarkersFactoryResolver
 				.resolve(new MockConnectionFactory("Oracle Database")).create();
 
 		assertThat(bindMarkers.next("foo").getPlaceholder()).isEqualTo(":P0_foo");
+	}
+
+	@Test
+	void shouldReturnBindMarkersFactoryForPostgreSQL() {
+
+		BindMarkers bindMarkers = BindMarkersFactoryResolver
+				.resolve(new MockConnectionFactory("PostgreSQL")).create();
+
+		assertThat(bindMarkers.next().getPlaceholder()).isEqualTo("$1");
 	}
 
 	static class MockConnectionFactory implements ConnectionFactory {
