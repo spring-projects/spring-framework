@@ -1085,8 +1085,8 @@ request with a simple request parameter.
 
 `MultipartResolver` from the `org.springframework.web.multipart` package is a strategy
 for parsing multipart requests including file uploads. There is one implementation
-based on https://jakarta.apache.org/commons/fileupload[Commons FileUpload] and another
-based on Servlet 3.0 multipart request parsing.
+based on https://commons.apache.org/proper/commons-fileupload[Commons FileUpload] and
+another based on Servlet 3.0 multipart request parsing.
 
 To enable multipart handling, you need to declare a `MultipartResolver` bean in your
 `DispatcherServlet` Spring configuration with a name of `multipartResolver`.
