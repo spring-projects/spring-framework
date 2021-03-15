@@ -186,7 +186,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
-		builder.append(this.status.toString());
+		builder.append(this.status);
 		if (this.status instanceof HttpStatus) {
 			builder.append(' ');
 			builder.append(((HttpStatus) this.status).getReasonPhrase());
