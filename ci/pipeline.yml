@@ -9,8 +9,8 @@ anchors:
     GRADLE_ENTERPRISE_CACHE_USERNAME: ((gradle_enterprise_cache_user.username))
     GRADLE_ENTERPRISE_CACHE_PASSWORD: ((gradle_enterprise_cache_user.password))
   sonatype-task-params: &sonatype-task-params
-    SONATYPE_USER_TOKEN: ((sonatype-user-token))
-    SONATYPE_PASSWORD_TOKEN: ((sonatype-user-token-password))
+    SONATYPE_USERNAME: ((sonatype-username))
+    SONATYPE_PASSWORD: ((sonatype-password))
     SONATYPE_URL: ((sonatype-url))
     SONATYPE_STAGING_PROFILE_ID: ((sonatype-staging-profile-id))
   artifactory-task-params: &artifactory-task-params
@@ -376,7 +376,7 @@ jobs:
       trigger: false
       passed: [stage-release]
       params:
-        download_artifacts: false
+        download_artifacts: true
         save_build_info: true
     - task: promote
       image: ci-image
