@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,7 +241,7 @@ public abstract class TestContextAnnotationUtils {
 			return new AnnotationDescriptor<>(clazz, clazz.getAnnotation(annotationType));
 		}
 
-		AnnotationDescriptor<T> descriptor = null;
+		AnnotationDescriptor<T> descriptor;
 
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		for (Annotation composedAnn : clazz.getDeclaredAnnotations()) {
@@ -270,10 +270,7 @@ public abstract class TestContextAnnotationUtils {
 
 		// Declared on an enclosing class of an inner class?
 		if (searchEnclosingClass.test(clazz)) {
-			descriptor = findAnnotationDescriptor(clazz.getEnclosingClass(), annotationType, searchEnclosingClass, visited);
-			if (descriptor != null) {
-				return descriptor;
-			}
+			return findAnnotationDescriptor(clazz.getEnclosingClass(), annotationType, searchEnclosingClass, visited);
 		}
 
 		return null;
@@ -376,10 +373,7 @@ public abstract class TestContextAnnotationUtils {
 
 		// Declared on an enclosing class of an inner class?
 		if (searchEnclosingClass(clazz)) {
-			descriptor = findAnnotationDescriptorForTypes(clazz.getEnclosingClass(), annotationTypes, visited);
-			if (descriptor != null) {
-				return descriptor;
-			}
+			return findAnnotationDescriptorForTypes(clazz.getEnclosingClass(), annotationTypes, visited);
 		}
 
 		return null;
