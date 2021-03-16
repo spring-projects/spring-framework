@@ -923,7 +923,7 @@ injection:
 	public class SimpleMovieLister {
 
 		// the SimpleMovieLister has a dependency on a MovieFinder
-		private MovieFinder movieFinder;
+		private final MovieFinder movieFinder;
 
 		// a constructor so that the Spring container can inject a MovieFinder
 		public SimpleMovieLister(MovieFinder movieFinder) {
@@ -943,7 +943,7 @@ injection:
 ----
 
 Notice that there is nothing special about this class. It is a POJO that
-has no dependencies on container specific interfaces, base classes or annotations.
+has no dependencies on container specific interfaces, base classes, or annotations.
 
 [[beans-factory-ctor-arguments-resolution]]
 ===== Constructor Argument Resolution
@@ -974,10 +974,10 @@ being instantiated. Consider the following class:
 	class ThingOne(thingTwo: ThingTwo, thingThree: ThingThree)
 ----
 
-Assuming that `ThingTwo` and `ThingThree` classes are not related by inheritance, no potential
-ambiguity exists. Thus, the following configuration works fine, and you do not need to specify
-the constructor argument indexes or types explicitly in the `<constructor-arg/>`
-element.
+Assuming that the `ThingTwo` and `ThingThree` classes are not related by inheritance, no
+potential ambiguity exists. Thus, the following configuration works fine, and you do not
+need to specify the constructor argument indexes or types explicitly in the
+`<constructor-arg/>` element.
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -1006,10 +1006,10 @@ by type without help. Consider the following class:
 	public class ExampleBean {
 
 		// Number of years to calculate the Ultimate Answer
-		private int years;
+		private final int years;
 
 		// The Answer to Life, the Universe, and Everything
-		private String ultimateAnswer;
+		private final String ultimateAnswer;
 
 		public ExampleBean(int years, String ultimateAnswer) {
 			this.years = years;
@@ -1031,7 +1031,7 @@ by type without help. Consider the following class:
 .[[beans-factory-ctor-arguments-type]]Constructor argument type matching
 --
 In the preceding scenario, the container can use type matching with simple types if
-you explicitly specify the type of the constructor argument by using the `type` attribute.
+you explicitly specify the type of the constructor argument by using the `type` attribute,
 as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -1251,7 +1251,8 @@ visibility of some configuration issues is why `ApplicationContext` implementati
 default pre-instantiate singleton beans. At the cost of some upfront time and memory to
 create these beans before they are actually needed, you discover configuration issues
 when the `ApplicationContext` is created, not later. You can still override this default
-behavior so that singleton beans initialize lazily, rather than being pre-instantiated.
+behavior so that singleton beans initialize lazily, rather than being eagerly
+pre-instantiated.
 
 If no circular dependencies exist, when one or more collaborating beans are being
 injected into a dependent bean, each collaborating bean is totally configured prior
