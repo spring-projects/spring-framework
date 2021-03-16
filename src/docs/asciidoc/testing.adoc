@@ -7471,12 +7471,35 @@ or reactive type such as Reactor `Mono`:
 [[spring-mvc-test-vs-streaming-response]]
 ===== Streaming Responses
 
-There are no options built into Spring MVC Test for container-less testing of streaming
-responses. However you can test streaming requests through the <<WebTestClient>>.
-This is also supported in Spring Boot where you can
-{doc-spring-boot}/html/spring-boot-features.html#boot-features-testing-spring-boot-applications-testing-with-running-server[test a running server]
-with `WebTestClient`. One extra advantage is the ability to use the `StepVerifier` from
-project Reactor that allows declaring expectations on a stream of data.
+The best way to test streaming responses such as Server-Sent Events is through the
+<<WebTestClient>> which can be used as a test client to connect to a `MockMvc` instance
+to perform tests on Spring MVC controllers without a running server. For example:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	WebTestClient client = MockMvcWebTestClient.bindToController(new SseController()).build();
+
+	FluxExchangeResult<Person> exchangeResult = client.get()
+			.uri("/persons")
+			.exchange()
+			.expectStatus().isOk()
+			.expectHeader().contentType("text/event-stream")
+			.returnResult(Person.class);
+
+	// Use StepVerifier from Project Reactor to test the streaming response
+
+	StepVerifier.create(exchangeResult.getResponseBody())
+			.expectNext(new Person("N0"), new Person("N1"), new Person("N2"))
+			.expectNextCount(4)
+			.consumeNextWith(person -> assertThat(person.getName()).endsWith("7"))
+			.thenCancel()
+			.verify();
+----
+
+`WebTestClient` can also connect to a live server and perform full end-to-end integration
+tests. This is also supported in Spring Boot where you can
+{doc-spring-boot}/html/spring-boot-features.html#boot-features-testing-spring-boot-applications-testing-with-running-server[test a running server].
 
 
 [[spring-mvc-test-server-filters]]
