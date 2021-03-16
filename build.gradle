@@ -90,7 +90,7 @@ configure(allprojects) { project ->
 			}
 			dependency "org.ogce:xpp3:1.1.6"
 			dependency "org.yaml:snakeyaml:1.28"
-			dependencySet(group: 'org.jetbrains.kotlinx', version: '1.0.0') {
+			dependencySet(group: 'org.jetbrains.kotlinx', version: '1.0.1') {
 				entry 'kotlinx-serialization-core'
 				entry 'kotlinx-serialization-json'
 			}
