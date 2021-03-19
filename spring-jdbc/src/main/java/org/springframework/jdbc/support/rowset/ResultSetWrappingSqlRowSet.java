@@ -29,7 +29,7 @@ import java.util.Map;
 
 import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.lang.Nullable;
-import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * The default implementation of Spring's {@link SqlRowSet} interface, wrapping a
@@ -97,7 +97,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			ResultSetMetaData rsmd = resultSet.getMetaData();
 			if (rsmd != null) {
 				int columnCount = rsmd.getColumnCount();
-				this.columnLabelMap = CollectionUtils.newHashMap(columnCount);
+				this.columnLabelMap = new LinkedCaseInsensitiveMap<>(columnCount);
 				for (int i = 1; i <= columnCount; i++) {
 					String key = rsmd.getColumnLabel(i);
 					// Make sure to preserve first matching column for any given name,
