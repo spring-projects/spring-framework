@@ -411,7 +411,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			String handlerName = (String) handler;
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
-		//获得 HandlerExecutionChain 对象
+		//获得 HandlerExecutionChain 对象,会将拦截器加入到HandlerExecutionChain对象
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 
 		if (logger.isTraceEnabled()) {

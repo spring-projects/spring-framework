@@ -49,6 +49,7 @@ public class HandlerExecutionChain {
 	@Nullable
 	private List<HandlerInterceptor> interceptorList;
 
+	//已经执行的拦截器的位置
 	private int interceptorIndex = -1;
 
 
@@ -133,15 +134,26 @@ public class HandlerExecutionChain {
 	 * next interceptor or the handler itself. Else, DispatcherServlet assumes
 	 * that this interceptor has already dealt with the response itself.
 	 */
+	//应用拦截器的前置处理
 	boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+		//获取拦截器数组
 		HandlerInterceptor[] interceptors = getInterceptors();
 		if (!ObjectUtils.isEmpty(interceptors)) {
+
+			//遍历拦截器
 			for (int i = 0; i < interceptors.length; i++) {
 				HandlerInterceptor interceptor = interceptors[i];
+
+				//执行拦截器前置处理
 				if (!interceptor.preHandle(request, response, this.handler)) {
+					//触发已完成处理
+					//不是触发当前拦截器的已完成逻辑，而是触发 [0, interceptorIndex) 这几个拦截器已完成的逻辑( 不包括当前这个拦截器 )，并且是按照倒序执行的
 					triggerAfterCompletion(request, response, null);
 					return false;
 				}
+
+				//标记已执行拦截器的下标
 				this.interceptorIndex = i;
 			}
 		}
@@ -151,6 +163,7 @@ public class HandlerExecutionChain {
 	/**
 	 * Apply postHandle methods of registered interceptors.
 	 */
+	//应用拦截器的后置处理
 	void applyPostHandle(HttpServletRequest request, HttpServletResponse response, @Nullable ModelAndView mv)
 			throws Exception {
 
@@ -158,6 +171,7 @@ public class HandlerExecutionChain {
 		if (!ObjectUtils.isEmpty(interceptors)) {
 			for (int i = interceptors.length - 1; i >= 0; i--) {
 				HandlerInterceptor interceptor = interceptors[i];
+				// 后置处理
 				interceptor.postHandle(request, response, this.handler, mv);
 			}
 		}
@@ -173,12 +187,15 @@ public class HandlerExecutionChain {
 
 		HandlerInterceptor[] interceptors = getInterceptors();
 		if (!ObjectUtils.isEmpty(interceptors)) {
-			for (int i = this.interceptorIndex; i >= 0; i--) {
+			//i 为当前已执行的拦截器下标
+			for (int i = this.interceptorIndex; i >= 0; i--) {//倒叙
 				HandlerInterceptor interceptor = interceptors[i];
 				try {
+					//执行已完成处理，只有preHandler执行成功才会调用
 					interceptor.afterCompletion(request, response, this.handler, ex);
 				}
 				catch (Throwable ex2) {
+					// 注意，如果执行失败，仅仅会打印错误日志，不会结束循环
 					logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
 				}
 			}

@@ -544,12 +544,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	class MappingRegistry {
 
+		// key mapping (RequestMappingInfo)
 		private final Map<T, MappingRegistration<T>> registry = new HashMap<>();
 
 		private final Map<T, HandlerMethod> mappingLookup = new LinkedHashMap<>();
 
+		//url 映射
 		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<>();
 
+		//mapping名字 映射
 		private final Map<String, List<HandlerMethod>> nameLookup = new ConcurrentHashMap<>();
 
 		private final Map<HandlerMethod, CorsConfiguration> corsLookup = new ConcurrentHashMap<>();

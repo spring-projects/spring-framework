@@ -56,6 +56,7 @@ public class SimpleServletHandlerAdapter implements HandlerAdapter {
 
 	@Override
 	public boolean supports(Object handler) {
+		//是否servlet
 		return (handler instanceof Servlet);
 	}
 
