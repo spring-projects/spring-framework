@@ -139,10 +139,15 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 				return true;
 			}
 			else {
-				return (this.servletContext.getRealPath(this.path) != null);
+				String realPath = this.servletContext.getRealPath(this.path);
+				if (realPath == null) {
+					return false;
+				}
+				File file = new File(realPath);
+				return (file.exists() && file.isFile());
 			}
 		}
-		catch (MalformedURLException ex) {
+		catch (IOException ex) {
 			return false;
 		}
 	}

@@ -36,6 +36,8 @@ public class ResourceTests {
 		MockServletContext sc = new MockServletContext();
 		Resource resource = new ServletContextResource(sc, "org/springframework/core/io/Resource.class");
 		doTestResource(resource);
+		Resource resourceNotExists = new ServletContextResource(sc, "org/springframework/core/io/ResourceNotExists.class");
+		doTestNotExistsResource(resourceNotExists);
 		assertThat(new ServletContextResource(sc, "org/springframework/core/../core/io/./Resource.class")).isEqualTo(resource);
 	}
 
@@ -48,6 +50,9 @@ public class ResourceTests {
 	}
 
 	private void doTestResource(Resource resource) throws IOException {
+		assertThat(resource.getFile()).isNotNull();
+		assertThat(resource.exists()).isTrue();
+		assertThat(resource.isFile()).isTrue();
 		assertThat(resource.getFilename()).isEqualTo("Resource.class");
 		assertThat(resource.getURL().getFile().endsWith("Resource.class")).isTrue();
 
@@ -60,5 +65,10 @@ public class ResourceTests {
 		assertThat(relative2.getFilename()).isEqualTo("ResourcePatternResolver.class");
 		assertThat(relative2.getURL().getFile().endsWith("ResourcePatternResolver.class")).isTrue();
 		assertThat(relative2.exists()).isTrue();
+	}
+
+	private void doTestNotExistsResource(Resource resource) throws IOException {
+		assertThat(resource.exists()).isFalse();
+		assertThat(resource.isFile()).isFalse();
 	}
 }
