@@ -23,6 +23,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import reactor.blockhound.BlockHound;
+import reactor.blockhound.integration.BlockHoundIntegration;
+
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -416,6 +419,22 @@ public final class WebHttpHandlerBuilder {
 	@Override
 	public WebHttpHandlerBuilder clone() {
 		return new WebHttpHandlerBuilder(this);
+	}
+
+
+	/**
+	 * {@code BlockHoundIntegration} for spring-web classes.
+	 * @since 5.3.6
+	 */
+	public static class SpringWebBlockHoundIntegration implements BlockHoundIntegration {
+
+		@Override
+		public void applyTo(BlockHound.Builder builder) {
+
+			// Avoid hard references potentially anywhere in spring-web (no need for structural dependency)
+
+			builder.allowBlockingCallsInside("org.springframework.web.util.HtmlUtils", "<clinit>");
+		}
 	}
 
 }
