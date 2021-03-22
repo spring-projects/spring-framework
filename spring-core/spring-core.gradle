@@ -9,7 +9,7 @@ description = "Spring Core"
 apply plugin: "kotlin"
 
 // spring-core includes asm and repackages cglib, inlining both into the spring-core jar.
-// cglib itself depends on asm and is therefore further transformed by the JarJar task to
+// cglib itself depends on asm and is therefore further transformed by the ShadowJar task to
 // depend on org.springframework.asm; this avoids including two different copies of asm.
 def cglibVersion = "3.3.0"
 def objenesisVersion = "3.1"
@@ -73,7 +73,7 @@ dependencies {
 
 jar {
 	reproducibleFileOrder = true
-	preserveFileTimestamps = false // maybe not necessary here, but good for reproducibility
+	preserveFileTimestamps = false  // maybe not necessary here, but good for reproducibility
 
 	// Inline repackaged cglib classes directly into spring-core jar
 	dependsOn cglibRepackJar
