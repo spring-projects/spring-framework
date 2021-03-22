@@ -37,7 +37,7 @@ configure(allprojects) { project ->
 			mavenBom "org.junit:junit-bom:5.7.1"
 		}
 		dependencies {
-			dependencySet(group: 'org.apache.logging.log4j', version: '2.14.0') {
+			dependencySet(group: 'org.apache.logging.log4j', version: '2.14.1') {
 				entry 'log4j-api'
 				entry 'log4j-core'
 				entry 'log4j-jul'
@@ -117,26 +117,26 @@ configure(allprojects) { project ->
 			}
 			dependency "org.apache.poi:poi-ooxml:4.1.2"
 			dependency "org.apache-extras.beanshell:bsh:2.0b6"
-			dependency "org.freemarker:freemarker:2.3.30"
+			dependency "org.freemarker:freemarker:2.3.31"
 			dependency "org.hsqldb:hsqldb:2.5.1"
 			dependency "org.quartz-scheduler:quartz:2.3.2"
 			dependency "org.codehaus.fabric3.api:commonj:1.1.0"
 			dependency "net.sf.ehcache:ehcache:2.10.6"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core:5.4.29.Final"
+			dependency "org.hibernate:hibernate-core:5.4.30.Final"
 			dependency "org.hibernate:hibernate-validator:6.2.0.Final"
 			dependency "org.webjars:webjars-locator-core:0.46"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.43') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.44') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.43') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.44') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
@@ -188,7 +188,7 @@ configure(allprojects) { project ->
 			dependency("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1") {
 				exclude group: "junit", name: "junit"
 			}
-			dependency "org.testng:testng:7.3.0"
+			dependency "org.testng:testng:7.4.0"
 			dependency "org.hamcrest:hamcrest:2.1"
 			dependency "org.awaitility:awaitility:3.1.6"
 			dependency "org.assertj:assertj-core:3.19.0"
@@ -206,10 +206,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.10.2"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.47.1") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.48.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.47.1") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.48.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
