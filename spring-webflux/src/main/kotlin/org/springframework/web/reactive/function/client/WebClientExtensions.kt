@@ -144,6 +144,17 @@ suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBody() : T =
 	}
 
 /**
+ * Coroutines variant of [WebClient.ResponseSpec.bodyToMono].
+ *
+ * @author Valentin Shakhov
+ */
+suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBodyOrNull() : T? =
+	when (T::class) {
+		Unit::class -> awaitBodilessEntity().let { Unit as T }
+		else -> bodyToMono<T>().awaitSingleOrNull()
+	}
+
+/**
  * Coroutines variant of [WebClient.ResponseSpec.toBodilessEntity].
  */
 suspend fun WebClient.ResponseSpec.awaitBodilessEntity() =
