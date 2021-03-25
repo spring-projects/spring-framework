@@ -82,6 +82,16 @@ public abstract class MethodMatchers {
 	}
 
 	/**
+	 * reverse the given MethodMatcher match.
+	 * @param mm the MethodMatcher
+	 * @return a distinct MethodMatcher that not matches methods
+	 * of the given MethodMatcher match
+	 */
+	public static MethodMatcher reversion(MethodMatcher mm) {
+		return  new ReversionMethodMatcher(mm);
+	}
+
+	/**
 	 * Apply the given MethodMatcher to the given Method, supporting an
 	 * {@link org.springframework.aop.IntroductionAwareMethodMatcher}
 	 * (if applicable).
@@ -349,6 +359,59 @@ public abstract class MethodMatchers {
 			return (MethodMatchers.matches(this.mm1, method, targetClass, hasIntroductions) &&
 					MethodMatchers.matches(this.mm2, method, targetClass, hasIntroductions));
 		}
+	}
+
+
+	/**
+	 * MethodMatcher implementation for an reversion of the given MethodMatcher.
+	 */
+	@SuppressWarnings("serial")
+	private static class ReversionMethodMatcher implements MethodMatcher, Serializable {
+
+		protected final MethodMatcher mm;
+
+		public ReversionMethodMatcher(MethodMatcher mm) {
+			Assert.notNull(mm, "MethodMatcher must not be null");
+			this.mm = mm;
+		}
+
+		@Override
+		public boolean matches(Method method, Class<?> targetClass) {
+			return !this.mm.matches(method, targetClass);
+		}
+
+		@Override
+		public boolean isRuntime() {
+			return this.mm.isRuntime();
+		}
+
+		@Override
+		public boolean matches(Method method, Class<?> targetClass, Object... args) {
+			return !this.mm.matches(method, targetClass, args);
+		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof ReversionMethodMatcher)) {
+				return false;
+			}
+			ReversionMethodMatcher that = (ReversionMethodMatcher) other;
+			return this.mm.equals(that.mm);
+		}
+
+		@Override
+		public int hashCode() {
+			return 37 * this.mm.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return getClass().getName() + ": " + this.mm;
+		}
+		
 	}
 
 }
