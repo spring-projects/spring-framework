@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactive.awaitSingleOrNull
 import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.mono
 import org.reactivestreams.Publisher
@@ -141,6 +142,17 @@ suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBody() : T =
 	when (T::class) {
 		Unit::class -> awaitBodilessEntity().let { Unit as T }
 		else -> bodyToMono<T>().awaitSingle()
+	}
+
+/**
+ * Coroutines variant of [WebClient.ResponseSpec.bodyToMono].
+ *
+ * @author Valentin Shakhov
+ */
+suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBodyOrNull() : T? =
+	when (T::class) {
+		Unit::class -> awaitBodilessEntity().let { Unit as T? }
+		else -> bodyToMono<T>().awaitSingleOrNull()
 	}
 
 /**
