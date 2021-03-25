@@ -66,4 +66,13 @@ class ClassFiltersTests {
 			.matches("^.+IntersectionClassFilter: \\[.+RootClassFilter: .+Exception, .+RootClassFilter: .+NestedRuntimeException\\]$");
 	}
 
+	@Test
+	void reversion() {
+		assertThat(exceptionFilter.matches(RuntimeException.class)).isTrue();
+		ClassFilter reversion = ClassFilters.reversion(exceptionFilter);
+		assertThat(reversion.matches(RuntimeException.class)).isFalse();
+		assertThat(reversion.toString())
+				.matches("^.+ReversionClassFilter: .+RootClassFilter: .+Exception$");
+	}
+	
 }

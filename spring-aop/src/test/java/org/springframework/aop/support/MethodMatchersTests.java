@@ -111,6 +111,19 @@ public class MethodMatchersTests {
 		assertThat(second.equals(first)).isTrue();
 	}
 
+	@Test
+	public void testDynamicAndStaticMethodMatcherReversion() throws Exception {
+		MethodMatcher getterMatcher = new StartsWithMatcher("get");
+		MethodMatcher reversion = MethodMatchers.reversion(getterMatcher);
+		assertThat(reversion.isRuntime()).as("Reversion is a static matcher").isFalse();
+		assertThat(reversion.matches(ITESTBEAN_GETAGE, TestBean.class)).as("Didn't matched getAge method").isFalse();
+		assertThat(reversion.matches(IOTHER_ABSQUATULATE, TestBean.class)).as("Matched absquatulate method").isTrue();
+		reversion = MethodMatchers.reversion(new TestDynamicMethodMatcherWhichDoesNotMatch());
+		assertThat(reversion.isRuntime()).as("Intersection is a dynamic matcher").isTrue();
+		assertThat(reversion.matches(ITESTBEAN_SETAGE, TestBean.class)).as("Didn't matched setAge method").isFalse();
+		assertThat(reversion.matches(ITESTBEAN_SETAGE, TestBean.class, 5)).as("Matched setAge method").isTrue();
+	}
+
 
 	public static class StartsWithMatcher extends StaticMethodMatcher {
 
