@@ -85,6 +85,17 @@ public abstract class ClassFilters {
 		return new IntersectionClassFilter(classFilters);
 	}
 
+	/**
+	 * reverse the given ClassFilter match.
+	 * @param cf the ClassFilter
+	 * @return a distinct ClassFilter that not matches classes
+	 * of the given ClassFilter match
+	 */
+	public static ClassFilter reversion(ClassFilter cf) {
+		Assert.notNull(cf, "ClassFilter must not be null");
+		return new ReversionClassFilter(cf);
+	}
+
 
 	/**
 	 * ClassFilter implementation for a union of the given ClassFilters.
@@ -167,4 +178,39 @@ public abstract class ClassFilters {
 
 	}
 
+
+	/**
+	 * ClassFilter implementation for an reversion of the given ClassFilter.
+	 */
+	@SuppressWarnings("serial")
+	private static class ReversionClassFilter implements ClassFilter, Serializable {
+
+		private final ClassFilter filter;
+
+		ReversionClassFilter(ClassFilter filter) {
+			this.filter = filter;
+		}
+
+		@Override
+		public boolean matches(Class<?> clazz) {
+			return !filter.matches(clazz);
+		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof ReversionClassFilter &&
+					this.filter.equals(((ReversionClassFilter)other).filter)));
+		}
+
+		@Override
+		public int hashCode() {
+			return 37 * this.filter.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return getClass().getName() + ": " + this.filter;
+		}
+
+	}
 }
