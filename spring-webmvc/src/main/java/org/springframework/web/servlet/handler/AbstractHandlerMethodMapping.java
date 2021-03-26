@@ -346,7 +346,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * Extract and return the CORS configuration for the mapping.
 	 */
 	@Nullable
-	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, T mapping) {
+	protected CorsConfiguration initCorsConfiguration(HandlerMethod handlerMethod, T mapping) {
 		return null;
 	}
 
@@ -638,7 +638,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					addMappingName(name, handlerMethod);
 				}
 
-				CorsConfiguration corsConfig = initCorsConfiguration(handler, method, mapping);
+				CorsConfiguration corsConfig = initCorsConfiguration(handlerMethod, mapping);
 				if (corsConfig != null) {
 					corsConfig.validateAllowCredentials();
 					this.corsLookup.put(handlerMethod, corsConfig);

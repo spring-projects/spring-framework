@@ -302,7 +302,8 @@ public class HandlerMethodMappingTests {
 		}
 
 		@Override
-		protected CorsConfiguration initCorsConfiguration(Object handler, Method method, String mapping) {
+		protected CorsConfiguration initCorsConfiguration(HandlerMethod handlerMethod, String mapping) {
+			Method method = handlerMethod.getMethod();
 			CrossOrigin crossOrigin = AnnotatedElementUtils.findMergedAnnotation(method, CrossOrigin.class);
 			if (crossOrigin != null) {
 				CorsConfiguration corsConfig = new CorsConfiguration();
