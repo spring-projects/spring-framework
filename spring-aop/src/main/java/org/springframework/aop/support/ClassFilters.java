@@ -193,7 +193,7 @@ public abstract class ClassFilters {
 
 		@Override
 		public boolean matches(Class<?> clazz) {
-			return !filter.matches(clazz);
+			return !this.filter.matches(clazz);
 		}
 
 		@Override
