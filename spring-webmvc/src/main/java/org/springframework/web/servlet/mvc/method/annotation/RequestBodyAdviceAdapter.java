@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * A convenient starting point for implementing
- * {@link org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
- * ResponseBodyAdvice} with default method implementations.
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice
+ * RequestBodyAdvice} with default method implementations.
  *
  * <p>Sub-classes are required to implement {@link #supports} to return true
  * depending on when the advice applies.
