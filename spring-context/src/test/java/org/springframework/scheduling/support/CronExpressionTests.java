@@ -1266,13 +1266,13 @@ class CronExpressionTests {
 		CronExpression cronExpression = CronExpression.parse("0 0 9 * * *");
 
 		ZonedDateTime last = ZonedDateTime.parse("2021-03-27T09:00:00+01:00[Europe/Amsterdam]");
-		ZonedDateTime expected = ZonedDateTime.parse("2021-03-28T09:00:00+01:00[Europe/Amsterdam]");
+		ZonedDateTime expected = ZonedDateTime.parse("2021-03-28T09:00:00+02:00[Europe/Amsterdam]");
 		ZonedDateTime actual = cronExpression.next(last);
 		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
-		last = ZonedDateTime.parse("2021-10-30T09:00:00+01:00[Europe/Amsterdam]");
-		expected = ZonedDateTime.parse("2021-10-31T09:00:00+02:00[Europe/Amsterdam]");
+		last = ZonedDateTime.parse("2021-10-30T09:00:00+02:00[Europe/Amsterdam]");
+		expected = ZonedDateTime.parse("2021-10-31T09:00:00+01:00[Europe/Amsterdam]");
 		actual = cronExpression.next(last);
 		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
