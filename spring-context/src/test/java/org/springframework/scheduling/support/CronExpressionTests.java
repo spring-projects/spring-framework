@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1259,6 +1259,23 @@ class CronExpressionTests {
 		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 		assertThat(actual.getDayOfWeek()).isEqualTo(SUNDAY);
+	}
+
+	@Test
+	public void daylightSaving() {
+		CronExpression cronExpression = CronExpression.parse("0 0 9 * * *");
+
+		ZonedDateTime last = ZonedDateTime.parse("2021-03-27T09:00:00+01:00[Europe/Amsterdam]");
+		ZonedDateTime expected = ZonedDateTime.parse("2021-03-28T09:00:00+01:00[Europe/Amsterdam]");
+		ZonedDateTime actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		last = ZonedDateTime.parse("2021-10-30T09:00:00+01:00[Europe/Amsterdam]");
+		expected = ZonedDateTime.parse("2021-10-31T09:00:00+02:00[Europe/Amsterdam]");
+		actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
 	}
 
 
