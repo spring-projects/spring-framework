@@ -281,6 +281,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			// a class path resource (multiple resources for same name possible)
 			if (getPathMatcher().isPattern(locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length()))) {
 				// a class path resource pattern
+				/**
+				 * 全场最佳
+				 */
+				// 通过classpath*:[自定义路径]/**/*.class
+				// 找到指定路径下项目路径下所有class文件
 				return findPathMatchingResources(locationPattern);
 			}
 			else {

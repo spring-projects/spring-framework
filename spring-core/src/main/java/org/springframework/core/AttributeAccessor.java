@@ -28,6 +28,8 @@ import org.springframework.util.Assert;
  * @author Rob Harrop
  * @author Sam Brannen
  * @since 2.0
+ *
+ * 提供对BeanDefinition元数据操作的API，由AbstractBeanDefinition实现
  */
 public interface AttributeAccessor {
 

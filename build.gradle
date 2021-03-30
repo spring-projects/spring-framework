@@ -345,6 +345,8 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	dependencies {
+		implementation group: 'org.mybatis', name: 'mybatis', version: '3.5.6'
+		implementation group: 'org.mybatis', name: 'mybatis-spring', version: '2.0.6'
 		testCompile("org.junit.jupiter:junit-jupiter-api")
 		testCompile("org.junit.jupiter:junit-jupiter-params")
 		testCompile("org.mockito:mockito-core")

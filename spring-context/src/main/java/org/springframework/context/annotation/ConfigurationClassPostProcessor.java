@@ -265,7 +265,13 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
 		}
 
+		/**
+		 * 产生代理对象
+		 */
 		enhanceConfigurationClasses(beanFactory);
+		/**
+		 * 添加Bean后置处理器
+		 */
 		beanFactory.addBeanPostProcessor(new ImportAwareBeanPostProcessor(beanFactory));
 	}
 
@@ -275,15 +281,32 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 */
 	public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
 		List<BeanDefinitionHolder> configCandidates = new ArrayList<>();
+		/**
+		 * 获取所有内置的BD
+		 */
 		String[] candidateNames = registry.getBeanDefinitionNames();
 
 		for (String beanName : candidateNames) {
+			/**
+			 * 目标：解析配置类(Appconfig.class)
+			 * 根据名字得到BD
+			 */
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
+			/**
+			 * 判断是否已经被解析过
+			 * getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE)
+			 * =full||lite
+			 */
 			if (beanDef.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE) != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
 			}
+			/**
+			 * 判断BeanDefinition是否是一个配置类的BD
+			 * setAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE,full||lite)
+			 * @Configuration
+			 */
 			else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
 				configCandidates.add(new BeanDefinitionHolder(beanDef, beanName));
 			}
@@ -328,6 +351,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
 			StartupStep processConfig = this.applicationStartup.start("spring.context.config-classes.parse");
+			/**
+			 * 解析类里的注解
+			 * 第五步,初始化内部的configClasses
+			 */
 			parser.parse(candidates);
 			parser.validate();
 
@@ -340,6 +367,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						registry, this.sourceExtractor, this.resourceLoader, this.environment,
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
+			/**
+			 * 在这里执行parse方法的configClasses
+			 * 第六步
+			 */
 			this.reader.loadBeanDefinitions(configClasses);
 			alreadyParsed.addAll(configClasses);
 			processConfig.tag("classCount", () -> String.valueOf(configClasses.size())).end();
@@ -389,6 +420,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Map<String, AbstractBeanDefinition> configBeanDefs = new LinkedHashMap<>();
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
+			/**
+			 * 关键代码：赋值代码见===>ConfigurationClassUtils#checkConfigurationClassCandidate方法
+			 * 	在解析AppConfig时，赋值full
+			 * 	如果是包含了@Bean的类，赋值lite
+			 */
 			Object configClassAttr = beanDef.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE);
 			AnnotationMetadata annotationMetadata = null;
 			MethodMetadata methodMetadata = null;
@@ -444,12 +480,24 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			beanDef.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);
 			// Set enhanced subclass of the user-specified bean class
 			Class<?> configClass = beanDef.getBeanClass();
+			/**
+			 * 在此处产生代理对象
+			 * sourceClass===>configClass
+			 * targetClass===>enhancedClass
+			 *
+			 * 在初始化对象时(finishBeanFactoryInitialization(beanFactory))，调用
+			 * BeanMethodInterceptor
+			 * BeanFactoryAwareMethodInterceptor
+			 */
 			Class<?> enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);
 			if (configClass != enhancedClass) {
 				if (logger.isTraceEnabled()) {
 					logger.trace(String.format("Replacing bean definition '%s' existing class '%s' with " +
 							"enhanced class '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
 				}
+				/**
+				 * 替换为代理对象的Class
+				 */
 				beanDef.setBeanClass(enhancedClass);
 			}
 		}

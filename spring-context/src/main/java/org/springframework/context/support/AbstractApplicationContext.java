@@ -244,6 +244,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Create a new AbstractApplicationContext with no parent.
 	 */
 	public AbstractApplicationContext() {
+//		System.out.println("0000000000000000");
 		this.resourcePatternResolver = getResourcePatternResolver();
 	}
 
@@ -550,6 +551,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
+			/**
+			 * 检查BeanFactory是否已经初始化
+			 * 保证BeanFactory被初始化!
+			 * 例如ClassPathXmlApplicationContext
+			 */
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
@@ -560,17 +566,37 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				postProcessBeanFactory(beanFactory);
 
 				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
+
 				// Invoke factory processors registered as beans in the context.
+				/**
+				 * 完成了扫描和解析parse(类----BeanDefinition)，
+				 * 	同时实现程序员自己扩展的BeanFactoryPostProcessor
+				 * Bean工厂后置处理器----干预Bean(DefaultListableBeanFactory)工厂的工作流程
+				 * 	执行所有实现了BeanFactoryPostProcessor接口的类postProcessBeanFactory方法
+				 * 	Q1:为什么还要BeanDefinitionRegistryPostProcessor?
+				 * 	A1:保证Spring内置的后置处理器先执行，例如扫描Bean等功能
+				 * 		ConfigurationClassPostProcessor双重身份
+				 * 第一步
+				 */
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
+				/**
+				 * 注册BeanPostProcessor
+				 */
 				registerBeanPostProcessors(beanFactory);
 				beanPostProcess.end();
 
 				// Initialize message source for this context.
+				/**
+				 * 国际化
+				 */
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
+				/**
+				 * 事件广播器
+				 */
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
@@ -580,6 +606,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
+				/**
+				 * spring开始实例化单例的类
+				 * 	validate和lifecycle
+				 */
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
@@ -743,6 +773,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Must be called before singleton instantiation.
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+		/**
+		 * 第二步
+		 */
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime
@@ -915,6 +948,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
+		/**
+		 * 1.初始化Bean
+		 */
 		beanFactory.preInstantiateSingletons();
 	}
 

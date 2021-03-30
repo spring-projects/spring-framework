@@ -84,6 +84,9 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					}
 				}
 			}
+			/**
+			 * 初始化对象02
+			 */
 			return BeanUtils.instantiateClass(constructorToUse);
 		}
 		else {
@@ -150,6 +153,9 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 			Method priorInvokedFactoryMethod = currentlyInvokedFactoryMethod.get();
 			try {
+				/**
+				 * 将FactoryBean创建该Bean的当前方法名传入
+				 */
 				currentlyInvokedFactoryMethod.set(factoryMethod);
 				Object result = factoryMethod.invoke(factoryBean, args);
 				if (result == null) {

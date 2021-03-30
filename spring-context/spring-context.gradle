@@ -4,11 +4,14 @@ apply plugin: "groovy"
 apply plugin: "kotlin"
 
 dependencies {
+	implementation group: 'org.mybatis', name: 'mybatis', version: '3.5.6'
+	implementation group: 'org.mybatis', name: 'mybatis-spring', version: '2.0.6'
 	compile(project(":spring-aop"))
 	compile(project(":spring-beans"))
 	compile(project(":spring-core"))
 	compile(project(":spring-expression"))
-	optional(project(":spring-instrument"))
+	compile(project(":spring-instrument"))
+	/*optional(project(":spring-instrument"))*/
 	optional("javax.annotation:javax.annotation-api")
 	optional("javax.ejb:javax.ejb-api")
 	optional("javax.enterprise.concurrent:javax.enterprise.concurrent-api")

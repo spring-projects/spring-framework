@@ -74,6 +74,12 @@ class ComponentScanAnnotationParser {
 
 
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
+		/**
+		 * ClassPathBeanDefinitionScanner与ApplicationContext初始化时的扫描类区分
+		 * why？
+		 * 初始化的ClassPathBeanDefinitionScanner为Spring内部使用，只提供API而不会暴露自己本身给程序员使用
+		 * 本方法的ClassPathBeanDefinitionScanner程序员可以通过注解直接修改
+		 */
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry,
 				componentScan.getBoolean("useDefaultFilters"), this.environment, this.resourceLoader);
 
@@ -94,6 +100,9 @@ class ComponentScanAnnotationParser {
 		scanner.setResourcePattern(componentScan.getString("resourcePattern"));
 
 		for (AnnotationAttributes filter : componentScan.getAnnotationArray("includeFilters")) {
+			/**
+			 * 通过注解的Filter值添加相应的TypeFilter
+			 */
 			for (TypeFilter typeFilter : typeFiltersFor(filter)) {
 				scanner.addIncludeFilter(typeFilter);
 			}
@@ -129,6 +138,9 @@ class ComponentScanAnnotationParser {
 				return declaringClass.equals(className);
 			}
 		});
+		/**
+		 * 执行扫描，获取符合条件的BD
+		 */
 		return scanner.doScan(StringUtils.toStringArray(basePackages));
 	}
 

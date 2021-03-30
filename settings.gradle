@@ -62,3 +62,7 @@ settings.gradle.projectsLoaded {
 		}
 	}
 }
+include 'clocker'
+
+include 'clocker'
+

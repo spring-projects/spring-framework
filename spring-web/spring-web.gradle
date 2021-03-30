@@ -6,7 +6,8 @@ apply plugin: "kotlinx-serialization"
 dependencies {
 	compile(project(":spring-beans"))
 	compile(project(":spring-core"))
-	compileOnly(project(":kotlin-coroutines"))
+	compile(project(":kotlin-coroutines"))
+	/*compileOnly(project(":kotlin-coroutines"))*/
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))

@@ -154,6 +154,9 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+		/**
+		 * 执行Mybatis中MapperScannerRegistrar的registerBeanDefinitions方法
+		 */
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 
@@ -392,6 +395,10 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	private void loadBeanDefinitionsFromRegistrars(Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> registrars) {
+		/**
+		 * mybatis整合时执行MapperScannerRegistrar中registerBeanDefinitions方法
+		 * !!将MapperScannerConfigurer(扫描器)的BeanDefinition注册进beanFactory
+		 */
 		registrars.forEach((registrar, metadata) ->
 				registrar.registerBeanDefinitions(metadata, this.registry, this.importBeanNameGenerator));
 	}

@@ -87,6 +87,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Set the name of the parent definition of this bean definition, if any.
+	 * 合并的概念
+	 * 设置父BD名称
 	 */
 	void setParentName(@Nullable String parentName);
 
@@ -103,6 +105,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #setParentName
 	 * @see #setFactoryBeanName
 	 * @see #setFactoryMethodName
+	 *
+	 * 设置Bean的类型---名称
 	 */
 	void setBeanClassName(@Nullable String beanClassName);
 
@@ -151,6 +155,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Set the names of the beans that this bean depends on being initialized.
 	 * The bean factory will guarantee that these beans get initialized first.
+	 *
+	 * 提前加载Bean
 	 */
 	void setDependsOn(@Nullable String... dependsOn);
 
@@ -166,6 +172,9 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * It does not affect explicit references by name, which will get resolved even
 	 * if the specified bean is not marked as an autowire candidate. As a consequence,
 	 * autowiring by name will nevertheless inject a bean if the name matches.
+	 *
+	 * 设置是否作为自动装配的候选对象
+	 * autowire-candidate=boolean===>该Bean是否参与自动装配的候选
 	 */
 	void setAutowireCandidate(boolean autowireCandidate);
 
@@ -178,6 +187,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Set whether this bean is a primary autowire candidate.
 	 * <p>If this value is {@code true} for exactly one bean among multiple
 	 * matching candidates, it will serve as a tie-breaker.
+	 *
+	 * 设置是否作为装配的主要候选
 	 */
 	void setPrimary(boolean primary);
 
@@ -190,6 +201,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Specify the factory bean to use, if any.
 	 * This the name of the bean to call the specified factory method on.
 	 * @see #setFactoryMethodName
+	 *
+	 * FactoryBean专用属性
 	 */
 	void setFactoryBeanName(@Nullable String factoryBeanName);
 
@@ -206,6 +219,9 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * or otherwise as a static method on the local bean class.
 	 * @see #setFactoryBeanName
 	 * @see #setBeanClassName
+	 *
+	 * 设置该对象某个方法作为FactoryBean的返回对象方法
+	 * factory-method=methodName
 	 */
 	void setFactoryMethodName(@Nullable String factoryMethodName);
 
@@ -219,6 +235,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Return the constructor argument values for this bean.
 	 * <p>The returned instance can be modified during bean factory post-processing.
 	 * @return the ConstructorArgumentValues object (never {@code null})
+	 *
+	 * 构造方法参数的值
 	 */
 	ConstructorArgumentValues getConstructorArgumentValues();
 
@@ -234,6 +252,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Return the property values to be applied to a new instance of the bean.
 	 * <p>The returned instance can be modified during bean factory post-processing.
 	 * @return the MutablePropertyValues object (never {@code null})
+	 *
+	 * 属性值---setter的值
 	 */
 	MutablePropertyValues getPropertyValues();
 
@@ -315,6 +335,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @return the resolvable type (potentially {@link ResolvableType#NONE})
 	 * @since 5.2
 	 * @see ConfigurableBeanFactory#getMergedBeanDefinition
+	 *
+	 *
 	 */
 	ResolvableType getResolvableType();
 
@@ -335,6 +357,9 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Return whether this bean is "abstract", that is, not meant to be instantiated.
+	 *
+	 * 为什么Bean可以是抽象类?
+	 * 提供模板方法，让其他类继承自己
 	 */
 	boolean isAbstract();
 

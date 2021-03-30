@@ -210,6 +210,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	@Override
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+		/**
+		 * 获取Bean，如果容器中不存在，就实例化一个Bean==>找到并读取Bean的配置
+		 */
 		return doGetBean(name, requiredType, null, false);
 	}
 
@@ -249,6 +252,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
+		/**
+		 * 验证并强制规范beanName
+		 */
 		String beanName = transformedBeanName(name);
 		Object beanInstance;
 
@@ -306,6 +312,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (requiredType != null) {
 					beanCreation.tag("beanType", requiredType::toString);
 				}
+				/**
+				 * 获取MergedBeanDefinition
+				 */
 				RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 				checkMergedBeanDefinition(mbd, beanName, args);
 
@@ -332,6 +341,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (mbd.isSingleton()) {
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
+							/**
+							 * 3 进入获取singleton-Bean逻辑
+							 */
 							return createBean(beanName, mbd, args);
 						}
 						catch (BeansException ex) {

@@ -1,0 +1,32 @@
+com/cn/mayf/IDemoTest.java
+ com.cn.mayf.IDemoTest
+com/cn/mayf/beanfactorypostprocessor/MyBeanDefinitionRegistrar.java
+ com.cn.mayf.beanfactorypostprocessor.MyBeanDefinitionRegistrar
+com/cn/mayf/beanfactorypostprocessor/CustomScanner.java
+ com.cn.mayf.beanfactorypostprocessor.CustomScanner
+com/cn/mayf/service/NotBeingLoadService.java
+ com.cn.mayf.service.NotBeingLoadService
+com/cn/AppConfig.java
+ com.cn.AppConfig
+com/cn/mayf/service/BeanService.java
+ com.cn.mayf.service.BeanService
+com/cn/ServiceDemo.java
+ com.cn.ServiceDemo
+com/cn/mayf/beanfactorypostprocessor/Test001.java
+ com.cn.mayf.beanfactorypostprocessor.Test001
+com/cn/mayf/app/AppConfig.java
+ com.cn.mayf.app.AppConfig
+com/cn/mayf/mapper/DemoBeanFactoryPostProcessor.java
+ com.cn.mayf.mapper.DemoBeanFactoryPostProcessor
+com/cn/mayf/beanfactorypostprocessor/MyBeanFactoryPostProcessor.java
+ com.cn.mayf.beanfactorypostprocessor.MyBeanFactoryPostProcessor
+com/cn/mayf/test/TestDemo.java
+ com.cn.mayf.test.TestDemo
+com/cn/mayf/beanfactorypostprocessor/TagMain.java
+ com.cn.mayf.beanfactorypostprocessor.TagMain
+com/cn/MainStart.java
+ com.cn.MainStart
+com/cn/mayf/service/IndexService.java
+ com.cn.mayf.service.IndexService
+com/cn/mayf/beanfactorypostprocessor/Test045.java
+ com.cn.mayf.beanfactorypostprocessor.Test045

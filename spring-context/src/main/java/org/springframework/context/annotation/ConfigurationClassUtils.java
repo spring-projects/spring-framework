@@ -91,6 +91,10 @@ abstract class ConfigurationClassUtils {
 		}
 
 		AnnotationMetadata metadata;
+		/**
+		 * 被@ComponentScan扫描到的ScannedGenericBeanDefinition也是
+		 * 被register的Appconfig是AnnotatedGenericBeanDefinition
+		 */
 		if (beanDef instanceof AnnotatedBeanDefinition &&
 				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
 			// Can reuse the pre-parsed metadata from the given BeanDefinition...
@@ -111,6 +115,9 @@ abstract class ConfigurationClassUtils {
 		else {
 			try {
 				MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(className);
+				/**
+				 * 拿到Appconfig上的元数据信息
+				 */
 				metadata = metadataReader.getAnnotationMetadata();
 			}
 			catch (IOException ex) {
@@ -122,6 +129,11 @@ abstract class ConfigurationClassUtils {
 			}
 		}
 
+		/**
+		 * 给配置类赋configurationClass属性
+		 * full:@Configuration注解
+		 * lite:包含@Bean的类
+		 */
 		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);

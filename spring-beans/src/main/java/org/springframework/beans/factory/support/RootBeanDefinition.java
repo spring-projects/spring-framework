@@ -266,6 +266,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		return null;
 	}
 
+	/**
+	 * 为什么设置父名会抛异常
+	 * @param parentName
+	 */
 	@Override
 	public void setParentName(@Nullable String parentName) {
 		if (parentName != null) {
