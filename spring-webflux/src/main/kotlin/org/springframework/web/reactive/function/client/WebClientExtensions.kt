@@ -148,6 +148,7 @@ suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBody() : T =
  * Coroutines variant of [WebClient.ResponseSpec.bodyToMono].
  *
  * @author Valentin Shakhov
+ * @since 5.3.6
  */
 suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBodyOrNull() : T? =
 	when (T::class) {
