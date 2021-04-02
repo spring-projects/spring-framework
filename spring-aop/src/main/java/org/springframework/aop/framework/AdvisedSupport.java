@@ -27,12 +27,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInfo;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.EmptyTargetSource;
@@ -470,6 +471,16 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			cached = this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
 					this, method, targetClass);
 			this.methodCache.put(cacheKey, cached);
+		}
+		//check the ExposeInvocationInterceptor is front in the interceptor chain
+		if(!CollectionUtils.isEmpty(cached)){
+			Object obj = cached.get(0);
+			if(obj instanceof ExposeInvocationInterceptor == false){
+				throw new AopConfigException(
+	                    "Check that an AOP invocation is in progress, and that the " +
+	                    "ExposeInvocationInterceptor is upfront in the interceptor chain. Specifically, note that " +
+	                    "advices with order HIGHEST_PRECEDENCE will execute before ExposeInvocationInterceptor!");
+			}
 		}
 		return cached;
 	}
