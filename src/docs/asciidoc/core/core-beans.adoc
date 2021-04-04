@@ -4539,14 +4539,14 @@ Java as opposed to a (potentially) verbose amount of XML, you can create your ow
 `FactoryBean`, write the complex initialization inside that class, and then plug your
 custom `FactoryBean` into the container.
 
-The `FactoryBean` interface provides three methods:
+The `FactoryBean<T>` interface provides three methods:
 
-* `Object getObject()`: Returns an instance of the object this factory creates. The
+* `T getObject()`: Returns an instance of the object this factory creates. The
   instance can possibly be shared, depending on whether this factory returns singletons
   or prototypes.
 * `boolean isSingleton()`: Returns `true` if this `FactoryBean` returns singletons or
   `false` otherwise.
-* `Class getObjectType()`: Returns the object type returned by the `getObject()` method
+* `Class<?> getObjectType()`: Returns the object type returned by the `getObject()` method
   or `null` if the type is not known in advance.
 
 The `FactoryBean` concept and interface is used in a number of places within the Spring
