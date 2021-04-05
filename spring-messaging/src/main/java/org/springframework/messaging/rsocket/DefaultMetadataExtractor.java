@@ -154,7 +154,7 @@ public class DefaultMetadataExtractor implements MetadataExtractor, MetadataExtr
 		}
 		WellKnownMimeType wellKnownMimeType =  WellKnownMimeType.fromString(mimeType);
 		if(wellKnownMimeType == MESSAGE_RSOCKET_MIMETYPE || wellKnownMimeType == MESSAGE_RSOCKET_ACCEPT_MIMETYPES ){
-			List<MimeType> mimeTypes = MetadataMimeCodec.decodeMime(content).stream().map(MimeType::valueOf).collect(Collectors.toList());
+			List<MimeType> mimeTypes = MimeTypeMetadataCodec.decode(content).stream().map(MimeType::valueOf).collect(Collectors.toList());
 			switch (wellKnownMimeType) {
 				case MESSAGE_RSOCKET_MIMETYPE:
 					result.put(MessageHeaders.CONTENT_TYPE, mimeTypes);

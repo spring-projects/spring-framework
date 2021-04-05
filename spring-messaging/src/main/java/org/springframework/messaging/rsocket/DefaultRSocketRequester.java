@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import io.netty.buffer.ByteBuf;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import io.rsocket.core.RSocketClient;
@@ -155,14 +156,6 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			configurer.accept(this);
 			return this;
 		}
-
-
-		@Override
-		public RequestSpec header(List<String> values, WellKnownMimeType type) {
-			this.metadataEncoder.header(values, type);
-			return this;
-		}
-
 		@Override
 		public RequestSpec data(Object data) {
 			Assert.notNull(data, "'data' must not be null");
@@ -218,7 +211,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			}
 
 			Encoder<?> encoder = elementType != ResolvableType.NONE && !Object.class.equals(elementType.resolve()) ?
-					strategies.encoder(elementType, messageDataMime()) : null;
+					strategies.encoder(elementType, messageDataMimeType()) : null;
 
 			if (adapter != null && !adapter.isMultiValue()) {
 				Mono<DataBuffer> data = Mono.from(publisher)
@@ -250,18 +243,41 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		private <T> DataBuffer encodeData(T value, ResolvableType elementType, @Nullable Encoder<?> encoder) {
 			if (encoder == null) {
 				elementType = ResolvableType.forInstance(value);
-				encoder = strategies.encoder(elementType, messageDataMime());
+				encoder = strategies.encoder(elementType, messageDataMimeType());
 			}
 			return ((Encoder<T>) encoder).encodeValue(
-					value, bufferFactory(), elementType, messageDataMime(), EMPTY_HINTS);
+					value, bufferFactory(), elementType, messageDataMimeType(), EMPTY_HINTS);
 		}
 
 		/**
-		 * Compute message mime.
+		 * Get message mime type if it statements on metadata or {@link #dataMimeType} as default.
 		 **/
-		public MimeType messageDataMime(){
-			List<String> mimes = this.metadataEncoder.getHeaders().get(WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE);
-			return mimes == null || mimes.size() ==0 ? dataMimeType : MimeType.valueOf(mimes.get(0));
+		public MimeType messageDataMimeType() {
+			MetadataEncoder.MetadataEntry entry = this.metadataEncoder.getMetadata(
+					MimeType.valueOf(WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE.getString()));
+			if (entry == null|| entry.value() == null) {
+				return dataMimeType;
+			}
+			if (entry.value() instanceof String) {
+				return MimeType.valueOf((String)entry.value());
+			}
+			else if(entry.value() instanceof ByteBuf) {
+				ByteBuf buf = (ByteBuf) entry.value();
+				buf.markReaderIndex();
+				try {
+					List<String> mimeTypes = MimeTypeMetadataCodec.decode(buf);
+					if (mimeTypes.size() > 0) {
+						return MimeType.valueOf(mimeTypes.get(0));
+					}
+				}
+				finally {
+					buf.resetReaderIndex();
+				}
+			}
+			else {
+				throw new IllegalArgumentException("Message rsocket mime type should be type of String or ByteBuf");
+			}
+			return dataMimeType;
 		}
 
 		/**

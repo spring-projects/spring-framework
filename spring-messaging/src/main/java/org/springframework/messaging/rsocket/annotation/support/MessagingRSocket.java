@@ -209,7 +209,8 @@ class MessagingRSocket implements RSocket {
 		headers.setHeader(RSocketRequesterMethodArgumentResolver.RSOCKET_REQUESTER_HEADER, this.requester);
 		if (responseRef != null) {
 			headers.setHeader(RSocketPayloadReturnValueHandler.RESPONSE_HEADER, responseRef);
-			headers.setHeader(RSocketPayloadReturnValueHandler.METADATA_HEADER, new AtomicReference<>());
+			AtomicReference<MimeType> responseContentTypeRef = new AtomicReference<>();
+			headers.setHeader(RSocketPayloadReturnValueHandler.RESPONSE_CONTENT_TYPE, responseContentTypeRef);
 		}
 		headers.setHeader(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER,
 				this.strategies.dataBufferFactory());
@@ -219,7 +220,7 @@ class MessagingRSocket implements RSocket {
 
 
 	/**
-	 * Compute message content type mime.
+	 * Compute message content mime type.
 	 **/
 	@SuppressWarnings({ "unchecked" })
 	public MimeType getMessageContentType(MessageHeaderAccessor headers){

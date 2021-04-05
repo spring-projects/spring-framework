@@ -33,7 +33,10 @@ public interface HandlerMethodReturnValueHandler {
 
 	/** Header containing a DataBufferFactory for use in return value handling. */
 	String DATA_BUFFER_FACTORY_HEADER = "dataBufferFactory";
-
+	/**
+	 * Message header name of response content type.
+	 **/
+	String RESPONSE_CONTENT_TYPE = "responseContentType";
 
 	/**
 	 * Whether the given {@linkplain MethodParameter method return type} is

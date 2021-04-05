@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.google.common.collect.Lists;
-import io.rsocket.metadata.WellKnownMimeType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
@@ -42,15 +40,9 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.rsocket.MetadataEncoder;
-import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
-
-import static org.springframework.messaging.rsocket.annotation.support.RSocketPayloadReturnValueHandler.METADATA_HEADER;
-
 
 /**
  * Base class for a return value handler that encodes return values to
@@ -79,20 +71,12 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 	private final List<Encoder<?>> encoders;
 
 	private final ReactiveAdapterRegistry adapterRegistry;
-	private RSocketStrategies strategies;
-	private MimeType compositeMime =  MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
 	protected AbstractEncoderMethodReturnValueHandler(List<Encoder<?>> encoders, ReactiveAdapterRegistry registry) {
 		Assert.notEmpty(encoders, "At least one Encoder is required");
 		Assert.notNull(registry, "ReactiveAdapterRegistry is required");
 		this.encoders = Collections.unmodifiableList(encoders);
 		this.adapterRegistry = registry;
 	}
-
-	protected AbstractEncoderMethodReturnValueHandler(RSocketStrategies strategies, ReactiveAdapterRegistry registry) {
-		this(strategies.encoders(), registry);
-		this.strategies = strategies;
-	}
-
 
 	/**
 	 * The configured encoders.
@@ -129,7 +113,7 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 		MessageHeaderAccessor headerAccessor = new MessageHeaderAccessor(message);
 		MimeType mimeType = headerAccessor.getContentType();
 		List<MimeType> acceptMimes = headerAccessor.accept();
-		// compute response message according content type and accept
+		// Encode response message according content type and accept
 		Flux<DataBuffer> encodedContent = encodeContent(
 				returnValue, acceptMimes, message, returnType, bufferFactory, mimeType, Collections.emptyMap());
 
@@ -138,8 +122,8 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 	}
 
 	private Flux<DataBuffer> encodeContent(
-			@Nullable Object content, List<MimeType> accept,Message<?> message, MethodParameter returnType, DataBufferFactory bufferFactory,
-			@Nullable MimeType mimeType, Map<String, Object> hints) {
+			@Nullable Object content, List<MimeType> accept,Message<?> message, MethodParameter returnType,
+			DataBufferFactory bufferFactory, @Nullable MimeType mimeType, Map<String, Object> hints) {
 
 		ResolvableType returnValueType = ResolvableType.forMethodParameter(returnType);
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(returnValueType.resolve(), content);
@@ -163,12 +147,10 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 		if (elementType.resolve() == void.class || elementType.resolve() == Void.class) {
 			return Flux.from(publisher).cast(DataBuffer.class);
 		}
-		MimeType contentMime = getAvailableMime(elementType,mimeType,accept);
-		AtomicReference<Mono<DataBuffer>> metaAtomic = getResponseMetadata(message);
-		if (metaAtomic != null) {
-			MetadataEncoder metadataEncoder = new MetadataEncoder(this.compositeMime, this.strategies);
-			metadataEncoder.header(Lists.newArrayList(contentMime.toString()), WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE);
-			metaAtomic.set(metadataEncoder.encode());
+		MimeType contentMime = getAvailableMimeType(elementType,mimeType,accept);
+		AtomicReference<MimeType> responseContentTypeAtomic = getResponseContentType(message);
+		if (responseContentTypeAtomic != null) {
+			responseContentTypeAtomic.set(contentMime);
 		}
 		Encoder<?> encoder = getEncoder(elementType, contentMime);
 		return Flux.from(publisher).map(value ->
@@ -200,7 +182,8 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 
 	@Nullable
 	@SuppressWarnings("unchecked")
-	private MimeType getAvailableMime(ResolvableType elementType, @Nullable MimeType contentTypeMime,@Nullable List<MimeType> accept) {
+	private MimeType getAvailableMimeType(ResolvableType elementType, @Nullable MimeType contentTypeMime,
+											@Nullable List<MimeType> accept) {
 		if(accept == null && accept.size() ==0){
 			return contentTypeMime;
 		}
@@ -230,10 +213,10 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 	}
 
 	@SuppressWarnings("unchecked")
-	protected AtomicReference<Mono<DataBuffer>> getResponseMetadata(Message<?> message) {
-		Object headerValue = message.getHeaders().get(METADATA_HEADER);
+	protected AtomicReference<MimeType> getResponseContentType(Message<?> message) {
+		Object headerValue = message.getHeaders().get(RESPONSE_CONTENT_TYPE);
 		Assert.state(headerValue == null || headerValue instanceof AtomicReference, "Expected Mono");
-		return (AtomicReference<Mono<DataBuffer>>) headerValue;
+		return (AtomicReference<MimeType>) headerValue;
 	}
 
 	/**

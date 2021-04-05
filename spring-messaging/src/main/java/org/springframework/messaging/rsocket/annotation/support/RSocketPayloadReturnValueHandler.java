@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.rsocket.Payload;
+import io.rsocket.metadata.WellKnownMimeType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -30,9 +31,13 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.reactive.AbstractEncoderMethodReturnValueHandler;
+import org.springframework.messaging.rsocket.MetadataEncoder;
 import org.springframework.messaging.rsocket.PayloadUtils;
 import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
+
 
 /**
  * Extension of {@link AbstractEncoderMethodReturnValueHandler} that
@@ -50,16 +55,16 @@ public class RSocketPayloadReturnValueHandler extends AbstractEncoderMethodRetur
 	 * which will receive the {@code Flux<Payload>} that represents the response.
 	 */
 	public static final String RESPONSE_HEADER = "rsocketResponse";
-	/**
-	 * Message header name of response metadata.
-	 **/
-	public static final String METADATA_HEADER = "rsocketMetadata";
+
+	private RSocketStrategies strategies;
+	private MimeType compositeMime =  MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
 
 	public RSocketPayloadReturnValueHandler(List<Encoder<?>> encoders, ReactiveAdapterRegistry registry) {
 		super(encoders, registry);
 	}
 	public RSocketPayloadReturnValueHandler(RSocketStrategies strategies, ReactiveAdapterRegistry registry) {
-		super(strategies, registry);
+		this(strategies.encoders(), registry);
+		this.strategies = strategies;
 	}
 
 
@@ -68,12 +73,12 @@ public class RSocketPayloadReturnValueHandler extends AbstractEncoderMethodRetur
 			Flux<DataBuffer> encodedContent, MethodParameter returnType, Message<?> message) {
 
 		AtomicReference<Flux<Payload>> responseRef = getResponseReference(message);
-		AtomicReference<Mono<DataBuffer>> metadata = getResponseMetadata(message);
+		AtomicReference<MimeType> contentTypeAtomic = getResponseContentType(message);
 		Assert.notNull(responseRef, "Missing '" + RESPONSE_HEADER + "'");
 		responseRef.set(encodedContent.switchOnFirst((signal, inner) -> {
 			DataBuffer data = signal.get();
-			if (data != null && metadata.get() != null ) {
-				return firstPayload(Mono.fromCallable(() -> data), metadata.get())
+			if (data != null && contentTypeAtomic.get() != null ) {
+				return firstPayload(Mono.fromCallable(() -> data), metadata(contentTypeAtomic.get()))
 						.concatWith(inner.skip(1).map(PayloadUtils::createPayload));
 			}
 			else {
@@ -83,6 +88,19 @@ public class RSocketPayloadReturnValueHandler extends AbstractEncoderMethodRetur
 		return Mono.empty();
 	}
 
+	/**
+	 * Encode content mime type.
+	 **/
+	public Mono<DataBuffer> metadata(MimeType contentMimeType) {
+			MetadataEncoder metadataEncoder = new MetadataEncoder(this.compositeMime, this.strategies);
+			metadataEncoder.metadata(contentMimeType.toString(), MimeType.valueOf(
+					WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE.getString()));
+			return metadataEncoder.encode();
+	}
+
+	/**
+	 * Composite content with metadata into first payload.
+	 **/
 	private Mono<Payload> firstPayload(Mono<DataBuffer> encodedData,Mono<DataBuffer> metadata) {
 		return Mono.zip(encodedData, metadata)
 				.map(tuple -> PayloadUtils.createPayload(tuple.getT1(), tuple.getT2()));

@@ -19,6 +19,7 @@ package org.springframework.messaging.rsocket;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
 import io.rsocket.core.RSocketServer;
@@ -45,7 +46,6 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.rsocket.annotation.ConnectMapping;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -53,9 +53,10 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Server-side handling of RSocket requests.
+ * Server-side handling of RSocket requests with message mime type.
  *
  * @author Rossen Stoyanchev
  */
@@ -102,13 +103,25 @@ public class RSocketClientToServerContentTypeIntegrationTests {
 		server.dispose();
 	}
 
+	@Test
+	public void fireAndForgetWithMultiContentType() {
+		String customMime = "text/*";
+		assertThatThrownBy(()->
+		Flux.range(1, 3)
+				.concatMap(i -> requester.route("messageContentType")
+						.metadata(Lists.newArrayList(customMime), MimeType.valueOf(WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE.getString()))
+						.data("Hello " + i).send()).blockLast())
+						.isInstanceOf(IllegalArgumentException.class).hasMessage("Message rsocket mime type should be type of String or ByteBuf");
+	}
 
 	@Test
-	public void fireAndForgetWithContentType() {
+	public void fireAndForgetWithEncodeContentType() {
 		String customMime = "text/*";
 		Flux.range(1, 3)
-				.concatMap(i -> requester.route("messageContentType").header(Lists.newArrayList(customMime),
-						WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE).data("Hello " + i).send()).blockLast();
+				.concatMap(i -> requester.route("messageContentType")
+						.metadata(MimeTypeMetadataCodec.encode(ByteBufAllocator.DEFAULT, Lists.newArrayList(customMime)),
+								MimeType.valueOf(WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE.getString()))
+						.data("Hello " + i).send()).blockLast();
 
 		StepVerifier.create(context.getBean(ServerController.class).fireForgetPayloads.asFlux())
 				.expectNext("Hello 1")
@@ -128,30 +141,52 @@ public class RSocketClientToServerContentTypeIntegrationTests {
 		assertThat(interceptor.getFireAndForgetCount())
 				.as("Fire and forget requests did not actually complete handling on the server side")
 				.isEqualTo(3);
+		// clean
+		interceptor.getFireForgeCount().set(0);
+	}
+
+	@Test
+	public void fireAndForgetWithContentType() {
+		String customMime = "text/*";
+		Flux.range(1, 3)
+				.concatMap(i -> requester.route("messageContentType")
+						.metadata(customMime, MimeType.valueOf(WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE.getString()))
+						.data("Hello " + i).send()).blockLast();
+
+		StepVerifier.create(context.getBean(ServerController.class).fireForgetPayloads.asFlux())
+				.expectNext("Hello 1")
+				.expectNext("Hello 2")
+				.expectNext("Hello 3")
+				.thenAwait(Duration.ofMillis(50))
+				.thenCancel()
+				.verify(Duration.ofSeconds(5));
+		StepVerifier.create(context.getBean(ServerController.class).contentTypes.asFlux())
+				.expectNext(customMime)
+				.expectNext(customMime)
+				.expectNext(customMime)
+				.thenAwait(Duration.ofMillis(50))
+				.thenCancel()
+				.verify(Duration.ofSeconds(5));
+
+		assertThat(interceptor.getFireAndForgetCount())
+				.as("Fire and forget requests did not actually complete handling on the server side")
+				.isEqualTo(3);
+		// clean
+		interceptor.getFireForgeCount().set(0);
 	}
 
 	@Test
 	public void echoRetrieveMono() {
 		String customMime = "text/*";
-		String accept = "text/plain";
+		String accept = "text/*";
 		Flux<String> result = Flux.range(1, 3).concatMap(i ->
 				requester.route("echo")
-						.header(Lists.newArrayList(customMime),WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE)
-						.header(Lists.newArrayList(accept),WellKnownMimeType.MESSAGE_RSOCKET_ACCEPT_MIMETYPES).data("Hello " + i).retrieveMono(String.class));
+						.metadata(customMime, MimeType.valueOf(WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE.getString()))
+						.metadata(Lists.newArrayList(accept),MimeType.valueOf(WellKnownMimeType.MESSAGE_RSOCKET_ACCEPT_MIMETYPES.getString()))
+						.data("Hello " + i).retrieveMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("Hello 1").expectNext("Hello 2").expectNext("Hello 3")
-				.expectComplete()
-				.verify(Duration.ofSeconds(5));
-	}
-
-	@Test
-	public void echoAsync() {
-		Flux<String> result = Flux.range(1, 3).concatMap(i ->
-				requester.route("echo-async").data("Hello " + i).retrieveMono(String.class));
-
-		StepVerifier.create(result)
-				.expectNext("Hello 1 async").expectNext("Hello 2 async").expectNext("Hello 3 async")
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
 	}
@@ -161,8 +196,9 @@ public class RSocketClientToServerContentTypeIntegrationTests {
 		String customMime = "text/*";
 		String accept = "text/plain";
 		Flux<String> result = requester.route("echo-stream")
-				.header(Lists.newArrayList(customMime), WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE)
-				.header(Lists.newArrayList(accept), WellKnownMimeType.MESSAGE_RSOCKET_ACCEPT_MIMETYPES).data("Hello").retrieveFlux(String.class);
+				.metadata(customMime, MimeType.valueOf(WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE.getString()))
+				.metadata(Lists.newArrayList(accept), MimeType.valueOf(WellKnownMimeType.MESSAGE_RSOCKET_ACCEPT_MIMETYPES.getString()))
+				.data("Hello").retrieveFlux(String.class);
 		StepVerifier.create(result)
 				.expectNext("Hello 0").expectNextCount(6).expectNext("Hello 7")
 				.thenCancel()
@@ -171,7 +207,11 @@ public class RSocketClientToServerContentTypeIntegrationTests {
 
 	@Test
 	public void echoChannel() {
+		String customMime = "text/*";
+		String accept = "text/plain";
 		Flux<String> result = requester.route("echo-channel")
+				.metadata(customMime, MimeType.valueOf(WellKnownMimeType.MESSAGE_RSOCKET_MIMETYPE.getString()))
+				.metadata(Lists.newArrayList(accept), MimeType.valueOf(WellKnownMimeType.MESSAGE_RSOCKET_ACCEPT_MIMETYPES.getString()))
 				.data(Flux.range(1, 10).map(i -> "Hello " + i), String.class)
 				.retrieveFlux(String.class);
 
@@ -181,108 +221,13 @@ public class RSocketClientToServerContentTypeIntegrationTests {
 				.verify(Duration.ofSeconds(5));
 	}
 
-	@Test // gh-26344
-	public void echoChannelWithEmptyInput() {
-		Flux<String> result = requester.route("echo-channel-empty").data(Flux.empty()).retrieveFlux(String.class);
-		StepVerifier.create(result).verifyComplete();
-	}
-
-	@Test
-	public void metadataPush() {
-		Flux.just("bar", "baz")
-				.concatMap(s -> requester.route("foo-updates").metadata(s, FOO_MIME_TYPE).sendMetadata())
-				.blockLast();
-
-		StepVerifier.create(context.getBean(ServerController.class).metadataPushPayloads.asFlux())
-				.expectNext("bar")
-				.expectNext("baz")
-				.thenAwait(Duration.ofMillis(50))
-				.thenCancel()
-				.verify(Duration.ofSeconds(5));
-
-		assertThat(interceptor.getMetadataPushCount())
-				.as("Metadata pushes did not actually complete handling on the server side")
-				.isEqualTo(2);
-	}
-
-	@Test
-	public void voidReturnValue() {
-		Mono<String> result = requester.route("void-return-value").data("Hello").retrieveMono(String.class);
-		StepVerifier.create(result).expectComplete().verify(Duration.ofSeconds(5));
-	}
-
-	@Test
-	public void voidReturnValueFromExceptionHandler() {
-		Mono<String> result = requester.route("void-return-value").data("bad").retrieveMono(String.class);
-		StepVerifier.create(result).expectComplete().verify(Duration.ofSeconds(5));
-	}
-
-	@Test
-	public void handleWithThrownException() {
-		Mono<String> result = requester.route("thrown-exception").data("a").retrieveMono(String.class);
-		StepVerifier.create(result)
-				.expectNext("Invalid input error handled")
-				.expectComplete()
-				.verify(Duration.ofSeconds(5));
-	}
-
-	@Test
-	public void handleWithThrownExceptionFlux() {
-		Flux<String> result = requester.route("thrown-exception-flux").data("a").retrieveFlux(String.class);
-		StepVerifier.create(result)
-				.expectNext("Invalid input error handled")
-				.expectComplete()
-				.verify(Duration.ofSeconds(5));
-	}
-
-	@Test
-	public void handleWithErrorSignal() {
-		Mono<String> result = requester.route("error-signal").data("a").retrieveMono(String.class);
-		StepVerifier.create(result)
-				.expectNext("Invalid input error handled")
-				.expectComplete()
-				.verify(Duration.ofSeconds(5));
-	}
-
-	@Test
-	public void handleWithErrorSignalFLux() {
-		Flux<String> result = requester.route("error-signal-flux").data("a").retrieveFlux(String.class);
-		StepVerifier.create(result)
-				.expectNext("Invalid input error handled")
-				.expectComplete()
-				.verify(Duration.ofSeconds(5));
-	}
-
-	@Test
-	public void noMatchingRoute() {
-		Mono<String> result = requester.route("invalid").data("anything").retrieveMono(String.class);
-		StepVerifier.create(result)
-				.expectErrorMessage("No handler for destination 'invalid'")
-				.verify(Duration.ofSeconds(5));
-	}
-
-	@Test
-	public void noMatchingFluxRoute() {
-		Flux<String> result = requester.route("invalid").data("anything").retrieveFlux(String.class);
-		StepVerifier.create(result)
-				.expectErrorMessage("No handler for destination 'invalid'")
-				.verify(Duration.ofSeconds(5));
-	}
-
 
 	@Controller
 	static class ServerController {
 
 		final Sinks.Many<String> fireForgetPayloads = Sinks.many().replay().all();
 
-		final Sinks.Many<String> metadataPushPayloads = Sinks.many().replay().all();
-
 		final Sinks.Many<String> contentTypes = Sinks.many().replay().all();
-
-		@MessageMapping("receive")
-		void receive(String payload) {
-			this.fireForgetPayloads.tryEmitNext(payload);
-		}
 
 		@MessageMapping("messageContentType")
 		void messageContentType(@Payload String payload, @Header(name = MessageHeaders.CONTENT_TYPE) MimeType contentType) {
@@ -295,11 +240,6 @@ public class RSocketClientToServerContentTypeIntegrationTests {
 			return payload;
 		}
 
-		@MessageMapping("echo-async")
-		Mono<String> echoAsync(String payload) {
-			return Mono.delay(Duration.ofMillis(10)).map(aLong -> payload + " async");
-		}
-
 		@MessageMapping("echo-stream")
 		Flux<String> echoStream(String payload) {
 			return Flux.interval(Duration.ofMillis(10)).map(aLong -> payload + " " + aLong);
@@ -310,10 +250,6 @@ public class RSocketClientToServerContentTypeIntegrationTests {
 			return payloads.delayElements(Duration.ofMillis(10)).map(payload -> payload + " async");
 		}
 
-		@MessageMapping("echo-channel-empty")
-		Flux<String> echoChannelEmpty(@Payload(required = false) Flux<String> payloads) {
-			return payloads.map(payload -> payload + " echoed");
-		}
 
 		@MessageMapping("thrown-exception")
 		Mono<String> handleAndThrow(String payload) {
@@ -340,11 +276,6 @@ public class RSocketClientToServerContentTypeIntegrationTests {
 			return !payload.equals("bad") ?
 					Mono.delay(Duration.ofMillis(10)).then(Mono.empty()) :
 					Mono.error(new IllegalStateException("bad"));
-		}
-
-		@ConnectMapping("foo-updates")
-		public void handleMetadata(@Header("foo") String foo) {
-			this.metadataPushPayloads.tryEmitNext(foo);
 		}
 
 		@MessageExceptionHandler
@@ -396,6 +327,11 @@ public class RSocketClientToServerContentTypeIntegrationTests {
 		public int getFireAndForgetCount() {
 			return this.fireAndForgetCount.get();
 		}
+
+		public AtomicInteger getFireForgeCount(){
+			return this.fireAndForgetCount;
+		}
+
 
 		public int getMetadataPushCount() {
 			return this.metadataPushCount.get();
