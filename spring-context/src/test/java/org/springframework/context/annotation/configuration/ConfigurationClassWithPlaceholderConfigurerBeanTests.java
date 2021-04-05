@@ -18,6 +18,10 @@ package org.springframework.context.annotation.configuration;
 
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -27,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.parallel.Resources.SYSTEM_PROPERTIES;
 
 
 /**
@@ -45,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
+@Execution(ExecutionMode.CONCURRENT)
 public class ConfigurationClassWithPlaceholderConfigurerBeanTests {
 
 	/**
@@ -61,6 +67,10 @@ public class ConfigurationClassWithPlaceholderConfigurerBeanTests {
 	 */
 	@Test
 	@SuppressWarnings("resource")
+	@ResourceLock(
+			value = SYSTEM_PROPERTIES,
+			mode = ResourceAccessMode.READ_WRITE
+	)
 	public void valueFieldsAreNotProcessedWhenPlaceholderConfigurerIsIntegrated() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithValueFieldAndPlaceholderConfigurer.class);
