@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -762,6 +763,15 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 		resetSchemeSpecificPart();
 		return this;
+	}
+
+	@Override
+	public UriComponentsBuilder replaceQueryParam(String name, @Nullable Object value) {
+		Collection<?> values = null;
+		if (!ObjectUtils.isEmpty(value)) {
+			values = Collections.singleton(value);
+		}
+		return replaceQueryParam(name, values);
 	}
 
 	@Override

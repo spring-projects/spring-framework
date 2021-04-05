@@ -360,6 +360,12 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
+		public DefaultUriBuilder replaceQueryParam(String name, @Nullable Object value) {
+			this.uriComponentsBuilder.replaceQueryParam(name, value);
+			return this;
+		}
+
+		@Override
 		public DefaultUriBuilder replaceQueryParam(String name, @Nullable Collection<?> values) {
 			this.uriComponentsBuilder.replaceQueryParam(name, values);
 			return this;

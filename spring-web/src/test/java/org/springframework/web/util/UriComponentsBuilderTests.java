@@ -856,6 +856,21 @@ class UriComponentsBuilderTests {
 	}
 
 	@Test
+	void replaceQueryParamWithNullValue() {
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().queryParam("baz", "qux", 42);
+		builder.replaceQueryParam("baz", 40);
+		UriComponents result = builder.build();
+
+		assertThat(result.getQuery()).isEqualTo("baz=40");
+
+		Object obj = null;
+		builder.replaceQueryParam("baz", obj);
+		result = builder.build();
+
+		assertThat(result.getQuery()).as("Query param should have been deleted").isNull();
+	}
+
+	@Test
 	void replaceQueryParams() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().queryParam("baz", Arrays.asList("qux", 42));
 		builder.replaceQueryParam("baz", Arrays.asList("xuq", 24));

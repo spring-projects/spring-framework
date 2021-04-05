@@ -223,8 +223,22 @@ public interface UriBuilder {
 	 * @param name the query parameter name
 	 * @param values the query parameter values
 	 * @see #replaceQueryParam(String, Collection)
+	 * @see #replaceQueryParam(String, Object)
 	 */
 	UriBuilder replaceQueryParam(String name, Object... values);
+
+	/**
+	 * Set the query parameter value replacing existing values, or if null
+	 * value is provided, the query parameter is removed.
+	 * <p><strong>Note: </strong> please, review the Javadoc of
+	 * {@link #queryParam(String, Object...)} for further notes on the treatment
+	 * and encoding of individual query parameters.
+	 * @param name the query parameter name
+	 * @param value the query parameter value
+	 * @see #replaceQueryParam(String, Collection)
+	 * @see #replaceQueryParam(String, Object...)
+	 */
+	UriBuilder replaceQueryParam(String name, @Nullable Object value);
 
 	/**
 	 * Variant of {@link #replaceQueryParam(String, Object...)} with a Collection.
@@ -235,6 +249,7 @@ public interface UriBuilder {
 	 * @param values the query parameter values
 	 * @since 5.2
 	 * @see #replaceQueryParam(String, Object...)
+	 * @see #replaceQueryParam(String, Object)
 	 */
 	UriBuilder replaceQueryParam(String name, @Nullable Collection<?> values);
 
