@@ -154,8 +154,15 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 			}
 		}
 
-		processProperties(beanFactory, new PropertySourcesPropertyResolver(this.propertySources));
+		processProperties(beanFactory, getPropertyResolver(this.propertySources));
 		this.appliedPropertySources = this.propertySources;
+	}
+
+	/**
+	 * Construct and provide a PropertyResolver from the given properties.
+	 */
+	public ConfigurablePropertyResolver getPropertyResolver(MutablePropertySources propertySources){
+		return new PropertySourcesPropertyResolver(propertySources);
 	}
 
 	/**
