@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+group 'org.springframework'
+version '5.3.6-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task hello {
+    println 'Hello world!'
+}
+
+task hello2(dependsOn: hello) {
+    println "I'm Gradle, depends: hello"
+}
+
