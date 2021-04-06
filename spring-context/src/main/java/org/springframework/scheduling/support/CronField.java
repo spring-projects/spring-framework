@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,7 +237,12 @@ abstract class CronField {
 		public <T extends Temporal & Comparable<? super T>> T elapseUntil(T temporal, int goal) {
 			int current = get(temporal);
 			if (current < goal) {
-				return this.field.getBaseUnit().addTo(temporal, goal - current);
+				T result = this.field.getBaseUnit().addTo(temporal, goal - current);
+				current = get(result);
+				if (current > goal) { // can occur due to daylight saving, see gh-26744
+					result = this.field.getBaseUnit().addTo(result, goal - current);
+				}
+				return result;
 			}
 			else {
 				ValueRange range = temporal.range(this.field);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ package org.springframework.web.bind;
  * @since 2.0.2
  */
 @SuppressWarnings("serial")
-public class MissingServletRequestParameterException extends ServletRequestBindingException {
+public class MissingServletRequestParameterException extends MissingRequestValueException {
 
 	private final String parameterName;
 
@@ -36,7 +36,20 @@ public class MissingServletRequestParameterException extends ServletRequestBindi
 	 * @param parameterType the expected type of the missing parameter
 	 */
 	public MissingServletRequestParameterException(String parameterName, String parameterType) {
-		super("");
+		this(parameterName, parameterType, false);
+	}
+
+	/**
+	 * Constructor for use when a value was present but converted to {@code null}.
+	 * @param parameterName the name of the missing parameter
+	 * @param parameterType the expected type of the missing parameter
+	 * @param missingAfterConversion whether the value became null after conversion
+	 * @since 5.3.6
+	 */
+	public MissingServletRequestParameterException(
+			String parameterName, String parameterType, boolean missingAfterConversion) {
+
+		super("", missingAfterConversion);
 		this.parameterName = parameterName;
 		this.parameterType = parameterType;
 	}
@@ -44,7 +57,9 @@ public class MissingServletRequestParameterException extends ServletRequestBindi
 
 	@Override
 	public String getMessage() {
-		return "Required " + this.parameterType + " parameter '" + this.parameterName + "' is not present";
+		return "Required request parameter '" + this.parameterName + "' for method parameter type " +
+				this.parameterType + " is " +
+				(isMissingAfterConversion() ? "present but converted to null" : "not present");
 	}
 
 	/**

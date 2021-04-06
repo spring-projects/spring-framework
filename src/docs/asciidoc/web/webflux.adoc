@@ -1521,7 +1521,7 @@ segments. For example `/resources/{*path}` matches all files under `/resources/`
 `"path"` variable captures the complete relative path.
 
 The syntax `{varName:regex}` declares a URI variable with a regular expression that has the
-syntax: `{varName:regex}`. For example, given a URL of `/spring-web-3.0.5 .jar`, the following method
+syntax: `{varName:regex}`. For example, given a URL of `/spring-web-3.0.5.jar`, the following method
 extracts the name, version, and file extension:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]

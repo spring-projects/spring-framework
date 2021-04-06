@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.http.codec.multipart;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -69,11 +69,14 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 
 	private final AtomicBoolean requestOutstanding = new AtomicBoolean();
 
+	private final Charset headersCharset;
 
-	private MultipartParser(FluxSink<Token> sink, byte[] boundary, int maxHeadersSize) {
+
+	private MultipartParser(FluxSink<Token> sink, byte[] boundary, int maxHeadersSize, Charset headersCharset) {
 		this.sink = sink;
 		this.boundary = boundary;
 		this.maxHeadersSize = maxHeadersSize;
+		this.headersCharset = headersCharset;
 		this.state = new AtomicReference<>(new PreambleState());
 	}
 
@@ -82,11 +85,13 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	 * @param buffers the input buffers
 	 * @param boundary the multipart boundary, as found in the {@code Content-Type} header
 	 * @param maxHeadersSize the maximum buffered header size
+	 * @param headersCharset the charset to use for decoding headers
 	 * @return a stream of parsed tokens
 	 */
-	public static Flux<Token> parse(Flux<DataBuffer> buffers, byte[] boundary, int maxHeadersSize) {
+	public static Flux<Token> parse(Flux<DataBuffer> buffers, byte[] boundary, int maxHeadersSize,
+			Charset headersCharset) {
 		return Flux.create(sink -> {
-			MultipartParser parser = new MultipartParser(sink, boundary, maxHeadersSize);
+			MultipartParser parser = new MultipartParser(sink, boundary, maxHeadersSize, headersCharset);
 			sink.onCancel(parser::onSinkCancel);
 			sink.onRequest(n -> parser.requestBuffer());
 			buffers.subscribe(parser);
@@ -180,7 +185,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 
 
 	/**
-	 * Represents the output of {@link #parse(Flux, byte[], int)}.
+	 * Represents the output of {@link #parse(Flux, byte[], int, Charset)}.
 	 */
 	public abstract static class Token {
 
@@ -372,7 +377,6 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 				DataBufferUtils.release(buf);
 
 				emitHeaders(parseHeaders());
-				// TODO: no need to check result of changeState, no further statements
 				changeState(this, new BodyState(), bodyBuf);
 			}
 			else {
@@ -408,7 +412,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 			}
 			DataBuffer joined = this.buffers.get(0).factory().join(this.buffers);
 			this.buffers.clear();
-			String string = joined.toString(StandardCharsets.ISO_8859_1);
+			String string = joined.toString(MultipartParser.this.headersCharset);
 			DataBufferUtils.release(joined);
 			String[] lines = string.split(HEADER_ENTRY_SEPARATOR);
 			HttpHeaders result = new HttpHeaders();

@@ -137,6 +137,25 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
+	fun awaitBodyOrNull() {
+		val spec = mockk<WebClient.ResponseSpec>()
+		every { spec.bodyToMono<String>() } returns Mono.just("foo")
+		runBlocking {
+			assertThat(spec.awaitBodyOrNull<String>()).isEqualTo("foo")
+		}
+	}
+
+	@Test
+	fun `awaitBodyOrNull of type Unit`() {
+		val spec = mockk<WebClient.ResponseSpec>()
+		val entity = mockk<ResponseEntity<Void>>()
+		every { spec.toBodilessEntity() } returns Mono.just(entity)
+		runBlocking {
+			assertThat(spec.awaitBodyOrNull<Unit>()).isEqualTo(Unit)
+		}
+	}
+
+	@Test
 	fun awaitBodilessEntity() {
 		val spec = mockk<WebClient.ResponseSpec>()
 		val entity = mockk<ResponseEntity<Void>>()
