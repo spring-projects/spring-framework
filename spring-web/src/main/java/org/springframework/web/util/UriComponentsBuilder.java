@@ -357,9 +357,19 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				String value = matcher.group(1).trim();
 				String host = value;
 				int portSeparatorIdx = value.lastIndexOf(':');
-				if (portSeparatorIdx > value.lastIndexOf(']')) {
+				int squareBracketIdx = value.lastIndexOf(']');
+				if (portSeparatorIdx > squareBracketIdx) {
+					if (squareBracketIdx == -1 && value.indexOf(':') != portSeparatorIdx) {
+						throw new IllegalArgumentException("Invalid IPv4 address: " + value);
+					}
 					host = value.substring(0, portSeparatorIdx);
-					port = Integer.parseInt(value.substring(portSeparatorIdx + 1));
+					try {
+						port = Integer.parseInt(value.substring(portSeparatorIdx + 1));
+					}
+					catch (NumberFormatException ex) {
+						throw new IllegalArgumentException(
+								"Failed to parse a port from \"forwarded\"-type header value: " + value);
+					}
 				}
 				return new InetSocketAddress(host, port);
 			}
@@ -886,7 +896,11 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private void adaptForwardedHost(String rawValue) {
 		int portSeparatorIdx = rawValue.lastIndexOf(':');
-		if (portSeparatorIdx > rawValue.lastIndexOf(']')) {
+		int squareBracketIdx = rawValue.lastIndexOf(']');
+		if (portSeparatorIdx > squareBracketIdx) {
+			if (squareBracketIdx == -1 && rawValue.indexOf(':') != portSeparatorIdx) {
+				throw new IllegalArgumentException("Invalid IPv4 address: " + rawValue);
+			}
 			host(rawValue.substring(0, portSeparatorIdx));
 			port(Integer.parseInt(rawValue.substring(portSeparatorIdx + 1)));
 		}

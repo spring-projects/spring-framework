@@ -453,6 +453,21 @@ class UriComponentsBuilderTests {
 		assertThat(result.toString()).isEqualTo("http://[1abc:2abc:3abc::5ABC:6abc]:8080/mvc-showcase");
 	}
 
+	@Test  // gh-26748
+	void fromHttpRequestWithForwardedInvalidIPv6Address() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(-1);
+		request.setRequestURI("/mvc-showcase");
+		request.addHeader("X-Forwarded-Host", "2a02:918:175:ab60:45ee:c12c:dac1:808b");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				UriComponentsBuilder.fromHttpRequest(httpRequest).build());
+	}
+
 	@Test
 	void fromHttpRequestWithForwardedHost() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
