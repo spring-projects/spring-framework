@@ -8238,8 +8238,10 @@ Spring offers a convenient way of working with scoped dependencies through
 <<beans-factory-scopes-other-injection, scoped proxies>>. The easiest way to create
 such a proxy when using the XML configuration is the `<aop:scoped-proxy/>` element.
 Configuring your beans in Java with a `@Scope` annotation offers equivalent support
-with the `proxyMode` attribute. The default is no proxy (`ScopedProxyMode.NO`),
-but you can specify `ScopedProxyMode.TARGET_CLASS` or `ScopedProxyMode.INTERFACES`.
+with the `proxyMode` attribute. The default is `ScopedProxyMode.DEFAULT`, which
+typically indicates that no scoped proxy should be created unless a different default
+has been configured at the component-scan instruction level. You can specify
+`ScopedProxyMode.TARGET_CLASS`, `ScopedProxyMode.INTERFACES` or `ScopedProxyMode.NO`.
 
 If you port the scoped proxy example from the XML reference documentation (see
 <<beans-factory-scopes-other-injection, scoped proxies>>) to our `@Bean` using Java,
