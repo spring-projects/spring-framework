@@ -371,14 +371,14 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 								"Failed to parse a port from \"forwarded\"-type header value: " + value);
 					}
 				}
-				return new InetSocketAddress(host, port);
+				return InetSocketAddress.createUnresolved(host, port);
 			}
 		}
 
 		String forHeader = request.getHeaders().getFirst("X-Forwarded-For");
 		if (StringUtils.hasText(forHeader)) {
 			String host = StringUtils.tokenizeToStringArray(forHeader, ",")[0];
-			return new InetSocketAddress(host, port);
+			return InetSocketAddress.createUnresolved(host, port);
 		}
 
 		return null;

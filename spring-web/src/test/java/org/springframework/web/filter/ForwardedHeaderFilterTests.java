@@ -441,7 +441,7 @@ public class ForwardedHeaderFilterTests {
 			request.addHeader(FORWARDED, "for=\"[2001:db8:cafe::17]\"");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("2001:db8:cafe:0:0:0:0:17");
+			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("[2001:db8:cafe::17]");
 			assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
 		}
 
@@ -459,7 +459,7 @@ public class ForwardedHeaderFilterTests {
 			request.addHeader(FORWARDED, "For=\"[2001:db8:cafe::17]:47011\"");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("2001:db8:cafe:0:0:0:0:17");
+			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("[2001:db8:cafe::17]");
 			assertThat(actual.getRemotePort()).isEqualTo(47011);
 		}
 
