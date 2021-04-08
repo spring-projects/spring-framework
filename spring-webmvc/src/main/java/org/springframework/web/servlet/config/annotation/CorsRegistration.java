@@ -60,7 +60,7 @@ public class CorsRegistration {
 	/**
 	 * Alternative to {@link #allowCredentials} that supports origins declared
 	 * via wildcard patterns. Please, see
-	 * @link CorsConfiguration#setAllowedOriginPatterns(List)} for details.
+	 * {@link CorsConfiguration#setAllowedOriginPatterns(List)} for details.
 	 * <p>By default this is not set.
 	 * @since 5.3
 	 */
