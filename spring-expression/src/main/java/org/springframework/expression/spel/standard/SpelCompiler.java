@@ -136,6 +136,7 @@ public final class SpelCompiler implements Opcodes {
 	private Class<? extends CompiledExpression> createExpressionClass(SpelNodeImpl expressionToCompile) {
 		// Create class outline 'spel/ExNNN extends org.springframework.expression.spel.CompiledExpression'
 		String className = "spel/Ex" + getNextSuffix();
+		String evaluationContextClass = "org/springframework/expression/EvaluationContext";
 		ClassWriter cw = new ExpressionClassWriter();
 		cw.visit(V1_8, ACC_PUBLIC, className, null, "org/springframework/expression/spel/CompiledExpression", null);
 
@@ -151,7 +152,7 @@ public final class SpelCompiler implements Opcodes {
 
 		// Create getValue() method
 		mv = cw.visitMethod(ACC_PUBLIC, "getValue",
-				"(Ljava/lang/Object;Lorg/springframework/expression/EvaluationContext;)Ljava/lang/Object;", null,
+				"(Ljava/lang/Object;L" + evaluationContextClass + ";)Ljava/lang/Object;", null,
 				new String[] {"org/springframework/expression/EvaluationException"});
 		mv.visitCode();
 
