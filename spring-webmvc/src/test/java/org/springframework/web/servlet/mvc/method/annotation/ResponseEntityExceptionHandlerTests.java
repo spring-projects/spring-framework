@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,6 +113,20 @@ public class ResponseEntityExceptionHandlerTests {
 
 		ResponseEntity<Object> responseEntity = testException(ex);
 		assertThat(responseEntity.getHeaders().getAccept()).isEqualTo(acceptable);
+		assertThat(responseEntity.getHeaders().getAcceptPatch()).isEmpty();
+	}
+
+	@Test
+	public void patchHttpMediaTypeNotSupported() {
+		this.servletRequest = new MockHttpServletRequest("PATCH", "/");
+		this.request = new ServletWebRequest(this.servletRequest, this.servletResponse);
+
+		List<MediaType> acceptable = Arrays.asList(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML);
+		Exception ex = new HttpMediaTypeNotSupportedException(MediaType.APPLICATION_JSON, acceptable);
+
+		ResponseEntity<Object> responseEntity = testException(ex);
+		assertThat(responseEntity.getHeaders().getAccept()).isEqualTo(acceptable);
+		assertThat(responseEntity.getHeaders().getAcceptPatch()).isEqualTo(acceptable);
 	}
 
 	@Test

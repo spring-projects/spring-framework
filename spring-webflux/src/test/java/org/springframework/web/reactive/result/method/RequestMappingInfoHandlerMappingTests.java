@@ -317,6 +317,26 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertThat(uriVariables.get("cars")).isEqualTo("cars");
 	}
 
+	@Test
+	public void handlePatchUnsupportedMediaType() {
+		MockServerHttpRequest request = MockServerHttpRequest.patch("/qux")
+				.header("content-type", "application/xml")
+				.build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
+
+		StepVerifier.create(mono)
+				.expectErrorSatisfies(ex -> {
+					assertThat(ex).isInstanceOf(UnsupportedMediaTypeStatusException.class);
+					UnsupportedMediaTypeStatusException umtse = (UnsupportedMediaTypeStatusException) ex;
+					MediaType mediaType = new MediaType("foo", "bar");
+					assertThat(umtse.getSupportedMediaTypes()).containsExactly(mediaType);
+					assertThat(umtse.getResponseHeaders().getAcceptPatch()).containsExactly(mediaType);
+				})
+				.verify();
+
+	}
+
 
 	@SuppressWarnings("unchecked")
 	private <T> void assertError(Mono<Object> mono, final Class<T> exceptionClass, final Consumer<T> consumer) {

@@ -88,6 +88,18 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
+	public void patchHttpMediaTypeNotSupported() {
+		HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(new MediaType("text", "plain"),
+				Collections.singletonList(new MediaType("application", "pdf")));
+		MockHttpServletRequest request = new MockHttpServletRequest("PATCH", "/");
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertThat(mav).as("No ModelAndView returned").isNotNull();
+		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
+		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(415);
+		assertThat(response.getHeader("Accept-Patch")).as("Invalid Accept header").isEqualTo("application/pdf");
+	}
+
+	@Test
 	public void handleMissingPathVariable() throws NoSuchMethodException {
 		Method method = getClass().getMethod("handle", String.class);
 		MethodParameter parameter = new MethodParameter(method, 0);

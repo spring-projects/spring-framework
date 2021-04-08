@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -974,6 +974,26 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 		assertThat(response.getStatus()).isEqualTo(415);
 		assertThat(response.getHeader("Accept")).isEqualTo("text/plain");
+	}
+
+	@PathPatternsParameterizedTest
+	void unsupportedPatchBody(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(RequestResponseBodyController.class, usePathPatterns, wac -> {
+			RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
+			StringHttpMessageConverter converter = new StringHttpMessageConverter();
+			converter.setSupportedMediaTypes(Collections.singletonList(MediaType.TEXT_PLAIN));
+			adapterDef.getPropertyValues().add("messageConverters", converter);
+			wac.registerBeanDefinition("handlerAdapter", adapterDef);
+		});
+
+		MockHttpServletRequest request = new MockHttpServletRequest("PATCH", "/something");
+		String requestBody = "Hello World";
+		request.setContent(requestBody.getBytes(StandardCharsets.UTF_8));
+		request.addHeader("Content-Type", "application/pdf");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getStatus()).isEqualTo(415);
+		assertThat(response.getHeader("Accept-Patch")).isEqualTo("text/plain");
 	}
 
 	@PathPatternsParameterizedTest
