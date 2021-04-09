@@ -4628,10 +4628,11 @@ configuration (notice the inclusion of the `context` namespace):
 ----
 
 (The implicitly registered post-processors include
+{api-spring-framework}/context/annotation/ConfigurationClassPostProcessor.html[`ConfigurationClassPostProcessor`]
 {api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`],
 {api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`],
 {api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`], and
-{api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`].)
+{api-spring-framework}/context/event/EventListenerMethodProcessor.html[`EventListenerMethodProcessor.html`].)
 
 [NOTE]
 ====
