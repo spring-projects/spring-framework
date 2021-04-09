@@ -4690,10 +4690,7 @@ references and values even when you use the class outside of a container.
 [TIP]
 ====
 The {api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`]
-must be registered as a bean to enable support for the `@Required` annotation. Note,
-however, that a `RequiredAnnotationBeanPostProcessor` bean is registered automatically
-when using the `<context:annotation-config/>` or `<context:component-scan/>` XML
-namespace elements.
+must be registered as a bean to enable support for the `@Required` annotation.
 ====
 
 [NOTE]
