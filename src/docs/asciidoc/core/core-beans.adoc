@@ -4607,8 +4607,8 @@ Annotation injection is performed before XML injection. Thus, the XML configurat
 overrides the annotations for properties wired through both approaches.
 ====
 
-As always, you can register them as individual bean definitions, but they can also be
-implicitly registered by including the following tag in an XML-based Spring
+As always, you can register the post-processors as individual bean definitions, but they
+can also be implicitly registered by including the following tag in an XML-based Spring
 configuration (notice the inclusion of the `context` namespace):
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -4627,12 +4627,13 @@ configuration (notice the inclusion of the `context` namespace):
 	</beans>
 ----
 
-(The implicitly registered post-processors include
-{api-spring-framework}/context/annotation/ConfigurationClassPostProcessor.html[`ConfigurationClassPostProcessor`]
-{api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`],
-{api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`],
-{api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`], and
-{api-spring-framework}/context/event/EventListenerMethodProcessor.html[`EventListenerMethodProcessor.html`].)
+The `<context:annotation-config/>` element implicitly registers the following post-processors:
+
+* {api-spring-framework}/context/annotation/ConfigurationClassPostProcessor.html[`ConfigurationClassPostProcessor`]
+* {api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`]
+* {api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`]
+* {api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`]
+* {api-spring-framework}/context/event/EventListenerMethodProcessor.html[`EventListenerMethodProcessor`]
 
 [NOTE]
 ====
