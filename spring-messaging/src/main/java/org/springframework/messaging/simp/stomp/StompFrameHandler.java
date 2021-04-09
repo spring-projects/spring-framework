@@ -43,4 +43,6 @@ public interface StompFrameHandler {
 	 */
 	void handleFrame(StompHeaders headers, @Nullable Object payload);
 
+	void handleErrorFrame(StompHeaders headers, @Nullable byte[] payload);
+
 }

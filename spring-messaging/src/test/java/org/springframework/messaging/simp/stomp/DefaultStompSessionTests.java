@@ -230,6 +230,7 @@ public class DefaultStompSessionTests {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 		accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
 		accessor.addNativeHeader("foo", "bar");
+		accessor.setMessage("Error message");
 		accessor.setLeaveMutable(true);
 		String payload = "Oops";
 
@@ -239,39 +240,7 @@ public class DefaultStompSessionTests {
 		this.session.handleMessage(MessageBuilder.createMessage(
 				payload.getBytes(StandardCharsets.UTF_8), accessor.getMessageHeaders()));
 
-		verify(this.sessionHandler).getPayloadType(stompHeaders);
-		verify(this.sessionHandler).handleFrame(stompHeaders, payload);
-		verifyNoMoreInteractions(this.sessionHandler);
-	}
-
-	@Test
-	public void handleErrorFrameWithEmptyPayload() {
-		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
-		accessor.addNativeHeader("foo", "bar");
-		accessor.setLeaveMutable(true);
-		this.session.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
-
-		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
-		verify(this.sessionHandler).handleFrame(stompHeaders, null);
-		verifyNoMoreInteractions(this.sessionHandler);
-	}
-
-	@Test
-	public void handleErrorFrameWithConversionException() {
-		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
-		accessor.setContentType(MimeTypeUtils.APPLICATION_JSON);
-		accessor.addNativeHeader("foo", "bar");
-		accessor.setLeaveMutable(true);
-		byte[] payload = "{'foo':'bar'}".getBytes(StandardCharsets.UTF_8);
-
-		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
-		given(this.sessionHandler.getPayloadType(stompHeaders)).willReturn(Map.class);
-
-		this.session.handleMessage(MessageBuilder.createMessage(payload, accessor.getMessageHeaders()));
-
-		verify(this.sessionHandler).getPayloadType(stompHeaders);
-		verify(this.sessionHandler).handleException(same(this.session), same(StompCommand.ERROR),
-				eq(stompHeaders), same(payload), any(MessageConversionException.class));
+		verify(this.sessionHandler).handleErrorFrame(stompHeaders, payload.getBytes());
 		verifyNoMoreInteractions(this.sessionHandler);
 	}
 

@@ -137,6 +137,11 @@ public class ReactorNettyTcpStompClientTests {
 
 		@Override
 		public void handleFrame(StompHeaders headers, @Nullable Object payload) {
+			logger.error("STOMP frame " + headers + " payload=" + payload);
+		}
+
+		@Override
+		public void handleErrorFrame(StompHeaders headers, byte[] payload) {
 			logger.error("STOMP error frame " + headers + " payload=" + payload);
 		}
 
@@ -177,6 +182,11 @@ public class ReactorNettyTcpStompClientTests {
 					@Override
 					public void handleFrame(StompHeaders headers, @Nullable Object payload) {
 						received.add((String) payload);
+					}
+
+					@Override
+					public void handleErrorFrame(StompHeaders headers, @Nullable byte[] payload) {
+						//nothing to do
 					}
 				});
 				subscription.addReceiptTask(subscriptionLatch::countDown);

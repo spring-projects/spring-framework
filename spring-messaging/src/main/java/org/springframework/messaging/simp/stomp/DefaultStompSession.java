@@ -454,7 +454,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 					this.sessionHandler.afterConnected(this, headers);
 				}
 				else if (StompCommand.ERROR.equals(command)) {
-					invokeHandler(this.sessionHandler, message, headers);
+					invokeErrorFrameHandler(this.sessionHandler, message, headers);
 				}
 				else if (!isHeartbeat && logger.isTraceEnabled()) {
 					logger.trace("Message not handled.");
@@ -464,6 +464,10 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		catch (Throwable ex) {
 			this.sessionHandler.handleException(this, command, headers, message.getPayload(), ex);
 		}
+	}
+
+	private void invokeErrorFrameHandler(StompSessionHandler handler, Message<byte[]> message, StompHeaders headers) {
+		handler.handleErrorFrame(headers, message.getPayload());
 	}
 
 	private void invokeHandler(StompFrameHandler handler, Message<byte[]> message, StompHeaders headers) {

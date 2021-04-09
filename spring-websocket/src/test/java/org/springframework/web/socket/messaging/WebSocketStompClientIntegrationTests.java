@@ -117,7 +117,7 @@ class WebSocketStompClientIntegrationTests {
 		this.stompClient.connect(url, testHandler);
 
 		assertThat(testHandler.awaitForMessageCount(1, 5000)).isTrue();
-		assertThat(testHandler.getReceived()).containsExactly("payload");
+		assertThat(testHandler.getErrorReceived()).containsExactly("payload");
 	}
 
 
@@ -149,6 +149,8 @@ class WebSocketStompClientIntegrationTests {
 
 		private final List<String> received = new ArrayList<>();
 
+		private final List<String> errorReceived = new ArrayList<>();
+
 
 		public TestHandler(String topic, Object payload) {
 			this.topic = topic;
@@ -158,6 +160,10 @@ class WebSocketStompClientIntegrationTests {
 
 		public List<String> getReceived() {
 			return this.received;
+		}
+
+		public List<String> getErrorReceived(){
+			return this.errorReceived;
 		}
 
 
@@ -171,6 +177,11 @@ class WebSocketStompClientIntegrationTests {
 				@Override
 				public void handleFrame(StompHeaders headers, @Nullable Object payload) {
 					received.add((String) payload);
+				}
+
+				@Override
+				public void handleErrorFrame(StompHeaders headers, byte[] payload) {
+					errorReceived.add(String.valueOf(payload));
 				}
 			});
 			try {
@@ -208,6 +219,11 @@ class WebSocketStompClientIntegrationTests {
 		@Override
 		public void handleFrame(StompHeaders headers, @Nullable Object payload) {
 			logger.error("STOMP error frame " + headers + " payload=" + payload);
+		}
+
+		@Override
+		public void handleErrorFrame(StompHeaders headers, byte[] payload) {
+
 		}
 
 		@Override
