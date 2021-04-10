@@ -10652,7 +10652,7 @@ architectures that build upon the well-known Spring programming model.
 [[context-functionality-events-annotation]]
 ==== Annotation-based Event Listeners
 
-As of Spring 4.2, you can register an event listener on any public method of a managed
+As of Spring 4.2, you can register an event listener on any method of a managed
 bean by using the `@EventListener` annotation. The `BlockedListNotifier` can be rewritten as
 follows:
 
@@ -10793,7 +10793,7 @@ NOTE: This feature is not supported for
 <<context-functionality-events-async, asynchronous listeners>>.
 
 This new method publishes a new `ListUpdateEvent` for every `BlockedListEvent` handled by the
-method above. If you need to publish several events, you can return a `Collection` of events
+method above. If you need to publish several events, you can return a `Collection` or an `array` of events
 instead.
 
 
