@@ -38,11 +38,18 @@ public interface StompFrameHandler {
 	/**
 	 * Handle a STOMP frame with the payload converted to the target type returned
 	 * from {@link #getPayloadType(StompHeaders)}.
+	 * Method {@link #handleErrorFrame(StompHeaders, byte[])} is invoked if the frame
+	 * is an error frame.
 	 * @param headers the headers of the frame
 	 * @param payload the payload, or {@code null} if there was no payload
 	 */
 	void handleFrame(StompHeaders headers, @Nullable Object payload);
 
+	/**
+	 * Handle a STOMP error frame received from server.
+	 * @param headers the headers of the frame
+	 * @param payload the payload, or {@code null} if there was no payload
+	 */
 	void handleErrorFrame(StompHeaders headers, @Nullable byte[] payload);
 
 }
