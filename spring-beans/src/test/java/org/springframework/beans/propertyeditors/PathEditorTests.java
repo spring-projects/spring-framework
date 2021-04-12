@@ -84,11 +84,18 @@ public class PathEditorTests {
 	@Test
 	public void testWindowsAbsoluteFilePath() {
 		PropertyEditor pathEditor = new PathEditor();
-		pathEditor.setAsText("file://C:\\no_way_this_file_is_found.doc");
-		Object value = pathEditor.getValue();
-		assertThat(value instanceof Path).isTrue();
-		Path path = (Path) value;
-		assertThat(!path.toFile().exists()).isTrue();
+		try {
+			pathEditor.setAsText("file://C:\\no_way_this_file_is_found.doc");
+			Object value = pathEditor.getValue();
+			assertThat(value instanceof Path).isTrue();
+			Path path = (Path) value;
+			assertThat(!path.toFile().exists()).isTrue();
+		}
+		catch (IllegalArgumentException ex) {
+			if (File.separatorChar == '\\') {  // on Windows, otherwise silently ignore
+				throw ex;
+			}
+		}
 	}
 
 	@Test
