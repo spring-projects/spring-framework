@@ -244,7 +244,7 @@ public class ResourceWebHandlerTests {
 		handler.afterPropertiesSet();
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
-		setPathWithinHandlerMapping(exchange, UriUtils.encodePath("test/фоо.css", UTF_8));
+		setPathWithinHandlerMapping(exchange, UriUtils.encodePath("test/foo with spaces.css", UTF_8));
 		handler.handle(exchange).block(TIMEOUT);
 
 		HttpHeaders headers = exchange.getResponse().getHeaders();

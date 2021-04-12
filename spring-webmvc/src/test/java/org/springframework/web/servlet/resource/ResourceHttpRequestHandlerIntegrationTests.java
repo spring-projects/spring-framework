@@ -88,7 +88,7 @@ public class ResourceHttpRequestHandlerIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("argumentSource")
 	void classpathLocationWithEncodedPath(boolean usePathPatterns, String pathPrefix) throws Exception {
-		MockHttpServletRequest request = initRequest(pathPrefix + "/test/фоо.css");
+		MockHttpServletRequest request = initRequest(pathPrefix + "/test/foo with spaces.css");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		DispatcherServlet servlet = initDispatcherServlet(usePathPatterns, WebConfig.class);
