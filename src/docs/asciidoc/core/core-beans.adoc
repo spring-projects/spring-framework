@@ -135,8 +135,7 @@ dependency-inject domain objects with Spring>>.
 
 The following example shows the basic structure of XML-based configuration metadata:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -640,17 +639,16 @@ You can use the `Class` property in one of two ways:
   from the invocation of the `static` factory method may be the same class or another
   class entirely.
 
+.Nested class names
 ****
-.Inner class names
-If you want to configure a bean definition for a `static` nested class, you have to use
-the binary name of the nested class.
+If you want to configure a bean definition for a nested class, you may use either the
+binary name or the source name of the nested class.
 
-For example, if you have a class called `SomeThing` in the `com.example` package, and this
-`SomeThing` class has a `static` nested class called `OtherThing`, the value of the `class`
-attribute on a bean definition would be `com.example.SomeThing$OtherThing`.
-
-Notice the use of the `$` character in the name to separate the nested class name from
-the outer class name.
+For example, if you have a class called `SomeThing` in the `com.example` package, and
+this `SomeThing` class has a `static` nested class called `OtherThing`, they can be
+separated by a dollar sign (`$`) or a dot (`.`). So the value of the `class` attribute in
+a bean definition would be `com.example.SomeThing$OtherThing` or
+`com.example.SomeThing.OtherThing`.
 ****
 
 
@@ -925,7 +923,7 @@ injection:
 	public class SimpleMovieLister {
 
 		// the SimpleMovieLister has a dependency on a MovieFinder
-		private MovieFinder movieFinder;
+		private final MovieFinder movieFinder;
 
 		// a constructor so that the Spring container can inject a MovieFinder
 		public SimpleMovieLister(MovieFinder movieFinder) {
@@ -945,7 +943,7 @@ injection:
 ----
 
 Notice that there is nothing special about this class. It is a POJO that
-has no dependencies on container specific interfaces, base classes or annotations.
+has no dependencies on container specific interfaces, base classes, or annotations.
 
 [[beans-factory-ctor-arguments-resolution]]
 ===== Constructor Argument Resolution
@@ -976,10 +974,10 @@ being instantiated. Consider the following class:
 	class ThingOne(thingTwo: ThingTwo, thingThree: ThingThree)
 ----
 
-Assuming that `ThingTwo` and `ThingThree` classes are not related by inheritance, no potential
-ambiguity exists. Thus, the following configuration works fine, and you do not need to specify
-the constructor argument indexes or types explicitly in the `<constructor-arg/>`
-element.
+Assuming that the `ThingTwo` and `ThingThree` classes are not related by inheritance, no
+potential ambiguity exists. Thus, the following configuration works fine, and you do not
+need to specify the constructor argument indexes or types explicitly in the
+`<constructor-arg/>` element.
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -1008,10 +1006,10 @@ by type without help. Consider the following class:
 	public class ExampleBean {
 
 		// Number of years to calculate the Ultimate Answer
-		private int years;
+		private final int years;
 
 		// The Answer to Life, the Universe, and Everything
-		private String ultimateAnswer;
+		private final String ultimateAnswer;
 
 		public ExampleBean(int years, String ultimateAnswer) {
 			this.years = years;
@@ -1033,7 +1031,7 @@ by type without help. Consider the following class:
 .[[beans-factory-ctor-arguments-type]]Constructor argument type matching
 --
 In the preceding scenario, the container can use type matching with simple types if
-you explicitly specify the type of the constructor argument by using the `type` attribute.
+you explicitly specify the type of the constructor argument by using the `type` attribute,
 as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -1253,7 +1251,8 @@ visibility of some configuration issues is why `ApplicationContext` implementati
 default pre-instantiate singleton beans. At the cost of some upfront time and memory to
 create these beans before they are actually needed, you discover configuration issues
 when the `ApplicationContext` is created, not later. You can still override this default
-behavior so that singleton beans initialize lazily, rather than being pre-instantiated.
+behavior so that singleton beans initialize lazily, rather than being eagerly
+pre-instantiated.
 
 If no circular dependencies exist, when one or more collaborating beans are being
 injected into a dependent bean, each collaborating bean is totally configured prior
@@ -1980,8 +1979,7 @@ then nested `constructor-arg` elements.
 The following example uses the `c:` namespace to do the same thing as the from
 <<beans-constructor-injection>>:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -3409,15 +3407,9 @@ The `org.springframework.beans.factory.InitializingBean` interface lets a bean
 perform initialization work after the container has set all necessary properties on the
 bean. The `InitializingBean` interface specifies a single method:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	void afterPropertiesSet() throws Exception;
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	fun afterPropertiesSet()
 ----
 
 We recommend that you do not use the `InitializingBean` interface, because it
@@ -3428,8 +3420,7 @@ you can use the `init-method` attribute to specify the name of the method that h
 no-argument signature. With Java configuration, you can use the `initMethod` attribute of
 `@Bean`. See <<beans-java-lifecycle-callbacks>>. Consider the following example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/>
 ----
@@ -3495,15 +3486,9 @@ Implementing the `org.springframework.beans.factory.DisposableBean` interface le
 bean get a callback when the container that contains it is destroyed. The
 `DisposableBean` interface specifies a single method:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	void destroy() throws Exception;
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	fun destroy()
 ----
 
 We recommend that you do not use the `DisposableBean` callback interface, because it
@@ -3715,8 +3700,7 @@ Destroy methods are called in the same order:
 The `Lifecycle` interface defines the essential methods for any object that has its own
 lifecycle requirements (such as starting and stopping some background process):
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Lifecycle {
 
@@ -3727,18 +3711,6 @@ lifecycle requirements (such as starting and stopping some background process):
 		boolean isRunning();
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Lifecycle {
-
-		fun start()
-
-		fun stop()
-
-		val isRunning: Boolean
-	}
-----
 
 Any Spring-managed object may implement the `Lifecycle` interface. Then, when the
 `ApplicationContext` itself receives start and stop signals (for example, for a stop/restart
@@ -3746,24 +3718,13 @@ scenario at runtime), it cascades those calls to all `Lifecycle` implementations
 defined within that context. It does this by delegating to a `LifecycleProcessor`, shown
 in the following listing:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface LifecycleProcessor extends Lifecycle {
 
 		void onRefresh();
 
 		void onClose();
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface LifecycleProcessor : Lifecycle {
-
-		fun onRefresh()
-
-		fun onClose()
 	}
 ----
 
@@ -3792,43 +3753,23 @@ prior to objects of another type. In those cases, the `SmartLifecycle` interface
 another option, namely the `getPhase()` method as defined on its super-interface,
 `Phased`. The following listing shows the definition of the `Phased` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Phased {
 
 		int getPhase();
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Phased {
-
-		val phase: Int
-	}
-----
 
 The following listing shows the definition of the `SmartLifecycle` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface SmartLifecycle extends Lifecycle, Phased {
 
 		boolean isAutoStartup();
 
 		void stop(Runnable callback);
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface SmartLifecycle : Lifecycle, Phased {
-
-		val isAutoStartup: Boolean
-
-		fun stop(callback: Runnable)
 	}
 ----
 
@@ -3942,21 +3883,11 @@ When an `ApplicationContext` creates an object instance that implements the
 with a reference to that `ApplicationContext`. The following listing shows the definition
 of the `ApplicationContextAware` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface ApplicationContextAware {
 
 		void setApplicationContext(ApplicationContext applicationContext) throws BeansException;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface ApplicationContextAware {
-
-		@Throws(BeansException::class)
-		fun setApplicationContext(applicationContext: ApplicationContext)
 	}
 ----
 
@@ -3987,21 +3918,11 @@ When an `ApplicationContext` creates a class that implements the
 a reference to the name defined in its associated object definition. The following listing
 shows the definition of the BeanNameAware interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface BeanNameAware {
 
 		void setBeanName(String name) throws BeansException;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface BeanNameAware {
-
-		@Throws(BeansException::class)
-		fun setBeanName(name: String)
 	}
 ----
 
@@ -4401,15 +4322,14 @@ org.springframework.scripting.groovy.GroovyMessenger@272961
 ----
 
 
-[[beans-factory-extension-bpp-examples-rabpp]]
-==== Example: The `RequiredAnnotationBeanPostProcessor`
+[[beans-factory-extension-bpp-examples-aabpp]]
+==== Example: The `AutowiredAnnotationBeanPostProcessor`
 
-Using callback interfaces or annotations in conjunction with a custom
-`BeanPostProcessor` implementation is a common means of extending the Spring IoC
-container. An example is Spring's `RequiredAnnotationBeanPostProcessor` -- a
-`BeanPostProcessor` implementation that ships with the Spring distribution and that ensures
-that JavaBean properties on beans that are marked with an (arbitrary) annotation are
-actually (configured to be) dependency-injected with a value.
+Using callback interfaces or annotations in conjunction with a custom `BeanPostProcessor`
+implementation is a common means of extending the Spring IoC container. An example is
+Spring's `AutowiredAnnotationBeanPostProcessor` -- a `BeanPostProcessor` implementation
+that ships with the Spring distribution and autowires annotated fields, setter methods,
+and arbitrary config methods.
 
 
 
@@ -4673,7 +4593,7 @@ An alternative to XML setup is provided by annotation-based configuration, which
 the bytecode metadata for wiring up components instead of angle-bracket declarations.
 Instead of using XML to describe a bean wiring, the developer moves the configuration
 into the component class itself by using annotations on the relevant class, method, or
-field declaration. As mentioned in <<beans-factory-extension-bpp-examples-rabpp>>, using
+field declaration. As mentioned in <<beans-factory-extension-bpp-examples-aabpp>>, using
 a `BeanPostProcessor` in conjunction with annotations is a common means of extending the
 Spring IoC container. For example, Spring 2.0 introduced the possibility of enforcing
 required properties with the <<beans-required-annotation,`@Required`>> annotation. Spring
@@ -4692,8 +4612,8 @@ Annotation injection is performed before XML injection. Thus, the XML configurat
 overrides the annotations for properties wired through both approaches.
 ====
 
-As always, you can register them as individual bean definitions, but they can also be
-implicitly registered by including the following tag in an XML-based Spring
+As always, you can register the post-processors as individual bean definitions, but they
+can also be implicitly registered by including the following tag in an XML-based Spring
 configuration (notice the inclusion of the `context` namespace):
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -4712,12 +4632,13 @@ configuration (notice the inclusion of the `context` namespace):
 	</beans>
 ----
 
-(The implicitly registered post-processors include
-{api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`],
-{api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`],
-{api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`],
-and the aforementioned
-{api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`].)
+The `<context:annotation-config/>` element implicitly registers the following post-processors:
+
+* {api-spring-framework}/context/annotation/ConfigurationClassPostProcessor.html[`ConfigurationClassPostProcessor`]
+* {api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`]
+* {api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`]
+* {api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`]
+* {api-spring-framework}/context/event/EventListenerMethodProcessor.html[`EventListenerMethodProcessor`]
 
 [NOTE]
 ====
@@ -4763,7 +4684,6 @@ example:
 }
 ----
 
-
 This annotation indicates that the affected bean property must be populated at
 configuration time, through an explicit property value in a bean definition or through
 autowiring. The container throws an exception if the affected bean property has not been
@@ -4772,11 +4692,18 @@ instances or the like later on. We still recommend that you put assertions into 
 bean class itself (for example, into an init method). Doing so enforces those required
 references and values even when you use the class outside of a container.
 
+[TIP]
+====
+The {api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`]
+must be registered as a bean to enable support for the `@Required` annotation.
+====
+
 [NOTE]
 ====
-The `@Required` annotation is formally deprecated as of Spring Framework 5.1, in favor
-of using constructor injection for required settings (or a custom implementation of
-`InitializingBean.afterPropertiesSet()` along with bean property setter methods).
+The `@Required` annotation and `RequiredAnnotationBeanPostProcessor` are formally
+deprecated as of Spring Framework 5.1, in favor of using constructor injection for
+required settings (or a custom implementation of `InitializingBean.afterPropertiesSet()`
+or a custom `@PostConstruct` method along with bean property setter methods).
 ====
 
 
@@ -5001,6 +4928,7 @@ The same applies for typed collections, as the following example shows:
 	}
 ----
 
+[[beans-factory-ordered]]
 [TIP]
 ====
 Your target beans can implement the `org.springframework.core.Ordered` interface or use
@@ -7197,10 +7125,10 @@ metadata is provided per-instance rather than per-class.
 
 While classpath scanning is very fast, it is possible to improve the startup performance
 of large applications by creating a static list of candidates at compilation time. In this
-mode, all modules that are target of component scan must use this mechanism.
+mode, all modules that are targets of component scanning must use this mechanism.
 
-NOTE: Your existing `@ComponentScan` or `<context:component-scan` directives must stay as
-is to request the context to scan candidates in certain packages. When the
+NOTE: Your existing `@ComponentScan` or `<context:component-scan/>` directives must remain
+unchanged to request the context to scan candidates in certain packages. When the
 `ApplicationContext` detects such an index, it automatically uses it rather than scanning
 the classpath.
 
@@ -7229,12 +7157,10 @@ configuration, as shown in the following example:
 		compileOnly "org.springframework:spring-context-indexer:{spring-version}"
 	}
 ----
-====
 
 With Gradle 4.6 and later, the dependency should be declared in the `annotationProcessor`
 configuration, as shown in the following example:
 
-====
 [source,groovy,indent=0subs="verbatim,quotes,attributes"]
 ----
 	dependencies {
@@ -7242,19 +7168,20 @@ configuration, as shown in the following example:
 	}
 ----
 
-That process generates a `META-INF/spring.components` file that is
-included in the jar file.
+The `spring-context-indexer` artifact generates a `META-INF/spring.components` file that
+is included in the jar file.
 
 NOTE: When working with this mode in your IDE, the `spring-context-indexer` must be
 registered as an annotation processor to make sure the index is up-to-date when
 candidate components are updated.
 
-TIP: The index is enabled automatically when a `META-INF/spring.components` is found
+TIP: The index is enabled automatically when a `META-INF/spring.components` file is found
 on the classpath. If an index is partially available for some libraries (or use cases)
-but could not be built for the whole application, you can fallback to a regular classpath
-arrangement (as though no index was present at all) by setting `spring.index.ignore` to
-`true`, either as a system property or in a `spring.properties` file at the root of the
-classpath.
+but could not be built for the whole application, you can fall back to a regular classpath
+arrangement (as though no index were present at all) by setting `spring.index.ignore` to
+`true`, either as a JVM system property or in a `spring.properties` file at the root of
+the classpath.
+
 
 
 
@@ -7857,8 +7784,7 @@ To enable component scanning, you can annotate your `@Configuration` class as fo
 Experienced Spring users may be familiar with the XML declaration equivalent from
 Spring's `context:` namespace, shown in the following example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<context:component-scan base-package="com.acme"/>

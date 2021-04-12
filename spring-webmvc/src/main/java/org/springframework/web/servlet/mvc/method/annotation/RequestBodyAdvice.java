@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public interface RequestBodyAdvice {
 	 * @param targetType the target type, not necessarily the same as the method
 	 * parameter type, e.g. for {@code HttpEntity<String>}.
 	 * @param converterType the converter used to deserialize the body
-	 * @return the input request or a new instance, never {@code null}
+	 * @return the input request or a new instance (never {@code null})
 	 */
 	HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, MethodParameter parameter,
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) throws IOException;
@@ -83,8 +83,8 @@ public interface RequestBodyAdvice {
 	 * @param targetType the target type, not necessarily the same as the method
 	 * parameter type, e.g. for {@code HttpEntity<String>}.
 	 * @param converterType the selected converter type
-	 * @return the value to use or {@code null} which may then raise an
-	 * {@code HttpMessageNotReadableException} if the argument is required.
+	 * @return the value to use, or {@code null} which may then raise an
+	 * {@code HttpMessageNotReadableException} if the argument is required
 	 */
 	@Nullable
 	Object handleEmptyBody(@Nullable Object body, HttpInputMessage inputMessage, MethodParameter parameter,
