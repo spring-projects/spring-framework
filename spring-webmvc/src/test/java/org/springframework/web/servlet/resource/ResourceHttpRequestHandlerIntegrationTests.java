@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
@@ -49,6 +50,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Integration tests for static resource handling.
+ *
  * @author Rossen Stoyanchev
  */
 public class ResourceHttpRequestHandlerIntegrationTests {
@@ -135,7 +137,7 @@ public class ResourceHttpRequestHandlerIntegrationTests {
 
 			registerClasspathLocation("/cp/**", classPathLocation, registry);
 			registerFileSystemLocation("/fs/**", path, registry);
-			registerUrlLocation("/url/**", "file://" + path, registry);
+			registerUrlLocation("/url/**", "file://" + path.replace('\\', '/'), registry);
 		}
 
 		protected void registerClasspathLocation(String pattern, ClassPathResource resource, ResourceHandlerRegistry registry) {
