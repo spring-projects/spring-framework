@@ -101,7 +101,7 @@ public final class TemporalAccessorParser implements Parser<TemporalAccessor> {
 			if (this.source != null) {
 				throw new DateTimeParseException(
 					String.format("Unable to parse date time value \"%s\" using configuration from %s", text, this.source),
-					text, ex.getErrorIndex());
+					text, ex.getErrorIndex(), ex);
 			}
 			// else rethrow original exception
 			throw ex;

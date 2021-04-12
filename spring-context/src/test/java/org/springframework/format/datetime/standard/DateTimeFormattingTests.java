@@ -16,6 +16,7 @@
 
 package org.springframework.format.datetime.standard;
 
+import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -321,6 +322,35 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
+	void isoLocalDateWithInvalidFormat() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		String propertyName = "isoLocalDate";
+		propertyValues.add(propertyName, "2009-31-10");
+		binder.bind(propertyValues);
+		BindingResult bindingResult = binder.getBindingResult();
+		assertThat(bindingResult.getErrorCount()).isEqualTo(1);
+		FieldError fieldError = bindingResult.getFieldError(propertyName);
+		assertThat(fieldError.unwrap(TypeMismatchException.class))
+			.hasMessageContaining("for property 'isoLocalDate'")
+			.hasCauseInstanceOf(ConversionFailedException.class).getCause()
+				.hasMessageContaining("for value '2009-31-10'")
+				.hasCauseInstanceOf(IllegalArgumentException.class).getCause()
+					.hasMessageContaining("Parse attempt failed for value [2009-31-10]")
+					.hasCauseInstanceOf(DateTimeParseException.class).getCause()
+						// Unable to parse date time value "2009-31-10" using configuration from
+						// @org.springframework.format.annotation.DateTimeFormat(pattern=, style=SS, iso=DATE, fallbackPatterns=[])
+						.hasMessageContainingAll(
+							"Unable to parse date time value \"2009-31-10\" using configuration from",
+							"@org.springframework.format.annotation.DateTimeFormat",
+							"iso=DATE", "fallbackPatterns=[]")
+						.hasCauseInstanceOf(DateTimeParseException.class).getCause()
+							.hasMessageStartingWith("Text '2009-31-10'")
+							.hasCauseInstanceOf(DateTimeException.class).getCause()
+								.hasMessageContaining("Invalid value for MonthOfYear (valid values 1 - 12): 31")
+								.hasNoCause();
+	}
+
+	@Test
 	void testBindISOTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoLocalTime", "12:00:00");
@@ -519,9 +549,12 @@ class DateTimeFormattingTests {
 							.hasMessageContainingAll(
 								"Unable to parse date time value \"210302\" using configuration from",
 								"@org.springframework.format.annotation.DateTimeFormat",
-								"yyyy-MM-dd", "M/d/yy", "yyyyMMdd", "yyyy.MM.dd");
+								"yyyy-MM-dd", "M/d/yy", "yyyyMMdd", "yyyy.MM.dd")
+							.hasCauseInstanceOf(DateTimeParseException.class).getCause()
+								.hasMessageStartingWith("Text '210302'")
+								.hasNoCause();
 		}
-}
+	}
 
 
 	public static class DateTimeBean {
