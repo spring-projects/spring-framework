@@ -39,8 +39,7 @@ public class PathEditorTests {
 		pathEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
 				ClassUtils.getShortName(getClass()) + ".class");
 		Object value = pathEditor.getValue();
-		boolean condition = value instanceof Path;
-		assertThat(condition).isTrue();
+		assertThat(value instanceof Path).isTrue();
 		Path path = (Path) value;
 		assertThat(path.toFile().exists()).isTrue();
 	}
@@ -57,11 +56,9 @@ public class PathEditorTests {
 		PropertyEditor pathEditor = new PathEditor();
 		pathEditor.setAsText("file:/no_way_this_file_is_found.doc");
 		Object value = pathEditor.getValue();
-		boolean condition1 = value instanceof Path;
-		assertThat(condition1).isTrue();
+		assertThat(value instanceof Path).isTrue();
 		Path path = (Path) value;
-		boolean condition = !path.toFile().exists();
-		assertThat(condition).isTrue();
+		assertThat(!path.toFile().exists()).isTrue();
 	}
 
 	@Test
@@ -69,11 +66,9 @@ public class PathEditorTests {
 		PropertyEditor pathEditor = new PathEditor();
 		pathEditor.setAsText("/no_way_this_file_is_found.doc");
 		Object value = pathEditor.getValue();
-		boolean condition1 = value instanceof Path;
-		assertThat(condition1).isTrue();
+		assertThat(value instanceof Path).isTrue();
 		Path path = (Path) value;
-		boolean condition = !path.toFile().exists();
-		assertThat(condition).isTrue();
+		assertThat(!path.toFile().exists()).isTrue();
 	}
 
 	@Test
@@ -81,23 +76,26 @@ public class PathEditorTests {
 		PropertyEditor pathEditor = new PathEditor();
 		pathEditor.setAsText("C:\\no_way_this_file_is_found.doc");
 		Object value = pathEditor.getValue();
-		boolean condition1 = value instanceof Path;
-		assertThat(condition1).isTrue();
+		assertThat(value instanceof Path).isTrue();
 		Path path = (Path) value;
-		boolean condition = !path.toFile().exists();
-		assertThat(condition).isTrue();
+		assertThat(!path.toFile().exists()).isTrue();
 	}
 
 	@Test
 	public void testWindowsAbsoluteFilePath() {
 		PropertyEditor pathEditor = new PathEditor();
-		pathEditor.setAsText("file://C:\\no_way_this_file_is_found.doc");
-		Object value = pathEditor.getValue();
-		boolean condition1 = value instanceof Path;
-		assertThat(condition1).isTrue();
-		Path path = (Path) value;
-		boolean condition = !path.toFile().exists();
-		assertThat(condition).isTrue();
+		try {
+			pathEditor.setAsText("file://C:\\no_way_this_file_is_found.doc");
+			Object value = pathEditor.getValue();
+			assertThat(value instanceof Path).isTrue();
+			Path path = (Path) value;
+			assertThat(!path.toFile().exists()).isTrue();
+		}
+		catch (IllegalArgumentException ex) {
+			if (File.separatorChar == '\\') {  // on Windows, otherwise silently ignore
+				throw ex;
+			}
+		}
 	}
 
 	@Test
@@ -107,8 +105,7 @@ public class PathEditorTests {
 				ClassUtils.getShortName(getClass()) + ".class";
 		pathEditor.setAsText(fileName);
 		Object value = pathEditor.getValue();
-		boolean condition = value instanceof Path;
-		assertThat(condition).isTrue();
+		assertThat(value instanceof Path).isTrue();
 		Path path = (Path) value;
 		File file = path.toFile();
 		assertThat(file.exists()).isTrue();
@@ -126,8 +123,7 @@ public class PathEditorTests {
 				ClassUtils.getShortName(getClass()) + ".clazz";
 		pathEditor.setAsText(fileName);
 		Object value = pathEditor.getValue();
-		boolean condition = value instanceof Path;
-		assertThat(condition).isTrue();
+		assertThat(value instanceof Path).isTrue();
 		Path path = (Path) value;
 		File file = path.toFile();
 		assertThat(file.exists()).isFalse();
