@@ -47,10 +47,14 @@ public class CorsRegistration {
 
 
 	/**
-	 * A list of origins for which cross-origin requests are allowed. Please,
-	 * see {@link CorsConfiguration#setAllowedOrigins(List)} for details.
-	 * <p>By default all origins are allowed unless {@code originPatterns} is
-	 * also set in which case {@code originPatterns} is used instead.
+	 * Set the origins for which cross-origin requests are allowed from a browser.
+	 * Please, refer to {@link CorsConfiguration#setAllowedOrigins(List)} for
+	 * format details and other considerations.
+	 *
+	 * <p>By default, all origins are allowed, but if
+	 * {@link #allowedOriginPatterns(String...) allowedOriginPatterns} is also
+	 * set, then that takes precedence.
+	 * @see #allowedOriginPatterns(String...)
 	 */
 	public CorsRegistration allowedOrigins(String... origins) {
 		this.config.setAllowedOrigins(Arrays.asList(origins));
@@ -58,9 +62,11 @@ public class CorsRegistration {
 	}
 
 	/**
-	 * Alternative to {@link #allowCredentials} that supports origins declared
-	 * via wildcard patterns. Please, see
-	 * {@link CorsConfiguration#setAllowedOriginPatterns(List)} for details.
+	 * Alternative to {@link #allowedOrigins(String...)} that supports more
+	 * flexible patterns for specifying the origins for which cross-origin
+	 * requests are allowed from a browser. Please, refer to
+	 * {@link CorsConfiguration#setAllowedOriginPatterns(List)} for format
+	 * details and other considerations.
 	 * <p>By default this is not set.
 	 * @since 5.3
 	 */
