@@ -135,7 +135,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	}
 
 	/**
-	 * Sets the directory used to store parts larger than
+	 * Set the directory used to store parts larger than
 	 * {@link #setMaxInMemorySize(int) maxInMemorySize}. By default, a directory
 	 * named {@code spring-webflux-multipart} is created under the system
 	 * temporary directory.
@@ -154,7 +154,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	}
 
 	/**
-	 * Sets the Reactor {@link Scheduler} to be used for creating files and
+	 * Set the Reactor {@link Scheduler} to be used for creating files and
 	 * directories, and writing to files. By default,
 	 * {@link Schedulers#boundedElastic()} is used, but this property allows for
 	 * changing it to an externally managed scheduler.
@@ -174,13 +174,11 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * in memory nor file.
 	 * When {@code false}, parts are backed by
 	 * in-memory and/or file storage. Defaults to {@code false}.
-	 *
 	 * <p><strong>NOTE</strong> that with streaming enabled, the
 	 * {@code Flux<Part>} that is produced by this message reader must be
 	 * consumed in the original order, i.e. the order of the HTTP message.
 	 * Additionally, the {@linkplain Part#content() body contents} must either
 	 * be completely consumed or canceled before moving to the next part.
-	 *
 	 * <p>Also note that enabling this property effectively ignores
 	 * {@link #setMaxInMemorySize(int) maxInMemorySize},
 	 * {@link #setMaxDiskUsagePerPart(long) maxDiskUsagePerPart},
@@ -192,8 +190,8 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	}
 
 	/**
-	 * Sets the character set used to decode headers. Defaults to
-	 * UTF-8 as per RFC 7578.
+	 * Set the character set used to decode headers.
+	 * Defaults to UTF-8 as per RFC 7578.
 	 * @param headersCharset the charset to use for decoding headers
 	 * @since 5.3.6
 	 * @see <a href="https://tools.ietf.org/html/rfc7578#section-5.1">RFC-7578 Section 5.2</a>

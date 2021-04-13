@@ -10953,8 +10953,10 @@ location path as a classpath location. You can also use location paths (resource
 with special prefixes to force loading of definitions from the classpath or a URL,
 regardless of the actual context type.
 
+
+
 [[context-functionality-startup]]
-=== Application Startup tracking
+=== Application Startup Tracking
 
 The `ApplicationContext` manages the lifecycle of Spring applications and provides a rich
 programming model around components. As a result, complex applications can have equally
