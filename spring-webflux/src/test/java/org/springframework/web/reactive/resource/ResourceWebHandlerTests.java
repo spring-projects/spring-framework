@@ -237,7 +237,7 @@ public class ResourceWebHandlerTests {
 	@Test
 	public void getResourceFromFileSystem() throws Exception {
 		String path = new ClassPathResource("", getClass()).getFile().getCanonicalPath()
-				.replace("classes/java", "resources") + "/";
+				.replace('\\', '/').replace("classes/java", "resources") + "/";
 
 		ResourceWebHandler handler = new ResourceWebHandler();
 		handler.setLocations(Collections.singletonList(new FileSystemResource(path)));

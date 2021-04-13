@@ -18,8 +18,6 @@ package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
@@ -137,7 +135,7 @@ public class ResourceHttpRequestHandlerIntegrationTests {
 
 			registerClasspathLocation("/cp/**", classPathLocation, registry);
 			registerFileSystemLocation("/fs/**", path, registry);
-			registerUrlLocation("/url/**", "file://" + path.replace('\\', '/'), registry);
+			registerUrlLocation("/url/**", "file:" + path, registry);
 		}
 
 		protected void registerClasspathLocation(String pattern, ClassPathResource resource, ResourceHandlerRegistry registry) {
@@ -150,24 +148,20 @@ public class ResourceHttpRequestHandlerIntegrationTests {
 		}
 
 		protected void registerUrlLocation(String pattern, String path, ResourceHandlerRegistry registry) {
-			UrlResource urlLocation = new UrlResource(toURL(path));
-			registry.addResourceHandler(pattern).addResourceLocations(urlLocation);
-		}
-
-		private String getPath(ClassPathResource resource) {
 			try {
-				return resource.getFile().getCanonicalPath().replace("classes/java", "resources") + "/";
+				UrlResource urlLocation = new UrlResource(path);
+				registry.addResourceHandler(pattern).addResourceLocations(urlLocation);
 			}
-			catch (IOException ex) {
+			catch (MalformedURLException ex) {
 				throw new IllegalStateException(ex);
 			}
 		}
 
-		private URL toURL(String path) {
+		private String getPath(ClassPathResource resource) {
 			try {
-				return URI.create(path).toURL();
+				return resource.getFile().getCanonicalPath().replace('\\', '/').replace("classes/java", "resources") + "/";
 			}
-			catch (MalformedURLException ex) {
+			catch (IOException ex) {
 				throw new IllegalStateException(ex);
 			}
 		}
