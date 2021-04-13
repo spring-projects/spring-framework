@@ -8385,7 +8385,7 @@ annotation, as the following example shows:
 === Using the `@Configuration` annotation
 
 `@Configuration` is a class-level annotation indicating that an object is a source of
-bean definitions. `@Configuration` classes declare beans through public `@Bean` annotated
+bean definitions. `@Configuration` classes declare beans through `@Bean` annotated
 methods. Calls to `@Bean` methods on `@Configuration` classes can also be used to define
 inter-bean dependencies. See <<beans-java-basic-concepts>> for a general introduction.
 
