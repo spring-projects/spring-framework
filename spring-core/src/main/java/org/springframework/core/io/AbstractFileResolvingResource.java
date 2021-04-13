@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.JarURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
@@ -53,30 +54,35 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 			else {
 				// Try a URL connection content-length header
 				URLConnection con = url.openConnection();
-				customizeConnection(con);
-				HttpURLConnection httpCon =
-						(con instanceof HttpURLConnection ? (HttpURLConnection) con : null);
-				if (httpCon != null) {
-					int code = httpCon.getResponseCode();
-					if (code == HttpURLConnection.HTTP_OK) {
+				try {
+					customizeConnection(con);
+					HttpURLConnection httpCon =
+							(con instanceof HttpURLConnection ? (HttpURLConnection) con : null);
+					if (httpCon != null) {
+						int code = httpCon.getResponseCode();
+						if (code == HttpURLConnection.HTTP_OK) {
+							return true;
+						}
+						else if (code == HttpURLConnection.HTTP_NOT_FOUND) {
+							return false;
+						}
+					}
+					if (con.getContentLengthLong() > 0) {
 						return true;
 					}
-					else if (code == HttpURLConnection.HTTP_NOT_FOUND) {
+					if (httpCon != null) {
+						// No HTTP OK status, and no content-length header: give up
+						httpCon.disconnect();
 						return false;
 					}
+					else {
+						// Fall back to stream existence: can we open the stream?
+						getInputStream().close();
+						return true;
+					}
 				}
-				if (con.getContentLengthLong() > 0) {
-					return true;
-				}
-				if (httpCon != null) {
-					// No HTTP OK status, and no content-length header: give up
-					httpCon.disconnect();
-					return false;
-				}
-				else {
-					// Fall back to stream existence: can we open the stream?
-					getInputStream().close();
-					return true;
+				finally {
+					closeConnection(con);
 				}
 			}
 		}
@@ -105,26 +111,31 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 			else {
 				// Try InputStream resolution for jar resources
 				URLConnection con = url.openConnection();
-				customizeConnection(con);
-				if (con instanceof HttpURLConnection httpCon) {
-					int code = httpCon.getResponseCode();
-					if (code != HttpURLConnection.HTTP_OK) {
-						httpCon.disconnect();
+				try {
+					customizeConnection(con);
+					if (con instanceof HttpURLConnection httpCon) {
+						int code = httpCon.getResponseCode();
+						if (code != HttpURLConnection.HTTP_OK) {
+							httpCon.disconnect();
+							return false;
+						}
+					}
+					long contentLength = con.getContentLengthLong();
+					if (contentLength > 0) {
+						return true;
+					}
+					else if (contentLength == 0) {
+						// Empty file or directory -> not considered readable...
 						return false;
 					}
+					else {
+						// Fall back to stream existence: can we open the stream?
+						getInputStream().close();
+						return true;
+					}
 				}
-				long contentLength = con.getContentLengthLong();
-				if (contentLength > 0) {
-					return true;
-				}
-				else if (contentLength == 0) {
-					// Empty file or directory -> not considered readable...
-					return false;
-				}
-				else {
-					// Fall back to stream existence: can we open the stream?
-					getInputStream().close();
-					return true;
+				finally {
+					closeConnection(con);
 				}
 			}
 		}
@@ -243,8 +254,13 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		else {
 			// Try a URL connection content-length header
 			URLConnection con = url.openConnection();
-			customizeConnection(con);
-			return con.getContentLengthLong();
+			try {
+				customizeConnection(con);
+				return con.getContentLengthLong();
+			}
+			finally {
+				closeConnection(con);
+			}
 		}
 	}
 
@@ -268,13 +284,18 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		}
 		// Try a URL connection last-modified header
 		URLConnection con = url.openConnection();
-		customizeConnection(con);
-		long lastModified = con.getLastModified();
-		if (fileCheck && lastModified == 0 && con.getContentLengthLong() <= 0) {
-			throw new FileNotFoundException(getDescription() +
-					" cannot be resolved in the file system for checking its last-modified timestamp");
+		try {
+			customizeConnection(con);
+			long lastModified = con.getLastModified();
+			if (fileCheck && lastModified == 0 && con.getContentLengthLong() <= 0) {
+				throw new FileNotFoundException(getDescription() +
+						" cannot be resolved in the file system for checking its last-modified timestamp");
+			}
+			return lastModified;
 		}
-		return lastModified;
+		finally {
+			closeConnection(con);
+		}
 	}
 
 	/**
@@ -302,6 +323,38 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	 */
 	protected void customizeConnection(HttpURLConnection con) throws IOException {
 		con.setRequestMethod("HEAD");
+	}
+
+	/**
+	 * Tries to close the given {@link URLConnection}, obtained in the course of an
+	 * {@link #exists()}, {@link #contentLength()} or {@link #lastModified()} call.
+	 * <p>Delegates to {@link #closeConnection(JarURLConnection)} if possible.
+	 * Can be overridden in subclasses.
+	 * @param con the URLConnection to close
+	 * @throws IOException if thrown from URLConnection methods
+	 */
+	protected void closeConnection(URLConnection con) throws IOException {
+		if (con instanceof JarURLConnection) {
+			closeConnection((JarURLConnection) con);
+		}
+	}
+
+	/**
+	 * Tries to close the filed opened by the given {@link JarURLConnection}, obtained
+	 * in the course of an {@link #exists()}, {@link #contentLength()} or
+	 * {@link #lastModified()} call.
+	 * <p>Opens and then subsequently closes the connections inputstream. Can be
+	 * overridden in subclasses.
+	 * @param con the JarURLConnection to close
+	 * @throws IOException if thrown from JarURLConnection methods
+	 */
+	protected void closeConnection(JarURLConnection con) throws IOException {
+		try {
+			con.getInputStream().close();
+		}
+		catch (NullPointerException ignore) {
+			// catch https://bugs.openjdk.java.net/browse/JDK-8080094
+		}
 	}
 
 
