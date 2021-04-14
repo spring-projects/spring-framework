@@ -187,13 +187,6 @@ public interface WebClient {
 		Builder baseUrl(String baseUrl);
 
 		/**
-		 * Configure default URI variable values that will be used when expanding
-		 * URI templates using a {@link Map}.
-		 * @param defaultUriVariables the default values to use
-		 * @see #baseUrl(String)
-		 * @see #uriBuilderFactory(UriBuilderFactory)
-		 */
-		/**
 		 * Configure default URL variable values to use when expanding URI
 		 * templates with a {@link Map}. Effectively a shortcut for:
 		 * <p>
