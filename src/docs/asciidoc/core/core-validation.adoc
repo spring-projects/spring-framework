@@ -567,9 +567,10 @@ associates a `CustomNumberEditor` with the `age` property of the `Something` cla
 			try {
 				final PropertyEditor numberPE = new CustomNumberEditor(Integer.class, true);
 				PropertyDescriptor ageDescriptor = new PropertyDescriptor("age", Something.class) {
+				    @Override
 					public PropertyEditor createPropertyEditor(Object bean) {
 						return numberPE;
-					};
+					}
 				};
 				return new PropertyDescriptor[] { ageDescriptor };
 			}
