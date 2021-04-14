@@ -6642,7 +6642,7 @@ annotated classes. The following example shows how to do so:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Component
+	@Configuration
 	public class FactoryMethodComponent {
 
 		@Bean
@@ -6659,7 +6659,7 @@ annotated classes. The following example shows how to do so:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Component
+	@Configuration
 	class FactoryMethodComponent {
 
 		@Bean
