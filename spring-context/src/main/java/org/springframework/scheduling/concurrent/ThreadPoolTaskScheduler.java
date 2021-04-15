@@ -64,6 +64,10 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	private volatile boolean removeOnCancelPolicy;
 
+	private volatile boolean executeExistingDelayedTasksAfterShutdownPolicy;
+
+	private volatile boolean continueExistingPeriodicTasksAfterShutdownPolicy;
+
 	@Nullable
 	private volatile ErrorHandler errorHandler;
 
@@ -103,6 +107,40 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 		else if (removeOnCancelPolicy && this.scheduledExecutor != null) {
 			logger.debug("Could not apply remove-on-cancel policy - not a ScheduledThreadPoolExecutor");
+		}
+	}
+
+	/**
+	 * Set the execute-existing-delayed-tasks-after-shutdown mode on {@link ScheduledThreadPoolExecutor}.
+	 * <p>Default is {@code true}. If set to {@code false}, the target executor will be
+	 * switched into stop-existing-delayed-tasks-on-shutdown mode.
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
+	 */
+	public void setExecuteExistingDelayedTasksAfterShutdownPolicy(boolean executeExistingDelayedTasksAfterShutdownPolicy) {
+		this.executeExistingDelayedTasksAfterShutdownPolicy = executeExistingDelayedTasksAfterShutdownPolicy;
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
+			((ScheduledThreadPoolExecutor) this.scheduledExecutor)
+					.setExecuteExistingDelayedTasksAfterShutdownPolicy(executeExistingDelayedTasksAfterShutdownPolicy);
+		}
+		else if (executeExistingDelayedTasksAfterShutdownPolicy && this.scheduledExecutor != null) {
+			logger.debug("Could not apply execute-existing-delayed-tasks-after-shutdown policy - not a ScheduledThreadPoolExecutor");
+		}
+	}
+
+	/**
+	 * Set the continue-existing-periodic-tasks-after-shutdown mode on {@link ScheduledThreadPoolExecutor}.
+	 * <p>Default is {@code false}. If set to {@code true}, the target executor will be
+	 * switched into continue-existing-periodic-tasks-after-shutdown.
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
+	 */
+	public void setContinueExistingPeriodicTasksAfterShutdownPolicy(boolean continueExistingPeriodicTasksAfterShutdownPolicy) {
+		this.continueExistingPeriodicTasksAfterShutdownPolicy = continueExistingPeriodicTasksAfterShutdownPolicy;
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
+			((ScheduledThreadPoolExecutor) this.scheduledExecutor)
+					.setContinueExistingPeriodicTasksAfterShutdownPolicy(continueExistingPeriodicTasksAfterShutdownPolicy);
+		}
+		else if (continueExistingPeriodicTasksAfterShutdownPolicy && this.scheduledExecutor != null) {
+			logger.debug("Could not apply continue-existing-periodic-tasks-after-shutdown policy - not a ScheduledThreadPoolExecutor");
 		}
 	}
 
@@ -211,6 +249,30 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			return this.removeOnCancelPolicy;
 		}
 		return getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy();
+	}
+
+	/**
+	 * Return the current setting for the execute-existing-delayed-tasks-after-shutdown mode.
+	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor}.
+	 */
+	public boolean isExecuteExistingDelayedTasksAfterShutdownPolicy() {
+		if (this.scheduledExecutor == null) {
+			// Not initialized yet: return our setting for the time being.
+			return this.executeExistingDelayedTasksAfterShutdownPolicy;
+		}
+		return getScheduledThreadPoolExecutor().getExecuteExistingDelayedTasksAfterShutdownPolicy();
+	}
+
+	/**
+	 * Return the current setting for the continue-existing-periodic-tasks-after-shutdown mode.
+	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor}.
+	 */
+	public boolean isContinueExistingPeriodicTasksAfterShutdownPolicy() {
+		if (this.scheduledExecutor == null) {
+			// Not initialized yet: return our setting for the time being.
+			return this.continueExistingPeriodicTasksAfterShutdownPolicy;
+		}
+		return getScheduledThreadPoolExecutor().getContinueExistingPeriodicTasksAfterShutdownPolicy();
 	}
 
 	/**
