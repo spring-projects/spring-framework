@@ -1492,13 +1492,17 @@ The following listing shows the `FormatterRegistry` SPI:
 
 	public interface FormatterRegistry extends ConverterRegistry {
 
-		void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser);
+		void addPrinter(Printer<?> printer);
+
+		void addParser(Parser<?> parser);
+
+		void addFormatter(Formatter<?> formatter);
 
 		void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter);
 
-		void addFormatterForFieldType(Formatter<?> formatter);
+		void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser);
 
-		void addFormatterForAnnotation(AnnotationFormatterFactory<?> factory);
+		void addFormatterForFieldAnnotation(AnnotationFormatterFactory<? extends Annotation> annotationFormatterFactory);
 	}
 ----
 
