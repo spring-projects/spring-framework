@@ -64,7 +64,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	private volatile boolean removeOnCancelPolicy;
 
-	private volatile boolean executeExistingDelayedTasksAfterShutdownPolicy;
+	private volatile boolean executeExistingDelayedTasksAfterShutdownPolicy = true;
 
 	private volatile boolean continueExistingPeriodicTasksAfterShutdownPolicy;
 
