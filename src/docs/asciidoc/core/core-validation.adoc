@@ -501,7 +501,7 @@ the various `PropertyEditor` implementations that Spring provides:
 | `LocaleEditor`
 | Can resolve strings to `Locale` objects and vice-versa (the string format is
   `[language]\_[country]_[variant]`, same as the `toString()` method of
-  `Locale`). Also accepts spaces as separators, as alternative to underscores.
+  `Locale`). Also accepts spaces as separators, as an alternative to underscores.
   By default, registered by `BeanWrapperImpl`.
 
 | `PatternEditor`
