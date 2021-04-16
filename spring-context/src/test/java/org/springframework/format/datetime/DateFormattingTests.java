@@ -120,6 +120,36 @@ public class DateFormattingTests {
 	}
 
 	@Test
+	void styleDateWithInvalidFormat() {
+		String propertyName = "styleDate";
+		String propertyValue = "99/01/01";
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add(propertyName, propertyValue);
+		binder.bind(propertyValues);
+		BindingResult bindingResult = binder.getBindingResult();
+		assertThat(bindingResult.getErrorCount()).isEqualTo(1);
+		FieldError fieldError = bindingResult.getFieldError(propertyName);
+		TypeMismatchException exception = fieldError.unwrap(TypeMismatchException.class);
+		exception.printStackTrace(System.err);
+		assertThat(exception)
+			.hasMessageContaining("for property 'styleDate'")
+			.hasCauseInstanceOf(ConversionFailedException.class).getCause()
+				.hasMessageContaining("for value '99/01/01'")
+				.hasCauseInstanceOf(IllegalArgumentException.class).getCause()
+					.hasMessageContaining("Parse attempt failed for value [99/01/01]")
+					.hasCauseInstanceOf(ParseException.class).getCause()
+						// Unable to parse date time value "99/01/01" using configuration from
+						// @org.springframework.format.annotation.DateTimeFormat(pattern=, style=S-, iso=NONE, fallbackPatterns=[])
+						.hasMessageContainingAll(
+							"Unable to parse date time value \"99/01/01\" using configuration from",
+							"@org.springframework.format.annotation.DateTimeFormat",
+							"style=S-", "iso=NONE", "fallbackPatterns=[]")
+						.hasCauseInstanceOf(ParseException.class).getCause()
+							.hasMessageStartingWith("Unparseable date: \"99/01/01\"")
+							.hasNoCause();
+	}
+
+	@Test
 	void testBindDateArray() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleDate", new String[]{"10/31/09 12:00 PM"});
@@ -330,7 +360,10 @@ public class DateFormattingTests {
 							.hasMessageContainingAll(
 								"Unable to parse date time value \"210302\" using configuration from",
 								"@org.springframework.format.annotation.DateTimeFormat",
-								"yyyy-MM-dd", "M/d/yy", "yyyyMMdd", "yyyy.MM.dd");
+								"yyyy-MM-dd", "M/d/yy", "yyyyMMdd", "yyyy.MM.dd")
+							.hasCauseInstanceOf(ParseException.class).getCause()
+								.hasMessageStartingWith("Unparseable date: \"210302\"")
+								.hasNoCause();
 		}
 	}
 

@@ -219,9 +219,11 @@ public class DateFormatter implements Formatter<Date> {
 				}
 			}
 			if (this.source != null) {
-				throw new ParseException(
+				ParseException parseException = new ParseException(
 					String.format("Unable to parse date time value \"%s\" using configuration from %s", text, this.source),
 					ex.getErrorOffset());
+				parseException.initCause(ex);
+				throw parseException;
 			}
 			// else rethrow original exception
 			throw ex;
