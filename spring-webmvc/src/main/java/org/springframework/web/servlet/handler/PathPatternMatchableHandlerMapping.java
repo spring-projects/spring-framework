@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -69,5 +70,40 @@ class PathPatternMatchableHandlerMapping implements MatchableHandlerMapping {
 	@Override
 	public HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		return this.delegate.getHandler(request);
+	}
+
+	MatchableHandlerMapping decorate(RequestPath requestPath) {
+		return new MatchableHandlerMapping() {
+
+			@Nullable
+			@Override
+			public RequestMatchResult match(HttpServletRequest request, String pattern) {
+				RequestPath previousPath = setRequestPathAttribute(request);
+				try {
+					return PathPatternMatchableHandlerMapping.this.match(request, pattern);
+				}
+				finally {
+					ServletRequestPathUtils.setParsedRequestPath(previousPath, request);
+				}
+			}
+
+			@Nullable
+			@Override
+			public HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+				RequestPath previousPath = setRequestPathAttribute(request);
+				try {
+					return PathPatternMatchableHandlerMapping.this.getHandler(request);
+				}
+				finally {
+					ServletRequestPathUtils.setParsedRequestPath(previousPath, request);
+				}
+			}
+
+			private RequestPath setRequestPathAttribute(HttpServletRequest request) {
+				RequestPath previous = (RequestPath) request.getAttribute(ServletRequestPathUtils.PATH_ATTRIBUTE);
+				ServletRequestPathUtils.setParsedRequestPath(requestPath, request);
+				return previous;
+			}
+		};
 	}
 }

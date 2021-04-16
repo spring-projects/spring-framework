@@ -968,7 +968,9 @@ public class DispatcherServlet extends FrameworkServlet {
 					restoreAttributesAfterInclude(request, attributesSnapshot);
 				}
 			}
-			ServletRequestPathUtils.setParsedRequestPath(previousRequestPath, request);
+			if (this.parseRequestPath) {
+				ServletRequestPathUtils.setParsedRequestPath(previousRequestPath, request);
+			}
 		}
 	}
 

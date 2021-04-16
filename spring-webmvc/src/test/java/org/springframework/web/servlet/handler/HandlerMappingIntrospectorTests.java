@@ -127,16 +127,11 @@ public class HandlerMappingIntrospectorTests {
 		context.refresh();
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path/123");
-
-		// Initialize the RequestPath. At runtime, ServletRequestPathFilter is expected to do that.
-		if (usePathPatterns) {
-			ServletRequestPathUtils.parseAndCache(request);
-		}
-
 		MatchableHandlerMapping mapping = initIntrospector(context).getMatchableHandlerMapping(request);
 
 		assertThat(mapping).isNotNull();
 		assertThat(request.getAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE)).as("Attribute changes not ignored").isNull();
+		assertThat(request.getAttribute(ServletRequestPathUtils.PATH_ATTRIBUTE)).as("Parsed path not cleaned").isNull();
 
 		assertThat(mapping.match(request, "/p*/*")).isNotNull();
 		assertThat(mapping.match(request, "/b*/*")).isNull();
