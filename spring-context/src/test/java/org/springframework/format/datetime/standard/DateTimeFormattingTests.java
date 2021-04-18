@@ -339,10 +339,11 @@ class DateTimeFormattingTests {
 					.hasCauseInstanceOf(DateTimeParseException.class).getCause()
 						// Unable to parse date time value "2009-31-10" using configuration from
 						// @org.springframework.format.annotation.DateTimeFormat(pattern=, style=SS, iso=DATE, fallbackPatterns=[])
+						// We do not check "fallbackPatterns=[]", since the array representation in the toString()
+						// implementation for annotations changed from [] to {} in Java 9.
 						.hasMessageContainingAll(
 							"Unable to parse date time value \"2009-31-10\" using configuration from",
-							"@org.springframework.format.annotation.DateTimeFormat",
-							"iso=DATE", "fallbackPatterns=[]")
+							"@org.springframework.format.annotation.DateTimeFormat", "iso=DATE")
 						.hasCauseInstanceOf(DateTimeParseException.class).getCause()
 							.hasMessageStartingWith("Text '2009-31-10'")
 							.hasCauseInstanceOf(DateTimeException.class).getCause()
