@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -812,26 +812,24 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	public void testAliasChaining() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
+		lbf.registerAlias("test", "testAlias");
+		lbf.registerAlias("testAlias", "testAlias2");
+		lbf.registerAlias("testAlias2", "testAlias3");
+		Object bean = lbf.getBean("test");
+		assertSame(bean, lbf.getBean("testAlias"));
+		assertSame(bean, lbf.getBean("testAlias2"));
+		assertSame(bean, lbf.getBean("testAlias3"));
+	}
+
+	@Test
 	public void testBeanDefinitionOverriding() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
 		lbf.registerAlias("otherTest", "test2");
-		lbf.registerAlias("test", "test2");
-		assertTrue(lbf.getBean("test") instanceof NestedTestBean);
-		assertTrue(lbf.getBean("test2") instanceof NestedTestBean);
-	}
-
-	@Test
-	public void testBeanDefinitionRemoval() {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		lbf.setAllowBeanDefinitionOverriding(false);
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
-		lbf.registerAlias("test", "test2");
-		lbf.preInstantiateSingletons();
-		lbf.removeBeanDefinition("test");
-		lbf.removeAlias("test2");
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
 		lbf.registerAlias("test", "test2");
 		assertTrue(lbf.getBean("test") instanceof NestedTestBean);
 		assertTrue(lbf.getBean("test2") instanceof NestedTestBean);
@@ -864,16 +862,31 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	public void testAliasChaining() {
+	public void beanDefinitionOverridingWithConstructorArgumentMismatch() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(NestedTestBean.class);
+		bd1.getConstructorArgumentValues().addIndexedArgumentValue(1, "value1");
+		lbf.registerBeanDefinition("test", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition(NestedTestBean.class);
+		bd2.getConstructorArgumentValues().addIndexedArgumentValue(0, "value0");
+		lbf.registerBeanDefinition("test", bd2);
+		assertTrue(lbf.getBean("test") instanceof NestedTestBean);
+		assertEquals("value0", lbf.getBean("test", NestedTestBean.class).getCompany());
+	}
+
+	@Test
+	public void testBeanDefinitionRemoval() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.setAllowBeanDefinitionOverriding(false);
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
+		lbf.registerAlias("test", "test2");
+		lbf.preInstantiateSingletons();
+		lbf.removeBeanDefinition("test");
+		lbf.removeAlias("test2");
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
-		lbf.registerAlias("test", "testAlias");
-		lbf.registerAlias("testAlias", "testAlias2");
-		lbf.registerAlias("testAlias2", "testAlias3");
-		Object bean = lbf.getBean("test");
-		assertSame(bean, lbf.getBean("testAlias"));
-		assertSame(bean, lbf.getBean("testAlias2"));
-		assertSame(bean, lbf.getBean("testAlias3"));
+		lbf.registerAlias("test", "test2");
+		assertTrue(lbf.getBean("test") instanceof NestedTestBean);
+		assertTrue(lbf.getBean("test2") instanceof NestedTestBean);
 	}
 
 	@Test
@@ -1411,6 +1424,39 @@ public class DefaultListableBeanFactoryTests {
 	public void testGetBeanByTypeWithNoneFound() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.getBean(TestBean.class);
+	}
+
+	@Test
+	public void testGetBeanByTypeWithLateRegistration() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		try {
+			lbf.getBean(TestBean.class);
+			fail("Should have thrown NoSuchBeanDefinitionException");
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// expected
+		}
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		lbf.registerBeanDefinition("bd1", bd1);
+		TestBean bean = lbf.getBean(TestBean.class);
+		assertThat(bean.getBeanName(), equalTo("bd1"));
+	}
+
+	@Test
+	public void testGetBeanByTypeWithLateRegistrationAgainstFrozen() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.freezeConfiguration();
+		try {
+			lbf.getBean(TestBean.class);
+			fail("Should have thrown NoSuchBeanDefinitionException");
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// expected
+		}
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		lbf.registerBeanDefinition("bd1", bd1);
+		TestBean bean = lbf.getBean(TestBean.class);
+		assertThat(bean.getBeanName(), equalTo("bd1"));
 	}
 
 	@Test

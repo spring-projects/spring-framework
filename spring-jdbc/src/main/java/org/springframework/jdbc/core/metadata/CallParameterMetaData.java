@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,16 +31,16 @@ import org.springframework.lang.Nullable;
 public class CallParameterMetaData {
 
 	@Nullable
-	private String parameterName;
+	private final String parameterName;
 
-	private int parameterType;
+	private final int parameterType;
 
-	private int sqlType;
+	private final int sqlType;
 
 	@Nullable
-	private String typeName;
+	private final String typeName;
 
-	private boolean nullable;
+	private final boolean nullable;
 
 
 	/**
@@ -58,7 +58,7 @@ public class CallParameterMetaData {
 
 
 	/**
-	 * Get the parameter name.
+	 * Return the parameter name.
 	 */
 	@Nullable
 	public String getParameterName() {
@@ -66,7 +66,7 @@ public class CallParameterMetaData {
 	}
 
 	/**
-	 * Get the parameter type.
+	 * Return the parameter type.
 	 */
 	public int getParameterType() {
 		return this.parameterType;
@@ -84,14 +84,14 @@ public class CallParameterMetaData {
 	}
 
 	/**
-	 * Get the parameter SQL type.
+	 * Return the parameter SQL type.
 	 */
 	public int getSqlType() {
 		return this.sqlType;
 	}
 
 	/**
-	 * Get the parameter type name.
+	 * Return the parameter type name.
 	 */
 	@Nullable
 	public String getTypeName() {
@@ -99,7 +99,7 @@ public class CallParameterMetaData {
 	}
 
 	/**
-	 * Get whether the parameter is nullable.
+	 * Return whether the parameter is nullable.
 	 */
 	public boolean isNullable() {
 		return this.nullable;

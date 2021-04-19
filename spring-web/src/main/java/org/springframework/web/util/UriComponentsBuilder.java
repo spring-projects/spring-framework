@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,7 +152,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		this.host = other.host;
 		this.port = other.port;
 		this.pathBuilder = other.pathBuilder.cloneBuilder();
-		this.queryParams.putAll(other.queryParams);
+		this.uriVariables.putAll(other.uriVariables);
+		this.queryParams.addAll(other.queryParams);
 		this.fragment = other.fragment;
 		this.encodeTemplate = other.encodeTemplate;
 		this.charset = other.charset;
@@ -181,7 +182,13 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 	/**
-	 * Create a builder that is initialized with the given {@code URI}.
+	 * Create a builder that is initialized from the given {@code URI}.
+	 * <p><strong>Note:</strong> the components in the resulting builder will be
+	 * in fully encoded (raw) form and further changes must also supply values
+	 * that are fully encoded, for example via methods in {@link UriUtils}.
+	 * In addition please use {@link #build(boolean)} with a value of "true" to
+	 * build the {@link UriComponents} instance in order to indicate that the
+	 * components are encoded.
 	 * @param uri the URI to initialize with
 	 * @return the new {@code UriComponentsBuilder}
 	 */
@@ -226,7 +233,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			}
 			builder.scheme(scheme);
 			if (opaque) {
-				String ssp = uri.substring(scheme.length()).substring(1);
+				String ssp = uri.substring(scheme.length() + 1);
 				if (StringUtils.hasLength(fragment)) {
 					ssp = ssp.substring(0, ssp.length() - (fragment.length() + 1));
 				}
@@ -378,16 +385,17 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 	/**
-	 * Build a {@code UriComponents} instance from the various components
-	 * contained in this builder.
-	 * @param encoded whether all the components set in this builder are
-	 * encoded ({@code true}) or not ({@code false})
+	 * Variant of {@link #build()} to create a {@link UriComponents} instance
+	 * when components are already fully encoded. This is useful for example if
+	 * the builder was created via {@link UriComponentsBuilder#fromUri(URI)}.
+	 * @param encoded whether the components in this builder are already encoded
 	 * @return the URI components
+	 * @throws IllegalArgumentException if any of the components contain illegal
+	 * characters that should have been encoded.
 	 */
 	public UriComponents build(boolean encoded) {
-		return buildInternal(encoded ?
-				EncodingHint.FULLY_ENCODED :
-				this.encodeTemplate ? EncodingHint.ENCODE_TEMPLATE : EncodingHint.NONE);
+		return buildInternal(encoded ? EncodingHint.FULLY_ENCODED :
+				(this.encodeTemplate ? EncodingHint.ENCODE_TEMPLATE : EncodingHint.NONE));
 	}
 
 	private UriComponents buildInternal(EncodingHint hint) {
@@ -399,8 +407,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			HierarchicalUriComponents uric = new HierarchicalUriComponents(this.scheme, this.fragment,
 					this.userInfo, this.host, this.port, this.pathBuilder.build(), this.queryParams,
 					hint == EncodingHint.FULLY_ENCODED);
-
-			result = hint == EncodingHint.ENCODE_TEMPLATE ? uric.encodeTemplate(this.charset) : uric;
+			result = (hint == EncodingHint.ENCODE_TEMPLATE ? uric.encodeTemplate(this.charset) : uric);
 		}
 		if (!this.uriVariables.isEmpty()) {
 			result = result.expand(name -> this.uriVariables.getOrDefault(name, UriTemplateVariables.SKIP_VALUE));
@@ -457,9 +464,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @see UriComponents#toUriString()
 	 */
 	public String toUriString() {
-		return this.uriVariables.isEmpty() ?
-				build().encode().toUriString() :
-				buildInternal(EncodingHint.ENCODE_TEMPLATE).toUriString();
+		return (this.uriVariables.isEmpty() ? build().encode().toUriString() :
+				buildInternal(EncodingHint.ENCODE_TEMPLATE).toUriString());
 	}
 
 
@@ -832,12 +838,10 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 					scheme(StringUtils.tokenizeToStringArray(protocolHeader, ",")[0]);
 					port(null);
 				}
-
 				String hostHeader = headers.getFirst("X-Forwarded-Host");
 				if (StringUtils.hasText(hostHeader)) {
 					adaptForwardedHost(StringUtils.tokenizeToStringArray(hostHeader, ",")[0]);
 				}
-
 				String portHeader = headers.getFirst("X-Forwarded-Port");
 				if (StringUtils.hasText(portHeader)) {
 					port(Integer.parseInt(StringUtils.tokenizeToStringArray(portHeader, ",")[0]));

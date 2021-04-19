@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -501,7 +501,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		private final Set<GenericConverter> globalConverters = new LinkedHashSet<>();
 
-		private final Map<ConvertiblePair, ConvertersForPair> converters = new LinkedHashMap<>(36);
+		private final Map<ConvertiblePair, ConvertersForPair> converters = new LinkedHashMap<>(256);
 
 		public void add(GenericConverter converter) {
 			Set<ConvertiblePair> convertibleTypes = converter.getConvertibleTypes();
@@ -512,8 +512,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 			}
 			else {
 				for (ConvertiblePair convertiblePair : convertibleTypes) {
-					ConvertersForPair convertersForPair = getMatchableConverters(convertiblePair);
-					convertersForPair.add(converter);
+					getMatchableConverters(convertiblePair).add(converter);
 				}
 			}
 		}
@@ -642,7 +641,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		private List<String> getConverterStrings() {
 			List<String> converterStrings = new ArrayList<>();
-			for (ConvertersForPair convertersForPair : converters.values()) {
+			for (ConvertersForPair convertersForPair : this.converters.values()) {
 				converterStrings.add(convertersForPair.toString());
 			}
 			Collections.sort(converterStrings);
@@ -692,6 +691,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		@Override
+		@Nullable
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return null;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -307,11 +307,12 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		}
 
 		else {
+			Object result;
 			final ThrowableHolder throwableHolder = new ThrowableHolder();
 
 			// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
 			try {
-				Object result = ((CallbackPreferringPlatformTransactionManager) tm).execute(txAttr, status -> {
+				result = ((CallbackPreferringPlatformTransactionManager) tm).execute(txAttr, status -> {
 					TransactionInfo txInfo = prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
 					try {
 						return invocation.proceedWithInvocation();
@@ -336,12 +337,6 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 						cleanupTransactionInfo(txInfo);
 					}
 				});
-
-				// Check result state: It might indicate a Throwable to rethrow.
-				if (throwableHolder.throwable != null) {
-					throw throwableHolder.throwable;
-				}
-				return result;
 			}
 			catch (ThrowableHolderException ex) {
 				throw ex.getCause();
@@ -359,11 +354,17 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 				throw ex2;
 			}
+
+			// Check result state: It might indicate a Throwable to rethrow.
+			if (throwableHolder.throwable != null) {
+				throw throwableHolder.throwable;
+			}
+			return result;
 		}
 	}
 
 	/**
-	 * Clear the cache.
+	 * Clear the transaction manager cache.
 	 */
 	protected void clearTransactionManagerCache() {
 		this.transactionManagerCache.clear();
@@ -682,6 +683,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	@FunctionalInterface
 	protected interface InvocationCallback {
 
+		@Nullable
 		Object proceedWithInvocation() throws Throwable;
 	}
 

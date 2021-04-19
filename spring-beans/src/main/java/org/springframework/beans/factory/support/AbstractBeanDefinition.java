@@ -179,8 +179,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Nullable
 	private MutablePropertyValues propertyValues;
 
-	@Nullable
-	private MethodOverrides methodOverrides;
+	private MethodOverrides methodOverrides = new MethodOverrides();
 
 	@Nullable
 	private String initMethodName;
@@ -869,9 +868,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * <p>Never returns {@code null}.
 	 */
 	public MethodOverrides getMethodOverrides() {
-		if (this.methodOverrides == null) {
-			this.methodOverrides = new MethodOverrides();
-		}
 		return this.methodOverrides;
 	}
 
@@ -880,7 +876,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @since 5.0.2
 	 */
 	public boolean hasMethodOverrides() {
-		return (this.methodOverrides != null && !this.methodOverrides.isEmpty());
+		return !this.methodOverrides.isEmpty();
 	}
 
 	/**
@@ -900,16 +896,20 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Specify whether or not the configured init method is the default.
-	 * <p>The default value is {@code false}.
+	 * Specify whether or not the configured initializer method is the default.
+	 * <p>The default value is {@code true} for a locally specified init method
+	 * but switched to {@code false} for a shared setting in a defaults section
+	 * (e.g. {@code bean init-method} versus {@code beans default-init-method}
+	 * level in XML) which might not apply to all contained bean definitions.
 	 * @see #setInitMethodName
+	 * @see #applyDefaults
 	 */
 	public void setEnforceInitMethod(boolean enforceInitMethod) {
 		this.enforceInitMethod = enforceInitMethod;
 	}
 
 	/**
-	 * Indicate whether the configured init method is the default.
+	 * Indicate whether the configured initializer method is the default.
 	 * @see #getInitMethodName()
 	 */
 	public boolean isEnforceInitMethod() {
@@ -934,8 +934,12 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Specify whether or not the configured destroy method is the default.
-	 * <p>The default value is {@code false}.
+	 * <p>The default value is {@code true} for a locally specified destroy method
+	 * but switched to {@code false} for a shared setting in a defaults section
+	 * (e.g. {@code bean destroy-method} versus {@code beans default-destroy-method}
+	 * level in XML) which might not apply to all contained bean definitions.
 	 * @see #setDestroyMethodName
+	 * @see #applyDefaults
 	 */
 	public void setEnforceDestroyMethod(boolean enforceDestroyMethod) {
 		this.enforceDestroyMethod = enforceDestroyMethod;
@@ -943,7 +947,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Indicate whether the configured destroy method is the default.
-	 * @see #getDestroyMethodName
+	 * @see #getDestroyMethodName()
 	 */
 	public boolean isEnforceDestroyMethod() {
 		return this.enforceDestroyMethod;
@@ -1058,10 +1062,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public void validate() throws BeanDefinitionValidationException {
 		if (hasMethodOverrides() && getFactoryMethodName() != null) {
 			throw new BeanDefinitionValidationException(
-					"Cannot combine static factory method with method overrides: " +
-					"the static factory method must create the instance");
+					"Cannot combine factory method with container-generated method overrides: " +
+					"the factory method must create the concrete bean instance.");
 		}
-
 		if (hasBeanClass()) {
 			prepareMethodOverrides();
 		}
@@ -1073,14 +1076,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void prepareMethodOverrides() throws BeanDefinitionValidationException {
-		// Check that lookup methods exists.
+		// Check that lookup methods exist and determine their overloaded status.
 		if (hasMethodOverrides()) {
-			Set<MethodOverride> overrides = getMethodOverrides().getOverrides();
-			synchronized (overrides) {
-				for (MethodOverride mo : overrides) {
-					prepareMethodOverride(mo);
-				}
-			}
+			getMethodOverrides().getOverrides().forEach(this::prepareMethodOverride);
 		}
 	}
 

@@ -21,6 +21,7 @@ sourceSets {
 compileGroovy {
 	sourceCompatibility = 1.8
 	targetCompatibility = 1.8
+	options.compilerArgs += "-Werror"
 }
 
 // This module also builds Kotlin code and the compileKotlin task naturally depends on

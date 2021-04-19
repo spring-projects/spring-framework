@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class WebExchangeDataBinder extends WebDataBinder {
 
 	/**
 	 * Bind query params, form data, and or multipart form data to the binder target.
-	 * @param exchange the current exchange.
+	 * @param exchange the current exchange
 	 * @return a {@code Mono<Void>} when binding is complete
 	 */
 	public Mono<Void> bind(ServerWebExchange exchange) {

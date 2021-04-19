@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,7 +193,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @see <a href="https://tools.ietf.org/html/rfc2616#section-2.2">HTTP 1.1, section 2.2</a>
 	 */
 	private void checkToken(String token) {
-		for (int i = 0; i < token.length(); i++ ) {
+		for (int i = 0; i < token.length(); i++) {
 			char ch = token.charAt(i);
 			if (!TOKEN.get(ch)) {
 				throw new IllegalArgumentException("Invalid token character '" + ch + "' in token \"" + token + "\"");
@@ -206,8 +206,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		Assert.hasLength(value, "'value' must not be empty");
 		checkToken(attribute);
 		if (PARAM_CHARSET.equals(attribute)) {
-			value = unquote(value);
-			Charset.forName(value);
+			Charset.forName(unquote(value));
 		}
 		else if (!isQuotedString(value)) {
 			checkToken(value);
@@ -401,7 +400,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	/**
 	 * Determine if the parameters in this {@code MimeType} and the supplied
 	 * {@code MimeType} are equal, performing case-insensitive comparisons
-	 * for {@link Charset}s.
+	 * for {@link Charset Charsets}.
 	 * @since 4.2
 	 */
 	private boolean parametersAreEqual(MimeType other) {
@@ -542,6 +541,11 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 
+	/**
+	 * Comparator to sort {@link MimeType MimeTypes} in order of specificity.
+	 *
+	 * @param <T> the type of mime types that may be compared by this comparator
+	 */
 	public static class SpecificityComparator<T extends MimeType> implements Comparator<T> {
 
 		@Override

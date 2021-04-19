@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,14 +215,14 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 			return this.cookies;
 		}
 
-		@Nullable
 		@Override
+		@Nullable
 		public InetSocketAddress getRemoteAddress() {
 			return this.remoteAddress;
 		}
 
-		@Nullable
 		@Override
+		@Nullable
 		protected SslInfo initSslInfo() {
 			return this.sslInfo;
 		}

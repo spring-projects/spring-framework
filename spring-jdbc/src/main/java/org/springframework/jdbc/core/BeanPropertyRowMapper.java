@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ import org.springframework.util.StringUtils;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 2.5
+ * @param <T> the result type
  */
 public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
@@ -113,8 +114,6 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	/**
 	 * Create a new {@code BeanPropertyRowMapper}, accepting unpopulated
 	 * properties in the target bean.
-	 * <p>Consider using the {@link #newInstance} factory method instead,
-	 * which allows for specifying the mapped type once only.
 	 * @param mappedClass the class that each row should be mapped to
 	 */
 	public BeanPropertyRowMapper(Class<T> mappedClass) {
@@ -221,8 +220,8 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 		this.mappedClass = mappedClass;
 		this.mappedFields = new HashMap<>();
 		this.mappedProperties = new HashSet<>();
-		PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(mappedClass);
-		for (PropertyDescriptor pd : pds) {
+
+		for (PropertyDescriptor pd : BeanUtils.getPropertyDescriptors(mappedClass)) {
 			if (pd.getWriteMethod() != null) {
 				this.mappedFields.put(lowerCaseName(pd.getName()), pd);
 				String underscoredName = underscoreName(pd.getName());
@@ -246,6 +245,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 		if (!StringUtils.hasLength(name)) {
 			return "";
 		}
+
 		StringBuilder result = new StringBuilder();
 		result.append(lowerCaseName(name.substring(0, 1)));
 		for (int i = 1; i < name.length(); i++) {
@@ -336,8 +336,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 		if (populatedProperties != null && !populatedProperties.equals(this.mappedProperties)) {
 			throw new InvalidDataAccessApiUsageException("Given ResultSet does not contain all fields " +
-					"necessary to populate object of class [" + this.mappedClass.getName() + "]: " +
-					this.mappedProperties);
+					"necessary to populate object of " + this.mappedClass + ": " + this.mappedProperties);
 		}
 
 		return mappedObject;
@@ -379,8 +378,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 
 	/**
-	 * Static factory method to create a new {@code BeanPropertyRowMapper}
-	 * (with the mapped class specified only once).
+	 * Static factory method to create a new {@code BeanPropertyRowMapper}.
 	 * @param mappedClass the class that each row should be mapped to
 	 */
 	public static <T> BeanPropertyRowMapper<T> newInstance(Class<T> mappedClass) {

@@ -393,8 +393,8 @@ More and more types of expression will be compilable in the future.
 [[expressions-beandef]]
 == Expressions in bean definitions
 
-SpEL expressions can be used with XML or annotation-based configuration metadata for
-defining ``BeanDefinition``s. In both cases the syntax to define the expression is of the
+You can use SpEL expressions with XML-based or annotation-based configuration metadata for
+defining `BeanDefinition` instances. In both cases, the syntax to define the expression is of the
 form `#{ <expression string> }`.
 
 
@@ -402,7 +402,8 @@ form `#{ <expression string> }`.
 [[expressions-beandef-xml-based]]
 === XML configuration
 
-A property or constructor-arg value can be set using expressions as shown below.
+A property or constructor argument value can be set by using expressions, as the following
+example shows:
 
 [source,xml,indent=0]
 [subs="verbatim"]
@@ -414,10 +415,14 @@ A property or constructor-arg value can be set using expressions as shown below.
 	</bean>
 ----
 
-The variable `systemProperties` is predefined, so you can use it in your expressions as
-shown below. Note that you do not have to prefix the predefined variable with the `#`
-symbol in this context.
+All beans in the application context are available as predefined variables with their
+common bean name. This includes standard context beans such as `environment` (of type
+`org.springframework.core.env.Environment`) as well as `systemProperties` and
+`systemEnvironment` (of type `Map<String, Object>`) for access to the runtime environment.
 
+The following example shows access to the `systemProperties` bean as a SpEL variable:
+
+====
 [source,xml,indent=0]
 [subs="verbatim"]
 ----
@@ -428,8 +433,11 @@ symbol in this context.
 	</bean>
 ----
 
-You can also refer to other bean properties by name, for example.
+Note that you do not have to prefix the predefined variable with the `#` symbol here.
 
+You can also refer to other bean properties by name, as the following example shows:
+
+====
 [source,xml,indent=0]
 [subs="verbatim"]
 ----
@@ -451,10 +459,10 @@ You can also refer to other bean properties by name, for example.
 [[expressions-beandef-annotation-based]]
 === Annotation config
 
-The `@Value` annotation can be placed on fields, methods and method/constructor
-parameters to specify a default value.
+To specify a default value, you can place the `@Value` annotation on fields, methods,
+and method or constructor parameters.
 
-Here is an example to set the default value of a field variable.
+The following example sets the default value of a field variable:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -475,7 +483,7 @@ Here is an example to set the default value of a field variable.
 	}
 ----
 
-The equivalent but on a property setter method is shown below.
+The following example shows the equivalent but on a property setter method:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -496,7 +504,8 @@ The equivalent but on a property setter method is shown below.
 	}
 ----
 
-Autowired methods and constructors can also use the `@Value` annotation.
+Autowired methods and constructors can also use the `@Value` annotation, as the following
+examples show:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1129,7 +1138,7 @@ The following example shows how to use the Elvis operator:
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
-	String name = parser.parseExpression("name?:'Unknown'").getValue(String.class);
+	String name = parser.parseExpression("name?:'Unknown'").getValue(new Inventor(), String.class);
 	System.out.println(name);  // 'Unknown'
 ----
 

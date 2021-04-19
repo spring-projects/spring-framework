@@ -1,5 +1,6 @@
 buildscript {
 	repositories {
+		gradlePluginPortal()
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
 	dependencies {
@@ -47,14 +48,14 @@ ext {
 	junitVintageVersion  = "4.12.3"
 	kotlinVersion        = "1.2.71"
 	log4jVersion         = "2.11.2"
-	nettyVersion         = "4.1.38.Final"
+	nettyVersion         = "4.1.39.Final"
 	reactorVersion       = "Bismuth-SR17"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
 	rxjava2Version       = "2.1.17"
-	slf4jVersion         = "1.7.26"	  // spring-jcl + consistent 3rd party deps
+	slf4jVersion         = "1.7.28"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
-	tomcatVersion        = "8.5.43"
+	tomcatVersion        = "8.5.45"
 	undertowVersion      = "1.4.27.Final"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"
@@ -110,13 +111,13 @@ configure(allprojects) { project ->
 			 "-Xlint:-deprecation", "-Xlint:-unchecked"]
 
 	compileJava {
-		sourceCompatibility = 1.8  // can be switched to 10 for testing
+		sourceCompatibility = 1.8
 		targetCompatibility = 1.8
 		options.encoding = "UTF-8"
 	}
 
 	compileTestJava {
-		sourceCompatibility = 1.8  // can be switched to 10 for testing
+		sourceCompatibility = 1.8
 		targetCompatibility = 1.8
 		options.encoding = "UTF-8"
 		options.compilerArgs += "-parameters"
@@ -151,7 +152,8 @@ configure(allprojects) { project ->
 	}
 
 	repositories {
-		maven { url "https://repo.spring.io/libs-release" }
+		mavenCentral()
+		maven { url "https://repo.spring.io/libs-spring-framework-build" }
 	}
 
 	dependencies {
@@ -179,7 +181,7 @@ configure(allprojects) { project ->
 		"https://docs.oracle.com/javase/8/docs/api/",
 		"https://docs.oracle.com/javaee/7/api/",
 		"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
-		"https://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs/",
+		"https://www.ibm.com/support/knowledgecenter/SS7JFU_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/",
 		"https://glassfish.java.net/nonav/docs/v3/api/",
 		"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
 		"https://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",

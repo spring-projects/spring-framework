@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,14 +138,8 @@ class AspectJPrecedenceComparator implements Comparator<Advisor> {
 	}
 
 	private int getAspectDeclarationOrder(Advisor anAdvisor) {
-		AspectJPrecedenceInformation precedenceInfo =
-			AspectJAopUtils.getAspectJPrecedenceInformationFor(anAdvisor);
-		if (precedenceInfo != null) {
-			return precedenceInfo.getDeclarationOrder();
-		}
-		else {
-			return 0;
-		}
+		AspectJPrecedenceInformation precedenceInfo = AspectJAopUtils.getAspectJPrecedenceInformationFor(anAdvisor);
+		return (precedenceInfo != null ? precedenceInfo.getDeclarationOrder() : 0);
 	}
 
 }

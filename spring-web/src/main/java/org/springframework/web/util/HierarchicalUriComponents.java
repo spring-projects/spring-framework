@@ -416,7 +416,6 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	@Override
 	protected HierarchicalUriComponents expandInternal(UriTemplateVariables uriVariables) {
-
 		Assert.state(!this.encodeState.equals(EncodeState.FULLY_ENCODED),
 				"URI components already encoded, and could not possibly contain '{' or '}'.");
 

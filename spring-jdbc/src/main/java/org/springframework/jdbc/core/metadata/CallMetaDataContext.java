@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,7 +172,7 @@ public class CallMetaDataContext {
 	}
 
 	/**
-	 * Secify the name of the schema.
+	 * Specify the name of the schema.
 	 */
 	public void setSchemaName(@Nullable String schemaName) {
 		this.schemaName = schemaName;
@@ -354,7 +354,7 @@ public class CallMetaDataContext {
 							logger.debug("Using declared out parameter '" + paramName +
 									"' for function return value");
 						}
-						setFunctionReturnName(paramName);
+						this.actualFunctionReturnName = paramName;
 						returnDeclared = true;
 					}
 				}
@@ -362,8 +362,7 @@ public class CallMetaDataContext {
 		}
 		setOutParameterNames(outParamNames);
 
-		List<SqlParameter> workParams = new ArrayList<>();
-		workParams.addAll(declaredReturnParams);
+		List<SqlParameter> workParams = new ArrayList<>(declaredReturnParams);
 		if (!provider.isProcedureColumnMetaDataUsed()) {
 			workParams.addAll(declaredParams.values());
 			return workParams;
@@ -391,10 +390,10 @@ public class CallMetaDataContext {
 					if (param == null) {
 						throw new InvalidDataAccessApiUsageException(
 								"Unable to locate declared parameter for function return value - " +
-								" add a SqlOutParameter with name '" + getFunctionReturnName() + "'");
+								" add an SqlOutParameter with name '" + getFunctionReturnName() + "'");
 					}
-					else if (paramName != null) {
-						setFunctionReturnName(paramName);
+					else {
+						this.actualFunctionReturnName = param.getName();
 					}
 				}
 				else {
@@ -422,7 +421,7 @@ public class CallMetaDataContext {
 								(StringUtils.hasLength(paramNameToUse) ? paramNameToUse : getFunctionReturnName());
 						workParams.add(provider.createDefaultOutParameter(returnNameToUse, meta));
 						if (isFunction()) {
-							setFunctionReturnName(returnNameToUse);
+							this.actualFunctionReturnName = returnNameToUse;
 							outParamNames.add(returnNameToUse);
 						}
 						if (logger.isDebugEnabled()) {

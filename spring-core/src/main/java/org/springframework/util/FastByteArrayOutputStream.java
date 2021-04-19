@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -291,7 +291,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 	}
 
 	/**
-	 * Create a new buffer and store it in the LinkedList
+	 * Create a new buffer and store it in the LinkedList.
 	 * <p>Adds a new buffer that can store at least {@code minCapacity} bytes.
 	 */
 	private void addBuffer(int minCapacity) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,10 @@ import org.springframework.util.ObjectUtils;
  * {@link Comparator} implementation for {@link Ordered} objects, sorting
  * by order value ascending, respectively by priority descending.
  *
+ * <h3>{@code PriorityOrdered} Objects</h3>
+ * <p>{@link PriorityOrdered} objects will be sorted with higher priority than
+ * <em>plain</em> {@code Ordered} objects.
+ *
  * <h3>Same Order Objects</h3>
  * <p>Objects that have the same order value will be sorted with arbitrary
  * ordering with respect to other objects with the same order value.
@@ -41,6 +45,7 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @since 07.04.2003
  * @see Ordered
+ * @see PriorityOrdered
  * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
  * @see java.util.List#sort(java.util.Comparator)
  * @see java.util.Arrays#sort(Object[], java.util.Comparator)
@@ -96,8 +101,7 @@ public class OrderComparator implements Comparator<Object> {
 			Object orderSource = sourceProvider.getOrderSource(obj);
 			if (orderSource != null) {
 				if (orderSource.getClass().isArray()) {
-					Object[] sources = ObjectUtils.toObjectArray(orderSource);
-					for (Object source : sources) {
+					for (Object source : ObjectUtils.toObjectArray(orderSource)) {
 						order = findOrder(source);
 						if (order != null) {
 							break;

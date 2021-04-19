@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,10 +87,16 @@ public class HandlerExecutionChain {
 		return this.handler;
 	}
 
+	/**
+	 * Add the given interceptor to the end of this chain.
+	 */
 	public void addInterceptor(HandlerInterceptor interceptor) {
 		initInterceptorList().add(interceptor);
 	}
 
+	/**
+	 * Add the given interceptors to the end of this chain.
+	 */
 	public void addInterceptors(HandlerInterceptor... interceptors) {
 		if (!ObjectUtils.isEmpty(interceptors)) {
 			CollectionUtils.mergeArrayIntoCollection(interceptors, initInterceptorList());
@@ -187,13 +193,16 @@ public class HandlerExecutionChain {
 		HandlerInterceptor[] interceptors = getInterceptors();
 		if (!ObjectUtils.isEmpty(interceptors)) {
 			for (int i = interceptors.length - 1; i >= 0; i--) {
-				if (interceptors[i] instanceof AsyncHandlerInterceptor) {
+				HandlerInterceptor interceptor = interceptors[i];
+				if (interceptor instanceof AsyncHandlerInterceptor) {
 					try {
-						AsyncHandlerInterceptor asyncInterceptor = (AsyncHandlerInterceptor) interceptors[i];
+						AsyncHandlerInterceptor asyncInterceptor = (AsyncHandlerInterceptor) interceptor;
 						asyncInterceptor.afterConcurrentHandlingStarted(request, response, this.handler);
 					}
 					catch (Throwable ex) {
-						logger.error("Interceptor [" + interceptors[i] + "] failed in afterConcurrentHandlingStarted", ex);
+						if (logger.isErrorEnabled()) {
+							logger.error("Interceptor [" + interceptor + "] failed in afterConcurrentHandlingStarted", ex);
+						}
 					}
 				}
 			}
@@ -202,7 +211,7 @@ public class HandlerExecutionChain {
 
 
 	/**
-	 * Delegates to the handler's {@code toString()}.
+	 * Delegates to the handler's {@code toString()} implementation.
 	 */
 	@Override
 	public String toString() {
