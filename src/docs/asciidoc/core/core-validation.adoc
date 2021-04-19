@@ -1452,7 +1452,7 @@ example shows:
 A portable format annotation API exists in the `org.springframework.format.annotation`
 package. You can use `@NumberFormat` to format `Number` fields such as `Double` and
 `Long`, and `@DateTimeFormat` to format `java.util.Date`, `java.util.Calendar`, `Long`
-(for millisecond timestamps) as well as JSR-310 `java.time`.
+(for millisecond timestamps) as well as JSR-310 `java.time`and Joda-Time value types.
 
 The following example uses `@DateTimeFormat` to format a `java.util.Date` as an ISO Date
 (yyyy-MM-dd):
