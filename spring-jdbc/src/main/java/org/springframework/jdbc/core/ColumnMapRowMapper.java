@@ -34,12 +34,9 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  * in the column Map can be customized through overriding
  * {@link #createColumnMap} and {@link #getColumnKey}, respectively.
  *
- * <p><b>Note:</b> By default, ColumnMapRowMapper will try to build a linked Map
+ * <p><b>Note:</b> By default, {@code ColumnMapRowMapper} will try to build a linked Map
  * with case-insensitive keys, to preserve column order as well as allow any
- * casing to be used for column names. This requires Commons Collections on the
- * classpath (which will be autodetected). Else, the fallback is a standard linked
- * HashMap, which will still preserve column order but requires the application
- * to specify the column names in the same casing as exposed by the driver.
+ * casing to be used for column names.
  *
  * @author Juergen Hoeller
  * @since 1.2
