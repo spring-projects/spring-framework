@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -325,12 +325,6 @@ final class QuartzCronField extends CronField {
 			return atMidnight().adjustInto(result);
 		}
 	}
-
-	@SuppressWarnings("unchecked")
-	private static <T extends Temporal & Comparable<? super T>> T cast(Temporal temporal) {
-		return (T) temporal;
-	}
-
 
 	@Override
 	public <T extends Temporal & Comparable<? super T>> T nextOrSame(T temporal) {

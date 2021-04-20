@@ -822,13 +822,13 @@ class CronTriggerTests {
 
 		// 2:00 AM on March 31, 2013: start of Daylight Saving Time for CET in 2013.
 		// Setting up last completion:
-		// - PST: Sun Mar 31 10:10:54 CEST 2013
-		// - CET: Sun Mar 31 01:10:54 CET 2013
+		// - PST: Sun Mar 31 10:09:54 CEST 2013
+		// - CET: Sun Mar 31 01:09:54 CET 2013
 		this.calendar.set(Calendar.DAY_OF_MONTH, 31);
 		this.calendar.set(Calendar.MONTH, Calendar.MARCH);
 		this.calendar.set(Calendar.YEAR, 2013);
 		this.calendar.set(Calendar.HOUR_OF_DAY, 1);
-		this.calendar.set(Calendar.MINUTE, 10); // changing to any minute from 0-9 causes the test to fail for CET.
+		this.calendar.set(Calendar.MINUTE, 9);
 		this.calendar.set(Calendar.SECOND, 54);
 		Date lastCompletionTime = this.calendar.getTime();
 

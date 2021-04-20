@@ -157,6 +157,11 @@ abstract class CronField {
 		return this.type;
 	}
 
+	@SuppressWarnings("unchecked")
+	protected static <T extends Temporal & Comparable<? super T>> T cast(Temporal temporal) {
+		return (T) temporal;
+	}
+
 
 	/**
 	 * Represents the type of cron field, i.e. seconds, minutes, hours,
@@ -236,16 +241,17 @@ abstract class CronField {
 		 */
 		public <T extends Temporal & Comparable<? super T>> T elapseUntil(T temporal, int goal) {
 			int current = get(temporal);
+			ValueRange range = temporal.range(this.field);
 			if (current < goal) {
-				T result = this.field.getBaseUnit().addTo(temporal, goal - current);
-				current = get(result);
-				if (current > goal) { // can occur due to daylight saving, see gh-26744
-					result = this.field.getBaseUnit().addTo(result, goal - current);
+				if (range.isValidIntValue(goal)) {
+					return cast(temporal.with(this.field, goal));
 				}
-				return result;
+				else {
+					// goal is invalid, eg. 29th Feb, lets try to get as close as possible
+					return this.field.getBaseUnit().addTo(temporal, goal - current);
+				}
 			}
 			else {
-				ValueRange range = temporal.range(this.field);
 				long amount = goal + range.getMaximum() - current + 1 - range.getMinimum();
 				return this.field.getBaseUnit().addTo(temporal, amount);
 			}

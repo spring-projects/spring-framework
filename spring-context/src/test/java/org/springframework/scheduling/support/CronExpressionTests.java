@@ -1276,6 +1276,14 @@ class CronExpressionTests {
 		actual = cronExpression.next(last);
 		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
+
+		cronExpression = CronExpression.parse("0 10 2 * * *");
+
+		last = ZonedDateTime.parse("2013-03-31T01:09:00+01:00[Europe/Amsterdam]");
+		expected = ZonedDateTime.parse("2013-04-01T02:10:00+02:00[Europe/Amsterdam]");
+		actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
 	}
 
 
