@@ -103,7 +103,7 @@ example implements `Validator` for `Person` instances:
 ----
 	class PersonValidator : Validator {
 
-		/**
+		/\**
 		 * This Validator validates only Person instances
 		 */
 		override fun supports(clazz: Class<*>): Boolean {
