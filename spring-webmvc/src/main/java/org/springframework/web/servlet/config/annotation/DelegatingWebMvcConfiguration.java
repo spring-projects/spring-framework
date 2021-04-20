@@ -17,13 +17,14 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -46,10 +47,8 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 
 
 	@Autowired(required = false)
-	public void setConfigurers(List<WebMvcConfigurer> configurers) {
-		if (!CollectionUtils.isEmpty(configurers)) {
-			this.configurers.addWebMvcConfigurers(configurers);
-		}
+	public void setConfigurers(ObjectProvider<WebMvcConfigurer> configurers) {
+		this.configurers.addWebMvcConfigurers(configurers.orderedStream().collect(Collectors.toList()));
 	}
 
 
