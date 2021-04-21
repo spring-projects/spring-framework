@@ -962,7 +962,7 @@ following example shows how to do so:
 .Kotlin
 ----
 	// evaluates to a Java map containing the two entries
-	val inventorInfo = parser.parseExpression("{name:'Nikola',dob:'10-July-1856'}").getValue(context) as Map<*, *>
+	val inventorInfo = parser.parseExpression("{name:'Nikola',dob:'10-July-1856'}").getValue(context) as Map<\*, *>
 
 	val mapOfMaps = parser.parseExpression("{name:{first:'Nikola',last:'Tesla'},dob:{day:10,month:'July',year:1856}}").getValue(context) as Map<*, *>	
 ----
