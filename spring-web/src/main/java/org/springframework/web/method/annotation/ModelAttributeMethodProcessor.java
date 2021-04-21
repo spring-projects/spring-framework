@@ -44,8 +44,8 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.SmartValidator;
-import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -361,7 +361,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 */
 	protected void validateIfApplicable(WebDataBinder binder, MethodParameter parameter) {
 		for (Annotation ann : parameter.getParameterAnnotations()) {
-			Object[] validationHints = ValidationUtils.determineValidationHints(ann);
+			Object[] validationHints = ValidationAnnotationUtils.determineValidationHints(ann);
 			if (validationHints != null) {
 				binder.validate(validationHints);
 				break;
@@ -387,7 +387,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			Class<?> targetType, String fieldName, @Nullable Object value) {
 
 		for (Annotation ann : parameter.getParameterAnnotations()) {
-			Object[] validationHints = ValidationUtils.determineValidationHints(ann);
+			Object[] validationHints = ValidationAnnotationUtils.determineValidationHints(ann);
 			if (validationHints != null) {
 				for (Validator validator : binder.getValidators()) {
 					if (validator instanceof SmartValidator) {

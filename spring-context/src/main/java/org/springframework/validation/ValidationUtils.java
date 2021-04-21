@@ -16,17 +16,13 @@
 
 package org.springframework.validation;
 
-import java.lang.annotation.Annotation;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.annotation.Validated;
 
 /**
  * Utility class offering convenient methods for invoking a {@link Validator}
@@ -257,42 +253,6 @@ public abstract class ValidationUtils {
 		if (value == null ||!StringUtils.hasText(value.toString())) {
 			errors.rejectValue(field, errorCode, errorArgs, defaultMessage);
 		}
-	}
-
-	/**
-	 * Determine any validation hints by the given annotation.
-	 * <p>This implementation checks for {@code @javax.validation.Valid},
-	 * Spring's {@link org.springframework.validation.annotation.Validated},
-	 * and custom annotations whose name starts with "Valid".
-	 * @param ann the annotation (potentially a validation annotation)
-	 * @return the validation hints to apply (possibly an empty array),
-	 * or {@code null} if this annotation does not trigger any validation
-	 * @since 5.3.6
-	 */
-	@Nullable
-	public static Object[] determineValidationHints(Annotation ann) {
-		String annotationName = ann.annotationType().getName();
-		if ("javax.validation.Valid".equals(annotationName)) {
-			return new Object[0];
-		}
-		Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
-		if (validatedAnn != null) {
-			Object hints = validatedAnn.value();
-			return convertValidationHints(hints);
-		}
-		int offset = annotationName.lastIndexOf('.');
-		if (annotationName.startsWith("Valid", Math.max(offset, 0))) {
-			Object hints = AnnotationUtils.getValue(ann);
-			return convertValidationHints(hints);
-		}
-		return null;
-	}
-
-	private static Object[] convertValidationHints(@Nullable Object hints) {
-		if (hints == null) {
-			return new Object[0];
-		}
-		return (hints instanceof Object[] ? (Object[]) hints : new Object[]{hints});
 	}
 
 }

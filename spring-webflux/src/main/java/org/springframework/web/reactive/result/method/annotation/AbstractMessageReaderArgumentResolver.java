@@ -43,8 +43,8 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.BindingContext;
@@ -239,7 +239,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	private Object[] extractValidationHints(MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation ann : annotations) {
-			Object[] hints = ValidationUtils.determineValidationHints(ann);
+			Object[] hints = ValidationAnnotationUtils.determineValidationHints(ann);
 			if (hints != null) {
 				return hints;
 			}

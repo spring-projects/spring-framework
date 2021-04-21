@@ -51,7 +51,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 import org.springframework.validation.Errors;
-import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -240,7 +240,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	protected void validateIfApplicable(WebDataBinder binder, MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation ann : annotations) {
-			Object[] validationHints = ValidationUtils.determineValidationHints(ann);
+			Object[] validationHints = ValidationAnnotationUtils.determineValidationHints(ann);
 			if (validationHints != null) {
 				binder.validate(validationHints);
 				break;
