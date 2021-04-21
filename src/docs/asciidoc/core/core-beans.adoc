@@ -847,12 +847,12 @@ This approach shows that the factory bean itself can be managed and configured t
 dependency injection (DI). See <<beans-factory-properties-detailed,Dependencies and
 Configuration in Detail>>.
 
-NOTE: In Spring documentation, "`factory bean`" refers to a bean that is configured in
-the Spring container and that creates objects through an
+NOTE: In Spring documentation, "factory bean" refers to a bean that is configured in the
+Spring container and that creates objects through an
 <<beans-factory-class-instance-factory-method,instance>> or
 <<beans-factory-class-static-factory-method,static>> factory method. By contrast,
 `FactoryBean` (notice the capitalization) refers to a Spring-specific
-<<beans-factory-extension-factorybean, `FactoryBean` >> implementation class.
+<<beans-factory-extension-factorybean, `FactoryBean`>> implementation class.
 
 
 [[beans-factory-type-determination]]
@@ -3350,8 +3350,9 @@ of the scope. You can also do the `Scope` registration declaratively, by using t
 	</beans>
 ----
 
-NOTE: When you place `<aop:scoped-proxy/>` in a `FactoryBean` implementation, it is the factory
-bean itself that is scoped, not the object returned from `getObject()`.
+NOTE: When you place `<aop:scoped-proxy/>` within a `<bean>` declaration for a
+`FactoryBean` implementation, it is the factory bean itself that is scoped, not the object
+returned from `getObject()`.
 
 
 
@@ -4545,16 +4546,16 @@ The `FactoryBean<T>` interface provides three methods:
   instance can possibly be shared, depending on whether this factory returns singletons
   or prototypes.
 * `boolean isSingleton()`: Returns `true` if this `FactoryBean` returns singletons or
-  `false` otherwise.
+  `false` otherwise. The default implementation of this method returns `true`.
 * `Class<?> getObjectType()`: Returns the object type returned by the `getObject()` method
   or `null` if the type is not known in advance.
 
-The `FactoryBean` concept and interface is used in a number of places within the Spring
+The `FactoryBean` concept and interface are used in a number of places within the Spring
 Framework. More than 50 implementations of the `FactoryBean` interface ship with Spring
 itself.
 
 When you need to ask a container for an actual `FactoryBean` instance itself instead of
-the bean it produces, preface the bean's `id` with the ampersand symbol (`&`) when
+the bean it produces, prefix the bean's `id` with the ampersand symbol (`&`) when
 calling the `getBean()` method of the `ApplicationContext`. So, for a given `FactoryBean`
 with an `id` of `myBean`, invoking `getBean("myBean")` on the container returns the
 product of the `FactoryBean`, whereas invoking `getBean("&myBean")` returns the
