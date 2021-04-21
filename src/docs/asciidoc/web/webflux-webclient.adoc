@@ -936,6 +936,7 @@ any response content, whether expected or not, is released:
 			}
 		});
 	}
+----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
