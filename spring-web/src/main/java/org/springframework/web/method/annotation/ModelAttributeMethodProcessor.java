@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -46,7 +45,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.SmartValidator;
 import org.springframework.validation.Validator;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -362,7 +361,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 */
 	protected void validateIfApplicable(WebDataBinder binder, MethodParameter parameter) {
 		for (Annotation ann : parameter.getParameterAnnotations()) {
-			Object[] validationHints = determineValidationHints(ann);
+			Object[] validationHints = ValidationAnnotationUtils.determineValidationHints(ann);
 			if (validationHints != null) {
 				binder.validate(validationHints);
 				break;
@@ -388,7 +387,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			Class<?> targetType, String fieldName, @Nullable Object value) {
 
 		for (Annotation ann : parameter.getParameterAnnotations()) {
-			Object[] validationHints = determineValidationHints(ann);
+			Object[] validationHints = ValidationAnnotationUtils.determineValidationHints(ann);
 			if (validationHints != null) {
 				for (Validator validator : binder.getValidators()) {
 					if (validator instanceof SmartValidator) {
@@ -404,26 +403,6 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 				break;
 			}
 		}
-	}
-
-	/**
-	 * Determine any validation triggered by the given annotation.
-	 * @param ann the annotation (potentially a validation annotation)
-	 * @return the validation hints to apply (possibly an empty array),
-	 * or {@code null} if this annotation does not trigger any validation
-	 * @since 5.1
-	 */
-	@Nullable
-	private Object[] determineValidationHints(Annotation ann) {
-		Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
-		if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
-			Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
-			if (hints == null) {
-				return new Object[0];
-			}
-			return (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
-		}
-		return null;
 	}
 
 	/**
