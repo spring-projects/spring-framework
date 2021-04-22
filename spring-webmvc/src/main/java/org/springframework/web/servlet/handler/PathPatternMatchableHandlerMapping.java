@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.server.PathContainer;
-import org.springframework.http.server.RequestPath;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -72,38 +71,4 @@ class PathPatternMatchableHandlerMapping implements MatchableHandlerMapping {
 		return this.delegate.getHandler(request);
 	}
 
-	MatchableHandlerMapping decorate(RequestPath requestPath) {
-		return new MatchableHandlerMapping() {
-
-			@Nullable
-			@Override
-			public RequestMatchResult match(HttpServletRequest request, String pattern) {
-				RequestPath previousPath = setRequestPathAttribute(request);
-				try {
-					return PathPatternMatchableHandlerMapping.this.match(request, pattern);
-				}
-				finally {
-					ServletRequestPathUtils.setParsedRequestPath(previousPath, request);
-				}
-			}
-
-			@Nullable
-			@Override
-			public HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
-				RequestPath previousPath = setRequestPathAttribute(request);
-				try {
-					return PathPatternMatchableHandlerMapping.this.getHandler(request);
-				}
-				finally {
-					ServletRequestPathUtils.setParsedRequestPath(previousPath, request);
-				}
-			}
-
-			private RequestPath setRequestPathAttribute(HttpServletRequest request) {
-				RequestPath previous = (RequestPath) request.getAttribute(ServletRequestPathUtils.PATH_ATTRIBUTE);
-				ServletRequestPathUtils.setParsedRequestPath(requestPath, request);
-				return previous;
-			}
-		};
-	}
 }
