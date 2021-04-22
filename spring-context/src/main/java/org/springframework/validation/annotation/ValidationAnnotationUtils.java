@@ -42,7 +42,8 @@ public abstract class ValidationAnnotationUtils {
 	 */
 	@Nullable
 	public static Object[] determineValidationHints(Annotation ann) {
-		String annotationName = ann.annotationType().getName();
+		Class<? extends Annotation> annotationType = ann.annotationType();
+		String annotationName = annotationType.getName();
 		if ("javax.validation.Valid".equals(annotationName)) {
 			return new Object[0];
 		}
@@ -51,8 +52,7 @@ public abstract class ValidationAnnotationUtils {
 			Object hints = validatedAnn.value();
 			return convertValidationHints(hints);
 		}
-		int offset = annotationName.lastIndexOf('.');
-		if (annotationName.startsWith("Valid", Math.max(offset, 0))) {
+		if (annotationType.getSimpleName().startsWith("Valid")) {
 			Object hints = AnnotationUtils.getValue(ann);
 			return convertValidationHints(hints);
 		}
