@@ -1366,7 +1366,7 @@ to use the `T` operator:
 === Constructors
 
 You can invoke constructors by using the `new` operator. You should use the fully qualified class name
-for all but the primitive types (`int`, `float`, and so on) and String. The following
+for all but the types located in the core package `java.lang`. The following
 example shows how to use the `new` operator to invoke constructors:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
