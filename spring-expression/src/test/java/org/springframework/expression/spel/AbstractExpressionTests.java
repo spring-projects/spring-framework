@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public abstract class AbstractExpressionTests {
 
 	/**
 	 * Evaluate an expression and check that the actual result matches the
-	 * expectedValue and the class of the result matches the expectedClassOfResult.
+	 * expectedValue and the class of the result matches the expectedResultType.
 	 * @param expression the expression to evaluate
 	 * @param expectedValue the expected result for evaluating the expression
 	 * @param expectedResultType the expected class of the evaluation result
@@ -106,15 +106,15 @@ public abstract class AbstractExpressionTests {
 
 	/**
 	 * Evaluate an expression and check that the actual result matches the
-	 * expectedValue and the class of the result matches the expectedClassOfResult.
+	 * expectedValue and the class of the result matches the expectedResultType.
 	 * This method can also check if the expression is writable (for example,
 	 * it is a variable or property reference).
 	 * @param expression the expression to evaluate
 	 * @param expectedValue the expected result for evaluating the expression
-	 * @param expectedClassOfResult the expected class of the evaluation result
+	 * @param expectedResultType the expected class of the evaluation result
 	 * @param shouldBeWritable should the parsed expression be writable?
 	 */
-	public void evaluate(String expression, Object expectedValue, Class<?> expectedClassOfResult, boolean shouldBeWritable) {
+	public void evaluate(String expression, Object expectedValue, Class<?> expectedResultType, boolean shouldBeWritable) {
 		Expression expr = parser.parseExpression(expression);
 		assertThat(expr).as("expression").isNotNull();
 		if (DEBUG) {
@@ -134,7 +134,7 @@ public abstract class AbstractExpressionTests {
 		else {
 			assertThat(value).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
 		}
-		assertThat(expectedClassOfResult.equals(resultType)).as("Type of the result was not as expected.  Expected '" + expectedClassOfResult +
+		assertThat(expectedResultType.equals(resultType)).as("Type of the result was not as expected.  Expected '" + expectedResultType +
 				"' but result was of type '" + resultType + "'").isTrue();
 
 		assertThat(expr.isWritable(context)).as("isWritable").isEqualTo(shouldBeWritable);
