@@ -104,8 +104,12 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 				builder.uri(uri);
 				String prefix = getForwardedPrefix(request);
 				if (prefix != null) {
-					builder.path(prefix + uri.getRawPath());
-					builder.contextPath(prefix);
+                    builder.path(prefix + uri.getRawPath());
+                    builder.contextPath(prefix + request.getPath().contextPath().value());
+                    // if prefix contains contextPath (such as contextPath='/zf' prefix='/zz/zf')
+                    // then take the follow code
+//                    builder.path(prefix + request.getPath().pathWithinApplication().value());
+//                    builder.contextPath(prefix);
 				}
 				InetSocketAddress remoteAddress = request.getRemoteAddress();
 				remoteAddress = UriComponentsBuilder.parseForwardedFor(request, remoteAddress);
