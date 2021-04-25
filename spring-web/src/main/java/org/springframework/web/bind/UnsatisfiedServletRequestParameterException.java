@@ -16,7 +16,6 @@
 
 package org.springframework.web.bind;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +48,7 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 	 */
 	public UnsatisfiedServletRequestParameterException(String[] paramConditions, Map<String, String[]> actualParams) {
 		super("");
-		this.paramConditions = Arrays.<String[]>asList(paramConditions);
+		this.paramConditions = Collections.singletonList(paramConditions);
 		this.actualParams = actualParams;
 	}
 
