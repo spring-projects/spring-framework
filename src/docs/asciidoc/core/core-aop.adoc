@@ -316,7 +316,7 @@ other class. They can also contain pointcut, advice, and introduction (inter-typ
 declarations.
 
 .Autodetecting aspects through component scanning
-NOTE: You can register aspect classes as regular beans in your Spring XML configuration or
+NOTE: You can register aspect classes as regular beans in your Spring XML configuration, using `@Bean` factory method or
 autodetect them through classpath scanning -- the same as any other Spring-managed bean.
 However, note that the `@Aspect` annotation is not sufficient for autodetection in
 the classpath. For that purpose, you need to add a separate `@Component` annotation
