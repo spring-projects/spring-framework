@@ -10218,8 +10218,8 @@ bean with the same name. If it does, it uses that bean as the `MessageSource`. I
 `DelegatingMessageSource` is instantiated in order to be able to accept calls to the
 methods defined above.
 
-Spring provides two `MessageSource` implementations, `ResourceBundleMessageSource` and
-`StaticMessageSource`. Both implement `HierarchicalMessageSource` in order to do nested
+Spring provides three `MessageSource` implementations, `ResourceBundleMessageSource`, `ReloadableResourceBundleMessageSource`
+and `StaticMessageSource`. All of them implement `HierarchicalMessageSource` in order to do nested
 messaging. The `StaticMessageSource` is rarely used but provides programmatic ways to
 add messages to the source. The following example shows `ResourceBundleMessageSource`:
 
