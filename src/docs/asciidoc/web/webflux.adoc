@@ -9,11 +9,10 @@ https://www.reactive-streams.org/[Reactive Streams] back pressure, and runs on s
 Netty, Undertow, and Servlet 3.1+ containers.
 
 Both web frameworks mirror the names of their source modules
-(https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc[spring-webmvc] and
-https://github.com/spring-projects/spring-framework/tree/master/spring-webflux[spring-webflux])
-and co-exist side by side in the Spring Framework. Each module is optional.
-Applications can use one or the other module or, in some cases, both --
-for example, Spring MVC controllers with the reactive `WebClient`.
+({spring-framework-main-code}/spring-webmvc[spring-webmvc] and
+{spring-framework-main-code}/spring-webflux[spring-webflux]) and co-exist side by side in the
+Spring Framework. Each module is optional. Applications can use one or the other module or,
+in some cases, both -- for example, Spring MVC controllers with the reactive `WebClient`.
 
 
 

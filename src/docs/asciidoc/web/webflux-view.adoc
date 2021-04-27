@@ -380,8 +380,8 @@ The following example shows how compile a template:
 ----
 
 Check out the Spring Framework unit tests,
-https://github.com/spring-projects/spring-framework/tree/master/spring-webflux/src/test/java/org/springframework/web/reactive/result/view/script[Java], and
-https://github.com/spring-projects/spring-framework/tree/master/spring-webflux/src/test/resources/org/springframework/web/reactive/result/view/script[resources],
+{spring-framework-main-code}/spring-webflux/src/test/java/org/springframework/web/reactive/result/view/script[Java], and
+{spring-framework-main-code}/spring-webflux/src/test/resources/org/springframework/web/reactive/result/view/script[resources],
 for more configuration examples.
 
 

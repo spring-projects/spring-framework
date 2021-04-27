@@ -5,12 +5,12 @@
 Spring Web MVC is the original web framework built on the Servlet API and has been included
 in the Spring Framework from the very beginning. The formal name, "`Spring Web MVC,`"
 comes from the name of its source module
-(https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc[`spring-webmvc`]),
+({spring-framework-main-code}/spring-webmvc[`spring-webmvc`]),
 but it is more commonly known as "`Spring MVC`".
 
 Parallel to Spring Web MVC, Spring Framework 5.0 introduced a reactive-stack web framework
 whose name, "`Spring WebFlux,`" is also based on its source module
-(https://github.com/spring-projects/spring-framework/tree/master/spring-webflux[`spring-webflux`]).
+({spring-framework-main-code}/spring-webflux[`spring-webflux`]).
 This section covers Spring Web MVC. The <<web-reactive.adoc#spring-web-reactive, next section>>
 covers Spring WebFlux.
 
@@ -301,7 +301,7 @@ Applications can declare the infrastructure beans listed in <<mvc-servlet-specia
 that are required to process requests. The `DispatcherServlet` checks the
 `WebApplicationContext` for each special bean. If there are no matching bean types,
 it falls back on the default types listed in
-https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/resources/org/springframework/web/servlet/DispatcherServlet.properties[`DispatcherServlet.properties`].
+{spring-framework-main-code}/spring-webmvc/src/main/resources/org/springframework/web/servlet/DispatcherServlet.properties[`DispatcherServlet.properties`].
 
 In most cases, the <<mvc-config>> is the best starting point. It declares the required
 beans in either Java or XML and provides a higher-level configuration callback API to
