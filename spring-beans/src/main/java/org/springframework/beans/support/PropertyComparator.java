@@ -44,8 +44,6 @@ public class PropertyComparator<T> implements Comparator<T> {
 
 	private final SortDefinition sortDefinition;
 
-	private final BeanWrapperImpl beanWrapper = new BeanWrapperImpl(false);
-
 
 	/**
 	 * Create a new PropertyComparator for the given SortDefinition.
@@ -115,8 +113,9 @@ public class PropertyComparator<T> implements Comparator<T> {
 		// (similar to JSTL EL). If the property doesn't exist in the
 		// first place, let the exception through.
 		try {
-			this.beanWrapper.setWrappedInstance(obj);
-			return this.beanWrapper.getPropertyValue(this.sortDefinition.getProperty());
+            BeanWrapperImpl beanWrapper = new BeanWrapperImpl(false);
+            beanWrapper.setWrappedInstance(obj);
+            return beanWrapper.getPropertyValue(this.sortDefinition.getProperty());
 		}
 		catch (BeansException ex) {
 			logger.debug("PropertyComparator could not access property - treating as null for sorting", ex);
