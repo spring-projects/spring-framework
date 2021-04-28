@@ -1804,7 +1804,7 @@ Selection is a powerful expression language feature that lets you transform a
 source collection into another collection by selecting from its entries.
 
 Selection uses a syntax of `.?[selectionExpression]`. It filters the collection and
-returns a new collection that contain a subset of the original elements. For example,
+returns a new collection that contains a subset of the original elements. For example,
 selection lets us easily get a list of Serbian inventors, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -1820,14 +1820,14 @@ selection lets us easily get a list of Serbian inventors, as the following examp
 			"members.?[nationality == 'Serbian']").getValue(societyContext) as List<Inventor>
 ----
 
-Selection is actually supported for arrays and anything that implements `java.lang.Iterable` or `java.util.Map`.
-For a list or array, the selection criteria is evaluated against each individual element. Against a map, the
-selection criteria is evaluated against each map entry (objects of the Java type
-`Map.Entry`). Each map entry has its key and value accessible as properties for use in
-the selection.
+Selection is supported for arrays and anything that implements `java.lang.Iterable` or
+`java.util.Map`. For a list or array, the selection criteria is evaluated against each
+individual element. Against a map, the selection criteria is evaluated against each map
+entry (objects of the Java type `Map.Entry`). Each map entry has its `key` and `value`
+accessible as properties for use in the selection.
 
-The following expression returns a new map that consists of those elements of the original map
-where the entry value is less than 27:
+The following expression returns a new map that consists of those elements of the
+original map where the entry's value is less than 27:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1840,9 +1840,8 @@ where the entry value is less than 27:
 	val newMap = parser.parseExpression("map.?[value<27]").getValue()
 ----
 
-
-In addition to returning all the selected elements, you can retrieve only the
-first or the last value. To obtain the first entry matching the selection, the syntax is
+In addition to returning all the selected elements, you can retrieve only the first or
+the last element. To obtain the first element matching the selection, the syntax is
 `.^[selectionExpression]`. To obtain the last matching selection, the syntax is
 `.$[selectionExpression]`.
 
@@ -1851,11 +1850,11 @@ first or the last value. To obtain the first entry matching the selection, the s
 [[expressions-collection-projection]]
 === Collection Projection
 
-Projection lets a collection drive the evaluation of a sub-expression, and the
-result is a new collection. The syntax for projection is `.![projectionExpression]`. For
-example, suppose we have a list of inventors but want the list of
-cities where they were born. Effectively, we want to evaluate 'placeOfBirth.city' for
-every entry in the inventor list. The following example uses projection to do so:
+Projection lets a collection drive the evaluation of a sub-expression, and the result is
+a new collection. The syntax for projection is `.![projectionExpression]`. For example,
+suppose we have a list of inventors but want the list of cities where they were born.
+Effectively, we want to evaluate 'placeOfBirth.city' for every entry in the inventor
+list. The following example uses projection to do so:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1870,7 +1869,8 @@ every entry in the inventor list. The following example uses projection to do so
 	val placesOfBirth = parser.parseExpression("members.![placeOfBirth.city]") as List<*>
 ----
 
-You can also use a map to drive projection and, in this case, the projection expression is
+Projection is supported for arrays and anything that implements `java.lang.Iterable` or
+`java.util.Map`. When using a map to drive projection, the projection expression is
 evaluated against each entry in the map (represented as a Java `Map.Entry`). The result
 of a projection across a map is a list that consists of the evaluation of the projection
 expression against each map entry.
