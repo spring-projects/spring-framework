@@ -16,6 +16,7 @@
 
 package org.springframework.context;
 
+import java.time.Clock;
 import java.util.EventObject;
 
 /**
@@ -44,6 +45,17 @@ public abstract class ApplicationEvent extends EventObject {
 	public ApplicationEvent(Object source) {
 		super(source);
 		this.timestamp = System.currentTimeMillis();
+	}
+
+	/**
+	 * Create a new {@code ApplicationEvent} with a fixed timestamp.
+	 * @param source the object on which the event initially occurred or with
+	 * which the event is associated (never {@code null})
+	 * @param clock a clock which will provide the timestamp
+	 */
+	public ApplicationEvent(Object source, Clock clock) {
+		super(source);
+		this.timestamp = clock.millis();
 	}
 
 
