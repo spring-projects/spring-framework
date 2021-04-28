@@ -2332,7 +2332,7 @@ Type conversion is applied automatically if the target method parameter type is 
 [.small]#<<web.adoc#mvc-ann-modelattrib-method-args, Web MVC>>#
 
 You can use the `@ModelAttribute` annotation on a method argument to access an attribute from the
-model or have it instantiated if not present. The model attribute is also overlain with
+model or have it instantiated if not present. The model attribute is also overlaid with
 the values of query parameters and form fields whose names match to field names. This is
 referred to as data binding, and it saves you from having to deal with parsing and
 converting individual query parameters and form fields. The following example binds an instance of `Pet`:
