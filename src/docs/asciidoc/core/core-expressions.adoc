@@ -1820,8 +1820,8 @@ selection lets us easily get a list of Serbian inventors, as the following examp
 			"members.?[nationality == 'Serbian']").getValue(societyContext) as List<Inventor>
 ----
 
-Selection is possible upon both lists and maps. For a list, the selection
-criteria is evaluated against each individual list element. Against a map, the
+Selection is actually supported for arrays and anything that implements `java.lang.Iterable` or `java.util.Map`.
+For a list or array, the selection criteria is evaluated against each individual element. Against a map, the
 selection criteria is evaluated against each map entry (objects of the Java type
 `Map.Entry`). Each map entry has its key and value accessible as properties for use in
 the selection.
