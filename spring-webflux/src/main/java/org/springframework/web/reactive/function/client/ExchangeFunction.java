@@ -44,7 +44,7 @@ public interface ExchangeFunction {
 	/**
 	 * Exchange the given request for a {@link ClientResponse} promise.
 	 *
-	 * <p><strong>Note:</strong> When a calling this method from an
+	 * <p><strong>Note:</strong> When calling this method from an
 	 * {@link ExchangeFilterFunction} that handles the response in some way,
 	 * extra care must be taken to always consume its content or otherwise
 	 * propagate it downstream for further handling, for example by the
