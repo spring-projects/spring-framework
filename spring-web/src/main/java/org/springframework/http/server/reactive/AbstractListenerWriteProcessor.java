@@ -151,10 +151,11 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * container.
 	 */
 	public final void onWritePossible() {
+		State state = this.state.get();
 		if (rsWriteLogger.isTraceEnabled()) {
-			rsWriteLogger.trace(getLogPrefix() + "onWritePossible");
+			rsWriteLogger.trace(getLogPrefix() + "onWritePossible [" + state + "]");
 		}
-		this.state.get().onWritePossible(this);
+		state.onWritePossible(this);
 	}
 
 	/**
