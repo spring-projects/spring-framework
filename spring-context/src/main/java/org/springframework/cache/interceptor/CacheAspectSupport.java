@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -221,11 +221,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
 				throw new IllegalStateException("No CacheResolver specified, and no unique bean of type " +
-						"CacheManager found. Mark one as primary or declare a specific CacheManager to use.");
+						"CacheManager found. Mark one as primary or declare a specific CacheManager to use.", ex);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				throw new IllegalStateException("No CacheResolver specified, and no bean of type CacheManager found. " +
-						"Register a CacheManager bean or remove the @EnableCaching annotation from your configuration.");
+						"Register a CacheManager bean or remove the @EnableCaching annotation from your configuration.", ex);
 			}
 		}
 		this.initialized = true;
