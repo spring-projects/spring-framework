@@ -130,7 +130,6 @@ public class DateFormattingTests {
 		assertThat(bindingResult.getErrorCount()).isEqualTo(1);
 		FieldError fieldError = bindingResult.getFieldError(propertyName);
 		TypeMismatchException exception = fieldError.unwrap(TypeMismatchException.class);
-		exception.printStackTrace(System.err);
 		assertThat(exception)
 			.hasMessageContaining("for property 'styleDate'")
 			.hasCauseInstanceOf(ConversionFailedException.class).getCause()

@@ -496,7 +496,6 @@ class MockHttpServletResponseTests {
 		String expiryDate = "Tue, 8 Oct 2019 19:50:00 GMT";
 		String cookieValue = "SESSION=123; Path=/; Expires=" + expiryDate;
 		response.addHeader(SET_COOKIE, cookieValue);
-		System.err.println(response.getCookie("SESSION"));
 		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(cookieValue);
 
 		assertNumCookies(1);
