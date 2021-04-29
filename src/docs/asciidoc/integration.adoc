@@ -163,7 +163,7 @@ You can use the `exchange()` methods to specify request headers, as the followin
 	URI uri = UriComponentsBuilder.fromUriString(uriTemplate).build(42);
 
 	RequestEntity<Void> requestEntity = RequestEntity.get(uri)
-			.header(("MyRequestHeader", "MyValue")
+			.header("MyRequestHeader", "MyValue")
 			.build();
 
 	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
