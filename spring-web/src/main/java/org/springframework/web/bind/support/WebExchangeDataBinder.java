@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Specialized {@link org.springframework.validation.DataBinder} to perform data
- * binding from URL query params or form data in the request data to Java objects.
+ * binding from URL query parameters or form data in the request data to Java objects.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -64,7 +64,7 @@ public class WebExchangeDataBinder extends WebDataBinder {
 
 
 	/**
-	 * Bind query params, form data, and or multipart form data to the binder target.
+	 * Bind query parameters, form data, or multipart form data to the binder target.
 	 * @param exchange the current exchange
 	 * @return a {@code Mono<Void>} when binding is complete
 	 */
