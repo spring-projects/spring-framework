@@ -102,6 +102,8 @@ class LinkedCaseInsensitiveMapTests {
 
 		assertThat(map.put("null", null)).isNull();
 		assertThat(map.putIfAbsent("NULL", "value")).isNull();
+		assertThat(map.put("null", null)).isEqualTo("value");
+		assertThat(map.computeIfAbsent("NULL", s -> "value")).isEqualTo("value");
 		assertThat(map.get("null")).isEqualTo("value");
 	}
 
