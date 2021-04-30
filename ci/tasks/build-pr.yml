@@ -16,4 +16,4 @@ run:
   args:
     - -ec
     - |
-      ${PWD}/git-repo/ci/scripts/build-project.sh
+      ${PWD}/git-repo/ci/scripts/build-pr.sh
