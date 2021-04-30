@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,10 @@ class LinkedCaseInsensitiveMapTests {
 		assertThat(map.computeIfAbsent("key", key2 -> "value1")).isEqualTo("value3");
 		assertThat(map.computeIfAbsent("KEY", key1 -> "value2")).isEqualTo("value3");
 		assertThat(map.computeIfAbsent("Key", key -> "value3")).isEqualTo("value3");
+
+		assertThat(map.put("null", null)).isNull();
+		assertThat(map.putIfAbsent("NULL", "value")).isNull();
+		assertThat(map.get("null")).isEqualTo("value");
 	}
 
 	@Test
