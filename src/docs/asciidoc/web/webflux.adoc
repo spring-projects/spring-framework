@@ -9,11 +9,10 @@ https://www.reactive-streams.org/[Reactive Streams] back pressure, and runs on s
 Netty, Undertow, and Servlet 3.1+ containers.
 
 Both web frameworks mirror the names of their source modules
-(https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc[spring-webmvc] and
-https://github.com/spring-projects/spring-framework/tree/master/spring-webflux[spring-webflux])
-and co-exist side by side in the Spring Framework. Each module is optional.
-Applications can use one or the other module or, in some cases, both --
-for example, Spring MVC controllers with the reactive `WebClient`.
+({spring-framework-main-code}/spring-webmvc[spring-webmvc] and
+{spring-framework-main-code}/spring-webflux[spring-webflux]) and co-exist side by side in the
+Spring Framework. Each module is optional. Applications can use one or the other module or,
+in some cases, both -- for example, Spring MVC controllers with the reactive `WebClient`.
 
 
 
@@ -1521,7 +1520,7 @@ segments. For example `/resources/{*path}` matches all files under `/resources/`
 `"path"` variable captures the complete relative path.
 
 The syntax `{varName:regex}` declares a URI variable with a regular expression that has the
-syntax: `{varName:regex}`. For example, given a URL of `/spring-web-3.0.5 .jar`, the following method
+syntax: `{varName:regex}`. For example, given a URL of `/spring-web-3.0.5.jar`, the following method
 extracts the name, version, and file extension:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -2333,7 +2332,7 @@ Type conversion is applied automatically if the target method parameter type is 
 [.small]#<<web.adoc#mvc-ann-modelattrib-method-args, Web MVC>>#
 
 You can use the `@ModelAttribute` annotation on a method argument to access an attribute from the
-model or have it instantiated if not present. The model attribute is also overlain with
+model or have it instantiated if not present. The model attribute is also overlaid with
 the values of query parameters and form fields whose names match to field names. This is
 referred to as data binding, and it saves you from having to deal with parsing and
 converting individual query parameters and form fields. The following example binds an instance of `Pet`:

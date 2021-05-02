@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,31 +79,29 @@ public interface UriBuilder {
 
 	/**
 	 * Append to the path of this builder.
-	 * <p>The given value is appended as-is without any checks for slashes other
-	 * than to clean up duplicates. For example:
+	 * <p>The given value is appended as-is to previous {@link #path(String) path}
+	 * values without inserting any additional slashes. For example:
 	 * <pre class="code">
 	 *
 	 * builder.path("/first-").path("value/").path("/{id}").build("123")
 	 *
 	 * // Results is "/first-value/123"
 	 * </pre>
-	 * <p>By contrast {@link #pathSegment(String...)} builds the path from
-	 * individual path segments and in that case slashes are inserted transparently.
-	 * In some cases you may use a combination of both {@code pathSegment} and
-	 * {@code path}. For example:
+	 * <p>By contrast {@link #pathSegment(String...) pathSegment} does insert
+	 * slashes between individual path segments. For example:
 	 * <pre class="code">
 	 *
 	 * builder.pathSegment("first-value", "second-value").path("/")
 	 *
 	 * // Results is "/first-value/second-value/"
-	 *
 	 * </pre>
-	 * <p>If a URI variable value contains slashes, whether those are encoded or
-	 * not depends on the configured encoding mode. See
-	 * {@link UriComponentsBuilder#encode()}, or if using
-	 * {@code UriComponentsBuilder} via {@link DefaultUriBuilderFactory}
-	 * (e.g. {@code WebClient} or {@code RestTemplate}) see its
-	 * {@link DefaultUriBuilderFactory#setEncodingMode encodingMode} property.
+	 * <p>The resulting full path is normalized to eliminate duplicate slashes.
+	 * <p><strong>Note:</strong> When inserting a URI variable value that
+	 * contains slashes in a {@link #path(String) path}, whether those are
+	 * encoded depends on the configured encoding mode. For more details, see
+	 * {@link UriComponentsBuilder#encode()}, or otherwise if building URIs
+	 * indirectly via {@code WebClient} or {@code RestTemplate}, see its
+	 * {@link DefaultUriBuilderFactory#setEncodingMode encodingMode}.
 	 * Also see the <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#web-uri-encoding">
 	 * URI Encoding</a> section of the reference docs.
 	 * @param path the URI path
@@ -111,7 +109,7 @@ public interface UriBuilder {
 	UriBuilder path(String path);
 
 	/**
-	 * Override the existing path.
+	 * Override the current path.
 	 * @param path the URI path, or {@code null} for an empty path
 	 */
 	UriBuilder replacePath(@Nullable String path);
@@ -123,7 +121,6 @@ public interface UriBuilder {
 	 * builder.pathSegment("first-value", "second-value", "{id}").build("123")
 	 *
 	 * // Results is "/first-value/second-value/123"
-	 *
 	 * </pre>
 	 * <p>If slashes are present in a path segment, they are encoded:
 	 * <pre class="code">
@@ -131,7 +128,6 @@ public interface UriBuilder {
 	 * builder.pathSegment("ba/z", "{id}").build("a/b")
 	 *
 	 * // Results is "/ba%2Fz/a%2Fb"
-	 *
 	 * </pre>
 	 * To insert a trailing slash, use the {@link #path} builder method:
 	 * <pre class="code">
@@ -139,8 +135,9 @@ public interface UriBuilder {
 	 * builder.pathSegment("first-value", "second-value").path("/")
 	 *
 	 * // Results is "/first-value/second-value/"
-	 *
 	 * </pre>
+	 * <p>Empty path segments are ignored and therefore duplicate slashes do not
+	 * appear in the resulting full path.
 	 * @param pathSegments the URI path segments
 	 */
 	UriBuilder pathSegment(String... pathSegments) throws IllegalArgumentException;

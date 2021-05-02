@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -278,6 +278,20 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		assertThat(entity.getHeaders().getAccessControlAllowCredentials()).isTrue();
 	}
 
+	@ParameterizedHttpServerTest
+	void maxAgeWithDefaultOrigin(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		ResponseEntity<String> entity = performOptions("/classAge", this.headers, String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getHeaders().getAccessControlMaxAge()).isEqualTo(10);
+
+		entity = performOptions("/methodAge", this.headers, String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getHeaders().getAccessControlMaxAge()).isEqualTo(100);
+	}
+
 
 	@Configuration
 	@EnableWebFlux
@@ -392,6 +406,23 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		@GetMapping("/baz")
 		public String baz() {
 			return "baz";
+		}
+	}
+
+	@RestController
+	@CrossOrigin(maxAge = 10)
+	private static class MaxAgeWithDefaultOriginController {
+
+		@CrossOrigin
+		@GetMapping("/classAge")
+		String classAge() {
+			return "classAge";
+		}
+
+		@CrossOrigin(maxAge = 100)
+		@GetMapping("/methodAge")
+		String methodAge() {
+			return "methodAge";
 		}
 	}
 

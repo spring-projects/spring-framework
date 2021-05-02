@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.net.ssl.SSLSession;
 
@@ -49,6 +50,9 @@ import org.springframework.util.StringUtils;
  * @since 5.0
  */
 class UndertowServerHttpRequest extends AbstractServerHttpRequest {
+
+	private static final AtomicLong logPrefixIndex = new AtomicLong();
+
 
 	private final HttpServerExchange exchange;
 
@@ -125,7 +129,8 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	protected String initId() {
-		return ObjectUtils.getIdentityHexString(this.exchange.getConnection());
+		return ObjectUtils.getIdentityHexString(this.exchange.getConnection()) +
+				"-" + logPrefixIndex.incrementAndGet();
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,15 +36,16 @@ import org.springframework.util.StringValueResolver;
  * Example XML bean definition:
  *
  * <pre class="code">
- * &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"/&gt;
- *   &lt;property name="driverClassName" value="${driver}"/&gt;
- *   &lt;property name="url" value="jdbc:${dbname}"/&gt;
+ * &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
+ *   &lt;property name="driverClassName" value="${driver}" /&gt;
+ *   &lt;property name="url" value="jdbc:${dbname}" /&gt;
  * &lt;/bean&gt;
  * </pre>
  *
  * Example properties file:
  *
- * <pre class="code">driver=com.mysql.jdbc.Driver
+ * <pre class="code">
+ * driver=com.mysql.jdbc.Driver
  * dbname=mysql:mydb</pre>
  *
  * Annotated bean definitions may take advantage of property replacement using
@@ -56,7 +57,8 @@ import org.springframework.util.StringValueResolver;
  * in bean references. Furthermore, placeholder values can also cross-reference
  * other placeholders, like:
  *
- * <pre class="code">rootPath=myrootdir
+ * <pre class="code">
+ * rootPath=myrootdir
  * subPath=${rootPath}/subdir</pre>
  *
  * In contrast to {@link PropertyOverrideConfigurer}, subclasses of this type allow
@@ -71,13 +73,13 @@ import org.springframework.util.StringValueResolver;
  *
  * <p>Default property values can be defined globally for each configurer instance
  * via the {@link #setProperties properties} property, or on a property-by-property basis
- * using the default value separator which is {@code ":"} by default and
- * customizable via {@link #setValueSeparator(String)}.
+ * using the value separator which is {@code ":"} by default and customizable via
+ * {@link #setValueSeparator(String)}.
  *
  * <p>Example XML property with default value:
  *
  * <pre class="code">
- *   <property name="url" value="jdbc:${dbname:defaultdb}"/>
+ *   &lt;property name="url" value="jdbc:${dbname:defaultdb}" /&gt;
  * </pre>
  *
  * @author Chris Beams

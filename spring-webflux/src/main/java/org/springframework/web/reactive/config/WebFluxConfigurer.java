@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.reactive.socket.server.WebSocketService;
@@ -53,12 +54,16 @@ public interface WebFluxConfigurer {
 	}
 
 	/**
-	 * Configure "global" cross origin request processing.
-	 * <p>The configured readers and writers will apply to all requests including
-	 * annotated controllers and functional endpoints. Annotated controllers can
-	 * further declare more fine-grained configuration via
+	 * Configure "global" cross origin request processing. The configured CORS
+	 * mappings apply to annotated controllers, functional endpoints, and static
+	 * resources.
+	 * <p>Annotated controllers can further declare more fine-grained config via
 	 * {@link org.springframework.web.bind.annotation.CrossOrigin @CrossOrigin}.
+	 * In such cases "global" CORS configuration declared here is
+	 * {@link org.springframework.web.cors.CorsConfiguration#combine(CorsConfiguration) combined}
+	 * with local CORS configuration defined on a controller method.
 	 * @see CorsRegistry
+	 * @see CorsConfiguration#combine(CorsConfiguration)
 	 */
 	default void addCorsMappings(CorsRegistry registry) {
 	}
@@ -88,10 +93,13 @@ public interface WebFluxConfigurer {
 	}
 
 	/**
-	 * Configure custom HTTP message readers and writers or override built-in ones.
-	 * <p>The configured readers and writers will be used for both annotated
-	 * controllers and functional endpoints.
-	 * @param configurer the configurer to use
+	 * Configure the HTTP message readers and writers for reading from the
+	 * request body and for writing to the response body in annotated controllers
+	 * and functional endpoints.
+	 * <p>By default, all built-in readers and writers are configured as long as
+	 * the corresponding 3rd party libraries such Jackson JSON, JAXB2, and others
+	 * are present on the classpath.
+	 * @param configurer the configurer to customize readers and writers
 	 */
 	default void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
 	}

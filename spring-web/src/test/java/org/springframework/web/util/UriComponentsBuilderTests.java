@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -50,6 +51,27 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author David Eckel
  */
 class UriComponentsBuilderTests {
+
+	@Test  // see gh-26453
+	void examplesInReferenceManual() {
+		final String expected = "/hotel%20list/New%20York?q=foo%2Bbar";
+
+		URI uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
+			.queryParam("q", "{q}")
+			.encode()
+			.buildAndExpand("New York", "foo+bar")
+			.toUri();
+		assertThat(uri).asString().isEqualTo(expected);
+
+		uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
+			.queryParam("q", "{q}")
+			.build("New York", "foo+bar");
+		assertThat(uri).asString().isEqualTo(expected);
+
+		uri = UriComponentsBuilder.fromUriString("/hotel list/{city}?q={q}")
+			.build("New York", "foo+bar");
+		assertThat(uri).asString().isEqualTo(expected);
+	}
 
 	@Test
 	void plain() throws URISyntaxException {
@@ -429,6 +451,21 @@ class UriComponentsBuilderTests {
 		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
 
 		assertThat(result.toString()).isEqualTo("http://[1abc:2abc:3abc::5ABC:6abc]:8080/mvc-showcase");
+	}
+
+	@Test  // gh-26748
+	void fromHttpRequestWithForwardedInvalidIPv6Address() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(-1);
+		request.setRequestURI("/mvc-showcase");
+		request.addHeader("X-Forwarded-Host", "2a02:918:175:ab60:45ee:c12c:dac1:808b");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				UriComponentsBuilder.fromHttpRequest(httpRequest).build());
 	}
 
 	@Test
@@ -1014,6 +1051,35 @@ class UriComponentsBuilderTests {
 		assertThat(result2.getQuery()).isEqualTo("q1");
 		assertThat(result2.getFragment()).isEqualTo("f1");
 		assertThat(result1.getSchemeSpecificPart()).isEqualTo(null);
+	}
+
+	@Test // gh-26466
+	void encodeTemplateWithInvalidPlaceholderSyntax() {
+
+		BiConsumer<String, String> tester = (in, out) ->
+				assertThat(UriComponentsBuilder.fromUriString(in).encode().toUriString()).isEqualTo(out);
+
+		// empty
+		tester.accept("{}", "%7B%7D");
+		tester.accept("{ \t}", "%7B%20%09%7D");
+		tester.accept("/a{}b", "/a%7B%7Db");
+		tester.accept("/a{ \t}b", "/a%7B%20%09%7Db");
+
+		// nested, matching
+		tester.accept("{foo{}}", "%7Bfoo%7B%7D%7D");
+		tester.accept("{foo{bar}baz}", "%7Bfoo%7Bbar%7Dbaz%7D");
+		tester.accept("/a{foo{}}b", "/a%7Bfoo%7B%7D%7Db");
+		tester.accept("/a{foo{bar}baz}b", "/a%7Bfoo%7Bbar%7Dbaz%7Db");
+
+		// mismatched
+		tester.accept("{foo{{}", "%7Bfoo%7B%7B%7D");
+		tester.accept("{foo}}", "{foo}%7D");
+		tester.accept("/a{foo{{}bar", "/a%7Bfoo%7B%7B%7Dbar");
+		tester.accept("/a{foo}}b", "/a{foo}%7Db");
+
+		// variable with regex
+		tester.accept("{year:\\d{1,4}}", "{year:\\d{1,4}}");
+		tester.accept("/a{year:\\d{1,4}}b", "/a{year:\\d{1,4}}b");
 	}
 
 	@Test  // SPR-11856

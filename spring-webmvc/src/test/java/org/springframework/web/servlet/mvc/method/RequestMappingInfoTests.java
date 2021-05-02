@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ import javax.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.handler.PathPatternsParameterizedTest;
 import org.springframework.web.servlet.handler.PathPatternsTestUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
-import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static java.util.Arrays.asList;
@@ -108,7 +108,6 @@ class RequestMappingInfoTests {
 	void matchParamsCondition() {
 		MockHttpServletRequest request = PathPatternsTestUtils.initRequest("GET", "/foo", false);
 		request.setParameter("foo", "bar");
-		UrlPathHelper.defaultInstance.resolveAndCacheLookupPath(request);
 
 		RequestMappingInfo info = RequestMappingInfo.paths("/foo").params("foo=bar").build();
 		RequestMappingInfo match = info.getMatchingCondition(request);
@@ -125,7 +124,6 @@ class RequestMappingInfoTests {
 	void matchHeadersCondition() {
 		MockHttpServletRequest request = PathPatternsTestUtils.initRequest("GET", "/foo", false);
 		request.addHeader("foo", "bar");
-		UrlPathHelper.defaultInstance.resolveAndCacheLookupPath(request);
 
 		RequestMappingInfo info = RequestMappingInfo.paths("/foo").headers("foo=bar").build();
 		RequestMappingInfo match = info.getMatchingCondition(request);
@@ -142,7 +140,6 @@ class RequestMappingInfoTests {
 	void matchConsumesCondition() {
 		MockHttpServletRequest request = PathPatternsTestUtils.initRequest("GET", "/foo", false);
 		request.setContentType("text/plain");
-		UrlPathHelper.defaultInstance.resolveAndCacheLookupPath(request);
 
 		RequestMappingInfo info = RequestMappingInfo.paths("/foo").consumes("text/plain").build();
 		RequestMappingInfo match = info.getMatchingCondition(request);
@@ -159,7 +156,6 @@ class RequestMappingInfoTests {
 	void matchProducesCondition() {
 		MockHttpServletRequest request = PathPatternsTestUtils.initRequest("GET", "/foo", false);
 		request.addHeader("Accept", "text/plain");
-		UrlPathHelper.defaultInstance.resolveAndCacheLookupPath(request);
 
 		RequestMappingInfo info = RequestMappingInfo.paths("/foo").produces("text/plain").build();
 		RequestMappingInfo match = info.getMatchingCondition(request);
@@ -176,7 +172,6 @@ class RequestMappingInfoTests {
 	void matchCustomCondition() {
 		MockHttpServletRequest request = PathPatternsTestUtils.initRequest("GET", "/foo", false);
 		request.setParameter("foo", "bar");
-		UrlPathHelper.defaultInstance.resolveAndCacheLookupPath(request);
 
 		RequestMappingInfo info = RequestMappingInfo.paths("/foo").params("foo=bar").build();
 		RequestMappingInfo match = info.getMatchingCondition(request);
@@ -196,7 +191,6 @@ class RequestMappingInfoTests {
 		RequestMappingInfo oneMethodOneParam = RequestMappingInfo.paths().methods(GET).params("foo").build();
 
 		MockHttpServletRequest request = PathPatternsTestUtils.initRequest("GET", "/", false);
-		UrlPathHelper.defaultInstance.resolveAndCacheLookupPath(request);
 		Comparator<RequestMappingInfo> comparator = (info, otherInfo) -> info.compareTo(otherInfo, request);
 
 		List<RequestMappingInfo> list = asList(noMethods, oneMethod, oneMethodOneParam);
@@ -315,6 +309,29 @@ class RequestMappingInfoTests {
 		info = RequestMappingInfo.paths("/foo").methods(RequestMethod.OPTIONS).build();
 		match = info.getMatchingCondition(request);
 		assertThat(match).as("Pre-flight should match the ACCESS_CONTROL_REQUEST_METHOD").isNull();
+	}
+
+	@Test
+	void mutate() {
+		RequestMappingInfo.BuilderConfiguration options = new RequestMappingInfo.BuilderConfiguration();
+		options.setPatternParser(new PathPatternParser());
+
+		RequestMappingInfo info1 = RequestMappingInfo.paths("/foo")
+				.methods(GET).headers("h1=hv1").params("q1=qv1")
+				.consumes("application/json").produces("application/json")
+				.mappingName("testMapping").options(options)
+				.build();
+
+		RequestMappingInfo info2 = info1.mutate().produces("application/hal+json").build();
+
+		assertThat(info2.getName()).isEqualTo(info1.getName());
+		assertThat(info2.getPatternsCondition()).isNull();
+		assertThat(info2.getPathPatternsCondition()).isEqualTo(info1.getPathPatternsCondition());
+		assertThat(info2.getHeadersCondition()).isEqualTo(info1.getHeadersCondition());
+		assertThat(info2.getParamsCondition()).isEqualTo(info1.getParamsCondition());
+		assertThat(info2.getConsumesCondition()).isEqualTo(info1.getConsumesCondition());
+		assertThat(info2.getProducesCondition().getProducibleMediaTypes())
+				.containsOnly(MediaType.parseMediaType("application/hal+json"));
 	}
 
 }

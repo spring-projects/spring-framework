@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,13 @@ package org.springframework.core.env;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,8 +35,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 3.1
  */
 class CustomEnvironmentTests {
-
-	// -- tests relating to customizing reserved default profiles ----------------------
 
 	@Test
 	void control() {
@@ -105,10 +107,66 @@ class CustomEnvironmentTests {
 		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2"))).isFalse();
 	}
 
+	@Test
+	void withNoProfileProperties() {
+		ConfigurableEnvironment env = new AbstractEnvironment() {
+			@Override
+			@Nullable
+			protected String doGetActiveProfilesProperty() {
+				return null;
+			}
+			@Override
+			@Nullable
+			protected String doGetDefaultProfilesProperty() {
+				return null;
+			}
+		};
+		Map<String, Object> values = new LinkedHashMap<>();
+		values.put(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, "a,b,c");
+		values.put(AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME, "d,e,f");
+		PropertySource<?> propertySource = new MapPropertySource("test", values);
+		env.getPropertySources().addFirst(propertySource);
+		assertThat(env.getActiveProfiles()).isEmpty();
+		assertThat(env.getDefaultProfiles()).containsExactly(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME);
+	}
+
+	@Test
+	void withCustomMutablePropertySources() {
+		class CustomMutablePropertySources extends MutablePropertySources {}
+		MutablePropertySources propertySources = new CustomMutablePropertySources();
+		ConfigurableEnvironment env = new AbstractEnvironment(propertySources) {};
+		assertThat(env.getPropertySources()).isInstanceOf(CustomMutablePropertySources.class);
+	}
+
+	@Test
+	void withCustomPropertyResolver() {
+		class CustomPropertySourcesPropertyResolver extends PropertySourcesPropertyResolver {
+			public CustomPropertySourcesPropertyResolver(PropertySources propertySources) {
+				super(propertySources);
+			}
+			@Override
+			@Nullable
+			public String getProperty(String key) {
+				return super.getProperty(key)+"-test";
+			}
+		}
+
+		ConfigurableEnvironment env = new AbstractEnvironment() {
+			@Override
+			protected ConfigurablePropertyResolver createPropertyResolver(MutablePropertySources propertySources) {
+				return new CustomPropertySourcesPropertyResolver(propertySources);
+			}
+		};
+
+		Map<String, Object> values = new LinkedHashMap<>();
+		values.put("spring", "framework");
+		PropertySource<?> propertySource = new MapPropertySource("test", values);
+		env.getPropertySources().addFirst(propertySource);
+		assertThat(env.getProperty("spring")).isEqualTo("framework-test");
+	}
+
 	private Profiles defaultProfile() {
 		return Profiles.of(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME);
 	}
 
-
-	// -- tests relating to customizing property sources -------------------------------
 }

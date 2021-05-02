@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,15 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import reactor.blockhound.BlockHound;
+import reactor.blockhound.integration.BlockHoundIntegration;
+
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.HttpHandlerDecoratorFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -77,7 +81,6 @@ public final class WebHttpHandlerBuilder {
 	/** Well-known name for the ForwardedHeaderTransformer in the bean factory. */
 	public static final String FORWARDED_HEADER_TRANSFORMER_BEAN_NAME = "forwardedHeaderTransformer";
 
-
 	private final WebHandler webHandler;
 
 	@Nullable
@@ -86,6 +89,9 @@ public final class WebHttpHandlerBuilder {
 	private final List<WebFilter> filters = new ArrayList<>();
 
 	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
+
+	@Nullable
+	private Function<HttpHandler, HttpHandler> httpHandlerDecorator;
 
 	@Nullable
 	private WebSessionManager sessionManager;
@@ -98,9 +104,6 @@ public final class WebHttpHandlerBuilder {
 
 	@Nullable
 	private ForwardedHeaderTransformer forwardedHeaderTransformer;
-
-	@Nullable
-	private Function<HttpHandler, HttpHandler> httpHandlerDecorator;
 
 
 	/**
@@ -147,6 +150,8 @@ public final class WebHttpHandlerBuilder {
 	 * see {@link AnnotationAwareOrderComparator}.
 	 * <li>{@link WebExceptionHandler} [0..N] -- detected by type and
 	 * ordered.
+	 * <li>{@link HttpHandlerDecoratorFactory} [0..N] -- detected by type and
+	 * ordered.
 	 * <li>{@link WebSessionManager} [0..1] -- looked up by the name
 	 * {@link #WEB_SESSION_MANAGER_BEAN_NAME}.
 	 * <li>{@link ServerCodecConfigurer} [0..1] -- looked up by the name
@@ -158,6 +163,7 @@ public final class WebHttpHandlerBuilder {
 	 * @return the prepared builder
 	 */
 	public static WebHttpHandlerBuilder applicationContext(ApplicationContext context) {
+
 		WebHttpHandlerBuilder builder = new WebHttpHandlerBuilder(
 				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class), context);
 
@@ -166,11 +172,16 @@ public final class WebHttpHandlerBuilder {
 				.orderedStream()
 				.collect(Collectors.toList());
 		builder.filters(filters -> filters.addAll(webFilters));
+
 		List<WebExceptionHandler> exceptionHandlers = context
 				.getBeanProvider(WebExceptionHandler.class)
 				.orderedStream()
 				.collect(Collectors.toList());
 		builder.exceptionHandlers(handlers -> handlers.addAll(exceptionHandlers));
+
+		context.getBeanProvider(HttpHandlerDecoratorFactory.class)
+				.orderedStream()
+				.forEach(builder::httpHandlerDecorator);
 
 		try {
 			builder.sessionManager(
@@ -408,6 +419,22 @@ public final class WebHttpHandlerBuilder {
 	@Override
 	public WebHttpHandlerBuilder clone() {
 		return new WebHttpHandlerBuilder(this);
+	}
+
+
+	/**
+	 * {@code BlockHoundIntegration} for spring-web classes.
+	 * @since 5.3.6
+	 */
+	public static class SpringWebBlockHoundIntegration implements BlockHoundIntegration {
+
+		@Override
+		public void applyTo(BlockHound.Builder builder) {
+
+			// Avoid hard references potentially anywhere in spring-web (no need for structural dependency)
+
+			builder.allowBlockingCallsInside("org.springframework.web.util.HtmlUtils", "<clinit>");
+		}
 	}
 
 }

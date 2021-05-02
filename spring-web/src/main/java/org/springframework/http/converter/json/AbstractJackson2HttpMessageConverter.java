@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,14 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -94,7 +98,10 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	public static final Charset DEFAULT_CHARSET = null;
 
 
-	protected ObjectMapper objectMapper;
+	protected ObjectMapper defaultObjectMapper;
+
+	@Nullable
+	private Map<Class<?>, Map<MediaType, ObjectMapper>> objectMapperRegistrations;
 
 	@Nullable
 	private Boolean prettyPrint;
@@ -104,7 +111,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
+		this.defaultObjectMapper = objectMapper;
 		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
 		prettyPrinter.indentObjectsWith(new DefaultIndenter("  ", "\ndata:"));
 		this.ssePrettyPrinter = prettyPrinter;
@@ -122,27 +129,86 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 
 	/**
-	 * Set the {@code ObjectMapper} for this view.
-	 * If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
-	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further
-	 * control of the JSON serialization process. For example, an extended
+	 * Configure the main {@code ObjectMapper} to use for Object conversion.
+	 * If not set, a default {@link ObjectMapper} instance is created.
+	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take
+	 * further control of the JSON serialization process. For example, an extended
 	 * {@link com.fasterxml.jackson.databind.ser.SerializerFactory}
 	 * can be configured that provides custom serializers for specific types.
-	 * The other option for refining the serialization process is to use Jackson's
+	 * Another option for refining the serialization process is to use Jackson's
 	 * provided annotations on the types to be serialized, in which case a
 	 * custom-configured ObjectMapper is unnecessary.
+	 * @see #registerObjectMappersForType(Class, Consumer)
 	 */
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
-		this.objectMapper = objectMapper;
+		this.defaultObjectMapper = objectMapper;
 		configurePrettyPrint();
 	}
 
 	/**
-	 * Return the underlying {@code ObjectMapper} for this view.
+	 * Return the main {@code ObjectMapper} in use.
 	 */
 	public ObjectMapper getObjectMapper() {
-		return this.objectMapper;
+		return this.defaultObjectMapper;
+	}
+
+	/**
+	 * Configure the {@link ObjectMapper} instances to use for the given
+	 * {@link Class}. This is useful when you want to deviate from the
+	 * {@link #getObjectMapper() default} ObjectMapper or have the
+	 * {@code ObjectMapper} vary by {@code MediaType}.
+	 * <p><strong>Note:</strong> Use of this method effectively turns off use of
+	 * the default {@link #getObjectMapper() ObjectMapper} and
+	 * {@link #setSupportedMediaTypes(List) supportedMediaTypes} for the given
+	 * class. Therefore it is important for the mappings configured here to
+	 * {@link MediaType#includes(MediaType) include} every MediaType that must
+	 * be supported for the given class.
+	 * @param clazz the type of Object to register ObjectMapper instances for
+	 * @param registrar a consumer to populate or otherwise update the
+	 * MediaType-to-ObjectMapper associations for the given Class
+	 * @since 5.3.4
+	 */
+	public void registerObjectMappersForType(Class<?> clazz, Consumer<Map<MediaType, ObjectMapper>> registrar) {
+		if (this.objectMapperRegistrations == null) {
+			this.objectMapperRegistrations = new LinkedHashMap<>();
+		}
+		Map<MediaType, ObjectMapper> registrations =
+				this.objectMapperRegistrations.computeIfAbsent(clazz, c -> new LinkedHashMap<>());
+		registrar.accept(registrations);
+	}
+
+	/**
+	 * Return ObjectMapper registrations for the given class, if any.
+	 * @param clazz the class to look up for registrations for
+	 * @return a map with registered MediaType-to-ObjectMapper registrations,
+	 * or empty if in case of no registrations for the given class.
+	 * @since 5.3.4
+	 */
+	@Nullable
+	public Map<MediaType, ObjectMapper> getObjectMappersForType(Class<?> clazz) {
+		for (Map.Entry<Class<?>, Map<MediaType, ObjectMapper>> entry : getObjectMapperRegistrations().entrySet()) {
+			if (entry.getKey().isAssignableFrom(clazz)) {
+				return entry.getValue();
+			}
+		}
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public List<MediaType> getSupportedMediaTypes(Class<?> clazz) {
+		List<MediaType> result = null;
+		for (Map.Entry<Class<?>, Map<MediaType, ObjectMapper>> entry : getObjectMapperRegistrations().entrySet()) {
+			if (entry.getKey().isAssignableFrom(clazz)) {
+				result = (result != null ? result : new ArrayList<>(entry.getValue().size()));
+				result.addAll(entry.getValue().keySet());
+			}
+		}
+		return (CollectionUtils.isEmpty(result) ? getSupportedMediaTypes() : result);
+	}
+
+	private Map<Class<?>, Map<MediaType, ObjectMapper>> getObjectMapperRegistrations() {
+		return (this.objectMapperRegistrations != null ? this.objectMapperRegistrations : Collections.emptyMap());
 	}
 
 	/**
@@ -161,7 +227,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	private void configurePrettyPrint() {
 		if (this.prettyPrint != null) {
-			this.objectMapper.configure(SerializationFeature.INDENT_OUTPUT, this.prettyPrint);
+			this.defaultObjectMapper.configure(SerializationFeature.INDENT_OUTPUT, this.prettyPrint);
 		}
 	}
 
@@ -177,8 +243,12 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			return false;
 		}
 		JavaType javaType = getJavaType(type, contextClass);
+		ObjectMapper objectMapper = selectObjectMapper(javaType.getRawClass(), mediaType);
+		if (objectMapper == null) {
+			return false;
+		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<>();
-		if (this.objectMapper.canDeserialize(javaType, causeRef)) {
+		if (objectMapper.canDeserialize(javaType, causeRef)) {
 			return true;
 		}
 		logWarningIfNecessary(javaType, causeRef.get());
@@ -196,12 +266,41 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				return false;
 			}
 		}
+		ObjectMapper objectMapper = selectObjectMapper(clazz, mediaType);
+		if (objectMapper == null) {
+			return false;
+		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<>();
-		if (this.objectMapper.canSerialize(clazz, causeRef)) {
+		if (objectMapper.canSerialize(clazz, causeRef)) {
 			return true;
 		}
 		logWarningIfNecessary(clazz, causeRef.get());
 		return false;
+	}
+
+	/**
+	 * Select an ObjectMapper to use, either the main ObjectMapper or another
+	 * if the handling for the given Class has been customized through
+	 * {@link #registerObjectMappersForType(Class, Consumer)}.
+	 */
+	@Nullable
+	private ObjectMapper selectObjectMapper(Class<?> targetType, @Nullable MediaType targetMediaType) {
+		if (targetMediaType == null || CollectionUtils.isEmpty(this.objectMapperRegistrations)) {
+			return this.defaultObjectMapper;
+		}
+		for (Map.Entry<Class<?>, Map<MediaType, ObjectMapper>> typeEntry : getObjectMapperRegistrations().entrySet()) {
+			if (typeEntry.getKey().isAssignableFrom(targetType)) {
+				for (Map.Entry<MediaType, ObjectMapper> objectMapperEntry : typeEntry.getValue().entrySet()) {
+					if (objectMapperEntry.getKey().includes(targetMediaType)) {
+						return objectMapperEntry.getValue();
+					}
+				}
+				// No matching registrations
+				return null;
+			}
+		}
+		// No registrations
+		return this.defaultObjectMapper;
 	}
 
 	/**
@@ -255,12 +354,17 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		Charset charset = getCharset(contentType);
 
-		boolean isUnicode = ENCODINGS.containsKey(charset.name());
+		ObjectMapper objectMapper = selectObjectMapper(javaType.getRawClass(), contentType);
+		Assert.state(objectMapper != null, "No ObjectMapper for " + javaType);
+
+		boolean isUnicode = ENCODINGS.containsKey(charset.name()) ||
+				"UTF-16".equals(charset.name()) ||
+				"UTF-32".equals(charset.name());
 		try {
 			if (inputMessage instanceof MappingJacksonInputMessage) {
 				Class<?> deserializationView = ((MappingJacksonInputMessage) inputMessage).getDeserializationView();
 				if (deserializationView != null) {
-					ObjectReader objectReader = this.objectMapper.readerWithView(deserializationView).forType(javaType);
+					ObjectReader objectReader = objectMapper.readerWithView(deserializationView).forType(javaType);
 					if (isUnicode) {
 						return objectReader.readValue(inputMessage.getBody());
 					}
@@ -271,11 +375,11 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				}
 			}
 			if (isUnicode) {
-				return this.objectMapper.readValue(inputMessage.getBody(), javaType);
+				return objectMapper.readValue(inputMessage.getBody(), javaType);
 			}
 			else {
 				Reader reader = new InputStreamReader(inputMessage.getBody(), charset);
-				return this.objectMapper.readValue(reader, javaType);
+				return objectMapper.readValue(reader, javaType);
 			}
 		}
 		catch (InvalidDefinitionException ex) {
@@ -310,8 +414,13 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		JsonEncoding encoding = getJsonEncoding(contentType);
 
+		Class<?> clazz = (object instanceof MappingJacksonValue ?
+				((MappingJacksonValue) object).getValue().getClass() : object.getClass());
+		ObjectMapper objectMapper = selectObjectMapper(clazz, contentType);
+		Assert.state(objectMapper != null, "No ObjectMapper for " + clazz.getName());
+
 		OutputStream outputStream = StreamUtils.nonClosing(outputMessage.getBody());
-		try (JsonGenerator generator = this.objectMapper.getFactory().createGenerator(outputStream, encoding)) {
+		try (JsonGenerator generator = objectMapper.getFactory().createGenerator(outputStream, encoding)) {
 			writePrefix(generator, object);
 
 			Object value = object;
@@ -330,7 +439,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			}
 
 			ObjectWriter objectWriter = (serializationView != null ?
-					this.objectMapper.writerWithView(serializationView) : this.objectMapper.writer());
+					objectMapper.writerWithView(serializationView) : objectMapper.writer());
 			if (filters != null) {
 				objectWriter = objectWriter.with(filters);
 			}
@@ -379,7 +488,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * @return the Jackson JavaType
 	 */
 	protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {
-		return this.objectMapper.constructType(GenericTypeResolver.resolveType(type, contextClass));
+		return this.defaultObjectMapper.constructType(GenericTypeResolver.resolveType(type, contextClass));
 	}
 
 	/**

@@ -889,9 +889,8 @@ a filter for basic authentication through a static factory method:
 			.build()
 ----
 
-You can create a new `WebClient` instance by using another as a starting point. This allows
-insert or removing filters without affecting the original `WebClient`. Below is an example
-that inserts a basic authentication filter at index 0:
+Filters can be added or removed by mutating an existing `WebClient` instance, resulting
+in a new `WebClient` instance that does not affect the original one. For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -911,6 +910,54 @@ that inserts a basic authentication filter at index 0:
 			.filters { it.add(0, basicAuthentication("user", "password")) }
 			.build()
 ----
+
+`WebClient` is a thin facade around the chain of filters followed by an
+`ExchangeFunction`. It provides a workflow to make requests, to encode to and from higher
+level objects, and it helps to ensure that response content is always consumed.
+When filters handle the response in some way, extra care must be taken to always consume
+its content or to otherwise propagate it downstream to the `WebClient` which will ensure
+the same. Below is a filter that handles the `UNAUTHORIZED` status code but ensures that
+any response content, whether expected or not, is released:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public ExchangeFilterFunction renewTokenFilter() {
+		return (request, next) -> next.exchange(request).flatMap(response -> {
+			if (response.statusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
+				return response.releaseBody()
+						.then(renewToken())
+						.flatMap(token -> {
+							ClientRequest newRequest = ClientRequest.from(request).build();
+							return next.exchange(newRequest);
+						});
+			} else {
+				return Mono.just(response);
+			}
+		});
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	fun renewTokenFilter(): ExchangeFilterFunction? {
+		return ExchangeFilterFunction { request: ClientRequest?, next: ExchangeFunction ->
+			next.exchange(request!!).flatMap { response: ClientResponse ->
+				if (response.statusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
+					return@flatMap response.releaseBody()
+							.then(renewToken())
+							.flatMap { token: String? ->
+								val newRequest = ClientRequest.from(request).build()
+								next.exchange(newRequest)
+							}
+				} else {
+					return@flatMap Mono.just(response)
+				}
+			}
+		}
+	}
+----
+
 
 
 [[webflux-client-attributes]]
@@ -1083,7 +1130,7 @@ controller method .
 To test code that uses the `WebClient`, you can use a mock web server, such as the
 https://github.com/square/okhttp#mockwebserver[OkHttp MockWebServer]. To see an example
 of its use, check out
-https://github.com/spring-projects/spring-framework/blob/master/spring-webflux/src/test/java/org/springframework/web/reactive/function/client/WebClientIntegrationTests.java[`WebClientIntegrationTests`]
+{spring-framework-main-code}/spring-webflux/src/test/java/org/springframework/web/reactive/function/client/WebClientIntegrationTests.java[`WebClientIntegrationTests`]
 in the Spring Framework test suite or the
 https://github.com/square/okhttp/tree/master/samples/static-server[`static-server`]
 sample in the OkHttp repository.

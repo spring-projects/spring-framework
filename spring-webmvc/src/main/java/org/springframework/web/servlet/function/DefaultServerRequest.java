@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +81,6 @@ class DefaultServerRequest implements ServerRequest {
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
-	private final List<MediaType> allSupportedMediaTypes;
-
 	private final MultiValueMap<String, String> params;
 
 	private final Map<String, Object> attributes;
@@ -94,7 +92,6 @@ class DefaultServerRequest implements ServerRequest {
 	public DefaultServerRequest(HttpServletRequest servletRequest, List<HttpMessageConverter<?>> messageConverters) {
 		this.serverHttpRequest = new ServletServerHttpRequest(servletRequest);
 		this.messageConverters = Collections.unmodifiableList(new ArrayList<>(messageConverters));
-		this.allSupportedMediaTypes = allSupportedMediaTypes(messageConverters);
 
 		this.headers = new DefaultRequestHeaders(this.serverHttpRequest.getHeaders());
 		this.params = CollectionUtils.toMultiValueMap(new ServletParametersMap(servletRequest));
@@ -105,13 +102,6 @@ class DefaultServerRequest implements ServerRequest {
 		this.requestPath = (ServletRequestPathUtils.hasParsedRequestPath(servletRequest) ?
 				ServletRequestPathUtils.getParsedRequestPath(servletRequest) :
 				ServletRequestPathUtils.parseAndCache(servletRequest));
-	}
-
-	private static List<MediaType> allSupportedMediaTypes(List<HttpMessageConverter<?>> messageConverters) {
-		return messageConverters.stream()
-				.flatMap(converter -> converter.getSupportedMediaTypes().stream())
-				.sorted(MediaType.SPECIFICITY_COMPARATOR)
-				.collect(Collectors.toList());
 	}
 
 
@@ -211,7 +201,14 @@ class DefaultServerRequest implements ServerRequest {
 				return theConverter.read(clazz, this.serverHttpRequest);
 			}
 		}
-		throw new HttpMediaTypeNotSupportedException(contentType, this.allSupportedMediaTypes);
+		throw new HttpMediaTypeNotSupportedException(contentType, getSupportedMediaTypes(bodyClass));
+	}
+
+	private List<MediaType> getSupportedMediaTypes(Class<?> bodyClass) {
+		return this.messageConverters.stream()
+				.flatMap(converter -> converter.getSupportedMediaTypes(bodyClass).stream())
+				.sorted(MediaType.SPECIFICITY_COMPARATOR)
+				.collect(Collectors.toList());
 	}
 
 	@Override

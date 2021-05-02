@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -59,14 +60,6 @@ class ClassUtilsTests {
 	private final ClassLoader classLoader = getClass().getClassLoader();
 
 
-	@BeforeEach
-	void clearStatics() {
-		InnerClass.noArgCalled = false;
-		InnerClass.argCalled = false;
-		InnerClass.overloadedCalled = false;
-	}
-
-
 	@Test
 	void isPresent() {
 		assertThat(ClassUtils.isPresent("java.lang.String", classLoader)).isTrue();
@@ -86,6 +79,12 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.forName("org.springframework.tests.sample.objects.TestObject[][]", classLoader)).isEqualTo(TestObject[][].class);
 		assertThat(ClassUtils.forName(TestObject[][].class.getName(), classLoader)).isEqualTo(TestObject[][].class);
 		assertThat(ClassUtils.forName("[[[S", classLoader)).isEqualTo(short[][][].class);
+	}
+
+	@Test
+	void forNameWithNestedType() throws ClassNotFoundException {
+		assertThat(ClassUtils.forName("org.springframework.util.ClassUtilsTests$NestedClass", classLoader)).isEqualTo(NestedClass.class);
+		assertThat(ClassUtils.forName("org.springframework.util.ClassUtilsTests.NestedClass", classLoader)).isEqualTo(NestedClass.class);
 	}
 
 	@Test
@@ -143,11 +142,11 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.isCacheSafe(String.class, childLoader1)).isTrue();
 		assertThat(ClassUtils.isCacheSafe(String.class, childLoader2)).isTrue();
 		assertThat(ClassUtils.isCacheSafe(String.class, childLoader3)).isTrue();
-		assertThat(ClassUtils.isCacheSafe(InnerClass.class, null)).isFalse();
-		assertThat(ClassUtils.isCacheSafe(InnerClass.class, classLoader)).isTrue();
-		assertThat(ClassUtils.isCacheSafe(InnerClass.class, childLoader1)).isTrue();
-		assertThat(ClassUtils.isCacheSafe(InnerClass.class, childLoader2)).isTrue();
-		assertThat(ClassUtils.isCacheSafe(InnerClass.class, childLoader3)).isTrue();
+		assertThat(ClassUtils.isCacheSafe(NestedClass.class, null)).isFalse();
+		assertThat(ClassUtils.isCacheSafe(NestedClass.class, classLoader)).isTrue();
+		assertThat(ClassUtils.isCacheSafe(NestedClass.class, childLoader1)).isTrue();
+		assertThat(ClassUtils.isCacheSafe(NestedClass.class, childLoader2)).isTrue();
+		assertThat(ClassUtils.isCacheSafe(NestedClass.class, childLoader3)).isTrue();
 		assertThat(ClassUtils.isCacheSafe(composite, null)).isFalse();
 		assertThat(ClassUtils.isCacheSafe(composite, classLoader)).isFalse();
 		assertThat(ClassUtils.isCacheSafe(composite, childLoader1)).isTrue();
@@ -209,9 +208,9 @@ class ClassUtilsTests {
 	}
 
 	@Test
-	void getShortNameForInnerClass() {
-		String className = ClassUtils.getShortName(InnerClass.class);
-		assertThat(className).as("Class name did not match").isEqualTo("ClassUtilsTests.InnerClass");
+	void getShortNameForNestedClass() {
+		String className = ClassUtils.getShortName(NestedClass.class);
+		assertThat(className).as("Class name did not match").isEqualTo("ClassUtilsTests.NestedClass");
 	}
 
 	@Test
@@ -297,27 +296,6 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.hasAtLeastOneMethodWithName(TestObject.class, "hashCode")).isTrue();
 		// matches although it takes an arg
 		assertThat(ClassUtils.hasAtLeastOneMethodWithName(TestObject.class, "setAge")).isTrue();
-	}
-
-	@Test
-	void noArgsStaticMethod() throws IllegalAccessException, InvocationTargetException {
-		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod");
-		method.invoke(null, (Object[]) null);
-		assertThat(InnerClass.noArgCalled).as("no argument method was not invoked.").isTrue();
-	}
-
-	@Test
-	void argsStaticMethod() throws IllegalAccessException, InvocationTargetException {
-		Method method = ClassUtils.getStaticMethod(InnerClass.class, "argStaticMethod", String.class);
-		method.invoke(null, "test");
-		assertThat(InnerClass.argCalled).as("argument method was not invoked.").isTrue();
-	}
-
-	@Test
-	void overloadedStaticMethod() throws IllegalAccessException, InvocationTargetException {
-		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod", String.class);
-		method.invoke(null, "test");
-		assertThat(InnerClass.overloadedCalled).as("argument method was not invoked.").isTrue();
 	}
 
 	@Test
@@ -431,6 +409,40 @@ class ClassUtilsTests {
 	}
 
 
+	@Nested
+	class GetStaticMethodTests {
+
+		@BeforeEach
+		void clearStatics() {
+			NestedClass.noArgCalled = false;
+			NestedClass.argCalled = false;
+			NestedClass.overloadedCalled = false;
+		}
+
+		@Test
+		void noArgsStaticMethod() throws IllegalAccessException, InvocationTargetException {
+			Method method = ClassUtils.getStaticMethod(NestedClass.class, "staticMethod");
+			method.invoke(null, (Object[]) null);
+			assertThat(NestedClass.noArgCalled).as("no argument method was not invoked.").isTrue();
+		}
+
+		@Test
+		void argsStaticMethod() throws IllegalAccessException, InvocationTargetException {
+			Method method = ClassUtils.getStaticMethod(NestedClass.class, "argStaticMethod", String.class);
+			method.invoke(null, "test");
+			assertThat(NestedClass.argCalled).as("argument method was not invoked.").isTrue();
+		}
+
+		@Test
+		void overloadedStaticMethod() throws IllegalAccessException, InvocationTargetException {
+			Method method = ClassUtils.getStaticMethod(NestedClass.class, "staticMethod", String.class);
+			method.invoke(null, "test");
+			assertThat(NestedClass.overloadedCalled).as("argument method was not invoked.").isTrue();
+		}
+
+	}
+
+
 	@Target(ElementType.METHOD)
 	@Retention(RetentionPolicy.RUNTIME)
 	@ValueSource(classes = { Boolean.class, Character.class, Byte.class, Short.class,
@@ -445,7 +457,7 @@ class ClassUtilsTests {
 	@interface PrimitiveTypes {
 	}
 
-	public static class InnerClass {
+	public static class NestedClass {
 
 		static boolean noArgCalled;
 		static boolean argCalled;

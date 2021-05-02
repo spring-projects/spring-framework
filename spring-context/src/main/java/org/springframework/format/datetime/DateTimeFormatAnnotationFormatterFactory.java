@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package org.springframework.format.datetime;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.context.support.EmbeddedValueResolutionSupport;
@@ -34,6 +36,7 @@ import org.springframework.util.StringUtils;
  * Formats fields annotated with the {@link DateTimeFormat} annotation using a {@link DateFormatter}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.2
  * @see org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory
  */
@@ -68,15 +71,30 @@ public class DateTimeFormatAnnotationFormatterFactory  extends EmbeddedValueReso
 
 	protected Formatter<Date> getFormatter(DateTimeFormat annotation, Class<?> fieldType) {
 		DateFormatter formatter = new DateFormatter();
+		formatter.setSource(annotation);
+		formatter.setIso(annotation.iso());
+
 		String style = resolveEmbeddedValue(annotation.style());
 		if (StringUtils.hasLength(style)) {
 			formatter.setStylePattern(style);
 		}
-		formatter.setIso(annotation.iso());
+
 		String pattern = resolveEmbeddedValue(annotation.pattern());
 		if (StringUtils.hasLength(pattern)) {
 			formatter.setPattern(pattern);
 		}
+
+		List<String> resolvedFallbackPatterns = new ArrayList<>();
+		for (String fallbackPattern : annotation.fallbackPatterns()) {
+			String resolvedFallbackPattern = resolveEmbeddedValue(fallbackPattern);
+			if (StringUtils.hasLength(resolvedFallbackPattern)) {
+				resolvedFallbackPatterns.add(resolvedFallbackPattern);
+			}
+		}
+		if (!resolvedFallbackPatterns.isEmpty()) {
+			formatter.setFallbackPatterns(resolvedFallbackPatterns.toArray(new String[0]));
+		}
+
 		return formatter;
 	}
 

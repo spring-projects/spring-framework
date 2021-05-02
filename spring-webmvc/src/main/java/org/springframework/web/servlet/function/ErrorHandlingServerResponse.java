@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Base class for {@link ServerResponse} implementations with error handling.
- *
  * @author Arjen Poutsma
  * @since 5.3
  */
@@ -55,20 +54,35 @@ abstract class ErrorHandlingServerResponse implements ServerResponse {
 	}
 
 	@Nullable
-	protected ModelAndView handleError(Throwable t, HttpServletRequest servletRequest,
+	protected final ModelAndView handleError(Throwable t, HttpServletRequest servletRequest,
 			HttpServletResponse servletResponse, Context context) throws ServletException, IOException {
 
+		ServerResponse serverResponse = errorResponse(t, servletRequest);
+		if (serverResponse != null) {
+			return serverResponse.writeTo(servletRequest, servletResponse, context);
+		}
+		else if (t instanceof ServletException) {
+			throw (ServletException) t;
+		}
+		else if (t instanceof IOException) {
+			throw (IOException) t;
+		}
+		else {
+			throw new ServletException(t);
+		}
+	}
+
+	@Nullable
+	protected final ServerResponse errorResponse(Throwable t, HttpServletRequest servletRequest) {
 		for (ErrorHandler<?> errorHandler : this.errorHandlers) {
 			if (errorHandler.test(t)) {
 				ServerRequest serverRequest = (ServerRequest)
 						servletRequest.getAttribute(RouterFunctions.REQUEST_ATTRIBUTE);
-				ServerResponse serverResponse = errorHandler.handle(t, serverRequest);
-				return serverResponse.writeTo(servletRequest, servletResponse, context);
+				return errorHandler.handle(t, serverRequest);
 			}
 		}
-		throw new ServletException(t);
+		return null;
 	}
-
 
 	private static class ErrorHandler<T extends ServerResponse> {
 

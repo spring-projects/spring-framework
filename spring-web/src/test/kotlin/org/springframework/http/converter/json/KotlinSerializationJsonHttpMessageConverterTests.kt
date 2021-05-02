@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		assertThat(converter.canRead(typeTokenOf<List<Int>>(), List::class.java, MediaType.APPLICATION_PDF)).isFalse()
 
 		assertThat(converter.canRead(typeTokenOf<Ordered>(), Ordered::class.java, MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(converter.canRead(typeTokenOf<List<Ordered>>(), List::class.java, MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test
@@ -315,7 +316,8 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 			val number: Int,
 			val string: String?,
 			val bool: Boolean,
-			val fraction: Float
+			val fraction: Float,
+			val serializableBean: SerializableBean? = null
 	)
 
 	data class NotSerializableBean(val string: String)

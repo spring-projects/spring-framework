@@ -18,6 +18,7 @@ package org.springframework.web.reactive.socket.adapter;
 
 import java.util.function.Consumer;
 
+import io.netty.channel.ChannelId;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -25,6 +26,7 @@ import reactor.core.publisher.Mono;
 import reactor.netty.Connection;
 import reactor.netty.NettyInbound;
 import reactor.netty.NettyOutbound;
+import reactor.netty.channel.ChannelOperations;
 import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
 
@@ -46,6 +48,8 @@ public class ReactorNettyWebSocketSession
 
 	private final int maxFramePayloadLength;
 
+	private final ChannelId channelId;
+
 
 	/**
 	 * Constructor for the session, using the {@link #DEFAULT_FRAME_MAX_SIZE} value.
@@ -66,6 +70,16 @@ public class ReactorNettyWebSocketSession
 
 		super(new WebSocketConnection(inbound, outbound), info, bufferFactory);
 		this.maxFramePayloadLength = maxFramePayloadLength;
+		this.channelId = ((ChannelOperations) inbound).channel().id();
+	}
+
+
+	/**
+	 * Return the id of the underlying Netty channel.
+	 * @since 5.3.4
+	 */
+	public ChannelId getChannelId() {
+		return this.channelId;
 	}
 
 

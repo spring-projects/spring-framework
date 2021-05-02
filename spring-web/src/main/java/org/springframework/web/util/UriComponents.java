@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,10 +201,11 @@ public abstract class UriComponents implements Serializable {
 
 	/**
 	 * Concatenate all URI components to return the fully formed URI String.
-	 * <p>This method does nothing more than a simple concatenation based on
-	 * current values. That means it could produce different results if invoked
-	 * before vs after methods that can change individual values such as
-	 * {@code encode}, {@code expand}, or {@code normalize}.
+	 * <p>This method amounts to simple String concatenation of the current
+	 * URI component values and as such the result may contain illegal URI
+	 * characters, for example if URI variables have not been expanded or if
+	 * encoding has not been applied via {@link UriComponentsBuilder#encode()}
+	 * or {@link #encode()}.
 	 */
 	public abstract String toUriString();
 

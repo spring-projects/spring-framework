@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  */
 public class GenericTableMetaDataProvider implements TableMetaDataProvider {
@@ -422,8 +423,12 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Error while retrieving meta-data for table columns: " + ex.getMessage());
+				logger.warn("Error while retrieving meta-data for table columns. " +
+						"Consider specifying explicit column names -- for example, via SimpleJdbcInsert#usingColumns().",
+						ex);
 			}
+			// Clear the metadata so that we don't retain a partial list of column names
+			this.tableParameterMetaData.clear();
 		}
 		finally {
 			JdbcUtils.closeResultSet(tableColumns);
@@ -432,7 +437,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 
 	/**
-	 * Inner class representing table meta-data.
+	 * Class representing table meta-data.
 	 */
 	private static class TableMetaData {
 

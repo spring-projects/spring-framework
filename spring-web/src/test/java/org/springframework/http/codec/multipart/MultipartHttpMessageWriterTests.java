@@ -37,6 +37,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.ClientCodecConfigurer;
@@ -102,8 +103,12 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 				this.bufferFactory.wrap("Cc".getBytes(StandardCharsets.UTF_8))
 		);
 		FilePart mockPart = mock(FilePart.class);
+		HttpHeaders partHeaders = new HttpHeaders();
+		partHeaders.setContentType(MediaType.TEXT_PLAIN);
+		partHeaders.setContentDispositionFormData("filePublisher", "file.txt");
+		partHeaders.add("foo", "bar");
+		given(mockPart.headers()).willReturn(partHeaders);
 		given(mockPart.content()).willReturn(bufferPublisher);
-		given(mockPart.filename()).willReturn("file.txt");
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("name 1", "value 1");
@@ -166,6 +171,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 		part = requestParts.getFirst("filePublisher");
 		assertThat(part.name()).isEqualTo("filePublisher");
+		assertThat(part.headers()).containsEntry("foo", Collections.singletonList("bar"));
 		assertThat(((FilePart) part).filename()).isEqualTo("file.txt");
 		value = decodeToString(part);
 		assertThat(value).isEqualTo("AaBbCc");

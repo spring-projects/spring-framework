@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.web.testfixture.xml.Pojo;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.io.buffer.DataBufferUtils.release;
 
 /**
@@ -52,19 +53,13 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 	@Override
 	@Test
 	public void canEncode() {
-		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
-		MediaType.APPLICATION_XML)).isTrue();
-		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
-		MediaType.TEXT_XML)).isTrue();
-		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
-		MediaType.APPLICATION_JSON)).isFalse();
+		assertThat(this.encoder.canEncode(forClass(Pojo.class), MediaType.APPLICATION_XML)).isTrue();
+		assertThat(this.encoder.canEncode(forClass(Pojo.class), MediaType.TEXT_XML)).isTrue();
+		assertThat(this.encoder.canEncode(forClass(Pojo.class), new MediaType("application", "foo+xml"))).isTrue();
+		assertThat(this.encoder.canEncode(forClass(Pojo.class), MediaType.APPLICATION_JSON)).isFalse();
 
-		assertThat(this.encoder.canEncode(
-		ResolvableType.forClass(Jaxb2XmlDecoderTests.TypePojo.class),
-		MediaType.APPLICATION_XML)).isTrue();
-
-		assertThat(this.encoder.canEncode(ResolvableType.forClass(getClass()),
-		MediaType.APPLICATION_XML)).isFalse();
+		assertThat(this.encoder.canEncode(forClass(Jaxb2XmlDecoderTests.TypePojo.class), MediaType.APPLICATION_XML)).isTrue();
+		assertThat(this.encoder.canEncode(forClass(getClass()), MediaType.APPLICATION_XML)).isFalse();
 
 		// SPR-15464
 		assertThat(this.encoder.canEncode(ResolvableType.NONE, null)).isFalse();

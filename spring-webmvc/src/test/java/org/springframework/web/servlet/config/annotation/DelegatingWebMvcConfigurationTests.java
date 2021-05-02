@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
@@ -273,7 +274,6 @@ public class DelegatingWebMvcConfigurationTests {
 
 	@Test
 	public void configurePathPatternParser() {
-
 		PathPatternParser patternParser = new PathPatternParser();
 		PathMatcher pathMatcher = mock(PathMatcher.class);
 		UrlPathHelper pathHelper = mock(UrlPathHelper.class);
@@ -312,7 +312,9 @@ public class DelegatingWebMvcConfigurationTests {
 				webMvcConfig.mvcResourceUrlProvider());
 
 		assertThat(annotationsMapping).isNotNull();
-		assertThat(annotationsMapping.getPatternParser()).isSameAs(patternParser);
+		assertThat(annotationsMapping.getPatternParser())
+				.isSameAs(patternParser)
+				.isSameAs(webMvcConfig.mvcPatternParser());
 		configAssertion.accept(annotationsMapping.getUrlPathHelper(), annotationsMapping.getPathMatcher());
 
 		SimpleUrlHandlerMapping mapping = (SimpleUrlHandlerMapping) webMvcConfig.viewControllerHandlerMapping(
@@ -332,7 +334,16 @@ public class DelegatingWebMvcConfigurationTests {
 		assertThat(mapping.getPatternParser()).isSameAs(patternParser);
 		configAssertion.accept(mapping.getUrlPathHelper(), mapping.getPathMatcher());
 
+		BeanNameUrlHandlerMapping beanNameMapping = webMvcConfig.beanNameHandlerMapping(
+				webMvcConfig.mvcConversionService(),
+				webMvcConfig.mvcResourceUrlProvider());
+
+		assertThat(beanNameMapping).isNotNull();
+		assertThat(beanNameMapping.getPatternParser()).isSameAs(patternParser);
+		configAssertion.accept(beanNameMapping.getUrlPathHelper(), beanNameMapping.getPathMatcher());
+
 		assertThat(webMvcConfig.mvcResourceUrlProvider().getUrlPathHelper()).isSameAs(pathHelper);
 		assertThat(webMvcConfig.mvcResourceUrlProvider().getPathMatcher()).isSameAs(pathMatcher);
 	}
+
 }

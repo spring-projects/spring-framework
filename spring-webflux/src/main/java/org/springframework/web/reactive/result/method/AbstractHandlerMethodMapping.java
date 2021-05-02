@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,6 +211,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			if (logger.isTraceEnabled()) {
 				logger.trace(formatMappings(userType, methods));
 			}
+			else if (mappingsLogger.isDebugEnabled()) {
+				mappingsLogger.debug(formatMappings(userType, methods));
+			}
 			methods.forEach((method, mapping) -> {
 				Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
 				registerHandlerMethod(handler, invocableMethod, mapping);
@@ -330,19 +333,25 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					logger.trace(exchange.getLogPrefix() + matches.size() + " matching mappings: " + matches);
 				}
 				if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
-					return PREFLIGHT_AMBIGUOUS_MATCH;
+					for (Match match : matches) {
+						if (match.hasCorsConfig()) {
+							return PREFLIGHT_AMBIGUOUS_MATCH;
+						}
+					}
 				}
-				Match secondBestMatch = matches.get(1);
-				if (comparator.compare(bestMatch, secondBestMatch) == 0) {
-					Method m1 = bestMatch.handlerMethod.getMethod();
-					Method m2 = secondBestMatch.handlerMethod.getMethod();
-					RequestPath path = exchange.getRequest().getPath();
-					throw new IllegalStateException(
-							"Ambiguous handler methods mapped for '" + path + "': {" + m1 + ", " + m2 + "}");
+				else {
+					Match secondBestMatch = matches.get(1);
+					if (comparator.compare(bestMatch, secondBestMatch) == 0) {
+						Method m1 = bestMatch.getHandlerMethod().getMethod();
+						Method m2 = secondBestMatch.getHandlerMethod().getMethod();
+						RequestPath path = exchange.getRequest().getPath();
+						throw new IllegalStateException(
+								"Ambiguous handler methods mapped for '" + path + "': {" + m1 + ", " + m2 + "}");
+					}
 				}
 			}
-			handleMatch(bestMatch.mapping, bestMatch.handlerMethod, exchange);
-			return bestMatch.handlerMethod;
+			handleMatch(bestMatch.mapping, bestMatch.getHandlerMethod(), exchange);
+			return bestMatch.getHandlerMethod();
 		}
 		else {
 			return handleNoMatch(this.mappingRegistry.getRegistrations().keySet(), exchange);
@@ -353,8 +362,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		for (T mapping : mappings) {
 			T match = getMatchingMapping(mapping, exchange);
 			if (match != null) {
-				matches.add(new Match(match,
-						this.mappingRegistry.getRegistrations().get(mapping).getHandlerMethod()));
+				matches.add(new Match(match, this.mappingRegistry.getRegistrations().get(mapping)));
 			}
 		}
 	}
@@ -519,13 +527,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					this.pathLookup.add(path, mapping);
 				}
 
-				CorsConfiguration config = initCorsConfiguration(handler, method, mapping);
-				if (config != null) {
-					config.validateAllowCredentials();
-					this.corsLookup.put(handlerMethod, config);
+				CorsConfiguration corsConfig = initCorsConfiguration(handler, method, mapping);
+				if (corsConfig != null) {
+					corsConfig.validateAllowCredentials();
+					this.corsLookup.put(handlerMethod, corsConfig);
 				}
 
-				this.registry.put(mapping, new MappingRegistration<>(mapping, handlerMethod, directPaths));
+				this.registry.put(mapping,
+						new MappingRegistration<>(mapping, handlerMethod, directPaths, corsConfig != null));
 			}
 			finally {
 				this.readWriteLock.writeLock().unlock();
@@ -578,12 +587,17 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private final Set<String> directPaths;
 
-		public MappingRegistration(T mapping, HandlerMethod handlerMethod, @Nullable Set<String> directPaths) {
+		private final boolean corsConfig;
+
+		public MappingRegistration(
+				T mapping, HandlerMethod handlerMethod, @Nullable Set<String> directPaths, boolean corsConfig) {
+
 			Assert.notNull(mapping, "Mapping must not be null");
 			Assert.notNull(handlerMethod, "HandlerMethod must not be null");
 			this.mapping = mapping;
 			this.handlerMethod = handlerMethod;
 			this.directPaths = (directPaths != null ? directPaths : Collections.emptySet());
+			this.corsConfig = corsConfig;
 		}
 
 		public T getMapping() {
@@ -597,6 +611,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		public Set<String> getDirectPaths() {
 			return this.directPaths;
 		}
+
+		public boolean hasCorsConfig() {
+			return this.corsConfig;
+		}
 	}
 
 
@@ -608,11 +626,23 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private final T mapping;
 
-		private final HandlerMethod handlerMethod;
+		private final MappingRegistration<T> registration;
 
-		public Match(T mapping, HandlerMethod handlerMethod) {
+		public Match(T mapping, MappingRegistration<T> registration) {
 			this.mapping = mapping;
-			this.handlerMethod = handlerMethod;
+			this.registration = registration;
+		}
+
+		public T getMapping() {
+			return this.mapping;
+		}
+
+		public HandlerMethod getHandlerMethod() {
+			return this.registration.getHandlerMethod();
+		}
+
+		public boolean hasCorsConfig() {
+			return this.registration.hasCorsConfig();
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.mock.web;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -112,7 +113,7 @@ class MockHttpServletRequestTests {
 	@Test
 	void setContentAndGetContentAsStringWithExplicitCharacterEncoding() throws IOException {
 		String palindrome = "ablE was I ere I saw Elba";
-		byte[] bytes = palindrome.getBytes("UTF-16");
+		byte[] bytes = palindrome.getBytes(StandardCharsets.UTF_16);
 		request.setCharacterEncoding("UTF-16");
 		request.setContent(bytes);
 		assertThat(request.getContentLength()).isEqualTo(bytes.length);
@@ -394,7 +395,7 @@ class MockHttpServletRequestTests {
 	void getServerNameWithInvalidIpv6AddressViaHostHeader() {
 		request.addHeader(HOST, "[::ffff:abcd:abcd"); // missing closing bracket
 		assertThatIllegalStateException()
-			.isThrownBy(() -> request.getServerName())
+			.isThrownBy(request::getServerName)
 			.withMessageStartingWith("Invalid Host header: ");
 	}
 
@@ -426,7 +427,7 @@ class MockHttpServletRequestTests {
 	void getServerPortWithInvalidIpv6AddressViaHostHeader() {
 		request.addHeader(HOST, "[::ffff:abcd:abcd:8080"); // missing closing bracket
 		assertThatIllegalStateException()
-			.isThrownBy(() -> request.getServerPort())
+			.isThrownBy(request::getServerPort)
 			.withMessageStartingWith("Invalid Host header: ");
 	}
 
@@ -434,7 +435,7 @@ class MockHttpServletRequestTests {
 	void getServerPortWithIpv6AddressAndInvalidPortViaHostHeader() {
 		request.addHeader(HOST, "[::ffff:abcd:abcd]:bogus"); // "bogus" is not a port number
 		assertThatExceptionOfType(NumberFormatException.class)
-			.isThrownBy(() -> request.getServerPort())
+			.isThrownBy(request::getServerPort)
 			.withMessageContaining("bogus");
 	}
 
@@ -521,7 +522,7 @@ class MockHttpServletRequestTests {
 	void getRequestURLWithInvalidIpv6AddressViaHostHeader() {
 		request.addHeader(HOST, "[::ffff:abcd:abcd"); // missing closing bracket
 		assertThatIllegalStateException()
-			.isThrownBy(() -> request.getRequestURL())
+			.isThrownBy(request::getRequestURL)
 			.withMessageStartingWith("Invalid Host header: ");
 	}
 

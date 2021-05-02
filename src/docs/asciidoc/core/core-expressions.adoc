@@ -433,9 +433,9 @@ interpreter and only 3ms using the compiled version of the expression.
 
 The compiler is not turned on by default, but you can turn it on in either of two
 different ways. You can turn it on by using the parser configuration process
-(<<expressions-parser-configuration, discussed earlier>>) or by using a system
-property when SpEL usage is embedded inside another component. This section
-discusses both of these options.
+(<<expressions-parser-configuration, discussed earlier>>) or by using a Spring property
+when SpEL usage is embedded inside another component. This section discusses both of
+these options.
 
 The compiler can operate in one of three modes, which are captured in the
 `org.springframework.expression.spel.SpelCompilerMode` enum. The modes are as follows:
@@ -496,10 +496,12 @@ It is important to ensure that, if a classloader is specified, it can see all th
 the expression evaluation process. If you do not specify a classloader, a default classloader is used
 (typically the context classloader for the thread that is running during expression evaluation).
 
-The second way to configure the compiler is for use when SpEL is embedded inside some other
-component and it may not be possible to configure it through a configuration object. In these
-cases, it is possible to use a system property. You can set the `spring.expression.compiler.mode`
-property to one of the `SpelCompilerMode` enum values (`off`, `immediate`, or `mixed`).
+The second way to configure the compiler is for use when SpEL is embedded inside some
+other component and it may not be possible to configure it through a configuration
+object. In these cases, it is possible to set the `spring.expression.compiler.mode`
+property via a JVM system property (or via the
+<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism) to one of the
+`SpelCompilerMode` enum values (`off`, `immediate`, or `mixed`).
 
 
 [[expressions-compiler-limitations]]
@@ -515,7 +517,7 @@ kinds of expression cannot be compiled at the moment:
 * Expressions using custom resolvers or accessors
 * Expressions using selection or projection
 
-More types of expression will be compilable in the future.
+More types of expressions will be compilable in the future.
 
 
 
@@ -587,7 +589,7 @@ You can also refer to other bean properties by name, as the following example sh
 To specify a default value, you can place the `@Value` annotation on fields, methods,
 and method or constructor parameters.
 
-The following example sets the default value of a field variable:
+The following example sets the default value of a field:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -786,7 +788,7 @@ using a literal on one side of a logical comparison operator.
 ----
 
 Numbers support the use of the negative sign, exponential notation, and decimal points.
-By default, real numbers are parsed by using Double.parseDouble().
+By default, real numbers are parsed by using `Double.parseDouble()`.
 
 
 
@@ -794,10 +796,10 @@ By default, real numbers are parsed by using Double.parseDouble().
 === Properties, Arrays, Lists, Maps, and Indexers
 
 Navigating with property references is easy. To do so, use a period to indicate a nested
-property value. The instances of the `Inventor` class, `pupin` and `tesla`, were populated with
-data listed in the <<expressions-example-classes, Classes used in the examples>> section.
-To navigate "`down`" and get Tesla's year of birth and Pupin's city of birth, we use the following
-expressions:
+property value. The instances of the `Inventor` class, `pupin` and `tesla`, were
+populated with data listed in the <<expressions-example-classes, Classes used in the
+examples>> section. To navigate "down" the object graph and get Tesla's year of birth and
+Pupin's city of birth, we use the following expressions:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -937,7 +939,7 @@ You can directly express lists in an expression by using `{}` notation.
 ----
 
 `{}` by itself means an empty list. For performance reasons, if the list is itself
-entirely composed of fixed literals,  a constant list is created to represent the
+entirely composed of fixed literals, a constant list is created to represent the
 expression (rather than building a new list on each evaluation).
 
 
@@ -956,7 +958,7 @@ following example shows how to do so:
 
 	Map mapOfMaps = (Map) parser.parseExpression("{name:{first:'Nikola',last:'Tesla'},dob:{day:10,month:'July',year:1856}}").getValue(context);
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
 	// evaluates to a Java map containing the two entries
@@ -965,10 +967,11 @@ following example shows how to do so:
 	val mapOfMaps = parser.parseExpression("{name:{first:'Nikola',last:'Tesla'},dob:{day:10,month:'July',year:1856}}").getValue(context) as Map<*, *>	
 ----
 
-`{:}` by itself means an empty map. For performance reasons, if the map is itself composed
-of fixed literals or other nested constant structures (lists or maps), a constant map is created
-to represent the expression (rather than building a new map on each evaluation). Quoting of the map keys
-is optional. The examples above do not use quoted keys.
+`{:}` by itself means an empty map. For performance reasons, if the map is itself
+composed of fixed literals or other nested constant structures (lists or maps), a
+constant map is created to represent the expression (rather than building a new map on
+each evaluation). Quoting of the map keys is optional (unless the key contains a period
+(`.`)). The examples above do not use quoted keys.
 
 
 
@@ -1001,8 +1004,7 @@ to have the array populated at construction time. The following example shows ho
 	val numbers3 = parser.parseExpression("new int[4][5]").getValue(context) as Array<IntArray>
 ----
 
-You cannot currently supply an initializer when you construct
-multi-dimensional array.
+You cannot currently supply an initializer when you construct a multi-dimensional array.
 
 
 
@@ -1103,7 +1105,7 @@ expression-based `matches` operator. The following listing shows examples of bot
 	boolean trueValue = parser.parseExpression(
 			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
 
-	//evaluates to false
+	// evaluates to false
 	boolean falseValue = parser.parseExpression(
 			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
 ----
@@ -1118,14 +1120,14 @@ expression-based `matches` operator. The following listing shows examples of bot
 	val trueValue = parser.parseExpression(
 			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean::class.java)
 
-	//evaluates to false
+	// evaluates to false
 	val falseValue = parser.parseExpression(
 			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean::class.java)
 ----
 
-CAUTION: Be careful with primitive types, as they are immediately boxed up to the wrapper type,
-so `1 instanceof T(int)` evaluates to `false` while `1 instanceof T(Integer)`
-evaluates to `true`, as expected.
+CAUTION: Be careful with primitive types, as they are immediately boxed up to their
+wrapper types. For example, `1 instanceof T(int)` evaluates to `false`, while
+`1 instanceof T(Integer)` evaluates to `true`, as expected.
 
 Each symbolic operator can also be specified as a purely alphabetic equivalent. This
 avoids problems where the symbols used have special meaning for the document type in
@@ -1153,7 +1155,7 @@ SpEL supports the following logical operators:
 * `or` (`||`)
 * `not` (`!`)
 
-The following example shows how to use the logical operators
+The following example shows how to use the logical operators:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1220,10 +1222,11 @@ The following example shows how to use the logical operators
 [[expressions-operators-mathematical]]
 ==== Mathematical Operators
 
-You can use the addition operator on both numbers and strings. You can use the subtraction, multiplication,
-and division operators only on numbers. You can also use
-the modulus (%) and exponential power (^) operators. Standard operator precedence is enforced. The
-following example shows the mathematical operators in use:
+You can use the addition operator (`+`) on both numbers and strings. You can use the
+subtraction (`-`), multiplication (`*`), and division (`/`) operators only on numbers.
+You can also use the modulus (`%`) and exponential power (`^`) operators on numbers.
+Standard operator precedence is enforced. The following example shows the mathematical
+operators in use:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1294,9 +1297,9 @@ following example shows the mathematical operators in use:
 [[expressions-assignment]]
 ==== The Assignment Operator
 
-To setting a property, use the assignment operator (`=`). This is typically
-done within a call to `setValue` but can also be done inside a call to `getValue`. The
-following listing shows both ways to use the assignment operator:
+To set a property, use the assignment operator (`=`). This is typically done within a
+call to `setValue` but can also be done inside a call to `getValue`. The following
+listing shows both ways to use the assignment operator:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1331,9 +1334,9 @@ You can use the special `T` operator to specify an instance of `java.lang.Class`
 type). Static methods are invoked by using this operator as well. The
 `StandardEvaluationContext` uses a `TypeLocator` to find types, and the
 `StandardTypeLocator` (which can be replaced) is built with an understanding of the
-`java.lang` package. This means that `T()` references to types within `java.lang` do not need to be
-fully qualified, but all other type references must be. The following example shows how
-to use the `T` operator:
+`java.lang` package. This means that `T()` references to types within the `java.lang`
+package do not need to be fully qualified, but all other type references must be. The
+following example shows how to use the `T` operator:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1363,9 +1366,10 @@ to use the `T` operator:
 [[expressions-constructors]]
 === Constructors
 
-You can invoke constructors by using the `new` operator. You should use the fully qualified class name
-for all but the primitive types (`int`, `float`, and so on) and String. The following
-example shows how to use the `new` operator to invoke constructors:
+You can invoke constructors by using the `new` operator. You should use the fully
+qualified class name for all types except those located in the `java.lang` package
+(`Integer`, `Float`, `String`, and so on). The following example shows how to use the
+`new` operator to invoke constructors:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1374,7 +1378,7 @@ example shows how to use the `new` operator to invoke constructors:
 			"new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German')")
 			.getValue(Inventor.class);
 
-	//create new inventor instance within add method of List
+	// create new Inventor instance within the add() method of List
 	p.parseExpression(
 			"Members.add(new org.spring.samples.spel.inventor.Inventor(
 				'Albert Einstein', 'German'))").getValue(societyContext);
@@ -1386,7 +1390,7 @@ example shows how to use the `new` operator to invoke constructors:
 			"new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German')")
 			.getValue(Inventor::class.java)
 
-	//create new inventor instance within add method of List
+	// create new Inventor instance within the add() method of List
 	p.parseExpression(
 			"Members.add(new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German'))")
 			.getValue(societyContext)
@@ -1800,7 +1804,7 @@ Selection is a powerful expression language feature that lets you transform a
 source collection into another collection by selecting from its entries.
 
 Selection uses a syntax of `.?[selectionExpression]`. It filters the collection and
-returns a new collection that contain a subset of the original elements. For example,
+returns a new collection that contains a subset of the original elements. For example,
 selection lets us easily get a list of Serbian inventors, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -1816,14 +1820,14 @@ selection lets us easily get a list of Serbian inventors, as the following examp
 			"members.?[nationality == 'Serbian']").getValue(societyContext) as List<Inventor>
 ----
 
-Selection is possible upon both lists and maps. For a list, the selection
-criteria is evaluated against each individual list element. Against a map, the
-selection criteria is evaluated against each map entry (objects of the Java type
-`Map.Entry`). Each map entry has its key and value accessible as properties for use in
-the selection.
+Selection is supported for arrays and anything that implements `java.lang.Iterable` or
+`java.util.Map`. For a list or array, the selection criteria is evaluated against each
+individual element. Against a map, the selection criteria is evaluated against each map
+entry (objects of the Java type `Map.Entry`). Each map entry has its `key` and `value`
+accessible as properties for use in the selection.
 
-The following expression returns a new map that consists of those elements of the original map
-where the entry value is less than 27:
+The following expression returns a new map that consists of those elements of the
+original map where the entry's value is less than 27:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1836,9 +1840,8 @@ where the entry value is less than 27:
 	val newMap = parser.parseExpression("map.?[value<27]").getValue()
 ----
 
-
-In addition to returning all the selected elements, you can retrieve only the
-first or the last value. To obtain the first entry matching the selection, the syntax is
+In addition to returning all the selected elements, you can retrieve only the first or
+the last element. To obtain the first element matching the selection, the syntax is
 `.^[selectionExpression]`. To obtain the last matching selection, the syntax is
 `.$[selectionExpression]`.
 
@@ -1847,11 +1850,11 @@ first or the last value. To obtain the first entry matching the selection, the s
 [[expressions-collection-projection]]
 === Collection Projection
 
-Projection lets a collection drive the evaluation of a sub-expression, and the
-result is a new collection. The syntax for projection is `.![projectionExpression]`. For
-example, suppose we have a list of inventors but want the list of
-cities where they were born. Effectively, we want to evaluate 'placeOfBirth.city' for
-every entry in the inventor list. The following example uses projection to do so:
+Projection lets a collection drive the evaluation of a sub-expression, and the result is
+a new collection. The syntax for projection is `.![projectionExpression]`. For example,
+suppose we have a list of inventors but want the list of cities where they were born.
+Effectively, we want to evaluate 'placeOfBirth.city' for every entry in the inventor
+list. The following example uses projection to do so:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1866,7 +1869,8 @@ every entry in the inventor list. The following example uses projection to do so
 	val placesOfBirth = parser.parseExpression("members.![placeOfBirth.city]") as List<*>
 ----
 
-You can also use a map to drive projection and, in this case, the projection expression is
+Projection is supported for arrays and anything that implements `java.lang.Iterable` or
+`java.util.Map`. When using a map to drive projection, the projection expression is
 evaluated against each entry in the map (represented as a Java `Map.Entry`). The result
 of a projection across a map is a list that consists of the evaluation of the projection
 expression against each map entry.

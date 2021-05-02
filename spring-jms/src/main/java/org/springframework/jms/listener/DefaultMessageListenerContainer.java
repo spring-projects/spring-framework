@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,6 +191,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	private int idleConsumerLimit = 1;
 
 	private int idleTaskExecutionLimit = 1;
+
+	private int idleReceivesPerTaskLimit = Integer.MIN_VALUE;
 
 	private final Set<AsyncMessageListenerInvoker> scheduledInvokers = new HashSet<>();
 
@@ -505,6 +507,49 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	public final int getIdleTaskExecutionLimit() {
 		synchronized (this.lifecycleMonitor) {
 			return this.idleTaskExecutionLimit;
+		}
+	}
+
+	/**
+	 * Marks the consumer as 'idle' after the specified number of idle receives
+	 * have been reached. An idle receive is counted from the moment a null message
+	 * is returned by the receiver after the potential {@link #setReceiveTimeout}
+	 * elapsed. This gives the opportunity to check if the idle task count exceeds
+	 * {@link #setIdleTaskExecutionLimit} and based on that decide if the task needs
+	 * to be re-scheduled or not, saving resources that would otherwise be held.
+	 * <p>This setting differs from {@link #setMaxMessagesPerTask} where the task is
+	 * released and re-scheduled after this limit is reached, no matter if the received
+	 * messages were null or non-null messages. This setting alone can be inflexible
+	 * if one desires to have a large enough batch for each task but requires a
+	 * quick(er) release from the moment there are no more messages to process.
+	 * <p>This setting differs from {@link #setIdleTaskExecutionLimit} where this limit
+	 * decides after how many iterations of being marked as idle, a task is released.
+	 * <p>For example: If {@link #setMaxMessagesPerTask} is set to '500' and
+	 * {@code #setIdleReceivesPerTaskLimit} is set to '60' and {@link #setReceiveTimeout}
+	 * is set to '1000' and {@link #setIdleTaskExecutionLimit} is set to '1', then 500
+	 * messages per task would be processed unless there is a subsequent number of 60
+	 * idle messages received, the task would be marked as idle and released. This also
+	 * means that after the last message was processed, the task would be released after
+	 * 60 seconds as long as no new messages appear.
+	 * @since 5.3.5
+	 * @see #setMaxMessagesPerTask
+	 * @see #setReceiveTimeout
+	 */
+	public void setIdleReceivesPerTaskLimit(int idleReceivesPerTaskLimit) {
+		Assert.isTrue(idleReceivesPerTaskLimit != 0, "'idleReceivesPerTaskLimit' must not be 0)");
+		synchronized (this.lifecycleMonitor) {
+			this.idleReceivesPerTaskLimit = idleReceivesPerTaskLimit;
+		}
+	}
+
+	/**
+	 * Return the maximum number of subsequent null messages to receive in a single task
+	 * before marking the consumer as 'idle'.
+	 * @since 5.3.5
+	 */
+	public int getIdleReceivesPerTaskLimit() {
+		synchronized (this.lifecycleMonitor) {
+			return this.idleReceivesPerTaskLimit;
 		}
 	}
 
@@ -963,11 +1008,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				}
 			}
 			if (!applyBackOffTime(execution)) {
-				StringBuilder msg = new StringBuilder();
-				msg.append("Stopping container for destination '")
-						.append(getDestinationDescription())
-						.append("': back-off policy does not allow ").append("for further attempts.");
-				logger.error(msg.toString());
+				logger.error("Stopping container for destination '" + getDestinationDescription() +
+						"': back-off policy does not allow for further attempts.");
 				stop();
 			}
 		}
@@ -1072,14 +1114,20 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 			boolean messageReceived = false;
 			try {
-				if (maxMessagesPerTask < 0) {
+				int messageLimit = maxMessagesPerTask;
+				int idleLimit = idleReceivesPerTaskLimit;
+				if (messageLimit < 0 && idleLimit < 0) {
 					messageReceived = executeOngoingLoop();
 				}
 				else {
 					int messageCount = 0;
-					while (isRunning() && messageCount < maxMessagesPerTask) {
-						messageReceived = (invokeListener() || messageReceived);
+					int idleCount = 0;
+					while (isRunning() && (messageLimit < 0 || messageCount < messageLimit) &&
+							(idleLimit < 0 || idleCount < idleLimit)) {
+						boolean currentReceived = invokeListener();
+						messageReceived |= currentReceived;
 						messageCount++;
+						idleCount = (currentReceived ? 0 : idleCount + 1);
 					}
 				}
 			}

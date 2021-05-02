@@ -103,7 +103,7 @@ example implements `Validator` for `Person` instances:
 ----
 	class PersonValidator : Validator {
 
-		/**
+		/\**
 		 * This Validator validates only Person instances
 		 */
 		override fun supports(clazz: Class<*>): Boolean {
@@ -500,8 +500,9 @@ the various `PropertyEditor` implementations that Spring provides:
 
 | `LocaleEditor`
 | Can resolve strings to `Locale` objects and vice-versa (the string format is
-  `[language]_[country]_[variant]`, same as the `toString()` method of
-  `Locale`). By default, registered by `BeanWrapperImpl`.
+  `[language]\_[country]_[variant]`, same as the `toString()` method of
+  `Locale`). Also accepts spaces as separators, as an alternative to underscores.
+  By default, registered by `BeanWrapperImpl`.
 
 | `PatternEditor`
 | Can resolve strings to `java.util.regex.Pattern` objects and vice-versa.
@@ -541,10 +542,9 @@ com
 
 Note that you can also use the standard `BeanInfo` JavaBeans mechanism here as well
 (described to some extent
-https://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html[
-here]). The following example use the `BeanInfo` mechanism to
-explicitly register one or more `PropertyEditor` instances with the properties of an
-associated class:
+https://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html[here]). The
+following example uses the `BeanInfo` mechanism to explicitly register one or more
+`PropertyEditor` instances with the properties of an associated class:
 
 [literal,subs="verbatim,quotes"]
 ----
@@ -567,9 +567,10 @@ associates a `CustomNumberEditor` with the `age` property of the `Something` cla
 			try {
 				final PropertyEditor numberPE = new CustomNumberEditor(Integer.class, true);
 				PropertyDescriptor ageDescriptor = new PropertyDescriptor("age", Something.class) {
+					@Override
 					public PropertyEditor createPropertyEditor(Object bean) {
 						return numberPE;
-					};
+					}
 				};
 				return new PropertyDescriptor[] { ageDescriptor };
 			}
@@ -625,7 +626,7 @@ nested property setup, so we strongly recommend that you use it with the
 where it can be automatically detected and applied.
 
 Note that all bean factories and application contexts automatically use a number of
-built-in property editors, through their use a `BeanWrapper` to
+built-in property editors, through their use of a `BeanWrapper` to
 handle property conversions. The standard property editors that the `BeanWrapper`
 registers are listed in the <<beans-beans-conversion, previous section>>.
 Additionally, `ApplicationContexts` also override or add additional editors to handle
@@ -874,24 +875,13 @@ application where type conversion is needed.
 The SPI to implement type conversion logic is simple and strongly typed, as the following
 interface definition shows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.core.convert.converter;
 
 	public interface Converter<S, T> {
 
 		T convert(S source);
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	package org.springframework.core.convert.converter
-
-	interface Converter<S, T> {
-
-		fun convert(source: S): T
 	}
 ----
 
@@ -910,8 +900,7 @@ Several converter implementations are provided in the `core.convert.support` pac
 a convenience. These include converters from strings to numbers and other common types.
 The following listing shows the `StringToInteger` class, which is a typical `Converter` implementation:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.core.convert.support;
 
@@ -919,20 +908,6 @@ The following listing shows the `StringToInteger` class, which is a typical `Con
 
 		public Integer convert(String source) {
 			return Integer.valueOf(source);
-		}
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	package org.springframework.core.convert.support
-
-	import org.springframework.core.convert.converter.Converter
-
-	internal class StringToInteger : Converter<String, Int> {
-
-		override fun convert(source: String): Int? {
-			return Integer.valueOf(source)
 		}
 	}
 ----
@@ -946,24 +921,13 @@ When you need to centralize the conversion logic for an entire class hierarchy
 (for example, when converting from `String` to `Enum` objects), you can implement
 `ConverterFactory`, as the following example shows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.core.convert.converter;
 
 	public interface ConverterFactory<S, R> {
 
 		<T extends R> Converter<S, T> getConverter(Class<T> targetType);
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	package org.springframework.core.convert.converter
-
-	interface ConverterFactory<S, R> {
-
-		fun <T : R> getConverter(targetType: Class<T>): Converter<S, T>
 	}
 ----
 
@@ -974,7 +938,6 @@ where T is a subclass of R.
 Consider the `StringToEnumConverterFactory` as an example:
 
 [source,java,indent=0,subs="verbatim,quotes"]
-.Java
 ----
 	package org.springframework.core.convert.support;
 
@@ -1011,8 +974,7 @@ context that you can use when you implement your conversion logic. Such context 
 type conversion be driven by a field annotation or by generic information declared on a
 field signature. The following listing shows the interface definition of `GenericConverter`:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.core.convert.converter;
 
@@ -1021,18 +983,6 @@ field signature. The following listing shows the interface definition of `Generi
 		public Set<ConvertiblePair> getConvertibleTypes();
 
 		Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	package org.springframework.core.convert.converter
-
-	interface GenericConverter {
-
-		fun getConvertibleTypes(): Set<ConvertiblePair>?
-
-		fun convert(@Nullable source: Any?, sourceType: TypeDescriptor, targetType: TypeDescriptor): Any?
 	}
 ----
 
@@ -1063,8 +1013,7 @@ on the target field, or you might want to run a `Converter` only if a specific m
 `ConditionalGenericConverter` is the union of the `GenericConverter` and
 `ConditionalConverter` interfaces that lets you define such custom matching criteria:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface ConditionalConverter {
 
@@ -1074,19 +1023,9 @@ on the target field, or you might want to run a `Converter` only if a specific m
 	public interface ConditionalGenericConverter extends GenericConverter, ConditionalConverter {
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface ConditionalConverter {
 
-		fun matches(sourceType: TypeDescriptor, targetType: TypeDescriptor): Boolean
-	}
-
-	interface ConditionalGenericConverter : GenericConverter, ConditionalConverter
-----
-
-A good example of a `ConditionalGenericConverter` is an `EntityConverter` that converts
-between a persistent entity identifier and an entity reference. Such an `EntityConverter`
+A good example of a `ConditionalGenericConverter` is an `IdToEntityConverter` that converts
+between a persistent entity identifier and an entity reference. Such an `IdToEntityConverter`
 might match only if the target entity type declares a static finder method (for example,
 `findAccount(Long)`). You might perform such a finder method check in the implementation of
 `matches(TypeDescriptor, TypeDescriptor)`.
@@ -1099,8 +1038,7 @@ might match only if the target entity type declares a static finder method (for 
 `ConversionService` defines a unified API for executing type conversion logic at
 runtime. Converters are often run behind the following facade interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.core.convert;
 
@@ -1113,24 +1051,6 @@ runtime. Converters are often run behind the following facade interface:
 		boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
 
 		Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
-
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	package org.springframework.core.convert
-
-	interface ConversionService {
-
-		fun canConvert(sourceType: Class<*>, targetType: Class<*>): Boolean
-
-		fun <T> convert(source: Any, targetType: Class<T>): T
-
-		fun canConvert(sourceType: TypeDescriptor, targetType: TypeDescriptor): Boolean
-
-		fun convert(source: Any, sourceType: TypeDescriptor, targetType: TypeDescriptor): Any
-
 	}
 ----
 
@@ -1301,8 +1221,7 @@ provides a unified type conversion API for both SPIs.
 The `Formatter` SPI to implement field formatting logic is simple and strongly typed. The
 following listing shows the `Formatter` interface definition:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.format;
 
@@ -1313,40 +1232,21 @@ following listing shows the `Formatter` interface definition:
 `Formatter` extends from the `Printer` and `Parser` building-block interfaces. The
 following listing shows the definitions of those two interfaces:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Printer<T> {
 
 		String print(T fieldValue, Locale locale);
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Printer<T> {
 
-		fun print(fieldValue: T, locale: Locale): String
-	}
-----
-
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import java.text.ParseException;
 
 	public interface Parser<T> {
 
 		T parse(String clientValue, Locale locale) throws ParseException;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Parser<T> {
-
-		@Throws(ParseException::class)
-		fun parse(clientValue: String, locale: Locale): T
 	}
 ----
 
@@ -1432,8 +1332,7 @@ Field formatting can be configured by field type or annotation. To bind
 an annotation to a `Formatter`, implement `AnnotationFormatterFactory`. The following
 listing shows the definition of the `AnnotationFormatterFactory` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.format;
 
@@ -1444,20 +1343,6 @@ listing shows the definition of the `AnnotationFormatterFactory` interface:
 		Printer<?> getPrinter(A annotation, Class<?> fieldType);
 
 		Parser<?> getParser(A annotation, Class<?> fieldType);
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	package org.springframework.format
-
-	interface AnnotationFormatterFactory<A : Annotation> {
-
-		val fieldTypes: Set<Class<*>>
-
-		fun getPrinter(annotation: A, fieldType: Class<*>): Printer<*>
-
-		fun getParser(annotation: A, fieldType: Class<*>): Parser<*>
 	}
 ----
 
@@ -1602,36 +1487,23 @@ for use with Spring's `DataBinder` and the Spring Expression Language (SpEL).
 
 The following listing shows the `FormatterRegistry` SPI:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.format;
 
 	public interface FormatterRegistry extends ConverterRegistry {
 
-		void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser);
+		void addPrinter(Printer<?> printer);
+
+		void addParser(Parser<?> parser);
+
+		void addFormatter(Formatter<?> formatter);
 
 		void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter);
 
-		void addFormatterForFieldType(Formatter<?> formatter);
+		void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser);
 
-		void addFormatterForAnnotation(AnnotationFormatterFactory<?> factory);
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	package org.springframework.format
-
-	interface FormatterRegistry : ConverterRegistry {
-
-		fun addFormatterForFieldType(fieldType: Class<*>, printer: Printer<*>, parser: Parser<*>)
-
-		fun addFormatterForFieldType(fieldType: Class<*>, formatter: Formatter<*>)
-
-		fun addFormatterForFieldType(formatter: Formatter<*>)
-
-		fun addFormatterForAnnotation(factory: AnnotationFormatterFactory<*>)
+		void addFormatterForFieldAnnotation(AnnotationFormatterFactory<? extends Annotation> annotationFormatterFactory);
 	}
 ----
 
@@ -1651,24 +1523,13 @@ these rules once, and they are applied whenever formatting is needed.
 `FormatterRegistrar` is an SPI for registering formatters and converters through the
 FormatterRegistry. The following listing shows its interface definition:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.format;
 
 	public interface FormatterRegistrar {
 
 		void registerFormatters(FormatterRegistry registry);
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	package org.springframework.format
-
-	interface FormatterRegistrar {
-
-		fun registerFormatters(registry: FormatterRegistry)
 	}
 ----
 

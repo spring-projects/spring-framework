@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,45 @@
 package org.springframework.web.socket.server.support;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 /**
- * An extension of {@link SimpleUrlHandlerMapping} that is also a
- * {@link SmartLifecycle} container and propagates start and stop calls to any
- * handlers that implement {@link Lifecycle}. The handlers are typically expected
- * to be {@code WebSocketHttpRequestHandler} or {@code SockJsHttpRequestHandler}.
+ * Extension of {@link SimpleUrlHandlerMapping} with support for more
+ * precise mapping of WebSocket handshake requests to handlers of type
+ * {@link WebSocketHttpRequestHandler}. Also delegates {@link Lifecycle}
+ * methods to handlers in the {@link #getUrlMap()} that implement it.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
  */
 public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements SmartLifecycle {
 
+	private boolean webSocketUpgradeMatch;
+
 	private volatile boolean running;
+
+
+	/**
+	 * When this is set, if the matched handler is
+	 * {@link WebSocketHttpRequestHandler}, ensure the request is a WebSocket
+	 * handshake, i.e. HTTP GET with the header {@code "Upgrade:websocket"},
+	 * or otherwise suppress the match and return {@code null} allowing another
+	 * {@link org.springframework.web.servlet.HandlerMapping} to match for the
+	 * same URL path.
+	 * @param match whether to enable matching on {@code "Upgrade: websocket"}
+	 * @since 5.3.5
+	 */
+	public void setWebSocketUpgradeMatch(boolean match) {
+		this.webSocketUpgradeMatch = match;
+	}
 
 
 	@Override
@@ -74,6 +95,24 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 	@Override
 	public boolean isRunning() {
 		return this.running;
+	}
+
+	@Nullable
+	@Override
+	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
+		Object handler = super.getHandlerInternal(request);
+		return matchWebSocketUpgrade(handler, request) ? handler : null;
+	}
+
+	private boolean matchWebSocketUpgrade(@Nullable Object handler, HttpServletRequest request) {
+		handler = (handler instanceof HandlerExecutionChain ?
+				((HandlerExecutionChain) handler).getHandler() : handler);
+		if (this.webSocketUpgradeMatch && handler instanceof WebSocketHttpRequestHandler) {
+			String header = request.getHeader(HttpHeaders.UPGRADE);
+			return (request.getMethod().equals("GET") &&
+					header != null && header.equalsIgnoreCase("websocket"));
+		}
+		return true;
 	}
 
 }

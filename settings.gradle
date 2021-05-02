@@ -6,7 +6,7 @@ pluginManagement {
 }
 
 plugins {
-	id "com.gradle.enterprise" version "3.5.1"
+	id "com.gradle.enterprise" version "3.6.1"
 	id "io.spring.ge.conventions" version "0.0.7"
 }
 
@@ -45,11 +45,11 @@ rootProject.children.each {project ->
 settings.gradle.projectsLoaded {
 	gradleEnterprise {
 		buildScan {
-			if (settings.gradle.rootProject.hasProperty('customJavaHome')) {
-				value("Custom JAVA_HOME", settings.gradle.rootProject.getProperty('customJavaHome'))
+			if (settings.gradle.rootProject.hasProperty('mainToolchain')) {
+				value("Main toolchain", 'JDK' + settings.gradle.rootProject.getProperty('mainToolchain'))
 			}
-			if (settings.gradle.rootProject.hasProperty('customJavaSourceVersion')) {
-				value("Custom Java Source Version", settings.gradle.rootProject.getProperty('customJavaSourceVersion'))
+			if (settings.gradle.rootProject.hasProperty('testToolchain')) {
+				value("Test toolchain", 'JDK' + settings.gradle.rootProject.getProperty('testToolchain'))
 			}
 			File buildDir = settings.gradle.rootProject.getBuildDir()
 			buildDir.mkdirs()

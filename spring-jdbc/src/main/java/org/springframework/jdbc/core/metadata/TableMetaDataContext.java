@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  */
 public class TableMetaDataContext {
@@ -302,8 +303,12 @@ public class TableMetaDataContext {
 				}
 			}
 			else {
-				throw new InvalidDataAccessApiUsageException("Unable to locate columns for table '" +
-						getTableName() + "' so an insert statement can't be generated");
+				String message = "Unable to locate columns for table '" + getTableName()
+						+ "' so an insert statement can't be generated.";
+				if (isAccessTableColumnMetaData()) {
+					message += " Consider specifying explicit column names -- for example, via SimpleJdbcInsert#usingColumns().";
+				}
+				throw new InvalidDataAccessApiUsageException(message);
 			}
 		}
 		String params = String.join(", ", Collections.nCopies(columnCount, "?"));

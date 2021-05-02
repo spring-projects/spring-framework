@@ -522,26 +522,46 @@ public class ReflectUtils {
 			}
 		}
 
-		// Classic option: protected ClassLoader.defineClass method
-		if (c == null && classLoaderDefineClassMethod != null) {
+		// Direct defineClass attempt on the target Classloader
+		if (c == null) {
 			if (protectionDomain == null) {
 				protectionDomain = PROTECTION_DOMAIN;
 			}
-			Object[] args = new Object[]{className, b, 0, b.length, protectionDomain};
+
+			// Look for publicDefineClass(String name, byte[] b, ProtectionDomain protectionDomain)
 			try {
-				if (!classLoaderDefineClassMethod.isAccessible()) {
-					classLoaderDefineClassMethod.setAccessible(true);
-				}
-				c = (Class) classLoaderDefineClassMethod.invoke(loader, args);
+				Method publicDefineClass = loader.getClass().getMethod(
+						"publicDefineClass", String.class, byte[].class, ProtectionDomain.class);
+				c = (Class) publicDefineClass.invoke(loader, className, b, protectionDomain);
 			}
 			catch (InvocationTargetException ex) {
-				throw new CodeGenerationException(ex.getTargetException());
+				if (!(ex.getTargetException() instanceof UnsupportedOperationException)) {
+					throw new CodeGenerationException(ex.getTargetException());
+				}
+				// in case of UnsupportedOperationException, fall through
 			}
 			catch (Throwable ex) {
-				// Fall through if setAccessible fails with InaccessibleObjectException on JDK 9+
-				// (on the module path and/or with a JVM bootstrapped with --illegal-access=deny)
-				if (!ex.getClass().getName().endsWith("InaccessibleObjectException")) {
-					throw new CodeGenerationException(ex);
+				// publicDefineClass method not available -> fall through
+			}
+
+			// Classic option: protected ClassLoader.defineClass method
+			if (c == null && classLoaderDefineClassMethod != null) {
+				Object[] args = new Object[]{className, b, 0, b.length, protectionDomain};
+				try {
+					if (!classLoaderDefineClassMethod.isAccessible()) {
+						classLoaderDefineClassMethod.setAccessible(true);
+					}
+					c = (Class) classLoaderDefineClassMethod.invoke(loader, args);
+				}
+				catch (InvocationTargetException ex) {
+					throw new CodeGenerationException(ex.getTargetException());
+				}
+				catch (Throwable ex) {
+					// Fall through if setAccessible fails with InaccessibleObjectException on JDK 9+
+					// (on the module path and/or with a JVM bootstrapped with --illegal-access=deny)
+					if (!ex.getClass().getName().endsWith("InaccessibleObjectException")) {
+						throw new CodeGenerationException(ex);
+					}
 				}
 			}
 		}

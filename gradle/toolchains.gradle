@@ -1,0 +1,124 @@
+/**
+ * Apply the JVM Toolchain conventions
+ * See https://docs.gradle.org/current/userguide/toolchains.html
+ *
+ * One can choose the toolchain to use for compiling the MAIN sources and/or compiling
+ * and running the TEST sources. These options apply to Java, Kotlin and Groovy sources
+ * when available.
+ * {@code "./gradlew check -PmainToolchain=8 -PtestToolchain=11"} will use:
+ * <ul>
+ *     <li>a JDK8 toolchain for compiling the main SourceSet
+ *     <li>a JDK11 toolchain for compiling and running the test SourceSet
+ * </ul>
+ *
+ * Gradle will automatically detect JDK distributions in well-known locations.
+ * The following command will list the detected JDKs on the host.
+ * {@code
+ * $ ./gradlew -q javaToolchains
+ * }
+ *
+ * We can also configure ENV variables and let Gradle know about them:
+ * {@code
+ * $ echo JDK11
+ * /opt/openjdk/java11
+ * $ echo JDK15
+ * /opt/openjdk/java15
+ * $ ./gradlew -Dorg.gradle.java.installations.fromEnv=JDK11,JDK15 check
+ * }
+ *
+ * @author Brian Clozel
+ */
+
+plugins.withType(JavaPlugin) {
+	// Configure the Java Toolchain if the 'mainToolchain' property is defined
+	if (project.hasProperty('mainToolchain') && project.mainToolchain) {
+		def mainLanguageVersion = JavaLanguageVersion.of(project.mainToolchain.toString())
+		java {
+			toolchain {
+				languageVersion = mainLanguageVersion
+			}
+		}
+	}
+	else {
+		// Fallback to JDK8
+		java {
+			sourceCompatibility = JavaVersion.VERSION_1_8
+		}
+	}
+	// Configure a specific Java Toolchain for compiling and running tests if the 'testToolchain' property is defined
+	if (project.hasProperty('testToolchain') && project.testToolchain) {
+		def testLanguageVersion = JavaLanguageVersion.of(project.testToolchain.toString());
+		tasks.withType(JavaCompile).matching { it.name.contains("Test") }.configureEach {
+			javaCompiler = javaToolchains.compilerFor {
+				languageVersion = testLanguageVersion
+			}
+		}
+		tasks.withType(Test).configureEach{
+			javaLauncher = javaToolchains.launcherFor {
+				languageVersion = testLanguageVersion
+			}
+		}
+	}
+}
+
+plugins.withType(GroovyPlugin) {
+	// Fallback to JDK8
+	if (!project.hasProperty('mainToolchain')) {
+		compileGroovy {
+			sourceCompatibility = JavaVersion.VERSION_1_8
+		}
+	}
+}
+
+// Configure the Kotlin compiler if the 'mainToolchain' property is defined
+pluginManager.withPlugin("kotlin") {
+	if (project.hasProperty('mainToolchain') && project.mainToolchain) {
+		def mainLanguageVersion = JavaLanguageVersion.of(project.mainToolchain.toString());
+		def compiler = javaToolchains.compilerFor {
+			languageVersion = mainLanguageVersion
+		}
+		// See https://kotlinlang.org/docs/gradle.html#attributes-specific-for-jvm
+		def javaVersion = mainLanguageVersion.toString() == '8' ? '1.8' : mainLanguageVersion.toString()
+		compileKotlin {
+			kotlinOptions {
+				jvmTarget = javaVersion
+				jdkHome = compiler.get().metadata.installationPath.asFile.absolutePath
+			}
+		}
+		// Compile the test classes with the same version, 'testToolchain' will override if defined
+		compileTestKotlin {
+			kotlinOptions {
+				jvmTarget = javaVersion
+				jdkHome = compiler.get().metadata.installationPath.asFile.absolutePath
+			}
+		}
+	}
+	else {
+		// Fallback to JDK8
+		compileKotlin {
+			kotlinOptions {
+				jvmTarget = '1.8'
+			}
+		}
+		compileTestKotlin {
+			kotlinOptions {
+				jvmTarget = '1.8'
+			}
+		}
+	}
+	
+	if (project.hasProperty('testToolchain')  && project.testToolchain) {
+		def testLanguageVersion = JavaLanguageVersion.of(project.testToolchain.toString());
+		def compiler = javaToolchains.compilerFor {
+			languageVersion = testLanguageVersion
+		}
+		// See https://kotlinlang.org/docs/gradle.html#attributes-specific-for-jvm
+		def javaVersion = testLanguageVersion.toString() == '8' ? '1.8' : testLanguageVersion.toString()
+		compileTestKotlin {
+			kotlinOptions {
+				jvmTarget = javaVersion
+				jdkHome = compiler.get().metadata.installationPath.asFile.absolutePath
+			}
+		}
+	}
+}

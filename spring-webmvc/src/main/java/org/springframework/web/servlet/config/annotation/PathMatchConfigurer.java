@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,9 @@ public class PathMatchConfigurer {
 
 	@Nullable
 	private PathMatcher pathMatcher;
+
+	@Nullable
+	private PathPatternParser defaultPatternParser;
 
 	@Nullable
 	private UrlPathHelper defaultUrlPathHelper;
@@ -226,7 +229,7 @@ public class PathMatchConfigurer {
 	}
 
 	/**
-	 * Return the configure UrlPathHelper instance or a default (shared) instance.
+	 * Return the configured UrlPathHelper or a default, shared instance otherwise.
 	 * @since 5.3
 	 */
 	protected UrlPathHelper getUrlPathHelperOrDefault() {
@@ -240,7 +243,7 @@ public class PathMatchConfigurer {
 	}
 
 	/**
-	 * Return the configure PathMatcher instance or a default (shared) instance.
+	 * Return the configured PathMatcher or a default, shared instance otherwise.
 	 * @since 5.3
 	 */
 	protected PathMatcher getPathMatcherOrDefault() {
@@ -253,4 +256,17 @@ public class PathMatchConfigurer {
 		return this.defaultPathMatcher;
 	}
 
+	/**
+	 * Return the configured PathPatternParser or a default, shared instance otherwise.
+	 * @since 5.3.4
+	 */
+	public PathPatternParser getPatternParserOrDefault() {
+		if (this.patternParser != null) {
+			return this.patternParser;
+		}
+		if (this.defaultPatternParser == null) {
+			this.defaultPatternParser = new PathPatternParser();
+		}
+		return this.defaultPatternParser;
+	}
 }

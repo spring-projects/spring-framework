@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,6 +111,12 @@ public class AnnotationDrivenEventListenerTests {
 		this.context.publishEvent(event);
 		this.eventCollector.assertEvent(listener, event);
 		this.eventCollector.assertTotalEventsCount(1);
+
+		context.getBean(ApplicationEventMulticaster.class).removeApplicationListeners(l ->
+				l instanceof SmartApplicationListener && ((SmartApplicationListener) l).getListenerId().contains("TestEvent"));
+		this.eventCollector.clear();
+		this.context.publishEvent(event);
+		this.eventCollector.assertNoEventReceived(listener);
 	}
 
 	@Test
@@ -126,6 +132,12 @@ public class AnnotationDrivenEventListenerTests {
 		this.context.publishEvent(event);
 		this.eventCollector.assertEvent(listener, event);
 		this.eventCollector.assertTotalEventsCount(1);
+
+		context.getBean(ApplicationEventMulticaster.class).removeApplicationListeners(l ->
+				l instanceof SmartApplicationListener && ((SmartApplicationListener) l).getListenerId().contains("TestEvent"));
+		this.eventCollector.clear();
+		this.context.publishEvent(event);
+		this.eventCollector.assertNoEventReceived(listener);
 	}
 
 	@Test
@@ -138,6 +150,12 @@ public class AnnotationDrivenEventListenerTests {
 		this.context.publishEvent(event);
 		this.eventCollector.assertEvent(bean, event);
 		this.eventCollector.assertTotalEventsCount(1);
+
+		context.getBean(ApplicationEventMulticaster.class).removeApplicationListeners(l ->
+				l instanceof SmartApplicationListener && ((SmartApplicationListener) l).getListenerId().equals("foo"));
+		this.eventCollector.clear();
+		this.context.publishEvent(event);
+		this.eventCollector.assertNoEventReceived(bean);
 	}
 
 	@Test
@@ -711,7 +729,7 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 
-	@EventListener
+	@EventListener(id = "foo")
 	@Target(ElementType.METHOD)
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface FooListener {

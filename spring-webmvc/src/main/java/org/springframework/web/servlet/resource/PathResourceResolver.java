@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,11 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResource;
+import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -151,7 +153,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 
 		for (Resource location : locations) {
 			try {
-				String pathToUse = encodeIfNecessary(resourcePath, request, location);
+				String pathToUse = encodeOrDecodeIfNecessary(resourcePath, request, location);
 				Resource resource = getResource(pathToUse, location);
 				if (resource != null) {
 					return resource;
@@ -255,8 +257,11 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		return (resourcePath.startsWith(locationPath) && !isInvalidEncodedPath(resourcePath));
 	}
 
-	private String encodeIfNecessary(String path, @Nullable HttpServletRequest request, Resource location) {
-		if (shouldEncodeRelativePath(location) && request != null) {
+	private String encodeOrDecodeIfNecessary(String path, @Nullable HttpServletRequest request, Resource location) {
+		if (shouldDecodeRelativePath(location, request)) {
+			return UriUtils.decode(path, StandardCharsets.UTF_8);
+		}
+		else if (shouldEncodeRelativePath(location) && request != null) {
 			Charset charset = this.locationCharsets.getOrDefault(location, StandardCharsets.UTF_8);
 			StringBuilder sb = new StringBuilder();
 			StringTokenizer tokenizer = new StringTokenizer(path, "/");
@@ -275,8 +280,15 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		}
 	}
 
+	private boolean shouldDecodeRelativePath(Resource location, @Nullable HttpServletRequest request) {
+		return  (!(location instanceof UrlResource) && request != null &&
+				ServletRequestPathUtils.hasCachedPath(request) &&
+				ServletRequestPathUtils.getCachedPath(request) instanceof PathContainer);
+	}
+
 	private boolean shouldEncodeRelativePath(Resource location) {
-		return (location instanceof UrlResource && this.urlPathHelper != null && this.urlPathHelper.isUrlDecode());
+		return (location instanceof UrlResource &&
+				this.urlPathHelper != null && this.urlPathHelper.isUrlDecode());
 	}
 
 	private boolean isInvalidEncodedPath(String resourcePath) {

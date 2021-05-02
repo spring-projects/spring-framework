@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Represents a client-side reactive HTTP response.
@@ -29,6 +30,15 @@ import org.springframework.util.MultiValueMap;
  * @since 5.0
  */
 public interface ClientHttpResponse extends ReactiveHttpInputMessage {
+
+	/**
+	 * Return an id that represents the underlying connection, if available,
+	 * or the request for the purpose of correlating log messages.
+	 * @since 5.3.5
+	 */
+	default String getId() {
+		return ObjectUtils.getIdentityHexString(this);
+	}
 
 	/**
 	 * Return the HTTP status code as an {@link HttpStatus} enum value.

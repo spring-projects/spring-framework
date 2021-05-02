@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,8 +167,12 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		asyncContext.setTimeout(-1);
 
 		ServletServerHttpRequest httpRequest;
+		AsyncListener requestListener;
+		String logPrefix;
 		try {
 			httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
+			requestListener = httpRequest.getAsyncListener();
+			logPrefix = httpRequest.getLogPrefix();
 		}
 		catch (URISyntaxException ex) {
 			if (logger.isDebugEnabled()) {
@@ -180,15 +184,17 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		}
 
 		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext, httpRequest);
+		AsyncListener responseListener = ((ServletServerHttpResponse) httpResponse).getAsyncListener();
 		if (httpRequest.getMethod() == HttpMethod.HEAD) {
 			httpResponse = new HttpHeadResponseDecorator(httpResponse);
 		}
 
-		AtomicBoolean isCompleted = new AtomicBoolean();
-		HandlerResultAsyncListener listener = new HandlerResultAsyncListener(isCompleted, httpRequest);
-		asyncContext.addListener(listener);
+		AtomicBoolean completionFlag = new AtomicBoolean();
+		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext, completionFlag, logPrefix);
 
-		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext, isCompleted, httpRequest);
+		asyncContext.addListener(new HttpHandlerAsyncListener(
+				requestListener, responseListener, subscriber, completionFlag, logPrefix));
+
 		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
@@ -222,10 +228,6 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	}
 
 
-	/**
-	 * We cannot combine ERROR_LISTENER and HandlerResultSubscriber due to:
-	 * https://issues.jboss.org/browse/WFLY-8515.
-	 */
 	private static void runIfAsyncNotComplete(AsyncContext asyncContext, AtomicBoolean isCompleted, Runnable task) {
 		try {
 			if (asyncContext.getRequest().isAsyncStarted() && isCompleted.compareAndSet(false, true)) {
@@ -239,62 +241,138 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	}
 
 
-	private static class HandlerResultAsyncListener implements AsyncListener {
+	/**
+	 * AsyncListener to complete the {@link AsyncContext} in case of error or
+	 * timeout notifications from the container
+	 * <p>Additional {@link AsyncListener}s are registered in
+	 * {@link ServletServerHttpRequest} to signal onError/onComplete to the
+	 * request body Subscriber, and in {@link ServletServerHttpResponse} to
+	 * cancel the write Publisher and signal onError/onComplete downstream to
+	 * the writing result Subscriber.
+	 */
+	private static class HttpHandlerAsyncListener implements AsyncListener {
 
-		private final AtomicBoolean isCompleted;
+		private final AsyncListener requestAsyncListener;
+
+		private final AsyncListener responseAsyncListener;
+
+		// We cannot have AsyncListener and HandlerResultSubscriber until WildFly 12+:
+		// https://issues.jboss.org/browse/WFLY-8515
+		private final Runnable handlerDisposeTask;
+
+		private final AtomicBoolean completionFlag;
 
 		private final String logPrefix;
 
-		public HandlerResultAsyncListener(AtomicBoolean isCompleted, ServletServerHttpRequest httpRequest) {
-			this.isCompleted = isCompleted;
-			this.logPrefix = httpRequest.getLogPrefix();
+
+		public HttpHandlerAsyncListener(
+				AsyncListener requestAsyncListener, AsyncListener responseAsyncListener,
+				Runnable handlerDisposeTask, AtomicBoolean completionFlag, String logPrefix) {
+
+			this.requestAsyncListener = requestAsyncListener;
+			this.responseAsyncListener = responseAsyncListener;
+			this.handlerDisposeTask = handlerDisposeTask;
+			this.completionFlag = completionFlag;
+			this.logPrefix = logPrefix;
 		}
+
 
 		@Override
 		public void onTimeout(AsyncEvent event) {
-			logger.debug(this.logPrefix + "Timeout notification");
-			AsyncContext context = event.getAsyncContext();
-			runIfAsyncNotComplete(context, this.isCompleted, context::complete);
+			// Should never happen since we call asyncContext.setTimeout(-1)
+			if (logger.isDebugEnabled()) {
+				logger.debug(this.logPrefix + "AsyncEvent onTimeout");
+			}
+			delegateTimeout(this.requestAsyncListener, event);
+			delegateTimeout(this.responseAsyncListener, event);
+			handleTimeoutOrError(event);
 		}
 
 		@Override
 		public void onError(AsyncEvent event) {
 			Throwable ex = event.getThrowable();
-			logger.debug(this.logPrefix + "Error notification: " + (ex != null ? ex : "<no Throwable>"));
+			if (logger.isDebugEnabled()) {
+				logger.debug(this.logPrefix + "AsyncEvent onError: " + (ex != null ? ex : "<no Throwable>"));
+			}
+			delegateError(this.requestAsyncListener, event);
+			delegateError(this.responseAsyncListener, event);
+			handleTimeoutOrError(event);
+		}
+
+		@Override
+		public void onComplete(AsyncEvent event) {
+			delegateComplete(this.requestAsyncListener, event);
+			delegateComplete(this.responseAsyncListener, event);
+		}
+
+		private static void delegateTimeout(AsyncListener listener, AsyncEvent event) {
+			try {
+				listener.onTimeout(event);
+			}
+			catch (Exception ex) {
+				// Ignore
+			}
+		}
+
+		private static void delegateError(AsyncListener listener, AsyncEvent event) {
+			try {
+				listener.onError(event);
+			}
+			catch (Exception ex) {
+				// Ignore
+			}
+		}
+
+		private static void delegateComplete(AsyncListener listener, AsyncEvent event) {
+			try {
+				listener.onComplete(event);
+			}
+			catch (Exception ex) {
+				// Ignore
+			}
+		}
+
+		private void handleTimeoutOrError(AsyncEvent event) {
 			AsyncContext context = event.getAsyncContext();
-			runIfAsyncNotComplete(context, this.isCompleted, context::complete);
+			runIfAsyncNotComplete(context, this.completionFlag, () -> {
+				try {
+					this.handlerDisposeTask.run();
+				}
+				finally {
+					context.complete();
+				}
+			});
 		}
 
 		@Override
 		public void onStartAsync(AsyncEvent event) {
 			// no-op
 		}
-
-		@Override
-		public void onComplete(AsyncEvent event) {
-			// no-op
-		}
 	}
 
 
-	private class HandlerResultSubscriber implements Subscriber<Void> {
+	private static class HandlerResultSubscriber implements Subscriber<Void>, Runnable {
 
 		private final AsyncContext asyncContext;
 
-		private final AtomicBoolean isCompleted;
+		private final AtomicBoolean completionFlag;
 
 		private final String logPrefix;
 
+		@Nullable
+		private volatile Subscription subscription;
+
 		public HandlerResultSubscriber(
-				AsyncContext asyncContext, AtomicBoolean isCompleted, ServletServerHttpRequest httpRequest) {
+				AsyncContext asyncContext, AtomicBoolean completionFlag, String logPrefix) {
 
 			this.asyncContext = asyncContext;
-			this.isCompleted = isCompleted;
-			this.logPrefix = httpRequest.getLogPrefix();
+			this.completionFlag = completionFlag;
+			this.logPrefix = logPrefix;
 		}
 
 		@Override
 		public void onSubscribe(Subscription subscription) {
+			this.subscription = subscription;
 			subscription.request(Long.MAX_VALUE);
 		}
 
@@ -305,8 +383,10 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.trace(this.logPrefix + "Failed to complete: " + ex.getMessage());
-			runIfAsyncNotComplete(this.asyncContext, this.isCompleted, () -> {
+			if (logger.isTraceEnabled()) {
+				logger.trace(this.logPrefix + "onError: " + ex);
+			}
+			runIfAsyncNotComplete(this.asyncContext, this.completionFlag, () -> {
 				if (this.asyncContext.getResponse().isCommitted()) {
 					logger.trace(this.logPrefix + "Dispatch to container, to raise the error on servlet thread");
 					this.asyncContext.getRequest().setAttribute(WRITE_ERROR_ATTRIBUTE_NAME, ex);
@@ -327,8 +407,18 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onComplete() {
-			logger.trace(this.logPrefix + "Handling completed");
-			runIfAsyncNotComplete(this.asyncContext, this.isCompleted, this.asyncContext::complete);
+			if (logger.isTraceEnabled()) {
+				logger.trace(this.logPrefix + "onComplete");
+			}
+			runIfAsyncNotComplete(this.asyncContext, this.completionFlag, this.asyncContext::complete);
+		}
+
+		@Override
+		public void run() {
+			Subscription s = this.subscription;
+			if (s != null) {
+				s.cancel();
+			}
 		}
 	}
 

@@ -158,8 +158,7 @@ transaction management and the
 transaction management. The following listing shows the definition of the
 `PlatformTransactionManager` API:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface PlatformTransactionManager extends TransactionManager {
 
@@ -168,21 +167,6 @@ transaction management. The following listing shows the definition of the
 		void commit(TransactionStatus status) throws TransactionException;
 
 		void rollback(TransactionStatus status) throws TransactionException;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface PlatformTransactionManager : TransactionManager {
-
-		@Throws(TransactionException::class)
-		fun getTransaction(definition: TransactionDefinition): TransactionStatus
-
-		@Throws(TransactionException::class)
-		fun commit(status: TransactionStatus)
-
-		@Throws(TransactionException::class)
-		fun rollback(status: TransactionStatus)
 	}
 ----
 
@@ -215,8 +199,7 @@ reactive applications that make use of reactive types or Kotlin Coroutines. The 
 listing shows the transaction strategy defined by
 `org.springframework.transaction.ReactiveTransactionManager`:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface ReactiveTransactionManager extends TransactionManager {
 
@@ -225,21 +208,6 @@ listing shows the transaction strategy defined by
 		Mono<Void> commit(ReactiveTransaction status) throws TransactionException;
 
 		Mono<Void> rollback(ReactiveTransaction status) throws TransactionException;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface ReactiveTransactionManager : TransactionManager {
-
-		@Throws(TransactionException::class)
-		fun getReactiveTransaction(definition: TransactionDefinition): Mono<ReactiveTransaction>
-
-		@Throws(TransactionException::class)
-		fun commit(status: ReactiveTransaction): Mono<Void>
-
-		@Throws(TransactionException::class)
-		fun rollback(status: ReactiveTransaction): Mono<Void>
 	}
 ----
 
@@ -276,8 +244,7 @@ control transaction execution and query transaction status. The concepts should 
 familiar, as they are common to all transaction APIs. The following listing shows the
 `TransactionStatus` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface TransactionStatus extends TransactionExecution, SavepointManager, Flushable {
 
@@ -296,24 +263,6 @@ familiar, as they are common to all transaction APIs. The following listing show
 
 		@Override
 		boolean isCompleted();
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface TransactionStatus : TransactionExecution, SavepointManager, Flushable {
-
-		override fun isNewTransaction(): Boolean
-
-		fun hasSavepoint(): Boolean
-
-		override fun setRollbackOnly()
-
-		override fun isRollbackOnly(): Boolean
-
-		fun flush()
-
-		override fun isCompleted(): Boolean
 	}
 ----
 
@@ -4514,13 +4463,14 @@ While this usually works well, there is a potential for issues (for example, wit
 `null` values). Spring, by default, calls `ParameterMetaData.getParameterType` in such a
 case, which can be expensive with your JDBC driver. You should use a recent driver
 version and consider setting the `spring.jdbc.getParameterType.ignore` property to `true`
-(as a JVM system property or in a `spring.properties` file in the root of your classpath)
-if you encounter a performance issue (as reported on Oracle 12c, JBoss and PostgreSQL).
+(as a JVM system property or via the
+<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism) if you encounter
+a performance issue (as reported on Oracle 12c, JBoss, and PostgreSQL).
 
 Alternatively, you might consider specifying the corresponding JDBC types explicitly,
-either through a 'BatchPreparedStatementSetter' (as shown earlier), through an explicit type
-array given to a 'List<Object[]>' based call, through 'registerSqlType' calls on a
-custom 'MapSqlParameterSource' instance, or through a 'BeanPropertySqlParameterSource'
+either through a `BatchPreparedStatementSetter` (as shown earlier), through an explicit type
+array given to a `List<Object[]>` based call, through `registerSqlType` calls on a
+custom `MapSqlParameterSource` instance, or through a `BeanPropertySqlParameterSource`
 that derives the SQL type from the Java-declared property type even for a null value.
 ====
 
@@ -5506,10 +5456,10 @@ The following example creates a custom update method named `execute`:
 		}
 
 		/**
-		* @param id for the Customer to be updated
-		* @param rating the new value for credit rating
-		* @return number of rows updated
-		*/
+		 * @param id for the Customer to be updated
+		 * @param rating the new value for credit rating
+		 * @return number of rows updated
+		 */
 		fun execute(id: Int, rating: Int): Int {
 			return update(rating, id)
 		}
@@ -5520,10 +5470,8 @@ The following example creates a custom update method named `execute`:
 [[jdbc-StoredProcedure]]
 ==== Using `StoredProcedure`
 
-The `StoredProcedure` class is a superclass for object abstractions of RDBMS stored
-procedures. This class is `abstract`, and its various `execute(..)` methods have
-`protected` access, preventing use other than through a subclass that offers tighter
-typing.
+The `StoredProcedure` class is an `abstract` superclass for object abstractions of RDBMS
+stored procedures.
 
 The inherited `sql` property is the name of the stored procedure in the RDBMS.
 
@@ -8567,8 +8515,7 @@ the two Spring interfaces used for this purpose.
 Spring abstracts all marshalling operations behind the
 `org.springframework.oxm.Marshaller` interface, the main method of which follows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Marshaller {
 
@@ -8578,22 +8525,6 @@ Spring abstracts all marshalling operations behind the
 		void marshal(Object graph, Result result) throws XmlMappingException, IOException;
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Marshaller {
-
-		/**
-		* Marshal the object graph with the given root into the provided Result.
-		*/
-		@Throws(XmlMappingException::class, IOException::class)
-		fun marshal(
-				graph: Any,
-				result: Result
-		)
-	}
-----
-
 
 The `Marshaller` interface has one main method, which marshals the given object to a
 given `javax.xml.transform.Result`. The result is a tagging interface that basically
@@ -8627,8 +8558,7 @@ to determine how your O-X technology manages this.
 Similar to the `Marshaller`, we have the `org.springframework.oxm.Unmarshaller`
 interface, which the following listing shows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Unmarshaller {
 
@@ -8636,18 +8566,6 @@ interface, which the following listing shows:
 		 * Unmarshal the given provided Source into an object graph.
 		 */
 		Object unmarshal(Source source) throws XmlMappingException, IOException;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Unmarshaller {
-
-		/**
-		* Unmarshal the given provided Source into an object graph.
-		*/
-		@Throws(XmlMappingException::class, IOException::class)
-		fun unmarshal(source: Source): Any
 	}
 ----
 

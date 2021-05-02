@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,19 @@ final class PostProcessorRegistrationDelegate {
 
 	public static void invokeBeanFactoryPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
+
+		// WARNING: Although it may appear that the body of this method can be easily
+		// refactored to avoid the use of multiple loops and multiple lists, the use
+		// of multiple lists and multiple passes over the names of processors is
+		// intentional. We must ensure that we honor the contracts for PriorityOrdered
+		// and Ordered processors. Specifically, we must NOT cause processors to be
+		// instantiated (via getBean() invocations) or registered in the ApplicationContext
+		// in the wrong order.
+		//
+		// Before submitting a pull request (PR) to change this method, please review the
+		// list of all declined PRs involving changes to PostProcessorRegistrationDelegate
+		// to ensure that your proposal does not result in a breaking change:
+		// https://github.com/spring-projects/spring-framework/issues?q=PostProcessorRegistrationDelegate+is%3Aclosed+label%3A%22status%3A+declined%22
 
 		// Invoke BeanDefinitionRegistryPostProcessors first, if any.
 		Set<String> processedBeans = new HashSet<>();
@@ -191,6 +204,19 @@ final class PostProcessorRegistrationDelegate {
 
 	public static void registerBeanPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
+
+		// WARNING: Although it may appear that the body of this method can be easily
+		// refactored to avoid the use of multiple loops and multiple lists, the use
+		// of multiple lists and multiple passes over the names of processors is
+		// intentional. We must ensure that we honor the contracts for PriorityOrdered
+		// and Ordered processors. Specifically, we must NOT cause processors to be
+		// instantiated (via getBean() invocations) or registered in the ApplicationContext
+		// in the wrong order.
+		//
+		// Before submitting a pull request (PR) to change this method, please review the
+		// list of all declined PRs involving changes to PostProcessorRegistrationDelegate
+		// to ensure that your proposal does not result in a breaking change:
+		// https://github.com/spring-projects/spring-framework/issues?q=PostProcessorRegistrationDelegate+is%3Aclosed+label%3A%22status%3A+declined%22
 
 		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 

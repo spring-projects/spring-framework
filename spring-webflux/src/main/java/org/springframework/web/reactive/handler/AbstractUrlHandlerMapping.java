@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 
 import reactor.core.publisher.Mono;
 
@@ -57,6 +58,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private final Map<PathPattern, Object> handlerMap = new LinkedHashMap<>();
 
+	@Nullable
+	private BiPredicate<Object, ServerWebExchange> handlerPredicate;
+
 
 	/**
 	 * Set whether to lazily initialize handlers. Only applicable to
@@ -79,6 +83,23 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	public final Map<PathPattern, Object> getHandlerMap() {
 		return Collections.unmodifiableMap(this.handlerMap);
+	}
+
+	/**
+	 * Configure a predicate for extended matching of the handler that was
+	 * matched by URL path. This allows for further narrowing of the mapping by
+	 * checking additional properties of the request. If the predicate returns
+	 * "false", it result in a no-match, which allows another
+	 * {@link org.springframework.web.reactive.HandlerMapping} to match or
+	 * result in a 404 (NOT_FOUND) response.
+	 * @param handlerPredicate a bi-predicate to match the candidate handler
+	 * against the current exchange.
+	 * @since 5.3.5
+	 * @see org.springframework.web.reactive.socket.server.support.WebSocketUpgradeHandlerPredicate
+	 */
+	public void setHandlerPredicate(BiPredicate<Object, ServerWebExchange> handlerPredicate) {
+		this.handlerPredicate = (this.handlerPredicate != null ?
+				this.handlerPredicate.and(handlerPredicate) : handlerPredicate);
 	}
 
 
@@ -129,11 +150,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		PathPattern.PathMatchInfo matchInfo = pattern.matchAndExtract(lookupPath);
 		Assert.notNull(matchInfo, "Expected a match");
 
-		return handleMatch(this.handlerMap.get(pattern), pattern, pathWithinMapping, matchInfo, exchange);
-	}
-
-	private Object handleMatch(Object handler, PathPattern bestMatch, PathContainer pathWithinMapping,
-			PathPattern.PathMatchInfo matchInfo, ServerWebExchange exchange) {
+		Object handler = this.handlerMap.get(pattern);
 
 		// Bean name or resolved handler?
 		if (handler instanceof String) {
@@ -141,10 +158,14 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
+		if (this.handlerPredicate != null && !this.handlerPredicate.test(handler, exchange)) {
+			return null;
+		}
+
 		validateHandler(handler, exchange);
 
 		exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handler);
-		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestMatch);
+		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, pattern);
 		exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
 		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, matchInfo.getUriVariables());
 

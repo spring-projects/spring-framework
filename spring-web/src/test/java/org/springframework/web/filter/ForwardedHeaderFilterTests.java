@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -440,7 +441,7 @@ public class ForwardedHeaderFilterTests {
 			request.addHeader(FORWARDED, "for=\"[2001:db8:cafe::17]\"");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("2001:db8:cafe:0:0:0:0:17");
+			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("[2001:db8:cafe::17]");
 			assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
 		}
 
@@ -458,7 +459,7 @@ public class ForwardedHeaderFilterTests {
 			request.addHeader(FORWARDED, "For=\"[2001:db8:cafe::17]:47011\"");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("2001:db8:cafe:0:0:0:0:17");
+			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("[2001:db8:cafe::17]");
 			assertThat(actual.getRemotePort()).isEqualTo(47011);
 		}
 
@@ -469,6 +470,13 @@ public class ForwardedHeaderFilterTests {
 
 			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
 			assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+		}
+
+		@Test  // gh-26748
+		public void forwardedForInvalidIpV6Address() {
+			request.addHeader(FORWARDED, "for=\"2a02:918:175:ab60:45ee:c12c:dac1:808b\"");
+			assertThatIllegalArgumentException().isThrownBy(
+					ForwardedHeaderFilterTests.this::filterAndGetWrappedRequest);
 		}
 	}
 

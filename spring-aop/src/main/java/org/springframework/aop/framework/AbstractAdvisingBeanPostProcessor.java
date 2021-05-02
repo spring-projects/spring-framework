@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.core.SmartClassLoader;
 import org.springframework.lang.Nullable;
 
 /**
@@ -89,7 +90,13 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 			}
 			proxyFactory.addAdvisor(this.advisor);
 			customizeProxyFactory(proxyFactory);
-			return proxyFactory.getProxy(getProxyClassLoader());
+
+			// Use original ClassLoader if bean class not locally loaded in overriding class loader
+			ClassLoader classLoader = getProxyClassLoader();
+			if (classLoader instanceof SmartClassLoader && classLoader != bean.getClass().getClassLoader()) {
+				classLoader = ((SmartClassLoader) classLoader).getOriginalClassLoader();
+			}
+			return proxyFactory.getProxy(classLoader);
 		}
 
 		// No proxy needed.

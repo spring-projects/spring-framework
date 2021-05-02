@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Exception for errors that fit response status 415 (unsupported media type).
@@ -41,6 +44,9 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	@Nullable
 	private final ResolvableType bodyType;
 
+	@Nullable
+	private final HttpMethod method;
+
 
 	/**
 	 * Constructor for when the specified Content-Type is invalid.
@@ -50,13 +56,14 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 		this.contentType = null;
 		this.supportedMediaTypes = Collections.emptyList();
 		this.bodyType = null;
+		this.method = null;
 	}
 
 	/**
 	 * Constructor for when the Content-Type can be parsed but is not supported.
 	 */
 	public UnsupportedMediaTypeStatusException(@Nullable MediaType contentType, List<MediaType> supportedTypes) {
-		this(contentType, supportedTypes, null);
+		this(contentType, supportedTypes, null, null);
 	}
 
 	/**
@@ -65,11 +72,30 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	 */
 	public UnsupportedMediaTypeStatusException(@Nullable MediaType contentType, List<MediaType> supportedTypes,
 			@Nullable ResolvableType bodyType) {
+		this(contentType, supportedTypes, bodyType, null);
+	}
+
+	/**
+	 * Constructor that provides the HTTP method.
+	 * @since 5.3.6
+	 */
+	public UnsupportedMediaTypeStatusException(@Nullable MediaType contentType, List<MediaType> supportedTypes,
+			@Nullable HttpMethod method) {
+		this(contentType, supportedTypes, null, method);
+	}
+
+	/**
+	 * Constructor for when trying to encode from or decode to a specific Java type.
+	 * @since 5.3.6
+	 */
+	public UnsupportedMediaTypeStatusException(@Nullable MediaType contentType, List<MediaType> supportedTypes,
+			@Nullable ResolvableType bodyType, @Nullable HttpMethod method) {
 
 		super(HttpStatus.UNSUPPORTED_MEDIA_TYPE, initReason(contentType, bodyType));
 		this.contentType = contentType;
 		this.supportedMediaTypes = Collections.unmodifiableList(supportedTypes);
 		this.bodyType = bodyType;
+		this.method = method;
 	}
 
 	private static String initReason(@Nullable MediaType contentType, @Nullable ResolvableType bodyType) {
@@ -105,6 +131,16 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	@Nullable
 	public ResolvableType getBodyType() {
 		return this.bodyType;
+	}
+
+	@Override
+	public HttpHeaders getResponseHeaders() {
+		if (HttpMethod.PATCH != this.method || CollectionUtils.isEmpty(this.supportedMediaTypes) ) {
+			return HttpHeaders.EMPTY;
+		}
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAcceptPatch(this.supportedMediaTypes);
+		return headers;
 	}
 
 }

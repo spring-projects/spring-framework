@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,28 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonD
 				new MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue();
 		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
 				new MediaType("application", "json", StandardCharsets.ISO_8859_1))).isTrue();
+	}
+
+	@Test
+	public void canDecodeWithObjectMapperRegistrationForType() {
+				MediaType halJsonMediaType = MediaType.parseMediaType("application/hal+json");
+		MediaType halFormsJsonMediaType = MediaType.parseMediaType("application/prs.hal-forms+json");
+
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), halJsonMediaType)).isTrue();
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), halFormsJsonMediaType)).isTrue();
+		assertThat(decoder.canDecode(ResolvableType.forClass(Map.class), MediaType.APPLICATION_JSON)).isTrue();
+
+		decoder.registerObjectMappersForType(Pojo.class, map -> {
+			map.put(halJsonMediaType, new ObjectMapper());
+			map.put(MediaType.APPLICATION_JSON, new ObjectMapper());
+		});
+
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), halJsonMediaType)).isTrue();
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), halFormsJsonMediaType)).isFalse();
+		assertThat(decoder.canDecode(ResolvableType.forClass(Map.class), MediaType.APPLICATION_JSON)).isTrue();
+
 	}
 
 	@Test  // SPR-15866

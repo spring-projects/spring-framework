@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,6 @@
  */
 package org.springframework.web.server.session;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.server.ServerWebExchange;
@@ -34,106 +30,92 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Greg Turnquist
  * @author Rob Winch
  */
-public class HeaderWebSessionIdResolverTests {
-	private HeaderWebSessionIdResolver idResolver;
+class HeaderWebSessionIdResolverTests {
 
-	private ServerWebExchange exchange;
+	private final HeaderWebSessionIdResolver idResolver = new HeaderWebSessionIdResolver();
 
-	@BeforeEach
-	public void setUp() {
-		this.idResolver = new HeaderWebSessionIdResolver();
-		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
+	private ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
+
+
+	@Test
+	void expireWhenValidThenSetsEmptyHeader() {
+		this.idResolver.expireSession(this.exchange);
+
+		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).containsExactly("");
 	}
 
 	@Test
-	public void expireWhenValidThenSetsEmptyHeader() {
+	void expireWhenMultipleInvocationThenSetsSingleEmptyHeader() {
+		this.idResolver.expireSession(this.exchange);
 		this.idResolver.expireSession(this.exchange);
 
-		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).isEqualTo(Arrays.asList(""));
+		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).containsExactly("");
 	}
 
 	@Test
-	public void expireWhenMultipleInvocationThenSetsSingleEmptyHeader() {
-		this.idResolver.expireSession(this.exchange);
-
-		this.idResolver.expireSession(this.exchange);
-
-		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).isEqualTo(Arrays.asList(""));
-	}
-
-	@Test
-	public void expireWhenAfterSetSessionIdThenSetsEmptyHeader() {
+	void expireWhenAfterSetSessionIdThenSetsEmptyHeader() {
 		this.idResolver.setSessionId(this.exchange, "123");
-
 		this.idResolver.expireSession(this.exchange);
 
-		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).isEqualTo(Arrays.asList(""));
+		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).containsExactly("");
 	}
 
 	@Test
-	public void setSessionIdWhenValidThenSetsHeader() {
+	void setSessionIdWhenValidThenSetsHeader() {
 		String id = "123";
-
 		this.idResolver.setSessionId(this.exchange, id);
 
-		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).isEqualTo(Arrays.asList(id));
+		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).containsExactly(id);
 	}
 
 	@Test
-	public void setSessionIdWhenMultipleThenSetsSingleHeader() {
+	void setSessionIdWhenMultipleThenSetsSingleHeader() {
 		String id = "123";
 		this.idResolver.setSessionId(this.exchange, "overriddenByNextInvocation");
-
 		this.idResolver.setSessionId(this.exchange, id);
 
-		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).isEqualTo(Arrays.asList(id));
+		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).containsExactly(id);
 	}
 
 	@Test
-	public void setSessionIdWhenCustomHeaderNameThenSetsHeader() {
+	void setSessionIdWhenCustomHeaderNameThenSetsHeader() {
 		String headerName = "x-auth";
 		String id = "123";
 		this.idResolver.setHeaderName(headerName);
-
 		this.idResolver.setSessionId(this.exchange, id);
 
-		assertThat(this.exchange.getResponse().getHeaders().get(headerName)).isEqualTo(Arrays.asList(id));
+		assertThat(this.exchange.getResponse().getHeaders().get(headerName)).containsExactly(id);
 	}
 
 	@Test
-	public void setSessionIdWhenNullIdThenIllegalArgumentException() {
+	void setSessionIdWhenNullIdThenIllegalArgumentException() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.idResolver.setSessionId(this.exchange, (String) null));
+				this.idResolver.setSessionId(this.exchange, null));
 	}
 
 	@Test
-	public void resolveSessionIdsWhenNoIdsThenEmpty() {
-		List<String> ids = this.idResolver.resolveSessionIds(this.exchange);
-
-		assertThat(ids.isEmpty()).isTrue();
+	void resolveSessionIdsWhenNoIdsThenEmpty() {
+		assertThat(this.idResolver.resolveSessionIds(this.exchange)).isEmpty();
 	}
 
 	@Test
-	public void resolveSessionIdsWhenIdThenIdFound() {
+	void resolveSessionIdsWhenIdThenIdFound() {
 		String id = "123";
 		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path")
 				.header(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME, id));
 
-		List<String> ids = this.idResolver.resolveSessionIds(this.exchange);
-
-		assertThat(ids).isEqualTo(Arrays.asList(id));
+		assertThat(this.idResolver.resolveSessionIds(this.exchange)).containsExactly(id);
 	}
 
 	@Test
-	public void resolveSessionIdsWhenMultipleIdsThenIdsFound() {
+	void resolveSessionIdsWhenMultipleIdsThenIdsFound() {
 		String id1 = "123";
 		String id2 = "abc";
 		this.exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.get("/path")
 						.header(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME, id1, id2));
 
-		List<String> ids = this.idResolver.resolveSessionIds(this.exchange);
-
-		assertThat(ids).isEqualTo(Arrays.asList(id1, id2));
+		assertThat(this.idResolver.resolveSessionIds(this.exchange)).containsExactly(id1, id2);
 	}
+
 }

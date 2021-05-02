@@ -14,5 +14,6 @@ dependencies {
 	optional("com.fasterxml.jackson.core:jackson-databind")
 	testCompile(testFixtures(project(":spring-beans")))
 	testCompile(testFixtures(project(":spring-tx")))
+	testCompile("org.apache.activemq:activemq-broker")
 	testImplementation("javax.jms:javax.jms-api")
 }

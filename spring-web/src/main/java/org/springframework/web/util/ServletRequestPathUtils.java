@@ -15,24 +15,29 @@
  */
 package org.springframework.web.util;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletMapping;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.MappingMatch;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * Utility class to parse the path of an {@link HttpServletRequest} to a
- * {@link RequestPath} and cache it in a request attribute for further access.
- * This can then be used for URL path matching with
- * {@link org.springframework.web.util.pattern.PathPattern PathPattern}s.
- *
- * <p>Also includes helper methods to return either a previously
- * {@link UrlPathHelper#resolveAndCacheLookupPath resolved} String lookupPath
- * or a previously {@link #parseAndCache parsed} {@code RequestPath} depending
- * on which is cached in request attributes.
+ * Utility class to assist with preparation and access to the lookup path for
+ * request mapping purposes. This can be the parsed {@link RequestPath}
+ * representation of the path when use of
+ * {@link org.springframework.web.util.pattern.PathPattern  parsed patterns}
+ * is enabled or a String path for use with a
+ * {@link org.springframework.util.PathMatcher} otherwise.
  *
  * @author Rossen Stoyanchev
  * @since 5.3
@@ -44,20 +49,21 @@ public abstract class ServletRequestPathUtils {
 
 
 	/**
-	 * Parse the {@link HttpServletRequest#getRequestURI() requestURI} of the
-	 * request and its {@code contextPath} to create a {@link RequestPath} and
-	 * cache it in the request attribute {@link #PATH_ATTRIBUTE}.
+	 * Parse the {@link HttpServletRequest#getRequestURI() requestURI} to a
+	 * {@link RequestPath} and save it in the request attribute
+	 * {@link #PATH_ATTRIBUTE} for subsequent use with
+	 * {@link org.springframework.web.util.pattern.PathPattern parsed patterns}.
+	 * The returned {@code RequestPath} will have both the contextPath and any
+	 * servletPath prefix omitted from the {@link RequestPath#pathWithinApplication()
+	 * pathWithinApplication} it exposes.
 	 *
-	 * <p>This method ignores the {@link HttpServletRequest#getServletPath()
-	 * servletPath} and the {@link HttpServletRequest#getPathInfo() pathInfo}.
-	 * Therefore in case of a Servlet mapping by prefix, the
-	 * {@link RequestPath#pathWithinApplication()} will always include the
-	 * Servlet prefix.
+	 * <p>This method is typically called by the {@code DispatcherServlet} to
+	 * if any {@code HandlerMapping} indicates that it uses parsed patterns.
+	 * After that the pre-parsed and cached {@code RequestPath} can be accessed
+	 * through {@link #getParsedRequestPath(ServletRequest)}.
 	 */
 	public static RequestPath parseAndCache(HttpServletRequest request) {
-		String requestUri = (String) request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
-		requestUri = (requestUri != null ? requestUri : request.getRequestURI());
-		RequestPath requestPath = RequestPath.parse(requestUri, request.getContextPath());
+		RequestPath requestPath = ServletRequestPath.parse(request);
 		request.setAttribute(PATH_ATTRIBUTE, requestPath);
 		return requestPath;
 	}
@@ -170,6 +176,110 @@ public abstract class ServletRequestPathUtils {
 	public static boolean hasCachedPath(ServletRequest request) {
 		return (request.getAttribute(PATH_ATTRIBUTE) != null ||
 				request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE) != null);
+	}
+
+
+	/**
+	 * Simple wrapper around the default {@link RequestPath} implementation that
+	 * supports a servletPath as an additional prefix to be omitted from
+	 * {@link #pathWithinApplication()}.
+	 */
+	private static final class ServletRequestPath implements RequestPath {
+
+		private final RequestPath requestPath;
+
+		private final PathContainer contextPath;
+
+		private ServletRequestPath(String rawPath, @Nullable String contextPath, String servletPathPrefix) {
+			Assert.notNull(servletPathPrefix, "`servletPathPrefix` is required");
+			this.requestPath = RequestPath.parse(rawPath, contextPath + servletPathPrefix);
+			this.contextPath = PathContainer.parsePath(StringUtils.hasText(contextPath) ? contextPath : "");
+		}
+
+		@Override
+		public String value() {
+			return this.requestPath.value();
+		}
+
+		@Override
+		public List<Element> elements() {
+			return this.requestPath.elements();
+		}
+
+		@Override
+		public PathContainer contextPath() {
+			return this.contextPath;
+		}
+
+		@Override
+		public PathContainer pathWithinApplication() {
+			return this.requestPath.pathWithinApplication();
+		}
+
+		@Override
+		public RequestPath modifyContextPath(String contextPath) {
+			throw new UnsupportedOperationException();
+		}
+
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (other == null || getClass() != other.getClass()) {
+				return false;
+			}
+			return (this.requestPath.equals(((ServletRequestPath) other).requestPath));
+		}
+
+		@Override
+		public int hashCode() {
+			return this.requestPath.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return this.requestPath.toString();
+		}
+
+
+		public static RequestPath parse(HttpServletRequest request) {
+			String requestUri = (String) request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
+			if (requestUri == null) {
+				requestUri = request.getRequestURI();
+			}
+			if (UrlPathHelper.servlet4Present) {
+				String servletPathPrefix = Servlet4Delegate.getServletPathPrefix(request);
+				if (StringUtils.hasText(servletPathPrefix)) {
+					return new ServletRequestPath(requestUri, request.getContextPath(), servletPathPrefix);
+				}
+			}
+			return RequestPath.parse(requestUri, request.getContextPath());
+		}
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on Servlet 4 {@link HttpServletMapping}
+	 * and {@link MappingMatch} at runtime.
+	 */
+	private static class Servlet4Delegate {
+
+		@Nullable
+		public static String getServletPathPrefix(HttpServletRequest request) {
+			HttpServletMapping mapping = (HttpServletMapping) request.getAttribute(RequestDispatcher.INCLUDE_MAPPING);
+			if (mapping == null) {
+				mapping = request.getHttpServletMapping();
+			}
+			MappingMatch match = mapping.getMappingMatch();
+			if (!ObjectUtils.nullSafeEquals(match, MappingMatch.PATH)) {
+				return null;
+			}
+			String servletPath = (String) request.getAttribute(WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE);
+			servletPath = (servletPath != null ? servletPath : request.getServletPath());
+			return UriUtils.encodePath(servletPath, StandardCharsets.UTF_8);
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -44,6 +47,9 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
  * @see <a href="https://tools.ietf.org/html/rfc6266">RFC 6266</a>
  */
 public final class ContentDisposition {
+
+	private final static Pattern BASE64_ENCODED_PATTERN =
+			Pattern.compile("=\\?([0-9a-zA-Z-_]+)\\?B\\?([+/0-9a-zA-Z]+=*)\\?=");
 
 	private static final String INVALID_HEADER_FIELD_PARAMETER_FORMAT =
 			"Invalid header field parameter format (as defined in RFC 5987)";
@@ -136,8 +142,9 @@ public final class ContentDisposition {
 	}
 
 	/**
-	 * Return the value of the {@literal filename} parameter (or the value of the
-	 * {@literal filename*} one decoded as defined in the RFC 5987), or {@code null} if not defined.
+	 * Return the value of the {@literal filename} parameter, possibly decoded
+	 * from BASE64 encoding based on RFC 2047, or of the {@literal filename*}
+	 * parameter, possibly decoded as defined in the RFC 5987.
 	 */
 	@Nullable
 	public String getFilename() {
@@ -362,7 +369,20 @@ public final class ContentDisposition {
 					}
 				}
 				else if (attribute.equals("filename") && (filename == null)) {
-					filename = value;
+					if (value.startsWith("=?") ) {
+						Matcher matcher = BASE64_ENCODED_PATTERN.matcher(value);
+						if (matcher.find()) {
+							String match1 = matcher.group(1);
+							String match2 = matcher.group(2);
+							filename = new String(Base64.getDecoder().decode(match2), Charset.forName(match1));
+						}
+						else {
+							filename = value;
+						}
+					}
+					else {
+						filename = value;
+					}
 				}
 				else if (attribute.equals("size") ) {
 					size = Long.parseLong(value);

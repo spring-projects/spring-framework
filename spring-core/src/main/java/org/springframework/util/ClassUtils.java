@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,8 +74,8 @@ public abstract class ClassUtils {
 	/** The path separator character: {@code '/'}. */
 	private static final char PATH_SEPARATOR = '/';
 
-	/** The inner class separator character: {@code '$'}. */
-	private static final char INNER_CLASS_SEPARATOR = '$';
+	/** The nested class separator character: {@code '$'}. */
+	private static final char NESTED_CLASS_SEPARATOR = '$';
 
 	/** The CGLIB class separator: {@code "$$"}. */
 	public static final String CGLIB_CLASS_SEPARATOR = "$$";
@@ -232,7 +232,7 @@ public abstract class ClassUtils {
 	/**
 	 * Replacement for {@code Class.forName()} that also returns Class instances
 	 * for primitives (e.g. "int") and array class names (e.g. "String[]").
-	 * Furthermore, it is also capable of resolving inner class names in Java source
+	 * Furthermore, it is also capable of resolving nested class names in Java source
 	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
@@ -286,10 +286,10 @@ public abstract class ClassUtils {
 		catch (ClassNotFoundException ex) {
 			int lastDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR);
 			if (lastDotIndex != -1) {
-				String innerClassName =
-						name.substring(0, lastDotIndex) + INNER_CLASS_SEPARATOR + name.substring(lastDotIndex + 1);
+				String nestedClassName =
+						name.substring(0, lastDotIndex) + NESTED_CLASS_SEPARATOR + name.substring(lastDotIndex + 1);
 				try {
-					return Class.forName(innerClassName, false, clToUse);
+					return Class.forName(nestedClassName, false, clToUse);
 				}
 				catch (ClassNotFoundException ex2) {
 					// Swallow - let original exception get through
@@ -953,7 +953,7 @@ public abstract class ClassUtils {
 			nameEndIndex = className.length();
 		}
 		String shortName = className.substring(lastDotIndex + 1, nameEndIndex);
-		shortName = shortName.replace(INNER_CLASS_SEPARATOR, PACKAGE_SEPARATOR);
+		shortName = shortName.replace(NESTED_CLASS_SEPARATOR, PACKAGE_SEPARATOR);
 		return shortName;
 	}
 
@@ -968,7 +968,7 @@ public abstract class ClassUtils {
 
 	/**
 	 * Return the short string name of a Java class in uncapitalized JavaBeans
-	 * property format. Strips the outer class name in case of an inner class.
+	 * property format. Strips the outer class name in case of a nested class.
 	 * @param clazz the class
 	 * @return the short name rendered in a standard JavaBeans property format
 	 * @see java.beans.Introspector#decapitalize(String)

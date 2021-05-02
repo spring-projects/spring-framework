@@ -1,3 +1,4 @@
+apply plugin: 'java-library'
 apply plugin: 'org.springframework.build.compile'
 apply plugin: 'org.springframework.build.optional-dependencies'
 // Uncomment the following for Shadow support in the jmhJar block.

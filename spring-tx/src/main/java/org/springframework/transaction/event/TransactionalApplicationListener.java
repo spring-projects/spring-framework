@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,22 +60,24 @@ public interface TransactionalApplicationListener<E extends ApplicationEvent>
 	}
 
 	/**
+	 * Return an identifier for the listener to be able to refer to it individually.
+	 * <p>It might be necessary for specific completion callback implementations
+	 * to provide a specific id, whereas for other scenarios an empty String
+	 * (as the common default value) is acceptable as well.
+	 * @see org.springframework.context.event.SmartApplicationListener#getListenerId()
+	 * @see TransactionalEventListener#id
+	 * @see #addCallback
+	 */
+	default String getListenerId() {
+		return "";
+	}
+
+	/**
 	 * Return the {@link TransactionPhase} in which the listener will be invoked.
 	 * <p>The default phase is {@link TransactionPhase#AFTER_COMMIT}.
 	 */
 	default TransactionPhase getTransactionPhase() {
 		return TransactionPhase.AFTER_COMMIT;
-	}
-
-	/**
-	 * Return an identifier for the listener to be able to refer to it individually.
-	 * <p>It might be necessary for specific completion callback implementations
-	 * to provide a specific id, whereas for other scenarios an empty String
-	 * (as the common default value) is acceptable as well.
-	 * @see #addCallback
-	 */
-	default String getListenerId() {
-		return "";
 	}
 
 	/**

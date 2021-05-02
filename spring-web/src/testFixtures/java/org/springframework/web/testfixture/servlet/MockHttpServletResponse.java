@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -344,6 +344,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setLocale(Locale locale) {
+		if (locale == null) {
+			return;
+		}
 		this.locale = locale;
 		doAddHeaderValue(HttpHeaders.CONTENT_LANGUAGE, locale.toLanguageTag(), true);
 	}
@@ -375,10 +378,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			buf.append("; Domain=").append(cookie.getDomain());
 		}
 		int maxAge = cookie.getMaxAge();
+		ZonedDateTime expires = (cookie instanceof MockCookie ? ((MockCookie) cookie).getExpires() : null);
 		if (maxAge >= 0) {
 			buf.append("; Max-Age=").append(maxAge);
 			buf.append("; Expires=");
-			ZonedDateTime expires = (cookie instanceof MockCookie ? ((MockCookie) cookie).getExpires() : null);
 			if (expires != null) {
 				buf.append(expires.format(DateTimeFormatter.RFC_1123_DATE_TIME));
 			}
@@ -387,6 +390,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 				headers.setExpires(maxAge > 0 ? System.currentTimeMillis() + 1000L * maxAge : 0);
 				buf.append(headers.getFirst(HttpHeaders.EXPIRES));
 			}
+		}
+		else if (expires != null) {
+			buf.append("; Expires=");
+			buf.append(expires.format(DateTimeFormatter.RFC_1123_DATE_TIME));
 		}
 
 		if (cookie.getSecure()) {
@@ -421,7 +428,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public boolean containsHeader(String name) {
-		return (this.headers.get(name) != null);
+		return this.headers.containsKey(name);
 	}
 
 	/**
@@ -594,12 +601,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	public void setHeader(String name, String value) {
+	public void setHeader(String name, @Nullable String value) {
 		setHeaderValue(name, value);
 	}
 
 	@Override
-	public void addHeader(String name, String value) {
+	public void addHeader(String name, @Nullable String value) {
 		addHeaderValue(name, value);
 	}
 
@@ -613,7 +620,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		addHeaderValue(name, value);
 	}
 
-	private void setHeaderValue(String name, Object value) {
+	private void setHeaderValue(String name, @Nullable Object value) {
+		if (value == null) {
+			return;
+		}
 		boolean replaceHeader = true;
 		if (setSpecialHeader(name, value, replaceHeader)) {
 			return;
@@ -621,7 +631,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		doAddHeaderValue(name, value, replaceHeader);
 	}
 
-	private void addHeaderValue(String name, Object value) {
+	private void addHeaderValue(String name, @Nullable Object value) {
+		if (value == null) {
+			return;
+		}
 		boolean replaceHeader = false;
 		if (setSpecialHeader(name, value, replaceHeader)) {
 			return;

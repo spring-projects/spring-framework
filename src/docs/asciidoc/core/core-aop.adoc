@@ -316,17 +316,17 @@ other class. They can also contain pointcut, advice, and introduction (inter-typ
 declarations.
 
 .Autodetecting aspects through component scanning
-NOTE: You can register aspect classes as regular beans in your Spring XML configuration or
-autodetect them through classpath scanning -- the same as any other Spring-managed bean.
-However, note that the `@Aspect` annotation is not sufficient for autodetection in
-the classpath. For that purpose, you need to add a separate `@Component` annotation
-(or, alternatively, a custom stereotype annotation that qualifies, as per the rules of
-Spring's component scanner).
+NOTE: You can register aspect classes as regular beans in your Spring XML configuration,
+via `@Bean` methods in `@Configuration` classes, or have Spring autodetect them through
+classpath scanning -- the same as any other Spring-managed bean. However, note that the
+`@Aspect` annotation is not sufficient for autodetection in the classpath. For that
+purpose, you need to add a separate `@Component` annotation (or, alternatively, a custom
+stereotype annotation that qualifies, as per the rules of Spring's component scanner).
 
 .Advising aspects with other aspects?
-NOTE: In Spring AOP, aspects themselves cannot be the targets of advice
-from other aspects. The `@Aspect` annotation on a class marks it as an aspect and,
-hence, excludes it from auto-proxying.
+NOTE: In Spring AOP, aspects themselves cannot be the targets of advice from other
+aspects. The `@Aspect` annotation on a class marks it as an aspect and, hence, excludes
+it from auto-proxying.
 
 
 
@@ -361,7 +361,7 @@ matches the execution of any method named `transfer`:
 ----
 
 The pointcut expression that forms the value of the `@Pointcut` annotation is a regular
-AspectJ 5 pointcut expression. For a full discussion of AspectJ's pointcut language, see
+AspectJ pointcut expression. For a full discussion of AspectJ's pointcut language, see
 the https://www.eclipse.org/aspectj/doc/released/progguide/index.html[AspectJ
 Programming Guide] (and, for extensions, the
 https://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html[AspectJ 5
@@ -3394,7 +3394,7 @@ definition to configure new `Account` instances.
 You can also use autowiring to avoid having to specify a dedicated bean definition at
 all. To have Spring apply autowiring, use the `autowire` property of the `@Configurable`
 annotation. You can specify either `@Configurable(autowire=Autowire.BY_TYPE)` or
-`@Configurable(autowire=Autowire.BY_NAME` for autowiring by type or by name,
+`@Configurable(autowire=Autowire.BY_NAME)` for autowiring by type or by name,
 respectively. As an alternative, it is preferable to specify explicit, annotation-driven
 dependency injection for your `@Configurable` beans through `@Autowired` or `@Inject`
 at the field or method level (see <<beans-annotation-config>> for further details).

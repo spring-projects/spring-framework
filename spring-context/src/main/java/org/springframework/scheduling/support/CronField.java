@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,6 +157,11 @@ abstract class CronField {
 		return this.type;
 	}
 
+	@SuppressWarnings("unchecked")
+	protected static <T extends Temporal & Comparable<? super T>> T cast(Temporal temporal) {
+		return (T) temporal;
+	}
+
 
 	/**
 	 * Represents the type of cron field, i.e. seconds, minutes, hours,
@@ -236,11 +241,17 @@ abstract class CronField {
 		 */
 		public <T extends Temporal & Comparable<? super T>> T elapseUntil(T temporal, int goal) {
 			int current = get(temporal);
+			ValueRange range = temporal.range(this.field);
 			if (current < goal) {
-				return this.field.getBaseUnit().addTo(temporal, goal - current);
+				if (range.isValidIntValue(goal)) {
+					return cast(temporal.with(this.field, goal));
+				}
+				else {
+					// goal is invalid, eg. 29th Feb, lets try to get as close as possible
+					return this.field.getBaseUnit().addTo(temporal, goal - current);
+				}
 			}
 			else {
-				ValueRange range = temporal.range(this.field);
 				long amount = goal + range.getMaximum() - current + 1 - range.getMinimum();
 				return this.field.getBaseUnit().addTo(temporal, amount);
 			}

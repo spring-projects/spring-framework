@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -33,6 +34,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.HttpHandlerDecoratorFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
@@ -139,10 +141,60 @@ public class WebHttpHandlerBuilderTests {
 		assertThat(success.get()).isTrue();
 	}
 
+	@Test
+	void httpHandlerDecoratorFactoryBeans() {
+		HttpHandler handler = WebHttpHandlerBuilder.applicationContext(
+				new AnnotationConfigApplicationContext(HttpHandlerDecoratorFactoryBeansConfig.class)).build();
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		handler.handle(MockServerHttpRequest.get("/").build(), response).block();
+
+		Function<String, Long> headerValue = name -> Long.valueOf(response.getHeaders().getFirst(name));
+		assertThat(headerValue.apply("decoratorA")).isLessThan(headerValue.apply("decoratorB"));
+		assertThat(headerValue.apply("decoratorC")).isLessThan(headerValue.apply("decoratorB"));
+	}
+
 	private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
 		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
 		DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
 		return exchange.getResponse().writeWith(Flux.just(buffer));
+	}
+
+
+	@Configuration
+	static class HttpHandlerDecoratorFactoryBeansConfig {
+
+		@Bean
+		@Order(1)
+		public HttpHandlerDecoratorFactory decoratorFactoryA() {
+			return delegate -> (HttpHandler) (request, response) -> {
+				response.getHeaders().set("decoratorA", String.valueOf(System.nanoTime()));
+				return delegate.handle(request, response);
+			};
+		}
+
+		@Bean
+		@Order(3)
+		public HttpHandlerDecoratorFactory decoratorFactoryB() {
+			return delegate -> (HttpHandler) (request, response) -> {
+				response.getHeaders().set("decoratorB", String.valueOf(System.nanoTime()));
+				return delegate.handle(request, response);
+			};
+		}
+
+		@Bean
+		@Order(2)
+		public HttpHandlerDecoratorFactory decoratorFactoryC() {
+			return delegate -> (HttpHandler) (request, response) -> {
+				response.getHeaders().set("decoratorC", String.valueOf(System.nanoTime()));
+				return delegate.handle(request, response);
+			};
+		}
+
+		@Bean
+		public WebHandler webHandler() {
+			return exchange -> Mono.empty();
+		}
 	}
 
 

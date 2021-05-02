@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -99,7 +100,7 @@ public class AsyncTests {
 	}
 
 	@Test
-	public void deferredResultWithImmediateValue() throws Exception {
+	public void deferredResultWithImmediateValue() {
 		this.testClient.get()
 				.uri("/1?deferredResultWithImmediateValue=true")
 				.exchange()
@@ -109,7 +110,7 @@ public class AsyncTests {
 	}
 
 	@Test
-	public void deferredResultWithDelayedError() throws Exception {
+	public void deferredResultWithDelayedError() {
 		this.testClient.get()
 				.uri("/1?deferredResultWithDelayedError=true")
 				.exchange()
@@ -118,7 +119,7 @@ public class AsyncTests {
 	}
 
 	@Test
-	public void listenableFuture() throws Exception {
+	public void listenableFuture() {
 		this.testClient.get()
 				.uri("/1?listenableFuture=true")
 				.exchange()
@@ -142,17 +143,17 @@ public class AsyncTests {
 	@RequestMapping(path = "/{id}", produces = "application/json")
 	private static class AsyncController {
 
-		@RequestMapping(params = "callable")
+		@GetMapping(params = "callable")
 		public Callable<Person> getCallable() {
 			return () -> new Person("Joe");
 		}
 
-		@RequestMapping(params = "streaming")
+		@GetMapping(params = "streaming")
 		public StreamingResponseBody getStreaming() {
 			return os -> os.write("name=Joe".getBytes(StandardCharsets.UTF_8));
 		}
 
-		@RequestMapping(params = "streamingSlow")
+		@GetMapping(params = "streamingSlow")
 		public StreamingResponseBody getStreamingSlow() {
 			return os -> {
 				os.write("name=Joe".getBytes());
@@ -166,41 +167,41 @@ public class AsyncTests {
 			};
 		}
 
-		@RequestMapping(params = "streamingJson")
+		@GetMapping(params = "streamingJson")
 		public ResponseEntity<StreamingResponseBody> getStreamingJson() {
 			return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
 					.body(os -> os.write("{\"name\":\"Joe\",\"someDouble\":0.5}".getBytes(StandardCharsets.UTF_8)));
 		}
 
-		@RequestMapping(params = "deferredResult")
+		@GetMapping(params = "deferredResult")
 		public DeferredResult<Person> getDeferredResult() {
 			DeferredResult<Person> result = new DeferredResult<>();
 			delay(100, () -> result.setResult(new Person("Joe")));
 			return result;
 		}
 
-		@RequestMapping(params = "deferredResultWithImmediateValue")
+		@GetMapping(params = "deferredResultWithImmediateValue")
 		public DeferredResult<Person> getDeferredResultWithImmediateValue() {
 			DeferredResult<Person> result = new DeferredResult<>();
 			result.setResult(new Person("Joe"));
 			return result;
 		}
 
-		@RequestMapping(params = "deferredResultWithDelayedError")
+		@GetMapping(params = "deferredResultWithDelayedError")
 		public DeferredResult<Person> getDeferredResultWithDelayedError() {
 			DeferredResult<Person> result = new DeferredResult<>();
 			delay(100, () -> result.setErrorResult(new RuntimeException("Delayed Error")));
 			return result;
 		}
 
-		@RequestMapping(params = "listenableFuture")
+		@GetMapping(params = "listenableFuture")
 		public ListenableFuture<Person> getListenableFuture() {
 			ListenableFutureTask<Person> futureTask = new ListenableFutureTask<>(() -> new Person("Joe"));
 			delay(100, futureTask);
 			return futureTask;
 		}
 
-		@RequestMapping(params = "completableFutureWithImmediateValue")
+		@GetMapping(params = "completableFutureWithImmediateValue")
 		public CompletableFuture<Person> getCompletableFutureWithImmediateValue() {
 			CompletableFuture<Person> future = new CompletableFuture<>();
 			future.complete(new Person("Joe"));

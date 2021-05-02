@@ -36,7 +36,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  *
  * <p>The servlet and all filters involved in an async request must have async
  * support enabled using the Servlet API or by adding an
- * <code>&ltasync-supported&gttrue&lt/async-supported&gt</code> element to servlet and filter
+ * <code>&lt;async-supported&gt;true&lt;/async-supported&gt;</code> element to servlet and filter
  * declarations in {@code web.xml}.
  *
  * @author Rossen Stoyanchev

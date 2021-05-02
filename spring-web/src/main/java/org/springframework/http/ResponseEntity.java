@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Extension of {@link HttpEntity} that adds a {@link HttpStatus} status code.
- * Used in {@code RestTemplate} as well {@code @Controller} methods.
+ * Extension of {@link HttpEntity} that adds an {@link HttpStatus} status code.
+ * Used in {@code RestTemplate} as well as in {@code @Controller} methods.
  *
  * <p>In {@code RestTemplate}, this class is returned by
  * {@link org.springframework.web.client.RestTemplate#getForEntity getForEntity()} and
@@ -44,7 +44,8 @@ import org.springframework.util.ObjectUtils;
  * HttpStatus statusCode = entity.getStatusCode();
  * </pre>
  *
- * <p>Can also be used in Spring MVC, as the return value from a @Controller method:
+ * <p>This can also be used in Spring MVC as the return value from an
+ * {@code @Controller} method:
  * <pre class="code">
  * &#64;RequestMapping("/handle")
  * public ResponseEntity&lt;String&gt; handle() {
@@ -81,7 +82,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 
 	/**
-	 * Create a new {@code ResponseEntity} with the given status code, and no body nor headers.
+	 * Create a {@code ResponseEntity} with a status code only.
 	 * @param status the status code
 	 */
 	public ResponseEntity(HttpStatus status) {
@@ -89,7 +90,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create a new {@code ResponseEntity} with the given body and status code, and no headers.
+	 * Create a {@code ResponseEntity} with a body and status code.
 	 * @param body the entity body
 	 * @param status the status code
 	 */
@@ -98,7 +99,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create a new {@code HttpEntity} with the given headers and status code, and no body.
+	 * Create a {@code ResponseEntity} with headers and a status code.
 	 * @param headers the entity headers
 	 * @param status the status code
 	 */
@@ -107,7 +108,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create a new {@code HttpEntity} with the given body, headers, and status code.
+	 * Create a {@code ResponseEntity} with a body, headers, and a status code.
 	 * @param body the entity body
 	 * @param headers the entity headers
 	 * @param status the status code
@@ -117,7 +118,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create a new {@code HttpEntity} with the given body, headers, and status code.
+	 * Create a {@code ResponseEntity} with a body, headers, and a raw status code.
 	 * @param body the entity body
 	 * @param headers the entity headers
 	 * @param rawStatus the status code value
@@ -128,11 +129,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create a new {@code HttpEntity} with the given body, headers, and status code.
-	 * Just used behind the nested builder API.
-	 * @param body the entity body
-	 * @param headers the entity headers
-	 * @param status the status code (as {@code HttpStatus} or as {@code Integer} value)
+	 * Private constructor.
 	 */
 	private ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, Object status) {
 		super(body, headers);
@@ -189,7 +186,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
-		builder.append(this.status.toString());
+		builder.append(this.status);
 		if (this.status instanceof HttpStatus) {
 			builder.append(' ');
 			builder.append(((HttpStatus) this.status).getReasonPhrase());
@@ -240,12 +237,13 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * A shortcut for creating a {@code ResponseEntity} with the given body and
-	 * the status set to {@linkplain HttpStatus#OK OK}.
+	 * A shortcut for creating a {@code ResponseEntity} with the given body
+	 * and the status set to {@linkplain HttpStatus#OK OK}.
+	 * @param body the body of the response entity (possibly empty)
 	 * @return the created {@code ResponseEntity}
 	 * @since 4.1
 	 */
-	public static <T> ResponseEntity<T> ok(T body) {
+	public static <T> ResponseEntity<T> ok(@Nullable T body) {
 		return ok().body(body);
 	}
 

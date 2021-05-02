@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,15 @@ class MappedInterceptorTests {
 
 		assertThat(interceptor.matches(requestFactory.apply("/foo"))).isTrue();
 		assertThat(interceptor.matches(requestFactory.apply("/admin/foo"))).isFalse();
+	}
+
+	@PathPatternsParameterizedTest // gh-26690
+	void includePatternWithFallbackOnPathMatcher(Function<String, MockHttpServletRequest> requestFactory) {
+		MappedInterceptor interceptor = new MappedInterceptor(new String[] { "/path1/**/path2" }, null, delegate);
+
+		assertThat(interceptor.matches(requestFactory.apply("/path1/foo/bar/path2"))).isTrue();
+		assertThat(interceptor.matches(requestFactory.apply("/path1/foo/bar/path3"))).isFalse();
+		assertThat(interceptor.matches(requestFactory.apply("/path3/foo/bar/path2"))).isFalse();
 	}
 
 	@PathPatternsParameterizedTest
