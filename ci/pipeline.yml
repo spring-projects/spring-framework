@@ -231,7 +231,6 @@ jobs:
       image: ci-image
       file: git-repo/ci/tasks/check-project.yml
       params:
-        MAIN_TOOLCHAIN: 8
         TEST_TOOLCHAIN: 11
       <<: *build-project-task-params
     on_failure:
@@ -258,7 +257,6 @@ jobs:
         image: ci-image
         file: git-repo/ci/tasks/check-project.yml
         params:
-          MAIN_TOOLCHAIN: 8
           TEST_TOOLCHAIN: 15
         <<: *build-project-task-params
       on_failure:
