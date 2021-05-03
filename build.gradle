@@ -1,7 +1,7 @@
 plugins {
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE' apply false
 	id 'io.spring.nohttp' version '0.0.5.RELEASE'
-	id 'org.jetbrains.kotlin.jvm' version '1.4.32' apply false
+	id 'org.jetbrains.kotlin.jvm' version '1.5.0' apply false
 	id 'org.jetbrains.dokka' version '0.10.1' apply false
 	id 'org.asciidoctor.jvm.convert' version '3.1.0'
 	id 'org.asciidoctor.jvm.pdf' version '3.1.0'
@@ -10,7 +10,7 @@ plugins {
 	id "com.github.ben-manes.versions" version '0.28.0'
 	id "com.github.johnrengelman.shadow" version "6.1.0" apply false
 	id "me.champeau.jmh" version "0.6.4" apply false
-	id "org.jetbrains.kotlin.plugin.serialization" version "1.4.32" apply false
+	id "org.jetbrains.kotlin.plugin.serialization" version "1.5.0" apply false
 	id "org.unbroken-dome.xjc" version '2.0.0' apply false
 }
 
@@ -33,8 +33,9 @@ configure(allprojects) { project ->
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR9"
 			mavenBom "io.rsocket:rsocket-bom:1.1.0"
 			mavenBom "org.eclipse.jetty:jetty-bom:9.4.39.v20210325"
-			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.4.32"
+			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.5.0"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.4.3"
+			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.2.0"
 			mavenBom "org.junit:junit-bom:5.7.1"
 		}
 		dependencies {
@@ -91,10 +92,6 @@ configure(allprojects) { project ->
 			}
 			dependency "org.ogce:xpp3:1.1.6"
 			dependency "org.yaml:snakeyaml:1.28"
-			dependencySet(group: 'org.jetbrains.kotlinx', version: '1.0.1') {
-				entry 'kotlinx-serialization-core'
-				entry 'kotlinx-serialization-json'
-			}
 
 			dependency "com.h2database:h2:1.4.200"
 			dependency "com.github.ben-manes.caffeine:caffeine:2.9.0"
@@ -319,7 +316,7 @@ configure([rootProject] + javaProjects) { project ->
 			kotlinOptions {
 				languageVersion = "1.3"
 				apiVersion = "1.3"
-				freeCompilerArgs = ["-Xjsr305=strict"]
+				freeCompilerArgs = ["-Xjsr305=strict", "-Xsuppress-version-warnings"]
 				allWarningsAsErrors = true
 			}
 		}
