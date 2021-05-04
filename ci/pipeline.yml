@@ -18,9 +18,6 @@ anchors:
     ARTIFACTORY_USERNAME: ((artifactory-username))
     ARTIFACTORY_PASSWORD: ((artifactory-password))
   build-project-task-params: &build-project-task-params
-    privileged: true
-    timeout: ((task-timeout))
-    params:
       BRANCH: ((branch))
       <<: *gradle-enterprise-task-params
   docker-resource-source: &docker-resource-source
@@ -175,7 +172,10 @@ jobs:
     - task: build-project
       image: ci-image
       file: git-repo/ci/tasks/build-project.yml
-      <<: *build-project-task-params
+      privileged: true
+      timeout: ((task-timeout))
+      params:
+        <<: *build-project-task-params
     on_failure:
       do:
       - put: repo-status-build
@@ -230,9 +230,11 @@ jobs:
     - task: check-project
       image: ci-image
       file: git-repo/ci/tasks/check-project.yml
+      privileged: true
+      timeout: ((task-timeout))
       params:
         TEST_TOOLCHAIN: 11
-      <<: *build-project-task-params
+        <<: *build-project-task-params
     on_failure:
       do:
       - put: repo-status-jdk11-build
@@ -256,9 +258,11 @@ jobs:
       - task: check-project
         image: ci-image
         file: git-repo/ci/tasks/check-project.yml
+        privileged: true
+        timeout: ((task-timeout))
         params:
           TEST_TOOLCHAIN: 15
-        <<: *build-project-task-params
+          <<: *build-project-task-params
       on_failure:
         do:
           - put: repo-status-jdk15-build
@@ -285,7 +289,10 @@ jobs:
       - task: build-pr
         image: ci-image
         file: git-repo/ci/tasks/build-pr.yml
-        <<: *build-project-task-params
+        privileged: true
+        timeout: ((task-timeout))
+        params:
+          <<: *build-project-task-params
       on_success:
         put: git-pull-request
         params:
