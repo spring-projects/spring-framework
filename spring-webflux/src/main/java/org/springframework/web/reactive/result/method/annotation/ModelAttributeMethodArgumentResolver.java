@@ -147,7 +147,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 	/**
 	 * Determine if binding should be disabled for the supplied {@link MethodParameter},
 	 * based on the {@link ModelAttribute#binding} annotation attribute.
-	 * @since 5.3.7
+	 * @since 5.2.15
 	 */
 	private boolean bindingDisabled(MethodParameter parameter) {
 		ModelAttribute modelAttribute = parameter.getParameterAnnotation(ModelAttribute.class);
