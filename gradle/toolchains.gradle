@@ -25,7 +25,7 @@
  * /opt/openjdk/java11
  * $ echo JDK15
  * /opt/openjdk/java15
- * $ ./gradlew -Dorg.gradle.java.installations.fromEnv=JDK11,JDK15 check
+ * $ ./gradlew -Porg.gradle.java.installations.fromEnv=JDK11,JDK15 check
  * }
  *
  * @author Brian Clozel
