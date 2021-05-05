@@ -29,6 +29,7 @@
  * }
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  */
 
 def mainToolchainConfigured() {
@@ -129,7 +130,7 @@ pluginManager.withPlugin("kotlin") {
 			}
 		}
 	}
-	
+
 	if (testToolchainConfigured()) {
 		def testLanguageVersion = testToolchainLanguageVersion()
 		def compiler = javaToolchains.compilerFor {
@@ -159,5 +160,23 @@ pluginManager.withPlugin("me.champeau.jmh") {
 				languageVersion = testToolchainLanguageVersion()
 			}
 		}
+	}
+}
+
+// Store resolved Toolchain JVM information as custom values in the build scan.
+rootProject.ext {
+	resolvedMainToolchain = false
+	resolvedTestToolchain = false
+}
+gradle.taskGraph.afterTask { Task task, TaskState state ->
+	if (mainToolchainConfigured() && !resolvedMainToolchain && task instanceof JavaCompile && task.javaCompiler.isPresent()) {
+		def metadata = task.javaCompiler.get().metadata
+		task.project.buildScan.value('Main toolchain', "$metadata.vendor $metadata.languageVersion ($metadata.installationPath)")
+		resolvedMainToolchain = true
+	}
+	if (testToolchainConfigured() && !resolvedTestToolchain && task instanceof Test && task.javaLauncher.isPresent()) {
+		def metadata = task.javaLauncher.get().metadata
+		task.project.buildScan.value('Test toolchain', "$metadata.vendor $metadata.languageVersion ($metadata.installationPath)")
+		resolvedTestToolchain = true
 	}
 }
