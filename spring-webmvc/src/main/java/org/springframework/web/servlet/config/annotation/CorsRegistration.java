@@ -36,7 +36,7 @@ public class CorsRegistration {
 
 	private final String pathPattern;
 
-	private final CorsConfiguration config;
+	private CorsConfiguration config;
 
 
 	public CorsRegistration(String pathPattern) {
@@ -150,7 +150,7 @@ public class CorsRegistration {
 	 * @since 5.3
 	 */
 	public CorsRegistration combine(CorsConfiguration other) {
-		this.config.combine(other);
+		this.config = this.config.combine(other);
 		return this;
 	}
 
