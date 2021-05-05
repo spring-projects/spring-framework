@@ -57,11 +57,11 @@ The `MethodMatcher` interface is normally more important. The complete interface
 ----
 	public interface MethodMatcher {
 
-		boolean matches(Method m, Class targetClass);
+		boolean matches(Method m, Class<?> targetClass);
 
 		boolean isRuntime();
 
-		boolean matches(Method m, Class targetClass, Object[] args);
+		boolean matches(Method m, Class<?> targetClass, Object... args);
 	}
 ----
 
