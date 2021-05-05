@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -373,8 +373,13 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		for (NameValuePair param : this.webRequest.getRequestParameters()) {
 			if (param instanceof KeyDataPair) {
 				KeyDataPair pair = (KeyDataPair) param;
-				MockPart part = new MockPart(pair.getName(), pair.getFile().getName(), readAllBytes(pair.getFile()));
-				part.getHeaders().setContentType(MediaType.valueOf(pair.getMimeType()));
+				File file = pair.getFile();
+				MockPart part = (file != null ?
+						new MockPart(pair.getName(), file.getName(), readAllBytes(file)) :
+						new MockPart(pair.getName(), null));
+				if (StringUtils.hasLength(pair.getMimeType())) {
+					part.getHeaders().setContentType(MediaType.valueOf(pair.getMimeType()));
+				}
 				request.addPart(part);
 			}
 			else {
