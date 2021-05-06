@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import org.aspectj.weaver.ReferenceType;
 import org.aspectj.weaver.ReferenceTypeDelegate;
 import org.aspectj.weaver.ResolvedType;
+import org.aspectj.weaver.UnresolvedType;
 import org.aspectj.weaver.ast.And;
 import org.aspectj.weaver.ast.Call;
 import org.aspectj.weaver.ast.FieldGetCall;
