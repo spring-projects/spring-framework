@@ -285,12 +285,10 @@ class RuntimeTestWalker {
 
 		@Override
 		public void visit(HasAnnotation hasAnn) {
-			// If you thought things were bad before, now we sink to new levels of horror...
 			ReflectionVar v = (ReflectionVar) hasAnn.getVar();
-			int varType = getVarType(v);
-			if (varType == AT_THIS_VAR || varType == AT_TARGET_VAR || varType == AT_ANNOTATION_VAR) {
-				this.testsSubtypeSensitiveVars = true;
-			}
+			ResolvedType targetType = v.getType();
+			UnresolvedType annotationType = hasAnn.getAnnotationType();
+			this.testsSubtypeSensitiveVars = !targetType.hasAnnotation(annotationType);
 		}
 	}
 
