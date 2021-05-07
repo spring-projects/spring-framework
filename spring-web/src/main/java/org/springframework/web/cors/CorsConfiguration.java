@@ -551,6 +551,9 @@ public class CorsConfiguration {
 		if (!StringUtils.hasText(requestOrigin)) {
 			return null;
 		}
+		if (requestOrigin.endsWith("/")) {
+			requestOrigin = requestOrigin.substring(0, requestOrigin.length() - 1);
+		}
 		if (!ObjectUtils.isEmpty(this.allowedOrigins)) {
 			if (this.allowedOrigins.contains(ALL)) {
 				validateAllowCredentials();
