@@ -2622,33 +2622,41 @@ query parameters and form fields. The following example shows how to do so:
 .Java
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-	public String processSubmit(@ModelAttribute Pet pet) { } <1>
+	public String processSubmit(@ModelAttribute Pet pet) {
+		// method logic...
+	}
 ----
-<1> Bind an instance of `Pet`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 @PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-fun processSubmit(@ModelAttribute pet: Pet): String { } // <1>
+fun processSubmit(@ModelAttribute pet: Pet): String {
+	// method logic...
+}
 ----
-<1> Bind an instance of `Pet`.
 
-The `Pet` instance above is resolved as follows:
+The `Pet` instance above is sourced in one of the following ways:
 
-* From the model if already added by using <<mvc-ann-modelattrib-methods>>.
-* From the HTTP session by using <<mvc-ann-sessionattributes>>.
-* From a URI path variable passed through a `Converter` (see the next example).
-* From the invocation of a default constructor.
-* From the invocation of a "`primary constructor`" with arguments that match to Servlet
-request parameters. Argument names are determined through JavaBeans
-`@ConstructorProperties` or through runtime-retained parameter names in the bytecode.
+* Retrieved from the model where it may have been added by a
+  <<mvc-ann-modelattrib-methods,@ModelAttribute method>>.
+* Retrieved from the HTTP session if the model attribute was listed in
+  the class-level <<mvc-ann-sessionattributes>> annotation.
+* Obtained through a `Converter` where the model attribute name matches the name of a
+  request value such as a path variable or a request parameter (see next example).
+* Instantiated using its default constructor.
+* Instantiated through a "`primary constructor`" with arguments that match to Servlet
+  request parameters. Argument names are determined through JavaBeans
+  `@ConstructorProperties` or through runtime-retained parameter names in the bytecode.
 
-While it is common to use a <<mvc-ann-modelattrib-methods>> to populate the model with
-attributes, one other alternative is to rely on a `Converter<String, T>` in combination
-with a URI path variable convention. In the following example, the model attribute name,
-`account`, matches the URI path variable, `account`, and the `Account` is loaded by passing
-the `String` account number through a registered `Converter<String, Account>`:
+One alternative to using a <<mvc-ann-modelattrib-methods,@ModelAttribute method>> to
+supply it or relying on the framework to create the model attribute, is to have a
+`Converter<String, T>` to provide the instance. This is applied when the model attribute
+name matches to the name of a request value such as a path variable or a request
+parameter, and there is a `Converter` from `String` to the model attribute type.
+In the following example, the model attribute name is `account` which matches the URI
+path variable `account`, and there is a registered `Converter<String, Account>` which
+could load the `Account` from a data store:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
