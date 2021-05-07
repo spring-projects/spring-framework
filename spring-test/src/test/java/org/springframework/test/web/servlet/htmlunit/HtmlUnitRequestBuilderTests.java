@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -53,6 +54,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 /**
@@ -449,11 +451,20 @@ public class HtmlUnitRequestBuilderTests {
 
 		assertThat(actualRequest.getParts()).hasSize(1);
 		Part part = actualRequest.getPart("key");
-		assertThat(part).isNotNull();
-		assertThat(part.getName()).isEqualTo("key");
-		assertThat(IOUtils.toString(part.getInputStream(), StandardCharsets.UTF_8)).isEqualTo("");
-		assertThat(part.getSubmittedFileName()).isNull();
-		assertThat(part.getContentType()).isNull();
+
+		assertSoftly(softly -> {
+			softly.assertThat(part).isNotNull();
+			softly.assertThat(part.getName()).as("name").isEqualTo("key");
+			softly.assertThat(part.getSize()).as("size").isEqualTo(0);
+			try {
+				softly.assertThat(part.getInputStream()).isEmpty();
+			}
+			catch (IOException ex) {
+				softly.fail("failed to get InputStream", ex);
+			}
+			softly.assertThat(part.getSubmittedFileName()).as("filename").isEqualTo("");
+			softly.assertThat(part.getContentType()).as("content-type").isEqualTo("application/octet-stream");
+		});
 	}
 
 	@Test

@@ -374,11 +374,14 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			if (param instanceof KeyDataPair) {
 				KeyDataPair pair = (KeyDataPair) param;
 				File file = pair.getFile();
-				MockPart part = (file != null ?
-						new MockPart(pair.getName(), file.getName(), readAllBytes(file)) :
-						new MockPart(pair.getName(), null));
-				if (StringUtils.hasLength(pair.getMimeType())) {
+				MockPart part;
+				if (file != null) {
+					part = new MockPart(pair.getName(), file.getName(), readAllBytes(file));
 					part.getHeaders().setContentType(MediaType.valueOf(pair.getMimeType()));
+				}
+				else { // mimic empty file upload
+					part = new MockPart(pair.getName(), "", null);
+					part.getHeaders().setContentType(MediaType.APPLICATION_OCTET_STREAM);
 				}
 				request.addPart(part);
 			}
