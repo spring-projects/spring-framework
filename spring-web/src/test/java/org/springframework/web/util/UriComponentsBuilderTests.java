@@ -38,7 +38,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link UriComponentsBuilder}.
@@ -1275,40 +1275,12 @@ class UriComponentsBuilderTests {
 
 
 	@Test
-	void verifyNonNumberPort() {
-		UriComponents numberPort = UriComponentsBuilder.fromUriString("http://localhost:8080/path").build();
-		assertThat(numberPort.getScheme()).isEqualTo("http");
-		assertThat(numberPort.getHost()).isEqualTo("localhost");
-		assertThat(numberPort.getPort()).isEqualTo(8080);
-		assertThat(numberPort.getPath()).isEqualTo("/path");
-
-		UriComponents stringPort = UriComponentsBuilder.fromUriString("http://localhost:port/path").build();
-		try{
-			stringPort.getPort();
-			fail("port must be a number");
-		}catch (NumberFormatException e){
-
-		}
-		assertThat(stringPort.getScheme()).isEqualTo("http");
-		assertThat(stringPort.getHost()).isEqualTo("localhost");
-		assertThat(stringPort.getPath()).isEqualTo("/path");
-
-		UriComponents httpNumberPort = UriComponentsBuilder.fromHttpUrl("http://localhost:8080/path").build();
-		assertThat(httpNumberPort.getScheme()).isEqualTo("http");
-		assertThat(httpNumberPort.getPort()).isEqualTo(8080);
-		assertThat(httpNumberPort.getHost()).isEqualTo("localhost");
-		assertThat(httpNumberPort.getPath()).isEqualTo("/path");
-
-		UriComponents httpStringPort=  UriComponentsBuilder.fromHttpUrl("http://localhost:port/path").build();
-		try{
-			httpStringPort.getPort();
-			fail("port must be a number");
-		}catch (NumberFormatException e){
-
-		}
-		assertThat(httpStringPort.getScheme()).isEqualTo("http");
-		assertThat(httpStringPort.getHost()).isEqualTo("localhost");
-		assertThat(httpStringPort.getPath()).isEqualTo("/path");
+	void verifyInvalidPort() {
+		String url = "http://localhost:port/path";
+		assertThatThrownBy(() -> UriComponentsBuilder.fromUriString(url).build().toUri())
+				.isInstanceOf(NumberFormatException.class);
+		assertThatThrownBy(() -> UriComponentsBuilder.fromHttpUrl(url).build().toUri())
+				.isInstanceOf(NumberFormatException.class);
 	}
 
 }
