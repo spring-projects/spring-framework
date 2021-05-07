@@ -64,6 +64,6 @@ inline fun <reified T : Annotation> ListableBeanFactory.getBeansWithAnnotation()
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Annotation> ListableBeanFactory.findAnnotationOnBean(beanName:String): Annotation? =
+inline fun <reified T : Annotation> ListableBeanFactory.findAnnotationOnBean(beanName:String): T? =
 		findAnnotationOnBean(beanName, T::class.java)
 
