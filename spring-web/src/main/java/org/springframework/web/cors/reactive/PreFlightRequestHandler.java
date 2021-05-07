@@ -25,6 +25,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Rossen Stoyanchev
  * @since 5.3.4
+ * @see PreFlightRequestWebFilter
  */
 public interface PreFlightRequestHandler {
 
