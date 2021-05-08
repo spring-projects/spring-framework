@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -277,6 +278,14 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			String paramName = paramNames[i];
 			Class<?> paramType = paramTypes[i];
 			Object value = webRequest.getParameterValues(paramName);
+
+			// Since WebRequest#getParameter exposes a single-value parameter as an array
+			// with a single element, we unwrap the single value in such cases, analogous
+			// to WebExchangeDataBinder.addBindValue(Map<String, Object>, String, List<?>).
+			if (ObjectUtils.isArray(value) && Array.getLength(value) == 1) {
+				value = Array.get(value, 0);
+			}
+
 			if (value == null) {
 				if (fieldDefaultPrefix != null) {
 					value = webRequest.getParameter(fieldDefaultPrefix + paramName);
@@ -286,11 +295,6 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 						value = binder.getEmptyValue(paramType);
 					}
 				}
-			}
-
-			// Singular web parameters are wrapped with array, extract it so it can be picked up by conversion service later on
-			if (value != null && value.getClass().isArray() && Array.getLength(value) == 1) {
-				value = Array.get(value, 0);
 			}
 
 			try {
