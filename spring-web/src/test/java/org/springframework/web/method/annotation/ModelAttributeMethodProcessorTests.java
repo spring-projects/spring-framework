@@ -19,7 +19,6 @@ package org.springframework.web.method.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -271,7 +270,7 @@ public class ModelAttributeMethodProcessorTests {
 	}
 
 	@Test // gh-25182
-	public void testResolveConstructorListParameter() throws Exception {
+	public void resolveConstructorListArgumentFromCommaSeparatedRequestParameter() throws Exception {
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest();
 		mockRequest.addParameter("listOfStrings", "1,2");
 		ServletWebRequest requestWithParam = new ServletWebRequest(mockRequest);
@@ -281,14 +280,14 @@ public class ModelAttributeMethodProcessorTests {
 				.willAnswer(invocation -> {
 					WebRequestDataBinder binder = new WebRequestDataBinder(invocation.getArgument(1));
 
-					// Add conversion service which will convert "1,2" to List of size 2
+					// Add conversion service which will convert "1,2" to a list
 					binder.setConversionService(new DefaultFormattingConversionService());
 					return binder;
 				});
 
 		Object resolved = this.processor.resolveArgument(this.beanWithConstructorArgs, this.container, requestWithParam, factory);
-		assertThat(resolved).isNotNull();
-		assertThat(((TestBeanWithConstructorArgs) resolved).listOfStrings).isEqualTo(Arrays.asList("1", "2"));
+		assertThat(resolved).isInstanceOf(TestBeanWithConstructorArgs.class);
+		assertThat(((TestBeanWithConstructorArgs) resolved).listOfStrings).containsExactly("1", "2");
 	}
 
 	private void testGetAttributeFromModel(String expectedAttrName, MethodParameter param) throws Exception {
