@@ -64,6 +64,7 @@ import org.springframework.web.util.UriComponents.UriTemplateVariables;
  * @author Brian Clozel
  * @author Sebastien Deleuze
  * @author Sam Brannen
+ * @author Nguyen Bao Sach
  * @since 3.1
  * @see #newInstance()
  * @see #fromPath(String)
@@ -85,7 +86,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final String HOST_PATTERN = "(" + HOST_IPV6_PATTERN + "|" + HOST_IPV4_PATTERN + ")";
 
-	private static final String PORT_PATTERN = "(.[^/]*(?:\\{[^/]+?})?)";
+	private static final String PORT_PATTERN = "(.[^/?]*(?:\\{[^/]+?})?)";
 
 	private static final String PATH_PATTERN = "([^?#]*)";
 

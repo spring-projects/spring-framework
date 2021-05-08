@@ -50,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author David Eckel
+ * @author Nguyen Bao Sach
  */
 class UriComponentsBuilderTests {
 
@@ -1281,6 +1282,20 @@ class UriComponentsBuilderTests {
 				.isInstanceOf(NumberFormatException.class);
 		assertThatThrownBy(() -> UriComponentsBuilder.fromHttpUrl(url).build().toUri())
 				.isInstanceOf(NumberFormatException.class);
+	}
+
+	@Test
+	void fromUriStringNoPathWithPortAndQuery() {
+		String url = "http://localhost:8080?foo=bar";
+		UriComponents result = UriComponentsBuilder.fromUriString(url).build();
+		assertThat(result.getScheme()).isEqualTo("http");
+		assertThat(result.getUserInfo()).isNull();
+		assertThat(result.getHost()).isEqualTo("localhost");
+		assertThat(result.getPort()).isEqualTo(8080);
+		assertThat(result.getPath()).isNullOrEmpty();
+		assertThat(result.getPathSegments()).isEmpty();
+		assertThat(result.getQuery()).isEqualTo("foo=bar");
+		assertThat(result.getFragment()).isNull();
 	}
 
 }
