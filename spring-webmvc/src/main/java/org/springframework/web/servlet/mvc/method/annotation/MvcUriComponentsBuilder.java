@@ -37,12 +37,14 @@ import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodProxy;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
@@ -53,6 +55,7 @@ import org.springframework.util.PathMatcher;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
@@ -95,7 +98,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Sam Brannen
  * @since 4.0
  */
-public class MvcUriComponentsBuilder {
+public class MvcUriComponentsBuilder implements EmbeddedValueResolverAware {
 
 	/**
 	 * Well-known name for the {@link CompositeUriComponentsContributor} object in the bean factory.
@@ -117,6 +120,10 @@ public class MvcUriComponentsBuilder {
 		defaultUriComponentsContributor = new CompositeUriComponentsContributor(
 				new PathVariableMethodArgumentResolver(), new RequestParamMethodArgumentResolver(false));
 	}
+
+
+	@Nullable
+	private static StringValueResolver valueResolver;
 
 	private final UriComponentsBuilder baseUrl;
 
@@ -581,14 +588,7 @@ public class MvcUriComponentsBuilder {
 		if (mapping == null) {
 			return "/";
 		}
-		String[] paths = mapping.path();
-		if (ObjectUtils.isEmpty(paths) || !StringUtils.hasLength(paths[0])) {
-			return "/";
-		}
-		if (paths.length > 1 && logger.isTraceEnabled()) {
-			logger.trace("Using first of multiple paths on " + controllerType.getName());
-		}
-		return paths[0];
+		return getValueFromRequestMapping(mapping, controllerType.getName());
 	}
 
 	private static String getMethodMapping(Method method) {
@@ -597,14 +597,28 @@ public class MvcUriComponentsBuilder {
 		if (requestMapping == null) {
 			throw new IllegalArgumentException("No @RequestMapping on: " + method.toGenericString());
 		}
+		return getValueFromRequestMapping(requestMapping, method.toGenericString());
+	}
+
+	private static String getValueFromRequestMapping(@NonNull RequestMapping requestMapping, String resourceName) {
 		String[] paths = requestMapping.path();
 		if (ObjectUtils.isEmpty(paths) || !StringUtils.hasLength(paths[0])) {
 			return "/";
 		}
 		if (paths.length > 1 && logger.isTraceEnabled()) {
-			logger.trace("Using first of multiple paths on " + method.toGenericString());
+			logger.trace("Using first of multiple paths on " + resourceName);
 		}
-		return paths[0];
+		String path = paths[0];
+		if (valueResolver != null) {
+			String resolvedValue = valueResolver.resolveStringValue(path);
+			if (resolvedValue != null) {
+				path = resolvedValue;
+			}
+			else if (logger.isTraceEnabled()) {
+				logger.trace("Unable to resolve value for path : " + path + " for : " + resourceName);
+			}
+		}
+		return path;
 	}
 
 	private static Method getMethod(Class<?> controllerType, final String methodName, final Object... args) {
@@ -677,6 +691,10 @@ public class MvcUriComponentsBuilder {
 		return wac;
 	}
 
+	@Override
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		valueResolver = resolver;
+	}
 
 
 	/**
