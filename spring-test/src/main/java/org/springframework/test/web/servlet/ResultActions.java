@@ -42,7 +42,7 @@ public interface ResultActions {
 	 *   .andExpect(jsonPath("$.person.name").value("Jason"));
 	 * </pre>
 	 *
-	 * <p>Or alternatively provide all matchers as a vararg:
+	 * <p>Either provide all matchers as a vararg:
 	 * <pre class="code">
 	 * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*, ResultMatcher.matchAll
 	 *
@@ -54,6 +54,16 @@ public interface ResultActions {
 	 *       model().attributeExists("person"),
 	 *       flash().attributeCount(1),
 	 *       flash().attribute("message", "success!"))
+	 *   );
+	 * </pre>
+	 *
+	 * <p>Or provide all matchers to be evaluated no matter if one of them fail:
+	 * <pre class="code">
+	 * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*, ResultMatcher.matchAllSoftly
+	 * mockMvc.perform(post("/form"))
+	 *   .andExpect(matchAllSoftly(
+	 *       status().isOk(),
+	 *       redirectedUrl("/person/1")
 	 *   );
 	 * </pre>
 	 */
