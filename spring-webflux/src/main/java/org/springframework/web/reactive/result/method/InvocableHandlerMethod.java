@@ -22,9 +22,12 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -134,11 +137,17 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	public Mono<HandlerResult> invoke(
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
-		return getMethodArgumentValues(exchange, bindingContext, providedArgs).flatMap(args -> {
+		ReflectionUtils.makeAccessible(getBridgedMethod());
+		Method method = getBridgedMethod();
+
+		Mono<Object[]> argumentValues = getMethodArgumentValues(exchange, bindingContext, providedArgs);
+		if (isAsyncReturnType(method.getReturnType())) {
+			argumentValues.publishOn(Schedulers.boundedElastic());
+		}
+
+		return argumentValues.flatMap(args -> {
 			Object value;
 			try {
-				ReflectionUtils.makeAccessible(getBridgedMethod());
-				Method method = getBridgedMethod();
 				if (KotlinDetector.isSuspendingFunction(method)) {
 					value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
 				}
@@ -174,6 +183,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			HandlerResult result = new HandlerResult(this, value, returnType, bindingContext);
 			return Mono.just(result);
 		});
+	}
+
+	private boolean isAsyncReturnType(Class<?> returnType) {
+		return (Publisher.class.isAssignableFrom(returnType) || Future.class.isAssignableFrom(returnType));
 	}
 
 	private Mono<Object[]> getMethodArgumentValues(
