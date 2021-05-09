@@ -22,12 +22,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -38,6 +35,7 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -68,6 +66,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
+
+	private BlockingPredicate blockingPredicate = new BlockingPredicate();
 
 
 	/**
@@ -125,6 +125,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		this.reactiveAdapterRegistry = registry;
 	}
 
+	/**
+	 * Configure a blocking predicate. This is useful when some controller method
+	 * should running out of http I/O thread(Scheduler).
+	 */
+	public void setBlockingPredicate(@NonNull BlockingPredicate blockingPredicate) {
+		this.blockingPredicate = blockingPredicate;
+	}
 
 	/**
 	 * Invoke the method for the given exchange.
@@ -141,8 +148,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		Method method = getBridgedMethod();
 
 		Mono<Object[]> argumentValues = getMethodArgumentValues(exchange, bindingContext, providedArgs);
-		if (isAsyncReturnType(method.getReturnType())) {
-			argumentValues.publishOn(Schedulers.boundedElastic());
+		if (this.blockingPredicate.test(method)) {
+			argumentValues.publishOn(this.blockingPredicate.getScheduler(method));
 		}
 
 		return argumentValues.flatMap(args -> {
@@ -183,10 +190,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			HandlerResult result = new HandlerResult(this, value, returnType, bindingContext);
 			return Mono.just(result);
 		});
-	}
-
-	private boolean isAsyncReturnType(Class<?> returnType) {
-		return (Publisher.class.isAssignableFrom(returnType) || Future.class.isAssignableFrom(returnType));
 	}
 
 	private Mono<Object[]> getMethodArgumentValues(
