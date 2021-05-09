@@ -16,6 +16,9 @@
 
 package org.springframework.test.web.servlet;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A {@code ResultMatcher} matches the result of an executed request against
  * some expectation.
@@ -66,6 +69,32 @@ public interface ResultMatcher {
 		return result -> {
 			for (ResultMatcher matcher : matchers) {
 				matcher.match(result);
+			}
+		};
+	}
+
+	/**
+	 * Static method for matching with an array of result matchers whose assertion failures are caught and stored.
+	 * Only when all of them would be called a {@link AssertionError} be thrown containing the error messages of those
+	 * previously caught assertion failures.
+	 * @param matchers the matchers
+	 * @author Michał Rowicki
+	 * @since 5.2
+	 */
+	static ResultMatcher matchAllSoftly(ResultMatcher... matchers) {
+		return result -> {
+			List<String> failedMessages = new ArrayList<>();
+			for (int i = 0; i < matchers.length; i++) {
+				ResultMatcher matcher = matchers[i];
+				try {
+					matcher.match(result);
+				}
+				catch (AssertionError assertionException) {
+					failedMessages.add("[" + i + "] " + assertionException.getMessage());
+				}
+			}
+			if (!failedMessages.isEmpty()) {
+				throw new AssertionError(String.join("\n", failedMessages));
 			}
 		};
 	}
