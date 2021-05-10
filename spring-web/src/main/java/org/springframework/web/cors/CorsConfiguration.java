@@ -138,7 +138,12 @@ public class CorsConfiguration {
 	 * {@code @CrossOrigin}, via {@link #applyPermitDefaultValues()}.
 	 */
 	public void setAllowedOrigins(@Nullable List<String> allowedOrigins) {
-		this.allowedOrigins = (allowedOrigins != null ? new ArrayList<>(allowedOrigins) : null);
+		this.allowedOrigins = (allowedOrigins != null ?
+				allowedOrigins.stream().map(this::trimTrailingSlash).collect(Collectors.toList()) : null);
+	}
+
+	private String trimTrailingSlash(String origin) {
+		return origin.endsWith("/") ? origin.substring(0, origin.length() - 1) : origin;
 	}
 
 	/**
@@ -159,6 +164,7 @@ public class CorsConfiguration {
 		else if (this.allowedOrigins == DEFAULT_PERMIT_ALL && CollectionUtils.isEmpty(this.allowedOriginPatterns)) {
 			setAllowedOrigins(DEFAULT_PERMIT_ALL);
 		}
+		origin = trimTrailingSlash(origin);
 		this.allowedOrigins.add(origin);
 	}
 
@@ -209,6 +215,7 @@ public class CorsConfiguration {
 		if (this.allowedOriginPatterns == null) {
 			this.allowedOriginPatterns = new ArrayList<>(4);
 		}
+		originPattern = trimTrailingSlash(originPattern);
 		this.allowedOriginPatterns.add(new OriginPattern(originPattern));
 		if (this.allowedOrigins == DEFAULT_PERMIT_ALL) {
 			this.allowedOrigins = null;
@@ -551,9 +558,7 @@ public class CorsConfiguration {
 		if (!StringUtils.hasText(requestOrigin)) {
 			return null;
 		}
-		if (requestOrigin.endsWith("/")) {
-			requestOrigin = requestOrigin.substring(0, requestOrigin.length() - 1);
-		}
+		requestOrigin = trimTrailingSlash(requestOrigin);
 		if (!ObjectUtils.isEmpty(this.allowedOrigins)) {
 			if (this.allowedOrigins.contains(ALL)) {
 				validateAllowCredentials();

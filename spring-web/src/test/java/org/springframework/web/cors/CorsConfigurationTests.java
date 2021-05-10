@@ -282,14 +282,22 @@ public class CorsConfigurationTests {
 
 	@Test
 	public void checkOriginAllowed() {
+		// "*" matches
 		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("*");
 		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("*");
 
+		// "*" does not match together with allowCredentials
 		config.setAllowCredentials(true);
 		assertThatIllegalArgumentException().isThrownBy(() -> config.checkOrigin("https://domain.com"));
 
+		// specific origin matches Origin header with or without trailing "/"
 		config.setAllowedOrigins(Collections.singletonList("https://domain.com"));
+		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("https://domain.com");
+		assertThat(config.checkOrigin("https://domain.com/")).isEqualTo("https://domain.com");
+
+		// specific origin with trailing "/" matches Origin header with or without trailing "/"
+		config.setAllowedOrigins(Collections.singletonList("https://domain.com/"));
 		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("https://domain.com");
 		assertThat(config.checkOrigin("https://domain.com/")).isEqualTo("https://domain.com");
 
