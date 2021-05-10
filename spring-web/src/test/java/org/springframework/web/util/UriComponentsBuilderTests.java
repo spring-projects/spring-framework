@@ -1273,6 +1273,20 @@ class UriComponentsBuilderTests {
 		assertThat(path).isEqualTo("/home/path");
 	}
 
+	@Test
+	void validPort() {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://localhost:52567/path").build();
+		assertThat(uriComponents.getPort()).isEqualTo(52567);
+		assertThat(uriComponents.getPath()).isEqualTo("/path");
+
+		uriComponents = UriComponentsBuilder.fromUriString("http://localhost:52567?trace=false").build();
+		assertThat(uriComponents.getPort()).isEqualTo(52567);
+		assertThat(uriComponents.getQuery()).isEqualTo("trace=false");
+
+		uriComponents = UriComponentsBuilder.fromUriString("http://localhost:52567#fragment").build();
+		assertThat(uriComponents.getPort()).isEqualTo(52567);
+		assertThat(uriComponents.getFragment()).isEqualTo("fragment");
+	}
 
 	@Test
 	void verifyInvalidPort() {
