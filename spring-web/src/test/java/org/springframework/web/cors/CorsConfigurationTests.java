@@ -294,12 +294,12 @@ public class CorsConfigurationTests {
 		// specific origin matches Origin header with or without trailing "/"
 		config.setAllowedOrigins(Collections.singletonList("https://domain.com"));
 		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("https://domain.com");
-		assertThat(config.checkOrigin("https://domain.com/")).isEqualTo("https://domain.com");
+		assertThat(config.checkOrigin("https://domain.com/")).isEqualTo("https://domain.com/");
 
 		// specific origin with trailing "/" matches Origin header with or without trailing "/"
 		config.setAllowedOrigins(Collections.singletonList("https://domain.com/"));
 		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("https://domain.com");
-		assertThat(config.checkOrigin("https://domain.com/")).isEqualTo("https://domain.com");
+		assertThat(config.checkOrigin("https://domain.com/")).isEqualTo("https://domain.com/");
 
 		config.setAllowCredentials(false);
 		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("https://domain.com");

@@ -549,31 +549,31 @@ public class CorsConfiguration {
 
 	/**
 	 * Check the origin of the request against the configured allowed origins.
-	 * @param requestOrigin the origin to check
+	 * @param origin the origin to check
 	 * @return the origin to use for the response, or {@code null} which
 	 * means the request origin is not allowed
 	 */
 	@Nullable
-	public String checkOrigin(@Nullable String requestOrigin) {
-		if (!StringUtils.hasText(requestOrigin)) {
+	public String checkOrigin(@Nullable String origin) {
+		if (!StringUtils.hasText(origin)) {
 			return null;
 		}
-		requestOrigin = trimTrailingSlash(requestOrigin);
+		String originToCheck = trimTrailingSlash(origin);
 		if (!ObjectUtils.isEmpty(this.allowedOrigins)) {
 			if (this.allowedOrigins.contains(ALL)) {
 				validateAllowCredentials();
 				return ALL;
 			}
 			for (String allowedOrigin : this.allowedOrigins) {
-				if (requestOrigin.equalsIgnoreCase(allowedOrigin)) {
-					return requestOrigin;
+				if (originToCheck.equalsIgnoreCase(allowedOrigin)) {
+					return origin;
 				}
 			}
 		}
 		if (!ObjectUtils.isEmpty(this.allowedOriginPatterns)) {
 			for (OriginPattern p : this.allowedOriginPatterns) {
-				if (p.getDeclaredPattern().equals(ALL) || p.getPattern().matcher(requestOrigin).matches()) {
-					return requestOrigin;
+				if (p.getDeclaredPattern().equals(ALL) || p.getPattern().matcher(originToCheck).matches()) {
+					return origin;
 				}
 			}
 		}
