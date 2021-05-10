@@ -1298,4 +1298,18 @@ class UriComponentsBuilderTests {
 		assertThat(result.getFragment()).isNull();
 	}
 
+	@Test
+	void fromUriStringNoPathWithPortAndFragment() {
+		String url = "http://localhost:8080#foo";
+		UriComponents result = UriComponentsBuilder.fromUriString(url).build();
+		assertThat(result.getScheme()).isEqualTo("http");
+		assertThat(result.getUserInfo()).isNull();
+		assertThat(result.getHost()).isEqualTo("localhost");
+		assertThat(result.getPort()).isEqualTo(8080);
+		assertThat(result.getPath()).isNullOrEmpty();
+		assertThat(result.getPathSegments()).isEmpty();
+		assertThat(result.getQuery()).isNull();
+		assertThat(result.getFragment()).isEqualTo("foo");
+	}
+
 }
