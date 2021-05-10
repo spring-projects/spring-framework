@@ -1281,6 +1281,12 @@ class UriComponentsBuilderTests {
 				.isInstanceOf(NumberFormatException.class);
 		assertThatThrownBy(() -> UriComponentsBuilder.fromHttpUrl(url).build().toUri())
 				.isInstanceOf(NumberFormatException.class);
+
+		String url2 = "http://localhost:8080#summary";
+		assertThat(UriComponentsBuilder.fromUriString(url2).build().getPort()).isEqualTo(8080);
+
+		String url3 = "http://localhost:8080?hello=world";
+		assertThat(UriComponentsBuilder.fromUriString(url3).build().getPort()).isEqualTo(8080);
 	}
 
 }
