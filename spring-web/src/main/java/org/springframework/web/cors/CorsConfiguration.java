@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -647,6 +648,8 @@ public class CorsConfiguration {
 	 */
 	private static class OriginPattern {
 
+		private static final Pattern PORT_LIST_PATTERN = Pattern.compile("(.*):\\[(\\*|[\\d,]+)]");
+
 		private final String declaredPattern;
 
 		private final Pattern pattern;
@@ -657,8 +660,25 @@ public class CorsConfiguration {
 		}
 
 		private static Pattern toPattern(String patternValue) {
+			//if pattern ends with allowed ports list
+			Matcher matcher = PORT_LIST_PATTERN.matcher(patternValue);
+			String portList = null;
+			if (matcher.matches()) {
+				patternValue = matcher.group(1);
+				portList = matcher.group(2);
+			}
+
 			patternValue = "\\Q" + patternValue + "\\E";
 			patternValue = patternValue.replace("*", "\\E.*\\Q");
+
+			if (ALL.equals(portList)) {
+				//there is a corner case. If '*' is specified, then origins with implicit default port (e.g. "https://test.com") should also match.
+				patternValue += "(:\\d+)?";
+			}
+			else if (portList != null) {
+				patternValue += ":(" + portList.replace(',', '|') + ")";
+			}
+
 			return Pattern.compile(patternValue);
 		}
 
