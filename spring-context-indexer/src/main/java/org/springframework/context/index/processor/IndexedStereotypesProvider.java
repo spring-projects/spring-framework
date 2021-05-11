@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ class IndexedStereotypesProvider implements StereotypesProvider {
 	public Set<String> getStereotypes(Element element) {
 		Set<String> stereotypes = new LinkedHashSet<>();
 		ElementKind kind = element.getKind();
-		if (kind != ElementKind.CLASS && kind != ElementKind.INTERFACE) {
+		if (!kind.isClass() && kind != ElementKind.INTERFACE) {
 			return stereotypes;
 		}
 		Set<Element> seen = new HashSet<>();
