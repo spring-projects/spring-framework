@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.NamedThreadLocal;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.OrderComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -320,7 +320,7 @@ public abstract class TransactionSynchronizationManager {
 		else {
 			// Sort lazily here, not in registerSynchronization.
 			List<TransactionSynchronization> sortedSynchs = new ArrayList<>(synchs);
-			AnnotationAwareOrderComparator.sort(sortedSynchs);
+			OrderComparator.sort(sortedSynchs);
 			return Collections.unmodifiableList(sortedSynchs);
 		}
 	}
