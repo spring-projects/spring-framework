@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,6 +135,7 @@ public abstract class AbstractRowMapperTests {
 			given(resultSet.getObject(anyInt(), any(Class.class))).willThrow(new SQLFeatureNotSupportedException());
 			given(resultSet.getDate(3)).willReturn(new java.sql.Date(1221222L));
 			given(resultSet.getBigDecimal(4)).willReturn(new BigDecimal("1234.56"));
+			given(resultSet.getObject(4)).willReturn(new BigDecimal("1234.56"));
 			given(resultSet.wasNull()).willReturn(type == MockType.TWO);
 
 			given(resultSetMetaData.getColumnCount()).willReturn(4);

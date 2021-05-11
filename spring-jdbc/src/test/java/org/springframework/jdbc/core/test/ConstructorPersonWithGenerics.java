@@ -18,11 +18,12 @@ package org.springframework.jdbc.core.test;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Juergen Hoeller
  */
-public class ConstructorPerson {
+public class ConstructorPersonWithGenerics {
 
 	private final String name;
 
@@ -30,10 +31,10 @@ public class ConstructorPerson {
 
 	private final Date birth_date;
 
-	private final BigDecimal balance;
+	private final List<BigDecimal> balance;
 
 
-	public ConstructorPerson(String name, long age, Date birth_date, BigDecimal balance) {
+	public ConstructorPersonWithGenerics(String name, long age, Date birth_date, List<BigDecimal> balance) {
 		this.name = name;
 		this.age = age;
 		this.birth_date = birth_date;
@@ -53,7 +54,7 @@ public class ConstructorPerson {
 		return this.birth_date;
 	}
 
-	public BigDecimal balance() {
+	public List<BigDecimal> balance() {
 		return this.balance;
 	}
 
