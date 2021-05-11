@@ -19,7 +19,7 @@ package org.springframework.aop.framework;
 /**
  * The final class can not proxy by cglib. So return the target object.
  *
- * @author caoxuhao
+ * @author Eric Cao
  * @since 05.11.2021
  */
 public class NeedNotProxy implements AopProxy{
