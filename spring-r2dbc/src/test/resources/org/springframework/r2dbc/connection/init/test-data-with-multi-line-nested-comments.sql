@@ -5,7 +5,7 @@
  *  x, y, z...
  */
 
-INSERT INTO users(first_name, last_name) VALUES('Walter', 'White');
+INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller');
 -- This is also a comment.
 /*-------------------------------------------
 -- A fancy multi-line comments that puts
@@ -18,6 +18,6 @@ already inside a multi-line comment run.
 -------------------------------------------*/
  INSERT INTO
 users(first_name, last_name)    -- This is a single line comment containing the block-end-comment sequence here */ but it's still a single-line comment
-VALUES( 'Jesse'     -- first_name
-      , 'Pinkman' -- last_name
+VALUES( 'Sam'     -- first_name
+      , 'Brannen' -- last_name
 );--

@@ -19,6 +19,7 @@ package org.springframework.jdbc.datasource.init;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.assertj.core.util.Strings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -55,10 +56,13 @@ public class ScriptUtilsUnitTests {
 		String cleanedStatement2 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 		String rawStatement3 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 		String cleanedStatement3 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
-		char delim = ';';
-		String script = rawStatement1 + delim + rawStatement2 + delim + rawStatement3 + delim;
+
+		String delimiter = ";";
+		String script = Strings.join(rawStatement1, rawStatement2, rawStatement3).with(delimiter);
+
 		List<String> statements = new ArrayList<>();
-		splitSqlScript(script, delim, statements);
+		splitSqlScript(script, delimiter, statements);
+
 		assertThat(statements).containsExactly(cleanedStatement1, cleanedStatement2, cleanedStatement3);
 	}
 
@@ -67,10 +71,13 @@ public class ScriptUtilsUnitTests {
 		String statement1 = "insert into customer (id, name) values (1, 'Rod ; Johnson'), (2, 'Adrian \n Collier')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 		String statement3 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
-		char delim = '\n';
-		String script = statement1 + delim + statement2 + delim + statement3 + delim;
+
+		String delimiter = "\n";
+		String script = Strings.join(statement1, statement2, statement3).with(delimiter);
+
 		List<String> statements = new ArrayList<>();
-		splitSqlScript(script, delim, statements);
+		splitSqlScript(script, delimiter, statements);
+
 		assertThat(statements).containsExactly(statement1, statement2, statement3);
 	}
 
@@ -78,21 +85,27 @@ public class ScriptUtilsUnitTests {
 	public void splitSqlScriptDelimitedWithNewLineButDefaultDelimiterSpecified() {
 		String statement1 = "do something";
 		String statement2 = "do something else";
-		char delim = '\n';
-		String script = statement1 + delim + statement2 + delim;
+
+		String script = Strings.join(statement1, statement2).with("\n");
+
 		List<String> statements = new ArrayList<>();
+
 		splitSqlScript(script, DEFAULT_STATEMENT_SEPARATOR, statements);
+
 		assertThat(statements).as("stripped but not split statements").containsExactly(script.replace('\n', ' '));
 	}
 
 	@Test  // SPR-13218
-	public void splitScriptWithSingleQuotesNestedInsideDoubleQuotes() throws Exception {
+	public void splitScriptWithSingleQuotesNestedInsideDoubleQuotes() {
 		String statement1 = "select '1' as \"Dogbert's owner's\" from dual";
 		String statement2 = "select '2' as \"Dilbert's\" from dual";
-		char delim = ';';
-		String script = statement1 + delim + statement2 + delim;
+
+		String delimiter = ";";
+		String script = Strings.join(statement1, statement2).with(delimiter);
+
 		List<String> statements = new ArrayList<>();
-		splitSqlScript(script, ';', statements);
+		splitSqlScript(script, delimiter, statements);
+
 		assertThat(statements).containsExactly(statement1, statement2);
 	}
 
@@ -101,8 +114,10 @@ public class ScriptUtilsUnitTests {
 		String script = readScript("db-test-data-multi-newline.sql");
 		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, "\n\n", statements);
+
 		String statement1 = "insert into T_TEST (NAME) values ('Keith')";
 		String statement2 = "insert into T_TEST (NAME) values ('Dave')";
+
 		assertThat(statements).containsExactly(statement1, statement2);
 	}
 
@@ -124,15 +139,17 @@ public class ScriptUtilsUnitTests {
 		splitScriptContainingComments(script, "--", "#", "^");
 	}
 
-	private void splitScriptContainingComments(String script, String... commentPrefixes) throws Exception {
+	private void splitScriptContainingComments(String script, String... commentPrefixes) {
 		List<String> statements = new ArrayList<>();
 		splitSqlScript(null, script, ";", commentPrefixes, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
 				DEFAULT_BLOCK_COMMENT_END_DELIMITER, statements);
+
 		String statement1 = "insert into customer (id, name) values (1, 'Rod; Johnson'), (2, 'Adrian Collier')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 		String statement3 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 		// Statement 4 addresses the error described in SPR-9982.
 		String statement4 = "INSERT INTO persons( person_id , name) VALUES( 1 , 'Name' )";
+
 		assertThat(statements).containsExactly(statement1, statement2, statement3, statement4);
 	}
 
@@ -141,9 +158,11 @@ public class ScriptUtilsUnitTests {
 		String script = readScript("test-data-with-comments-and-leading-tabs.sql");
 		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, ';', statements);
+
 		String statement1 = "insert into customer (id, name) values (1, 'Sam Brannen')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2013-06-08', 1)";
 		String statement3 = "insert into orders(id, order_date, customer_id) values (2, '2013-06-08', 1)";
+
 		assertThat(statements).containsExactly(statement1, statement2, statement3);
 	}
 
@@ -152,8 +171,10 @@ public class ScriptUtilsUnitTests {
 		String script = readScript("test-data-with-multi-line-comments.sql");
 		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, ';', statements);
+
 		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller')";
 		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Sam' , 'Brannen' )";
+
 		assertThat(statements).containsExactly(statement1, statement2);
 	}
 
@@ -162,8 +183,10 @@ public class ScriptUtilsUnitTests {
 		String script = readScript("test-data-with-multi-line-nested-comments.sql");
 		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, ';', statements);
+
 		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller')";
 		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Sam' , 'Brannen' )";
+
 		assertThat(statements).containsExactly(statement1, statement2);
 	}
 
