@@ -59,8 +59,8 @@ abstract class FileStorage {
 	}
 
 	/**
-	 * Create a new {@code FileStorage} based a on a temporary directory.
-	 * @param scheduler scheduler to use for blocking operations
+	 * Create a new {@code FileStorage} based on a temporary directory.
+	 * @param scheduler the scheduler to use for blocking operations
 	 */
 	public static FileStorage tempDirectory(Supplier<Scheduler> scheduler) {
 		return new TempFileStorage(scheduler);

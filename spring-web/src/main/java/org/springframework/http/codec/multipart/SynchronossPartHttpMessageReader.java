@@ -470,6 +470,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 		}
 
 		@Override
+		@SuppressWarnings("resource")
 		public Flux<DataBuffer> content() {
 			return DataBufferUtils.readInputStream(
 					getStorage()::getInputStream, DefaultDataBufferFactory.sharedInstance, 4096);
