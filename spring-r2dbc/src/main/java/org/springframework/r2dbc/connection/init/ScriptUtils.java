@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -432,12 +432,18 @@ public abstract class ScriptUtils {
 	}
 
 	/**
-	 * Does the provided SQL script contain the specified delimiter?
-	 * @param script the SQL script
-	 * @param delim the string delimiting each statement - typically a ';' character
+	 * Determine if the provided SQL script contains the specified delimiter.
+	 * <p>This method is intended to be used to find the string delimiting each
+	 * SQL statement &mdash; for example, a ';' character.
+	 * <p>Any occurrence of the delimiter within the script will be ignored if it
+	 * is enclosed within single quotes ({@code '}) or double quotes ({@code "})
+	 * or if it is escaped with a backslash ({@code \}).
+	 * @param script the SQL script to search within
+	 * @param delimiter the delimiter to search for
 	 */
-	public static boolean containsSqlScriptDelimiters(String script, String delim) {
-		boolean inLiteral = false;
+	public static boolean containsSqlScriptDelimiters(String script, String delimiter) {
+		boolean inSingleQuote = false;
+		boolean inDoubleQuote = false;
 		boolean inEscape = false;
 
 		for (int i = 0; i < script.length(); i++) {
@@ -451,11 +457,16 @@ public abstract class ScriptUtils {
 				inEscape = true;
 				continue;
 			}
-			if (c == '\'') {
-				inLiteral = !inLiteral;
+			if (!inDoubleQuote && (c == '\'')) {
+				inSingleQuote = !inSingleQuote;
 			}
-			if (!inLiteral && script.startsWith(delim, i)) {
-				return true;
+			else if (!inSingleQuote && (c == '"')) {
+				inDoubleQuote = !inDoubleQuote;
+			}
+			if (!inSingleQuote && !inDoubleQuote) {
+				if (script.startsWith(delimiter, i)) {
+					return true;
+				}
 			}
 		}
 

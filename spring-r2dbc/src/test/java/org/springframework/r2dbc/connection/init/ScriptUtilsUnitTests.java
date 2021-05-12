@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,15 @@ import java.util.List;
 
 import org.assertj.core.util.Strings;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.support.EncodedResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.r2dbc.connection.init.ScriptUtils.containsSqlScriptDelimiters;
 
 /**
  * Unit tests for {@link ScriptUtils}.
@@ -184,30 +187,25 @@ public class ScriptUtilsUnitTests {
 		assertThat(statements).hasSize(2).containsSequence(statement1, statement2);
 	}
 
-	@Test
-	public void containsDelimiters() {
-		assertThat(ScriptUtils.containsSqlScriptDelimiters("select 1\n select ';'",
-				";")).isFalse();
-		assertThat(ScriptUtils.containsSqlScriptDelimiters("select 1; select 2",
-				";")).isTrue();
-
-		assertThat(ScriptUtils.containsSqlScriptDelimiters("select 1; select '\\n\n';",
-				"\n")).isFalse();
-		assertThat(ScriptUtils.containsSqlScriptDelimiters("select 1\n select 2",
-				"\n")).isTrue();
-
-		assertThat(ScriptUtils.containsSqlScriptDelimiters("select 1\n select 2",
-				"\n\n")).isFalse();
-		assertThat(ScriptUtils.containsSqlScriptDelimiters("select 1\n\n select 2",
-				"\n\n")).isTrue();
-
-		// MySQL style escapes '\\'
-		assertThat(ScriptUtils.containsSqlScriptDelimiters(
-				"insert into users(first_name, last_name)\nvalues('a\\\\', 'b;')",
-				";")).isFalse();
-		assertThat(ScriptUtils.containsSqlScriptDelimiters(
-				"insert into users(first_name, last_name)\nvalues('Charles', 'd\\'Artagnan'); select 1;",
-				";")).isTrue();
+	@ParameterizedTest
+	@CsvSource(delimiter = '#', value = {
+		// semicolon
+		"'select 1\n select '';'''                                                          # ;      # false",
+		"'select 1\n select \";\"'                                                          # ;      # false",
+		"'select 1; select 2'                                                               # ;      # true",
+		// newline
+		"'select 1; select ''\n'''                                                          # '\n'   # false",
+		"'select 1; select \"\n\"'                                                          # '\n'   # false",
+		"'select 1\n select 2'                                                              # '\n'   # true",
+		// double newline
+		"'select 1\n select 2'                                                              # '\n\n' # false",
+		"'select 1\n\n select 2'                                                            # '\n\n' # true",
+		// semicolon with MySQL style escapes '\\'
+		"'insert into users(first, last)\nvalues(''a\\\\'', ''b;'')'                        # ;      # false",
+		"'insert into users(first, last)\nvalues(''Charles'', ''d\\''Artagnan''); select 1' # ;      # true"
+	})
+	public void containsDelimiter(String script, String delimiter, boolean expected) {
+		assertThat(containsSqlScriptDelimiters(script, delimiter)).isEqualTo(expected);
 	}
 
 	private String readScript(String path) {
