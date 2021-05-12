@@ -29,7 +29,12 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.support.EncodedResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER;
+import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER;
+import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_COMMENT_PREFIXES;
+import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
 import static org.springframework.r2dbc.connection.init.ScriptUtils.containsSqlScriptDelimiters;
+import static org.springframework.r2dbc.connection.init.ScriptUtils.splitSqlScript;
 
 /**
  * Unit tests for {@link ScriptUtils}.
@@ -56,7 +61,7 @@ public class ScriptUtilsUnitTests {
 				";");
 
 		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, ";", statements);
+		splitSqlScript(script, ";", statements);
 
 		assertThat(statements).hasSize(3).containsSequence(cleanedStatement1,
 				cleanedStatement2, cleanedStatement3);
@@ -71,7 +76,7 @@ public class ScriptUtilsUnitTests {
 		String script = Strings.join(statement1, statement2, statement3).with("\n");
 
 		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, "\n", statements);
+		splitSqlScript(script, "\n", statements);
 
 		assertThat(statements).hasSize(3).containsSequence(statement1, statement2,
 				statement3);
@@ -87,7 +92,7 @@ public class ScriptUtilsUnitTests {
 
 		List<String> statements = new ArrayList<>();
 
-		ScriptUtils.splitSqlScript(script, ScriptUtils.DEFAULT_STATEMENT_SEPARATOR,
+		splitSqlScript(script, DEFAULT_STATEMENT_SEPARATOR,
 				statements);
 
 		assertThat(statements).hasSize(1).contains(script.replace('\n', ' '));
@@ -102,7 +107,7 @@ public class ScriptUtilsUnitTests {
 		String script = statement1 + delim + statement2 + delim;
 
 		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, ';', statements);
+		splitSqlScript(script, ';', statements);
 
 		assertThat(statements).hasSize(2).containsSequence(statement1, statement2);
 	}
@@ -111,7 +116,7 @@ public class ScriptUtilsUnitTests {
 	public void readAndSplitScriptWithMultipleNewlinesAsSeparator() {
 		String script = readScript("db-test-data-multi-newline.sql");
 		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, "\n\n", statements);
+		splitSqlScript(script, "\n\n", statements);
 
 		String statement1 = "insert into users (last_name) values ('Walter')";
 		String statement2 = "insert into users (last_name) values ('Jesse')";
@@ -126,19 +131,26 @@ public class ScriptUtilsUnitTests {
 	@Test
 	public void readAndSplitScriptContainingComments() {
 		String script = readScript("test-data-with-comments.sql");
-		splitScriptContainingComments(script);
+		splitScriptContainingComments(script, DEFAULT_COMMENT_PREFIXES);
 	}
 
 	@Test
 	public void readAndSplitScriptContainingCommentsWithWindowsLineEnding() {
 		String script = readScript("test-data-with-comments.sql").replaceAll("\n",
 				"\r\n");
-		splitScriptContainingComments(script);
+		splitScriptContainingComments(script, DEFAULT_COMMENT_PREFIXES);
 	}
 
-	private void splitScriptContainingComments(String script) {
+	@Test
+	public void readAndSplitScriptContainingCommentsWithMultiplePrefixes() throws Exception {
+		String script = readScript("test-data-with-multi-prefix-comments.sql");
+		splitScriptContainingComments(script, "--", "#", "^");
+	}
+
+	private void splitScriptContainingComments(String script, String... commentPrefixes) {
 		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, ';', statements);
+		splitSqlScript(null, script, ";", commentPrefixes, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
+				DEFAULT_BLOCK_COMMENT_END_DELIMITER, statements);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Rod; Johnson'), (2, 'Adrian Collier')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
@@ -153,7 +165,7 @@ public class ScriptUtilsUnitTests {
 	public void readAndSplitScriptContainingCommentsWithLeadingTabs() {
 		String script = readScript("test-data-with-comments-and-leading-tabs.sql");
 		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, ';', statements);
+		splitSqlScript(script, ';', statements);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Walter White')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2013-06-08', 1)";
@@ -167,7 +179,7 @@ public class ScriptUtilsUnitTests {
 	public void readAndSplitScriptContainingMultiLineComments() {
 		String script = readScript("test-data-with-multi-line-comments.sql");
 		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, ';', statements);
+		splitSqlScript(script, ';', statements);
 
 		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Walter', 'White')";
 		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Jesse' , 'Pinkman' )";
@@ -179,7 +191,7 @@ public class ScriptUtilsUnitTests {
 	public void readAndSplitScriptContainingMultiLineNestedComments() {
 		String script = readScript("test-data-with-multi-line-nested-comments.sql");
 		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, ';', statements);
+		splitSqlScript(script, ';', statements);
 
 		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Walter', 'White')";
 		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Jesse' , 'Pinkman' )";
