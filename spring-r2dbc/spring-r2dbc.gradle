@@ -19,5 +19,7 @@ dependencies {
 	testCompile(testFixtures(project(":spring-context")))
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("io.r2dbc:r2dbc-h2")
-	testCompile("io.r2dbc:r2dbc-spi-test:0.8.1.RELEASE")
+	testCompile("io.r2dbc:r2dbc-spi-test:0.8.1.RELEASE") {
+		exclude group: "org.springframework", module: "spring-jdbc"
+	}
 }
