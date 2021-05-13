@@ -205,9 +205,25 @@ public class ScriptUtilsUnitTests {
 		"'select 1\n\n select 2'                                                            # '\n\n' # true",
 		// semicolon with MySQL style escapes '\\'
 		"'insert into users(first, last)\nvalues(''a\\\\'', ''b;'')'                        # ;      # false",
-		"'insert into users(first, last)\nvalues(''Charles'', ''d\\''Artagnan''); select 1' # ;      # true"
+		"'insert into users(first, last)\nvalues(''Charles'', ''d\\''Artagnan''); select 1' # ;      # true",
+		// semicolon inside comments
+		"'-- a;b;c\ninsert into colors(color_num) values(42);'                              # ;      # true",
+		"'/* a;b;c */\ninsert into colors(color_num) values(42);'                           # ;      # true",
+		"'-- a;b;c\ninsert into colors(color_num) values(42)'                               # ;      # false",
+		"'/* a;b;c */\ninsert into colors(color_num) values(42)'                            # ;      # false",
+		// single quotes inside comments
+		"'-- What\\''s your favorite color?\ninsert into colors(color_num) values(42);'     # ;      # true",
+		"'-- What''s your favorite color?\ninsert into colors(color_num) values(42);'       # ;      # true",
+		"'/* What\\''s your favorite color? */\ninsert into colors(color_num) values(42);'  # ;      # true",
+		"'/* What''s your favorite color? */\ninsert into colors(color_num) values(42);'    # ;      # true",
+		// double quotes inside comments
+		"'-- double \" quotes\ninsert into colors(color_num) values(42);'                   # ;      # true",
+		"'-- double \\\" quotes\ninsert into colors(color_num) values(42);'                 # ;      # true",
+		"'/* double \" quotes */\ninsert into colors(color_num) values(42);'                # ;      # true",
+		"'/* double \\\" quotes */\ninsert into colors(color_num) values(42);'              # ;      # true"
 	})
-	public void containsDelimiter(String script, String delimiter, boolean expected) {
+	public void containsStatementSeparator(String script, String delimiter, boolean expected) {
+		// Indirectly tests ScriptUtils.containsStatementSeparator(EncodedResource, String, String, String[], String, String).
 		assertThat(containsSqlScriptDelimiters(script, delimiter)).isEqualTo(expected);
 	}
 
