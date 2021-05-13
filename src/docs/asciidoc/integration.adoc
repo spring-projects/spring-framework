@@ -5837,7 +5837,7 @@ regardless of the content of the annotation.
 
 Similarly to `key` and `keyGenerator`, the `cacheManager` and `cacheResolver`
 parameters are mutually exclusive, and an operation specifying both
-results in an exception. as a custom `CacheManager` is ignored by the
+results in an exception, as a custom `CacheManager` is ignored by the
 `CacheResolver` implementation. This is probably not what you expect.
 ====
 
