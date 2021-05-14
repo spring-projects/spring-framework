@@ -229,7 +229,8 @@ public class ScriptUtilsUnitTests {
 
 	private String readScript(String path) throws Exception {
 		EncodedResource resource = new EncodedResource(new ClassPathResource(path, getClass()));
-		return ScriptUtils.readScript(resource);
+		return ScriptUtils.readScript(resource, DEFAULT_STATEMENT_SEPARATOR, DEFAULT_COMMENT_PREFIXES,
+			DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 	}
 
 }

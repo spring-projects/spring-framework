@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Generic utility methods for working with SQL scripts.
+ *
  * <p>Mainly for internal use within the framework.
  *
  * @author Thomas Risberg
@@ -306,10 +307,11 @@ public abstract class ScriptUtils {
 	 * Read a script from the given resource, using "{@code --}" as the comment prefix
 	 * and "{@code ;}" as the statement separator, and build a String containing the lines.
 	 * @param resource the {@code EncodedResource} to be read
+	 * @param dataBufferFactory the factory to create data buffers with
 	 * @return {@code String} containing the script lines
 	 */
 	public static Mono<String> readScript(EncodedResource resource, DataBufferFactory dataBufferFactory) {
-		return readScript(resource, dataBufferFactory, DEFAULT_COMMENT_PREFIXES, DEFAULT_STATEMENT_SEPARATOR,
+		return readScript(resource, dataBufferFactory, DEFAULT_STATEMENT_SEPARATOR, DEFAULT_COMMENT_PREFIXES,
 				DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 	}
 
@@ -321,15 +323,16 @@ public abstract class ScriptUtils {
 	 * within a statement &mdash; will be included in the results.
 	 * @param resource the {@code EncodedResource} containing the script
 	 * to be processed
+	 * @param dataBufferFactory the factory to create data buffers with
+	 * @param separator the statement separator in the SQL script (typically ";")
 	 * @param commentPrefixes the prefixes that identify comments in the SQL script
 	 * (typically "--")
-	 * @param separator the statement separator in the SQL script (typically ";")
 	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter
 	 * @return a {@link Mono} of {@link String} containing the script lines that
 	 * completes once the resource was loaded
 	 */
 	private static Mono<String> readScript(EncodedResource resource, DataBufferFactory dataBufferFactory,
-			@Nullable String[] commentPrefixes, @Nullable String separator, @Nullable String blockCommentEndDelimiter) {
+			@Nullable String separator, @Nullable String[] commentPrefixes, @Nullable String blockCommentEndDelimiter) {
 
 		return DataBufferUtils.join(DataBufferUtils.read(resource.getResource(), dataBufferFactory, 8192))
 				.handle((it, sink) -> {
@@ -359,17 +362,18 @@ public abstract class ScriptUtils {
 	 * a statement &mdash; will be included in the results.
 	 * @param lineNumberReader the {@code LineNumberReader} containing the script
 	 * to be processed
-	 * @param lineCommentPrefix the prefix that identifies comments in the SQL script
+	 * @param commentPrefix the prefix that identifies comments in the SQL script
 	 * (typically "--")
 	 * @param separator the statement separator in the SQL script (typically ";")
 	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter
 	 * @return a {@code String} containing the script lines
 	 * @throws IOException in case of I/O errors
 	 */
-	public static String readScript(LineNumberReader lineNumberReader, @Nullable String lineCommentPrefix,
+	public static String readScript(LineNumberReader lineNumberReader, @Nullable String commentPrefix,
 			@Nullable String separator, @Nullable String blockCommentEndDelimiter) throws IOException {
-		String[] lineCommentPrefixes = (lineCommentPrefix != null) ? new String[] { lineCommentPrefix } : null;
-		return readScript(lineNumberReader, lineCommentPrefixes, separator, blockCommentEndDelimiter);
+
+		String[] commentPrefixes = (commentPrefix != null) ? new String[] { commentPrefix } : null;
+		return readScript(lineNumberReader, commentPrefixes, separator, blockCommentEndDelimiter);
 	}
 
 	/**
@@ -381,21 +385,21 @@ public abstract class ScriptUtils {
 	 * within a statement &mdash; will be included in the results.
 	 * @param lineNumberReader the {@code LineNumberReader} containing the script
 	 * to be processed
-	 * @param lineCommentPrefixes the prefixes that identify comments in the SQL script
+	 * @param commentPrefixes the prefixes that identify comments in the SQL script
 	 * (typically "--")
 	 * @param separator the statement separator in the SQL script (typically ";")
 	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter
 	 * @return a {@code String} containing the script lines
 	 * @throws IOException in case of I/O errors
 	 */
-	public static String readScript(LineNumberReader lineNumberReader, @Nullable String[] lineCommentPrefixes,
+	public static String readScript(LineNumberReader lineNumberReader, @Nullable String[] commentPrefixes,
 			@Nullable String separator, @Nullable String blockCommentEndDelimiter) throws IOException {
 
 		String currentStatement = lineNumberReader.readLine();
 		StringBuilder scriptBuilder = new StringBuilder();
 		while (currentStatement != null) {
 			if ((blockCommentEndDelimiter != null && currentStatement.contains(blockCommentEndDelimiter)) ||
-				(lineCommentPrefixes != null && !startsWithAny(currentStatement, lineCommentPrefixes, 0))) {
+				(commentPrefixes != null && !startsWithAny(currentStatement, commentPrefixes, 0))) {
 				if (scriptBuilder.length() > 0) {
 					scriptBuilder.append('\n');
 				}
@@ -589,6 +593,7 @@ public abstract class ScriptUtils {
 	 * configured and ready to use
 	 * @param resource the resource (potentially associated with a specific encoding)
 	 * to load the SQL script from
+	 * @param dataBufferFactory the factory to create data buffers with
 	 * @param continueOnError whether or not to continue without throwing an exception
 	 * in the event of an error
 	 * @param ignoreFailedDrops whether or not to continue in the event of specifically
@@ -629,6 +634,7 @@ public abstract class ScriptUtils {
 	 * configured and ready to use
 	 * @param resource the resource (potentially associated with a specific encoding)
 	 * to load the SQL script from
+	 * @param dataBufferFactory the factory to create data buffers with
 	 * @param continueOnError whether or not to continue without throwing an exception
 	 * in the event of an error
 	 * @param ignoreFailedDrops whether or not to continue in the event of specifically
@@ -660,7 +666,7 @@ public abstract class ScriptUtils {
 
 		long startTime = System.currentTimeMillis();
 
-		Mono<String> script = readScript(resource, dataBufferFactory, commentPrefixes, separator, blockCommentEndDelimiter)
+		Mono<String> script = readScript(resource, dataBufferFactory, separator, commentPrefixes, blockCommentEndDelimiter)
 				.onErrorMap(IOException.class, ex -> new CannotReadScriptException(resource, ex));
 
 		AtomicInteger statementNumber = new AtomicInteger();
