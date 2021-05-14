@@ -764,7 +764,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 							this.metadata.methodKey, evaluationContext);
 				}
 				else {
-					this.conditionPassing = true;
+					this.conditionPassing = Boolean.TRUE;
 				}
 			}
 			return this.conditionPassing;
