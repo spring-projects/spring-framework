@@ -36,7 +36,7 @@ configure(allprojects) { project ->
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.5.0"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.4.3"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.2.0"
-			mavenBom "org.junit:junit-bom:5.7.1"
+			mavenBom "org.junit:junit-bom:5.7.2"
 		}
 		dependencies {
 			dependencySet(group: 'org.apache.logging.log4j', version: '2.14.1') {
@@ -378,7 +378,7 @@ configure([rootProject] + javaProjects) { project ->
 			"https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
-			"https://junit.org/junit5/docs/5.7.1/api/"
+			"https://junit.org/junit5/docs/5.7.2/api/"
 	] as String[]
 }
 
