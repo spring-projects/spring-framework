@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package org.springframework.jdbc.datasource.init;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import org.springframework.core.io.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for {@link ResourceDatabasePopulator}.
@@ -31,84 +31,84 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @since 4.1
  * @see AbstractDatabasePopulatorTests
  */
-public class ResourceDatabasePopulatorTests {
+class ResourceDatabasePopulatorUnitTests {
 
-	private static final Resource script1 = Mockito.mock(Resource.class);
-	private static final Resource script2 = Mockito.mock(Resource.class);
-	private static final Resource script3 = Mockito.mock(Resource.class);
+	private static final Resource script1 = mock(Resource.class);
+	private static final Resource script2 = mock(Resource.class);
+	private static final Resource script3 = mock(Resource.class);
 
 
 	@Test
-	public void constructWithNullResource() {
+	void constructWithNullResource() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ResourceDatabasePopulator((Resource) null));
 	}
 
 	@Test
-	public void constructWithNullResourceArray() {
+	void constructWithNullResourceArray() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ResourceDatabasePopulator((Resource[]) null));
 	}
 
 	@Test
-	public void constructWithResource() {
+	void constructWithResource() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(script1);
-		assertThat(databasePopulator.scripts.size()).isEqualTo(1);
+		assertThat(databasePopulator.scripts).hasSize(1);
 	}
 
 	@Test
-	public void constructWithMultipleResources() {
+	void constructWithMultipleResources() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(script1, script2);
-		assertThat(databasePopulator.scripts.size()).isEqualTo(2);
+		assertThat(databasePopulator.scripts).hasSize(2);
 	}
 
 	@Test
-	public void constructWithMultipleResourcesAndThenAddScript() {
+	void constructWithMultipleResourcesAndThenAddScript() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(script1, script2);
-		assertThat(databasePopulator.scripts.size()).isEqualTo(2);
+		assertThat(databasePopulator.scripts).hasSize(2);
 
 		databasePopulator.addScript(script3);
-		assertThat(databasePopulator.scripts.size()).isEqualTo(3);
+		assertThat(databasePopulator.scripts).hasSize(3);
 	}
 
 	@Test
-	public void addScriptsWithNullResource() {
+	void addScriptsWithNullResource() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				databasePopulator.addScripts((Resource) null));
 	}
 
 	@Test
-	public void addScriptsWithNullResourceArray() {
+	void addScriptsWithNullResourceArray() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				databasePopulator.addScripts((Resource[]) null));
 	}
 
 	@Test
-	public void setScriptsWithNullResource() {
+	void setScriptsWithNullResource() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				databasePopulator.setScripts((Resource) null));
 	}
 
 	@Test
-	public void setScriptsWithNullResourceArray() {
+	void setScriptsWithNullResourceArray() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				databasePopulator.setScripts((Resource[]) null));
 	}
 
 	@Test
-	public void setScriptsAndThenAddScript() {
+	void setScriptsAndThenAddScript() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
-		assertThat(databasePopulator.scripts.size()).isEqualTo(0);
+		assertThat(databasePopulator.scripts).isEmpty();
 
 		databasePopulator.setScripts(script1, script2);
-		assertThat(databasePopulator.scripts.size()).isEqualTo(2);
+		assertThat(databasePopulator.scripts).hasSize(2);
 
 		databasePopulator.addScript(script3);
-		assertThat(databasePopulator.scripts.size()).isEqualTo(3);
+		assertThat(databasePopulator.scripts).hasSize(3);
 	}
 
 }
