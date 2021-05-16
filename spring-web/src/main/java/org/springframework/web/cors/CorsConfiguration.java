@@ -177,7 +177,9 @@ public class CorsConfiguration {
 	 * it always sets the {@code Access-Control-Allow-Origin} response header to
 	 * the matched origin and never to {@code "*"}, nor to any other pattern, and
 	 * therefore can be used in combination with {@link #setAllowCredentials}
-	 * set to {@code true}.
+	 * set to {@code true}. Patterns also support list of allowed ports for origin,
+	 * e.g. {@code "https://*.domain1.com:[8080,8081]"}. Additionally wildcard is supported
+	 * in case any generic port should be allowed {@code "https://*.domain1.com:[*]"}.
 	 * <p>By default this is not set.
 	 * @since 5.3
 	 */
