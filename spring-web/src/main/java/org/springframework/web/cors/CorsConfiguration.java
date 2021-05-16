@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -176,7 +177,9 @@ public class CorsConfiguration {
 	 * it always sets the {@code Access-Control-Allow-Origin} response header to
 	 * the matched origin and never to {@code "*"}, nor to any other pattern, and
 	 * therefore can be used in combination with {@link #setAllowCredentials}
-	 * set to {@code true}.
+	 * set to {@code true}. Patterns also support list of allowed ports for origin,
+	 * e.g. {@code "https://*.domain1.com:[8080,8081]"}. Additionally wildcard is supported
+	 * in case any generic port should be allowed {@code "https://*.domain1.com:[*]"}.
 	 * <p>By default this is not set.
 	 * @since 5.3
 	 */
@@ -647,6 +650,8 @@ public class CorsConfiguration {
 	 */
 	private static class OriginPattern {
 
+		private static final Pattern PORT_LIST_PATTERN = Pattern.compile("(.*):\\[(\\*|[\\d,]+)]");
+
 		private final String declaredPattern;
 
 		private final Pattern pattern;
@@ -657,8 +662,25 @@ public class CorsConfiguration {
 		}
 
 		private static Pattern toPattern(String patternValue) {
+			//if pattern ends with allowed ports list
+			Matcher matcher = PORT_LIST_PATTERN.matcher(patternValue);
+			String portList = null;
+			if (matcher.matches()) {
+				patternValue = matcher.group(1);
+				portList = matcher.group(2);
+			}
+
 			patternValue = "\\Q" + patternValue + "\\E";
 			patternValue = patternValue.replace("*", "\\E.*\\Q");
+
+			if (ALL.equals(portList)) {
+				//there is a corner case. If '*' is specified, then origins with implicit default port (e.g. "https://test.com") should also match.
+				patternValue += "(:\\d+)?";
+			}
+			else if (portList != null) {
+				patternValue += ":(" + portList.replace(',', '|') + ")";
+			}
+
 			return Pattern.compile(patternValue);
 		}
 

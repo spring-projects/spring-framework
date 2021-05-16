@@ -335,6 +335,15 @@ public class CorsConfigurationTests {
 		config.addAllowedOriginPattern("https://*.domain.com");
 		assertThat(config.checkOrigin("https://example.domain.com")).isEqualTo("https://example.domain.com");
 
+		config.addAllowedOriginPattern("https://*.port.domain.com:[*]");
+		assertThat(config.checkOrigin("https://example.port.domain.com")).isEqualTo("https://example.port.domain.com");
+		assertThat(config.checkOrigin("https://example.port.domain.com:1234")).isEqualTo("https://example.port.domain.com:1234");
+
+		config.addAllowedOriginPattern("https://*.specific.port.com:[8080,8081]");
+		assertThat(config.checkOrigin("https://example.specific.port.com:8080")).isEqualTo("https://example.specific.port.com:8080");
+		assertThat(config.checkOrigin("https://example.specific.port.com:8081")).isEqualTo("https://example.specific.port.com:8081");
+		assertThat(config.checkOrigin("https://example.specific.port.com:1234")).isNull();
+
 		config.setAllowCredentials(false);
 		assertThat(config.checkOrigin("https://example.domain.com")).isEqualTo("https://example.domain.com");
 	}
@@ -352,6 +361,9 @@ public class CorsConfigurationTests {
 
 		config.setAllowedOriginPatterns(new ArrayList<>());
 		assertThat(config.checkOrigin("https://domain.com")).isNull();
+
+		config.setAllowedOriginPatterns(Collections.singletonList("https://*.specific.port.com:[8080,8081]"));
+		assertThat(config.checkOrigin("https://example.specific.port.com:1234")).isNull();
 	}
 
 	@Test
