@@ -133,7 +133,7 @@ public @interface EventListener {
 	 * An optional identifier for the listener, defaulting to the fully-qualified
 	 * signature of the declaring method (e.g. "mypackage.MyClass.myMethod()").
 	 * @since 5.3.5
-	 * @see org.springframework.context.ApplicationListener#getListenerId()
+	 * @see SmartApplicationListener#getListenerId()
 	 * @see ApplicationEventMulticaster#removeApplicationListeners(Predicate)
 	 */
 	String id() default "";
