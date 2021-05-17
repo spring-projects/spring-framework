@@ -242,7 +242,7 @@ public abstract class ScriptUtils {
 						InputStreamReader in = (resource.getCharset() != null ?
 								new InputStreamReader(is, resource.getCharset()) : new InputStreamReader(is));
 						LineNumberReader lnr = new LineNumberReader(in);
-						String script = readScript(lnr, commentPrefixes, separator, blockCommentEndDelimiter);
+						String script = readScript(lnr, separator);
 						sink.next(script);
 						sink.complete();
 					}
@@ -256,34 +256,22 @@ public abstract class ScriptUtils {
 	}
 
 	/**
-	 * Read a script from the provided {@code LineNumberReader}, using the supplied
-	 * comment prefixes and statement separator, and build a {@code String} containing
-	 * the lines.
-	 * <p>Lines <em>beginning</em> with one of the comment prefixes are excluded
-	 * from the results; however, line comments anywhere else &mdash; for example,
-	 * within a statement &mdash; will be included in the results.
+	 * Read a script from the provided {@code LineNumberReader} and build a
+	 * {@code String} containing the lines.
 	 * @param lineNumberReader the {@code LineNumberReader} containing the script
 	 * to be processed
-	 * @param commentPrefixes the prefixes that identify comments in the SQL script
-	 * (typically "--")
 	 * @param separator the statement separator in the SQL script (typically ";")
-	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter
 	 * @return a {@code String} containing the script lines
 	 * @throws IOException in case of I/O errors
 	 */
-	private static String readScript(LineNumberReader lineNumberReader, @Nullable String[] commentPrefixes,
-			@Nullable String separator, @Nullable String blockCommentEndDelimiter) throws IOException {
-
-		String currentLine = lineNumberReader.readLine();
+	private static String readScript(LineNumberReader lineNumberReader, @Nullable String separator) throws IOException {
 		StringBuilder scriptBuilder = new StringBuilder();
+		String currentLine = lineNumberReader.readLine();
 		while (currentLine != null) {
-			if ((blockCommentEndDelimiter != null && currentLine.contains(blockCommentEndDelimiter)) ||
-				(commentPrefixes != null && !startsWithAny(currentLine, commentPrefixes, 0))) {
-				if (scriptBuilder.length() > 0) {
-					scriptBuilder.append('\n');
-				}
-				scriptBuilder.append(currentLine);
+			if (scriptBuilder.length() > 0) {
+				scriptBuilder.append('\n');
 			}
+			scriptBuilder.append(currentLine);
 			currentLine = lineNumberReader.readLine();
 		}
 		appendSeparatorToScriptIfNecessary(scriptBuilder, separator);
