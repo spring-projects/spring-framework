@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,9 +87,9 @@ public @interface CrossOrigin {
 	String[] origins() default {};
 
 	/**
-	 * Alternative to {@link #origins()} that supports origins declared via
-	 * wildcard patterns. Please, see
-	 * @link CorsConfiguration#setAllowedOriginPatterns(List)} for details.
+	 * Alternative to {@link #origins()} that supports more flexible origins
+	 * patterns. Please, see @link CorsConfiguration#setAllowedOriginPatterns(List)}
+	 * for details.
 	 * <p>By default this is not set.
 	 * @since 5.3
 	 */

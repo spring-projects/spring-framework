@@ -170,16 +170,22 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Alternative to {@link #setAllowedOrigins} that supports origins declared
-	 * via wildcard patterns. In contrast to {@link #setAllowedOrigins allowedOrigins}
-	 * which does support the special value {@code "*"}, this property allows
-	 * more flexible patterns, e.g. {@code "https://*.domain1.com"}. Furthermore
-	 * it always sets the {@code Access-Control-Allow-Origin} response header to
-	 * the matched origin and never to {@code "*"}, nor to any other pattern, and
-	 * therefore can be used in combination with {@link #setAllowCredentials}
-	 * set to {@code true}. Patterns also support list of allowed ports for origin,
-	 * e.g. {@code "https://*.domain1.com:[8080,8081]"}. Additionally wildcard is supported
-	 * in case any generic port should be allowed {@code "https://*.domain1.com:[*]"}.
+	 * Alternative to {@link #setAllowedOrigins} that supports more flexible
+	 * origins patterns with "*" anywhere in the host name in addition to port
+	 * lists. Examples:
+	 * <ul>
+	 * <li>{@literal https://*.domain1.com} -- domains ending with domain1.com
+	 * <li>{@literal https://*.domain1.com:[8080,8081]} -- domains ending with
+	 * domain1.com on port 8080 or port 8081
+	 * <li>{@literal https://*.domain1.com:[*]} -- domains ending with
+	 * domain1.com on any port, including the default port
+	 * </ul>
+	 * <p>In contrast to {@link #setAllowedOrigins(List) allowedOrigins} which
+	 * only supports "*" and cannot be used with {@code allowCredentials}, when
+	 * an allowedOriginPattern is matched, the {@code Access-Control-Allow-Origin}
+	 * response header is set to the matched origin and not to {@code "*"} nor
+	 * to the pattern. Therefore allowedOriginPatterns can be used in combination
+	 * with {@link #setAllowCredentials} set to {@code true}.
 	 * <p>By default this is not set.
 	 * @since 5.3
 	 */
@@ -650,7 +656,7 @@ public class CorsConfiguration {
 	 */
 	private static class OriginPattern {
 
-		private static final Pattern PORT_LIST_PATTERN = Pattern.compile("(.*):\\[(\\*|[\\d,]+)]");
+		private static final Pattern PORTS_PATTERN = Pattern.compile("(.*):\\[(\\*|\\d+(,\\d+)*)]");
 
 		private final String declaredPattern;
 
@@ -658,13 +664,12 @@ public class CorsConfiguration {
 
 		OriginPattern(String declaredPattern) {
 			this.declaredPattern = declaredPattern;
-			this.pattern = toPattern(declaredPattern);
+			this.pattern = initPattern(declaredPattern);
 		}
 
-		private static Pattern toPattern(String patternValue) {
-			//if pattern ends with allowed ports list
-			Matcher matcher = PORT_LIST_PATTERN.matcher(patternValue);
+		private static Pattern initPattern(String patternValue) {
 			String portList = null;
+			Matcher matcher = PORTS_PATTERN.matcher(patternValue);
 			if (matcher.matches()) {
 				patternValue = matcher.group(1);
 				portList = matcher.group(2);
@@ -673,12 +678,8 @@ public class CorsConfiguration {
 			patternValue = "\\Q" + patternValue + "\\E";
 			patternValue = patternValue.replace("*", "\\E.*\\Q");
 
-			if (ALL.equals(portList)) {
-				//there is a corner case. If '*' is specified, then origins with implicit default port (e.g. "https://test.com") should also match.
-				patternValue += "(:\\d+)?";
-			}
-			else if (portList != null) {
-				patternValue += ":(" + portList.replace(',', '|') + ")";
+			if (portList != null) {
+				patternValue += (portList.equals(ALL) ? "(:\\d+)?" : ":(" + portList.replace(',', '|') + ")");
 			}
 
 			return Pattern.compile(patternValue);
