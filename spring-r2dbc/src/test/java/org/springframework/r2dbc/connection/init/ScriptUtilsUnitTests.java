@@ -33,8 +33,6 @@ import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_BLOC
 import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER;
 import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_COMMENT_PREFIXES;
 import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
-import static org.springframework.r2dbc.connection.init.ScriptUtils.containsSqlScriptDelimiters;
-import static org.springframework.r2dbc.connection.init.ScriptUtils.splitSqlScript;
 
 /**
  * Unit tests for {@link ScriptUtils}.
@@ -143,7 +141,7 @@ public class ScriptUtilsUnitTests {
 
 	private void splitScriptContainingComments(String script, String... commentPrefixes) {
 		List<String> statements = new ArrayList<>();
-		splitSqlScript(null, script, ";", commentPrefixes, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
+		ScriptUtils.splitSqlScript(null, script, ";", commentPrefixes, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
 				DEFAULT_BLOCK_COMMENT_END_DELIMITER, statements);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Rod; Johnson'), (2, 'Adrian Collier')";
@@ -159,7 +157,7 @@ public class ScriptUtilsUnitTests {
 	public void readAndSplitScriptContainingCommentsWithLeadingTabs() throws Exception {
 		String script = readScript("test-data-with-comments-and-leading-tabs.sql");
 		List<String> statements = new ArrayList<>();
-		splitSqlScript(script, ';', statements);
+		splitSqlScript(script, ";", statements);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Sam Brannen')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2013-06-08', 1)";
@@ -172,7 +170,7 @@ public class ScriptUtilsUnitTests {
 	public void readAndSplitScriptContainingMultiLineComments() throws Exception {
 		String script = readScript("test-data-with-multi-line-comments.sql");
 		List<String> statements = new ArrayList<>();
-		splitSqlScript(script, ';', statements);
+		splitSqlScript(script, ";", statements);
 
 		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller')";
 		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Sam' , 'Brannen' )";
@@ -184,7 +182,7 @@ public class ScriptUtilsUnitTests {
 	public void readAndSplitScriptContainingMultiLineNestedComments() throws Exception {
 		String script = readScript("test-data-with-multi-line-nested-comments.sql");
 		List<String> statements = new ArrayList<>();
-		splitSqlScript(script, ';', statements);
+		splitSqlScript(script, ";", statements);
 
 		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller')";
 		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Sam' , 'Brannen' )";
@@ -225,13 +223,21 @@ public class ScriptUtilsUnitTests {
 		"'/* double \\\" quotes */\ninsert into colors(color_num) values(42);'              # ;      # true"
 	})
 	public void containsStatementSeparator(String script, String delimiter, boolean expected) {
-		// Indirectly tests ScriptUtils.containsStatementSeparator(EncodedResource, String, String, String[], String, String).
-		assertThat(containsSqlScriptDelimiters(script, delimiter)).isEqualTo(expected);
+		boolean contains = ScriptUtils.containsStatementSeparator(null, script, delimiter, DEFAULT_COMMENT_PREFIXES,
+				DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+
+		assertThat(contains).isEqualTo(expected);
 	}
 
 	private String readScript(String path) throws Exception {
 		EncodedResource resource = new EncodedResource(new ClassPathResource(path, getClass()));
-		return ScriptUtils.readScript(resource, DefaultDataBufferFactory.sharedInstance).block();
+		return ScriptUtils.readScript(resource, DefaultDataBufferFactory.sharedInstance, DEFAULT_STATEMENT_SEPARATOR,
+				DEFAULT_COMMENT_PREFIXES, DEFAULT_BLOCK_COMMENT_END_DELIMITER).block();
+	}
+
+	private static void splitSqlScript(String script, String separator, List<String> statements) throws ScriptException {
+		ScriptUtils.splitSqlScript(null, script, separator, DEFAULT_COMMENT_PREFIXES, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
+				DEFAULT_BLOCK_COMMENT_END_DELIMITER, statements);
 	}
 
 }
