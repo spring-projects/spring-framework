@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,7 @@
 @file:JvmName("CoroutinesUtils")
 package org.springframework.core
 
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingleOrNull
 import kotlinx.coroutines.reactor.asFlux
@@ -48,6 +45,8 @@ internal fun <T: Any> deferredToMono(source: Deferred<T>) =
  * @author Sebastien Deleuze
  * @since 5.2
  */
+@Suppress("DEPRECATION")
+@OptIn(DelicateCoroutinesApi::class)
 internal fun <T: Any> monoToDeferred(source: Mono<T>) =
 		GlobalScope.async(Dispatchers.Unconfined) { source.awaitSingleOrNull() }
 
