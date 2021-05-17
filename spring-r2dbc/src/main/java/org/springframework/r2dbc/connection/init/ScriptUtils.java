@@ -472,7 +472,7 @@ public abstract class ScriptUtils {
 	 * (typically {@code "/*"})
 	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter
 	 * (typically <code>"*&#47;"</code>)
-	 * @since 5.2.16
+	 * @since 5.3.8
 	 */
 	private static boolean containsStatementSeparator(@Nullable EncodedResource resource, String script,
 			String separator, String[] commentPrefixes, String blockCommentStartDelimiter,
@@ -677,7 +677,9 @@ public abstract class ScriptUtils {
 			if (separatorToUse == null) {
 				separatorToUse = DEFAULT_STATEMENT_SEPARATOR;
 			}
-			if (!EOF_STATEMENT_SEPARATOR.equals(separatorToUse) && !containsSqlScriptDelimiters(statement, separatorToUse)) {
+			if (!EOF_STATEMENT_SEPARATOR.equals(separatorToUse) &&
+					!containsStatementSeparator(resource, statement, separatorToUse, commentPrefixes,
+						blockCommentStartDelimiter, blockCommentEndDelimiter)) {
 				separatorToUse = FALLBACK_STATEMENT_SEPARATOR;
 			}
 			splitSqlScript(resource, statement, separatorToUse, commentPrefixes, blockCommentStartDelimiter,
