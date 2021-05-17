@@ -106,8 +106,8 @@ public abstract class ScriptUtils {
 
 	/**
 	 * Split an SQL script into separate statements delimited by the provided
-	 * separator string. Each individual statement will be added to the provided
-	 * {@code List}.
+	 * separator string and return a {@code List} containing each individual
+	 * statement.
 	 * <p>Within the script, the provided {@code commentPrefixes} will be honored:
 	 * any text beginning with one of the comment prefixes and extending to the
 	 * end of the line will be omitted from the output. Similarly, the provided
@@ -125,12 +125,12 @@ public abstract class ScriptUtils {
 	 * never {@code null} or empty
 	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter;
 	 * never {@code null} or empty
-	 * @param statements the list that will contain the individual statements
+	 * @return a list of statements
 	 * @throws ScriptException if an error occurred while splitting the SQL script
 	 */
-	static void splitSqlScript(@Nullable EncodedResource resource, String script,
+	static List<String> splitSqlScript(EncodedResource resource, String script,
 			String separator, String[] commentPrefixes, String blockCommentStartDelimiter,
-			String blockCommentEndDelimiter, List<String> statements) throws ScriptException {
+			String blockCommentEndDelimiter) throws ScriptException {
 
 		Assert.hasText(script, "'script' must not be null or empty");
 		Assert.notNull(separator, "'separator' must not be null");
@@ -141,6 +141,7 @@ public abstract class ScriptUtils {
 		Assert.hasText(blockCommentStartDelimiter, "'blockCommentStartDelimiter' must not be null or empty");
 		Assert.hasText(blockCommentEndDelimiter, "'blockCommentEndDelimiter' must not be null or empty");
 
+		List<String> statements = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
 		boolean inSingleQuote = false;
 		boolean inDoubleQuote = false;
@@ -215,26 +216,22 @@ public abstract class ScriptUtils {
 		if (StringUtils.hasText(sb)) {
 			statements.add(sb.toString());
 		}
+
+		return statements;
 	}
 
 	/**
-	 * Read a script from the provided resource, using the supplied comment prefixes
-	 * and statement separator, and build a {@code String} containing the lines.
-	 * <p>Lines <em>beginning</em> with one of the comment prefixes are excluded
-	 * from the results; however, line comments anywhere else &mdash; for example,
-	 * within a statement &mdash; will be included in the results.
-	 * @param resource the {@code EncodedResource} containing the script
-	 * to be processed
+	 * Read a script from the provided resource, using the supplied statement
+	 * separator, and build a {@code String} containing the lines.
+	 * @param resource the {@code EncodedResource} containing the script to be
+	 * processed
 	 * @param dataBufferFactory the factory to create data buffers with
 	 * @param separator the statement separator in the SQL script (typically ";")
-	 * @param commentPrefixes the prefixes that identify comments in the SQL script
-	 * (typically "--")
-	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter
 	 * @return a {@link Mono} of {@link String} containing the script lines that
-	 * completes once the resource was loaded
+	 * completes once the resource has been loaded
 	 */
 	static Mono<String> readScript(EncodedResource resource, DataBufferFactory dataBufferFactory,
-			@Nullable String separator, @Nullable String[] commentPrefixes, @Nullable String blockCommentEndDelimiter) {
+			@Nullable String separator) {
 
 		return DataBufferUtils.join(DataBufferUtils.read(resource.getResource(), dataBufferFactory, 8192))
 				.handle((it, sink) -> {
@@ -322,7 +319,7 @@ public abstract class ScriptUtils {
 	 * (typically <code>"*&#47;"</code>)
 	 * @since 5.3.8
 	 */
-	static boolean containsStatementSeparator(@Nullable EncodedResource resource, String script,
+	static boolean containsStatementSeparator(EncodedResource resource, String script,
 			String separator, String[] commentPrefixes, String blockCommentStartDelimiter,
 			String blockCommentEndDelimiter) throws ScriptException {
 
@@ -514,13 +511,12 @@ public abstract class ScriptUtils {
 
 		long startTime = System.currentTimeMillis();
 
-		Mono<String> inputScript = readScript(resource, dataBufferFactory, separator, commentPrefixes, blockCommentEndDelimiter)
+		Mono<String> inputScript = readScript(resource, dataBufferFactory, separator)
 				.onErrorMap(IOException.class, ex -> new CannotReadScriptException(resource, ex));
 
 		AtomicInteger statementNumber = new AtomicInteger();
 
 		Flux<Void> executeScript = inputScript.flatMapIterable(script -> {
-			List<String> statements = new ArrayList<>();
 			String separatorToUse = separator;
 			if (separatorToUse == null) {
 				separatorToUse = DEFAULT_STATEMENT_SEPARATOR;
@@ -530,9 +526,8 @@ public abstract class ScriptUtils {
 						blockCommentStartDelimiter, blockCommentEndDelimiter)) {
 				separatorToUse = FALLBACK_STATEMENT_SEPARATOR;
 			}
-			splitSqlScript(resource, script, separatorToUse, commentPrefixes, blockCommentStartDelimiter,
-					blockCommentEndDelimiter, statements);
-			return statements;
+			return splitSqlScript(resource, script, separatorToUse, commentPrefixes,
+					blockCommentStartDelimiter, blockCommentEndDelimiter);
 		}).concatMap(statement -> {
 			statementNumber.incrementAndGet();
 			return runStatement(statement, connection, resource, continueOnError, ignoreFailedDrops, statementNumber);
