@@ -274,17 +274,17 @@ public abstract class ScriptUtils {
 	private static String readScript(LineNumberReader lineNumberReader, @Nullable String[] commentPrefixes,
 			@Nullable String separator, @Nullable String blockCommentEndDelimiter) throws IOException {
 
-		String currentStatement = lineNumberReader.readLine();
+		String currentLine = lineNumberReader.readLine();
 		StringBuilder scriptBuilder = new StringBuilder();
-		while (currentStatement != null) {
-			if ((blockCommentEndDelimiter != null && currentStatement.contains(blockCommentEndDelimiter)) ||
-				(commentPrefixes != null && !startsWithAny(currentStatement, commentPrefixes, 0))) {
+		while (currentLine != null) {
+			if ((blockCommentEndDelimiter != null && currentLine.contains(blockCommentEndDelimiter)) ||
+				(commentPrefixes != null && !startsWithAny(currentLine, commentPrefixes, 0))) {
 				if (scriptBuilder.length() > 0) {
 					scriptBuilder.append('\n');
 				}
-				scriptBuilder.append(currentStatement);
+				scriptBuilder.append(currentLine);
 			}
-			currentStatement = lineNumberReader.readLine();
+			currentLine = lineNumberReader.readLine();
 		}
 		appendSeparatorToScriptIfNecessary(scriptBuilder, separator);
 		return scriptBuilder.toString();
@@ -526,27 +526,26 @@ public abstract class ScriptUtils {
 
 		long startTime = System.currentTimeMillis();
 
-		Mono<String> script = readScript(resource, dataBufferFactory, separator, commentPrefixes, blockCommentEndDelimiter)
+		Mono<String> inputScript = readScript(resource, dataBufferFactory, separator, commentPrefixes, blockCommentEndDelimiter)
 				.onErrorMap(IOException.class, ex -> new CannotReadScriptException(resource, ex));
 
 		AtomicInteger statementNumber = new AtomicInteger();
 
-		Flux<Void> executeScript = script.flatMapIterable(statement -> {
+		Flux<Void> executeScript = inputScript.flatMapIterable(script -> {
 			List<String> statements = new ArrayList<>();
 			String separatorToUse = separator;
 			if (separatorToUse == null) {
 				separatorToUse = DEFAULT_STATEMENT_SEPARATOR;
 			}
 			if (!EOF_STATEMENT_SEPARATOR.equals(separatorToUse) &&
-					!containsStatementSeparator(resource, statement, separatorToUse, commentPrefixes,
+					!containsStatementSeparator(resource, script, separatorToUse, commentPrefixes,
 						blockCommentStartDelimiter, blockCommentEndDelimiter)) {
 				separatorToUse = FALLBACK_STATEMENT_SEPARATOR;
 			}
-			splitSqlScript(resource, statement, separatorToUse, commentPrefixes, blockCommentStartDelimiter,
+			splitSqlScript(resource, script, separatorToUse, commentPrefixes, blockCommentStartDelimiter,
 					blockCommentEndDelimiter, statements);
 			return statements;
 		}).concatMap(statement -> {
-
 			statementNumber.incrementAndGet();
 			return runStatement(statement, connection, resource, continueOnError, ignoreFailedDrops, statementNumber);
 		});
