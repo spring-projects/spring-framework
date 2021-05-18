@@ -31,6 +31,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
 
@@ -55,13 +56,14 @@ import org.springframework.web.util.WebUtils;
  */
 public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
+	private static final String WEAK_PREFIX = "W/";
 	private static final String DIRECTIVE_NO_STORE = "no-store";
 
 	private static final String STREAMING_ATTRIBUTE = ShallowEtagHeaderFilter.class.getName() + ".STREAMING";
 
 
 	private boolean writeWeakETag = false;
-
+	private Validator validator = new StrongValidator();
 
 	/**
 	 * Set whether the ETag value written to the response should be weak, as per RFC 7232.
@@ -72,6 +74,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	 */
 	public void setWriteWeakETag(boolean writeWeakETag) {
 		this.writeWeakETag = writeWeakETag;
+		this.validator = writeWeakETag ? new WeakValidator() : new StrongValidator();
 	}
 
 	/**
@@ -122,7 +125,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			String responseETag = generateETagHeaderValue(responseWrapper.getContentInputStream(), this.writeWeakETag);
 			rawResponse.setHeader(HttpHeaders.ETAG, responseETag);
 			String requestETag = request.getHeader(HttpHeaders.IF_NONE_MATCH);
-			if (requestETag != null && ("*".equals(requestETag) || compareETagHeaderValue(requestETag, responseETag))) {
+			if (requestETag != null && ("*".equals(requestETag) || validator.isMatch(requestETag, responseETag))) {
 				rawResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 			}
 			else {
@@ -171,22 +174,12 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		// length of W/ + " + 0 + 32bits md5 hash + "
 		StringBuilder builder = new StringBuilder(37);
 		if (isWeak) {
-			builder.append("W/");
+			builder.append(WEAK_PREFIX);
 		}
 		builder.append("\"0");
 		DigestUtils.appendMd5DigestAsHex(inputStream, builder);
 		builder.append('"');
 		return builder.toString();
-	}
-
-	private boolean compareETagHeaderValue(String requestETag, String responseETag) {
-		if (requestETag.startsWith("W/")) {
-			requestETag = requestETag.substring(2);
-		}
-		if (responseETag.startsWith("W/")) {
-			responseETag = responseETag.substring(2);
-		}
-		return requestETag.equals(responseETag);
 	}
 
 
@@ -231,4 +224,42 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		}
 	}
 
+	interface Validator {
+		boolean isMatch(String requestETag, String responseETag);
+	}
+
+	private static class WeakValidator implements Validator{
+		@Override
+		public boolean isMatch(String requestETag, String responseETag) {
+			if (!StringUtils.hasLength(requestETag) || !StringUtils.hasLength(responseETag)) {
+				return false;
+			}
+
+			if (isWeakETag(requestETag)) {
+				requestETag = requestETag.substring(WEAK_PREFIX.length());
+			}
+			if (isWeakETag(responseETag)) {
+				responseETag = responseETag.substring(WEAK_PREFIX.length());
+			}
+			return requestETag.equals(responseETag);
+		}
+	}
+
+	private static class StrongValidator implements Validator{
+		@Override
+		public boolean isMatch(String requestETag, String responseETag) {
+			if (!StringUtils.hasLength(requestETag) || !StringUtils.hasLength(responseETag)) {
+				return false;
+			}
+
+			if(isWeakETag(requestETag) || isWeakETag(responseETag)) {
+				return false;
+			}
+			return requestETag.equals(responseETag);
+		}
+	}
+
+	private static boolean isWeakETag(String eTag) {
+		return eTag.startsWith(WEAK_PREFIX);
+	}
 }
