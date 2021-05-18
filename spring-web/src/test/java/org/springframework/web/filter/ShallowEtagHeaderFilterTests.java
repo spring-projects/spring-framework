@@ -122,7 +122,7 @@ public class ShallowEtagHeaderFilterTests {
 	public void filterMatchWeakEtag() throws Exception {
 		final MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		String etag = "\"0b10a8db164e0754105b7a99be72e3fe5\"";
-		request.addHeader("If-None-Match", "W/" + etag);
+		request.addHeader("If-None-Match", etag);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		FilterChain filterChain = (filterRequest, filterResponse) -> {
