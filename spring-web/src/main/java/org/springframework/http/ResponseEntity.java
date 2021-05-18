@@ -317,6 +317,16 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		return status(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
 
+	/**
+	 * Create a builder with an
+	 * {@linkplain HttpStatus#INTERNAL_SERVER_ERROR INTERNAL_SERVER_ERROR} status.
+	 * @return the created builder
+	 * @since 5.3.8
+	 */
+	public static BodyBuilder internalServerError() {
+		return status(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
 
 	/**
 	 * Defines a builder that adds headers to the response entity.
