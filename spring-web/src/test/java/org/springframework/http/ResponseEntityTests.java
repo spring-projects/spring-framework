@@ -160,6 +160,15 @@ public class ResponseEntityTests {
 	}
 
 	@Test
+	public void internalServerError() throws URISyntaxException {
+		ResponseEntity<String> responseEntity = ResponseEntity.internalServerError().body("error");
+
+		assertThat(responseEntity).isNotNull();
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+		assertThat(responseEntity.getBody()).isEqualTo("error");
+	}
+
+	@Test
 	public void headers() throws URISyntaxException {
 		URI location = new URI("location");
 		long contentLength = 67890;
