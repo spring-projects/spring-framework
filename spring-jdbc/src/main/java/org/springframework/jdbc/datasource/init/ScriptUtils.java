@@ -345,7 +345,10 @@ public abstract class ScriptUtils {
 	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter
 	 * @return a {@code String} containing the script lines
 	 * @throws IOException in case of I/O errors
+	 * @deprecated as of Spring Framework 5.2.16 with no plans for replacement.
+	 * This is an internal API and will likely be removed in Spring Framework 6.0.
 	 */
+	@Deprecated
 	public static String readScript(LineNumberReader lineNumberReader, @Nullable String commentPrefix,
 			@Nullable String separator, @Nullable String blockCommentEndDelimiter) throws IOException {
 
@@ -369,7 +372,10 @@ public abstract class ScriptUtils {
 	 * @return a {@code String} containing the script lines
 	 * @throws IOException in case of I/O errors
 	 * @since 5.2
+	 * @deprecated as of Spring Framework 5.2.16 with no plans for replacement.
+	 * This is an internal API and will likely be removed in Spring Framework 6.0.
 	 */
+	@Deprecated
 	public static String readScript(LineNumberReader lineNumberReader, @Nullable String[] commentPrefixes,
 			@Nullable String separator, @Nullable String blockCommentEndDelimiter) throws IOException {
 
@@ -417,7 +423,10 @@ public abstract class ScriptUtils {
 	 * @see #DEFAULT_COMMENT_PREFIXES
 	 * @see #DEFAULT_BLOCK_COMMENT_START_DELIMITER
 	 * @see #DEFAULT_BLOCK_COMMENT_END_DELIMITER
+	 * @deprecated as of Spring Framework 5.2.16 with no plans for replacement.
+	 * This is an internal API and will likely be removed in Spring Framework 6.0.
 	 */
+	@Deprecated
 	public static boolean containsSqlScriptDelimiters(String script, String delimiter) {
 		return containsStatementSeparator(null, script, delimiter, DEFAULT_COMMENT_PREFIXES,
 			DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
@@ -520,7 +529,10 @@ public abstract class ScriptUtils {
 	 * @throws ScriptException if an error occurred while splitting the SQL script
 	 * @see #splitSqlScript(String, String, List)
 	 * @see #splitSqlScript(EncodedResource, String, String, String, String, String, List)
+	 * @deprecated as of Spring Framework 5.2.16 with no plans for replacement.
+	 * This is an internal API and will likely be removed in Spring Framework 6.0.
 	 */
+	@Deprecated
 	public static void splitSqlScript(String script, char separator, List<String> statements) throws ScriptException {
 		splitSqlScript(script, String.valueOf(separator), statements);
 	}
@@ -544,7 +556,10 @@ public abstract class ScriptUtils {
 	 * @throws ScriptException if an error occurred while splitting the SQL script
 	 * @see #splitSqlScript(String, char, List)
 	 * @see #splitSqlScript(EncodedResource, String, String, String, String, String, List)
+	 * @deprecated as of Spring Framework 5.2.16 with no plans for replacement.
+	 * This is an internal API and will likely be removed in Spring Framework 6.0.
 	 */
+	@Deprecated
 	public static void splitSqlScript(String script, String separator, List<String> statements) throws ScriptException {
 		splitSqlScript(null, script, separator, DEFAULT_COMMENT_PREFIX, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
 				DEFAULT_BLOCK_COMMENT_END_DELIMITER, statements);
@@ -573,7 +588,10 @@ public abstract class ScriptUtils {
 	 * never {@code null} or empty
 	 * @param statements the list that will contain the individual statements
 	 * @throws ScriptException if an error occurred while splitting the SQL script
+	 * @deprecated as of Spring Framework 5.2.16 with no plans for replacement.
+	 * This is an internal API and will likely be removed in Spring Framework 6.0.
 	 */
+	@Deprecated
 	public static void splitSqlScript(@Nullable EncodedResource resource, String script,
 			String separator, String commentPrefix, String blockCommentStartDelimiter,
 			String blockCommentEndDelimiter, List<String> statements) throws ScriptException {
@@ -607,7 +625,10 @@ public abstract class ScriptUtils {
 	 * @param statements the list that will contain the individual statements
 	 * @throws ScriptException if an error occurred while splitting the SQL script
 	 * @since 5.2
+	 * @deprecated as of Spring Framework 5.2.16 with no plans for replacement.
+	 * This is an internal API and will likely be removed in Spring Framework 6.0.
 	 */
+	@Deprecated
 	public static void splitSqlScript(@Nullable EncodedResource resource, String script,
 			String separator, String[] commentPrefixes, String blockCommentStartDelimiter,
 			String blockCommentEndDelimiter, List<String> statements) throws ScriptException {
