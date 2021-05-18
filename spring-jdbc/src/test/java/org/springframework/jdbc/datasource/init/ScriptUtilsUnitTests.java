@@ -48,6 +48,7 @@ import static org.springframework.jdbc.datasource.init.ScriptUtils.splitSqlScrip
 public class ScriptUtilsUnitTests {
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void splitSqlScriptDelimitedWithSemicolon() {
 		String rawStatement1 = "insert into customer (id, name)\nvalues (1, 'Rod ; Johnson'), (2, 'Adrian \n Collier')";
 		String cleanedStatement1 = "insert into customer (id, name) values (1, 'Rod ; Johnson'), (2, 'Adrian \n Collier')";
@@ -63,6 +64,7 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void splitSqlScriptDelimitedWithNewLine() {
 		String statement1 = "insert into customer (id, name) values (1, 'Rod ; Johnson'), (2, 'Adrian \n Collier')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
@@ -75,6 +77,7 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void splitSqlScriptDelimitedWithNewLineButDefaultDelimiterSpecified() {
 		String statement1 = "do something";
 		String statement2 = "do something else";
@@ -86,6 +89,7 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test  // SPR-13218
+	@SuppressWarnings("deprecation")
 	public void splitScriptWithSingleQuotesNestedInsideDoubleQuotes() throws Exception {
 		String statement1 = "select '1' as \"Dogbert's owner's\" from dual";
 		String statement2 = "select '2' as \"Dilbert's\" from dual";
@@ -97,6 +101,7 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test  // SPR-11560
+	@SuppressWarnings("deprecation")
 	public void readAndSplitScriptWithMultipleNewlinesAsSeparator() throws Exception {
 		String script = readScript("db-test-data-multi-newline.sql");
 		List<String> statements = new ArrayList<>();
@@ -124,6 +129,7 @@ public class ScriptUtilsUnitTests {
 		splitScriptContainingComments(script, "--", "#", "^");
 	}
 
+	@SuppressWarnings("deprecation")
 	private void splitScriptContainingComments(String script, String... commentPrefixes) throws Exception {
 		List<String> statements = new ArrayList<>();
 		splitSqlScript(null, script, ";", commentPrefixes, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
@@ -137,6 +143,7 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test  // SPR-10330
+	@SuppressWarnings("deprecation")
 	public void readAndSplitScriptContainingCommentsWithLeadingTabs() throws Exception {
 		String script = readScript("test-data-with-comments-and-leading-tabs.sql");
 		List<String> statements = new ArrayList<>();
@@ -148,6 +155,7 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test  // SPR-9531
+	@SuppressWarnings("deprecation")
 	public void readAndSplitScriptContainingMultiLineComments() throws Exception {
 		String script = readScript("test-data-with-multi-line-comments.sql");
 		List<String> statements = new ArrayList<>();
@@ -158,6 +166,7 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void readAndSplitScriptContainingMultiLineNestedComments() throws Exception {
 		String script = readScript("test-data-with-multi-line-nested-comments.sql");
 		List<String> statements = new ArrayList<>();
@@ -199,6 +208,7 @@ public class ScriptUtilsUnitTests {
 		"'/* double \" quotes */\ninsert into colors(color_num) values(42);'                # ;      # true",
 		"'/* double \\\" quotes */\ninsert into colors(color_num) values(42);'              # ;      # true"
 	})
+	@SuppressWarnings("deprecation")
 	public void containsStatementSeparator(String script, String delimiter, boolean expected) {
 		// Indirectly tests ScriptUtils.containsStatementSeparator(EncodedResource, String, String, String[], String, String).
 		assertThat(containsSqlScriptDelimiters(script, delimiter)).isEqualTo(expected);
