@@ -235,13 +235,9 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 				return false;
 			}
 
-			if (isWeakETag(requestETag)) {
-				requestETag = requestETag.substring(WEAK_PREFIX.length());
-			}
-			if (isWeakETag(responseETag)) {
-				responseETag = responseETag.substring(WEAK_PREFIX.length());
-			}
-			return requestETag.equals(responseETag);
+			String requestETagOpaque = extractOpaqueTag(requestETag);
+			String responseETagOpaque = extractOpaqueTag(responseETag);
+			return requestETagOpaque.equals(responseETagOpaque);
 		}
 	}
 
@@ -261,5 +257,13 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 	private static boolean isWeakETag(String eTag) {
 		return eTag.startsWith(WEAK_PREFIX);
+	}
+
+	private static String extractOpaqueTag(String eTag) {
+		if (!isWeakETag(eTag)) {
+			return eTag;
+		}
+
+		return eTag.substring(WEAK_PREFIX.length());
 	}
 }
