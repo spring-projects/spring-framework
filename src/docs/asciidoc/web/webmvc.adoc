@@ -2054,7 +2054,7 @@ and others) and is equivalent to `required=false`.
 | Currently authenticated user -- possibly a specific `Principal` implementation class if known.
 
   Note that this argument is not resolved eagerly, if it is annotated in order to allow a custom resolver to resolve it
-  before falling back on default resolution resolution via `HttpServletRequest#getUserPrincipal`.
+  before falling back on default resolution via `HttpServletRequest#getUserPrincipal`.
   For example, the Spring Security `Authentication` implements `Principal` and would be injected as such via
   `HttpServletRequest#getUserPrincipal`, unless it is also annotated with `@AuthenticationPrincipal` in which case it
   is resolved by a custom Spring Security resolver through `Authentication#getPrincipal`.
