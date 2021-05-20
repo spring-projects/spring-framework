@@ -134,6 +134,10 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	private ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, Object status) {
 		super(body, headers);
 		Assert.notNull(status, "HttpStatus must not be null");
+		if(status == HttpStatus.NO_CONTENT || status == HttpStatus.NOT_MODIFIED || status == HttpStatus.CHECKPOINT ||
+		status == HttpStatus.CONTINUE || status == HttpStatus.PROCESSING || status == HttpStatus.SWITCHING_PROTOCOLS){
+			Assert.isNull(body, "All 1xx (Informational), 204 (No Content), and 304 (Not Modified) responses do not include a message body");
+		}
 		this.status = status;
 	}
 
