@@ -395,6 +395,14 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		}
 
 		@Override
+		public Mono<WebSession> getSessionOrEmpty() {
+			if (this.delegate.getSession() == null) {
+				return Mono.empty();
+			}
+			return getSession();
+		}
+
+		@Override
 		public <T extends Principal> Mono<T> getPrincipal() {
 			return this.delegate.getPrincipal();
 		}

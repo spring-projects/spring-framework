@@ -117,6 +117,18 @@ public interface ServerWebExchange {
 	Mono<WebSession> getSession();
 
 	/**
+	 * Return the web session for the current request. Always guaranteed  to
+	 * return an instance either matching to the session id requested by the
+	 * client, or with a new session id either because the client did not
+	 * specify one or because the underlying session had expired. Use of this
+	 * method does not automatically create a session.
+	 * Method will return empty value if session is null
+	 * See {@link WebSession}
+	 * for more details.
+	 */
+	Mono<WebSession> getSessionOrEmpty();
+
+	/**
 	 * Return the authenticated user for the request, if any.
 	 */
 	<T extends Principal> Mono<T> getPrincipal();

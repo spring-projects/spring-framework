@@ -83,6 +83,14 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 	}
 
 	@Override
+	public Mono<WebSession> getSessionOrEmpty() {
+		if (getDelegate().getSession() == null) {
+			return Mono.empty();
+		}
+		return getSession();
+	}
+
+	@Override
 	public <T extends Principal> Mono<T> getPrincipal() {
 		return getDelegate().getPrincipal();
 	}
