@@ -1,15 +1,15 @@
 plugins {
-	id 'io.spring.dependency-management' version '1.0.9.RELEASE' apply false
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE' apply false
 	id 'io.spring.nohttp' version '0.0.5.RELEASE'
 	id 'org.jetbrains.kotlin.jvm' version '1.5.30' apply false
-	id 'org.jetbrains.dokka' version '0.10.1' apply false
+	id 'org.jetbrains.dokka' version '1.5.0' apply false
 	id 'org.asciidoctor.jvm.convert' version '3.1.0'
 	id 'org.asciidoctor.jvm.pdf' version '3.1.0'
-	id 'de.undercouch.download' version '4.1.1'
-	id "io.freefair.aspectj" version '5.1.1' apply false
-	id "com.github.ben-manes.versions" version '0.28.0'
-	id "com.github.johnrengelman.shadow" version "6.1.0" apply false
-	id "me.champeau.jmh" version "0.6.4" apply false
+	id 'de.undercouch.download' version '4.1.2'
+	id "io.freefair.aspectj" version '6.1.0' apply false
+	id "com.github.ben-manes.versions" version '0.39.0'
+	id "com.github.johnrengelman.shadow" version '7.0.0' apply false
+	id "me.champeau.jmh" version "0.6.6" apply false
 	id "org.jetbrains.kotlin.plugin.serialization" version "1.5.30" apply false
 	id "org.unbroken-dome.xjc" version '2.0.0' apply false
 }
@@ -342,18 +342,18 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	dependencies {
-		testCompile("org.junit.jupiter:junit-jupiter-api")
-		testCompile("org.junit.jupiter:junit-jupiter-params")
-		testCompile("org.mockito:mockito-core")
-		testCompile("org.mockito:mockito-junit-jupiter")
-		testCompile("io.mockk:mockk")
-		testCompile("org.assertj:assertj-core")
+		testImplementation("org.junit.jupiter:junit-jupiter-api")
+		testImplementation("org.junit.jupiter:junit-jupiter-params")
+		testImplementation("org.mockito:mockito-core")
+		testImplementation("org.mockito:mockito-junit-jupiter")
+		testImplementation("io.mockk:mockk")
+		testImplementation("org.assertj:assertj-core")
 		// Pull in the latest JUnit 5 Launcher API to ensure proper support in IDEs.
-		testRuntime("org.junit.platform:junit-platform-launcher")
-		testRuntime("org.junit.jupiter:junit-jupiter-engine")
-		testRuntime("org.apache.logging.log4j:log4j-core")
-		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl")
-		testRuntime("org.apache.logging.log4j:log4j-jul")
+		testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+		testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+		testRuntimeOnly("org.apache.logging.log4j:log4j-core")
+		testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j-impl")
+		testRuntimeOnly("org.apache.logging.log4j:log4j-jul")
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305")
 		testCompileOnly("com.google.code.findbugs:jsr305")
@@ -364,7 +364,7 @@ configure([rootProject] + javaProjects) { project ->
 			"https://docs.oracle.com/javase/8/docs/api/",
 			"https://docs.oracle.com/javaee/7/api/",
 			"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
-			"https://www.ibm.com/support/knowledgecenter/SS7JFU_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/",
+			"https://www.ibm.com/docs/api/v1/content/SSEQTP_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/",
 			"https://glassfish.java.net/nonav/docs/v3/api/",
 			"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
 			"https://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",

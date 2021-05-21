@@ -11,7 +11,7 @@ sourceSets.test.java.srcDirs = files()
 aspectj.version = dependencyManagement.managedVersions['org.aspectj:aspectjweaver']
 
 dependencies {
-	compile("org.aspectj:aspectjweaver")
+	api("org.aspectj:aspectjweaver")
 	compileOnly("org.aspectj:aspectjrt")
 	optional(project(":spring-aop"))  // for @Async support
 	optional(project(":spring-beans"))  // for @Configurable support
@@ -21,13 +21,13 @@ dependencies {
 	optional(project(":spring-tx"))  // for JPA, @Transactional support
 	optional("javax.cache:cache-api")  // for JCache aspect
 	optional("javax.transaction:javax.transaction-api")  // for @javax.transaction.Transactional support
-	testCompile(project(":spring-core"))  // for CodeStyleAspect
-	testCompile(project(":spring-test"))
-	testCompile(testFixtures(project(":spring-context")))
-	testCompile(testFixtures(project(":spring-context-support")))
-	testCompile(testFixtures(project(":spring-core")))
-	testCompile(testFixtures(project(":spring-tx")))
-	testCompile("javax.mail:javax.mail-api")
+	testImplementation(project(":spring-core"))  // for CodeStyleAspect
+	testImplementation(project(":spring-test"))
+	testImplementation(testFixtures(project(":spring-context")))
+	testImplementation(testFixtures(project(":spring-context-support")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-tx")))
+	testImplementation("javax.mail:javax.mail-api")
 	testCompileOnly("org.aspectj:aspectjrt")
 }
 

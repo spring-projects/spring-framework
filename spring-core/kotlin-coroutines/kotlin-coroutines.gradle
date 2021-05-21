@@ -14,11 +14,11 @@ artifacts {
 }
 
 dependencies {
-	compile("org.jetbrains.kotlin:kotlin-reflect")
-	compile("org.jetbrains.kotlin:kotlin-stdlib")
-	compile("io.projectreactor:reactor-core")
-	compile("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-	compile("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	api("org.jetbrains.kotlin:kotlin-reflect")
+	api("org.jetbrains.kotlin:kotlin-stdlib")
+	api("io.projectreactor:reactor-core")
+	api("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	api("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 }
 
 eclipse {

@@ -3,9 +3,9 @@ description = "Spring JDBC"
 apply plugin: "kotlin"
 
 dependencies {
-	compile(project(":spring-beans"))
-	compile(project(":spring-core"))
-	compile(project(":spring-tx"))
+	api(project(":spring-beans"))
+	api(project(":spring-core"))
+	api(project(":spring-tx"))
 	optional(project(":spring-context"))  // for JndiDataSourceLookup
 	optional("javax.transaction:javax.transaction-api")
 	optional("org.hsqldb:hsqldb")
@@ -14,6 +14,6 @@ dependencies {
 	optional("org.apache.derby:derbyclient")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
-	testCompile(testFixtures(project(":spring-beans")))
-	testCompile(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-core")))
 }

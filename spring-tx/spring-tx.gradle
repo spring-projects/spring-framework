@@ -3,8 +3,8 @@ description = "Spring Transaction"
 apply plugin: "kotlin"
 
 dependencies {
-	compile(project(":spring-beans"))
-	compile(project(":spring-core"))
+	api(project(":spring-beans"))
+	api(project(":spring-core"))
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))  // for JCA, @EnableTransactionManagement
 	optional(project(":kotlin-coroutines"))
@@ -19,11 +19,11 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-	testCompile(testFixtures(project(":spring-beans")))
-	testCompile(testFixtures(project(":spring-context")))
-	testCompile(testFixtures(project(":spring-core")))
-	testCompile("org.aspectj:aspectjweaver")
-	testCompile("org.codehaus.groovy:groovy")
-	testCompile("org.eclipse.persistence:javax.persistence")
-	testCompile("io.projectreactor:reactor-test")
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-context")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation("org.aspectj:aspectjweaver")
+	testImplementation("org.codehaus.groovy:groovy")
+	testImplementation("org.eclipse.persistence:javax.persistence")
+	testImplementation("io.projectreactor:reactor-test")
 }

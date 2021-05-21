@@ -17,6 +17,10 @@ jmh {
 	duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+tasks.findByName("processJmhResources").configure {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 jmhJar {
 	// Uncomment the following for Shadow's Transformer support.
 	// mergeServiceFiles()
