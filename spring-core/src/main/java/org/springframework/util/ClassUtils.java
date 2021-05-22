@@ -1322,7 +1322,7 @@ public abstract class ClassUtils {
 	 * Note that, despite being synthetic, bridge methods ({@link Method#isBridge()}) are considered
 	 * as user-level methods since they are eventually pointing to a user-declared generic method.
 	 * @param method the method to check
-	 * @return {@code true} if the method can be considered as user-declared; [@code false} otherwise
+	 * @return {@code true} if the method can be considered as user-declared; {@code false} otherwise
 	 */
 	public static boolean isUserLevelMethod(Method method) {
 		Assert.notNull(method, "Method must not be null");

@@ -88,7 +88,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 
 	/**
-	 * Create a new @link ConnectionFactoryTransactionManager} instance.
+	 * Create a new {@link R2dbcTransactionManager} instance.
 	 * A ConnectionFactory has to be set to be able to use it.
 	 * @see #setConnectionFactory
 	 */

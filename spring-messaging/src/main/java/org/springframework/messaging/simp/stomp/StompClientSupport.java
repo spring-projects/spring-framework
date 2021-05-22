@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * Base class for STOMP client implementations.
  *
  * <p>Subclasses can connect over WebSocket or TCP using any library. When creating
- * a new connection, a subclass can create an instance of @link DefaultStompSession}
+ * a new connection, a subclass can create an instance of {@link DefaultStompSession}
  * which extends {@link org.springframework.messaging.tcp.TcpConnectionHandler}
  * whose lifecycle methods the subclass must then invoke.
  *

@@ -88,7 +88,7 @@ public @interface CrossOrigin {
 
 	/**
 	 * Alternative to {@link #origins()} that supports more flexible origins
-	 * patterns. Please, see @link CorsConfiguration#setAllowedOriginPatterns(List)}
+	 * patterns. Please, see {@link CorsConfiguration#setAllowedOriginPatterns(List)}
 	 * for details.
 	 * <p>By default this is not set.
 	 * @since 5.3
