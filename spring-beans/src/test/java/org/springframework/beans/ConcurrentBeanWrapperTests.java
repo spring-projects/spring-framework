@@ -26,7 +26,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,11 +46,9 @@ public class ConcurrentBeanWrapperTests {
 
 	private Throwable ex = null;
 
-	@Test
+	@RepeatedTest(100)
 	public void testSingleThread() {
-		for (int i = 0; i < 100; i++) {
-			performSet();
-		}
+		performSet();
 	}
 
 	@Test
