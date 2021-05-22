@@ -22,7 +22,7 @@ import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
- * Convenience subclass of @link AbstractTemplateViewResolver} that supports
+ * Convenience subclass of {@link AbstractTemplateViewResolver} that supports
  * {@link GroovyMarkupView} (i.e. Groovy XML/XHTML markup templates) and
  * custom subclasses of it.
  *

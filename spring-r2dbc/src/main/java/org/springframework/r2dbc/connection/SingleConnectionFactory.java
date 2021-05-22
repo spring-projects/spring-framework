@@ -108,8 +108,8 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 	 * @param target underlying target {@link Connection}.
 	 * @param metadata {@link ConnectionFactory} metadata to be associated with this {@link ConnectionFactory}.
 	 * @param suppressClose if the {@link Connection} should be wrapped with a {@link Connection} that suppresses
-	 * @code close()} calls (to allow for normal {@code close()} usage in applications that expect a pooled
-	 * @link Connection}).
+	 * {@code close()} calls (to allow for normal {@code close()} usage in applications that expect a pooled
+	 * {@link Connection}).
 	 */
 	public SingleConnectionFactory(Connection target, ConnectionFactoryMetadata metadata, boolean suppressClose) {
 		super(new ConnectionFactory() {
