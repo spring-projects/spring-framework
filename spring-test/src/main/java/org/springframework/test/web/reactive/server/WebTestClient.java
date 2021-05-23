@@ -845,6 +845,11 @@ public interface WebTestClient {
 		 * about a target type with generics.
 		 */
 		<T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef);
+
+		/**
+		 * Array of assertions to test together a.k.a. soft assertions.
+		 */
+		ResponseSpec expectAllSoftly(ResponseSpecMatcher... asserts);
 	}
 
 
@@ -1006,4 +1011,5 @@ public interface WebTestClient {
 		EntityExchangeResult<byte[]> returnResult();
 	}
 
+	interface ResponseSpecMatcher extends Consumer<ResponseSpec> {}
 }

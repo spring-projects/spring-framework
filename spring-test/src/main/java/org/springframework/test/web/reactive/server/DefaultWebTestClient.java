@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -506,6 +507,24 @@ class DefaultWebTestClient implements WebTestClient {
 		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef) {
 			Flux<T> body = this.response.bodyToFlux(elementTypeRef);
 			return new FluxExchangeResult<>(this.exchangeResult, body);
+		}
+
+		@Override
+		public ResponseSpec expectAllSoftly(ResponseSpecMatcher... asserts) {
+			List<String> failedMessages = new ArrayList<>();
+			for (int i = 0; i < asserts.length; i++) {
+				ResponseSpecMatcher anAssert = asserts[i];
+				try {
+					anAssert.accept(this);
+				}
+				catch (AssertionError assertionException) {
+					failedMessages.add("[" + i + "] " + assertionException.getMessage());
+				}
+			}
+			if (!failedMessages.isEmpty()) {
+				throw new AssertionError(String.join("\n", failedMessages));
+			}
+			return this;
 		}
 	}
 
