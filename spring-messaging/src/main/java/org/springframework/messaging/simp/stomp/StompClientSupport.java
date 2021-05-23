@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  *
  * <p>Subclasses can connect over WebSocket or TCP using any library. When creating
  * a new connection, a subclass can create an instance of {@link DefaultStompSession}
- * which extends {@link org.springframework.messaging.tcp.TcpConnectionHandler}
+ * which implements {@link org.springframework.messaging.tcp.TcpConnectionHandler}
  * whose lifecycle methods the subclass must then invoke.
  *
  * <p>In effect, {@code TcpConnectionHandler} and {@code TcpConnection} are the
