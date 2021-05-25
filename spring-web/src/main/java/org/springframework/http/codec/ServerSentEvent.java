@@ -119,7 +119,7 @@ public final class ServerSentEvent<T> {
 	}
 
 	/**
-	 * Return a builder for a {@code SseEvent}, populated with the give {@linkplain #data() data}.
+	 * Return a builder for a {@code SseEvent}, populated with the given {@linkplain #data() data}.
 	 * @param <T> the type of data that this event contains
 	 * @return the builder
 	 */
