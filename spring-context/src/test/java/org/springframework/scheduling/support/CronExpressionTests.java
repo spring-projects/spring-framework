@@ -498,6 +498,29 @@ class CronExpressionTests {
 	}
 
 	@Test
+	public void everyTenDays() {
+		CronExpression cronExpression = CronExpression.parse("0 15 12 */10 1-8 5");
+
+		LocalDateTime last = LocalDateTime.parse("2021-04-30T12:14:59");
+		LocalDateTime expected = LocalDateTime.parse("2021-05-21T12:15");
+		LocalDateTime actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = LocalDateTime.parse("2021-06-11T12:15");
+		actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = LocalDateTime.parse("2022-01-21T12:15");
+		actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
 	void yearly() {
 		CronExpression expression = CronExpression.parse("@yearly");
 		assertThat(expression).isEqualTo(CronExpression.parse("0 0 0 1 1 *"));
