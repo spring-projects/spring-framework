@@ -83,6 +83,7 @@ import org.springframework.core.annotation.AliasFor;
  * @author Sam Brannen
  * @since 4.2
  * @see EventListenerMethodProcessor
+ * @see org.springframework.transaction.event.TransactionalEventListener
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
