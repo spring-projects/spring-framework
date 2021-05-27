@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,18 +39,18 @@ import org.springframework.util.Assert;
  * {@link org.springframework.transaction.ReactiveTransactionManager}
  * implementation for a single R2DBC {@link ConnectionFactory}. This class is
  * capable of working in any environment with any R2DBC driver, as long as the
- * setup uses a {@link ConnectionFactory} as its {@link Connection} factory
- * mechanism. Binds a R2DBC {@link Connection} from the specified
- * {@link ConnectionFactory} to the current subscriber context, potentially
- * allowing for one context-bound {@link Connection} per {@link ConnectionFactory}.
+ * setup uses a {@code ConnectionFactory} as its {@link Connection} factory
+ * mechanism. Binds a R2DBC {@code Connection} from the specified
+ * {@code ConnectionFactory} to the current subscriber context, potentially
+ * allowing for one context-bound {@code Connection} per {@code ConnectionFactory}.
  *
- * <p><b>Note: The {@link ConnectionFactory} that this transaction manager
- * operates on needs to return independent {@link Connection}s.</b>
- * The {@link Connection}s may come from a pool (the typical case), but the
- * {@link ConnectionFactory} must not return scoped scoped {@link Connection}s
- * or the like. This transaction manager will associate {@link Connection}
+ * <p><b>Note: The {@code ConnectionFactory} that this transaction manager
+ * operates on needs to return independent {@code Connection}s.</b>
+ * The {@code Connection}s may come from a pool (the typical case), but the
+ * {@code ConnectionFactory} must not return scoped scoped {@code Connection}s
+ * or the like. This transaction manager will associate {@code Connection}
  * with context-bound transactions itself, according to the specified propagation
- * behavior. It assumes that a separate, independent {@link Connection} can
+ * behavior. It assumes that a separate, independent {@code Connection} can
  * be obtained even during an ongoing transaction.
  *
  * <p>Application code is required to retrieve the R2DBC Connection via
@@ -59,18 +59,18 @@ import org.springframework.util.Assert;
  * Spring classes such as {@code DatabaseClient} use this strategy implicitly.
  * If not used in combination with this transaction manager, the
  * {@link ConnectionFactoryUtils} lookup strategy behaves exactly like the
- * native {@link ConnectionFactory} lookup; it can thus be used in a portable fashion.
+ * native {@code ConnectionFactory} lookup; it can thus be used in a portable fashion.
  *
  * <p>Alternatively, you can allow application code to work with the standard
  * R2DBC lookup pattern {@link ConnectionFactory#create()}, for example for code
  * that is not aware of Spring at all. In that case, define a
- * {@link TransactionAwareConnectionFactoryProxy} for your target {@link ConnectionFactory},
- * and pass that proxy {@link ConnectionFactory} to your DAOs, which will automatically
+ * {@link TransactionAwareConnectionFactoryProxy} for your target {@code ConnectionFactory},
+ * and pass that proxy {@code ConnectionFactory} to your DAOs, which will automatically
  * participate in Spring-managed transactions when accessing it.
  *
  * <p>This transaction manager triggers flush callbacks on registered transaction
  * synchronizations (if synchronization is generally active), assuming resources
- * operating on the underlying R2DBC {@link Connection}.
+ * operating on the underlying R2DBC {@code Connection}.
  *
  * @author Mark Paluch
  * @since 5.3
@@ -88,14 +88,14 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 
 	/**
-	 * Create a new @link ConnectionFactoryTransactionManager} instance.
+	 * Create a new {@code R2dbcTransactionManager} instance.
 	 * A ConnectionFactory has to be set to be able to use it.
 	 * @see #setConnectionFactory
 	 */
 	public R2dbcTransactionManager() {}
 
 	/**
-	 * Create a new {@link R2dbcTransactionManager} instance.
+	 * Create a new {@code R2dbcTransactionManager} instance.
 	 * @param connectionFactory the R2DBC ConnectionFactory to manage transactions for
 	 */
 	public R2dbcTransactionManager(ConnectionFactory connectionFactory) {
@@ -107,10 +107,10 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 	/**
 	 * Set the R2DBC {@link ConnectionFactory} that this instance should manage transactions for.
-	 * <p>This will typically be a locally defined {@link ConnectionFactory}, for example an connection pool.
-	 * <p><b>The {@link ConnectionFactory} passed in here needs to return independent {@link Connection}s.</b>
-	 * The {@link Connection}s may come from a pool (the typical case), but the {@link ConnectionFactory}
-	 * must not return scoped {@link Connection}s or the like.
+	 * <p>This will typically be a locally defined {@code ConnectionFactory}, for example an connection pool.
+	 * <p><b>The {@code ConnectionFactory} passed in here needs to return independent {@link Connection}s.</b>
+	 * The {@code Connection}s may come from a pool (the typical case), but the {@code ConnectionFactory}
+	 * must not return scoped {@code Connection}s or the like.
 	 * @see TransactionAwareConnectionFactoryProxy
 	 */
 	public void setConnectionFactory(@Nullable ConnectionFactory connectionFactory) {
@@ -127,7 +127,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 	/**
 	 * Obtain the {@link ConnectionFactory} for actual use.
-	 * @return the {@link ConnectionFactory} (never {@code null})
+	 * @return the {@code ConnectionFactory} (never {@code null})
 	 * @throws IllegalStateException in case of no ConnectionFactory set
 	 */
 	protected ConnectionFactory obtainConnectionFactory() {
@@ -405,9 +405,9 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	}
 
 	/**
-	 * Resolve the {@link TransactionDefinition#getIsolationLevel() isolation level constant} to a R2DBC
+	 * Resolve the {@linkplain TransactionDefinition#getIsolationLevel() isolation level constant} to a R2DBC
 	 * {@link IsolationLevel}. If you'd like to extend isolation level translation for vendor-specific
-	 * {@link IsolationLevel}s, override this method accordingly.
+	 * {@code IsolationLevel}s, override this method accordingly.
 	 * @param isolationLevel the isolation level to translate.
 	 * @return the resolved isolation level. Can be {@code null} if not resolvable or the isolation level
 	 * should remain {@link TransactionDefinition#ISOLATION_DEFAULT default}.
