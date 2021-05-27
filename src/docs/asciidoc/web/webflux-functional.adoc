@@ -181,7 +181,7 @@ The following example shows how to access form data:
 [source,java,role="primary"]
 .Java
 ----
-Mono<MultiValueMap<String, String> map = request.formData();
+Mono<MultiValueMap<String, String>> map = request.formData();
 ----
 [source,kotlin,role="secondary"]
 .Kotlin
@@ -194,7 +194,7 @@ The following example shows how to access multipart data as a map:
 [source,java,role="primary"]
 .Java
 ----
-Mono<MultiValueMap<String, Part> map = request.multipartData();
+Mono<MultiValueMap<String, Part>> map = request.multipartData();
 ----
 [source,kotlin,role="secondary"]
 .Kotlin
