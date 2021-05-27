@@ -50,4 +50,5 @@ public class MailAuthenticationException extends MailException {
 		super("Authentication failed", cause);
 	}
 
+
 }
