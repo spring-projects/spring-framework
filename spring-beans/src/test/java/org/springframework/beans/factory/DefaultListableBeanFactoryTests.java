@@ -53,17 +53,7 @@ import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.beans.factory.config.AutowiredPropertyMarker;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanExpressionContext;
-import org.springframework.beans.factory.config.BeanExpressionResolver;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
-import org.springframework.beans.factory.config.PropertiesFactoryBean;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.beans.factory.config.*;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -105,6 +95,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR;
 
 /**
  * Tests properties population and autowire behavior.
@@ -2119,6 +2110,14 @@ class DefaultListableBeanFactoryTests {
 		assertThat(tb.getBeanFactory()).isSameAs(lbf);
 		lbf.destroyBean(tb);
 		assertThat(tb.wasDestroyed()).isTrue();
+	}
+
+	@Test
+	void createBeanWithDependencyCheck(){
+		TestBean tb = (TestBean) lbf.createBean(TestBean.class,AUTOWIRE_CONSTRUCTOR,true );
+		assertThat(tb.getBeanFactory()).isSameAs(lbf);
+		lbf.destroyBean(tb);
+//		assertThat(tb.wasDestroyed()).isTrue();
 	}
 
 	@Test
