@@ -105,6 +105,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.springframework.beans.factory.support.AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR;
 
 /**
  * Tests properties population and autowire behavior.
@@ -1210,7 +1211,7 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerSingleton("integer2", 5);
 
 		RootBeanDefinition rbd = new RootBeanDefinition(ArrayBean.class);
-		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		rbd.setAutowireMode(AUTOWIRE_CONSTRUCTOR);
 		lbf.registerBeanDefinition("arrayBean", rbd);
 		ArrayBean ab = (ArrayBean) lbf.getBean("arrayBean");
 
@@ -1221,7 +1222,7 @@ class DefaultListableBeanFactoryTests {
 	@Test
 	void arrayConstructorWithOptionalAutowiring() {
 		RootBeanDefinition rbd = new RootBeanDefinition(ArrayBean.class);
-		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		rbd.setAutowireMode(AUTOWIRE_CONSTRUCTOR);
 		lbf.registerBeanDefinition("arrayBean", rbd);
 		ArrayBean ab = (ArrayBean) lbf.getBean("arrayBean");
 
@@ -1236,7 +1237,7 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
 
 		RootBeanDefinition rbd = new RootBeanDefinition(ArrayBean.class);
-		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		rbd.setAutowireMode(AUTOWIRE_CONSTRUCTOR);
 		lbf.registerBeanDefinition("arrayBean", rbd);
 		ArrayBean ab = (ArrayBean) lbf.getBean("arrayBean");
 
@@ -1252,7 +1253,7 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
 
 		RootBeanDefinition rbd = new RootBeanDefinition(ArrayBean.class);
-		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		rbd.setAutowireMode(AUTOWIRE_CONSTRUCTOR);
 		lbf.registerBeanDefinition("arrayBean", rbd);
 		ArrayBean ab = (ArrayBean) lbf.getBean("arrayBean");
 
@@ -1528,7 +1529,7 @@ class DefaultListableBeanFactoryTests {
 		RootBeanDefinition bd1 = new RootBeanDefinition(HighPriorityTestBean.class);
 		RootBeanDefinition bd2 = new RootBeanDefinition(LowPriorityTestBean.class);
 		RootBeanDefinition bd3 = new RootBeanDefinition(NullTestBeanFactoryBean.class);
-		RootBeanDefinition bd4 = new RootBeanDefinition(TestBeanRecipient.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false);
+		RootBeanDefinition bd4 = new RootBeanDefinition(TestBeanRecipient.class, AUTOWIRE_CONSTRUCTOR, false);
 		lbf.registerBeanDefinition("bd1", bd1);
 		lbf.registerBeanDefinition("bd2", bd2);
 		lbf.registerBeanDefinition("bd3", bd3);
@@ -2120,6 +2121,12 @@ class DefaultListableBeanFactoryTests {
 		lbf.destroyBean(tb);
 		assertThat(tb.wasDestroyed()).isTrue();
 	}
+	@Test
+	void createBeanWithDependencyCheck(){
+		TestBean tb = (TestBean) lbf.createBean(TestBean.class,AUTOWIRE_CONSTRUCTOR,true );
+		assertThat(tb.getBeanFactory()).isSameAs(lbf);
+		lbf.destroyBean(tb);
+	}
 
 	@Test
 	void configureBean() {
@@ -2172,7 +2179,7 @@ class DefaultListableBeanFactoryTests {
 	@Test
 	void circularReferenceThroughAutowiring() {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorDependencyBean.class);
-		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bd.setAutowireMode(AUTOWIRE_CONSTRUCTOR);
 		lbf.registerBeanDefinition("test", bd);
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
 				lbf::preInstantiateSingletons);
@@ -2181,7 +2188,7 @@ class DefaultListableBeanFactoryTests {
 	@Test
 	void circularReferenceThroughFactoryBeanAutowiring() {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorDependencyFactoryBean.class);
-		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bd.setAutowireMode(AUTOWIRE_CONSTRUCTOR);
 		lbf.registerBeanDefinition("test", bd);
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
 				lbf::preInstantiateSingletons);
@@ -2190,7 +2197,7 @@ class DefaultListableBeanFactoryTests {
 	@Test
 	void circularReferenceThroughFactoryBeanTypeCheck() {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorDependencyFactoryBean.class);
-		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bd.setAutowireMode(AUTOWIRE_CONSTRUCTOR);
 		lbf.registerBeanDefinition("test", bd);
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
 				lbf.getBeansOfType(String.class));
@@ -2199,10 +2206,10 @@ class DefaultListableBeanFactoryTests {
 	@Test
 	void avoidCircularReferenceThroughAutowiring() {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorDependencyFactoryBean.class);
-		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bd.setAutowireMode(AUTOWIRE_CONSTRUCTOR);
 		lbf.registerBeanDefinition("test", bd);
 		RootBeanDefinition bd2 = new RootBeanDefinition(String.class);
-		bd2.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bd2.setAutowireMode(AUTOWIRE_CONSTRUCTOR);
 		lbf.registerBeanDefinition("string", bd2);
 		lbf.preInstantiateSingletons();
 	}
