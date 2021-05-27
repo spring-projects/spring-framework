@@ -60,4 +60,28 @@ class SimpleAliasRegistryTests {
 		assertThat(registry.hasAlias("real_name", "alias_c")).isTrue();
 	}
 
+	@Test
+	void removeAliasTest() {
+		SimpleAliasRegistry registry = new SimpleAliasRegistry();
+		registry.registerAlias("realname", "nickname");
+		assertThat(registry.hasAlias("realname", "nickname")).isTrue();
+
+		registry.removeAlias("nickname");
+		assertThat(registry.hasAlias("realname", "nickname")).isFalse();
+	}
+
+	@Test
+	void isAliasTest() {
+		SimpleAliasRegistry registry = new SimpleAliasRegistry();
+		registry.registerAlias("realname", "nickname");
+		assertThat(registry.isAlias("nickname")).isTrue();
+		assertThat(registry.isAlias("fake")).isFalse();
+	}
+
+	@Test
+	void getAliasesTest() {
+		SimpleAliasRegistry registry = new SimpleAliasRegistry();
+		registry.registerAlias("realname", "nickname");
+		assertThat(registry.getAliases("realname"));
+	}
 }
