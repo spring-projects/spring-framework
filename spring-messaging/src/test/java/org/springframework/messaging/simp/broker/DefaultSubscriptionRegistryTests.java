@@ -110,6 +110,27 @@ public class DefaultSubscriptionRegistryTests {
 		assertThat(actual.size()).isEqualTo(1);
 		assertThat(actual.get(sessId)).containsExactly(subId);
 	}
+	
+	@Test
+	public void registerSameSubscriptionForDifferentDestinations() {
+		String sessId = "sess01";
+		String subId = "subs01";
+		String dest1 = "/foo";
+		String dest2 = "user/foo";
+
+		this.registry.registerSubscription(subscribeMessage(sessId, subId, dest1));
+		this.registry.registerSubscription(subscribeMessage(sessId, subId, dest2));
+
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest1));
+		assertThat(actual).isNotNull();
+		assertThat(actual.size()).isEqualTo(1);
+		assertThat(actual.get(sessId)).containsExactly(subId);
+		
+		actual = this.registry.findSubscriptions(createMessage(dest2));
+		assertThat(actual).isNotNull();
+		assertThat(actual.size()).isEqualTo(1);
+		assertThat(actual.get(sessId)).containsExactly(subId);
+	}
 
 	@Test
 	public void registerSubscriptionMultipleSessions() {
