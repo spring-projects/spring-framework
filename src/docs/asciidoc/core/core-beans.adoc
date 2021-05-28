@@ -8277,7 +8277,7 @@ it resembles the following:
 	fun userService(): Service {
 		return SimpleUserService().apply {
 			// a reference to the proxied userPreferences bean
-			setUserPreferences(userPreferences()
+			setUserPreferences(userPreferences())
 		}
 	}
 ----
