@@ -216,7 +216,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			SessionInfo info = this.sessionRegistry.getSession(sessionId);
 			if (info != null) {
 				for (String subscriptionId : subscriptionIds) {
-					info.getSubscription(subscriptionId).forEach(subscription -> {
+					info.getSubscriptions(subscriptionId).forEach(subscription -> {
 						if (evaluateExpression(subscription.getSelector(), message)) {
 							result.add(sessionId, subscription.getId());
 						}
@@ -420,7 +420,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			return this.subscriptionMap.values().stream().flatMap(Set::stream);
 		}
 
-		public Stream<Subscription> getSubscription(String subscriptionId) {
+		public Stream<Subscription> getSubscriptions(String subscriptionId) {
 			return this.subscriptionMap.getOrDefault(subscriptionId, emptySet()).stream();
 		}
 
