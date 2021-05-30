@@ -1314,19 +1314,19 @@ Consider the following class definition:
 	@Transactional
 	public class DefaultFooService implements FooService {
 
-		Foo getFoo(String fooName) {
+		public Foo getFoo(String fooName) {
 			// ...
 		}
 
-		Foo getFoo(String fooName, String barName) {
+		public Foo getFoo(String fooName, String barName) {
 			// ...
 		}
 
-		void insertFoo(Foo foo) {
+		public void insertFoo(Foo foo) {
 			// ...
 		}
 
-		void updateFoo(Foo foo) {
+		public void updateFoo(Foo foo) {
 			// ...
 		}
 	}
@@ -1356,7 +1356,7 @@ Consider the following class definition:
 	}
 ----
 
-Used at the class level as above, the annotation indicates a default for all methods
+Used at the class level as above, the annotation indicates a default for all public methods
 of the declaring class (as well as its subclasses). Alternatively, each method can
 get annotated individually. Note that a class-level annotation does not apply to
 ancestor classes up the class hierarchy; in such a scenario, methods need to be
@@ -1420,19 +1420,19 @@ programming arrangements as the following listing shows:
 	@Transactional
 	public class DefaultFooService implements FooService {
 
-		Publisher<Foo> getFoo(String fooName) {
+		public Publisher<Foo> getFoo(String fooName) {
 			// ...
 		}
 
-		Mono<Foo> getFoo(String fooName, String barName) {
+		public Mono<Foo> getFoo(String fooName, String barName) {
 			// ...
 		}
 
-		Mono<Void> insertFoo(Foo foo) {
+		public Mono<Void> insertFoo(Foo foo) {
 			// ...
 		}
 
-		Mono<Void> updateFoo(Foo foo) {
+		public Mono<Void> updateFoo(Foo foo) {
 			// ...
 		}
 	}
