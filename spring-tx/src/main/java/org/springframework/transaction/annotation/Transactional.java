@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,13 @@ import org.springframework.transaction.TransactionDefinition;
 /**
  * Describes a transaction attribute on an individual method or on a class.
  *
- * <p>At the class level, this annotation applies as a default to all methods of
- * the declaring class and its subclasses. Note that it does not apply to ancestor
- * classes up the class hierarchy; methods need to be locally redeclared in order
- * to participate in a subclass-level annotation.
+ * <p>When this annotation is declared at the class level, it applies as a default
+ * to all methods of the declaring class and its subclasses. Note that it does not
+ * apply to ancestor classes up the class hierarchy; inherited methods need to be
+ * locally redeclared in order to participate in a subclass-level annotation. For
+ * details on method visibility constraints, consult the
+ * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/data-access.html#transaction">Transaction Management</a>
+ * section of the reference manual.
  *
  * <p>This annotation type is generally directly comparable to Spring's
  * {@link org.springframework.transaction.interceptor.RuleBasedTransactionAttribute}
@@ -46,14 +49,14 @@ import org.springframework.transaction.TransactionDefinition;
  * consult the {@link org.springframework.transaction.TransactionDefinition} and
  * {@link org.springframework.transaction.interceptor.TransactionAttribute} javadocs.
  *
- * <p>This annotation commonly works with thread-bound transactions managed by
+ * <p>This annotation commonly works with thread-bound transactions managed by a
  * {@link org.springframework.transaction.PlatformTransactionManager}, exposing a
  * transaction to all data access operations within the current execution thread.
  * <b>Note: This does NOT propagate to newly started threads within the method.</b>
  *
  * <p>Alternatively, this annotation may demarcate a reactive transaction managed
- * by {@link org.springframework.transaction.ReactiveTransactionManager} which
- * uses the Reactor context instead of thread-local attributes. As a consequence,
+ * by a {@link org.springframework.transaction.ReactiveTransactionManager} which
+ * uses the Reactor context instead of thread-local variables. As a consequence,
  * all participating data access operations need to execute within the same
  * Reactor context in the same reactive pipeline.
  *
