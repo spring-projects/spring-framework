@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 
 /**
- * A {@link StereotypesProvider} that extract a stereotype for each
- * {@code javax.*} annotation placed on a class or interface.
+ * A {@link StereotypesProvider} that extracts a stereotype for each
+ * {@code javax.*} annotation <i>present</i> on a class or interface.
  *
  * @author Stephane Nicoll
  * @since 5.0
