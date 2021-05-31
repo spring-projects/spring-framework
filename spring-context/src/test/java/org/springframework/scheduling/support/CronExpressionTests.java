@@ -51,6 +51,16 @@ class CronExpressionTests {
 		}
 	};
 
+	@Test
+	public void isValidExpression() {
+		assertThat(CronExpression.isValidExpression(null)).isFalse();
+		assertThat(CronExpression.isValidExpression("")).isFalse();
+		assertThat(CronExpression.isValidExpression("*")).isFalse();
+		assertThat(CronExpression.isValidExpression("* * * * *")).isFalse();
+		assertThat(CronExpression.isValidExpression("* * * * * * *")).isFalse();
+
+		assertThat(CronExpression.isValidExpression("* * * * * *")).isTrue();
+	}
 
 	@Test
 	void matchAll() {
