@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,12 @@ public final class MultipartBodyBuilder {
 			Part partObject = (Part) part;
 			PartBuilder builder = asyncPart(name, partObject.content(), DataBuffer.class);
 			if (!partObject.headers().isEmpty()) {
-				builder.headers(headers -> headers.putAll(partObject.headers()));
+				builder.headers(headers -> {
+					headers.putAll(partObject.headers());
+					String filename = headers.getContentDisposition().getFilename();
+					// reset to parameter name
+					headers.setContentDispositionFormData(name, filename);
+				});
 			}
 			if (contentType != null) {
 				builder.contentType(contentType);
