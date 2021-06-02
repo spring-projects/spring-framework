@@ -6,6 +6,14 @@ independent of release cadence, are maintained externally on the project's
 https://github.com/spring-projects/spring-framework/wiki[*Github Wiki*].
 ****
 
+ifdef::backend-html5[]
+NOTE: This documentation is also available as {doc-root}/spring-framework/docs/{spring-version}/reference/pdf/index.pdf[PDF].
+endif::[]
+
+ifdef::backend-pdf[]
+NOTE: This documentation is also available as {doc-root}/spring-framework/docs/{spring-version}/reference/html/index.html[HTML].
+endif::[]
+
 [horizontal]
 <<overview.adoc#overview, Overview>> :: history, design philosophy, feedback,
 getting started.
