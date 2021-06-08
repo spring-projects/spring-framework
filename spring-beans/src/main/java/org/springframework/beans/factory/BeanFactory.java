@@ -103,6 +103,8 @@ import org.springframework.lang.Nullable;
  * @see BeanClassLoaderAware#setBeanClassLoader
  * @see BeanFactoryAware#setBeanFactory
  * @see org.springframework.context.ResourceLoaderAware#setResourceLoader
+ * @see org.springframework.context.EnvironmentAware#setEnvironment
+ * @see org.springframework.context.EmbeddedValueResolverAware#setEmbeddedValueResolver
  * @see org.springframework.context.ApplicationEventPublisherAware#setApplicationEventPublisher
  * @see org.springframework.context.MessageSourceAware#setMessageSource
  * @see org.springframework.context.ApplicationContextAware#setApplicationContext
