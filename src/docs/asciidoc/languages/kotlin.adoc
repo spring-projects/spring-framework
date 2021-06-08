@@ -8,14 +8,13 @@ with existing libraries written in Java.
 
 The Spring Framework provides first-class support for Kotlin and lets developers write
 Kotlin applications almost as if the Spring Framework was a native Kotlin framework.
+Most of the code samples of the reference documentation are
+provided in Kotlin in addition to Java.
 
 The easiest way to build a Spring application with Kotlin is to leverage Spring Boot and
 its https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-kotlin.html[dedicated Kotlin support].
 https://spring.io/guides/tutorials/spring-boot-kotlin/[This comprehensive tutorial]
 will teach you how to build Spring Boot applications with Kotlin using https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io].
-
-As of Spring Framework 5.2, most of the code samples of the reference documentation are
-provided in Kotlin in addition to Java.
 
 Feel free to join the #spring channel of https://slack.kotlinlang.org/[Kotlin Slack]
 or ask a question with `spring` and `kotlin` as tags on
@@ -24,10 +23,10 @@ https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow] if you n
 [[kotlin-requirements]]
 == Requirements
 
-Spring Framework supports Kotlin 1.3 and requires
-https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib[`kotlin-stdlib`]
-(or one of its variants, such as https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib-jdk8[`kotlin-stdlib-jdk8`])
-and https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-reflect[`kotlin-reflect`]
+Spring Framework supports Kotlin 1.3+ and requires
+https://search.maven.org/artifact/org.jetbrains.kotlin/kotlin-stdlib[`kotlin-stdlib`]
+(or one of its variants, such as https://search.maven.org/artifact/org.jetbrains.kotlin/kotlin-stdlib-jdk8[`kotlin-stdlib-jdk8`])
+and https://search.maven.org/artifact/org.jetbrains.kotlin/kotlin-reflect[`kotlin-reflect`]
 to be present on the classpath. They are provided by default if you bootstrap a Kotlin project on
 https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io].
 
@@ -344,7 +343,7 @@ Spring Framework provides a
 https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/view/script/ScriptTemplateView.html[`ScriptTemplateView`]
 which supports https://www.jcp.org/en/jsr/detail?id=223[JSR-223] to render templates by using script engines.
 
-By leveraging `kotlin-script-runtime` and `scripting-jsr223-embeddable` dependencies, it
+By leveraging `scripting-jsr223` dependencies, it
 is possible to use such feature to render Kotlin-based templates with
 https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or Kotlin multiline interpolated `String`.
 
@@ -352,8 +351,7 @@ https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or Kotlin multiline int
 [source,kotlin,indent=0]
 ----
 dependencies {
-	compile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
-	runtime("org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable:${kotlinVersion}")
+        runtime("org.jetbrains.kotlin:kotlin-scripting-jsr223:${kotlinVersion}")
 }
 ----
 
