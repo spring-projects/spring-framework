@@ -31,6 +31,11 @@ and https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-reflect[`k
 to be present on the classpath. They are provided by default if you bootstrap a Kotlin project on
 https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io].
 
+NOTE: The https://github.com/FasterXML/jackson-module-kotlin[Jackson Kotlin module] is required
+for serializing or deserializing JSON data for Kotlin classes with Jackson, so make sure to add the
+`com.fasterxml.jackson.module:jackson-module-kotlin` dependency to your project if you have such need.
+It is automatically registered when found in the classpath.
+
 [[kotlin-extensions]]
 == Extensions
 
@@ -119,11 +124,6 @@ with default values.
 Kotlin parameter names are recognized through a dedicated `KotlinReflectionParameterNameDiscoverer`,
 which allows finding interface method parameter names without requiring the Java 8 `-parameters`
 compiler flag to be enabled during compilation.
-
-The https://github.com/FasterXML/jackson-module-kotlin[Jackson Kotlin module], which is required
-for serializing or deserializing JSON data, is automatically registered when
-found in the classpath, and a warning message is logged if Jackson and Kotlin are
-detected without the Jackson Kotlin module being present.
 
 You can declare configuration classes as
 https://kotlinlang.org/docs/reference/nested-classes.html[top level or nested but not inner],
