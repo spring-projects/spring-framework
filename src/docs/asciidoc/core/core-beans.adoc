@@ -847,12 +847,12 @@ This approach shows that the factory bean itself can be managed and configured t
 dependency injection (DI). See <<beans-factory-properties-detailed,Dependencies and
 Configuration in Detail>>.
 
-NOTE: In Spring documentation, "`factory bean`" refers to a bean that is configured in
-the Spring container and that creates objects through an
+NOTE: In Spring documentation, "factory bean" refers to a bean that is configured in the
+Spring container and that creates objects through an
 <<beans-factory-class-instance-factory-method,instance>> or
 <<beans-factory-class-static-factory-method,static>> factory method. By contrast,
 `FactoryBean` (notice the capitalization) refers to a Spring-specific
-<<beans-factory-extension-factorybean, `FactoryBean` >> implementation class.
+<<beans-factory-extension-factorybean, `FactoryBean`>> implementation class.
 
 
 [[beans-factory-type-determination]]
@@ -8279,7 +8279,7 @@ it resembles the following:
 	fun userService(): Service {
 		return SimpleUserService().apply {
 			// a reference to the proxied userPreferences bean
-			setUserPreferences(userPreferences()
+			setUserPreferences(userPreferences())
 		}
 	}
 ----

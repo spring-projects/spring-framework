@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * Annotation which indicates that a method parameter should be bound to an HTTP cookie.
+ * Annotation to indicate that a method parameter is bound to an HTTP cookie.
  *
  * <p>The method parameter may be declared as type {@link javax.servlet.http.Cookie}
  * or as cookie value type (String, int, etc.).

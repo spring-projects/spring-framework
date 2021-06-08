@@ -131,7 +131,6 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	 * @param message the current message
 	 * @return the frame type or {@code null} if not found
 	 */
-	@SuppressWarnings("ConstantConditions")
 	@Nullable
 	public static FrameType getFrameType(Message<?> message) {
 		return (FrameType) message.getHeaders().get(RSocketFrameTypeMessageCondition.FRAME_TYPE_HEADER);
