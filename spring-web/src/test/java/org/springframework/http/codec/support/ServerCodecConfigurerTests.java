@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,15 +125,19 @@ public class ServerCodecConfigurerTests {
 
 	@Test
 	public void jackson2EncoderOverride() {
+		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder();
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
+		this.configurer.defaultCodecs().jackson2JsonDecoder(decoder);
 		this.configurer.defaultCodecs().jackson2JsonEncoder(encoder);
 
-		assertThat(this.configurer.getWriters().stream()
-				.filter(writer -> ServerSentEventHttpMessageWriter.class.equals(writer.getClass()))
-				.map(writer -> (ServerSentEventHttpMessageWriter) writer)
-				.findFirst()
-				.map(ServerSentEventHttpMessageWriter::getEncoder)
-				.filter(e -> e == encoder).orElse(null)).isSameAs(encoder);
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
+		Jackson2JsonDecoder actualDecoder = findCodec(readers, Jackson2JsonDecoder.class);
+		assertThat(actualDecoder).isSameAs(decoder);
+
+		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
+		Jackson2JsonEncoder actualEncoder = findCodec(writers, Jackson2JsonEncoder.class);
+		assertThat(actualEncoder).isSameAs(encoder);
+		assertThat(findCodec(writers, ServerSentEventHttpMessageWriter.class).getEncoder()).isSameAs(encoder);
 	}
 
 	@Test
@@ -261,7 +265,19 @@ public class ServerCodecConfigurerTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T findCodec(List<?> codecs, Class<T> type) {
-		return (T) codecs.stream().filter(type::isInstance).findFirst().get();
+		return (T) codecs.stream()
+				.map(c -> {
+					if (c instanceof EncoderHttpMessageWriter) {
+						return ((EncoderHttpMessageWriter<?>) c).getEncoder();
+					}
+					else if (c instanceof DecoderHttpMessageReader) {
+						return ((DecoderHttpMessageReader<?>) c).getDecoder();
+					}
+					else {
+						return c;
+					}
+				})
+				.filter(type::isInstance).findFirst().get();
 	}
 
 	@SuppressWarnings("unchecked")
