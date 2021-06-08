@@ -79,6 +79,8 @@ public @interface ResponseStatus {
 
 	/**
 	 * The <em>reason</em> to be used for the response.
+	 * <p>Defaults to an empty string which will be ignored. Set the reason to a
+	 * non-empty value to have it used for the response.
 	 * @see javax.servlet.http.HttpServletResponse#sendError(int, String)
 	 */
 	String reason() default "";
