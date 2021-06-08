@@ -46,7 +46,7 @@ import org.springframework.http.HttpStatus;
  *
  * <p>Note that a controller class may also be annotated with
  * {@code @ResponseStatus} and is then inherited by all {@code @RequestMapping}
- * methods.
+ * and {@code @ExceptionHandler} methods.
  *
  * @author Arjen Poutsma
  * @author Sam Brannen
