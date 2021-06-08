@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,9 @@ import org.springframework.http.HttpStatus;
  * a return type and avoid the use of {@code @ResponseStatus} altogether.
  *
  * <p>Note that a controller class may also be annotated with
- * {@code @ResponseStatus} and is then inherited by all {@code @RequestMapping}
- * and {@code @ExceptionHandler} methods.
+ * {@code @ResponseStatus} which is then inherited by all {@code @RequestMapping}
+ * and {@code @ExceptionHandler} methods in that class and its subclasses unless
+ * overridden by a local {@code @ResponseStatus} declaration on the method.
  *
  * @author Arjen Poutsma
  * @author Sam Brannen
