@@ -57,16 +57,13 @@ public class CorsConfiguration {
 	/** Wildcard representing <em>all</em> origins, methods, or headers. */
 	public static final String ALL = "*";
 
-	private static final List<String> ALL_LIST = Collections.unmodifiableList(
-			Collections.singletonList(ALL));
+	private static final List<String> ALL_LIST = Collections.singletonList(ALL);
 
 	private static final OriginPattern ALL_PATTERN = new OriginPattern("*");
 
-	private static final List<OriginPattern> ALL_PATTERN_LIST = Collections.unmodifiableList(
-			Collections.singletonList(ALL_PATTERN));
+	private static final List<OriginPattern> ALL_PATTERN_LIST = Collections.singletonList(ALL_PATTERN);
 
-	private static final List<String> DEFAULT_PERMIT_ALL = Collections.unmodifiableList(
-			Collections.singletonList(ALL));
+	private static final List<String> DEFAULT_PERMIT_ALL = Collections.singletonList(ALL);
 
 	private static final List<HttpMethod> DEFAULT_METHODS = Collections.unmodifiableList(
 			Arrays.asList(HttpMethod.GET, HttpMethod.HEAD));
