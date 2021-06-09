@@ -51,7 +51,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @since 4.0.3
  * @see org.springframework.r2dbc.connection.init.ScriptUtils
- */
+ * **/
 public abstract class ScriptUtils {
 
 	/**
@@ -645,7 +645,14 @@ public abstract class ScriptUtils {
 		StringBuilder sb = new StringBuilder();
 		boolean inSingleQuote = false;
 		boolean inDoubleQuote = false;
+		boolean inDollarQuote = false;
 		boolean inEscape = false;
+		boolean foundStartTag = false;
+		boolean possibleEndTag = false;
+		int startTagIndex = -1;
+		int start = 0;
+		StringBuilder startTag = new StringBuilder();
+String a= "$a$I’m happy $a$";
 
 		for (int i = 0; i < script.length(); i++) {
 			char c = script.charAt(i);
@@ -660,11 +667,45 @@ public abstract class ScriptUtils {
 				sb.append(c);
 				continue;
 			}
-			if (!inDoubleQuote && (c == '\'')) {
+			if (!inDoubleQuote && (c == '\'') && !foundStartTag) {
 				inSingleQuote = !inSingleQuote;
 			}
 			else if (!inSingleQuote && (c == '"')) {
 				inDoubleQuote = !inDoubleQuote;
+			}else if ( c == '$' ){
+				if(foundStartTag){
+					if(possibleEndTag){
+						if(startTag.length() == startTagIndex){
+							//found end tag
+							sb.append(c);
+							statements.add(sb.toString());
+							sb = new StringBuilder();
+							foundStartTag = false;
+							possibleEndTag = false;
+							continue;
+						}else{
+							//not the end tag but the current & can be the start of the end tag we are looking for
+							// so reset the startTagIndex
+							startTagIndex = 0;
+						}
+					}else{
+						possibleEndTag = true;
+						startTagIndex = 0;
+					}
+				} else{
+
+					foundStartTag = true;
+
+				}
+			}else{
+				if(foundStartTag){
+					if(possibleEndTag){
+
+					} else {
+						startTag.append(c);
+					}
+				}
+
 			}
 			if (!inSingleQuote && !inDoubleQuote) {
 				if (script.startsWith(separator, i)) {
@@ -711,6 +752,15 @@ public abstract class ScriptUtils {
 				}
 			}
 			sb.append(c);
+			if(c != '$' && possibleEndTag){
+				if(startTagIndex >= startTag.length() || c != startTag.charAt(startTagIndex)){
+					//this is not the end tag we are looking for
+					possibleEndTag = false;
+					startTagIndex = -1;
+				}else{
+					startTagIndex++;
+				}
+			}
 		}
 
 		if (StringUtils.hasText(sb)) {
