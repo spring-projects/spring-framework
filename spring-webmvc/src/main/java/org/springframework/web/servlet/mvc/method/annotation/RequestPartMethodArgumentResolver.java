@@ -58,8 +58,9 @@ import org.springframework.web.multipart.support.RequestPartServletServerHttpReq
  * it is derived from the name of the method argument.
  *
  * <p>Automatic validation may be applied if the argument is annotated with
- * {@code @javax.validation.Valid}. In case of validation failure, a {@link MethodArgumentNotValidException}
- * is raised and a 400 response status code returned if
+ * {@code @javax.validation.Valid}, Spring's {@link org.springframework.validation.annotation.Validated}
+ * or custom annotations whose name starts with "Valid". In case of validation failure,
+ * a {@link MethodArgumentNotValidException} is raised and a 400 response status code returned if
  * {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver} is configured.
  *
  * @author Rossen Stoyanchev
