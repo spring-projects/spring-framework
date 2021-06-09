@@ -1,9 +1,4 @@
 = Spring Framework Documentation
-:doc-root: https://docs.spring.io
-:github-repo: spring-projects/spring-framework
-
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
-:spring-framework-main-code: https://github.com/{github-repo}/tree/main
 
 ****
 _What's New_, _Upgrade Notes_, _Supported Versions_, and other topics,
