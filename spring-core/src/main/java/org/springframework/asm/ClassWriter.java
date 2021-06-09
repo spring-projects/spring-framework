@@ -79,7 +79,7 @@ public class ClassWriter extends ClassVisitor {
 
   /**
    * The access_flags field of the JVMS ClassFile structure. This field can contain ASM specific
-   * access flags, such as {@link Opcodes#ACC_DEPRECATED} or {}@link Opcodes#ACC_RECORD}, which are
+   * access flags, such as {@link Opcodes#ACC_DEPRECATED} or {@link Opcodes#ACC_RECORD}, which are
    * removed when generating the ClassFile structure.
    */
   private int accessFlags;

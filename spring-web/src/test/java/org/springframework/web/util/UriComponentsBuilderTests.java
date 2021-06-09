@@ -1297,4 +1297,14 @@ class UriComponentsBuilderTests {
 				.isInstanceOf(NumberFormatException.class);
 	}
 
+	@Test // gh-27039
+	void expandPortAndPathWithoutSeparator() {
+		URI uri = UriComponentsBuilder
+				.fromUriString("ws://localhost:{port}{path}")
+				.buildAndExpand(7777, "/test")
+				.toUri();
+		assertThat(uri.toString()).isEqualTo("ws://localhost:7777/test");
+	}
+
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,8 +90,7 @@ class SseServerResponseTests {
 	}
 
 	@Test
-	public void builder() throws Exception {
-		String body = "foo bar";
+	void builder() throws Exception {
 		ServerResponse response = ServerResponse.sse(sse -> {
 			try {
 				sse.id("id")
@@ -132,14 +131,15 @@ class SseServerResponseTests {
 			this.age = age;
 		}
 
+		@SuppressWarnings("unused")
 		public String getName() {
 			return this.name;
 		}
 
+		@SuppressWarnings("unused")
 		public int getAge() {
 			return this.age;
 		}
 	}
-
 
 }

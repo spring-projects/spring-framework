@@ -105,8 +105,6 @@ import org.springframework.util.xml.StaxUtils;
  */
 public class Jackson2ObjectMapperBuilder {
 
-	private static volatile boolean kotlinWarningLogged;
-
 	private final Log logger = HttpLogging.forLogName(getClass());
 
 	private final Map<Class<?>, Class<?>> mixIns = new LinkedHashMap<>();
@@ -863,11 +861,7 @@ public class Jackson2ObjectMapperBuilder {
 				modulesToRegister.set(kotlinModule.getTypeId(), kotlinModule);
 			}
 			catch (ClassNotFoundException ex) {
-				if (!kotlinWarningLogged) {
-					kotlinWarningLogged = true;
-					logger.warn("For Jackson Kotlin classes support please add " +
-							"\"com.fasterxml.jackson.module:jackson-module-kotlin\" to the classpath");
-				}
+				// jackson-module-kotlin not available
 			}
 		}
 	}
