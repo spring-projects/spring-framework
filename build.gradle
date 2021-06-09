@@ -31,7 +31,7 @@ configure(allprojects) { project ->
 			mavenBom "io.netty:netty-bom:4.1.65.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.7"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR10"
-			mavenBom "io.rsocket:rsocket-bom:1.1.0"
+			mavenBom "io.rsocket:rsocket-bom:1.1.1"
 			mavenBom "org.eclipse.jetty:jetty-bom:9.4.41.v20210516"
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.5.10"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.5.0"
