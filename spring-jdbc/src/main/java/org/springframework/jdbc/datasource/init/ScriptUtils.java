@@ -24,6 +24,7 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -645,14 +646,13 @@ public abstract class ScriptUtils {
 		StringBuilder sb = new StringBuilder();
 		boolean inSingleQuote = false;
 		boolean inDoubleQuote = false;
-		boolean inDollarQuote = false;
+		boolean scanningStartTag = false;
 		boolean inEscape = false;
 		boolean foundStartTag = false;
 		boolean possibleEndTag = false;
 		int startTagIndex = -1;
-		int start = 0;
 		StringBuilder startTag = new StringBuilder();
-String a= "$a$I’m happy $a$";
+		Stack<String> tags = new Stack<>();
 
 		for (int i = 0; i < script.length(); i++) {
 			char c = script.charAt(i);
@@ -667,45 +667,74 @@ String a= "$a$I’m happy $a$";
 				sb.append(c);
 				continue;
 			}
-			if (!inDoubleQuote && (c == '\'') && !foundStartTag) {
+			if (!inDoubleQuote && (c == '\'')) {
 				inSingleQuote = !inSingleQuote;
 			}
 			else if (!inSingleQuote && (c == '"')) {
 				inDoubleQuote = !inDoubleQuote;
-			}else if ( c == '$' ){
+			}
+			if ( c == '$' ){
 				if(foundStartTag){
-					if(possibleEndTag){
-						if(startTag.length() == startTagIndex){
+					if(scanningStartTag) {
+//						startTag.append(c);
+						scanningStartTag = false;
+						for(int j = 0 ; j < tags.size()+1; j++){
+							sb.append('\'');
+						}
+
+					}else if (possibleEndTag) {
+						if (startTag.length() == startTagIndex) {
 							//found end tag
-							sb.append(c);
-							statements.add(sb.toString());
-							sb = new StringBuilder();
-							foundStartTag = false;
-							possibleEndTag = false;
-							continue;
-						}else{
+
+							for(int j = 0 ; j < tags.size()+1; j++){
+								sb.append('\'');
+							}
+							if(tags.size()>0){
+								startTag = new StringBuilder(tags.pop());
+								possibleEndTag = false;
+							}
+
+
+						} else {
 							//not the end tag but the current & can be the start of the end tag we are looking for
 							// so reset the startTagIndex
 							startTagIndex = 0;
 						}
-					}else{
+					} else {
 						possibleEndTag = true;
 						startTagIndex = 0;
 					}
 				} else{
-
 					foundStartTag = true;
-
+					scanningStartTag = true;
 				}
 			}else{
-				if(foundStartTag){
-					if(possibleEndTag){
+				if(scanningStartTag){
+					startTag.append(c);
+				}else if(!possibleEndTag){
+					if(c == '\''){
+						sb.append('\'');
+					}
+					sb.append(c);
+				}else{
+					if(startTagIndex >= startTag.length() || c != startTag.charAt(startTagIndex)){
+						//this is not the end tag we are looking for
 
-					} else {
-						startTag.append(c);
+						if(startTag != null) {
+							tags.push(startTag.toString());
+						}else{
+							tags.push(null);
+						}
+						i = i - startTagIndex - 1;
+						possibleEndTag = false;
+						startTagIndex = -1;
+						startTag = new StringBuilder();
+
+						scanningStartTag = true;
+					}else{
+						startTagIndex++;
 					}
 				}
-
 			}
 			if (!inSingleQuote && !inDoubleQuote) {
 				if (script.startsWith(separator, i)) {
@@ -751,22 +780,23 @@ String a= "$a$I’m happy $a$";
 					}
 				}
 			}
-			sb.append(c);
-			if(c != '$' && possibleEndTag){
-				if(startTagIndex >= startTag.length() || c != startTag.charAt(startTagIndex)){
-					//this is not the end tag we are looking for
-					possibleEndTag = false;
-					startTagIndex = -1;
-				}else{
-					startTagIndex++;
-				}
-			}
+
 		}
 
 		if (StringUtils.hasText(sb)) {
 			statements.add(sb.toString());
 		}
 	}
+
+//	private static String scanDollarQuote(){
+//		boolean scanningStartTag = false;
+//		boolean foundStartTag = false;
+//		boolean possibleEndTag = false;
+//		int startTagIndex = -1;
+//		StringBuilder startTag = new StringBuilder();
+//
+//
+//	}
 
 	private static boolean startsWithAny(String script, String[] prefixes, int offset) {
 		for (String prefix : prefixes) {
