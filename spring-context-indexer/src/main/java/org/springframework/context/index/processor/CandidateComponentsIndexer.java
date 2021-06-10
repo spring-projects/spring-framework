@@ -36,7 +36,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 /**
- * Annotation {@link Processor} that writes {@link CandidateComponentsMetadata}
+ * Annotation {@link Processor} that writes a {@link CandidateComponentsMetadata}
  * file for spring components.
  *
  * @author Stephane Nicoll

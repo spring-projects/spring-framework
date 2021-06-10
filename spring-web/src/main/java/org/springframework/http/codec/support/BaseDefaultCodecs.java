@@ -221,6 +221,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	public void jackson2JsonEncoder(Encoder<?> encoder) {
 		this.jackson2JsonEncoder = encoder;
 		initObjectWriters();
+		initTypedWriters();
 	}
 
 	@Override
@@ -233,6 +234,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	public void jackson2SmileEncoder(Encoder<?> encoder) {
 		this.jackson2SmileEncoder = encoder;
 		initObjectWriters();
+		initTypedWriters();
 	}
 
 	@Override

@@ -143,7 +143,8 @@ asciidoctorj {
 			'highlightjs-theme': 'googlecode',
 			stylesdir: 'css/',
 			stylesheet: 'stylesheet.css',
-			'spring-version': project.version
+			'spring-version': project.version,
+			'spring-framework-main-code': 'https://github.com/spring-projects/spring-framework/tree/main'
 	])
 }
 

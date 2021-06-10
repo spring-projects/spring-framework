@@ -145,6 +145,8 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * for processing requests with {@link HttpRequestHandler HttpRequestHandlers}.
  * <li>{@link SimpleControllerHandlerAdapter}
  * for processing requests with interface-based {@link Controller Controllers}.
+ * <li>{@link HandlerFunctionAdapter}
+ * for processing requests with {@linkplain org.springframework.web.servlet.function.RouterFunction router functions}.
  * </ul>
  *
  * <p>Registers a {@link HandlerExceptionResolverComposite} with this chain of

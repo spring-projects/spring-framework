@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,6 +199,25 @@ public final class CronExpression {
 		catch (IllegalArgumentException ex) {
 			String msg = ex.getMessage() + " in cron expression \"" + expression + "\"";
 			throw new IllegalArgumentException(msg, ex);
+		}
+	}
+
+	/**
+	 * Determine whether the given string represents a valid cron expression.
+	 * @param expression the expression to evaluate
+	 * @return {@code true} if the given expression is a valid cron expression
+	 * @since 5.3.8
+	 */
+	public static boolean isValidExpression(@Nullable String expression) {
+		if (expression == null) {
+			return false;
+		}
+		try {
+			parse(expression);
+			return true;
+		}
+		catch (IllegalArgumentException ex) {
+			return false;
 		}
 	}
 

@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,16 +57,13 @@ public class CorsConfiguration {
 	/** Wildcard representing <em>all</em> origins, methods, or headers. */
 	public static final String ALL = "*";
 
-	private static final List<String> ALL_LIST = Collections.unmodifiableList(
-			Collections.singletonList(ALL));
+	private static final List<String> ALL_LIST = Collections.singletonList(ALL);
 
 	private static final OriginPattern ALL_PATTERN = new OriginPattern("*");
 
-	private static final List<OriginPattern> ALL_PATTERN_LIST = Collections.unmodifiableList(
-			Collections.singletonList(ALL_PATTERN));
+	private static final List<OriginPattern> ALL_PATTERN_LIST = Collections.singletonList(ALL_PATTERN);
 
-	private static final List<String> DEFAULT_PERMIT_ALL = Collections.unmodifiableList(
-			Collections.singletonList(ALL));
+	private static final List<String> DEFAULT_PERMIT_ALL = Collections.singletonList(ALL);
 
 	private static final List<HttpMethod> DEFAULT_METHODS = Collections.unmodifiableList(
 			Arrays.asList(HttpMethod.GET, HttpMethod.HEAD));
@@ -138,13 +136,13 @@ public class CorsConfiguration {
 	 * However an instance of this class is often initialized further, e.g. for
 	 * {@code @CrossOrigin}, via {@link #applyPermitDefaultValues()}.
 	 */
-	public void setAllowedOrigins(@Nullable List<String> allowedOrigins) {
-		this.allowedOrigins = (allowedOrigins != null ?
-				allowedOrigins.stream().map(this::trimTrailingSlash).collect(Collectors.toList()) : null);
+	public void setAllowedOrigins(@Nullable List<String> origins) {
+		this.allowedOrigins = (origins == null ? null :
+				origins.stream().filter(Objects::nonNull).map(this::trimTrailingSlash).collect(Collectors.toList()));
 	}
 
 	private String trimTrailingSlash(String origin) {
-		return origin.endsWith("/") ? origin.substring(0, origin.length() - 1) : origin;
+		return (origin.endsWith("/") ? origin.substring(0, origin.length() - 1) : origin);
 	}
 
 	/**
@@ -158,7 +156,10 @@ public class CorsConfiguration {
 	/**
 	 * Variant of {@link #setAllowedOrigins} for adding one origin at a time.
 	 */
-	public void addAllowedOrigin(String origin) {
+	public void addAllowedOrigin(@Nullable String origin) {
+		if (origin == null) {
+			return;
+		}
 		if (this.allowedOrigins == null) {
 			this.allowedOrigins = new ArrayList<>(4);
 		}
@@ -220,7 +221,10 @@ public class CorsConfiguration {
 	 * Variant of {@link #setAllowedOriginPatterns} for adding one origin at a time.
 	 * @since 5.3
 	 */
-	public void addAllowedOriginPattern(String originPattern) {
+	public void addAllowedOriginPattern(@Nullable String originPattern) {
+		if (originPattern == null) {
+			return;
+		}
 		if (this.allowedOriginPatterns == null) {
 			this.allowedOriginPatterns = new ArrayList<>(4);
 		}

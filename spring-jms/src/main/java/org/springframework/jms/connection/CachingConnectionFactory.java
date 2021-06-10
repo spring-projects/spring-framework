@@ -423,6 +423,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			return new CachedMessageProducer(producer);
 		}
 
+		@SuppressWarnings("resource")
 		private MessageConsumer getCachedConsumer(Destination dest, @Nullable String selector,
 				@Nullable Boolean noLocal, @Nullable String subscription, boolean durable) throws JMSException {
 
