@@ -788,16 +788,6 @@ public abstract class ScriptUtils {
 		}
 	}
 
-//	private static String scanDollarQuote(){
-//		boolean scanningStartTag = false;
-//		boolean foundStartTag = false;
-//		boolean possibleEndTag = false;
-//		int startTagIndex = -1;
-//		StringBuilder startTag = new StringBuilder();
-//
-//
-//	}
-
 	private static boolean startsWithAny(String script, String[] prefixes, int offset) {
 		for (String prefix : prefixes) {
 			if (script.startsWith(prefix, offset)) {
