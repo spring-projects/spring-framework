@@ -369,7 +369,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 		Mono<Void> prepare = Mono.empty();
 
-		if (isEnforceReadOnly() && definition.isReadOnly()) {
+		if (isEnforceReadOnly() || definition.isReadOnly()) {
 			prepare = Mono.from(con.createStatement("SET TRANSACTION READ ONLY").execute())
 					.flatMapMany(Result::getRowsUpdated)
 					.then();
