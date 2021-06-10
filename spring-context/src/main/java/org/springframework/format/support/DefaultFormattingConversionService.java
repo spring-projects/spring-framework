@@ -70,6 +70,7 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 	 * {@linkplain DefaultConversionService#addDefaultConverters default converters} and,
 	 * based on the value of {@code registerDefaultFormatters}, the set of
 	 * {@linkplain #addDefaultFormatters default formatters}.
+	 *
 	 * @param registerDefaultFormatters whether to register default formatters
 	 */
 	public DefaultFormattingConversionService(boolean registerDefaultFormatters) {
@@ -81,8 +82,9 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 	 * {@linkplain DefaultConversionService#addDefaultConverters default converters} and,
 	 * based on the value of {@code registerDefaultFormatters}, the set of
 	 * {@linkplain #addDefaultFormatters default formatters}.
-	 * @param embeddedValueResolver delegated to {@link #setEmbeddedValueResolver(StringValueResolver)}
-	 * prior to calling {@link #addDefaultFormatters}.
+	 *
+	 * @param embeddedValueResolver     delegated to {@link #setEmbeddedValueResolver(StringValueResolver)}
+	 *                                  prior to calling {@link #addDefaultFormatters}.
 	 * @param registerDefaultFormatters whether to register default formatters
 	 */
 	public DefaultFormattingConversionService(
@@ -102,6 +104,7 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 	 * Add formatters appropriate for most environments: including number formatters,
 	 * JSR-354 Money & Currency formatters, JSR-310 Date-Time and/or Joda-Time formatters,
 	 * depending on the presence of the corresponding API on the classpath.
+	 *
 	 * @param formatterRegistry the service to register default formatters with
 	 */
 	@SuppressWarnings("deprecation")
@@ -117,18 +120,9 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 		}
 
 		// Default handling of date-time values
-
-		// just handling JSR-310 specific date and time types
-		new DateTimeFormatterRegistrar().registerFormatters(formatterRegistry);
-
-		if (jodaTimePresent) {
-			// handles Joda-specific types as well as Date, Calendar, Long
-			new org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar().registerFormatters(formatterRegistry);
-		}
-		else {
-			// regular DateFormat-based Date, Calendar, Long converters
-			new DateFormatterRegistrar().registerFormatters(formatterRegistry);
-		}
+		DateTimeFormatterRegistrar dateTimeFormatterRegistrar = new DateTimeFormatterRegistrar();
+		dateTimeFormatterRegistrar.setUseIsoFormat(true);
+		dateTimeFormatterRegistrar.registerFormatters(formatterRegistry);
 	}
 
 }
