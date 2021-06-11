@@ -136,7 +136,7 @@ final class DefaultPathContainer implements PathContainer {
 		int index = segment.indexOf(';');
 		if (index == -1) {
 			String valueToMatch = StringUtils.uriDecode(segment, charset);
-			return new DefaultPathSegment(segment, valueToMatch, EMPTY_PARAMS);
+			return new DefaultPathSegment(segment, valueToMatch);
 		}
 		else {
 			String valueToMatch = StringUtils.uriDecode(segment.substring(0, index), charset);
@@ -242,6 +242,15 @@ final class DefaultPathContainer implements PathContainer {
 			this.value = value;
 			this.valueToMatch = valueToMatch;
 			this.parameters = CollectionUtils.unmodifiableMultiValueMap(params);
+		}
+
+		/**
+		 * Constructor for decoded and parsed segments.
+		 */
+		DefaultPathSegment(String value, String valueToMatch) {
+			this.value = value;
+			this.valueToMatch = valueToMatch;
+			this.parameters = EMPTY_PARAMS;
 		}
 
 		/**
