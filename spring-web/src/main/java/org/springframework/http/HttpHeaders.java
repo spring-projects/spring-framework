@@ -703,27 +703,25 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public List<Charset> getAcceptCharset() {
 		String value = getFirst(ACCEPT_CHARSET);
-		if (value != null) {
-			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
-			List<Charset> result = new ArrayList<>(tokens.length);
-			for (String token : tokens) {
-				int paramIdx = token.indexOf(';');
-				String charsetName;
-				if (paramIdx == -1) {
-					charsetName = token;
-				}
-				else {
-					charsetName = token.substring(0, paramIdx);
-				}
-				if (!charsetName.equals("*")) {
-					result.add(Charset.forName(charsetName));
-				}
-			}
-			return result;
-		}
-		else {
+		if (value == null) {
 			return Collections.emptyList();
 		}
+		String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+		List<Charset> result = new ArrayList<>(tokens.length);
+		for (String token : tokens) {
+			int paramIdx = token.indexOf(';');
+			String charsetName;
+			if (paramIdx == -1) {
+				charsetName = token;
+			}
+			else {
+				charsetName = token.substring(0, paramIdx);
+			}
+			if (!charsetName.equals("*")) {
+				result.add(Charset.forName(charsetName));
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -1538,16 +1536,16 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public List<String> getValuesAsList(String headerName) {
 		List<String> values = get(headerName);
-		if (values != null) {
-			List<String> result = new ArrayList<>();
-			for (String value : values) {
-				if (value != null) {
-					Collections.addAll(result, StringUtils.tokenizeToStringArray(value, ","));
-				}
-			}
-			return result;
+		if (values == null) {
+			return Collections.emptyList();
 		}
-		return Collections.emptyList();
+		List<String> result = new ArrayList<>();
+		for (String value : values) {
+			if (value != null) {
+				Collections.addAll(result, StringUtils.tokenizeToStringArray(value, ","));
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -1575,28 +1573,28 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	protected List<String> getETagValuesAsList(String headerName) {
 		List<String> values = get(headerName);
-		if (values != null) {
-			List<String> result = new ArrayList<>();
-			for (String value : values) {
-				if (value != null) {
-					Matcher matcher = ETAG_HEADER_VALUE_PATTERN.matcher(value);
-					while (matcher.find()) {
-						if ("*".equals(matcher.group())) {
-							result.add(matcher.group());
-						}
-						else {
-							result.add(matcher.group(1));
-						}
+		if (values == null) {
+			return Collections.emptyList();
+		}
+		List<String> result = new ArrayList<>();
+		for (String value : values) {
+			if (value != null) {
+				Matcher matcher = ETAG_HEADER_VALUE_PATTERN.matcher(value);
+				while (matcher.find()) {
+					if ("*".equals(matcher.group())) {
+						result.add(matcher.group());
 					}
-					if (result.isEmpty()) {
-						throw new IllegalArgumentException(
-								"Could not parse header '" + headerName + "' with value '" + value + "'");
+					else {
+						result.add(matcher.group(1));
 					}
 				}
+				if (result.isEmpty()) {
+					throw new IllegalArgumentException(
+							"Could not parse header '" + headerName + "' with value '" + value + "'");
+				}
 			}
-			return result;
 		}
-		return Collections.emptyList();
+		return result;
 	}
 
 	/**
