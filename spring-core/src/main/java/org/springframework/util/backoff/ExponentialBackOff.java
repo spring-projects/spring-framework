@@ -76,6 +76,9 @@ public class ExponentialBackOff implements BackOff {
 	 */
 	public static final long DEFAULT_MAX_ELAPSED_TIME = Long.MAX_VALUE;
 
+	/**
+	 * The default maximum attempts.
+	 */
 	public static final int DEFAULT_MAX_ATTEMPTS = Integer.MAX_VALUE;
 
 	private long initialInterval = DEFAULT_INITIAL_INTERVAL;
@@ -179,6 +182,7 @@ public class ExponentialBackOff implements BackOff {
 	 * The maximum number of attempts after which a call to
 	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
 	 * @param maxAttempts the maxAttempts.
+	 * @since 5.3.8
 	 * @see #setMaxElapsedTime(long)
 	 */
 	public void setMaxAttempts(int maxAttempts) {
@@ -189,10 +193,11 @@ public class ExponentialBackOff implements BackOff {
 	 * Return the maximum number of attempts after which a call to
 	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
 	 * @return the maxAttempts.
+	 * @since 5.3.8
 	 * @see #getMaxElapsedTime()
 	 */
 	public int getMaxAttempts() {
-		return maxAttempts;
+		return this.maxAttempts;
 	}
 
 	@Override
