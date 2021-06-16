@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,10 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.util.backoff.BackOffExecution;
 import org.springframework.util.backoff.ExponentialBackOff;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -129,6 +133,19 @@ class ExponentialBackOffTests {
 		assertThat(execution.toString()).isEqualTo("ExponentialBackOff{currentInterval=2000ms, multiplier=2.0}");
 		execution.nextBackOff();
 		assertThat(execution.toString()).isEqualTo("ExponentialBackOff{currentInterval=4000ms, multiplier=2.0}");
+	}
+
+	@Test
+	void maxAttempts() {
+		ExponentialBackOff bo = new ExponentialBackOff();
+		bo.setInitialInterval(1_000L);
+		bo.setMultiplier(2.0);
+		bo.setMaxInterval(10_000L);
+		bo.setMaxAttempts(6);
+		List<Long> delays = new ArrayList<>();
+		BackOffExecution boEx = bo.start();
+		IntStream.range(0, 7).forEach(i -> delays.add(boEx.nextBackOff()));
+		assertThat(delays).containsExactly(1_000L, 2_000L, 4_000L, 8_000L, 10_000L, 10_000L, -1L);
 	}
 
 }
