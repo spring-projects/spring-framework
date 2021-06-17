@@ -1578,20 +1578,21 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		}
 		List<String> result = new ArrayList<>();
 		for (String value : values) {
-			if (value != null) {
-				Matcher matcher = ETAG_HEADER_VALUE_PATTERN.matcher(value);
-				while (matcher.find()) {
-					if ("*".equals(matcher.group())) {
-						result.add(matcher.group());
-					}
-					else {
-						result.add(matcher.group(1));
-					}
+			if (value == null) {
+				continue;
+			}
+			Matcher matcher = ETAG_HEADER_VALUE_PATTERN.matcher(value);
+			while (matcher.find()) {
+				if ("*".equals(matcher.group())) {
+					result.add(matcher.group());
 				}
-				if (result.isEmpty()) {
-					throw new IllegalArgumentException(
-							"Could not parse header '" + headerName + "' with value '" + value + "'");
+				else {
+					result.add(matcher.group(1));
 				}
+			}
+			if (result.isEmpty()) {
+				throw new IllegalArgumentException(
+						"Could not parse header '" + headerName + "' with value '" + value + "'");
 			}
 		}
 		return result;
