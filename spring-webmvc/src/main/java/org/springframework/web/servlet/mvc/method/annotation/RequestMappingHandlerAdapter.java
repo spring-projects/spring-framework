@@ -92,6 +92,7 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 import org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -821,15 +822,20 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * This implementation always returns -1. An {@code @RequestMapping} method can
-	 * calculate the lastModified value, call {@link WebRequest#checkNotModified(long)},
+	 * This implementation delegates the call to bean,
+	 * if it implements the {@link LastModified} interface or returns -1 by default.
+	 * <p>An {@code @RequestMapping} method can calculate the lastModified value,
+	 * call {@link WebRequest#checkNotModified(long)},
 	 * and return {@code null} if the result of that call is {@code true}.
 	 */
 	@Override
 	protected long getLastModifiedInternal(HttpServletRequest request, HandlerMethod handlerMethod) {
+		Object bean = handlerMethod.getBean();
+		if (bean instanceof LastModified) {
+			return ((LastModified) bean).getLastModified(request);
+		}
 		return -1;
 	}
-
 
 	/**
 	 * Return the {@link SessionAttributesHandler} instance for the given handler type
