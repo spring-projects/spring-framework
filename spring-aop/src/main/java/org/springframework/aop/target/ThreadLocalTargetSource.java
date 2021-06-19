@@ -18,6 +18,7 @@ package org.springframework.aop.target;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
@@ -69,6 +70,8 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 
 	private int hitCount;
 
+	private AtomicInteger objCount = new AtomicInteger();
+
 
 	/**
 	 * Implementation of abstract getTarget() method.
@@ -87,9 +90,13 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 			// Associate target with ThreadLocal.
 			target = newPrototypeInstance();
 			this.targetInThread.set(target);
-			synchronized (this.targetSet) {
-				this.targetSet.add(target);
+			this.objCount.incrementAndGet();
+			if (target instanceof DisposableBean) {
+				synchronized (this.targetSet) {
+					this.targetSet.add(target);
+				}
 			}
+
 		}
 		else {
 			++this.hitCount;
@@ -109,6 +116,7 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 				destroyPrototypeInstance(target);
 			}
 			this.targetSet.clear();
+			this.objCount.set(0);
 		}
 		// Clear ThreadLocal, just in case.
 		this.targetInThread.remove();
@@ -127,9 +135,7 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 
 	@Override
 	public int getObjectCount() {
-		synchronized (this.targetSet) {
-			return this.targetSet.size();
-		}
+		return this.objCount.get();
 	}
 
 
