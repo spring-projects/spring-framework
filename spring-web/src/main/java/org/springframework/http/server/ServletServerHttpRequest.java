@@ -29,10 +29,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -244,24 +241,21 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		Writer writer = new OutputStreamWriter(bos, FORM_CHARSET);
 
 		Map<String, String[]> form = request.getParameterMap();
-		for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext();) {
-			String name = nameIterator.next();
-			List<String> values = Arrays.asList(form.get(name));
-			for (Iterator<String> valueIterator = values.iterator(); valueIterator.hasNext();) {
-				String value = valueIterator.next();
-				writer.write(URLEncoder.encode(name, FORM_CHARSET.name()));
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry<String, String[]> entry : form.entrySet()) {
+			String name = entry.getKey();
+			String[] values = entry.getValue();
+			for (String value : values) {
+				sb.append('&');
+				sb.append(URLEncoder.encode(name, FORM_CHARSET.name()));
 				if (value != null) {
-					writer.write('=');
-					writer.write(URLEncoder.encode(value, FORM_CHARSET.name()));
-					if (valueIterator.hasNext()) {
-						writer.write('&');
-					}
+					sb.append('=');
+					sb.append(URLEncoder.encode(value, FORM_CHARSET.name()));
 				}
 			}
-			if (nameIterator.hasNext()) {
-				writer.append('&');
-			}
 		}
+
+		writer.write(sb.length() > 0 ? sb.substring(1) : sb.toString());
 		writer.flush();
 
 		return new ByteArrayInputStream(bos.toByteArray());
