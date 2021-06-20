@@ -263,6 +263,7 @@ public abstract class ScriptUtils {
 						if (logger.isDebugEnabled()) {
 							logger.debug(rowsAffected + " returned as update count for SQL: " + statement);
 							SQLWarning warningToLog = stmt.getWarnings();
+							stmt.clearWarnings();
 							while (warningToLog != null) {
 								logger.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() +
 										"', error code '" + warningToLog.getErrorCode() +
