@@ -155,6 +155,9 @@ asciidoctorj {
 asciidoctor {
 	baseDirFollowsSourceDir()
 	configurations 'asciidoctorExt'
+	attributes([
+			noheader: '' // custom header in docinfo-header.html
+	])
 	sources {
 		include '*.adoc'
 	}
