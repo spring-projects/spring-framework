@@ -1753,6 +1753,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@PathPatternsParameterizedTest
+	@SuppressWarnings("deprecation")
 	void responseBodyAsHtml(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(TextRestController.class, usePathPatterns, wac -> {
 			if (!usePathPatterns) {
@@ -1792,6 +1793,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@PathPatternsParameterizedTest
+	@SuppressWarnings("deprecation")
 	void responseBodyAsHtmlWithSuffixPresent(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(TextRestController.class, usePathPatterns, wac -> {
 			ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
