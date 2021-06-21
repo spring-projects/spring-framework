@@ -1,4 +1,5 @@
 = Spring Framework Documentation
+:doc-root: https://docs.spring.io
 
 [horizontal]
 <<overview.adoc#overview, Overview>> :: history, design philosophy, feedback,
