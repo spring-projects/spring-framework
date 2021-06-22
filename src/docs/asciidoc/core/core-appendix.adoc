@@ -1,6 +1,3 @@
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
-
 = Appendix
 
 

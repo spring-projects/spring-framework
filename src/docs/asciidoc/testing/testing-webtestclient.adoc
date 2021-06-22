@@ -1,7 +1,5 @@
 [[webtestclient]]
 = WebTestClient
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 
 `WebTestClient` is an HTTP client designed for testing server applications. It wraps
 Spring's <<web-reactive.adoc#webflux-client, WebClient>> and uses it to perform requests
