@@ -43,7 +43,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 
 	private final int access;
 
-	private final String name;
+	private final String methodName;
 
 	private final String descriptor;
 
@@ -56,13 +56,13 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 
 
 	SimpleMethodMetadataReadingVisitor(@Nullable ClassLoader classLoader, String declaringClassName,
-			int access, String name, String descriptor, Consumer<SimpleMethodMetadata> consumer) {
+			int access, String methodName, String descriptor, Consumer<SimpleMethodMetadata> consumer) {
 
 		super(SpringAsmInfo.ASM_VERSION);
 		this.classLoader = classLoader;
 		this.declaringClassName = declaringClassName;
 		this.access = access;
-		this.name = name;
+		this.methodName = methodName;
 		this.descriptor = descriptor;
 		this.consumer = consumer;
 	}
@@ -80,7 +80,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 		if (!this.annotations.isEmpty()) {
 			String returnTypeName = Type.getReturnType(this.descriptor).getClassName();
 			MergedAnnotations annotations = MergedAnnotations.of(this.annotations);
-			SimpleMethodMetadata metadata = new SimpleMethodMetadata(this.name,
+			SimpleMethodMetadata metadata = new SimpleMethodMetadata(this.methodName,
 					this.access, this.declaringClassName, returnTypeName, annotations);
 			this.consumer.accept(metadata);
 		}
@@ -89,7 +89,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 	private Object getSource() {
 		Source source = this.source;
 		if (source == null) {
-			source = new Source(this.declaringClassName, this.name, this.descriptor);
+			source = new Source(this.declaringClassName, this.methodName, this.descriptor);
 			this.source = source;
 		}
 		return source;
@@ -103,16 +103,16 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 
 		private final String declaringClassName;
 
-		private final String name;
+		private final String methodName;
 
 		private final String descriptor;
 
 		@Nullable
 		private String toStringValue;
 
-		Source(String declaringClassName, String name, String descriptor) {
+		Source(String declaringClassName, String methodName, String descriptor) {
 			this.declaringClassName = declaringClassName;
-			this.name = name;
+			this.methodName = methodName;
 			this.descriptor = descriptor;
 		}
 
@@ -120,7 +120,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 		public int hashCode() {
 			int result = 1;
 			result = 31 * result + this.declaringClassName.hashCode();
-			result = 31 * result + this.name.hashCode();
+			result = 31 * result + this.methodName.hashCode();
 			result = 31 * result + this.descriptor.hashCode();
 			return result;
 		}
@@ -135,7 +135,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 			}
 			Source otherSource = (Source) other;
 			return (this.declaringClassName.equals(otherSource.declaringClassName) &&
-					this.name.equals(otherSource.name) && this.descriptor.equals(otherSource.descriptor));
+					this.methodName.equals(otherSource.methodName) && this.descriptor.equals(otherSource.descriptor));
 		}
 
 		@Override
@@ -145,7 +145,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 				StringBuilder builder = new StringBuilder();
 				builder.append(this.declaringClassName);
 				builder.append(".");
-				builder.append(this.name);
+				builder.append(this.methodName);
 				Type[] argumentTypes = Type.getArgumentTypes(this.descriptor);
 				builder.append("(");
 				for (Type type : argumentTypes) {
