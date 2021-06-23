@@ -369,6 +369,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * Look up a handler method for the given request.
 	 */
 	@Override
+	@Nullable
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = initLookupPath(request);
 		this.mappingRegistry.acquireReadLock();

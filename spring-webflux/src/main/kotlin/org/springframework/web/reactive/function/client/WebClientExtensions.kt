@@ -91,6 +91,15 @@ suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange
 		exchangeToMono { mono(Dispatchers.Unconfined) { responseHandler.invoke(it) } }.awaitSingle()
 
 /**
+ * Variant of [WebClient.RequestHeadersSpec.awaitExchange] that allows a nullable return
+ *
+ * @since 5.3.8
+ */
+@Suppress("DEPRECATION")
+suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchangeOrNull(responseHandler: suspend (ClientResponse) -> T?): T? =
+		exchangeToMono { mono(Dispatchers.Unconfined) { responseHandler.invoke(it) } }.awaitSingleOrNull()
+
+/**
  * Coroutines variant of [WebClient.RequestHeadersSpec.exchangeToFlux].
  *
  * @author Sebastien Deleuze

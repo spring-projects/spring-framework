@@ -48,9 +48,6 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 @WebSocket
 public class Jetty10WebSocketHandlerAdapter {
 
-	private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.wrap(new byte[0]);
-
-
 	private final WebSocketHandler delegateHandler;
 
 	private final Function<Session, JettyWebSocketSession> sessionFactory;
@@ -97,7 +94,9 @@ public class Jetty10WebSocketHandlerAdapter {
 // TODO: onWebSocketFrame can't be declared without compiling against Jetty 10
 //   Jetty 10: org.eclipse.jetty.websocket.api.Frame
 //   Jetty  9: org.eclipse.jetty.websocket.api.extensions.Frame
-
+//
+// private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.wrap(new byte[0]);
+//
 //	@OnWebSocketFrame
 //	public void onWebSocketFrame(Frame frame) {
 //		if (this.delegateSession != null) {
