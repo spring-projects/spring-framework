@@ -72,7 +72,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 	@Override
 	@Nullable
 	public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-		return MergedAnnotationReadingVisitor.get(this.classLoader, this::getSource,
+		return MergedAnnotationReadingVisitor.get(this.classLoader, getSource(),
 				descriptor, visible, this.annotations::add);
 	}
 
