@@ -65,8 +65,8 @@ class AnnotationMetadataReadingVisitorTests extends AbstractAnnotationMetadataTe
 	@Override
 	@Test
 	public void getAnnotationsReturnsDirectAnnotations() {
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
-				super::getAnnotationsReturnsDirectAnnotations);
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+			.isThrownBy(super::getAnnotationsReturnsDirectAnnotations);
 	}
 
 }
