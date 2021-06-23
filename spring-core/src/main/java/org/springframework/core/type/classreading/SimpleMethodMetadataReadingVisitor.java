@@ -81,8 +81,8 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 		if (!this.annotations.isEmpty()) {
 			String returnTypeName = Type.getReturnType(this.descriptor).getClassName();
 			MergedAnnotations annotations = MergedAnnotations.of(this.annotations);
-			SimpleMethodMetadata metadata = new SimpleMethodMetadata(this.methodName,
-					this.access, this.declaringClassName, returnTypeName, annotations);
+			SimpleMethodMetadata metadata = new SimpleMethodMetadata(this.methodName, this.access,
+					this.declaringClassName, returnTypeName, getSource(), annotations);
 			this.consumer.accept(metadata);
 		}
 	}

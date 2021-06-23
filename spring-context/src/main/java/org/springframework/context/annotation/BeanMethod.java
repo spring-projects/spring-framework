@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.lang.Nullable;
 
 /**
  * Represents a {@link Configuration @Configuration} class method annotated with
@@ -26,6 +27,7 @@ import org.springframework.core.type.MethodMetadata;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see ConfigurationClass
  * @see ConfigurationClassParser
@@ -52,6 +54,21 @@ final class BeanMethod extends ConfigurationMethod {
 		}
 	}
 
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		return ((this == obj) || ((obj instanceof BeanMethod) &&
+				this.metadata.equals(((BeanMethod) obj).metadata)));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.metadata.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return "BeanMethod: " + this.metadata;
+	}
 
 	private class NonOverridableMethodError extends Problem {
 

@@ -19,11 +19,13 @@ package org.springframework.core.type.classreading;
 import org.springframework.asm.Opcodes;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link MethodMetadata} created from a {@link SimpleMethodMetadataReadingVisitor}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.2
  */
 final class SimpleMethodMetadata implements MethodMetadata {
@@ -36,16 +38,20 @@ final class SimpleMethodMetadata implements MethodMetadata {
 
 	private final String returnTypeName;
 
+	// The source implements equals(), hashCode(), and toString() for the underlying method.
+	private final Object source;
+
 	private final MergedAnnotations annotations;
 
 
-	public SimpleMethodMetadata(String methodName, int access, String declaringClassName,
-			String returnTypeName, MergedAnnotations annotations) {
+	SimpleMethodMetadata(String methodName, int access, String declaringClassName,
+			String returnTypeName, Object source, MergedAnnotations annotations) {
 
 		this.methodName = methodName;
 		this.access = access;
 		this.declaringClassName = declaringClassName;
 		this.returnTypeName = returnTypeName;
+		this.source = source;
 		this.annotations = annotations;
 	}
 
@@ -92,6 +98,22 @@ final class SimpleMethodMetadata implements MethodMetadata {
 	@Override
 	public MergedAnnotations getAnnotations() {
 		return this.annotations;
+	}
+
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		return ((this == obj) || ((obj instanceof SimpleMethodMetadata) &&
+				this.source.equals(((SimpleMethodMetadata) obj).source)));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.source.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return this.source.toString();
 	}
 
 }
