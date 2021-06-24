@@ -177,9 +177,9 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	 */
 	protected StringBuilder getEndpointDescription() {
 		StringBuilder result = new StringBuilder();
-		return result.append(getClass().getSimpleName()).append("[").append(this.id).append("] destination=").
+		return result.append(getClass().getSimpleName()).append('[').append(this.id).append("] destination=").
 				append(this.destination).append("' | subscription='").append(this.subscription).
-				append(" | selector='").append(this.selector).append("'");
+				append(" | selector='").append(this.selector).append('\'');
 	}
 
 	@Override

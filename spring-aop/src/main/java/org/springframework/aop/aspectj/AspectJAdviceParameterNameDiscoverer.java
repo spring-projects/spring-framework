@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -625,7 +625,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 			StringBuilder sb = new StringBuilder();
 			if (bodyStart >= 0 && bodyStart != (currentToken.length() - 1)) {
 				sb.append(currentToken.substring(bodyStart + 1));
-				sb.append(" ");
+				sb.append(' ');
 			}
 			numTokensConsumed++;
 			int currentIndex = startIndex + numTokensConsumed;
@@ -645,7 +645,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 					toAppend = toAppend.substring(1);
 				}
 				sb.append(toAppend);
-				sb.append(" ");
+				sb.append(' ');
 				currentIndex++;
 				numTokensConsumed++;
 			}

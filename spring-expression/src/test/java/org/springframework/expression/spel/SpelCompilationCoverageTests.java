@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -5111,21 +5111,21 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			List<?> ls = (List<?>) object;
 			for (Object l: ls) {
 				s.append(l);
-				s.append(" ");
+				s.append(' ');
 			}
 		}
 		else if (object instanceof Object[]) {
 			Object[] os = (Object[]) object;
 			for (Object o: os) {
 				s.append(o);
-				s.append(" ");
+				s.append(' ');
 			}
 		}
 		else if (object instanceof int[]) {
 			int[] is = (int[]) object;
 			for (int i: is) {
 				s.append(i);
-				s.append(" ");
+				s.append(' ');
 			}
 		}
 		else {
@@ -5931,9 +5931,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		public Obj3(String s, Float f, int... ints) {
 			StringBuilder b = new StringBuilder();
 			b.append(s);
-			b.append(":");
+			b.append(':');
 			b.append(Float.toString(f));
-			b.append(":");
+			b.append(':');
 			for (int param: ints) {
 				b.append(Integer.toString(param));
 			}

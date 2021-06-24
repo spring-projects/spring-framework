@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -322,7 +322,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	protected String createMessage(HttpServletRequest request, String prefix, String suffix) {
 		StringBuilder msg = new StringBuilder();
 		msg.append(prefix);
-		msg.append(request.getMethod()).append(" ");
+		msg.append(request.getMethod()).append(' ');
 		msg.append(request.getRequestURI());
 
 		if (isIncludeQueryString()) {
