@@ -489,9 +489,9 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 						resolveConstructorArguments(args, 2, hasClosureArgument ? args.length - 1 : args.length);
 				this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, (Class<?>) args[1], constructorArgs);
 				Map<?, ?> namedArgs = (Map<?, ?>) args[0];
-				for (Object key : namedArgs.keySet()) {
-					String propName = (String) key;
-					setProperty(propName, namedArgs.get(propName));
+				for (Map.Entry<?, ?> entity : namedArgs.entrySet()) {
+					String propName = (String) entity.getKey();
+					setProperty(propName, entity.getValue());
 				}
 			}
 			// factory method syntax
