@@ -93,8 +93,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 					logger.debug("Failed to set JMSType - skipping", ex);
 				}
 			}
-			Set<Map.Entry<String, Object>> entries = headers.entrySet();
-			for (Map.Entry<String, Object> entry : entries) {
+			for (Map.Entry<String, Object> entry : headers.entrySet()) {
 				String headerName = entry.getKey();
 				if (StringUtils.hasText(headerName) && !headerName.startsWith(JmsHeaders.PREFIX)) {
 					Object value = entry.getValue();
