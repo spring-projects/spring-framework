@@ -1110,7 +1110,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 		}
 
 		/**
-		 * Return an provider for the specified bean, allowing for lazy on-demand retrieval
+		 * Return a provider for the specified bean, allowing for lazy on-demand retrieval
 		 * of instances, including availability and uniqueness options.
 		 * @see org.springframework.beans.factory.BeanFactory.getBeanProvider
 		 */
