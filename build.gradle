@@ -202,7 +202,7 @@ configure(allprojects) { project ->
 				}
 				entry 'mockito-junit-jupiter'
 			}
-			dependency "io.mockk:mockk:1.10.2"
+			dependency "io.mockk:mockk:1.11.0"
 
 			dependency("net.sourceforge.htmlunit:htmlunit:2.50.0") {
 				exclude group: "commons-logging", name: "commons-logging"
