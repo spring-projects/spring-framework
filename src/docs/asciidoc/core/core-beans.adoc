@@ -5388,7 +5388,7 @@ matching an `account` qualifier against beans marked with the same qualifier lab
 
 For beans that are themselves defined as a collection, `Map`, or array type, `@Resource`
 is a fine solution, referring to the specific collection or array bean by unique name.
-That said, as of 4.3, collection, you can match `Map`, and array types through Spring's
+That said, as of 4.3, you can match collection, `Map`, and array types through Spring's
 `@Autowired` type matching algorithm as well, as long as the element type information
 is preserved in `@Bean` return type signatures or collection inheritance hierarchies.
 In this case, you can use qualifier values to select among same-typed collections,
