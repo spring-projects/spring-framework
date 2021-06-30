@@ -8027,8 +8027,7 @@ parameter, as the following example shows:
 ----
 
 
-The resolution mechanism is pretty much identical to constructor-based dependency
-injection. See <<beans-constructor-injection, the relevant section>> for more details.
+The resolution mechanism is pretty much identical as used in constructor-type autowiring. See <<beans-factory-autowiring-modes-tbl, the relevant section>> for more details.
 
 
 [[beans-java-lifecycle-callbacks]]
