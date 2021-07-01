@@ -26,6 +26,6 @@ package org.springframework.ui
  * @author Mario Arias
  * @since 5.0
  */
-operator fun Model.set(attributeName: String, attributeValue: Any) {
+operator fun Model.set(attributeName: String, attributeValue: Any?) {
 	this.addAttribute(attributeName, attributeValue)
 }
