@@ -102,6 +102,7 @@ public interface HandlerInterceptor {
 	/**
 	 * Intercept the execution of a handler. Called after HandlerAdapter actually
 	 * invoked the handler, but before the DispatcherServlet renders the view.
+	 * In addition does not run if handler throws exception.
 	 * Can expose additional model objects to the view via the given ModelAndView.
 	 * <p>DispatcherServlet processes a handler in an execution chain, consisting
 	 * of any number of interceptors, with the handler itself at the end.
