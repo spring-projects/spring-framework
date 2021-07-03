@@ -18,6 +18,8 @@ package org.springframework.http;
 
 import org.springframework.lang.Nullable;
 
+import java.util.Arrays;
+
 /**
  * Enumeration of HTTP status codes.
  *
@@ -415,13 +417,12 @@ public enum HttpStatus {
 	 */
 	NETWORK_AUTHENTICATION_REQUIRED(511, Series.SERVER_ERROR, "Network Authentication Required");
 
-
-	private static final HttpStatus[] VALUES;
-
-	static {
-		VALUES = values();
-	}
-
+	/**
+	 * Index of array value is the same with HttpStatus code.
+	 * For example, CODE_TO_VALUE[404]==HttpStatus.NOT_FOUND
+	 * Missing values are null: = CODE_TO_VALUE[1]==null
+	 */
+	private static final HttpStatus[] CODE_TO_VALUE = getCodeToValueArray();
 
 	private final int value;
 
@@ -557,13 +558,29 @@ public enum HttpStatus {
 	 */
 	@Nullable
 	public static HttpStatus resolve(int statusCode) {
-		// Use cached VALUES instead of values() to prevent array allocation.
-		for (HttpStatus status : VALUES) {
-			if (status.value == statusCode) {
-				return status;
-			}
+		if(statusCode < 0 || statusCode >= CODE_TO_VALUE.length) {
+			return null;
 		}
-		return null;
+
+		return CODE_TO_VALUE[statusCode];
+	}
+
+	private static HttpStatus[] getCodeToValueArray() {
+		final HttpStatus[] enumValues = values();
+
+		//noinspection OptionalGetWithoutIsPresent - value is always present by design
+		final int maximumCode = Arrays.stream(enumValues)
+				.map(HttpStatus::value)
+				.max(Integer::compareTo)
+				.get();
+
+		final HttpStatus[] result = new HttpStatus[maximumCode + 1];
+
+		for (HttpStatus status : enumValues) {
+			result[status.value] = status;
+		}
+
+		return result;
 	}
 
 
