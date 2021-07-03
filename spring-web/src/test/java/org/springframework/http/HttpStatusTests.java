@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -135,7 +137,19 @@ class HttpStatusTests {
 		for (HttpStatus status : HttpStatus.values()) {
 			HttpStatus.Series expectedSeries = HttpStatus.Series.valueOf(status.value());
 			assertThat(status.series()).isEqualTo(expectedSeries);
+			assertThat(HttpStatus.resolve(status.value())).isEqualTo(status);
+			assertThat(HttpStatus.valueOf(status.value())).isEqualTo(status);
 		}
 	}
 
+	@ParameterizedTest
+	@ValueSource(ints = {-1, 0, 999})
+		// six numbers
+	void outOfRangeStatusShouldNotBeResolved(final int invalidStatusCode) {
+		// when
+		final HttpStatus actualStatus = HttpStatus.resolve(invalidStatusCode);
+
+		// then
+		assertThat(actualStatus).isEqualTo(null);
+	}
 }
