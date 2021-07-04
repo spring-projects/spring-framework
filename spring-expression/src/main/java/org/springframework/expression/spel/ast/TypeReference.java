@@ -18,6 +18,9 @@ package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.Array;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Type;
 import org.springframework.expression.EvaluationException;
@@ -39,7 +42,19 @@ public class TypeReference extends SpelNodeImpl {
 
 	@Nullable
 	private transient Class<?> type;
-
+	
+	private static final Map<Class<?>, String> typeOwnerMap = new HashMap<>();
+	
+	static {
+		typeOwnerMap.put(Boolean.TYPE, "java/lang/Boolean");
+		typeOwnerMap.put(Byte.TYPE, "java/lang/Byte");
+		typeOwnerMap.put(Character.TYPE, "java/lang/Character");
+		typeOwnerMap.put(Double.TYPE, "java/lang/Double");
+		typeOwnerMap.put(Float.TYPE, "java/lang/Float");
+		typeOwnerMap.put(Integer.TYPE, "java/lang/Integer");
+		typeOwnerMap.put(Long.TYPE, "java/lang/Long");
+		typeOwnerMap.put(Short.TYPE, "java/lang/Short");
+	}
 
 	public TypeReference(int startPos, int endPos, SpelNodeImpl qualifiedId) {
 		this(startPos, endPos, qualifiedId, 0);
@@ -104,32 +119,11 @@ public class TypeReference extends SpelNodeImpl {
 		// TODO Future optimization - if followed by a static method call, skip generating code here
 		Assert.state(this.type != null, "No type available");
 		if (this.type.isPrimitive()) {
-			if (this.type == Boolean.TYPE) {
-				mv.visitFieldInsn(GETSTATIC, "java/lang/Boolean", "TYPE", "Ljava/lang/Class;");
+			final String owner = typeOwnerMap.get(this.type);
+			if (owner != null) {
+				mv.visitFieldInsn(GETSTATIC, owner, "TYPE", "Ljava/lang/Class;");
 			}
-			else if (this.type == Byte.TYPE) {
-				mv.visitFieldInsn(GETSTATIC, "java/lang/Byte", "TYPE", "Ljava/lang/Class;");
-			}
-			else if (this.type == Character.TYPE) {
-				mv.visitFieldInsn(GETSTATIC, "java/lang/Character", "TYPE", "Ljava/lang/Class;");
-			}
-			else if (this.type == Double.TYPE) {
-				mv.visitFieldInsn(GETSTATIC, "java/lang/Double", "TYPE", "Ljava/lang/Class;");
-			}
-			else if (this.type == Float.TYPE) {
-				mv.visitFieldInsn(GETSTATIC, "java/lang/Float", "TYPE", "Ljava/lang/Class;");
-			}
-			else if (this.type == Integer.TYPE) {
-				mv.visitFieldInsn(GETSTATIC, "java/lang/Integer", "TYPE", "Ljava/lang/Class;");
-			}
-			else if (this.type == Long.TYPE) {
-				mv.visitFieldInsn(GETSTATIC, "java/lang/Long", "TYPE", "Ljava/lang/Class;");
-			}
-			else if (this.type == Short.TYPE) {
-				mv.visitFieldInsn(GETSTATIC, "java/lang/Short", "TYPE", "Ljava/lang/Class;");
-			}
-		}
-		else {
+		} else {
 			mv.visitLdcInsn(Type.getType(this.type));
 		}
 		cf.pushDescriptor(this.exitTypeDescriptor);
