@@ -1,4 +1,0 @@
-# Tooling related information for the mvc namespace
-http\://www.springframework.org/schema/mvc@name=mvc Namespace
-http\://www.springframework.org/schema/mvc@prefix=mvc
-http\://www.springframework.org/schema/mvc@icon=org/springframework/web/servlet/config/spring-mvc.gif

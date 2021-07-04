@@ -1,4 +1,0 @@
-# Tooling related information for the aop namespace
-http\://www.springframework.org/schema/aop@name=aop Namespace
-http\://www.springframework.org/schema/aop@prefix=aop
-http\://www.springframework.org/schema/aop@icon=org/springframework/aop/config/spring-aop.gif
