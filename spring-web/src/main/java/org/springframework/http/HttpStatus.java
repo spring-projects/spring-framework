@@ -420,7 +420,7 @@ public enum HttpStatus {
 	/**
 	 * Index of array value is the same with HttpStatus code.
 	 * For example, CODE_TO_VALUE[404]==HttpStatus.NOT_FOUND
-	 * Missing values are null: = CODE_TO_VALUE[1]==null
+	 * Missing values are null: CODE_TO_VALUE[1]==null
 	 */
 	private static final HttpStatus[] CODE_TO_VALUE = getCodeToValueArray();
 
