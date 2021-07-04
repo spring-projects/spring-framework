@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN" "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<suppressions>
+
+	<!-- global -->
+	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]" checks="AnnotationLocation|AnnotationUseStyle|AtclauseOrder|AvoidNestedBlocks|FinalClass|HideUtilityClassConstructor|InnerTypeLast|JavadocStyle|JavadocType|JavadocVariable|LeftCurly|MultipleVariableDeclarations|NeedBraces|OneTopLevelClass|OuterTypeFilename|RequireThis|SpringCatch|SpringJavadoc|SpringNoThis" />
+	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]org[\\/]springframework[\\/].+(Tests|Suite)" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]" checks="SpringJUnit5" message="should not be public" />
+
+	<!-- spring-beans -->
+	<suppress files="TypeMismatchException" checks="MutableException"/>
+	<suppress files="BeanCreationException" checks="MutableException"/>
+	<suppress files="BeanDefinitionParserDelegate" checks="JavadocVariable" />
+	<suppress files="DefaultBeanDefinitionDocumentReader" checks="JavadocVariable" />
+	<suppress files="BeanComponentDefinition" checks="EqualsHashCode" />
+	<suppress files="GenericBeanDefinition" checks="EqualsHashCode" />
+	<suppress files="RootBeanDefinition" checks="EqualsHashCode" />
+
+	<!-- spring-context -->
+	<suppress files="SpringAtInjectTckTests" checks="IllegalImportCheck" id="bannedJUnit3Imports" />
+
+	<!-- spring-core -->
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]asm[\\/]" checks=".*" />
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]cglib[\\/]" checks=".*" />
+	<suppress files="ByteArrayEncoder" checks="SpringLambda" />
+	<suppress files="SocketUtils" checks="HideUtilityClassConstructor" />
+	<suppress files="ResolvableType" checks="FinalClass" />
+	<suppress files="[\\/]src[\\/]testFixtures[\\/]java[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+
+	<!-- spring-expression -->
+	<suppress files="ExpressionException" checks="MutableException" />
+	<suppress files="SpelMessage" checks="JavadocVariable|JavadocStyle" />
+	<suppress files="SpelReproTests" checks="InterfaceIsType" />
+
+	<!-- spring-jcl -->
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]apache[\\/]commons[\\/]logging[\\/]" checks="Header|SpringNoThis|IllegalImport" />
+
+	<!-- spring-jdbc -->
+	<suppress files="ResultSetWrappingSqlRowSet" checks="JavadocStyle" />
+
+	<!-- spring-jms -->
+	<suppress files="JmsHeaderMapper" checks="InterfaceIsType" />
+	<suppress files="JmsHeaders" checks="InterfaceIsType" />
+	<suppress files="AbstractJmsListenerContainerFactory" checks="JavadocStyle" />
+	<suppress files="DefaultJmsListenerContainerFactory" checks="JavadocStyle" />
+	<suppress files="DefaultJcaListenerContainerFactory" checks="JavadocStyle" />
+
+	<!-- spring-messaging -->
+	<suppress files="SimpMessageHeaderAccessor" checks="JavadocVariable" />
+	<suppress files="SimpMessageType" checks="JavadocVariable" />
+	<suppress files="StompCommand" checks="JavadocVariable" />
+	<suppress files="StompHeaderAccessor" checks="JavadocVariable" />
+	<suppress files="StompHeaders" checks="JavadocVariable" />
+	<suppress files="org[\\/]springframework[\\/]messaging[\\/]handler[\\/]annotation[\\/]ValueConstants" checks="InterfaceIsType" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]messaging[\\/]protobuf[\\/].*" checks=".*" />
+
+	<!-- spring-orm -->
+	<suppress files="jpa[\\/]vendor[\\/]Database" checks="JavadocVariable|JavadocStyle"/>
+
+	<!-- spring-tx -->
+	<suppress files="TransactionSystemException" checks="MutableException" />
+	<suppress files="TransactionTemplate" checks="EqualsHashCode" />
+
+	<!-- spring-test - main and test -->
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]junit4[\\/].+" checks="IllegalImport" id="bannedJUnit4Imports" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]junit[\\/]jupiter[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]testng[\\/].+" checks="IllegalImport" id="bannedTestNGImports" />
+	<!-- spring-test - main -->
+	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]util[\\/].+Helper" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/]client[\\/]match[\\/].+Matchers" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/]reactive[\\/]server[\\/].+" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/]servlet[\\/]result[\\/].+Matchers" checks="IllegalImport" id="bannedHamcrestImports" />
+	<!-- spring-test - test -->
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/].+TestNGTests" checks="IllegalImport" id="bannedTestNGImports" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/]junit[\\/]jupiter[\\/]web[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]util[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/](client|reactive|servlet)[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/]junit4" checks="SpringJUnit5" />
+	<suppress files="ContextHierarchyDirtiesContextTests|ClassLevelDirtiesContextTests|ContextConfigurationWithPropertiesExtendingPropertiesAndInheritedLoaderTests|ContextConfigurationWithPropertiesExtendingPropertiesTests|DirtiesContextInterfaceTests|.+WacTests|JUnit4SpringContextWebTests" checks="SpringJUnit5" />
+	<suppress files=".+TestSuite|ContextHierarchyDirtiesContextTests|ClassLevelDirtiesContextTests|ContextConfigurationWithPropertiesExtendingPropertiesAndInheritedLoaderTests|ContextConfigurationWithPropertiesExtendingPropertiesTests|DirtiesContextInterfaceTests|.+WacTests|JUnit4SpringContextWebTests" checks="IllegalImport" id="bannedJUnit4Imports" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/].+[\\/](ExpectedExceptionSpringRunnerTests|StandardJUnit4FeaturesTests|ProgrammaticTxMgmtTestNGTests)" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
+
+	<!-- spring-web -->
+	<suppress files="SpringHandlerInstantiator" checks="JavadocStyle" />
+	<suppress files="org[\\/]springframework[\\/]http[\\/]HttpMethod" checks="JavadocVariable|JavadocStyle" />
+	<suppress files="org[\\/]springframework[\\/]http[\\/]HttpStatus" checks="JavadocVariable|JavadocStyle" />
+	<suppress files="org[\\/]springframework[\\/]web[\\/]bind[\\/]annotation[\\/]CrossOrigin" checks="JavadocStyle" />
+	<suppress files="org[\\/]springframework[\\/]web[\\/]bind[\\/]annotation[\\/]RequestMethod" checks="JavadocVariable" />
+	<suppress files="org[\\/]springframework[\\/]web[\\/]bind[\\/]annotation[\\/]ValueConstants" checks="InterfaceIsType" />
+	<suppress files="PatternParseException" checks="JavadocVariable" />
+	<suppress files="web[\\/]reactive[\\/]socket[\\/]CloseStatus" checks="JavadocStyle" />
+
+	<!-- spring-webflux -->
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]web[\\/]reactive[\\/]resource[\\/]GzipSupport" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+
+	<!-- spring-webmvc -->
+	<suppress files="org[\\/]springframework[\\/]web[\\/]servlet[\\/]tags[\\/]form[\\/].*Tag" checks="JavadocVariable" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]protobuf[\\/].*" checks=".*" />
+	<suppress files="ExtractingResponseErrorHandlerTests" checks="MutableException" />
+	<suppress files="ServletAnnotationControllerHandlerMethodTests" checks="InterfaceIsType" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]web[\\/]servlet[\\/]resource[\\/]GzipSupport" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+
+	<!-- spring-websocket -->
+	<suppress files="web[\\/]socket[\\/]CloseStatus" checks="JavadocStyle" />
+	<suppress files="web[\\/]socket[\\/]WebSocketHttpHeaders" checks="JavadocVariable" />
+	<suppress files="sockjs[\\/]frame[\\/]SockJsFrameType" checks="JavadocVariable" />
+	<suppress files="sockjs[\\/]transport[\\/]TransportType" checks="JavadocVariable" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]web[\\/]reactive[\\/]protobuf[\\/].*" checks=".*" />
+
+</suppressions>

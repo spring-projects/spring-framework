@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="properties"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="properties">
+			<props>
+				<prop key="user.name">Dave</prop>
+				<prop key="username">Andy</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- spr5906 -->
+
+	<bean id="derived"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="properties">
+			<props>
+				<prop key="user.name">#{properties['user.name']}</prop>
+				<prop key="username">#{properties['username']}</prop>
+				<prop key="username.no.quotes">#{properties[username]}</prop>
+				<prop key="username.no.brackets">#{properties.username}</prop>
+				<prop key="#{properties['user.name']}">exists</prop>
+				<prop key="#{properties.username}">exists also</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- spr5847 -->
+
+	<bean id="andy"
+		class="org.springframework.test.context.expression.ExpressionUsageTests$Foo">
+		<property name="name" value="#{properties.username}" />
+	</bean>
+
+	<bean id="andy2"
+		class="org.springframework.test.context.expression.ExpressionUsageTests$Foo">
+		<property name="name" value="#{properties.username }" /><!-- space in expression -->
+	</bean>
+
+</beans>

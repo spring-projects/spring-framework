@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+	Tests for independent prototype behaviour.
+-->
+<beans>
+
+	<bean id="nopInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor"/>
+
+	<bean id="serializableNopInterceptor" class="org.springframework.aop.testfixture.interceptor.SerializableNopInterceptor"/>
+
+	<bean id="serializableSingleton" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="interceptorNames"><value>serializableNopInterceptor</value></property>
+		<property name="proxyInterfaces"><value>org.springframework.beans.testfixture.beans.Person</value></property>
+		<property name="target">
+			<bean class="org.springframework.beans.testfixture.beans.SerializablePerson">
+				<property name="name"><value>serializableSingleton</value></property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="prototypeTarget" class="org.springframework.beans.testfixture.beans.SerializablePerson">
+		<property name="name"><value>serializablePrototype</value></property>
+	</bean>
+
+	<bean id="serializablePrototype" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="interceptorNames"><value>serializableNopInterceptor,prototypeTarget</value></property>
+		<property name="proxyInterfaces"><value>org.springframework.beans.testfixture.beans.Person</value></property>
+		<property name="singleton"><value>false</value></property>
+	</bean>
+
+	<bean id="interceptorNotSerializableSingleton" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="interceptorNames"><value>nopInterceptor</value></property>
+		<property name="target">
+			<bean class="org.springframework.beans.testfixture.beans.SerializablePerson"/>
+		</property>
+	</bean>
+
+</beans>

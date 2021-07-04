@@ -1,0 +1,412 @@
+plugins {
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE' apply false
+	id 'io.spring.ge.conventions' version '0.0.7'
+	id 'io.spring.nohttp' version '0.0.5.RELEASE'
+	id 'org.jetbrains.kotlin.jvm' version '1.3.72' apply false
+	id 'org.jetbrains.dokka' version '0.10.1' apply false
+	id 'org.asciidoctor.jvm.convert' version '2.4.0'
+	id 'org.asciidoctor.jvm.pdf' version '2.4.0'
+	id 'de.undercouch.download' version '4.1.1'
+	id "io.freefair.aspectj" version '4.1.6' apply false
+	id "com.github.ben-manes.versions" version '0.28.0'
+	id 'com.gradle.build-scan' version '3.2'
+}
+
+apply from: "$rootDir/gradle/build-scan-user-data.gradle"
+ext {
+	moduleProjects = subprojects.findAll { it.name.startsWith("spring-") }
+	javaProjects = subprojects - project(":framework-bom")
+	withoutJclOverSlf4j = {
+		exclude group: "org.slf4j", name: "jcl-over-slf4j"
+	}
+}
+
+configure(allprojects) { project ->
+	apply plugin: "io.spring.dependency-management"
+
+	dependencyManagement {
+		imports {
+			mavenBom "com.fasterxml.jackson:jackson-bom:2.10.5"
+			mavenBom "io.netty:netty-bom:4.1.51.Final"
+			mavenBom "io.projectreactor:reactor-bom:Dysprosium-SR20"
+			mavenBom "io.rsocket:rsocket-bom:1.0.4"
+			mavenBom "org.eclipse.jetty:jetty-bom:9.4.31.v20200723"
+			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.3.72"
+			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.3.5"
+			mavenBom "org.junit:junit-bom:5.6.3"
+		}
+		dependencies {
+			dependencySet(group: 'org.apache.logging.log4j', version: '2.13.3') {
+				entry 'log4j-api'
+				entry 'log4j-core'
+				entry 'log4j-jul'
+				entry 'log4j-slf4j-impl'
+			}
+			dependency "org.slf4j:slf4j-api:1.7.30"
+			dependency "com.google.code.findbugs:jsr305:3.0.2"
+
+			dependencySet(group: 'org.aspectj', version: '1.9.6') {
+				entry 'aspectjrt'
+				entry 'aspectjtools'
+				entry 'aspectjweaver'
+			}
+			dependencySet(group: 'org.codehaus.groovy', version: '2.5.13') {
+				entry 'groovy'
+				entry 'groovy-jsr223'
+				entry 'groovy-templates'
+				entry 'groovy-test'
+				entry 'groovy-xml'
+			}
+
+			dependency "io.reactivex:rxjava:1.3.8"
+			dependency "io.reactivex:rxjava-reactive-streams:1.2.1"
+			dependency "io.reactivex.rxjava2:rxjava:2.2.21"
+			dependency "io.projectreactor.tools:blockhound:1.0.4.RELEASE"
+
+			dependency "com.caucho:hessian:4.0.63"
+			dependency "com.fasterxml:aalto-xml:1.2.2"
+			dependency("com.fasterxml.woodstox:woodstox-core:6.2.3") {
+				exclude group: "stax", name: "stax-api"
+			}
+			dependency "com.google.code.gson:gson:2.8.6"
+			dependency "com.google.protobuf:protobuf-java-util:3.11.4"
+			dependency "com.googlecode.protobuf-java-format:protobuf-java-format:1.4"
+			dependency("com.thoughtworks.xstream:xstream:1.4.11.1") {
+				exclude group: "xpp3", name: "xpp3_min"
+				exclude group: "xmlpull", name: "xmlpull"
+			}
+			dependency "org.apache.johnzon:johnzon-jsonb:1.2.10"
+			dependency("org.codehaus.jettison:jettison:1.3.8") {
+				exclude group: "stax", name: "stax-api"
+			}
+			dependencySet(group: 'org.jibx', version: '1.3.3') {
+				entry 'jibx-bind'
+				entry 'jibx-run'
+			}
+			dependency "org.ogce:xpp3:1.1.6"
+			dependency "org.yaml:snakeyaml:1.27"
+
+			dependency "com.h2database:h2:1.4.200"
+			dependency "com.github.ben-manes.caffeine:caffeine:2.8.8"
+			dependency "com.github.librepdf:openpdf:1.3.25"
+			dependency "com.rometools:rome:1.12.2"
+			dependency "commons-io:commons-io:2.5"
+			dependency "io.vavr:vavr:0.10.3"
+			dependency "net.sf.jopt-simple:jopt-simple:5.0.4"
+			dependencySet(group: 'org.apache.activemq', version: '5.8.0') {
+				entry 'activemq-broker'
+				entry('activemq-kahadb-store') {
+					exclude group: "org.springframework", name: "spring-context"
+				}
+				entry 'activemq-stomp'
+			}
+			dependency "org.apache.bcel:bcel:6.0"
+			dependency "org.apache.commons:commons-pool2:2.8.1"
+			dependencySet(group: 'org.apache.derby', version: '10.14.2.0') {
+				entry 'derby'
+				entry 'derbyclient'
+			}
+			dependency "org.apache.poi:poi-ooxml:4.1.2"
+			dependency "org.apache-extras.beanshell:bsh:2.0b6"
+			dependency "org.freemarker:freemarker:2.3.30"
+			dependency "org.hsqldb:hsqldb:2.5.1"
+			dependency "org.quartz-scheduler:quartz:2.3.2"
+			dependency "org.codehaus.fabric3.api:commonj:1.1.0"
+			dependency "net.sf.ehcache:ehcache:2.10.6"
+			dependency "org.ehcache:jcache:1.0.1"
+			dependency "org.ehcache:ehcache:3.4.0"
+			dependency "org.hibernate:hibernate-core:5.4.28.Final"
+			dependency "org.hibernate:hibernate-validator:6.1.7.Final"
+			dependency "org.webjars:webjars-locator-core:0.46"
+			dependency "org.webjars:underscorejs:1.8.3"
+
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.37') {
+				entry 'tomcat-util'
+				entry('tomcat-websocket') {
+					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
+					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
+				}
+			}
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.37') {
+				entry 'tomcat-embed-core'
+				entry 'tomcat-embed-websocket'
+			}
+			dependencySet(group: 'io.undertow', version: '2.0.32.Final') {
+				entry 'undertow-core'
+				entry('undertow-websockets-jsr') {
+					exclude group: "org.jboss.spec.javax.websocket", name: "jboss-websocket-api_1.1_spec"
+				}
+				entry('undertow-servlet') {
+					exclude group: "org.jboss.spec.javax.servlet", name: "jboss-servlet-api_3.1_spec"
+					exclude group: "org.jboss.spec.javax.annotation", name: "jboss-annotations-api_1.2_spec"
+				}
+			}
+
+			dependencySet(group: 'com.squareup.okhttp3', version: '3.14.9') {
+				entry 'okhttp'
+				entry 'mockwebserver'
+			}
+			dependency("org.apache.httpcomponents:httpclient:4.5.13") {
+				exclude group: "commons-logging", name: "commons-logging"
+			}
+			dependency("org.apache.httpcomponents:httpasyncclient:4.1.4") {
+				exclude group: "commons-logging", name: "commons-logging"
+			}
+			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.1.4"
+
+			dependency "org.jruby:jruby:9.2.11.1"
+			dependency "org.python:jython-standalone:2.7.1"
+			dependency "org.mozilla:rhino:1.7.11"
+
+			dependency "commons-fileupload:commons-fileupload:1.4"
+			dependency "org.synchronoss.cloud:nio-multipart-parser:1.1.0"
+
+			dependency("dom4j:dom4j:1.6.1") {
+				exclude group: "xml-apis", name: "xml-apis"
+			}
+			dependency("jaxen:jaxen:1.1.1") {
+				exclude group: "xml-apis", name: "xml-apis"
+				exclude group: "xom", name: "xom"
+				exclude group: "xerces", name: "xercesImpl"
+			}
+
+			dependency("junit:junit:4.12") {
+				exclude group: "org.hamcrest", name: "hamcrest-core"
+			}
+			dependency("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1") {
+				exclude group: "junit", name: "junit"
+			}
+			dependency "org.testng:testng:6.14.3"
+			dependency "org.hamcrest:hamcrest:2.1"
+			dependency "org.awaitility:awaitility:3.1.6"
+			dependency "org.assertj:assertj-core:3.18.1"
+			dependencySet(group: 'org.xmlunit', version: '2.6.2') {
+				entry 'xmlunit-assertj'
+				entry('xmlunit-matchers') {
+					exclude group: "org.hamcrest", name: "hamcrest-core"
+				}
+			}
+			dependencySet(group: 'org.mockito', version: '3.3.3') {
+				entry('mockito-core') {
+					exclude group: "org.hamcrest", name: "hamcrest-core"
+				}
+				entry 'mockito-junit-jupiter'
+			}
+			dependency "io.mockk:mockk:1.10.2"
+
+			dependency("net.sourceforge.htmlunit:htmlunit:2.43.0") {
+				exclude group: "commons-logging", name: "commons-logging"
+			}
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.43.1") {
+				exclude group: "commons-logging", name: "commons-logging"
+			}
+			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
+				exclude group: "commons-logging", name: "commons-logging"
+				exclude group: "io.netty", name: "netty"
+			}
+			dependency "org.skyscreamer:jsonassert:1.5.0"
+			dependency "com.jayway.jsonpath:json-path:2.4.0"
+
+			dependencySet(group: 'org.apache.tiles', version: '3.0.8') {
+				entry 'tiles-api'
+				entry('tiles-core', withoutJclOverSlf4j)
+				entry('tiles-servlet', withoutJclOverSlf4j)
+				entry('tiles-jsp', withoutJclOverSlf4j)
+				entry('tiles-el', withoutJclOverSlf4j)
+				entry('tiles-extras') {
+					exclude group: "org.springframework", name: "spring-web"
+					exclude group: "org.slf4j", name: "jcl-over-slf4j"
+				}
+			}
+			dependency("org.apache.taglibs:taglibs-standard-jstlel:1.2.5") {
+				exclude group: "org.apache.taglibs", name: "taglibs-standard-spec"
+			}
+
+			dependency "com.ibm.websphere:uow:6.0.2.17"
+			dependency "com.jamonapi:jamon:2.82"
+			dependency "joda-time:joda-time:2.10.10"
+			dependency "org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.7"
+			dependency "org.javamoney:moneta:1.3"
+
+			dependency "com.sun.activation:javax.activation:1.2.0"
+			dependency "com.sun.mail:javax.mail:1.6.2"
+			dependencySet(group: 'com.sun.xml.bind', version: '2.3.0.1') {
+				entry 'jaxb-core'
+				entry 'jaxb-impl'
+				entry 'jaxb-xjc'
+			}
+
+			dependency "javax.activation:javax.activation-api:1.2.0"
+			dependency "javax.annotation:javax.annotation-api:1.3.2"
+			dependency "javax.cache:cache-api:1.1.0"
+			dependency "javax.ejb:javax.ejb-api:3.2"
+			dependency "javax.el:javax.el-api:3.0.1-b04"
+			dependency "javax.enterprise.concurrent:javax.enterprise.concurrent-api:1.0"
+			dependency "javax.faces:javax.faces-api:2.2"
+			dependency "javax.inject:javax.inject:1"
+			dependency "javax.inject:javax.inject-tck:1"
+			dependency "javax.interceptor:javax.interceptor-api:1.2.2"
+			dependency "javax.jms:javax.jms-api:2.0.1"
+			dependency "javax.json:javax.json-api:1.1.4"
+			dependency "javax.json.bind:javax.json.bind-api:1.0"
+			dependency "javax.mail:javax.mail-api:1.6.2"
+			dependency "javax.money:money-api:1.0.3"
+			dependency "javax.resource:javax.resource-api:1.7.1"
+			dependency "javax.servlet:javax.servlet-api:4.0.1"
+			dependency "javax.servlet.jsp:javax.servlet.jsp-api:2.3.2-b02"
+			dependency "javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1"
+			dependency "javax.transaction:javax.transaction-api:1.3"
+			dependency "javax.validation:validation-api:2.0.1.Final"
+			dependency "javax.websocket:javax.websocket-api:1.1"
+			dependency "javax.xml.bind:jaxb-api:2.3.1"
+			dependency "javax.xml.ws:jaxws-api:2.3.1"
+
+			dependency "org.eclipse.persistence:javax.persistence:2.2.0"
+
+			// Substitute for "javax.management:jmxremote_optional:1.0.1_04" which
+			// is not available on Maven Central
+			dependency "org.glassfish.external:opendmk_jmxremote_optional_jar:1.0-b01-ea"
+			dependency "org.glassfish:javax.el:3.0.1-b08"
+			dependency "org.glassfish.main:javax.jws:4.0-b33"
+			dependency "org.glassfish.tyrus:tyrus-container-servlet:1.13.1"
+		}
+		generatedPomCustomization {
+			enabled = false
+		}
+		resolutionStrategy {
+			cacheChangingModulesFor 0, "seconds"
+		}
+		repositories {
+			maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
+			mavenCentral()
+			maven { url "https://repo.spring.io/libs-spring-framework-build" }
+		}
+	}
+	configurations.all {
+		resolutionStrategy {
+			cacheChangingModulesFor 0, "seconds"
+			cacheDynamicVersionsFor 0, "seconds"
+		}
+	}
+}
+
+configure([rootProject] + javaProjects) { project ->
+	group = "org.springframework"
+
+	apply plugin: "java"
+	apply plugin: "java-test-fixtures"
+	apply plugin: "checkstyle"
+	apply plugin: 'org.springframework.build.compile'
+	apply from: "${rootDir}/gradle/custom-java-home.gradle"
+	apply from: "${rootDir}/gradle/ide.gradle"
+
+	pluginManager.withPlugin("kotlin") {
+		apply plugin: "org.jetbrains.dokka"
+		compileKotlin {
+			kotlinOptions {
+				jvmTarget = "1.8"
+				freeCompilerArgs = ["-Xjsr305=strict"]
+				allWarningsAsErrors = true
+			}
+		}
+		compileTestKotlin {
+			kotlinOptions {
+				jvmTarget = "1.8"
+				freeCompilerArgs = ["-Xjsr305=strict"]
+			}
+		}
+	}
+
+	test {
+		useJUnitPlatform()
+		include(["**/*Tests.class", "**/*Test.class"])
+		systemProperty("java.awt.headless", "true")
+		systemProperty("testGroups", project.properties.get("testGroups"))
+		systemProperty("io.netty.leakDetection.level", "paranoid")
+	}
+
+	checkstyle {
+		toolVersion = "8.38"
+		configDir = rootProject.file("src/checkstyle")
+	}
+
+	dependencies {
+		testCompile("org.junit.jupiter:junit-jupiter-api")
+		testCompile("org.junit.jupiter:junit-jupiter-params")
+		testCompile("org.mockito:mockito-core")
+		testCompile("org.mockito:mockito-junit-jupiter")
+		testCompile("io.mockk:mockk")
+		testCompile("org.assertj:assertj-core")
+		// Pull in the latest JUnit 5 Launcher API to ensure proper support in IDEs.
+		testRuntime("org.junit.platform:junit-platform-launcher")
+		testRuntime("org.junit.jupiter:junit-jupiter-engine")
+		testRuntime("org.apache.logging.log4j:log4j-core")
+		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl")
+		testRuntime("org.apache.logging.log4j:log4j-jul")
+		// JSR-305 only used for non-required meta-annotations
+		compileOnly("com.google.code.findbugs:jsr305")
+		testCompileOnly("com.google.code.findbugs:jsr305")
+		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.15")
+	}
+
+	ext.javadocLinks = [
+			"https://docs.oracle.com/javase/8/docs/api/",
+			"https://docs.oracle.com/javaee/7/api/",
+			"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
+			"https://www.ibm.com/support/knowledgecenter/SS7JFU_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/",
+			"https://glassfish.java.net/nonav/docs/v3/api/",
+			"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
+			"https://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",
+			"https://tiles.apache.org/tiles-request/apidocs/",
+			"https://tiles.apache.org/framework/apidocs/",
+			"https://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
+			"https://www.ehcache.org/apidocs/2.10.4/",
+			"https://www.quartz-scheduler.org/api/2.3.0/",
+			"https://fasterxml.github.io/jackson-core/javadoc/2.10/",
+			"https://fasterxml.github.io/jackson-databind/javadoc/2.10/",
+			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.10/",
+			"https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
+			"https://junit.org/junit4/javadoc/4.12/",
+			"https://junit.org/junit5/docs/5.6.3/api/"
+	] as String[]
+}
+
+configure(moduleProjects) { project ->
+	apply from: "${rootDir}/gradle/spring-module.gradle"
+}
+
+configure(rootProject) {
+	description = "Spring Framework"
+
+	apply plugin: "groovy"
+	apply plugin: "kotlin"
+	apply plugin: "io.spring.nohttp"
+	apply plugin: 'org.springframework.build.api-diff'
+	apply from: "${rootDir}/gradle/publications.gradle"
+	apply from: "${rootDir}/gradle/docs.gradle"
+
+	nohttp {
+		source.exclude "**/test-output/**"
+		allowlistFile = project.file("src/nohttp/allowlist.lines")
+		def rootPath = file(rootDir).toPath()
+		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc"
+		projectDirs.forEach { dir ->
+			[ 'bin', 'build', 'out', '.settings' ]
+				.collect { rootPath.relativize(new File(dir, it).toPath()) }
+				.forEach { source.exclude "$it/**" }
+			[ '.classpath', '.project' ]
+				.collect { rootPath.relativize(new File(dir, it).toPath()) }
+				.forEach { source.exclude "$it" }
+		}
+	}
+
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				artifact docsZip
+				artifact schemaZip
+				artifact distZip
+			}
+		}
+	}
+}

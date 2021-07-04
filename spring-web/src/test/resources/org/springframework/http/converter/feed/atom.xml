@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <title>title</title>
+    <subtitle>subtitle</subtitle>
+    <entry>
+        <id>id1</id>
+        <title>title1</title>
+    </entry>
+    <entry>
+        <id>id2</id>
+        <title>title2</title>
+    </entry>
+</feed>

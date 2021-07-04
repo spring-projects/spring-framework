@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{1.} - %msg%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Logger name="org.springframework.messaging" level="warn" />
+		<Logger name="org.apache.activemq" level="info" />
+		<Logger name="reactor" level="info" />
+		<Logger name="io.netty" level="info" />
+		<!-- Enable TRACE level to chase integration test issues on CI servers -->
+<!--
+		<Logger name="org.springframework.messaging.simp.stomp" level="trace" />
+-->
+		<Root level="error">
+			<AppenderRef ref="Console" />
+		</Root>
+	</Loggers>
+</Configuration>

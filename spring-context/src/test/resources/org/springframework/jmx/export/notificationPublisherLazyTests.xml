@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="publisher" class="org.springframework.jmx.export.NotificationPublisherTests$MyNotificationPublisher" lazy-init="true"/>
+
+	<bean class="org.springframework.jmx.export.MBeanExporter">
+		<property name="beans">
+			<map>
+				<entry key="spring:type=Publisher" value="publisher"/>
+			</map>
+		</property>
+    <property name="server" ref="server"/>
+  </bean>
+
+</beans>

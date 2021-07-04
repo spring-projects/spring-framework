@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="inheritsFromParentFactory" parent="inheritedTestBean">
+		<property name="name"><value>override</value></property>
+		<!-- age should inherit value of 1 from parent -->
+	</bean>
+
+	<bean id="inheritsWithDifferentClass" class="org.springframework.beans.testfixture.beans.DerivedTestBean"
+			parent="inheritedTestBean" init-method="initialize">
+		<property name="name"><value>override</value></property>
+		<!-- age should inherit value of 1 from parent -->
+	</bean>
+
+	<bean id="inheritsWithClass" class="org.springframework.beans.testfixture.beans.DerivedTestBean"
+			parent="inheritedTestBeanWithoutClass" init-method="initialize">
+		<property name="name"><value>override</value></property>
+		<!-- age should inherit value of 1 from parent -->
+	</bean>
+
+	<bean id="protoypeInheritsFromParentFactorySingleton" parent="inheritedTestBean" scope="prototype">
+		<property name="name"><value>prototypeOverridesInheritedSingleton</value></property>
+		<!-- age should inherit value of 1 from parent -->
+	</bean>
+
+	<bean id="prototypeInheritsFromParentFactoryPrototype" parent="inheritedTestBeanPrototype" scope="prototype">
+		<property name="name"><value>prototype-override</value></property>
+		<!-- age should inherit value of 2 from parent -->
+	</bean>
+
+	<bean id="singletonInheritsFromParentFactoryPrototype" parent="inheritedTestBeanPrototype" scope="singleton">
+		<property name="name"><value>prototype-override</value></property>
+		<!-- age should inherit value of 2 from parent -->
+	</bean>
+
+	<bean id="inheritedTestBean" parent="inheritedTestBean">
+		<property name="name"><value>overrideParentBean</value></property>
+		<!-- age should inherit value of 1 from parent -->
+	</bean>
+
+	<bean id="bogusParent" parent="bogus" scope="prototype"/>
+
+	<bean id="indexedTestBean" class="org.springframework.beans.testfixture.beans.IndexedTestBean">
+		<property name="array[0].name"><value>myname</value></property>
+	</bean>
+
+	<bean parent="inheritedTestBean"/>
+
+</beans>

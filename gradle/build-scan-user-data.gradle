@@ -1,0 +1,16 @@
+addCustomJavaHomeMetadata()
+addCustomJavaSourceVersionMetadata()
+
+void addCustomJavaHomeMetadata() {
+	def customJavaHome = System.getProperty("customJavaHome")
+	if (customJavaHome) {
+		buildScan.value "Custom JAVA_HOME", customJavaHome
+	}
+}
+
+void addCustomJavaSourceVersionMetadata() {
+	def customJavaSourceVersion = System.getProperty("customJavaSourceVersion")
+	if (customJavaSourceVersion) {
+		buildScan.value "Custom Java Source Version", customJavaSourceVersion
+	}
+}

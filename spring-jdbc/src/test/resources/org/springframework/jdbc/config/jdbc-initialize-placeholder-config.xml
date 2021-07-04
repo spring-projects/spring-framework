@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/jdbc https://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd">
+
+	<jdbc:embedded-database id="dataSource" type="HSQL" />
+
+	<jdbc:initialize-database data-source="dataSource" enabled="${data.source.init}">
+		<jdbc:script location="${schema.scripts}" />
+		<jdbc:script location="${insert.scripts}" />
+	</jdbc:initialize-database>
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="properties">
+			<value>
+				schema.scripts=classpath:org/springframework/jdbc/config/db-schema.sql
+				insert.scripts=classpath*:org/springframework/jdbc/config/*-data.sql
+				data.source.init=true
+			</value>
+		</property>
+	</bean>
+
+</beans>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="urlDecode"><value>true</value></property>
+		<property name="mappings">
+			<value>
+				welcome.html=mainController
+				/path??matching.html=mainController
+				/pathmatchingTest.html=mainController
+				??path??matching.html=mainController
+				/administrator/pathmatching.html=mainController
+				/administrator/testlast*=mainController
+				/administrator/testing/longer/{*foobar}=mainController
+				/administrator/*/testlast*=mainController
+				/administrator/*/pathmatching.html=mainController
+				/pathmatching??.html=mainController
+				/*.jsp=mainController
+				/administrator/another/bla.xml=mainController
+				/*test*.jpeg=mainController
+				/*/test.jpeg=mainController
+				/outofpattern*yeah=mainController
+				/anotherTest*=mainController
+				/stillAnotherTestYeah=mainController
+				/shortpattern/testing=mainController
+				/show123.html=mainController
+				/sho*=mainController
+				/bookseats.html=mainController
+				/reservation.html=mainController
+				/payment.html=mainController
+				/confirmation.html=mainController
+				/test%26t%20est/path%26m%20atching.html=mainController
+				*=starController
+			</value>
+		</property>
+	</bean>
+
+	<bean id="mainController" class="java.lang.Object"/>
+
+	<bean id="starController" class="java.lang.Object"/>
+
+	<bean id="anotherController" class="java.lang.Object"/>
+
+</beans>

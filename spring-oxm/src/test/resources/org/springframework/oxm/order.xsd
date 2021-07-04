@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+        targetNamespace="https://samples.springframework.org/order"
+        xmlns:tns="https://samples.springframework.org/order">
+    <element name="order">
+        <complexType>
+            <sequence>
+                <element name="order-item" type="tns:orderItemType"
+                         maxOccurs="unbounded">
+                </element>
+            </sequence>
+        </complexType>
+    </element>
+    <complexType name="orderItemType">
+    	<attribute name="id" type="string" />
+    	<attribute name="quantity" type="int" />
+    </complexType>
+</schema>

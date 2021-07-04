@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans default-init-method="init" default-destroy-method="destroy">
+
+	<bean id="lifecycleAware" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean"/>
+
+	<bean id="lifecycleMethodsDisabled" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean"
+			init-method="" destroy-method=""/>
+
+	<bean id="overrideLifecycleMethods" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean"
+			init-method="customInit" destroy-method="customDestroy"/>
+
+	<bean id="childWithDefaultLifecycleMethods" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean"
+			parent="overrideLifecycleMethods"/>
+
+	<bean id="childWithLifecycleMethodsDisabled" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean"
+			parent="overrideLifecycleMethods" init-method="" destroy-method=""/>
+
+</beans>
