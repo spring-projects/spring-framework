@@ -17,7 +17,6 @@
 package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.Array;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,9 +41,9 @@ public class TypeReference extends SpelNodeImpl {
 
 	@Nullable
 	private transient Class<?> type;
-	
+
 	private static final Map<Class<?>, String> typeOwnerMap = new HashMap<>();
-	
+
 	static {
 		typeOwnerMap.put(Boolean.TYPE, "java/lang/Boolean");
 		typeOwnerMap.put(Byte.TYPE, "java/lang/Byte");
@@ -123,7 +122,8 @@ public class TypeReference extends SpelNodeImpl {
 			if (owner != null) {
 				mv.visitFieldInsn(GETSTATIC, owner, "TYPE", "Ljava/lang/Class;");
 			}
-		} else {
+		}
+		else {
 			mv.visitLdcInsn(Type.getType(this.type));
 		}
 		cf.pushDescriptor(this.exitTypeDescriptor);
