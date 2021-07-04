@@ -16,13 +16,13 @@
 
 package org.springframework.http;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -135,10 +135,14 @@ class HttpStatusTests {
 	void allStatusSeriesShouldMatchExpectations() {
 		// The Series of an HttpStatus is set manually, so we make sure it is the correct one.
 		for (HttpStatus status : HttpStatus.values()) {
-			HttpStatus.Series expectedSeries = HttpStatus.Series.valueOf(status.value());
+			final int value = status.value();
+			HttpStatus.Series expectedSeries = HttpStatus.Series.valueOf(value);
 			assertThat(status.series()).isEqualTo(expectedSeries);
-			assertThat(HttpStatus.resolve(status.value())).isEqualTo(status);
-			assertThat(HttpStatus.valueOf(status.value())).isEqualTo(status);
+
+			// verify that at least status codes are the same
+			// more deep verification is in fromEnumToMap
+			assertThat(HttpStatus.resolve(value).value()).isEqualTo(value);
+			assertThat(HttpStatus.valueOf(value).value()).isEqualTo(value);
 		}
 	}
 

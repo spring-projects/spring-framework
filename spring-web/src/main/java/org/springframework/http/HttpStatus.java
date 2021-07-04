@@ -577,7 +577,11 @@ public enum HttpStatus {
 		final HttpStatus[] result = new HttpStatus[maximumCode + 1];
 
 		for (HttpStatus status : enumValues) {
-			result[status.value] = status;
+			// all deprecated values are strictly after actual, which allows condition below
+			// See also test HttpStatusTests
+			if (result[status.value] == null) {
+				result[status.value] = status;
+			}
 		}
 
 		return result;
