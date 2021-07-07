@@ -28,11 +28,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  */
-public class BeanDefinitionBuilderTests {
+class BeanDefinitionBuilderTests {
 
 	@Test
-	public void beanClassWithSimpleProperty() {
+	void builderWithBeanClassWithSimpleProperty() {
 		String[] dependsOn = new String[] { "A", "B", "C" };
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(TestBean.class);
 		bdb.setScope(BeanDefinition.SCOPE_PROTOTYPE);
@@ -49,7 +50,7 @@ public class BeanDefinitionBuilderTests {
 	}
 
 	@Test
-	public void beanClassWithFactoryMethod() {
+	void builderWithBeanClassAndFactoryMethod() {
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(TestBean.class, "create");
 		RootBeanDefinition rbd = (RootBeanDefinition) bdb.getBeanDefinition();
 		assertThat(rbd.hasBeanClass()).isTrue();
@@ -58,7 +59,7 @@ public class BeanDefinitionBuilderTests {
 	}
 
 	@Test
-	public void beanClassName() {
+	void builderWithBeanClassName() {
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(TestBean.class.getName());
 		RootBeanDefinition rbd = (RootBeanDefinition) bdb.getBeanDefinition();
 		assertThat(rbd.hasBeanClass()).isFalse();
@@ -66,12 +67,60 @@ public class BeanDefinitionBuilderTests {
 	}
 
 	@Test
-	public void beanClassNameWithFactoryMethod() {
+	void builderWithBeanClassNameAndFactoryMethod() {
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(TestBean.class.getName(), "create");
 		RootBeanDefinition rbd = (RootBeanDefinition) bdb.getBeanDefinition();
 		assertThat(rbd.hasBeanClass()).isFalse();
 		assertThat(rbd.getBeanClassName()).isEqualTo(TestBean.class.getName());
 		assertThat(rbd.getFactoryMethodName()).isEqualTo("create");
+	}
+
+	@Test
+	void builderWithAutowireMode() {
+		assertThat(BeanDefinitionBuilder.rootBeanDefinition(TestBean.class)
+				.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE).getBeanDefinition().getAutowireMode())
+				.isEqualTo(RootBeanDefinition.AUTOWIRE_BY_TYPE);
+	}
+
+	@Test
+	void builderWithDependencyCheck() {
+		assertThat(BeanDefinitionBuilder.rootBeanDefinition(TestBean.class)
+				.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_ALL)
+				.getBeanDefinition().getDependencyCheck())
+				.isEqualTo(RootBeanDefinition.DEPENDENCY_CHECK_ALL);
+	}
+
+	@Test
+	void builderWithDependsOn() {
+		assertThat(BeanDefinitionBuilder.rootBeanDefinition(TestBean.class).addDependsOn("test")
+				.addDependsOn("test2").getBeanDefinition().getDependsOn())
+				.containsExactly("test", "test2");
+	}
+
+	@Test
+	void builderWithPrimary() {
+		assertThat(BeanDefinitionBuilder.rootBeanDefinition(TestBean.class)
+				.setPrimary(true).getBeanDefinition().isPrimary()).isTrue();
+	}
+
+	@Test
+	void builderWithRole() {
+		assertThat(BeanDefinitionBuilder.rootBeanDefinition(TestBean.class)
+				.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition().getRole())
+				.isEqualTo(BeanDefinition.ROLE_INFRASTRUCTURE);
+	}
+
+	@Test
+	void builderWithCustomizers() {
+		BeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(TestBean.class)
+				.applyCustomizers(builder -> {
+					builder.setFactoryMethodName("create");
+					builder.setRole(BeanDefinition.ROLE_SUPPORT);
+				})
+				.applyCustomizers(builder -> builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE))
+				.getBeanDefinition();
+		assertThat(beanDefinition.getFactoryMethodName()).isEqualTo("create");
+		assertThat(beanDefinition.getRole()).isEqualTo(BeanDefinition.ROLE_INFRASTRUCTURE);
 	}
 
 }
