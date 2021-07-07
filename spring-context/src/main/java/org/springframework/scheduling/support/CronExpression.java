@@ -66,8 +66,9 @@ public final class CronExpression {
 			CronField daysOfWeek,
 			String expression) {
 
+		// reverse order, to make big changes first
 		// to make sure we end up at 0 nanos, we add an extra field
-		this.fields = new CronField[]{CronField.zeroNanos(), seconds, minutes, hours, daysOfMonth, months, daysOfWeek};
+		this.fields = new CronField[]{daysOfWeek, months, daysOfMonth, hours, minutes, seconds, CronField.zeroNanos()};
 		this.expression = expression;
 	}
 
