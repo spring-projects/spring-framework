@@ -27,12 +27,12 @@ configure(allprojects) { project ->
 
 	dependencyManagement {
 		imports {
-			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.3"
+			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.4"
 			mavenBom "io.netty:netty-bom:4.1.65.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.8"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR10"
 			mavenBom "io.rsocket:rsocket-bom:1.1.1"
-			mavenBom "org.eclipse.jetty:jetty-bom:9.4.42.v20210604"
+			mavenBom "org.eclipse.jetty:jetty-bom:9.4.43.v20210629"
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.5.10"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.5.0"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.2.1"
@@ -127,14 +127,14 @@ configure(allprojects) { project ->
 			dependency "org.webjars:webjars-locator-core:0.47"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.48') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.50') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.48') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.50') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
@@ -204,10 +204,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.11.0"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.50.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.51.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.50.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.51.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
