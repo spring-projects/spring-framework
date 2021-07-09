@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,10 +84,10 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	 */
 	public void setPoolSize(int poolSize) {
 		Assert.isTrue(poolSize > 0, "'poolSize' must be 1 or higher");
-		this.poolSize = poolSize;
 		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
 			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setCorePoolSize(poolSize);
 		}
+		this.poolSize = poolSize;
 	}
 
 	/**
@@ -97,13 +97,13 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setRemoveOnCancelPolicy(boolean removeOnCancelPolicy) {
-		this.removeOnCancelPolicy = removeOnCancelPolicy;
 		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
 			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(removeOnCancelPolicy);
 		}
 		else if (removeOnCancelPolicy && this.scheduledExecutor != null) {
 			logger.debug("Could not apply remove-on-cancel policy - not a ScheduledThreadPoolExecutor");
 		}
+		this.removeOnCancelPolicy = removeOnCancelPolicy;
 	}
 
 	/**

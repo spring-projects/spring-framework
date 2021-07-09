@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.scheduling.concurrent;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
+
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,6 +33,7 @@ class ThreadPoolTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 	private final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
+
 	@Override
 	protected AsyncListenableTaskExecutor buildExecutor() {
 		executor.setThreadNamePrefix(this.threadNamePrefix);
@@ -39,6 +41,7 @@ class ThreadPoolTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 		executor.afterPropertiesSet();
 		return executor;
 	}
+
 
 	@Test
 	void modifyCorePoolSizeWhileRunning() {
@@ -108,4 +111,5 @@ class ThreadPoolTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 		assertThat(executor.getKeepAliveSeconds()).isEqualTo(60);
 		assertThat(executor.getThreadPoolExecutor().getKeepAliveTime(TimeUnit.SECONDS)).isEqualTo(60);
 	}
+
 }
