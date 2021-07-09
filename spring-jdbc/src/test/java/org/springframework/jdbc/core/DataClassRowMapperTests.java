@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.core.test.ConstructorPerson;
 import org.springframework.jdbc.core.test.ConstructorPersonWithGenerics;
+import org.springframework.jdbc.core.test.ConstructorPersonWithSetters;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,6 +59,22 @@ public class DataClassRowMapperTests extends AbstractRowMapperTests {
 		assertThat(person.age()).isEqualTo(22L);
 		assertThat(person.birth_date()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
 		assertThat(person.balance()).isEqualTo(Collections.singletonList(new BigDecimal("1234.56")));
+
+		mock.verifyClosed();
+	}
+
+	@Test
+	public void testStaticQueryWithDataClassAndSetters() throws Exception {
+		Mock mock = new Mock();
+		List<ConstructorPersonWithSetters> result = mock.getJdbcTemplate().query(
+				"select name, age, birth_date, balance from people",
+				new DataClassRowMapper<>(ConstructorPersonWithSetters.class));
+		assertThat(result.size()).isEqualTo(1);
+		ConstructorPersonWithSetters person = result.get(0);
+		assertThat(person.name()).isEqualTo("BUBBA");
+		assertThat(person.age()).isEqualTo(22L);
+		assertThat(person.birth_date()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
+		assertThat(person.balance()).isEqualTo(new BigDecimal("1234.56"));
 
 		mock.verifyClosed();
 	}
