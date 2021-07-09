@@ -58,7 +58,7 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 	public JettyClientHttpRequest(Request jettyRequest, DataBufferFactory bufferFactory) {
 		this.jettyRequest = jettyRequest;
 		this.bufferFactory = bufferFactory;
-		this.builder = ReactiveRequest.newBuilder(this.jettyRequest);
+		this.builder = ReactiveRequest.newBuilder(this.jettyRequest).abortOnCancel(true);
 	}
 
 
