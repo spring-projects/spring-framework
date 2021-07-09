@@ -50,7 +50,7 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 
 	private static final Pattern SAMESITE_PATTERN = Pattern.compile("(?i).*SameSite=(Strict|Lax|None).*");
 
-	private static final ClassLoader loader = JettyClientHttpResponse.class.getClassLoader();
+	private static final ClassLoader classLoader = JettyClientHttpResponse.class.getClassLoader();
 
 	private static final boolean jetty10Present;
 
@@ -64,7 +64,7 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 
 	static {
 		try {
-			Class<?> httpFieldsClass = loader.loadClass("org.eclipse.jetty.http.HttpFields");
+			Class<?> httpFieldsClass = classLoader.loadClass("org.eclipse.jetty.http.HttpFields");
 			jetty10Present = httpFieldsClass.isInterface();
 		}
 		catch (ClassNotFoundException ex) {
@@ -144,7 +144,7 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 		static {
 			try {
 				getHeadersMethod = Response.class.getMethod("getHeaders");
-				Class<?> type = loader.loadClass("org.eclipse.jetty.http.HttpField");
+				Class<?> type = classLoader.loadClass("org.eclipse.jetty.http.HttpField");
 				getNameMethod = type.getMethod("getName");
 				getValueMethod = type.getMethod("getValue");
 			}
