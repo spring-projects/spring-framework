@@ -1045,7 +1045,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						}
 						ps.addBatch();
 					}
-					return ps.executeBatch();
+					return batchSize > 0 ? ps.executeBatch() : new int[] {};
 				}
 				else {
 					List<Integer> rowsAffected = new ArrayList<>();

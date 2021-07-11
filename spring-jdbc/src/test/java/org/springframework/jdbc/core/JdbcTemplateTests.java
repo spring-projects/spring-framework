@@ -517,6 +517,34 @@ public class JdbcTemplateTests {
 	}
 
 	@Test
+	public void testBatchUpdateWithPreparedStatementWithEmptyData() throws Exception {
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final int[] ids = new int[] {};
+		final int[] rowsAffected = new int[] {};
+
+		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
+		mockDatabaseMetaData(true);
+
+		BatchPreparedStatementSetter setter = new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+				ps.setInt(1, ids[i]);
+			}
+			@Override
+			public int getBatchSize() {
+				return ids.length;
+			}
+		};
+
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
+
+		int[] actualRowsAffected = template.batchUpdate(sql, setter);
+		assertThat(actualRowsAffected.length == 0).as("executed 0 updates").isTrue();
+
+		verify(this.preparedStatement, never()).executeBatch();
+	}
+
+	@Test
 	public void testInterruptibleBatchUpdate() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] {100, 200};
