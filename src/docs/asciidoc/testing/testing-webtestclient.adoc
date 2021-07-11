@@ -45,7 +45,7 @@ to handle requests:
 ----
 
 For Spring MVC, use the following which delegates to the
-{api-spring-framework}/https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/test/web/servlet/setup/StandaloneMockMvcBuilder.html[StandaloneMockMvcBuilder]
+{api-spring-framework}/test/web/servlet/setup/StandaloneMockMvcBuilder.html[StandaloneMockMvcBuilder]
 to load infrastructure equivalent to the <<web.adoc#mvc-config, WebMvc Java config>>,
 registers the given controller(s), and creates an instance of
 <<testing.adoc#spring-mvc-test-framework, MockMvc>> to handle requests:
