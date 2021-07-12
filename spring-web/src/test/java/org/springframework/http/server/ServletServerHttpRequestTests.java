@@ -175,4 +175,14 @@ public class ServletServerHttpRequestTests {
 		assertThat(result).as("Invalid content returned").isEqualTo(content);
 	}
 
+	@Test
+	void getEmptyFormBody() throws IOException {
+		mockRequest.setContentType("application/x-www-form-urlencoded; charset=UTF-8");
+		mockRequest.setMethod("POST");
+
+		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
+		byte[] content = "".getBytes(StandardCharsets.UTF_8);
+		assertThat(result).as("Invalid content returned").isEqualTo(content);
+	}
+
 }
