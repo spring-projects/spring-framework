@@ -334,6 +334,7 @@ public final class BeanDefinitionBuilder {
 	/**
 	 * Set whether this bean is 'synthetic', that is, not defined by
 	 * the application itself.
+	 * @since 5.3.9
 	 */
 	public BeanDefinitionBuilder setSynthetic(boolean synthetic) {
 		this.beanDefinition.setSynthetic(synthetic);
