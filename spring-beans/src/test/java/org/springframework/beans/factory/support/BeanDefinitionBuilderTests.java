@@ -17,11 +17,13 @@
 package org.springframework.beans.factory.support;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.ResolvableType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -73,6 +75,26 @@ class BeanDefinitionBuilderTests {
 		assertThat(rbd.hasBeanClass()).isFalse();
 		assertThat(rbd.getBeanClassName()).isEqualTo(TestBean.class.getName());
 		assertThat(rbd.getFactoryMethodName()).isEqualTo("create");
+	}
+
+	@Test
+	void builderWithResolvableTypeAndInstanceSupplier() {
+		ResolvableType type = ResolvableType.forClassWithGenerics(Function.class, Integer.class, String.class);
+		Function<Integer, String> function = i -> "value " + i;
+		RootBeanDefinition rbd = (RootBeanDefinition) BeanDefinitionBuilder
+				.rootBeanDefinition(type, () -> function).getBeanDefinition();
+		assertThat(rbd.getResolvableType()).isEqualTo(type);
+		assertThat(rbd.getInstanceSupplier()).isNotNull();
+		assertThat(rbd.getInstanceSupplier().get()).isInstanceOf(Function.class);
+	}
+
+	@Test
+	void builderWithBeanClassAndInstanceSupplier() {
+		RootBeanDefinition rbd = (RootBeanDefinition) BeanDefinitionBuilder
+				.rootBeanDefinition(String.class, () -> "test").getBeanDefinition();
+		assertThat(rbd.getResolvableType().resolve()).isEqualTo(String.class);
+		assertThat(rbd.getInstanceSupplier()).isNotNull();
+		assertThat(rbd.getInstanceSupplier().get()).isEqualTo("test");
 	}
 
 	@Test
