@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -31,6 +32,15 @@ import org.springframework.web.multipart.MultipartResolver;
  * based on the Servlet 3.0 {@link javax.servlet.http.Part} API.
  * To be added as "multipartResolver" bean to a Spring DispatcherServlet context,
  * without any extra configuration at the bean level (see below).
+ *
+ * <p>This resolver variant uses your Servlet container's multipart parser as-is,
+ * potentially exposing the application to container implementation differences.
+ * See {@link org.springframework.web.multipart.commons.CommonsMultipartResolver}
+ * for an alternative implementation using a local Commons FileUpload library
+ * within the application, providing maximum portability across Servlet containers.
+ * Also, see this resolver's configuration option for
+ * {@link #setStrictServletCompliance strict Servlet compliance}, narrowing the
+ * applicability of Spring's {@link MultipartHttpServletRequest} to form data only.
  *
  * <p><b>Note:</b> In order to use Servlet 3.0 based multipart parsing,
  * you need to mark the affected servlet with a "multipart-config" section in
@@ -55,12 +65,15 @@ import org.springframework.web.multipart.MultipartResolver;
  * @author Juergen Hoeller
  * @since 3.1
  * @see #setResolveLazily
+ * @see #setStrictServletCompliance
  * @see HttpServletRequest#getParts()
  * @see org.springframework.web.multipart.commons.CommonsMultipartResolver
  */
 public class StandardServletMultipartResolver implements MultipartResolver {
 
 	private boolean resolveLazily = false;
+
+	private boolean strictServletCompliance = false;
 
 
 	/**
@@ -76,10 +89,32 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 		this.resolveLazily = resolveLazily;
 	}
 
+	/**
+	 * Specify whether this resolver should strictly comply with the Servlet
+	 * specification, only kicking in for "multipart/form-data" requests.
+	 * <p>Default is "false", trying to process any request with a "multipart/"
+	 * content type as far as the underlying Servlet container supports it
+	 * (which works on e.g. Tomcat but not on Jetty). For consistent portability
+	 * and in particular for consistent custom handling of non-form multipart
+	 * request types outside of Spring's {@link MultipartResolver} mechanism,
+	 * switch this flag to "true": Only "multipart/form-data" requests will be
+	 * wrapped with a {@link MultipartHttpServletRequest} then; other kinds of
+	 * requests will be left as-is, allowing for custom processing in user code.
+	 * <p>Note that Commons FileUpload and therefore
+	 * {@link org.springframework.web.multipart.commons.CommonsMultipartResolver}
+	 * supports any "multipart/" request type. However, it restricts processing
+	 * to POST requests which standard Servlet multipart parsers might not do.
+	 * @since 5.3.9
+	 */
+	public void setStrictServletCompliance(boolean strictServletCompliance) {
+		this.strictServletCompliance = strictServletCompliance;
+	}
+
 
 	@Override
 	public boolean isMultipart(HttpServletRequest request) {
-		return StringUtils.startsWithIgnoreCase(request.getContentType(), "multipart/");
+		return StringUtils.startsWithIgnoreCase(request.getContentType(),
+				(this.strictServletCompliance ? MediaType.MULTIPART_FORM_DATA_VALUE : "multipart/"));
 	}
 
 	@Override

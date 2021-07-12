@@ -1140,18 +1140,30 @@ another based on Servlet 3.0 multipart request parsing.
 
 To enable multipart handling, you need to declare a `MultipartResolver` bean in your
 `DispatcherServlet` Spring configuration with a name of `multipartResolver`.
-The `DispatcherServlet` detects it and applies it to the incoming request. When a POST with
-content-type of `multipart/form-data` is received, the resolver parses the content and
-wraps the current `HttpServletRequest` as `MultipartHttpServletRequest` to
-provide access to resolved parts in addition to exposing them as request parameters.
+The `DispatcherServlet` detects it and applies it to the incoming request. When a POST
+with a content type of `multipart/form-data` is received, the resolver parses the
+content wraps the current `HttpServletRequest` as a `MultipartHttpServletRequest` to
+provide access to resolved files in addition to exposing parts as request parameters.
 
 
 [[mvc-multipart-resolver-commons]]
 ==== Apache Commons `FileUpload`
 
 To use Apache Commons `FileUpload`, you can configure a bean of type
-`CommonsMultipartResolver` with a name of `multipartResolver`. You also need to
-have `commons-fileupload` as a dependency on your classpath.
+`CommonsMultipartResolver` with a name of `multipartResolver`. You also need to have
+the `commons-fileupload` jar as a dependency on your classpath.
+
+This resolver variant delegates to a local library within the application, providing
+maximum portability across Servlet containers. As an alternative, consider standard
+Servlet multipart resolution through the container's own parser as discussed below.
+
+[NOTE]
+====
+Commons FileUpload traditionally applies to POST requests only but accepts any
+`multipart/` content type. See the
+{api-spring-framework}/web/multipart/commons/CommonsMultipartResolver.html[`CommonsMultipartResolver`]
+javadoc for details and configuration options.
+====
 
 
 [[mvc-multipart-resolver-standard]]
@@ -1199,6 +1211,16 @@ The following example shows how to set a `MultipartConfigElement` on the Servlet
 
 Once the Servlet 3.0 configuration is in place, you can add a bean of type
 `StandardServletMultipartResolver` with a name of `multipartResolver`.
+
+[NOTE]
+====
+This resolver variant uses your Servlet container's multipart parser as-is,
+potentially exposing the application to container implementation differences.
+By default, it will try to parse any `multipart/` content type with any HTTP
+method but this may not be supported across all Servlet containers. See the
+{api-spring-framework}/web/multipart/support/StandardServletMultipartResolver.html[`StandardServletMultipartResolver`]
+javadoc for details and configuration options.
+====
 
 
 
