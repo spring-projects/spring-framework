@@ -56,6 +56,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.cfg.ConstructorDetector;
 import com.fasterxml.jackson.databind.cfg.DeserializerFactoryConfig;
 import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
 import com.fasterxml.jackson.databind.deser.BasicDeserializerFactory;
@@ -574,6 +575,20 @@ class Jackson2ObjectMapperBuilderTests {
 		assertThat(json).contains("property1");
 		assertThat(json).contains("property2");
 		assertThat(json).doesNotContain("property3");
+	}
+
+	@Test
+	void constructorDetector() {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+				.constructorDetector(ConstructorDetector.USE_DELEGATING
+						.withAllowJDKTypeConstructors(true)
+						.withRequireAnnotation(true))
+				.build();
+
+		ConstructorDetector constructorDetector = objectMapper.getDeserializationConfig().getConstructorDetector();
+		assertThat(constructorDetector.allowJDKTypeConstructors()).isTrue();
+		assertThat(constructorDetector.requireCtorAnnotation()).isTrue();
+		assertThat(constructorDetector.singleArgMode()).isEqualTo(ConstructorDetector.SingleArgConstructor.DELEGATING);
 	}
 
 

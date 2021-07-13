@@ -43,6 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.cfg.ConstructorDetector;
 import com.fasterxml.jackson.databind.cfg.DeserializerFactoryConfig;
 import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
 import com.fasterxml.jackson.databind.deser.BasicDeserializerFactory;
@@ -389,6 +390,20 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertThat(this.factory.getObject()).isNotNull();
 		assertThat(this.factory.isSingleton()).isTrue();
 		assertThat(this.factory.getObject().getFactory().getClass()).isEqualTo(SmileFactory.class);
+	}
+
+	@Test
+	public void setConstructorDetector() {
+		this.factory.setConstructorDetector(ConstructorDetector.USE_PROPERTIES_BASED
+				.withAllowJDKTypeConstructors(true)
+				.withRequireAnnotation(false));
+		this.factory.afterPropertiesSet();
+		ObjectMapper objectMapper = this.factory.getObject();
+
+		ConstructorDetector constructorDetector = objectMapper.getDeserializationConfig().getConstructorDetector();
+		assertThat(constructorDetector.allowJDKTypeConstructors()).isTrue();
+		assertThat(constructorDetector.requireCtorAnnotation()).isFalse();
+		assertThat(constructorDetector.singleArgMode()).isEqualTo(ConstructorDetector.SingleArgConstructor.PROPERTIES);
 	}
 
 

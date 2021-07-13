@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.cfg.ConstructorDetector;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
@@ -454,6 +455,14 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.builder.applicationContext(applicationContext);
+	}
+
+	/**
+	 * Set the method to detect constructors for Jackson deserialization.
+	 * @see com.fasterxml.jackson.databind.cfg.ConstructorDetector
+	 */
+	public void setConstructorDetector(ConstructorDetector constructorDetector) {
+		this.builder.constructorDetector(constructorDetector);
 	}
 
 

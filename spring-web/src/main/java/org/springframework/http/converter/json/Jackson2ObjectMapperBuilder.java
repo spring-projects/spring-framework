@@ -45,6 +45,7 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.cfg.ConstructorDetector;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
@@ -163,6 +164,9 @@ public class Jackson2ObjectMapperBuilder {
 
 	@Nullable
 	private ApplicationContext applicationContext;
+
+	@Nullable
+	private ConstructorDetector constructorDetector;
 
 	@Nullable
 	private Boolean defaultUseWrapper;
@@ -644,6 +648,14 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
+	 * Set the {@link ConstructorDetector} method to be used by Jackson during deserialization.
+	 */
+	public Jackson2ObjectMapperBuilder constructorDetector(ConstructorDetector constructorDetector) {
+		this.constructorDetector = constructorDetector;
+		return this;
+	}
+
+	/**
 	 * An option to apply additional customizations directly to the
 	 * {@code ObjectMapper} instances at the end, after all other config
 	 * properties of the builder have been applied.
@@ -756,6 +768,10 @@ public class Jackson2ObjectMapperBuilder {
 		else if (this.applicationContext != null) {
 			objectMapper.setHandlerInstantiator(
 					new SpringHandlerInstantiator(this.applicationContext.getAutowireCapableBeanFactory()));
+		}
+
+		if (this.constructorDetector != null) {
+			objectMapper.setConstructorDetector(this.constructorDetector);
 		}
 
 		if (this.configurer != null) {
