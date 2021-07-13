@@ -306,7 +306,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 		static {
 			try {
-				Class<?> type = loader.loadClass("org.eclipse.jetty.websocket.api.WebSocketPolicy");
+				Class<?> type = loader.loadClass("org.eclipse.jetty.websocket.api.Session");
 				getTextMessageSizeLimitMethod = type.getMethod("getMaxTextMessageSize");
 				getBinaryMessageSizeLimitMethod = type.getMethod("getMaxBinaryMessageSize");
 				getRemoteAddressMethod = type.getMethod("getRemoteAddress");
