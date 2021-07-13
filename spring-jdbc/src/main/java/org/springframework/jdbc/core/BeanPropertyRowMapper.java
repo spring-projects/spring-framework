@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,10 +223,11 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 		for (PropertyDescriptor pd : BeanUtils.getPropertyDescriptors(mappedClass)) {
 			if (pd.getWriteMethod() != null) {
-				this.mappedFields.put(lowerCaseName(pd.getName()), pd);
-				String underscoredName = underscoreName(pd.getName());
-				if (!lowerCaseName(pd.getName()).equals(underscoredName)) {
-					this.mappedFields.put(underscoredName, pd);
+				String lowerCaseName = lowerCaseName(pd.getName());
+				this.mappedFields.put(lowerCaseName, pd);
+				String underscoreName = underscoreName(pd.getName());
+				if (!lowerCaseName.equals(underscoreName)) {
+					this.mappedFields.put(underscoreName, pd);
 				}
 				this.mappedProperties.add(pd.getName());
 			}
