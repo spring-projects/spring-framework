@@ -1,7 +1,7 @@
 plugins {
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE' apply false
 	id 'io.spring.nohttp' version '0.0.5.RELEASE'
-	id 'org.jetbrains.kotlin.jvm' version '1.5.10' apply false
+	id 'org.jetbrains.kotlin.jvm' version '1.5.21' apply false
 	id 'org.jetbrains.dokka' version '0.10.1' apply false
 	id 'org.asciidoctor.jvm.convert' version '3.1.0'
 	id 'org.asciidoctor.jvm.pdf' version '3.1.0'
@@ -10,7 +10,7 @@ plugins {
 	id "com.github.ben-manes.versions" version '0.28.0'
 	id "com.github.johnrengelman.shadow" version "6.1.0" apply false
 	id "me.champeau.jmh" version "0.6.4" apply false
-	id "org.jetbrains.kotlin.plugin.serialization" version "1.5.10" apply false
+	id "org.jetbrains.kotlin.plugin.serialization" version "1.5.21" apply false
 	id "org.unbroken-dome.xjc" version '2.0.0' apply false
 }
 
@@ -33,7 +33,7 @@ configure(allprojects) { project ->
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR10"
 			mavenBom "io.rsocket:rsocket-bom:1.1.1"
 			mavenBom "org.eclipse.jetty:jetty-bom:9.4.43.v20210629"
-			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.5.10"
+			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.5.21"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.5.1"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.2.1"
 			mavenBom "org.junit:junit-bom:5.7.2"
