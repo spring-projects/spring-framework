@@ -10406,6 +10406,10 @@ You can also use the `MessageSourceAware` interface to acquire a reference to an
 `ApplicationContext` that implements the `MessageSourceAware` interface is injected with
 the application context's `MessageSource` when the bean is created and configured.
 
+NOTE: Because Spring's `MessageSource` is based on Java's `ResourceBundle`, it does not merge
+bundles with the same base name, but will only use the first bundle found.
+Subsequent message bundles with the same base name are ignored.
+
 NOTE: As an alternative to `ResourceBundleMessageSource`, Spring provides a
 `ReloadableResourceBundleMessageSource` class. This variant supports the same bundle
 file format but is more flexible than the standard JDK based
