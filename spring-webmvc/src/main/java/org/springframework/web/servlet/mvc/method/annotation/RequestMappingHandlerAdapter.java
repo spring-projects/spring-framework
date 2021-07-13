@@ -826,6 +826,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * and return {@code null} if the result of that call is {@code true}.
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	protected long getLastModifiedInternal(HttpServletRequest request, HandlerMethod handlerMethod) {
 		return -1;
 	}

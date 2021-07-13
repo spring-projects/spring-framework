@@ -527,13 +527,9 @@ The `HandlerExceptionResolver` beans declared in the `WebApplicationContext` are
 resolve exceptions thrown during request processing. Those exception resolvers allow
 customizing the logic to address exceptions. See <<mvc-exceptionhandlers>> for more details.
 
-The Spring `DispatcherServlet` also supports the return of the
-`last-modification-date`, as specified by the Servlet API. The process of determining
-the last modification date for a specific request is straightforward: The
-`DispatcherServlet` looks up an appropriate handler mapping and tests whether the
-handler that is found implements the `LastModified` interface. If so, the value of the
-`long getLastModified(request)` method of the `LastModified` interface is returned to
-the client.
+For HTTP caching support, handlers can use the `checkNotModified` methods of `WebRequest`,
+along with further options for annoated controllers as described in
+<<mvc-caching-etag-lastmodified,HTTP Caching for Controllers>>.
 
 You can customize individual `DispatcherServlet` instances by adding Servlet
 initialization parameters (`init-param` elements) to the Servlet declaration in the
