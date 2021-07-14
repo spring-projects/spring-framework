@@ -103,9 +103,6 @@ dokka {
 		externalDocumentationLink {
 			url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
 		}
-		externalDocumentationLink {
-			url = new URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
-		}
 	}
 }
 
