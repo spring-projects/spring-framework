@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -302,7 +302,7 @@ public class StopWatch {
 			for (TaskInfo task : getTaskInfo()) {
 				sb.append(nf.format(task.getTimeNanos())).append("  ");
 				sb.append(pf.format((double) task.getTimeNanos() / getTotalTimeNanos())).append("  ");
-				sb.append(task.getTaskName()).append("\n");
+				sb.append(task.getTaskName()).append('\n');
 			}
 		}
 		return sb.toString();
@@ -320,7 +320,7 @@ public class StopWatch {
 			for (TaskInfo task : getTaskInfo()) {
 				sb.append("; [").append(task.getTaskName()).append("] took ").append(task.getTimeNanos()).append(" ns");
 				long percent = Math.round(100.0 * task.getTimeNanos() / getTotalTimeNanos());
-				sb.append(" = ").append(percent).append("%");
+				sb.append(" = ").append(percent).append('%');
 			}
 		}
 		else {

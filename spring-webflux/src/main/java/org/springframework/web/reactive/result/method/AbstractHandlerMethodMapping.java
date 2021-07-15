@@ -258,7 +258,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected HandlerMethod createHandlerMethod(Object handler, Method method) {
 		if (handler instanceof String) {
 			return new HandlerMethod((String) handler,
-					obtainApplicationContext().getAutowireCapableBeanFactory(), method);
+					obtainApplicationContext().getAutowireCapableBeanFactory(),
+					obtainApplicationContext(),
+					method);
 		}
 		return new HandlerMethod(handler, method);
 	}

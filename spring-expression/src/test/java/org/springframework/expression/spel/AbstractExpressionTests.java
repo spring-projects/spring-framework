@@ -245,22 +245,22 @@ public abstract class AbstractExpressionTests {
 					sb.append("int[").append(l.length).append("]{");
 					for (int j = 0; j < l.length; j++) {
 						if (j > 0) {
-							sb.append(",");
+							sb.append(',');
 						}
 						sb.append(stringValueOf(l[j]));
 					}
-					sb.append("}");
+					sb.append('}');
 				}
 				else if (primitiveType == Long.TYPE) {
 					long[] l = (long[]) value;
 					sb.append("long[").append(l.length).append("]{");
 					for (int j = 0; j < l.length; j++) {
 						if (j > 0) {
-							sb.append(",");
+							sb.append(',');
 						}
 						sb.append(stringValueOf(l[j]));
 					}
-					sb.append("}");
+					sb.append('}');
 				}
 				else {
 					throw new RuntimeException("Please implement support for type " + primitiveType.getName() +
@@ -272,32 +272,32 @@ public abstract class AbstractExpressionTests {
 				if (!isNested) {
 					sb.append(value.getClass().getComponentType().getName());
 				}
-				sb.append("[").append(l.size()).append("]{");
+				sb.append('[').append(l.size()).append("]{");
 				int i = 0;
 				for (Object object : l) {
 					if (i > 0) {
-						sb.append(",");
+						sb.append(',');
 					}
 					i++;
 					sb.append(stringValueOf(object, true));
 				}
-				sb.append("}");
+				sb.append('}');
 			}
 			else {
 				List<Object> l = Arrays.asList((Object[]) value);
 				if (!isNested) {
 					sb.append(value.getClass().getComponentType().getName());
 				}
-				sb.append("[").append(l.size()).append("]{");
+				sb.append('[').append(l.size()).append("]{");
 				int i = 0;
 				for (Object object : l) {
 					if (i > 0) {
-						sb.append(",");
+						sb.append(',');
 					}
 					i++;
 					sb.append(stringValueOf(object));
 				}
-				sb.append("}");
+				sb.append('}');
 			}
 			return sb.toString();
 		}

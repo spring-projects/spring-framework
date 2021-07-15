@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,6 +54,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 /**
@@ -423,8 +426,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test // gh-24926
-	public void buildRequestParameterMapViaWebRequestDotSetFileToUploadAsParameter() throws Exception {
-
+	public void buildRequestParameterMapViaWebRequestDotSetRequestParametersWithFileToUploadAsParameter() throws Exception {
 		webRequest.setRequestParameters(Collections.singletonList(
 				new KeyDataPair("key",
 						new ClassPathResource("org/springframework/test/web/htmlunit/test.txt").getFile(),
@@ -432,13 +434,37 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParts().size()).isEqualTo(1);
+		assertThat(actualRequest.getParts()).hasSize(1);
 		Part part = actualRequest.getPart("key");
 		assertThat(part).isNotNull();
 		assertThat(part.getName()).isEqualTo("key");
 		assertThat(IOUtils.toString(part.getInputStream(), StandardCharsets.UTF_8)).isEqualTo("test file");
 		assertThat(part.getSubmittedFileName()).isEqualTo("test.txt");
 		assertThat(part.getContentType()).isEqualTo(MimeType.TEXT_PLAIN);
+	}
+
+	@Test // gh-26799
+	public void buildRequestParameterMapViaWebRequestDotSetRequestParametersWithNullFileToUploadAsParameter() throws Exception {
+		webRequest.setRequestParameters(Collections.singletonList(new KeyDataPair("key", null, null, null, (Charset) null)));
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getParts()).hasSize(1);
+		Part part = actualRequest.getPart("key");
+
+		assertSoftly(softly -> {
+			softly.assertThat(part).isNotNull();
+			softly.assertThat(part.getName()).as("name").isEqualTo("key");
+			softly.assertThat(part.getSize()).as("size").isEqualTo(0);
+			try {
+				softly.assertThat(part.getInputStream()).isEmpty();
+			}
+			catch (IOException ex) {
+				softly.fail("failed to get InputStream", ex);
+			}
+			softly.assertThat(part.getSubmittedFileName()).as("filename").isEqualTo("");
+			softly.assertThat(part.getContentType()).as("content-type").isEqualTo("application/octet-stream");
+		});
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,35 +159,38 @@ public class ResourceHandlerRegistry {
 	 * of no registrations.
 	 */
 	@Nullable
-	@SuppressWarnings("deprecation")
 	protected AbstractHandlerMapping getHandlerMapping() {
 		if (this.registrations.isEmpty()) {
 			return null;
 		}
-
 		Map<String, HttpRequestHandler> urlMap = new LinkedHashMap<>();
 		for (ResourceHandlerRegistration registration : this.registrations) {
+			ResourceHttpRequestHandler handler = getRequestHandler(registration);
 			for (String pathPattern : registration.getPathPatterns()) {
-				ResourceHttpRequestHandler handler = registration.getRequestHandler();
-				if (this.pathHelper != null) {
-					handler.setUrlPathHelper(this.pathHelper);
-				}
-				if (this.contentNegotiationManager != null) {
-					handler.setContentNegotiationManager(this.contentNegotiationManager);
-				}
-				handler.setServletContext(this.servletContext);
-				handler.setApplicationContext(this.applicationContext);
-				try {
-					handler.afterPropertiesSet();
-				}
-				catch (Throwable ex) {
-					throw new BeanInitializationException("Failed to init ResourceHttpRequestHandler", ex);
-				}
 				urlMap.put(pathPattern, handler);
 			}
 		}
-
 		return new SimpleUrlHandlerMapping(urlMap, this.order);
+	}
+
+	@SuppressWarnings("deprecation")
+	private ResourceHttpRequestHandler getRequestHandler(ResourceHandlerRegistration registration) {
+		ResourceHttpRequestHandler handler = registration.getRequestHandler();
+		if (this.pathHelper != null) {
+			handler.setUrlPathHelper(this.pathHelper);
+		}
+		if (this.contentNegotiationManager != null) {
+			handler.setContentNegotiationManager(this.contentNegotiationManager);
+		}
+		handler.setServletContext(this.servletContext);
+		handler.setApplicationContext(this.applicationContext);
+		try {
+			handler.afterPropertiesSet();
+		}
+		catch (Throwable ex) {
+			throw new BeanInitializationException("Failed to init ResourceHttpRequestHandler", ex);
+		}
+		return handler;
 	}
 
 }

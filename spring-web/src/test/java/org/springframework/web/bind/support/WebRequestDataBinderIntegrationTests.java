@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,11 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -48,23 +49,22 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Brian Clozel
  * @author Sam Brannen
  */
-public class WebRequestDataBinderIntegrationTests {
+@TestInstance(Lifecycle.PER_CLASS)
+class WebRequestDataBinderIntegrationTests {
 
-	private static Server jettyServer;
+	private final PartsServlet partsServlet = new PartsServlet();
 
-	private static final PartsServlet partsServlet = new PartsServlet();
-
-	private static final PartListServlet partListServlet = new PartListServlet();
+	private final PartListServlet partListServlet = new PartListServlet();
 
 	private final RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
-	protected static String baseUrl;
+	private Server jettyServer;
 
-	protected static MediaType contentType;
+	private String baseUrl;
 
 
 	@BeforeAll
-	public static void startJettyServer() throws Exception {
+	void startJettyServer() throws Exception {
 		// Let server pick its own random, available port.
 		jettyServer = new Server(0);
 
@@ -89,7 +89,7 @@ public class WebRequestDataBinderIntegrationTests {
 	}
 
 	@AfterAll
-	public static void stopJettyServer() throws Exception {
+	void stopJettyServer() throws Exception {
 		if (jettyServer != null) {
 			jettyServer.stop();
 		}
@@ -97,7 +97,7 @@ public class WebRequestDataBinderIntegrationTests {
 
 
 	@Test
-	public void partsBinding() {
+	void partsBinding() {
 		PartsBean bean = new PartsBean();
 		partsServlet.setBean(bean);
 
@@ -113,7 +113,7 @@ public class WebRequestDataBinderIntegrationTests {
 	}
 
 	@Test
-	public void partListBinding() {
+	void partListBinding() {
 		PartListBean bean = new PartListBean();
 		partListServlet.setBean(bean);
 
@@ -143,7 +143,7 @@ public class WebRequestDataBinderIntegrationTests {
 			response.setStatus(HttpServletResponse.SC_OK);
 		}
 
-		public void setBean(T bean) {
+		void setBean(T bean) {
 			this.bean = bean;
 		}
 	}
@@ -151,9 +151,9 @@ public class WebRequestDataBinderIntegrationTests {
 
 	private static class PartsBean {
 
-		public Part firstPart;
+		private Part firstPart;
 
-		public Part secondPart;
+		private Part secondPart;
 
 		public Part getFirstPart() {
 			return firstPart;
@@ -182,7 +182,7 @@ public class WebRequestDataBinderIntegrationTests {
 
 	private static class PartListBean {
 
-		public List<Part> partList;
+		private List<Part> partList;
 
 		public List<Part> getPartList() {
 			return partList;

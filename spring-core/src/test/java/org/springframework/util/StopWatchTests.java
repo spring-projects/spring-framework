@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class StopWatchTests {
 
 	private static final long duration1 = 200;
 	private static final long duration2 = 100;
-	private static final long fudgeFactor = 50;
+	private static final long fudgeFactor = 100;
 
 	private final StopWatch stopWatch = new StopWatch(ID);
 
@@ -107,7 +107,7 @@ class StopWatchTests {
 			.isLessThanOrEqualTo(duration1 + duration2 + fudgeFactor);
 		assertThat(stopWatch.getTotalTimeSeconds())
 			.as("total time in seconds for task #2")
-			.isGreaterThanOrEqualTo((duration1 + duration2  - fudgeFactor) / 1000.0)
+			.isGreaterThanOrEqualTo((duration1 + duration2 - fudgeFactor) / 1000.0)
 			.isLessThanOrEqualTo((duration1 + duration2 + fudgeFactor) / 1000.0);
 
 		assertThat(stopWatch.getTaskCount()).isEqualTo(2);

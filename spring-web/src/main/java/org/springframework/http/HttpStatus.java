@@ -557,7 +557,7 @@ public enum HttpStatus {
 	 */
 	@Nullable
 	public static HttpStatus resolve(int statusCode) {
-		// used cached VALUES instead of values() to prevent array allocation
+		// Use cached VALUES instead of values() to prevent array allocation.
 		for (HttpStatus status : VALUES) {
 			if (status.value == statusCode) {
 				return status;

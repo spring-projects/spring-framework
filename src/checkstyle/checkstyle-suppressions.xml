@@ -6,6 +6,8 @@
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]" checks="AnnotationLocation|AnnotationUseStyle|AtclauseOrder|AvoidNestedBlocks|FinalClass|HideUtilityClassConstructor|InnerTypeLast|JavadocStyle|JavadocType|JavadocVariable|LeftCurly|MultipleVariableDeclarations|NeedBraces|OneTopLevelClass|OuterTypeFilename|RequireThis|SpringCatch|SpringJavadoc|SpringNoThis" />
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]org[\\/]springframework[\\/].+(Tests|Suite)" checks="IllegalImport" id="bannedJUnitJupiterImports" />
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]" checks="SpringJUnit5" message="should not be public" />
+	<!-- generated sources -->
+	<suppress files="[\\/]build[\\/]generated[\\/]sources[\\/]" checks=".*" />
 
 	<!-- JMH benchmarks -->
 	<suppress files="[\\/]src[\\/]jmh[\\/]java[\\/]org[\\/]springframework[\\/]" checks="JavadocVariable|JavadocStyle|InnerTypeLast" />

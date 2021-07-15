@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,10 +64,10 @@ import org.springframework.util.StringUtils;
  * underneath the {@code /resources/} path, including {@code /resources/image.png}
  * and {@code /resources/css/spring.css}</li>
  * <li><code>/resources/{&#42;path}</code> &mdash; matches all files
- * underneath the {@code /resources/} path and captures their relative path in
- * a variable named "path"; {@code /resources/image.png} will match with
- * "path" &rarr; "/image.png", and {@code /resources/css/spring.css} will match
- * with "path" &rarr; "/css/spring.css"</li>
+ * underneath the {@code /resources/}, as well as {@code /resources}, and captures
+ * their relative path in a variable named "path"; {@code /resources/image.png}
+ * will match with "path" &rarr; "/image.png", and {@code /resources/css/spring.css}
+ * will match with "path" &rarr; "/css/spring.css"</li>
  * <li><code>/resources/{filename:\\w+}.dat</code> will match {@code /resources/spring.dat}
  * and assign the value {@code "spring"} to the {@code filename} variable</li>
  * </ul>

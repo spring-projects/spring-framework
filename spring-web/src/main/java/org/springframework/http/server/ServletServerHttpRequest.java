@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -244,9 +244,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		Writer writer = new OutputStreamWriter(bos, FORM_CHARSET);
 
 		Map<String, String[]> form = request.getParameterMap();
-		for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext();) {
-			String name = nameIterator.next();
-			List<String> values = Arrays.asList(form.get(name));
+		for (Iterator<Map.Entry<String, String[]>> entryIterator = form.entrySet().iterator(); entryIterator.hasNext();) {
+			Map.Entry<String, String[]> entry = entryIterator.next();
+			String name = entry.getKey();
+			List<String> values = Arrays.asList(entry.getValue());
 			for (Iterator<String> valueIterator = values.iterator(); valueIterator.hasNext();) {
 				String value = valueIterator.next();
 				writer.write(URLEncoder.encode(name, FORM_CHARSET.name()));
@@ -258,7 +259,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 					}
 				}
 			}
-			if (nameIterator.hasNext()) {
+			if (entryIterator.hasNext()) {
 				writer.append('&');
 			}
 		}

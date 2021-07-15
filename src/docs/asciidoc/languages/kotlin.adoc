@@ -8,14 +8,13 @@ with existing libraries written in Java.
 
 The Spring Framework provides first-class support for Kotlin and lets developers write
 Kotlin applications almost as if the Spring Framework was a native Kotlin framework.
+Most of the code samples of the reference documentation are
+provided in Kotlin in addition to Java.
 
 The easiest way to build a Spring application with Kotlin is to leverage Spring Boot and
 its https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-kotlin.html[dedicated Kotlin support].
 https://spring.io/guides/tutorials/spring-boot-kotlin/[This comprehensive tutorial]
 will teach you how to build Spring Boot applications with Kotlin using https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io].
-
-As of Spring Framework 5.2, most of the code samples of the reference documentation are
-provided in Kotlin in addition to Java.
 
 Feel free to join the #spring channel of https://slack.kotlinlang.org/[Kotlin Slack]
 or ask a question with `spring` and `kotlin` as tags on
@@ -24,12 +23,17 @@ https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow] if you n
 [[kotlin-requirements]]
 == Requirements
 
-Spring Framework supports Kotlin 1.3 and requires
-https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib[`kotlin-stdlib`]
-(or one of its variants, such as https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib-jdk8[`kotlin-stdlib-jdk8`])
-and https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-reflect[`kotlin-reflect`]
+Spring Framework supports Kotlin 1.3+ and requires
+https://search.maven.org/artifact/org.jetbrains.kotlin/kotlin-stdlib[`kotlin-stdlib`]
+(or one of its variants, such as https://search.maven.org/artifact/org.jetbrains.kotlin/kotlin-stdlib-jdk8[`kotlin-stdlib-jdk8`])
+and https://search.maven.org/artifact/org.jetbrains.kotlin/kotlin-reflect[`kotlin-reflect`]
 to be present on the classpath. They are provided by default if you bootstrap a Kotlin project on
 https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io].
+
+NOTE: The https://github.com/FasterXML/jackson-module-kotlin[Jackson Kotlin module] is required
+for serializing or deserializing JSON data for Kotlin classes with Jackson, so make sure to add the
+`com.fasterxml.jackson.module:jackson-module-kotlin` dependency to your project if you have such need.
+It is automatically registered when found in the classpath.
 
 [[kotlin-extensions]]
 == Extensions
@@ -38,8 +42,8 @@ Kotlin https://kotlinlang.org/docs/reference/extensions.html[extensions] provide
 to extend existing classes with additional functionality. The Spring Framework Kotlin APIs
 use these extensions to add new Kotlin-specific conveniences to existing Spring APIs.
 
-The {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/[Spring Framework KDoc API] lists
-and documents all available the Kotlin extensions and DSLs.
+The {docs-spring-framework}/kdoc-api/spring-framework/[Spring Framework KDoc API] lists
+and documents all available Kotlin extensions and DSLs.
 
 NOTE: Keep in mind that Kotlin extensions need to be imported to be used. This means,
 for example, that the `GenericApplicationContext.registerBean` Kotlin extension
@@ -119,11 +123,6 @@ with default values.
 Kotlin parameter names are recognized through a dedicated `KotlinReflectionParameterNameDiscoverer`,
 which allows finding interface method parameter names without requiring the Java 8 `-parameters`
 compiler flag to be enabled during compilation.
-
-The https://github.com/FasterXML/jackson-module-kotlin[Jackson Kotlin module], which is required
-for serializing or deserializing JSON data, is automatically registered when
-found in the classpath, and a warning message is logged if Jackson and Kotlin are
-detected without the Jackson Kotlin module being present.
 
 You can declare configuration classes as
 https://kotlinlang.org/docs/reference/nested-classes.html[top level or nested but not inner],
@@ -210,7 +209,7 @@ the constructor parameters will be autowired by type:
 ----
 
 In order to allow a more declarative approach and cleaner syntax, Spring Framework provides
-a {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.context.support/-bean-definition-dsl/[Kotlin bean definition DSL]
+a {docs-spring-framework}/kdoc-api/spring-framework/org.springframework.context.support/-bean-definition-dsl/[Kotlin bean definition DSL]
 It declares an `ApplicationContextInitializer` through a clean declarative API,
 which lets you deal with profiles and `Environment` for customizing
 how beans are registered.
@@ -276,9 +275,9 @@ for more details and up-to-date information. See also the experimental Kofu DSL 
 
 Spring Framework comes with a Kotlin router DSL available in 3 flavors:
 
-* WebMvc.fn DSL with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.servlet.function/router.html[router { }]
-* WebFlux.fn <<web-reactive#webflux-fn, Reactive>> DSL with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/router.html[router { }]
-* WebFlux.fn <<Coroutines>> DSL with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }]
+* WebMvc.fn DSL with {docs-spring-framework}/kdoc-api/spring-framework/org.springframework.web.servlet.function/router.html[router { }]
+* WebFlux.fn <<web-reactive#webflux-fn, Reactive>> DSL with {docs-spring-framework}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/router.html[router { }]
+* WebFlux.fn <<Coroutines>> DSL with {docs-spring-framework}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }]
 
 These DSL let you write clean and idiomatic Kotlin code to build a `RouterFunction` instance as the following example shows:
 
@@ -344,7 +343,7 @@ Spring Framework provides a
 https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/view/script/ScriptTemplateView.html[`ScriptTemplateView`]
 which supports https://www.jcp.org/en/jsr/detail?id=223[JSR-223] to render templates by using script engines.
 
-By leveraging `kotlin-script-runtime` and `scripting-jsr223-embeddable` dependencies, it
+By leveraging `scripting-jsr223` dependencies, it
 is possible to use such feature to render Kotlin-based templates with
 https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or Kotlin multiline interpolated `String`.
 
@@ -352,8 +351,7 @@ https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or Kotlin multiline int
 [source,kotlin,indent=0]
 ----
 dependencies {
-	compile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
-	runtime("org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable:${kotlinVersion}")
+        runtime("org.jetbrains.kotlin:kotlin-scripting-jsr223:${kotlinVersion}")
 }
 ----
 
@@ -410,10 +408,10 @@ Spring Framework provides support for Coroutines on the following scope:
 
 * https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-deferred/index.html[Deferred] and https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html[Flow] return values support in Spring MVC and WebFlux annotated `@Controller`
 * Suspending function support in Spring MVC and WebFlux annotated `@Controller`
-* Extensions for WebFlux {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.client/index.html[client] and {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/index.html[server] functional API.
-* WebFlux.fn {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL
+* Extensions for WebFlux {docs-spring-framework}/kdoc-api/spring-framework/org.springframework.web.reactive.function.client/index.html[client] and {docs-spring-framework}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/index.html[server] functional API.
+* WebFlux.fn {docs-spring-framework}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL
 * Suspending function and `Flow` support in RSocket `@MessageMapping` annotated methods
-* Extensions for {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.messaging.rsocket/index.html[`RSocketRequester`]
+* Extensions for {docs-spring-framework}/kdoc-api/spring-framework/org.springframework.messaging.rsocket/index.html[`RSocketRequester`]
 
 === Dependencies
 
@@ -556,7 +554,7 @@ class CoroutinesViewController(banner: Banner) {
 
 === WebFlux.fn
 
-Here is an example of Coroutines router defined via the {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL and related handlers.
+Here is an example of Coroutines router defined via the {docs-spring-framework}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL and related handlers.
 
 [source,kotlin,indent=0]
 ----

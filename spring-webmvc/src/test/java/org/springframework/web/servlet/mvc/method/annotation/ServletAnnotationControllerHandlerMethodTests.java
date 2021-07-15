@@ -1753,6 +1753,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@PathPatternsParameterizedTest
+	@SuppressWarnings("deprecation")
 	void responseBodyAsHtml(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(TextRestController.class, usePathPatterns, wac -> {
 			if (!usePathPatterns) {
@@ -1792,6 +1793,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@PathPatternsParameterizedTest
+	@SuppressWarnings("deprecation")
 	void responseBodyAsHtmlWithSuffixPresent(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(TextRestController.class, usePathPatterns, wac -> {
 			ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
@@ -1996,9 +1998,8 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	void dataClassBindingWithServletPart(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(ServletPartDataClassController.class, usePathPatterns);
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/bind");
 		request.setContentType("multipart/form-data");
-		request.setRequestURI("/bind");
 		request.addPart(new MockPart("param1", "value1".getBytes(StandardCharsets.UTF_8)));
 		request.addParameter("param2", "true");
 		MockHttpServletResponse response = new MockHttpServletResponse();

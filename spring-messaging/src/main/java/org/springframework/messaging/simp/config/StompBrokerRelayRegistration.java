@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,12 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	private String userRegistryBroadcast;
 
 
+	/**
+	 * Create a new {@code StompBrokerRelayRegistration}.
+	 * @param clientInboundChannel the inbound channel
+	 * @param clientOutboundChannel the outbound channel
+	 * @param destinationPrefixes the destination prefixes
+	 */
 	public StompBrokerRelayRegistration(SubscribableChannel clientInboundChannel,
 			MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
 

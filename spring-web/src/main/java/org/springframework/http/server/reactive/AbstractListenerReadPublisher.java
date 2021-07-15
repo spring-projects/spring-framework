@@ -186,7 +186,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 */
 	private boolean readAndPublish() throws IOException {
 		long r;
-		while ((r = this.demand) > 0 && !this.state.get().equals(State.COMPLETED)) {
+		while ((r = this.demand) > 0 && (this.state.get() != State.COMPLETED)) {
 			T data = read();
 			if (data != null) {
 				if (r != Long.MAX_VALUE) {
@@ -222,7 +222,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 			// Protect from infinite recursion in Undertow, where we can't check if data
 			// is available, so all we can do is to try to read.
 			// Generally, no need to check if we just came out of readAndPublish()...
-			if (!oldState.equals(State.READING)) {
+			if (oldState != State.READING) {
 				checkOnDataAvailable();
 			}
 		}
@@ -230,7 +230,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	private boolean handlePendingCompletionOrError() {
 		State state = this.state.get();
-		if (state.equals(State.DEMAND) || state.equals(State.NO_DEMAND)) {
+		if (state == State.DEMAND || state  == State.NO_DEMAND) {
 			if (this.completionPending) {
 				rsReadLogger.trace(getLogPrefix() + "Processing pending completion");
 				this.state.get().onAllDataRead(this);

@@ -1,5 +1,5 @@
-insert into users (last_name)
-values ('Walter')
+insert into T_TEST (NAME) 
+values ('Keith')
 
-insert into users (last_name)
-values ('Jesse')
+insert into T_TEST (NAME)
+values ('Dave')

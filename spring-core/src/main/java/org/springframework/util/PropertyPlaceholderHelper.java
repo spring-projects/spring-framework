@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.Nullable;
 
 /**
- * Utility class for working with Strings that have placeholder values in them. A placeholder takes the form
- * {@code ${name}}. Using {@code PropertyPlaceholderHelper} these placeholders can be substituted for
- * user-supplied values. <p> Values for substitution can be supplied using a {@link Properties} instance or
+ * Utility class for working with Strings that have placeholder values in them.
+ * A placeholder takes the form {@code ${name}}. Using {@code PropertyPlaceholderHelper}
+ * these placeholders can be substituted for user-supplied values.
+ *
+ * <p>Values for substitution can be supplied using a {@link Properties} instance or
  * using a {@link PlaceholderResolver}.
  *
  * @author Juergen Hoeller

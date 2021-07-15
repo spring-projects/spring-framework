@@ -58,10 +58,10 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * Abstract base class for argument resolvers that resolve method arguments
  * by reading the request body with an {@link HttpMessageReader}.
  *
- * <p>Applies validation if the method argument is annotated with
- * {@code @javax.validation.Valid} or
- * {@link org.springframework.validation.annotation.Validated}. Validation
- * failure results in an {@link ServerWebInputException}.
+ * <p>Applies validation if the method argument is annotated with any
+ * {@linkplain org.springframework.validation.annotation.ValidationAnnotationUtils#determineValidationHints
+ * annotations that trigger validation}. Validation failure results in a
+ * {@link ServerWebInputException}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze

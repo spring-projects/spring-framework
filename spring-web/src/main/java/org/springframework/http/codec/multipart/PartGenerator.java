@@ -578,9 +578,6 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 
 		private WritingFileState createFileState(Path directory) {
 			try {
-				if (!Files.exists(directory)) {
-					Files.createDirectory(directory);
-				}
 				Path tempFile = Files.createTempFile(directory, null, ".multipart");
 				if (logger.isTraceEnabled()) {
 					logger.trace("Storing multipart data in file " + tempFile);

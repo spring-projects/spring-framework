@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,11 @@ import static org.mockito.BDDMockito.when;
 /**
  * Unit tests for {@link CompositeDatabasePopulator}.
  *
+ * @author Kazuki Shimizu
+ * @author Juergen Hoeller
  * @author Mark Paluch
  */
-public class CompositeDatabasePopulatorTests {
+class CompositeDatabasePopulatorTests {
 
 	Connection mockedConnection = mock(Connection.class);
 
@@ -45,15 +47,13 @@ public class CompositeDatabasePopulatorTests {
 
 
 	@BeforeEach
-	public void before() {
-		when(mockedDatabasePopulator1.populate(mockedConnection)).thenReturn(
-				Mono.empty());
-		when(mockedDatabasePopulator2.populate(mockedConnection)).thenReturn(
-				Mono.empty());
+	void before() {
+		when(mockedDatabasePopulator1.populate(mockedConnection)).thenReturn(Mono.empty());
+		when(mockedDatabasePopulator2.populate(mockedConnection)).thenReturn(Mono.empty());
 	}
 
 	@Test
-	public void addPopulators() {
+	void addPopulators() {
 		CompositeDatabasePopulator populator = new CompositeDatabasePopulator();
 		populator.addPopulators(mockedDatabasePopulator1, mockedDatabasePopulator2);
 
@@ -64,7 +64,7 @@ public class CompositeDatabasePopulatorTests {
 	}
 
 	@Test
-	public void setPopulatorsWithMultiple() {
+	void setPopulatorsWithMultiple() {
 		CompositeDatabasePopulator populator = new CompositeDatabasePopulator();
 		populator.setPopulators(mockedDatabasePopulator1, mockedDatabasePopulator2); // multiple
 
@@ -75,7 +75,7 @@ public class CompositeDatabasePopulatorTests {
 	}
 
 	@Test
-	public void setPopulatorsForOverride() {
+	void setPopulatorsForOverride() {
 		CompositeDatabasePopulator populator = new CompositeDatabasePopulator();
 		populator.setPopulators(mockedDatabasePopulator1);
 		populator.setPopulators(mockedDatabasePopulator2); // override
@@ -87,9 +87,9 @@ public class CompositeDatabasePopulatorTests {
 	}
 
 	@Test
-	public void constructWithVarargs() {
-		CompositeDatabasePopulator populator = new CompositeDatabasePopulator(
-				mockedDatabasePopulator1, mockedDatabasePopulator2);
+	void constructWithVarargs() {
+		CompositeDatabasePopulator populator =
+				new CompositeDatabasePopulator(mockedDatabasePopulator1, mockedDatabasePopulator2);
 
 		populator.populate(mockedConnection).as(StepVerifier::create).verifyComplete();
 
@@ -98,7 +98,7 @@ public class CompositeDatabasePopulatorTests {
 	}
 
 	@Test
-	public void constructWithCollection() {
+	void constructWithCollection() {
 		Set<DatabasePopulator> populators = new LinkedHashSet<>();
 		populators.add(mockedDatabasePopulator1);
 		populators.add(mockedDatabasePopulator2);

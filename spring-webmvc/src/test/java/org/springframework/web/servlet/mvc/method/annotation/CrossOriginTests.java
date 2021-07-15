@@ -284,7 +284,7 @@ class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
 		assertThat(config.getAllowedMethods()).containsExactly("GET");
-		assertThat(config.getAllowedOrigins()).containsExactly("http://www.foo.example/");
+		assertThat(config.getAllowedOrigins()).containsExactly("http://www.foo.example");
 		assertThat(config.getAllowCredentials()).isTrue();
 	}
 
@@ -297,7 +297,7 @@ class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
 		assertThat(config.getAllowedMethods()).containsExactly("GET");
-		assertThat(config.getAllowedOrigins()).containsExactly("http://www.foo.example/");
+		assertThat(config.getAllowedOrigins()).containsExactly("http://www.foo.example");
 		assertThat(config.getAllowCredentials()).isTrue();
 	}
 

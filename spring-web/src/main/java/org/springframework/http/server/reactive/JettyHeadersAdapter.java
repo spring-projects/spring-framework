@@ -187,7 +187,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
-		private Enumeration<String> names = headers.getFieldNames();
+		private final Enumeration<String> names = headers.getFieldNames();
 
 		@Override
 		public boolean hasNext() {
@@ -240,6 +240,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 			return headers.getFieldNamesCollection().size();
 		}
 	}
+
 
 	private final class HeaderNamesIterator implements Iterator<String> {
 

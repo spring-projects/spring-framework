@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core.type.classreading;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.asm.ClassReader;
@@ -35,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Tests for {@link AnnotationMetadataReadingVisitor}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 @SuppressWarnings("deprecation")
 class AnnotationMetadataReadingVisitorTests extends AbstractAnnotationMetadataTests {
@@ -62,11 +64,29 @@ class AnnotationMetadataReadingVisitorTests extends AbstractAnnotationMetadataTe
 		}
 	}
 
+	@Test
+	@Disabled("equals() not implemented in deprecated AnnotationMetadataReadingVisitor")
+	@Override
+	public void verifyEquals() throws Exception {
+	}
+
+	@Test
+	@Disabled("hashCode() not implemented in deprecated AnnotationMetadataReadingVisitor")
+	@Override
+	public void verifyHashCode() throws Exception {
+	}
+
+	@Test
+	@Disabled("toString() not implemented in deprecated AnnotationMetadataReadingVisitor")
+	@Override
+	public void verifyToString() {
+	}
+
 	@Override
 	@Test
 	public void getAnnotationsReturnsDirectAnnotations() {
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
-				super::getAnnotationsReturnsDirectAnnotations);
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+			.isThrownBy(super::getAnnotationsReturnsDirectAnnotations);
 	}
 
 }

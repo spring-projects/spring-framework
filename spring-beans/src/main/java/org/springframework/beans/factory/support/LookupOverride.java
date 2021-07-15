@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,25 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represents an override of a method that looks up an object in the same IoC context.
+ * Represents an override of a method that looks up an object in the same IoC context,
+ * either by bean name or by bean type (based on the declared method return type).
  *
- * <p>Methods eligible for lookup override must not have arguments.
+ * <p>Methods eligible for lookup override may declare arguments in which case the
+ * given arguments are passed to the bean retrieval operation.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 1.1
+ * @see org.springframework.beans.factory.BeanFactory#getBean(String)
+ * @see org.springframework.beans.factory.BeanFactory#getBean(Class)
+ * @see org.springframework.beans.factory.BeanFactory#getBean(String, Object...)
+ * @see org.springframework.beans.factory.BeanFactory#getBean(Class, Object...)
+ * @see org.springframework.beans.factory.BeanFactory#getBeanProvider(ResolvableType)
  */
 public class LookupOverride extends MethodOverride {
 
@@ -43,8 +51,8 @@ public class LookupOverride extends MethodOverride {
 	/**
 	 * Construct a new LookupOverride.
 	 * @param methodName the name of the method to override
-	 * @param beanName the name of the bean in the current {@code BeanFactory}
-	 * that the overridden method should return (may be {@code null})
+	 * @param beanName the name of the bean in the current {@code BeanFactory} that the
+	 * overridden method should return (may be {@code null} for type-based bean retrieval)
 	 */
 	public LookupOverride(String methodName, @Nullable String beanName) {
 		super(methodName);
@@ -53,9 +61,9 @@ public class LookupOverride extends MethodOverride {
 
 	/**
 	 * Construct a new LookupOverride.
-	 * @param method the method to override
-	 * @param beanName the name of the bean in the current {@code BeanFactory}
-	 * that the overridden method should return (may be {@code null})
+	 * @param method the method declaration to override
+	 * @param beanName the name of the bean in the current {@code BeanFactory} that the
+	 * overridden method should return (may be {@code null} for type-based bean retrieval)
 	 */
 	public LookupOverride(Method method, @Nullable String beanName) {
 		super(method.getName());

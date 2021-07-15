@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.util.MultiValueMap;
  * @author Mark Pollack
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.0
  */
 public class StandardMethodMetadata implements MethodMetadata {
@@ -148,6 +149,22 @@ public class StandardMethodMetadata implements MethodMetadata {
 		}
 		return AnnotatedElementUtils.getAllAnnotationAttributes(this.introspectedMethod,
 				annotationName, classValuesAsString, false);
+	}
+
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		return ((this == obj) || ((obj instanceof StandardMethodMetadata) &&
+				this.introspectedMethod.equals(((StandardMethodMetadata) obj).introspectedMethod)));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.introspectedMethod.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return this.introspectedMethod.toString();
 	}
 
 }

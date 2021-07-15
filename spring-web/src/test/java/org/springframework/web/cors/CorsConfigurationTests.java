@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -282,15 +282,24 @@ public class CorsConfigurationTests {
 
 	@Test
 	public void checkOriginAllowed() {
+		// "*" matches
 		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("*");
 		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("*");
 
+		// "*" does not match together with allowCredentials
 		config.setAllowCredentials(true);
 		assertThatIllegalArgumentException().isThrownBy(() -> config.checkOrigin("https://domain.com"));
 
+		// specific origin matches Origin header with or without trailing "/"
 		config.setAllowedOrigins(Collections.singletonList("https://domain.com"));
 		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("https://domain.com");
+		assertThat(config.checkOrigin("https://domain.com/")).isEqualTo("https://domain.com/");
+
+		// specific origin with trailing "/" matches Origin header with or without trailing "/"
+		config.setAllowedOrigins(Collections.singletonList("https://domain.com/"));
+		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("https://domain.com");
+		assertThat(config.checkOrigin("https://domain.com/")).isEqualTo("https://domain.com/");
 
 		config.setAllowCredentials(false);
 		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("https://domain.com");
@@ -326,6 +335,15 @@ public class CorsConfigurationTests {
 		config.addAllowedOriginPattern("https://*.domain.com");
 		assertThat(config.checkOrigin("https://example.domain.com")).isEqualTo("https://example.domain.com");
 
+		config.addAllowedOriginPattern("https://*.port.domain.com:[*]");
+		assertThat(config.checkOrigin("https://example.port.domain.com")).isEqualTo("https://example.port.domain.com");
+		assertThat(config.checkOrigin("https://example.port.domain.com:1234")).isEqualTo("https://example.port.domain.com:1234");
+
+		config.addAllowedOriginPattern("https://*.specific.port.com:[8080,8081]");
+		assertThat(config.checkOrigin("https://example.specific.port.com:8080")).isEqualTo("https://example.specific.port.com:8080");
+		assertThat(config.checkOrigin("https://example.specific.port.com:8081")).isEqualTo("https://example.specific.port.com:8081");
+		assertThat(config.checkOrigin("https://example.specific.port.com:1234")).isNull();
+
 		config.setAllowCredentials(false);
 		assertThat(config.checkOrigin("https://example.domain.com")).isEqualTo("https://example.domain.com");
 	}
@@ -343,6 +361,9 @@ public class CorsConfigurationTests {
 
 		config.setAllowedOriginPatterns(new ArrayList<>());
 		assertThat(config.checkOrigin("https://domain.com")).isNull();
+
+		config.setAllowedOriginPatterns(Collections.singletonList("https://*.specific.port.com:[8080,8081]"));
+		assertThat(config.checkOrigin("https://example.specific.port.com:1234")).isNull();
 	}
 
 	@Test
