@@ -1,4 +1,6 @@
-plugins {
+'# $ *. ' ; ! - = /
+$ *. 
+''# plugins {
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE' apply false
 	id 'io.spring.nohttp' version '0.0.5.RELEASE'
 	id 'org.jetbrains.kotlin.jvm' version '1.5.21' apply false

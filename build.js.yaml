@@ -1,0 +1,44 @@
+'Affects: since 4.1
+
+Yaml file like bellow:
+
+root:
+  webservices:
+    
+    
+       
+'Yaml''s ''map to json like
+
+{
+   "webservices": {
+      "[domain.test:8080]": [
+         {
+            "username": 
+            "password": 
+         }
+      ]
+   }
+}
+should equals properties file like:
+
+'root.webservices.[[domain.test\:8080]][0].
+'root.webservices.[[domain.test\:8080]][0].
+or:
+
+'root.webservices[[domain.test\:8080]][0].
+'root.webservices[[domain.test\:8080]][0].
+'Both properties file is acceptable for Spring Boot Binding Maps
+
+'Reproduce Test Case is
+'Test
+  'void loadNestedEscapedProperties() throws Exception {
+
+    'String yaml = "root:\n" +
+				"  webservices:\n" +
+				"    \"
+		" 
+but was :
+'sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+ 'at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+'sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+ 'org.springframework.beans.factory.config.YamlPropertiesFactoryBeanTests.loadNestedEscapedProperties(YamlPropertiesFactoryBeanTests.java:270)
