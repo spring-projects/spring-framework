@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -579,9 +579,6 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 			GenericReactiveTransaction status) {
 
 		if (status.isNewSynchronization()) {
-			if (status.isDebug()) {
-				logger.trace("Triggering beforeCommit synchronization");
-			}
 			return TransactionSynchronizationUtils.triggerBeforeCommit(
 					synchronizationManager.getSynchronizations(), status.isReadOnly());
 		}
@@ -597,9 +594,6 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 			GenericReactiveTransaction status) {
 
 		if (status.isNewSynchronization()) {
-			if (status.isDebug()) {
-				logger.trace("Triggering beforeCompletion synchronization");
-			}
 			return TransactionSynchronizationUtils.triggerBeforeCompletion(synchronizationManager.getSynchronizations());
 		}
 		return Mono.empty();
@@ -614,9 +608,6 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 			GenericReactiveTransaction status) {
 
 		if (status.isNewSynchronization()) {
-			if (status.isDebug()) {
-				logger.trace("Triggering afterCommit synchronization");
-			}
 			return TransactionSynchronizationUtils.invokeAfterCommit(synchronizationManager.getSynchronizations());
 		}
 		return Mono.empty();
@@ -635,9 +626,6 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 			List<TransactionSynchronization> synchronizations = synchronizationManager.getSynchronizations();
 			synchronizationManager.clearSynchronization();
 			if (!status.hasTransaction() || status.isNewTransaction()) {
-				if (status.isDebug()) {
-					logger.trace("Triggering afterCompletion synchronization");
-				}
 				// No transaction or new transaction for the current scope ->
 				// invoke the afterCompletion callbacks immediately
 				return invokeAfterCompletion(synchronizationManager, synchronizations, completionStatus);

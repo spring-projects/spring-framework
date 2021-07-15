@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ package org.springframework.jdbc.datasource.init;
 public class UncategorizedScriptException extends ScriptException {
 
 	/**
-	 * Construct a new {@code UncategorizedScriptException}.
+	 * Create a new {@code UncategorizedScriptException}.
 	 * @param message detailed message
 	 */
 	public UncategorizedScriptException(String message) {
@@ -36,7 +36,7 @@ public class UncategorizedScriptException extends ScriptException {
 	}
 
 	/**
-	 * Construct a new {@code UncategorizedScriptException}.
+	 * Create a new {@code UncategorizedScriptException}.
 	 * @param message detailed message
 	 * @param cause the root cause
 	 */

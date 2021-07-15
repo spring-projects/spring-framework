@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -83,8 +82,7 @@ public class HandlerMappingIntrospector
 	@Nullable
 	private List<HandlerMapping> handlerMappings;
 
-	@Nullable
-	private Map<HandlerMapping, PathPatternMatchableHandlerMapping> pathPatternHandlerMappings = new ConcurrentHashMap<>();
+	private Map<HandlerMapping, PathPatternMatchableHandlerMapping> pathPatternHandlerMappings = Collections.emptyMap();
 
 
 	/**
@@ -106,7 +104,7 @@ public class HandlerMappingIntrospector
 
 
 	/**
-	 * Return the configured or detected HandlerMapping's.
+	 * Return the configured or detected {@code HandlerMapping}s.
 	 */
 	public List<HandlerMapping> getHandlerMappings() {
 		return (this.handlerMappings != null ? this.handlerMappings : Collections.emptyList());
@@ -180,7 +178,6 @@ public class HandlerMappingIntrospector
 			BiFunction<HandlerMapping, HandlerExecutionChain, T> matchHandler) throws Exception {
 
 		Assert.notNull(this.handlerMappings, "Handler mappings not initialized");
-		Assert.notNull(this.pathPatternHandlerMappings, "Handler mappings with PathPatterns not initialized");
 
 		boolean parseRequestPath = !this.pathPatternHandlerMappings.isEmpty();
 		RequestPath previousPath = null;
@@ -247,6 +244,7 @@ public class HandlerMappingIntrospector
 		catch (IOException ex) {
 			throw new IllegalStateException("Could not load '" + path + "': " + ex.getMessage());
 		}
+
 		String value = props.getProperty(HandlerMapping.class.getName());
 		String[] names = StringUtils.commaDelimitedListToStringArray(value);
 		List<HandlerMapping> result = new ArrayList<>(names.length);

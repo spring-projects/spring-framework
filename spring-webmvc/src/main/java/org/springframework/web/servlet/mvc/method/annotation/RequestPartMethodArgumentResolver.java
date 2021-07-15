@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,13 +54,16 @@ import org.springframework.web.multipart.support.RequestPartServletServerHttpReq
  * 'Content-Type' of the request part in mind. This is analogous to what @{@link RequestBody}
  * does to resolve an argument based on the content of a regular request.
  *
- * <p>When a parameter is not annotated or the name of the part is not specified,
- * it is derived from the name of the method argument.
+ * <p>When a parameter is not annotated with {@code @RequestPart} or the name of
+ * the part is not specified, the request part's name is derived from the name of
+ * the method argument.
  *
- * <p>Automatic validation may be applied if the argument is annotated with
- * {@code @javax.validation.Valid}. In case of validation failure, a {@link MethodArgumentNotValidException}
- * is raised and a 400 response status code returned if
- * {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver} is configured.
+ * <p>Automatic validation may be applied if the argument is annotated with any
+ * {@linkplain org.springframework.validation.annotation.ValidationAnnotationUtils#determineValidationHints
+ * annotations that trigger validation}. In case of validation failure, a
+ * {@link MethodArgumentNotValidException} is raised and a 400 response status code returned if the
+ * {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver}
+ * is configured.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
@@ -77,7 +80,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	}
 
 	/**
-	 * Constructor with converters and {@code Request~} and
+	 * Constructor with converters and {@code RequestBodyAdvice} and
 	 * {@code ResponseBodyAdvice}.
 	 */
 	public RequestPartMethodArgumentResolver(List<HttpMessageConverter<?>> messageConverters,
@@ -88,8 +91,8 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 
 
 	/**
-	 * Whether the given {@linkplain MethodParameter method parameter} is a multi-part
-	 * supported. Supports the following:
+	 * Whether the given {@linkplain MethodParameter method parameter} is
+	 * supported as multi-part. Supports the following method parameters:
 	 * <ul>
 	 * <li>annotated with {@code @RequestPart}
 	 * <li>of type {@link MultipartFile} unless annotated with {@code @RequestParam}

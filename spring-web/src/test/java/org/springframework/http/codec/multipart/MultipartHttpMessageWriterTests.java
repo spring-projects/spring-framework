@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		FilePart mockPart = mock(FilePart.class);
 		HttpHeaders partHeaders = new HttpHeaders();
 		partHeaders.setContentType(MediaType.TEXT_PLAIN);
-		partHeaders.setContentDispositionFormData("filePublisher", "file.txt");
+		partHeaders.setContentDispositionFormData("foo", "file.txt");
 		partHeaders.add("foo", "bar");
 		given(mockPart.headers()).willReturn(partHeaders);
 		given(mockPart.content()).willReturn(bufferPublisher);
@@ -159,17 +159,20 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		assertThat(part.headers().getContentLength()).isEqualTo(utf8.getFile().length());
 
 		part = requestParts.getFirst("json");
+		assertThat(part).isNotNull();
 		assertThat(part.name()).isEqualTo("json");
 		assertThat(part.headers().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
 		String value = decodeToString(part);
 		assertThat(value).isEqualTo("{\"bar\":\"bar\"}");
 
 		part = requestParts.getFirst("publisher");
+		assertThat(part).isNotNull();
 		assertThat(part.name()).isEqualTo("publisher");
 		value = decodeToString(part);
 		assertThat(value).isEqualTo("foobarbaz");
 
 		part = requestParts.getFirst("filePublisher");
+		assertThat(part).isNotNull();
 		assertThat(part.name()).isEqualTo("filePublisher");
 		assertThat(part.headers()).containsEntry("foo", Collections.singletonList("bar"));
 		assertThat(((FilePart) part).filename()).isEqualTo("file.txt");

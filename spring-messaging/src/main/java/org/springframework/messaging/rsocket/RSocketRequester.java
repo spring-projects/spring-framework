@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.client.WebsocketClientTransport;
 import org.reactivestreams.Publisher;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -49,7 +50,7 @@ import org.springframework.util.MimeType;
  * @author Brian Clozel
  * @since 5.2
  */
-public interface RSocketRequester {
+public interface RSocketRequester extends Disposable {
 
 	/**
 	 * Return the underlying {@link RSocketClient} used to make requests with.
@@ -109,6 +110,27 @@ public interface RSocketRequester {
 	 * argument may be left as {@code null}.
 	 */
 	RequestSpec metadata(Object metadata, @Nullable MimeType mimeType);
+
+	/**
+	 * Shortcut method that delegates to the same on the underlying
+	 * {@link #rsocketClient()} in order to close the connection from the
+	 * underlying transport and notify subscribers.
+	 * @since 5.3.7
+	 */
+	@Override
+	default void dispose() {
+		rsocketClient().dispose();
+	}
+
+	/**
+	 * Shortcut method that delegates to the same on the underlying
+	 * {@link #rsocketClient()}.
+	 * @since 5.3.7
+	 */
+	@Override
+	default boolean isDisposed() {
+		return rsocketClient().isDisposed();
+	}
 
 	/**
 	 * Obtain a builder to create a client {@link RSocketRequester} by connecting

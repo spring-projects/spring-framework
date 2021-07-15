@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 4.0.3
  */
-class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
+class H2DatabasePopulatorIntegrationTests extends AbstractDatabasePopulatorTests {
 
 	@Override
 	protected EmbeddedDatabaseType getEmbeddedDatabaseType() {

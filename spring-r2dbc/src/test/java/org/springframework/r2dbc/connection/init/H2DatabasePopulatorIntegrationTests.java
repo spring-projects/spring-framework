@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,13 @@ import java.util.UUID;
 
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
-import org.junit.jupiter.api.Test;
-import reactor.test.StepVerifier;
 
 /**
  * Integration tests for {@link DatabasePopulator} using H2.
  *
  * @author Mark Paluch
  */
-public class H2DatabasePopulatorIntegrationTests
-		extends AbstractDatabaseInitializationTests {
+class H2DatabasePopulatorIntegrationTests extends AbstractDatabasePopulatorTests {
 
 	UUID databaseName = UUID.randomUUID();
 
@@ -40,22 +37,6 @@ public class H2DatabasePopulatorIntegrationTests
 	@Override
 	ConnectionFactory getConnectionFactory() {
 		return this.connectionFactory;
-	}
-
-	@Test
-	public void shouldRunScript() {
-
-		databasePopulator.addScript(usersSchema());
-		databasePopulator.addScript(resource("db-test-data-h2.sql"));
-		// Set statement separator to double newline so that ";" is not
-		// considered a statement separator within the source code of the
-		// aliased function 'REVERSE'.
-		databasePopulator.setSeparator("\n\n");
-
-		databasePopulator.populate(connectionFactory).as(
-				StepVerifier::create).verifyComplete();
-
-		assertUsersDatabaseCreated(connectionFactory, "White");
 	}
 
 }

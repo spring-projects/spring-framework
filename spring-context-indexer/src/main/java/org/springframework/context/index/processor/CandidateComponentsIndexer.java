@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.context.index.processor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,7 +36,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 /**
- * Annotation {@link Processor} that writes {@link CandidateComponentsMetadata}
+ * Annotation {@link Processor} that writes a {@link CandidateComponentsMetadata}
  * file for spring components.
  *
  * @author Stephane Nicoll
@@ -45,9 +44,6 @@ import javax.lang.model.element.TypeElement;
  * @since 5.0
  */
 public class CandidateComponentsIndexer implements Processor {
-
-	private static final Set<ElementKind> TYPE_KINDS =
-			Collections.unmodifiableSet(EnumSet.of(ElementKind.CLASS, ElementKind.INTERFACE));
 
 	private MetadataStore metadataStore;
 
@@ -136,7 +132,8 @@ public class CandidateComponentsIndexer implements Processor {
 	private static List<TypeElement> staticTypesIn(Iterable<? extends Element> elements) {
 		List<TypeElement> list = new ArrayList<>();
 		for (Element element : elements) {
-			if (TYPE_KINDS.contains(element.getKind()) && element.getModifiers().contains(Modifier.STATIC)) {
+			if ((element.getKind().isClass() || element.getKind() == ElementKind.INTERFACE) &&
+					element.getModifiers().contains(Modifier.STATIC) && element instanceof TypeElement) {
 				list.add((TypeElement) element);
 			}
 		}

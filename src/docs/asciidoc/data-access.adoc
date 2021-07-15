@@ -1,7 +1,5 @@
 [[spring-data-tier]]
 = Data Access
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 4
 :tabsize: 4
@@ -837,9 +835,9 @@ that test drives the configuration shown earlier:
 	public final class Boot {
 
 		public static void main(final String[] args) throws Exception {
-			ApplicationContext ctx = new ClassPathXmlApplicationContext("context.xml", Boot.class);
-			FooService fooService = (FooService) ctx.getBean("fooService");
-			fooService.insertFoo (new Foo());
+			ApplicationContext ctx = new ClassPathXmlApplicationContext("context.xml");
+			FooService fooService = ctx.getBean(FooService.class);
+			fooService.insertFoo(new Foo());
 		}
 	}
 ----
@@ -1314,19 +1312,23 @@ Consider the following class definition:
 	@Transactional
 	public class DefaultFooService implements FooService {
 
-		Foo getFoo(String fooName) {
+		@Override
+		public Foo getFoo(String fooName) {
 			// ...
 		}
 
-		Foo getFoo(String fooName, String barName) {
+		@Override
+		public Foo getFoo(String fooName, String barName) {
 			// ...
 		}
 
-		void insertFoo(Foo foo) {
+		@Override
+		public void insertFoo(Foo foo) {
 			// ...
 		}
 
-		void updateFoo(Foo foo) {
+		@Override
+		public void updateFoo(Foo foo) {
 			// ...
 		}
 	}
@@ -1356,11 +1358,13 @@ Consider the following class definition:
 	}
 ----
 
-Used at the class level as above, the annotation indicates a default for all methods
-of the declaring class (as well as its subclasses). Alternatively, each method can
-get annotated individually. Note that a class-level annotation does not apply to
-ancestor classes up the class hierarchy; in such a scenario, methods need to be
-locally redeclared in order to participate in a subclass-level annotation.
+Used at the class level as above, the annotation indicates a default for all methods of
+the declaring class (as well as its subclasses). Alternatively, each method can be
+annotated individually. See <<transaction-declarative-annotations-method-visibility>> for
+further details on which methods Spring considers transactional. Note that a class-level
+annotation does not apply to ancestor classes up the class hierarchy; in such a scenario,
+inherited methods need to be locally redeclared in order to participate in a
+subclass-level annotation.
 
 When a POJO class such as the one above is defined as a bean in a Spring context,
 you can make the bean instance transactional through an `@EnableTransactionManagement`
@@ -1390,7 +1394,8 @@ In XML configuration, the `<tx:annotation-driven/>` tag provides similar conveni
 		<bean id="fooService" class="x.y.service.DefaultFooService"/>
 
 		<!-- enable the configuration of transactional behavior based on annotations -->
-		<tx:annotation-driven transaction-manager="txManager"/><!-- a TransactionManager is still required --> <1>
+		<!-- a TransactionManager is still required -->
+		<tx:annotation-driven transaction-manager="txManager"/> <1>
 
 		<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 			<!-- (this dependency is defined somewhere else) -->
@@ -1405,7 +1410,7 @@ In XML configuration, the `<tx:annotation-driven/>` tag provides similar conveni
 
 
 TIP: You can omit the `transaction-manager` attribute in the `<tx:annotation-driven/>`
-tag if the bean name of the `TransactionManager` that you want to wire in has the name,
+tag if the bean name of the `TransactionManager` that you want to wire in has the name
 `transactionManager`. If the `TransactionManager` bean that you want to dependency-inject
 has any other name, you have to use the `transaction-manager` attribute, as in the
 preceding example.
@@ -1420,19 +1425,23 @@ programming arrangements as the following listing shows:
 	@Transactional
 	public class DefaultFooService implements FooService {
 
-		Publisher<Foo> getFoo(String fooName) {
+		@Override
+		public Publisher<Foo> getFoo(String fooName) {
 			// ...
 		}
 
-		Mono<Foo> getFoo(String fooName, String barName) {
+		@Override
+		public Mono<Foo> getFoo(String fooName, String barName) {
 			// ...
 		}
 
-		Mono<Void> insertFoo(Foo foo) {
+		@Override
+		public Mono<Void> insertFoo(Foo foo) {
 			// ...
 		}
 
-		Mono<Void> updateFoo(Foo foo) {
+		@Override
+		public Mono<Void> updateFoo(Foo foo) {
 			// ...
 		}
 	}
@@ -1467,17 +1476,47 @@ Reactive Streams cancellation signals. See the <<tx-prog-operator-cancel>> secti
 "Using the TransactionOperator" for more details.
 
 
+[[transaction-declarative-annotations-method-visibility]]
 .Method visibility and `@Transactional`
-****
-When you use proxies, you should apply the `@Transactional` annotation only to methods
-with public visibility. If you do annotate protected, private or package-visible
-methods with the `@Transactional` annotation, no error is raised, but the annotated
-method does not exhibit the configured transactional settings. If you need to annotate
-non-public methods, consider using AspectJ (described later).
-****
+[NOTE]
+====
+When you use transactional proxies with Spring's standard configuration, you should apply
+the `@Transactional` annotation only to methods with `public` visibility. If you do
+annotate `protected`, `private`, or package-visible methods with the `@Transactional`
+annotation, no error is raised, but the annotated method does not exhibit the configured
+transactional settings. If you need to annotate non-public methods, consider the tip in
+the following paragraph for class-based proxies or consider using AspectJ compile-time or
+load-time weaving (described later).
+
+When using `@EnableTransactionManagement` in a `@Configuration` class, `protected` or
+package-visible methods can also be made transactional for class-based proxies by
+registering a custom `transactionAttributeSource` bean like in the following example.
+Note, however, that transactional methods in interface-based proxies must always be
+`public` and defined in the proxied interface.
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	/**
+	 * Register a custom AnnotationTransactionAttributeSource with the
+	 * publicMethodsOnly flag set to false to enable support for
+	 * protected and package-private @Transactional methods in
+	 * class-based proxies.
+	 *
+	 * @see ProxyTransactionManagementConfiguration#transactionAttributeSource()
+	 */
+	@Bean
+	TransactionAttributeSource transactionAttributeSource() {
+		return new AnnotationTransactionAttributeSource(false);
+	}
+----
+
+The _Spring TestContext Framework_ supports non-private `@Transactional` test methods by
+default. See <<testing.adoc#testcontext-tx,Transaction Management>> in the testing
+chapter for examples.
+====
 
 You can apply the `@Transactional` annotation to an interface definition, a method
-on an interface, a class definition, or a public method on a class. However, the
+on an interface, a class definition, or a method on a class. However, the
 mere presence of the `@Transactional` annotation is not enough to activate the
 transactional behavior. The `@Transactional` annotation is merely metadata that can
 be consumed by some runtime infrastructure that is `@Transactional`-aware and that
@@ -1499,12 +1538,13 @@ the proxy are intercepted. This means that self-invocation (in effect, a method 
 the target object calling another method of the target object) does not lead to an actual
 transaction at runtime even if the invoked method is marked with `@Transactional`. Also,
 the proxy must be fully initialized to provide the expected behavior, so you should not
-rely on this feature in your initialization code (that is, `@PostConstruct`).
+rely on this feature in your initialization code -- for example, in a `@PostConstruct`
+method.
 
-Consider using of AspectJ mode (see the `mode` attribute in the following table) if you
-expect self-invocations to be wrapped with transactions as well. In this case, there no
-proxy in the first place. Instead, the target class is woven (that is, its byte code is
-modified) to turn `@Transactional` into runtime behavior on any kind of method.
+Consider using AspectJ mode (see the `mode` attribute in the following table) if you
+expect self-invocations to be wrapped with transactions as well. In this case, there is
+no proxy in the first place. Instead, the target class is woven (that is, its byte code
+is modified) to support `@Transactional` runtime behavior on any kind of method.
 
 [[tx-annotation-driven-settings]]
 .Annotation driven transaction settings
@@ -1557,14 +1597,14 @@ NOTE: The `proxy-target-class` attribute controls what type of transactional pro
 created for classes annotated with the `@Transactional` annotation. If
 `proxy-target-class` is set to `true`, class-based proxies are created. If
 `proxy-target-class` is `false` or if the attribute is omitted, standard JDK
-interface-based proxies are created. (See <<core.adoc#aop-proxying>> for a discussion of the
-different proxy types.)
+interface-based proxies are created. (See <<core.adoc#aop-proxying, Proxying Mechanisms>>
+for a discussion of the different proxy types.)
 
-NOTE: `@EnableTransactionManagement` and `<tx:annotation-driven/>` looks for
+NOTE: `@EnableTransactionManagement` and `<tx:annotation-driven/>` look for
 `@Transactional` only on beans in the same application context in which they are defined.
 This means that, if you put annotation-driven configuration in a `WebApplicationContext`
 for a `DispatcherServlet`, it checks for `@Transactional` beans only in your controllers
-and not your services. See <<web.adoc#mvc-servlet, MVC>> for more information.
+and not in your services. See <<web.adoc#mvc-servlet, MVC>> for more information.
 
 The most derived location takes precedence when evaluating the transactional settings
 for a method. In the case of the following example, the `DefaultFooService` class is
@@ -1612,8 +1652,8 @@ precedence over the transactional settings defined at the class level.
 ===== `@Transactional` Settings
 
 The `@Transactional` annotation is metadata that specifies that an interface, class,
-or method must have transactional semantics (for example, "`start a brand new read-only
-transaction when this method is invoked, suspending any existing transaction`").
+or method must have transactional semantics (for example, "start a brand new read-only
+transaction when this method is invoked, suspending any existing transaction").
 The default `@Transactional` settings are as follows:
 
 * The propagation setting is `PROPAGATION_REQUIRED.`

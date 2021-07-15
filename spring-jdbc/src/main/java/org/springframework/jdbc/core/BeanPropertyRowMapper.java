@@ -225,14 +225,38 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 		for (PropertyDescriptor pd : BeanUtils.getPropertyDescriptors(mappedClass)) {
 			if (pd.getWriteMethod() != null) {
-				this.mappedFields.put(lowerCaseName(pd.getName()), pd);
-				String underscoredName = underscoreName(pd.getName());
-				if (!lowerCaseName(pd.getName()).equals(underscoredName)) {
-					this.mappedFields.put(underscoredName, pd);
+				String lowerCaseName = lowerCaseName(pd.getName());
+				this.mappedFields.put(lowerCaseName, pd);
+				String underscoreName = underscoreName(pd.getName());
+				if (!lowerCaseName.equals(underscoreName)) {
+					this.mappedFields.put(underscoreName, pd);
 				}
 				this.mappedProperties.add(pd.getName());
 			}
 		}
+	}
+
+	/**
+	 * Remove the specified property from the mapped fields.
+	 * @param propertyName the property name (as used by property descriptors)
+	 * @since 5.3.9
+	 */
+	protected void suppressProperty(String propertyName) {
+		if (this.mappedFields != null) {
+			this.mappedFields.remove(lowerCaseName(propertyName));
+			this.mappedFields.remove(underscoreName(propertyName));
+		}
+	}
+
+	/**
+	 * Convert the given name to lower case.
+	 * By default, conversions will happen within the US locale.
+	 * @param name the original name
+	 * @return the converted name
+	 * @since 4.2
+	 */
+	protected String lowerCaseName(String name) {
+		return name.toLowerCase(Locale.US);
 	}
 
 	/**
@@ -259,17 +283,6 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 			}
 		}
 		return result.toString();
-	}
-
-	/**
-	 * Convert the given name to lower case.
-	 * By default, conversions will happen within the US locale.
-	 * @param name the original name
-	 * @return the converted name
-	 * @since 4.2
-	 */
-	protected String lowerCaseName(String name) {
-		return name.toLowerCase(Locale.US);
 	}
 
 

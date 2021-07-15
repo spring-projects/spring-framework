@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,15 +29,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-
 /**
  * Abstract base class for integration tests involving database initialization.
  *
  * @author Sam Brannen
  * @since 4.0.3
  */
-public abstract class AbstractDatabaseInitializationTests {
+abstract class AbstractDatabaseInitializationTests {
 
 	private final ClassRelativeResourceLoader resourceLoader = new ClassRelativeResourceLoader(getClass());
 
@@ -47,13 +45,13 @@ public abstract class AbstractDatabaseInitializationTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		db = new EmbeddedDatabaseBuilder().setType(getEmbeddedDatabaseType()).build();
 		jdbcTemplate = new JdbcTemplate(db);
 	}
 
 	@AfterEach
-	public void shutDown() {
+	void shutDown() {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.clear();
 			TransactionSynchronizationManager.unbindResource(db);

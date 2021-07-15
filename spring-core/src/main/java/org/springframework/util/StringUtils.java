@@ -566,7 +566,7 @@ public abstract class StringUtils {
 
 		char[] chars = str.toCharArray();
 		chars[0] = updatedChar;
-		return new String(chars, 0, chars.length);
+		return new String(chars);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public abstract class DataBufferUtils {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Obtain a {@link InputStream} from the given supplier, and read it into a
+	 * Obtain an {@link InputStream} from the given supplier, and read it into a
 	 * {@code Flux} of {@code DataBuffer}s. Closes the input stream when the
 	 * Flux is terminated.
 	 * @param inputStreamSupplier the supplier for the input stream to read from
@@ -125,7 +125,7 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Obtain a {@code AsynchronousFileChannel} from the given supplier, and
+	 * Obtain an {@code AsynchronousFileChannel} from the given supplier, and
 	 * read it into a {@code Flux} of {@code DataBuffer}s, starting at the given
 	 * position. Closes the channel when the Flux is terminated.
 	 * @param channelSupplier the supplier for the channel to read from

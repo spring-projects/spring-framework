@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -70,6 +72,9 @@ public class HandlerMethod {
 	@Nullable
 	private final BeanFactory beanFactory;
 
+	@Nullable
+	private final MessageSource messageSource;
+
 	private final Class<?> beanType;
 
 	private final Method method;
@@ -101,6 +106,7 @@ public class HandlerMethod {
 		Assert.notNull(method, "Method is required");
 		this.bean = bean;
 		this.beanFactory = null;
+		this.messageSource = null;
 		this.beanType = ClassUtils.getUserClass(bean);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
@@ -118,6 +124,7 @@ public class HandlerMethod {
 		Assert.notNull(methodName, "Method name is required");
 		this.bean = bean;
 		this.beanFactory = null;
+		this.messageSource = null;
 		this.beanType = ClassUtils.getUserClass(bean);
 		this.method = bean.getClass().getMethod(methodName, parameterTypes);
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(this.method);
@@ -132,11 +139,23 @@ public class HandlerMethod {
 	 * re-create the {@code HandlerMethod} with an initialized bean.
 	 */
 	public HandlerMethod(String beanName, BeanFactory beanFactory, Method method) {
+		this(beanName, beanFactory, null, method);
+	}
+
+	/**
+	 * Variant of {@link #HandlerMethod(String, BeanFactory, Method)} that
+	 * also accepts a {@link MessageSource}.
+	 */
+	public HandlerMethod(
+			String beanName, BeanFactory beanFactory,
+			@Nullable MessageSource messageSource, Method method) {
+
 		Assert.hasText(beanName, "Bean name is required");
 		Assert.notNull(beanFactory, "BeanFactory is required");
 		Assert.notNull(method, "Method is required");
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
+		this.messageSource = messageSource;
 		Class<?> beanType = beanFactory.getType(beanName);
 		if (beanType == null) {
 			throw new IllegalStateException("Cannot resolve bean type for bean with name '" + beanName + "'");
@@ -156,6 +175,7 @@ public class HandlerMethod {
 		Assert.notNull(handlerMethod, "HandlerMethod is required");
 		this.bean = handlerMethod.bean;
 		this.beanFactory = handlerMethod.beanFactory;
+		this.messageSource = handlerMethod.messageSource;
 		this.beanType = handlerMethod.beanType;
 		this.method = handlerMethod.method;
 		this.bridgedMethod = handlerMethod.bridgedMethod;
@@ -174,6 +194,7 @@ public class HandlerMethod {
 		Assert.notNull(handler, "Handler object is required");
 		this.bean = handler;
 		this.beanFactory = handlerMethod.beanFactory;
+		this.messageSource = handlerMethod.messageSource;
 		this.beanType = handlerMethod.beanType;
 		this.method = handlerMethod.method;
 		this.bridgedMethod = handlerMethod.bridgedMethod;
@@ -199,8 +220,13 @@ public class HandlerMethod {
 			annotation = AnnotatedElementUtils.findMergedAnnotation(getBeanType(), ResponseStatus.class);
 		}
 		if (annotation != null) {
+			String reason = annotation.reason();
+			String resolvedReason = (StringUtils.hasText(reason) && this.messageSource != null ?
+					this.messageSource.getMessage(reason, null, reason, LocaleContextHolder.getLocale()) :
+					reason);
+
 			this.responseStatus = annotation.code();
-			this.responseStatusReason = annotation.reason();
+			this.responseStatusReason = resolvedReason;
 		}
 	}
 

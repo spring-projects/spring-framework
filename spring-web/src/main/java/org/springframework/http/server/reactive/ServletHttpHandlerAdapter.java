@@ -157,7 +157,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	@Override
 	public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
 		// Check for existing error attribute first
-		if (DispatcherType.ASYNC.equals(request.getDispatcherType())) {
+		if (DispatcherType.ASYNC == request.getDispatcherType()) {
 			Throwable ex = (Throwable) request.getAttribute(WRITE_ERROR_ATTRIBUTE_NAME);
 			throw new ServletException("Failed to create response content", ex);
 		}

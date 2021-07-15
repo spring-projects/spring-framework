@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,8 +177,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * Set up the ExecutorService.
 	 */
 	public void initialize() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Initializing ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
+		if (logger.isDebugEnabled()) {
+			logger.debug("Initializing ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
 		}
 		if (!this.threadNamePrefixSet && this.beanName != null) {
 			setThreadNamePrefix(this.beanName + "-");
@@ -214,8 +214,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * @see java.util.concurrent.ExecutorService#shutdownNow()
 	 */
 	public void shutdown() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Shutting down ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
+		if (logger.isDebugEnabled()) {
+			logger.debug("Shutting down ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
 		}
 		if (this.executor != null) {
 			if (this.waitForTasksToCompleteOnShutdown) {

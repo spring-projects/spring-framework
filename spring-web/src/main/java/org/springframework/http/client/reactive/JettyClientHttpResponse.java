@@ -33,7 +33,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -51,10 +50,9 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 
 	private static final Pattern SAMESITE_PATTERN = Pattern.compile("(?i).*SameSite=(Strict|Lax|None).*");
 
-	private static final ClassLoader loader = JettyClientHttpResponse.class.getClassLoader();
+	private static final ClassLoader classLoader = JettyClientHttpResponse.class.getClassLoader();
 
-	private static final boolean jetty10Present = ClassUtils.isPresent(
-			"org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer", loader);
+	private static final boolean jetty10Present;
 
 
 	private final ReactiveResponse reactiveResponse;
@@ -62,6 +60,17 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 	private final Flux<DataBuffer> content;
 
 	private final HttpHeaders headers;
+
+
+	static {
+		try {
+			Class<?> httpFieldsClass = classLoader.loadClass("org.eclipse.jetty.http.HttpFields");
+			jetty10Present = httpFieldsClass.isInterface();
+		}
+		catch (ClassNotFoundException ex) {
+			throw new IllegalStateException("No compatible Jetty version found", ex);
+		}
+	}
 
 
 	public JettyClientHttpResponse(ReactiveResponse reactiveResponse, Publisher<DataBuffer> content) {
@@ -135,7 +144,7 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 		static {
 			try {
 				getHeadersMethod = Response.class.getMethod("getHeaders");
-				Class<?> type = loader.loadClass("org.eclipse.jetty.http.HttpField");
+				Class<?> type = classLoader.loadClass("org.eclipse.jetty.http.HttpField");
 				getNameMethod = type.getMethod("getName");
 				getValueMethod = type.getMethod("getValue");
 			}

@@ -1448,7 +1448,7 @@ You can map requests by using glob patterns and wildcards:
 
 | `+{*path}+`
 | Matches zero or more path segments until the end of the path and captures it as a variable named "path"
-| `+"/resources/{*file}"+` matches `+"/resources/images/file.png"+` and captures `+file=images/file.png+`
+| `+"/resources/{*file}"+` matches `+"/resources/images/file.png"+` and captures `+file=/images/file.png+`
 
 |===
 
@@ -1517,7 +1517,7 @@ information or with the `-parameters` compiler flag on Java 8.
 
 The syntax `{*varName}` declares a URI variable that matches zero or more remaining path
 segments. For example `/resources/{*path}` matches all files under `/resources/`, and the
-`"path"` variable captures the complete relative path.
+`"path"` variable captures the complete path under `/resources`.
 
 The syntax `{varName:regex}` declares a URI variable with a regular expression that has the
 syntax: `{varName:regex}`. For example, given a URL of `/spring-web-3.0.5.jar`, the following method

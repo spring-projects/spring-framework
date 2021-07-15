@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ public class WebClientResponseException extends WebClientException {
 
 	private final HttpHeaders headers;
 
+	@Nullable
 	private final Charset responseCharset;
 
 	@Nullable
@@ -97,7 +98,7 @@ public class WebClientResponseException extends WebClientException {
 		this.statusText = statusText;
 		this.headers = (headers != null ? headers : HttpHeaders.EMPTY);
 		this.responseBody = (responseBody != null ? responseBody : new byte[0]);
-		this.responseCharset = (charset != null ? charset : StandardCharsets.ISO_8859_1);
+		this.responseCharset = charset;
 		this.request = request;
 	}
 
@@ -139,10 +140,26 @@ public class WebClientResponseException extends WebClientException {
 	}
 
 	/**
-	 * Return the response body as a string.
+	 * Return the response content as a String using the charset of media type
+	 * for the response, if available, or otherwise falling back on
+	 * {@literal ISO-8859-1}. Use {@link #getResponseBodyAsString(Charset)} if
+	 * you want to fall back on a different, default charset.
 	 */
 	public String getResponseBodyAsString() {
-		return new String(this.responseBody, this.responseCharset);
+		return getResponseBodyAsString(StandardCharsets.ISO_8859_1);
+	}
+
+	/**
+	 * Variant of {@link #getResponseBodyAsString()} that allows specifying the
+	 * charset to fall back on, if a charset is not available from the media
+	 * type for the response.
+	 * @param defaultCharset the charset to use if the {@literal Content-Type}
+	 * of the response does not specify one.
+	 * @since 5.3.7
+	 */
+	public String getResponseBodyAsString(Charset defaultCharset) {
+		return new String(this.responseBody,
+				(this.responseCharset != null ? this.responseCharset : defaultCharset));
 	}
 
 	/**

@@ -334,6 +334,9 @@ final class QuartzCronField extends CronField {
 				// We ended up before the start, roll forward and try again
 				temporal = this.rollForwardType.rollForward(temporal);
 				result = adjust(temporal);
+				if (result != null) {
+					result = type().reset(result);
+				}
 			}
 		}
 		return result;

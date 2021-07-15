@@ -398,6 +398,10 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				if (requestInfo != null) {
 					logger.debug("Processing transport request: " + requestInfo);
 				}
+				if ("websocket".equalsIgnoreCase(request.getHeaders().getUpgrade())) {
+					response.setStatusCode(HttpStatus.BAD_REQUEST);
+					return;
+				}
 				response.getHeaders().setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
 				response.getBody().write("Welcome to SockJS!\n".getBytes(StandardCharsets.UTF_8));
 			}

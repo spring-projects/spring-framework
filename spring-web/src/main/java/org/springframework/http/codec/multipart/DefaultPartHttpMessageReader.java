@@ -19,9 +19,7 @@ package org.springframework.http.codec.multipart;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -63,8 +61,6 @@ import org.springframework.util.Assert;
  */
 public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements HttpMessageReader<Part> {
 
-	private static final String IDENTIFIER = "spring-multipart";
-
 	private int maxInMemorySize = 256 * 1024;
 
 	private int maxHeadersSize = 8 * 1024;
@@ -77,7 +73,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 
 	private Scheduler blockingOperationScheduler = Schedulers.boundedElastic();
 
-	private Mono<Path> fileStorageDirectory = Mono.defer(this::defaultFileStorageDirectory).cache();
+	private FileStorage fileStorage = FileStorage.tempDirectory(this::getBlockingOperationScheduler);
 
 	private Charset headersCharset = StandardCharsets.UTF_8;
 
@@ -147,10 +143,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 */
 	public void setFileStorageDirectory(Path fileStorageDirectory) throws IOException {
 		Assert.notNull(fileStorageDirectory, "FileStorageDirectory must not be null");
-		if (!Files.exists(fileStorageDirectory)) {
-			Files.createDirectory(fileStorageDirectory);
-		}
-		this.fileStorageDirectory = Mono.just(fileStorageDirectory);
+		this.fileStorage = FileStorage.fromPath(fileStorageDirectory);
 	}
 
 	/**
@@ -166,6 +159,10 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	public void setBlockingOperationScheduler(Scheduler blockingOperationScheduler) {
 		Assert.notNull(blockingOperationScheduler, "FileCreationScheduler must not be null");
 		this.blockingOperationScheduler = blockingOperationScheduler;
+	}
+
+	private Scheduler getBlockingOperationScheduler() {
+		return this.blockingOperationScheduler;
 	}
 
 	/**
@@ -230,7 +227,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 					this.maxHeadersSize, this.headersCharset);
 
 			return PartGenerator.createParts(tokens, this.maxParts, this.maxInMemorySize, this.maxDiskUsagePerPart,
-					this.streaming, this.fileStorageDirectory, this.blockingOperationScheduler);
+					this.streaming, this.fileStorage.directory(), this.blockingOperationScheduler);
 		});
 	}
 
@@ -248,18 +245,6 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 			}
 		}
 		return null;
-	}
-
-	@SuppressWarnings("BlockingMethodInNonBlockingContext")
-	private Mono<Path> defaultFileStorageDirectory() {
-		return Mono.fromCallable(() -> {
-			Path tempDirectory = Paths.get(System.getProperty("java.io.tmpdir"), IDENTIFIER);
-			if (!Files.exists(tempDirectory)) {
-				Files.createDirectory(tempDirectory);
-			}
-			return tempDirectory;
-		}).subscribeOn(this.blockingOperationScheduler);
-
 	}
 
 }

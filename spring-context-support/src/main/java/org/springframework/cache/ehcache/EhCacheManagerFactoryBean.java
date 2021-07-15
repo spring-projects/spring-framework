@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,8 +130,8 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 	@Override
 	public void afterPropertiesSet() throws CacheException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Initializing EhCache CacheManager" +
+		if (logger.isDebugEnabled()) {
+			logger.debug("Initializing EhCache CacheManager" +
 					(this.cacheManagerName != null ? " '" + this.cacheManagerName + "'" : ""));
 		}
 
@@ -188,8 +188,8 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 	@Override
 	public void destroy() {
 		if (this.cacheManager != null && this.locallyManaged) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Shutting down EhCache CacheManager" +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Shutting down EhCache CacheManager" +
 						(this.cacheManagerName != null ? " '" + this.cacheManagerName + "'" : ""));
 			}
 			this.cacheManager.shutdown();

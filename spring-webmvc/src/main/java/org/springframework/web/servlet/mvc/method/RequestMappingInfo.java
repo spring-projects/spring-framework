@@ -509,7 +509,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		}
 
 		// Patterns conditions are never empty and have "" (empty path) at least.
-		builder.append(" ").append(getActivePatternsCondition());
+		builder.append(' ').append(getActivePatternsCondition());
 
 		if (!this.paramsCondition.isEmpty()) {
 			builder.append(", params ").append(this.paramsCondition);

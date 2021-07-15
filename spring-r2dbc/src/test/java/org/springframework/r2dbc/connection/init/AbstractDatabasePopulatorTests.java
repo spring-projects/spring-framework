@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,22 +24,23 @@ import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.r2dbc.core.DatabaseClient;
 
-
 /**
  * Abstract test support for {@link DatabasePopulator}.
  *
+ * @author Dave Syer
+ * @author Sam Brannen
+ * @author Oliver Gierke
  * @author Mark Paluch
  */
-public abstract class AbstractDatabaseInitializationTests {
+abstract class AbstractDatabasePopulatorTests {
 
-	ClassRelativeResourceLoader resourceLoader = new ClassRelativeResourceLoader(
-			getClass());
+	ClassRelativeResourceLoader resourceLoader = new ClassRelativeResourceLoader(getClass());
 
 	ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
 
 
 	@Test
-	public void scriptWithSingleLineCommentsAndFailedDrop() {
+	void scriptWithSingleLineCommentsAndFailedDrop() {
 		databasePopulator.addScript(resource("db-schema-failed-drop-comments.sql"));
 		databasePopulator.addScript(resource("db-test-data.sql"));
 		databasePopulator.setIgnoreFailedDrops(true);
@@ -56,7 +57,7 @@ public abstract class AbstractDatabaseInitializationTests {
 	}
 
 	@Test
-	public void scriptWithStandardEscapedLiteral() {
+	void scriptWithStandardEscapedLiteral() {
 		databasePopulator.addScript(defaultSchema());
 		databasePopulator.addScript(resource("db-test-data-escaped-literal.sql"));
 
@@ -66,7 +67,7 @@ public abstract class AbstractDatabaseInitializationTests {
 	}
 
 	@Test
-	public void scriptWithMySqlEscapedLiteral() {
+	void scriptWithMySqlEscapedLiteral() {
 		databasePopulator.addScript(defaultSchema());
 		databasePopulator.addScript(resource("db-test-data-mysql-escaped-literal.sql"));
 
@@ -76,7 +77,7 @@ public abstract class AbstractDatabaseInitializationTests {
 	}
 
 	@Test
-	public void scriptWithMultipleStatements() {
+	void scriptWithMultipleStatements() {
 		databasePopulator.addScript(defaultSchema());
 		databasePopulator.addScript(resource("db-test-data-multiple.sql"));
 
@@ -86,7 +87,7 @@ public abstract class AbstractDatabaseInitializationTests {
 	}
 
 	@Test
-	public void scriptWithMultipleStatementsAndLongSeparator() {
+	void scriptWithMultipleStatementsAndLongSeparator() {
 		databasePopulator.addScript(defaultSchema());
 		databasePopulator.addScript(resource("db-test-data-endings.sql"));
 		databasePopulator.setSeparator("@@");
@@ -120,15 +121,13 @@ public abstract class AbstractDatabaseInitializationTests {
 		DatabaseClient client = DatabaseClient.create(connectionFactory);
 
 		for (String lastName : lastNames) {
-
 			client.sql("select count(0) from users where last_name = :name") //
 					.bind("name", lastName) //
 					.map((row, metadata) -> row.get(0)) //
 					.first() //
 					.map(number -> ((Number) number).intValue()) //
 					.as(StepVerifier::create) //
-					.expectNext(1).as(
-							"Did not find user with last name [" + lastName + "].") //
+					.expectNext(1).as("Did not find user with last name [" + lastName + "].") //
 					.verifyComplete();
 		}
 	}

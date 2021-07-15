@@ -268,7 +268,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			while (tokenizer.hasMoreTokens()) {
 				String value = UriUtils.encode(tokenizer.nextToken(), charset);
 				sb.append(value);
-				sb.append("/");
+				sb.append('/');
 			}
 			if (!path.endsWith("/")) {
 				sb.setLength(sb.length() - 1);

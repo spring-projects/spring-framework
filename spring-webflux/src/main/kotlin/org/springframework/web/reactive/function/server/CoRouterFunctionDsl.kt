@@ -531,8 +531,8 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	fun filter(filterFunction: suspend (ServerRequest, suspend (ServerRequest) -> ServerResponse) -> ServerResponse) {
 		builder.filter { serverRequest, handlerFunction ->
 			mono(Dispatchers.Unconfined) {
-				filterFunction(serverRequest) {
-					handlerFunction.handle(serverRequest).awaitSingle()
+				filterFunction(serverRequest) { handlerRequest ->
+					handlerFunction.handle(handlerRequest).awaitSingle()
 				}
 			}
 		}

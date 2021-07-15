@@ -183,14 +183,14 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 		cancel();
 		for (;;) {
 			State prev = this.state.get();
-			if (prev.equals(State.COMPLETED)) {
+			if (prev == State.COMPLETED) {
 				break;
 			}
 			if (this.state.compareAndSet(prev, State.COMPLETED)) {
 				if (rsWriteLogger.isTraceEnabled()) {
 					rsWriteLogger.trace(getLogPrefix() + prev + " -> " + this.state);
 				}
-				if (!prev.equals(State.WRITING)) {
+				if (prev != State.WRITING) {
 					discardCurrentData();
 				}
 				break;
@@ -430,7 +430,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.sourceCompleted = true;
 				// A competing write might have completed very quickly
-				if (processor.state.get().equals(State.REQUESTED)) {
+				if (processor.state.get() == State.REQUESTED) {
 					processor.changeStateToComplete(State.REQUESTED);
 				}
 			}
@@ -441,7 +441,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.sourceCompleted = true;
 				// A competing write might have completed very quickly
-				if (processor.state.get().equals(State.REQUESTED)) {
+				if (processor.state.get() == State.REQUESTED) {
 					processor.changeStateToComplete(State.REQUESTED);
 				}
 			}

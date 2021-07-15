@@ -193,7 +193,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		if (!this.requests.isEmpty()) {
 			sb.append(":\n");
 			for (ClientHttpRequest request : this.requests) {
-				sb.append(request.toString()).append("\n");
+				sb.append(request.toString()).append('\n');
 			}
 		}
 		else {

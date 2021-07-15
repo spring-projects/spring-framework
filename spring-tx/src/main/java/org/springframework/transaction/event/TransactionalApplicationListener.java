@@ -33,9 +33,10 @@ import org.springframework.lang.Nullable;
  * transaction completion.
  *
  * <p><b>NOTE: Transactional event listeners only work with thread-bound transactions
- * managed by {@link org.springframework.transaction.PlatformTransactionManager}.</b>
- * A reactive transaction managed by {@link org.springframework.transaction.ReactiveTransactionManager}
- * uses the Reactor context instead of thread-local attributes, so from the perspective of
+ * managed by a {@link org.springframework.transaction.PlatformTransactionManager
+ * PlatformTransactionManager}.</b> A reactive transaction managed by a
+ * {@link org.springframework.transaction.ReactiveTransactionManager ReactiveTransactionManager}
+ * uses the Reactor context instead of thread-local variables, so from the perspective of
  * an event listener, there is no compatible active transaction that it can participate in.
  *
  * @author Juergen Hoeller

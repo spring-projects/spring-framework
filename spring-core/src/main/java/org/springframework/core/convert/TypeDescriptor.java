@@ -513,7 +513,7 @@ public class TypeDescriptor implements Serializable {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (Annotation ann : getAnnotations()) {
-			builder.append("@").append(ann.annotationType().getName()).append(' ');
+			builder.append('@').append(ann.annotationType().getName()).append(' ');
 		}
 		builder.append(getResolvableType());
 		return builder.toString();

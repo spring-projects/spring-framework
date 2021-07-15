@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ import java.util.Date;
  */
 public class ConstructorPerson {
 
-	private String name;
+	private final String name;
 
-	private long age;
+	private final long age;
 
-	private java.util.Date birth_date;
+	private final Date birth_date;
 
-	private BigDecimal balance;
+	private final BigDecimal balance;
 
 
 	public ConstructorPerson(String name, long age, Date birth_date, BigDecimal balance) {
@@ -42,19 +42,19 @@ public class ConstructorPerson {
 
 
 	public String name() {
-		return name;
+		return this.name;
 	}
 
 	public long age() {
-		return age;
+		return this.age;
 	}
 
 	public Date birth_date() {
-		return birth_date;
+		return this.birth_date;
 	}
 
 	public BigDecimal balance() {
-		return balance;
+		return this.balance;
 	}
 
 }

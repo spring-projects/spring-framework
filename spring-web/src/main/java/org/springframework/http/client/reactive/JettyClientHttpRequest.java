@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.function.Function;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.reactive.client.ContentChunk;
 import org.eclipse.jetty.reactive.client.ReactiveRequest;
-import org.eclipse.jetty.reactive.client.internal.PublisherContentProvider;
 import org.eclipse.jetty.util.Callback;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -52,10 +51,14 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final DataBufferFactory bufferFactory;
 
+	private final ReactiveRequest.Builder builder;
+
+
 
 	public JettyClientHttpRequest(Request jettyRequest, DataBufferFactory bufferFactory) {
 		this.jettyRequest = jettyRequest;
 		this.bufferFactory = bufferFactory;
+		this.builder = ReactiveRequest.newBuilder(this.jettyRequest).abortOnCancel(true);
 	}
 
 
@@ -71,7 +74,7 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public Mono<Void> setComplete() {
-		return doCommit(this::completes);
+		return doCommit();
 	}
 
 	@Override
@@ -91,10 +94,10 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 			ReactiveRequest.Content content = Flux.from(body)
 					.map(buffer -> toContentChunk(buffer, sink))
 					.as(chunks -> ReactiveRequest.Content.fromPublisher(chunks, getContentType()));
-			this.jettyRequest.content(new PublisherContentProvider(content));
+			this.builder.content(content);
 			sink.success();
 		})
-				.then(doCommit(this::completes));
+				.then(doCommit());
 	}
 
 	@Override
@@ -109,10 +112,6 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 		return contentType != null ? contentType.toString() : MediaType.APPLICATION_OCTET_STREAM_VALUE;
 	}
 
-	private Mono<Void> completes() {
-		return Mono.empty();
-	}
-
 	private ContentChunk toContentChunk(DataBuffer buffer, MonoSink<Void> sink) {
 		return new ContentChunk(buffer.asByteBuffer(), new Callback() {
 			@Override
@@ -120,9 +119,9 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 				DataBufferUtils.release(buffer);
 			}
 			@Override
-			public void failed(Throwable x) {
+			public void failed(Throwable t) {
 				DataBufferUtils.release(buffer);
-				sink.error(x);
+				sink.error(t);
 			}
 		});
 	}
@@ -143,5 +142,10 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 			this.jettyRequest.header(HttpHeaders.ACCEPT, "*/*");
 		}
 	}
+
+	public ReactiveRequest toReactiveRequest() {
+		return this.builder.build();
+	}
+
 
 }
