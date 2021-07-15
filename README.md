@@ -1,7 +1,10 @@
 # README.md
-# [![img.src](img.src/docs/spring-framework.png)](width="80" height= "80"> Spring Framework)
-# [![Build Status](https://ci.spring.io/api/v1/teams/spring-framework/pipelines/spring-framework-5.3.x/jobs/build/badge)](https://ci.spring.io/teams/spring-framework/pipelines/spring-framework-5.3.x?groups=Build")
-# [![Revved up by Gradle Enterprise](https://img.shields.io/badge/Revved%20up%20by-Gradle%20Enterprise-06A0CE?logo=Gradle&labelColor=02303A)](https://ge.spring.io/scans?search.rootProjectNames=spring)
+>
+# ![img.src]('img.src/docs/spring-framework.png width="80" height= "80"> Spring Framework)"
+>
+# ![Build Status](https://ci.spring.io/api/v1/teams/spring-framework/pipelines/spring-framework-5.3.x/jobs/build/badge)](https://ci.spring.io/teams/spring-framework/pipelines/spring-framework-5.3.x?groups=Build")
+>
+# ![Revved up by Gradle Enterprise](https://img.shields.io/badge/Revved%20up%20by-Gradle%20Enterprise-06A0CE?logo=Gradle&labelColor=02303A)](https://ge.spring.io/scans?search.rootProjectNames=spring)
 >
 # This is the home of the Spring Framework: 
 >
@@ -23,21 +26,16 @@
 >
 ## Access to Binaries
 >
-# For access to artifacts or a distribution zip, see the [Spring Framework Artifacts](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Artifacts) wiki page.
+# For access to artifacts or a distribution zip see the 
+[Spring Framework Artifacts](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Artifacts) wiki page.
 >
 ## Documentation
 >
-# The Spring Framework maintains reference documentation ([published](https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/)
+# The Spring Framework maintains reference documentation ([published](https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/)[source](src/docs/asciidoc)
 >
-# and
->
-# [source](src/docs/asciidoc)), Github [wiki pages](https://github.com/spring-projects/spring-framework/wiki),
->
-# and an
->
-# [API reference](https://docs.spring.io/spring-framework/docs/current/javadoc-api/). There are also [guides and tutorials](https://spring.io/guides) 
->
-# across Spring projects.
+Github [wiki pages](https://github.com/spring-projects/spring-framework/wiki), and an
+[API reference](https://docs.spring.io/spring-framework/docs/current/javadoc-api/). 
+There are also [guides and tutorials](https://spring.io/guides) across Spring projects.
 >
 ## Micro-Benchmarks
 
