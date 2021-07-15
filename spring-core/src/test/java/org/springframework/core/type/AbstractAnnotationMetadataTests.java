@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,50 @@ import static org.assertj.core.api.Assertions.entry;
  * Base class for {@link AnnotationMetadata} tests.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 public abstract class AbstractAnnotationMetadataTests {
+
+	@Test
+	public void verifyEquals() throws Exception {
+		AnnotationMetadata testClass1 = get(TestClass.class);
+		AnnotationMetadata testClass2 = get(TestClass.class);
+		AnnotationMetadata testMemberClass1 = get(TestMemberClass.class);
+		AnnotationMetadata testMemberClass2 = get(TestMemberClass.class);
+
+		assertThat(testClass1.equals(null)).isFalse();
+
+		assertThat(testClass1.equals(testClass1)).isTrue();
+		assertThat(testClass2.equals(testClass2)).isTrue();
+		assertThat(testClass1.equals(testClass2)).isTrue();
+		assertThat(testClass2.equals(testClass1)).isTrue();
+
+		assertThat(testMemberClass1.equals(testMemberClass1)).isTrue();
+		assertThat(testMemberClass2.equals(testMemberClass2)).isTrue();
+		assertThat(testMemberClass1.equals(testMemberClass2)).isTrue();
+		assertThat(testMemberClass2.equals(testMemberClass1)).isTrue();
+
+		assertThat(testClass1.equals(testMemberClass1)).isFalse();
+		assertThat(testMemberClass1.equals(testClass1)).isFalse();
+	}
+
+	@Test
+	public void verifyHashCode() throws Exception {
+		AnnotationMetadata testClass1 = get(TestClass.class);
+		AnnotationMetadata testClass2 = get(TestClass.class);
+		AnnotationMetadata testMemberClass1 = get(TestMemberClass.class);
+		AnnotationMetadata testMemberClass2 = get(TestMemberClass.class);
+
+		assertThat(testClass1).hasSameHashCodeAs(testClass2);
+		assertThat(testMemberClass1).hasSameHashCodeAs(testMemberClass2);
+
+		assertThat(testClass1).doesNotHaveSameHashCodeAs(testMemberClass1);
+	}
+
+	@Test
+	public void verifyToString() throws Exception {
+		assertThat(get(TestClass.class).toString()).isEqualTo(TestClass.class.getName());
+	}
 
 	@Test
 	public void getClassNameReturnsClassName() {

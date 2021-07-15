@@ -177,17 +177,17 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	private String annotationToString() {
 		String string = this.string;
 		if (string == null) {
-			StringBuilder builder = new StringBuilder("@").append(this.type.getName()).append("(");
+			StringBuilder builder = new StringBuilder("@").append(this.type.getName()).append('(');
 			for (int i = 0; i < this.attributes.size(); i++) {
 				Method attribute = this.attributes.get(i);
 				if (i > 0) {
 					builder.append(", ");
 				}
 				builder.append(attribute.getName());
-				builder.append("=");
+				builder.append('=');
 				builder.append(toString(getAttributeValue(attribute)));
 			}
-			builder.append(")");
+			builder.append(')');
 			string = builder.toString();
 			this.string = string;
 		}
@@ -206,7 +206,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 				}
 				builder.append(toString(Array.get(value, i)));
 			}
-			builder.append("]");
+			builder.append(']');
 			return builder.toString();
 		}
 		return String.valueOf(value);

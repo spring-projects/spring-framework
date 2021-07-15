@@ -24,7 +24,9 @@ import java.nio.charset.Charset;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.server.HttpOutput;
@@ -98,10 +100,28 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			super(createHeaders(request), request, asyncContext, servletPath, bufferFactory, bufferSize);
 		}
 
-		private static MultiValueMap<String, String> createHeaders(HttpServletRequest request) {
-			HttpFields fields = ((Request) request).getMetaData().getFields();
+		private static MultiValueMap<String, String> createHeaders(HttpServletRequest servletRequest) {
+			Request request = getRequest(servletRequest);
+			HttpFields fields = request.getMetaData().getFields();
 			return new JettyHeadersAdapter(fields);
 		}
+
+		private static Request getRequest(HttpServletRequest request) {
+			if (request instanceof Request) {
+				return (Request) request;
+			}
+			else if (request instanceof HttpServletRequestWrapper) {
+				HttpServletRequestWrapper wrapper = (HttpServletRequestWrapper) request;
+				HttpServletRequest wrappedRequest = (HttpServletRequest) wrapper.getRequest();
+				return getRequest(wrappedRequest);
+			}
+			else {
+				throw new IllegalArgumentException("Cannot convert [" + request.getClass() +
+						"] to org.eclipse.jetty.server.Request");
+			}
+		}
+
+
 	}
 
 
@@ -141,9 +161,25 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			super(createHeaders(response), response, asyncContext, bufferFactory, bufferSize, request);
 		}
 
-		private static HttpHeaders createHeaders(HttpServletResponse response) {
-			HttpFields fields = ((Response) response).getHttpFields();
+		private static HttpHeaders createHeaders(HttpServletResponse servletResponse) {
+			Response response = getResponse(servletResponse);
+			HttpFields fields = response.getHttpFields();
 			return new HttpHeaders(new JettyHeadersAdapter(fields));
+		}
+
+		private static Response getResponse(HttpServletResponse response) {
+			if (response instanceof Response) {
+				return (Response) response;
+			}
+			else if (response instanceof HttpServletResponseWrapper) {
+				HttpServletResponseWrapper wrapper = (HttpServletResponseWrapper) response;
+				HttpServletResponse wrappedResponse = (HttpServletResponse) wrapper.getResponse();
+				return getResponse(wrappedResponse);
+			}
+			else {
+				throw new IllegalArgumentException("Cannot convert [" + response.getClass() +
+						"] to org.eclipse.jetty.server.Response");
+			}
 		}
 
 		@Override

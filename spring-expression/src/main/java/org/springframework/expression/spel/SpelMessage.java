@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -284,7 +284,7 @@ public enum SpelMessage {
 		formattedMessage.append("EL").append(this.code);
 		switch (this.kind) {
 			case ERROR:
-				formattedMessage.append("E");
+				formattedMessage.append('E');
 				break;
 		}
 		formattedMessage.append(": ");

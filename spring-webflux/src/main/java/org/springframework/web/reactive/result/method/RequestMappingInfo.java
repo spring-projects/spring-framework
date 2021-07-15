@@ -380,7 +380,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		}
 		if (!this.patternsCondition.isEmpty()) {
 			Set<PathPattern> patterns = this.patternsCondition.getPatterns();
-			builder.append(" ").append(patterns.size() == 1 ? patterns.iterator().next() : patterns);
+			builder.append(' ').append(patterns.size() == 1 ? patterns.iterator().next() : patterns);
 		}
 		if (!this.paramsCondition.isEmpty()) {
 			builder.append(", params ").append(this.paramsCondition);

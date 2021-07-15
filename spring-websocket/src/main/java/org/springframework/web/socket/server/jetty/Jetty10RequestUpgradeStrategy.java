@@ -29,7 +29,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.eclipse.jetty.websocket.server.HandshakeRFC6455;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.EmptyTargetSource;
@@ -56,7 +55,7 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  */
 public class Jetty10RequestUpgradeStrategy implements RequestUpgradeStrategy {
 
-	private static final String[] SUPPORTED_VERSIONS = new String[] { String.valueOf(HandshakeRFC6455.VERSION) };
+	private static final String[] SUPPORTED_VERSIONS = new String[] { String.valueOf(13) };
 
 	private static final Class<?> webSocketCreatorClass;
 

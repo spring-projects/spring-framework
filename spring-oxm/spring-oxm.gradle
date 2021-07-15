@@ -43,7 +43,7 @@ dependencies {
 }
 
 // JiBX compiler is currently not compatible with JDK 9+.
-// If customJavaHome has been set, we assume the custom JDK version is 9+.
+// If testToolchain has been set, we assume the custom JDK version is 9+.
 if ((JavaVersion.current() == JavaVersion.VERSION_1_8) && !project.hasProperty("testToolchain")) {
 	compileTestJava {
 		def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"

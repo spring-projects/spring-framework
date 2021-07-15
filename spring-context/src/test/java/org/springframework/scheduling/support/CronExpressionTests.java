@@ -1319,6 +1319,21 @@ class CronExpressionTests {
 		assertThat(actual).isEqualTo(expected);
 	}
 
+	@Test
+	public void various() {
+		CronExpression cronExpression = CronExpression.parse("3-57 13-28 17,18 1,15 3-12 6#1");
+		LocalDateTime last =     LocalDateTime.of(2022, 9, 15, 17, 44, 11);
+		LocalDateTime expected = LocalDateTime.of(2022, 10, 1, 17, 13, 3);
+		LocalDateTime actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
 
+		cronExpression = CronExpression.parse("*/28 56 22 */6 * *");
+		last = LocalDateTime.of(2022, 2, 27, 8, 0, 42);
+		expected = LocalDateTime.of(2022, 3, 1, 22, 56, 0);
+		actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+	}
 
 }

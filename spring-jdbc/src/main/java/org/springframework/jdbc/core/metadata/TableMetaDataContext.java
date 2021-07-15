@@ -280,7 +280,7 @@ public class TableMetaDataContext {
 		insertStatement.append("INSERT INTO ");
 		if (getSchemaName() != null) {
 			insertStatement.append(getSchemaName());
-			insertStatement.append(".");
+			insertStatement.append('.');
 		}
 		insertStatement.append(getTableName());
 		insertStatement.append(" (");
@@ -313,7 +313,7 @@ public class TableMetaDataContext {
 		}
 		String params = String.join(", ", Collections.nCopies(columnCount, "?"));
 		insertStatement.append(params);
-		insertStatement.append(")");
+		insertStatement.append(')');
 		return insertStatement.toString();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,7 @@ public class ExpressionException extends RuntimeException {
 			StringBuilder output = new StringBuilder();
 			output.append("Expression [");
 			output.append(this.expressionString);
-			output.append("]");
+			output.append(']');
 			if (this.position >= 0) {
 				output.append(" @");
 				output.append(this.position);

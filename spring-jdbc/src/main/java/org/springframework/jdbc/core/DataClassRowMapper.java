@@ -80,6 +80,9 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 		int paramCount = this.mappedConstructor.getParameterCount();
 		if (paramCount > 0) {
 			this.constructorParameterNames = BeanUtils.getParameterNames(this.mappedConstructor);
+			for (String name : this.constructorParameterNames) {
+				suppressProperty(name);
+			}
 			this.constructorParameterTypes = new TypeDescriptor[paramCount];
 			for (int i = 0; i < paramCount; i++) {
 				this.constructorParameterTypes[i] = new TypeDescriptor(new MethodParameter(this.mappedConstructor, i));

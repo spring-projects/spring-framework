@@ -28,6 +28,8 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -374,10 +376,11 @@ class UriComponentsBuilderTests {
 		assertThat(result.getQuery()).isEqualTo("a=1");
 	}
 
-	@Test  // SPR-12771
-	void fromHttpRequestResetsPortBeforeSettingIt() {
+	@ParameterizedTest // gh-17368, gh-27097
+	@ValueSource(strings = {"https", "wss"})
+	void fromHttpRequestResetsPortBeforeSettingIt(String protocol) {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addHeader("X-Forwarded-Proto", "https");
+		request.addHeader("X-Forwarded-Proto", protocol);
 		request.addHeader("X-Forwarded-Host", "84.198.58.199");
 		request.addHeader("X-Forwarded-Port", 443);
 		request.setScheme("http");
@@ -388,7 +391,7 @@ class UriComponentsBuilderTests {
 		HttpRequest httpRequest = new ServletServerHttpRequest(request);
 		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
 
-		assertThat(result.getScheme()).isEqualTo("https");
+		assertThat(result.getScheme()).isEqualTo(protocol);
 		assertThat(result.getHost()).isEqualTo("84.198.58.199");
 		assertThat(result.getPort()).isEqualTo(-1);
 		assertThat(result.getPath()).isEqualTo("/rest/mobile/users/1");
@@ -1296,5 +1299,15 @@ class UriComponentsBuilderTests {
 		assertThatThrownBy(() -> UriComponentsBuilder.fromHttpUrl(url).build().toUri())
 				.isInstanceOf(NumberFormatException.class);
 	}
+
+	@Test // gh-27039
+	void expandPortAndPathWithoutSeparator() {
+		URI uri = UriComponentsBuilder
+				.fromUriString("ws://localhost:{port}{path}")
+				.buildAndExpand(7777, "/test")
+				.toUri();
+		assertThat(uri.toString()).isEqualTo("ws://localhost:7777/test");
+	}
+
 
 }

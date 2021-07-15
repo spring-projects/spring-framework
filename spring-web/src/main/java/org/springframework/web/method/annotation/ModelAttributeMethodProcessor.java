@@ -38,6 +38,9 @@ import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -349,9 +352,10 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 				return (files.size() == 1 ? files.get(0) : files);
 			}
 		}
-		else if (StringUtils.startsWithIgnoreCase(request.getHeader("Content-Type"), "multipart/")) {
+		else if (StringUtils.startsWithIgnoreCase(
+				request.getHeader(HttpHeaders.CONTENT_TYPE), MediaType.MULTIPART_FORM_DATA_VALUE)) {
 			HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
-			if (servletRequest != null) {
+			if (servletRequest != null && HttpMethod.POST.matches(servletRequest.getMethod())) {
 				List<Part> parts = StandardServletPartUtils.getParts(servletRequest, paramName);
 				if (!parts.isEmpty()) {
 					return (parts.size() == 1 ? parts.get(0) : parts);

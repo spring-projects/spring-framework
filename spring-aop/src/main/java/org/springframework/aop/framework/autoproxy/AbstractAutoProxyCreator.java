@@ -17,6 +17,7 @@
 package org.springframework.aop.framework.autoproxy;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -440,7 +441,17 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.copyFrom(this);
 
-		if (!proxyFactory.isProxyTargetClass()) {
+		if (proxyFactory.isProxyTargetClass()) {
+			// Explicit handling of JDK proxy targets (for introduction advice scenarios)
+			if (Proxy.isProxyClass(beanClass)) {
+				// Must allow for introductions; can't just set interfaces to the proxy's interfaces only.
+				for (Class<?> ifc : beanClass.getInterfaces()) {
+					proxyFactory.addInterface(ifc);
+				}
+			}
+		}
+		else {
+			// No proxyTargetClass flag enforced, let's apply our default checks...
 			if (shouldProxyTargetClass(beanClass, beanName)) {
 				proxyFactory.setProxyTargetClass(true);
 			}

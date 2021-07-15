@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package org.springframework.web.multipart.commons;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +30,9 @@ import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -41,7 +46,11 @@ import org.springframework.web.util.WebUtils;
 /**
  * Servlet-based {@link MultipartResolver} implementation for
  * <a href="https://commons.apache.org/proper/commons-fileupload">Apache Commons FileUpload</a>
- * 1.2 or above.
+ * 1.2 or above. This resolver variant delegates to a local FileUpload library
+ * within the application, providing maximum portability across Servlet containers.
+ *
+ * <p>Commons FileUpload traditionally parses POST requests with any "multipart/" type.
+ * Supported HTTP methods may be customized through {@link #setSupportedMethods}.
  *
  * <p>Provides "maxUploadSize", "maxInMemorySize" and "defaultEncoding" settings as
  * bean properties (inherited from {@link CommonsFileUploadSupport}). See corresponding
@@ -52,18 +61,28 @@ import org.springframework.web.util.WebUtils;
  * Needs to be initialized <i>either</i> by an application context <i>or</i>
  * via the constructor that takes a ServletContext (for standalone usage).
  *
+ * <p>Note: The common alternative is
+ * {@link org.springframework.web.multipart.support.StandardServletMultipartResolver},
+ * delegating to the Servlet container's own multipart parser, with configuration to
+ * happen at the container level and potentially with container-specific limitations.
+ *
  * @author Trevor D. Cook
  * @author Juergen Hoeller
  * @since 29.09.2003
  * @see #CommonsMultipartResolver(ServletContext)
  * @see #setResolveLazily
+ * @see #setSupportedMethods
  * @see org.apache.commons.fileupload.servlet.ServletFileUpload
  * @see org.apache.commons.fileupload.disk.DiskFileItemFactory
+ * @see org.springframework.web.multipart.support.StandardServletMultipartResolver
  */
 public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		implements MultipartResolver, ServletContextAware {
 
 	private boolean resolveLazily = false;
+
+	@Nullable
+	private Set<String> supportedMethods;
 
 
 	/**
@@ -102,6 +121,17 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 	}
 
 	/**
+	 * Specify supported methods as an array of HTTP method names.
+	 * The traditional Commons FileUpload default is "POST" only.
+	 * <p>When configured as a Spring property value,
+	 * this can be a comma-separated String: e.g. "POST,PUT".
+	 * @since 5.3.9
+	 */
+	public void setSupportedMethods(String... supportedMethods) {
+		this.supportedMethods = new HashSet<>(Arrays.asList(supportedMethods));
+	}
+
+	/**
 	 * Initialize the underlying {@code org.apache.commons.fileupload.servlet.ServletFileUpload}
 	 * instance. Can be overridden to use a custom subclass, e.g. for testing purposes.
 	 * @param fileItemFactory the Commons FileItemFactory to use
@@ -122,7 +152,10 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 
 	@Override
 	public boolean isMultipart(HttpServletRequest request) {
-		return ServletFileUpload.isMultipartContent(request);
+		return (this.supportedMethods != null ?
+				this.supportedMethods.contains(request.getMethod()) &&
+						FileUploadBase.isMultipartContent(new ServletRequestContext(request)) :
+				ServletFileUpload.isMultipartContent(request));
 	}
 
 	@Override

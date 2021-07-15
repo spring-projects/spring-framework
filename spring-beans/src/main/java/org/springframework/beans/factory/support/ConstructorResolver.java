@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -277,12 +277,12 @@ class ConstructorResolver {
 					throw ex;
 				}
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-						"Could not resolve matching constructor " +
+						"Could not resolve matching constructor on bean class [" + mbd.getBeanClassName() + "] " +
 						"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");
 			}
 			else if (ambiguousConstructors != null && !mbd.isLenientConstructorResolution()) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-						"Ambiguous constructor matches found in bean '" + beanName + "' " +
+						"Ambiguous constructor matches found on bean class [" + mbd.getBeanClassName() + "] " +
 						"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities): " +
 						ambiguousConstructors);
 			}
@@ -608,7 +608,7 @@ class ConstructorResolver {
 				}
 				String argDesc = StringUtils.collectionToCommaDelimitedString(argTypes);
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-						"No matching factory method found: " +
+						"No matching factory method found on class [" + factoryClass.getName() + "]: " +
 						(mbd.getFactoryBeanName() != null ?
 							"factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
 						"factory method '" + mbd.getFactoryMethodName() + "(" + argDesc + ")'. " +
@@ -619,12 +619,12 @@ class ConstructorResolver {
 			}
 			else if (void.class == factoryMethodToUse.getReturnType()) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-						"Invalid factory method '" + mbd.getFactoryMethodName() +
-						"': needs to have a non-void return type!");
+						"Invalid factory method '" + mbd.getFactoryMethodName() + "' on class [" +
+						factoryClass.getName() + "]: needs to have a non-void return type!");
 			}
 			else if (ambiguousFactoryMethods != null) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-						"Ambiguous factory method matches found in bean '" + beanName + "' " +
+						"Ambiguous factory method matches found on class [" + factoryClass.getName() + "] " +
 						"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities): " +
 						ambiguousFactoryMethods);
 			}

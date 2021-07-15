@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,7 +241,7 @@ public class StompHeaderAccessorTests {
 
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < 80; i++) {
-			sb.append("a");
+			sb.append('a');
 		}
 		final String payload = sb.toString() + " > 80";
 		actual = accessor.getShortLogMessage(payload.getBytes(StandardCharsets.UTF_8));

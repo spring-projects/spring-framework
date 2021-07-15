@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -286,7 +286,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 			}
 		}
 		if (this.type != UrlType.RELATIVE && this.type != UrlType.ABSOLUTE && !this.value.startsWith("/")) {
-			url.append("/");
+			url.append('/');
 		}
 		url.append(replaceUriTemplateParams(this.value, this.params, this.templateParams));
 		url.append(createQueryString(this.params, this.templateParams, (url.indexOf("?") == -1)));
@@ -324,15 +324,15 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 		for (Param param : params) {
 			if (!usedParams.contains(param.getName()) && StringUtils.hasLength(param.getName())) {
 				if (includeQueryStringDelimiter && qs.length() == 0) {
-					qs.append("?");
+					qs.append('?');
 				}
 				else {
-					qs.append("&");
+					qs.append('&');
 				}
 				try {
 					qs.append(UriUtils.encodeQueryParam(param.getName(), encoding));
 					if (param.getValue() != null) {
-						qs.append("=");
+						qs.append('=');
 						qs.append(UriUtils.encodeQueryParam(param.getValue(), encoding));
 					}
 				}

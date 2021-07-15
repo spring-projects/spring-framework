@@ -527,13 +527,9 @@ The `HandlerExceptionResolver` beans declared in the `WebApplicationContext` are
 resolve exceptions thrown during request processing. Those exception resolvers allow
 customizing the logic to address exceptions. See <<mvc-exceptionhandlers>> for more details.
 
-The Spring `DispatcherServlet` also supports the return of the
-`last-modification-date`, as specified by the Servlet API. The process of determining
-the last modification date for a specific request is straightforward: The
-`DispatcherServlet` looks up an appropriate handler mapping and tests whether the
-handler that is found implements the `LastModified` interface. If so, the value of the
-`long getLastModified(request)` method of the `LastModified` interface is returned to
-the client.
+For HTTP caching support, handlers can use the `checkNotModified` methods of `WebRequest`,
+along with further options for annoated controllers as described in
+<<mvc-caching-etag-lastmodified,HTTP Caching for Controllers>>.
 
 You can customize individual `DispatcherServlet` instances by adding Servlet
 initialization parameters (`init-param` elements) to the Servlet declaration in the
@@ -1140,18 +1136,30 @@ another based on Servlet 3.0 multipart request parsing.
 
 To enable multipart handling, you need to declare a `MultipartResolver` bean in your
 `DispatcherServlet` Spring configuration with a name of `multipartResolver`.
-The `DispatcherServlet` detects it and applies it to the incoming request. When a POST with
-content-type of `multipart/form-data` is received, the resolver parses the content and
-wraps the current `HttpServletRequest` as `MultipartHttpServletRequest` to
-provide access to resolved parts in addition to exposing them as request parameters.
+The `DispatcherServlet` detects it and applies it to the incoming request. When a POST
+with a content type of `multipart/form-data` is received, the resolver parses the
+content wraps the current `HttpServletRequest` as a `MultipartHttpServletRequest` to
+provide access to resolved files in addition to exposing parts as request parameters.
 
 
 [[mvc-multipart-resolver-commons]]
 ==== Apache Commons `FileUpload`
 
 To use Apache Commons `FileUpload`, you can configure a bean of type
-`CommonsMultipartResolver` with a name of `multipartResolver`. You also need to
-have `commons-fileupload` as a dependency on your classpath.
+`CommonsMultipartResolver` with a name of `multipartResolver`. You also need to have
+the `commons-fileupload` jar as a dependency on your classpath.
+
+This resolver variant delegates to a local library within the application, providing
+maximum portability across Servlet containers. As an alternative, consider standard
+Servlet multipart resolution through the container's own parser as discussed below.
+
+[NOTE]
+====
+Commons FileUpload traditionally applies to POST requests only but accepts any
+`multipart/` content type. See the
+{api-spring-framework}/web/multipart/commons/CommonsMultipartResolver.html[`CommonsMultipartResolver`]
+javadoc for details and configuration options.
+====
 
 
 [[mvc-multipart-resolver-standard]]
@@ -1199,6 +1207,16 @@ The following example shows how to set a `MultipartConfigElement` on the Servlet
 
 Once the Servlet 3.0 configuration is in place, you can add a bean of type
 `StandardServletMultipartResolver` with a name of `multipartResolver`.
+
+[NOTE]
+====
+This resolver variant uses your Servlet container's multipart parser as-is,
+potentially exposing the application to container implementation differences.
+By default, it will try to parse any `multipart/` content type with any HTTP
+method but this may not be supported across all Servlet containers. See the
+{api-spring-framework}/web/multipart/support/StandardServletMultipartResolver.html[`StandardServletMultipartResolver`]
+javadoc for details and configuration options.
+====
 
 
 
@@ -5366,12 +5384,10 @@ The following example shows how to achieve the same configuration in XML:
 You can configure how Spring MVC determines the requested media types from the request
 (for example, `Accept` header, URL path extension, query parameter, and others).
 
-By default, the URL path extension is checked first -- with `json`, `xml`, `rss`, and `atom`
-registered as known extensions (depending on classpath dependencies). The `Accept` header
-is checked second.
+By default, only the `Accept` header is checked.
 
-Consider changing those defaults to `Accept` header only, and, if you must use URL-based
-content type resolution, consider using the query parameter strategy over path extensions. See
+If you must use URL-based content type resolution, consider using the query parameten
+strategy over path extensions. See
 <<mvc-ann-requestmapping-suffix-pattern-match>> and <<mvc-ann-requestmapping-rfd>> for
 more details.
 
