@@ -378,7 +378,7 @@ class UriComponentsBuilderTests {
 
 	@ParameterizedTest // gh-17368, gh-27097
 	@ValueSource(strings = {"https", "wss"})
-	void fromHttpRequestResetsPortBeforeSettingIt(String protocol) {
+	void fromHttpRequestResetsPort443(String protocol) {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("X-Forwarded-Proto", protocol);
 		request.addHeader("X-Forwarded-Host", "84.198.58.199");
@@ -395,6 +395,27 @@ class UriComponentsBuilderTests {
 		assertThat(result.getHost()).isEqualTo("84.198.58.199");
 		assertThat(result.getPort()).isEqualTo(-1);
 		assertThat(result.getPath()).isEqualTo("/rest/mobile/users/1");
+	}
+
+	@ParameterizedTest // gh-27097
+	@ValueSource(strings = {"http", "ws"})
+	void fromHttpRequestResetsPort80(String protocol) {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("X-Forwarded-Proto", protocol);
+		request.addHeader("X-Forwarded-Host", "84.198.58.199");
+		request.addHeader("X-Forwarded-Port", 80);
+		request.setScheme("http");
+		request.setServerName("example.com");
+		request.setServerPort(80);
+		request.setRequestURI("/path");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertThat(result.getScheme()).isEqualTo(protocol);
+		assertThat(result.getHost()).isEqualTo("84.198.58.199");
+		assertThat(result.getPort()).isEqualTo(-1);
+		assertThat(result.getPath()).isEqualTo("/path");
 	}
 
 	@Test  // SPR-14761
