@@ -4,6 +4,7 @@ buildscript {
 		maven { url "https://repo.spring.io/plugins-release" }
 		maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
 	}
+//    测试
 	dependencies {
 		classpath("io.spring.gradle:propdeps-plugin:0.0.9.RELEASE")
 		classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16")
