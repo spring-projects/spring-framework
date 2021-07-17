@@ -139,7 +139,7 @@ asciidoctorj {
 			icons: 'font',
 			idprefix: '',
 			idseparator: '-',
-			docinfo: 'shared',
+			docinfo: 'shared,private-header', // https://docs.asciidoctor.org/asciidoctor/latest/docinfo/
 			revnumber: project.version,
 			sectanchors: '',
 			sectnums: '',
@@ -163,9 +163,6 @@ asciidoctorj {
 asciidoctor {
 	baseDirFollowsSourceDir()
 	configurations 'asciidoctorExt'
-	attributes([
-			noheader: '' // custom header in docinfo-header.html
-	])
 	sources {
 		include '*.adoc'
 	}
