@@ -41,6 +41,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -79,6 +80,7 @@ import static org.springframework.http.MediaType.parseMediaType;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Sam Brannen
+ * @author Yanming Zhou
  */
 @SuppressWarnings("unchecked")
 class RestTemplateTests {
@@ -293,6 +295,36 @@ class RestTemplateTests {
 
 		String url = "https://example.com/hotels/{hotel}/pic/{publicpath}/size/{scale}";
 		template.getForObject(url, String.class, uriVariables);
+
+		verify(response).close();
+	}
+
+	@Test
+	void getForObjectWithCustomUriTemplateHandlerAndWithoutUriVariables() throws Exception {
+		DefaultUriBuilderFactory uriTemplateHandler = new DefaultUriBuilderFactory("https://example.com");
+		template.setUriTemplateHandler(uriTemplateHandler);
+		mockSentRequest(GET, "https://example.com/hotels/1/pic/logo.png/size/150x150");
+		mockResponseStatus(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(new HttpHeaders());
+		given(response.getBody()).willReturn(InputStream.nullInputStream());
+
+		String url = "/hotels/1/pic/logo.png/size/150x150";
+		template.getForObject(URI.create(url), void.class);
+
+		verify(response).close();
+	}
+
+	@Test
+	void exchangeWithCustomUriTemplateHandlerAndWithoutUriVariables() throws Exception {
+		DefaultUriBuilderFactory uriTemplateHandler = new DefaultUriBuilderFactory("https://example.com");
+		template.setUriTemplateHandler(uriTemplateHandler);
+		mockSentRequest(GET, "https://example.com/hotels/1/pic/logo.png/size/150x150");
+		mockResponseStatus(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(new HttpHeaders());
+		given(response.getBody()).willReturn(InputStream.nullInputStream());
+
+		String url = "/hotels/1/pic/logo.png/size/150x150";
+		template.exchange(RequestEntity.method(GET, URI.create(url)).build(), void.class);
 
 		verify(response).close();
 	}
