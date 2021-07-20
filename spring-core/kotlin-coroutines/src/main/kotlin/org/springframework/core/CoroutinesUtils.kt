@@ -27,6 +27,7 @@ import org.reactivestreams.Publisher
 import reactor.core.publisher.Mono
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.jvm.kotlinFunction
 
@@ -56,10 +57,19 @@ internal fun <T: Any> monoToDeferred(source: Mono<T>) =
  * @author Sebastien Deleuze
  * @since 5.2
  */
+fun invokeSuspendingFunction(method: Method, target: Any, vararg args: Any?): Publisher<*> =
+	invokeSuspendingFunction(Dispatchers.Unconfined, method, target, *args)
+
+/**
+ * Invoke a suspending function and converts it to [Mono] or [reactor.core.publisher.Flux].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.3
+ */
 @Suppress("UNCHECKED_CAST")
-fun invokeSuspendingFunction(method: Method, target: Any, vararg args: Any?): Publisher<*> {
+fun invokeSuspendingFunction(context: CoroutineContext, method: Method, target: Any, vararg args: Any?): Publisher<*> {
 	val function = method.kotlinFunction!!
-	val mono = mono(Dispatchers.Unconfined) {
+	val mono = mono(context) {
 		function.callSuspend(target, *args.sliceArray(0..(args.size-2))).let { if (it == Unit) null else it }
 	}.onErrorMap(InvocationTargetException::class.java) { it.targetException }
 	return if (function.returnType.classifier == Flow::class) {
