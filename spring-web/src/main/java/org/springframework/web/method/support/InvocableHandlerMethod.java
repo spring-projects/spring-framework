@@ -21,6 +21,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.springframework.context.MessageSource;
+import org.jetbrains.annotations.NotNull;
+import org.reactivestreams.Publisher;
+
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
@@ -200,7 +203,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		Method method = getBridgedMethod();
 		try {
 			if (KotlinDetector.isSuspendingFunction(method)) {
-				return CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
+				return invokeSuspendingFunction(method, args);
 			}
 			return method.invoke(getBean(), args);
 		}
@@ -226,6 +229,14 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				throw new IllegalStateException(formatInvokeError("Invocation failure", args), targetException);
 			}
 		}
+	}
+
+	/**
+	 * Invokes Kotlin coroutine suspended function.
+	 */
+	@NotNull
+	protected Publisher<?> invokeSuspendingFunction(Method method, Object[] args) {
+		return CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
 	}
 
 }
