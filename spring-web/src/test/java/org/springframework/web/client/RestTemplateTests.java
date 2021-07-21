@@ -16,8 +16,10 @@
 
 package org.springframework.web.client;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,6 +38,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -51,6 +54,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -62,6 +66,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
@@ -263,6 +268,58 @@ class RestTemplateTests {
 		assertThat(result.getHeaders().getContentType()).as("Invalid Content-Type header").isEqualTo(MediaType.TEXT_PLAIN);
 		assertThat(result.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
 
+		verify(response).close();
+	}
+
+	@Test
+	void getForEntityWithInputStreamResource() throws Exception {
+		HttpHeaders requestHeaders = new HttpHeaders();
+		mockSentRequest(GET, "https://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
+		String expected = "Hello World";
+		mockTextResponseBody(expected);
+		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()) {
+			@Override
+			public void close() {
+				response.close();
+			}
+		});
+
+		template.getMessageConverters().add(new ResourceHttpMessageConverter());
+		ResponseEntity<InputStreamResource> result = template.getForEntity("https://example.com", InputStreamResource.class);
+
+		verify(response, never()).close();
+
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(result.getBody().getInputStream()))) {
+			String content = reader.lines().collect(Collectors.joining("\n"));
+			assertThat(content).as("Invalid GET result").isEqualTo(expected);
+		}
+		verify(response).close();
+	}
+
+	@Test
+	void getForObjectWithInputStreamResource() throws Exception {
+		HttpHeaders requestHeaders = new HttpHeaders();
+		mockSentRequest(GET, "https://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
+		String expected = "Hello World";
+		mockTextResponseBody(expected);
+		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()) {
+			@Override
+			public void close() {
+				response.close();
+			}
+		});
+
+		template.getMessageConverters().add(new ResourceHttpMessageConverter());
+		InputStreamResource result = template.getForObject("https://example.com", InputStreamResource.class);
+
+		verify(response, never()).close();
+
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(result.getInputStream()))) {
+			String content = reader.lines().collect(Collectors.joining("\n"));
+			assertThat(content).as("Invalid GET result").isEqualTo(expected);
+		}
 		verify(response).close();
 	}
 

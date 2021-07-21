@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.SpringProperties;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -767,6 +768,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		Assert.notNull(url, "URI is required");
 		Assert.notNull(method, "HttpMethod is required");
+		T result = null;
 		ClientHttpResponse response = null;
 		try {
 			ClientHttpRequest request = createRequest(url, method);
@@ -775,7 +777,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			}
 			response = request.execute();
 			handleResponse(url, method, response);
-			return (responseExtractor != null ? responseExtractor.extractData(response) : null);
+			result = (responseExtractor != null ? responseExtractor.extractData(response) : null);
+			return result;
 		}
 		catch (IOException ex) {
 			String resource = url.toString();
@@ -786,7 +789,13 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 		finally {
 			if (response != null) {
-				response.close();
+				Object body = result;
+				if (body instanceof ResponseEntity) {
+					body = ((ResponseEntity<?>) body).getBody();
+				}
+				if (!(body instanceof InputStreamResource)) {
+					response.close();
+				}
 			}
 		}
 	}
