@@ -27,6 +27,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.asm.ClassWriter;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.CompiledExpression;
@@ -136,24 +138,22 @@ public final class SpelCompiler implements Opcodes {
 	private Class<? extends CompiledExpression> createExpressionClass(SpelNodeImpl expressionToCompile) {
 		// Create class outline 'spel/ExNNN extends org.springframework.expression.spel.CompiledExpression'
 		String className = "spel/Ex" + getNextSuffix();
-		String evaluationContextClass = "org/springframework/expression/EvaluationContext";
 		ClassWriter cw = new ExpressionClassWriter();
-		cw.visit(V1_8, ACC_PUBLIC, className, null, "org/springframework/expression/spel/CompiledExpression", null);
+		cw.visit(V1_8, ACC_PUBLIC, className, null, CompiledExpression.class.getSimpleName(), null);
 
 		// Create default constructor
 		MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
 		mv.visitCode();
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitMethodInsn(INVOKESPECIAL, "org/springframework/expression/spel/CompiledExpression",
-				"<init>", "()V", false);
+		mv.visitMethodInsn(INVOKESPECIAL, CompiledExpression.class.getSimpleName(), "<init>", "()V", false);
 		mv.visitInsn(RETURN);
 		mv.visitMaxs(1, 1);
 		mv.visitEnd();
 
 		// Create getValue() method
 		mv = cw.visitMethod(ACC_PUBLIC, "getValue",
-				"(Ljava/lang/Object;L" + evaluationContextClass + ";)Ljava/lang/Object;", null,
-				new String[] {"org/springframework/expression/EvaluationException"});
+				"(Ljava/lang/Object;L" + EvaluationContext.class.getSimpleName() + ";)Ljava/lang/Object;", null,
+				new String[] { EvaluationException.class.getSimple() });
 		mv.visitCode();
 
 		CodeFlow cf = new CodeFlow(className, cw);
