@@ -153,7 +153,7 @@ public final class SpelCompiler implements Opcodes {
 		// Create getValue() method
 		mv = cw.visitMethod(ACC_PUBLIC, "getValue",
 				"(Ljava/lang/Object;L" + EvaluationContext.class.getSimpleName() + ";)Ljava/lang/Object;", null,
-				new String[] { EvaluationException.class.getSimple() });
+				new String[] { EvaluationException.class.getSimpleName() });
 		mv.visitCode();
 
 		CodeFlow cf = new CodeFlow(className, cw);
