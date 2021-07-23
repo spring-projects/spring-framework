@@ -28,7 +28,7 @@ configure(allprojects) { project ->
 	dependencyManagement {
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.4"
-			mavenBom "io.netty:netty-bom:4.1.65.Final"
+			mavenBom "io.netty:netty-bom:4.1.66.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.9"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR10"
 			mavenBom "io.rsocket:rsocket-bom:1.1.1"
@@ -138,7 +138,7 @@ configure(allprojects) { project ->
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.2.8.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.9.Final') {
 				entry 'undertow-core'
 				entry('undertow-websockets-jsr') {
 					exclude group: "org.jboss.spec.javax.websocket", name: "jboss-websocket-api_1.1_spec"
