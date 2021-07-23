@@ -433,6 +433,7 @@ public final class WebHttpHandlerBuilder {
 
 			// Avoid hard references potentially anywhere in spring-web (no need for structural dependency)
 
+			builder.allowBlockingCallsInside("org.springframework.http.MediaTypeFactory", "<clinit>");
 			builder.allowBlockingCallsInside("org.springframework.web.util.HtmlUtils", "<clinit>");
 		}
 	}
