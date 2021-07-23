@@ -25,6 +25,7 @@ import java.util.concurrent.Callable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.context.MessageSource;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -68,6 +69,13 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	@Nullable
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
+	/**
+	 * Variant of {@link #ServletInvocableHandlerMethod(Object, Method)} that
+	 * also accepts a {@link MessageSource}.
+	 */
+	public ServletInvocableHandlerMethod(Object handler, Method method, @Nullable MessageSource messageSource) {
+		super(handler, method, messageSource);
+	}
 
 	/**
 	 * Creates an instance from the given handler and method.

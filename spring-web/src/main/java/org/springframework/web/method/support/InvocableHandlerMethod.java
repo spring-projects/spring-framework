@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.springframework.context.MessageSource;
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
@@ -69,6 +70,14 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	public InvocableHandlerMethod(Object bean, Method method) {
 		super(bean, method);
+	}
+
+	/**
+	 * Variant of {@link #InvocableHandlerMethod(Object, Method)} that
+	 * also accepts a {@link MessageSource}.
+	 */
+	public InvocableHandlerMethod(Object bean, Method method, @Nullable MessageSource messageSource) {
+		super(bean, method, messageSource);
 	}
 
 	/**
