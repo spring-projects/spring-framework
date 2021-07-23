@@ -483,7 +483,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			}
 			Method method = resolver.resolveMethod(exception);
 			if (method != null) {
-				return new ServletInvocableHandlerMethod(handlerMethod.getBean(), method);
+				return new ServletInvocableHandlerMethod(handlerMethod.getBean(), method, this.applicationContext);
 			}
 			// For advice applicability check below (involving base packages, assignable types
 			// and annotation presence), use target class instead of interface-based proxy.
@@ -498,7 +498,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 				ExceptionHandlerMethodResolver resolver = entry.getValue();
 				Method method = resolver.resolveMethod(exception);
 				if (method != null) {
-					return new ServletInvocableHandlerMethod(advice.resolveBean(), method);
+					return new ServletInvocableHandlerMethod(advice.resolveBean(), method, this.applicationContext);
 				}
 			}
 		}
