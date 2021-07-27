@@ -36,6 +36,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.MethodIntrospector;
@@ -262,7 +263,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 		}
 		if (beanType != null ) {
-			Object bean = obtainApplicationContext().getBean(beanType);
+			Object bean = null;
+			try {
+				bean = obtainApplicationContext().getBean(beanType);
+			} catch (BeansException ignore) {
+			}
 			if (AopUtils.isJdkDynamicProxy(bean)) {
 				beanType = AopUtils.getTargetClass(bean);
 			}
