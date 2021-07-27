@@ -356,7 +356,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 			this.isFilePart = (MultipartUtils.getFileName(headers) != null);
 			this.partSize = 0;
 			if (maxParts > 0 && index > maxParts) {
-				throw new DecodingException("Too many parts (" + index + " allowed)");
+				throw new DecodingException("Too many parts (" + index + "/" + maxParts + " allowed)");
 			}
 			return this.storageFactory.newStreamStorageForPartBody(headers, index);
 		}
