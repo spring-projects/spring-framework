@@ -266,7 +266,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			Object bean = null;
 			try {
 				bean = obtainApplicationContext().getBean(beanType);
-			} catch (BeansException ignore) {
+			}
+			catch (BeansException ignore) {
 			}
 			if (AopUtils.isJdkDynamicProxy(bean)) {
 				beanType = AopUtils.getTargetClass(bean);
