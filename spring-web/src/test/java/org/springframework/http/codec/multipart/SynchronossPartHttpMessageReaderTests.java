@@ -170,7 +170,7 @@ public class SynchronossPartHttpMessageReaderTests extends AbstractLeakCheckingT
 							.isInstanceOf(DecodingException.class)
 							.hasMessageStartingWith("Failure while parsing part[2]");
 					assertThat(ex.getCause())
-							.hasMessage("Too many parts (2 allowed)");
+							.hasMessage("Too many parts (2/1 allowed)");
 				}
 		);
 	}
