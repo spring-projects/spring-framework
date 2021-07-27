@@ -261,8 +261,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				logger.trace("Could not resolve type for bean '" + beanName + "'", ex);
 			}
 		}
-		if (beanType != null && isHandler(beanType)) {
-			detectHandlerMethods(beanName);
+		if (beanType != null ) {
+			Object bean = obtainApplicationContext().getBean(beanType);
+			if (AopUtils.isJdkDynamicProxy(bean)) {
+				beanType = AopUtils.getTargetClass(bean);
+			}
+			if (isHandler(beanType)) {
+				detectHandlerMethods(beanName);
+			}
 		}
 	}
 
