@@ -83,7 +83,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	@Nullable
 	private String characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
-	private boolean charset = false;
+	/**
+	 * {@code true} if the character encoding has been explicitly set through
+	 * {@link HttpServletResponse} methods or through a {@code charset} parameter
+	 * on the {@code Content-Type}.
+	 */
+	private boolean characterEncodingSet = false;
 
 	private final ByteArrayOutputStream content = new ByteArrayOutputStream(1024);
 
@@ -116,6 +121,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Nullable
 	private String errorMessage;
+
+
+	//---------------------------------------------------------------------
+	// Properties for MockRequestDispatcher
+	//---------------------------------------------------------------------
 
 	@Nullable
 	private String forwardedUrl;
@@ -158,24 +168,27 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	/**
-	 * Return whether the character encoding has been set.
-	 * <p>If {@code false}, {@link #getCharacterEncoding()} will return a default encoding value.
+	 * Determine whether the character encoding has been explicitly set through
+	 * {@link HttpServletResponse} methods or through a {@code charset} parameter
+	 * on the {@code Content-Type}.
+	 * <p>If {@code false}, {@link #getCharacterEncoding()} will return a default
+	 * encoding value.
 	 */
 	public boolean isCharset() {
-		return this.charset;
+		return this.characterEncodingSet;
 	}
 
 	@Override
 	public void setCharacterEncoding(String characterEncoding) {
 		this.characterEncoding = characterEncoding;
-		this.charset = true;
+		this.characterEncodingSet = true;
 		updateContentTypePropertyAndHeader();
 	}
 
 	private void updateContentTypePropertyAndHeader() {
 		if (this.contentType != null) {
 			String value = this.contentType;
-			if (this.charset && !this.contentType.toLowerCase().contains(CHARSET_PREFIX)) {
+			if (this.characterEncodingSet && !this.contentType.toLowerCase().contains(CHARSET_PREFIX)) {
 				value = value + ';' + CHARSET_PREFIX + this.characterEncoding;
 				this.contentType = value;
 			}
@@ -270,7 +283,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 				MediaType mediaType = MediaType.parseMediaType(contentType);
 				if (mediaType.getCharset() != null) {
 					this.characterEncoding = mediaType.getCharset().name();
-					this.charset = true;
+					this.characterEncodingSet = true;
 				}
 			}
 			catch (Exception ex) {
@@ -278,7 +291,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 				int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
 				if (charsetIndex != -1) {
 					this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
-					this.charset = true;
+					this.characterEncodingSet = true;
 				}
 			}
 			updateContentTypePropertyAndHeader();
@@ -332,7 +345,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	public void reset() {
 		resetBuffer();
 		this.characterEncoding = null;
-		this.charset = false;
+		this.characterEncodingSet = false;
 		this.contentLength = 0;
 		this.contentType = null;
 		this.locale = Locale.getDefault();
