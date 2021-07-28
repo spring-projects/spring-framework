@@ -72,6 +72,35 @@ public class DefaultClientRequestBuilderTests {
 	}
 
 	@Test
+	public void fromCopiesBody() {
+		String body = "foo";
+		BodyInserter<String, ClientHttpRequest> inserter = (response, strategies) -> {
+			byte[] bodyBytes = body.getBytes(UTF_8);
+			DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bodyBytes);
+
+			return response.writeWith(Mono.just(buffer));
+		};
+
+		ClientRequest other = ClientRequest.create(POST, URI.create("https://example.com"))
+				.body(inserter).build();
+
+		ClientRequest result = ClientRequest.from(other).build();
+
+		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
+		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
+
+		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
+		given(strategies.messageWriters()).willReturn(messageWriters);
+
+		MockClientHttpRequest request = new MockClientHttpRequest(POST, "/");
+		result.writeTo(request, strategies).block();
+
+		String copiedBody = request.getBodyAsString().block();
+
+		assertThat(copiedBody).isEqualTo("foo");
+	}
+
+	@Test
 	public void method() throws URISyntaxException {
 		URI url = new URI("https://example.com");
 		ClientRequest.Builder builder = ClientRequest.create(DELETE, url);
