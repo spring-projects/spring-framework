@@ -105,12 +105,12 @@ public class HandlerMethod {
 		this(bean, method, null);
 	}
 
-
 	/**
 	 * Variant of {@link #HandlerMethod(Object, Method)} that
-	 * also accepts a {@link MessageSource}.
+	 * also accepts a {@link MessageSource} for use from sub-classes.
+	 * @since 5.3.10
 	 */
-	public HandlerMethod(Object bean, Method method, @Nullable MessageSource messageSource) {
+	protected HandlerMethod(Object bean, Method method, @Nullable MessageSource messageSource) {
 		Assert.notNull(bean, "Bean is required");
 		Assert.notNull(method, "Method is required");
 		this.bean = bean;

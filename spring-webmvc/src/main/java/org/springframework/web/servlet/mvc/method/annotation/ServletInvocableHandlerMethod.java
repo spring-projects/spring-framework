@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,19 +69,22 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	@Nullable
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
-	/**
-	 * Variant of {@link #ServletInvocableHandlerMethod(Object, Method)} that
-	 * also accepts a {@link MessageSource}.
-	 */
-	public ServletInvocableHandlerMethod(Object handler, Method method, @Nullable MessageSource messageSource) {
-		super(handler, method, messageSource);
-	}
 
 	/**
 	 * Creates an instance from the given handler and method.
 	 */
 	public ServletInvocableHandlerMethod(Object handler, Method method) {
 		super(handler, method);
+	}
+
+	/**
+	 * Variant of {@link #ServletInvocableHandlerMethod(Object, Method)} that
+	 * also accepts a {@link MessageSource}, e.g. to resolve
+	 * {@code @ResponseStatus} messages with.
+	 * @since 5.3.10
+	 */
+	public ServletInvocableHandlerMethod(Object handler, Method method, @Nullable MessageSource messageSource) {
+		super(handler, method, messageSource);
 	}
 
 	/**
