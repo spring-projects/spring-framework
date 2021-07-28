@@ -80,7 +80,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private boolean writerAccessAllowed = true;
 
-	@Nullable
 	private String characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
 	/**
@@ -171,8 +170,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * Determine whether the character encoding has been explicitly set through
 	 * {@link HttpServletResponse} methods or through a {@code charset} parameter
 	 * on the {@code Content-Type}.
-	 * <p>If {@code false}, {@link #getCharacterEncoding()} will return a default
-	 * encoding value.
+	 * <p>If {@code false}, {@link #getCharacterEncoding()} will return the default
+	 * character encoding.
 	 */
 	public boolean isCharset() {
 		return this.characterEncodingSet;
@@ -180,16 +179,21 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setCharacterEncoding(String characterEncoding) {
+		setExplicitCharacterEncoding(characterEncoding);
+		updateContentTypePropertyAndHeader();
+	}
+
+	private void setExplicitCharacterEncoding(String characterEncoding) {
+		Assert.notNull(characterEncoding, "'characterEncoding' must not be null");
 		this.characterEncoding = characterEncoding;
 		this.characterEncodingSet = true;
-		updateContentTypePropertyAndHeader();
 	}
 
 	private void updateContentTypePropertyAndHeader() {
 		if (this.contentType != null) {
 			String value = this.contentType;
-			if (this.characterEncodingSet && !this.contentType.toLowerCase().contains(CHARSET_PREFIX)) {
-				value = value + ';' + CHARSET_PREFIX + this.characterEncoding;
+			if (this.characterEncodingSet && !value.toLowerCase().contains(CHARSET_PREFIX)) {
+				value += ';' + CHARSET_PREFIX + getCharacterEncoding();
 				this.contentType = value;
 			}
 			doAddHeaderValue(HttpHeaders.CONTENT_TYPE, value, true);
@@ -197,7 +201,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	@Nullable
 	public String getCharacterEncoding() {
 		return this.characterEncoding;
 	}
@@ -212,9 +215,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	public PrintWriter getWriter() throws UnsupportedEncodingException {
 		Assert.state(this.writerAccessAllowed, "Writer access not allowed");
 		if (this.writer == null) {
-			Writer targetWriter = (this.characterEncoding != null ?
-					new OutputStreamWriter(this.content, this.characterEncoding) :
-					new OutputStreamWriter(this.content));
+			Writer targetWriter = new OutputStreamWriter(this.content, getCharacterEncoding());
 			this.writer = new ResponsePrintWriter(targetWriter);
 		}
 		return this.writer;
@@ -228,14 +229,16 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * Get the content of the response body as a {@code String}, using the charset
 	 * specified for the response by the application, either through
 	 * {@link HttpServletResponse} methods or through a charset parameter on the
-	 * {@code Content-Type}.
+	 * {@code Content-Type}. If no charset has been explicitly defined, the default
+	 * character encoding will be used.
 	 * @return the content as a {@code String}
 	 * @throws UnsupportedEncodingException if the character encoding is not supported
 	 * @see #getContentAsString(Charset)
+	 * @see #setCharacterEncoding(String)
+	 * @see #setContentType(String)
 	 */
 	public String getContentAsString() throws UnsupportedEncodingException {
-		return (this.characterEncoding != null ?
-				this.content.toString(this.characterEncoding) : this.content.toString());
+		return this.content.toString(getCharacterEncoding());
 	}
 
 	/**
@@ -248,11 +251,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @throws UnsupportedEncodingException if the character encoding is not supported
 	 * @since 5.2
 	 * @see #getContentAsString()
+	 * @see #setCharacterEncoding(String)
+	 * @see #setContentType(String)
 	 */
 	public String getContentAsString(Charset fallbackCharset) throws UnsupportedEncodingException {
-		return (isCharset() && this.characterEncoding != null ?
-				this.content.toString(this.characterEncoding) :
-				this.content.toString(fallbackCharset.name()));
+		String charsetName = (this.characterEncodingSet ? getCharacterEncoding() : fallbackCharset.name());
+		return this.content.toString(charsetName);
 	}
 
 	@Override
@@ -282,16 +286,14 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			try {
 				MediaType mediaType = MediaType.parseMediaType(contentType);
 				if (mediaType.getCharset() != null) {
-					this.characterEncoding = mediaType.getCharset().name();
-					this.characterEncodingSet = true;
+					setExplicitCharacterEncoding(mediaType.getCharset().name());
 				}
 			}
 			catch (Exception ex) {
 				// Try to get charset value anyway
 				int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
 				if (charsetIndex != -1) {
-					this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
-					this.characterEncodingSet = true;
+					setExplicitCharacterEncoding(contentType.substring(charsetIndex + CHARSET_PREFIX.length()));
 				}
 			}
 			updateContentTypePropertyAndHeader();
@@ -344,7 +346,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	@Override
 	public void reset() {
 		resetBuffer();
-		this.characterEncoding = null;
+		this.characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 		this.characterEncodingSet = false;
 		this.contentLength = 0;
 		this.contentType = null;
