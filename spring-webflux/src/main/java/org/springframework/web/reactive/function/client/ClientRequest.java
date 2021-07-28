@@ -125,8 +125,8 @@ public interface ClientRequest {
 	// Static builder methods
 
 	/**
-	 * Create a builder with the method, URI, headers, and cookies of the given request.
-	 * @param other the request to copy the method, URI, headers, and cookies from
+	 * Create a builder with the method, URI, headers, cookies and body of the given request.
+	 * @param other the request to copy the method, URI, headers, cookies and body from
 	 * @return the created builder
 	 */
 	static Builder from(ClientRequest other) {
