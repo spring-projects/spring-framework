@@ -276,7 +276,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * determines the {@code CorsConfiguration} to use which is then further
 	 * {@link CorsConfiguration#combine(CorsConfiguration) combined} with the
 	 * {@code CorsConfiguration} for the selected handler.
-	 * <p>This is mutually exclusie with
+	 * <p>This is mutually exclusive with
 	 * {@link #setCorsConfigurationSource(CorsConfigurationSource)}.
 	 * @since 4.2
 	 * @see #setCorsProcessor(CorsProcessor)
@@ -305,7 +305,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * {@code CorsConfiguration} determined by the source is
 	 * {@link CorsConfiguration#combine(CorsConfiguration) combined} with the
 	 * {@code CorsConfiguration} for the selected handler.
-	 * <p>This is mutually exclusie with {@link #setCorsConfigurations(Map)}.
+	 * <p>This is mutually exclusive with {@link #setCorsConfigurations(Map)}.
 	 * @since 5.1
 	 * @see #setCorsProcessor(CorsProcessor)
 	 */
