@@ -123,13 +123,10 @@ public class PrintingResultHandler implements ResultHandler {
 
 	protected final HttpHeaders getRequestHeaders(MockHttpServletRequest request) {
 		HttpHeaders headers = new HttpHeaders();
-		Enumeration<?> names = request.getHeaderNames();
+		Enumeration<String> names = request.getHeaderNames();
 		while (names.hasMoreElements()) {
-			String name = (String) names.nextElement();
-			Enumeration<String> values = request.getHeaders(name);
-			while (values.hasMoreElements()) {
-				headers.add(name, values.nextElement());
-			}
+			String name = names.nextElement();
+			headers.put(name, Collections.list(request.getHeaders(name)));
 		}
 		return headers;
 	}
