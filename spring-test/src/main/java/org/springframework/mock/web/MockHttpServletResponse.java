@@ -80,7 +80,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private boolean writerAccessAllowed = true;
 
-	private String characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
+	private String defaultCharacterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
+
+	private String characterEncoding = this.defaultCharacterEncoding;
 
 	/**
 	 * {@code true} if the character encoding has been explicitly set through
@@ -167,11 +169,32 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	/**
+	 * Set the <em>default</em> character encoding for the response.
+	 * <p>If this method is not invoked, {@code ISO-8859-1} will be used as the
+	 * default character encoding.
+	 * <p>If the {@linkplain #getCharacterEncoding() character encoding} for the
+	 * response has not already been explicitly set via {@link #setCharacterEncoding(String)}
+	 * or {@link #setContentType(String)}, the character encoding for the response
+	 * will be set to the supplied default character encoding.
+	 * @param characterEncoding the default character encoding
+	 * @since 5.3.10
+	 * @see #setCharacterEncoding(String)
+	 * @see #setContentType(String)
+	 */
+	public void setDefaultCharacterEncoding(String characterEncoding) {
+		Assert.notNull(characterEncoding, "'characterEncoding' must not be null");
+		this.defaultCharacterEncoding = characterEncoding;
+		if (!this.characterEncodingSet) {
+			this.characterEncoding = characterEncoding;
+		}
+	}
+
+	/**
 	 * Determine whether the character encoding has been explicitly set through
 	 * {@link HttpServletResponse} methods or through a {@code charset} parameter
 	 * on the {@code Content-Type}.
-	 * <p>If {@code false}, {@link #getCharacterEncoding()} will return the default
-	 * character encoding.
+	 * <p>If {@code false}, {@link #getCharacterEncoding()} will return the
+	 * {@linkplain #setDefaultCharacterEncoding(String) default character encoding}.
 	 */
 	public boolean isCharset() {
 		return this.characterEncodingSet;
@@ -229,8 +252,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * Get the content of the response body as a {@code String}, using the charset
 	 * specified for the response by the application, either through
 	 * {@link HttpServletResponse} methods or through a charset parameter on the
-	 * {@code Content-Type}. If no charset has been explicitly defined, the default
-	 * character encoding will be used.
+	 * {@code Content-Type}. If no charset has been explicitly defined, the
+	 * {@linkplain #setDefaultCharacterEncoding(String) default character encoding}
+	 * will be used.
 	 * @return the content as a {@code String}
 	 * @throws UnsupportedEncodingException if the character encoding is not supported
 	 * @see #getContentAsString(Charset)
@@ -346,7 +370,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	@Override
 	public void reset() {
 		resetBuffer();
-		this.characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
+		this.characterEncoding = this.defaultCharacterEncoding;
 		this.characterEncodingSet = false;
 		this.contentLength = 0;
 		this.contentType = null;
