@@ -358,7 +358,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	public void setLocale(Locale locale) {
+	public void setLocale(@Nullable Locale locale) {
+		// Although the Javadoc for javax.servlet.ServletResponse.setLocale(Locale) does not
+		// state how a null value for the supplied Locale should be handled, both Tomcat and
+		// Jetty simply ignore a null value. So we do the same here.
 		if (locale == null) {
 			return;
 		}
