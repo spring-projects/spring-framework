@@ -114,7 +114,7 @@ public abstract class ObjectUtils {
 	 * Determine whether the given object is empty.
 	 * <p>This method supports the following object types.
 	 * <ul>
-	 * <li>{@code Optional}: considered empty if {@link Optional#empty()}</li>
+	 * <li>{@code Optional}: considered empty if {@link Optional#isEmpty()}</li>
 	 * <li>{@code Array}: considered empty if its length is zero</li>
 	 * <li>{@link CharSequence}: considered empty if its length is zero</li>
 	 * <li>{@link Collection}: delegates to {@link Collection#isEmpty()}</li>
@@ -137,7 +137,7 @@ public abstract class ObjectUtils {
 		}
 
 		if (obj instanceof Optional) {
-			return !((Optional<?>) obj).isPresent();
+			return ((Optional<?>) obj).isEmpty();
 		}
 		if (obj instanceof CharSequence) {
 			return ((CharSequence) obj).length() == 0;
