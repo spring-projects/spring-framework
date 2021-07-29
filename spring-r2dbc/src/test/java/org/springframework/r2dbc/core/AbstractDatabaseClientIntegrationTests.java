@@ -18,6 +18,8 @@ package org.springframework.r2dbc.core;
 
 import java.util.Map;
 
+import java.util.Arrays;
+
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.Parameters;
 import io.r2dbc.spi.Result;
@@ -134,6 +136,51 @@ abstract class AbstractDatabaseClientIntegrationTests {
 				.as(StepVerifier::create)
 				.assertNext(actual -> assertThat(actual.id()).isEqualTo(42055))
 				.verifyComplete();
+	}
+
+	@Test
+	public void executeBatchInsert() {
+		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
+
+		databaseClient.sql("INSERT INTO legoset (id, name, manual) VALUES(:id, :name, :manual)")
+				.bind("id", 42055)
+				.bind("name", "SCHAUFELRADBAGGER")
+				.bindNull("manual", Integer.class)
+				.add()
+				.bind("id", 2021)
+				.bind("name", "TOM")
+				.bindNull("manual", Integer.class)
+				.fetch().rowsUpdated()
+				.as(StepVerifier::create)
+				.expectNextMatches(updatedRows -> updatedRows.equals(2))
+				.verifyComplete();
+
+		databaseClient.sql("SELECT id FROM legoset")
+				.map(row -> row.get("id"))
+				.all()
+				.as(StepVerifier::create)
+				.assertNext(actual -> {
+					assertThat(actual).isInstanceOf(Number.class);
+					assertThat(((Number) actual).intValue()).isEqualTo(2021);
+				})
+				.expectNextCount(1)
+				.verifyComplete();
+	}
+
+	@Test
+	public void shouldThrowIllegalArgumentException() {
+		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
+
+		databaseClient.sql("INSERT INTO legoset (id, name, manual) VALUES(:my_list)")
+				.bind("my_list", Arrays.asList(1, "Bob", 1))
+				.add()
+				.bind("my_list", Arrays.asList(2, "Alice", 1, "next"))
+				.fetch().rowsUpdated()
+				.as(StepVerifier::create)
+				.expectErrorSatisfies(exception -> assertThat(exception)
+						.isInstanceOf(IllegalArgumentException.class)
+						.hasMessageContaining("not the same"))
+				.verify();
 	}
 
 	@Test

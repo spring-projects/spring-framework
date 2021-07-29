@@ -218,6 +218,31 @@ class DefaultDatabaseClientUnitTests {
 	}
 
 	@Test
+	void executeBatchShouldBindValues() {
+		Statement statement = mockStatementFor("INSERT INTO table VALUES ($1)");
+
+		DatabaseClient databaseClient = databaseClientBuilder.build();
+
+		databaseClient.sql("INSERT INTO table VALUES ($1)")
+				.bind(0, Parameter.from("foo"))
+				.add()
+				.bind(0, Parameter.from("bar"))
+				.then().as(StepVerifier::create).verifyComplete();
+
+		verify(statement).bind(0, "foo");
+		verify(statement).bind(0, "bar");
+
+		databaseClient.sql("INSERT INTO table VALUES ($1)")
+				.bind("$1", "foo")
+				.add()
+				.bind("$1", "bar")
+				.then().as(StepVerifier::create).verifyComplete();
+
+		verify(statement).bind("$1", "foo");
+		verify(statement).bind("$1", "bar");
+	}
+
+	@Test
 	void executeShouldBindNamedValuesByIndex() {
 		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
 		DatabaseClient databaseClient = databaseClientBuilder.build();
