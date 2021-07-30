@@ -125,12 +125,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	 */
 	protected DefaultListableBeanFactory getInternalBeanFactoryForBean(String beanName) {
 		synchronized (this.internalBeanFactories) {
-			DefaultListableBeanFactory internalBeanFactory = this.internalBeanFactories.get(beanName);
-			if (internalBeanFactory == null) {
-				internalBeanFactory = buildInternalBeanFactory(this.beanFactory);
-				this.internalBeanFactories.put(beanName, internalBeanFactory);
-			}
-			return internalBeanFactory;
+			return this.internalBeanFactories.computeIfAbsent(beanName, k -> buildInternalBeanFactory(this.beanFactory));
 		}
 	}
 
