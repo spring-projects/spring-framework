@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +79,9 @@ public final class MockMvc {
 	@Nullable
 	private RequestBuilder defaultRequestBuilder;
 
+	@Nullable
+	private Charset defaultResponseCharacterEncoding;
+
 	private List<ResultMatcher> defaultResultMatchers = new ArrayList<>();
 
 	private List<ResultHandler> defaultResultHandlers = new ArrayList<>();
@@ -104,6 +108,14 @@ public final class MockMvc {
 	 */
 	void setDefaultRequest(@Nullable RequestBuilder requestBuilder) {
 		this.defaultRequestBuilder = requestBuilder;
+	}
+
+	/**
+	 * The default character encoding to be applied to every response.
+	 * @see org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder#defaultResponseCharacterEncoding(Charset)
+	 */
+	void setDefaultResponseCharacterEncoding(@Nullable Charset defaultResponseCharacterEncoding) {
+		this.defaultResponseCharacterEncoding = defaultResponseCharacterEncoding;
 	}
 
 	/**
@@ -167,6 +179,10 @@ public final class MockMvc {
 		else {
 			mockResponse = new MockHttpServletResponse();
 			servletResponse = mockResponse;
+		}
+
+		if (this.defaultResponseCharacterEncoding != null) {
+			mockResponse.setDefaultCharacterEncoding(this.defaultResponseCharacterEncoding.name());
 		}
 
 		if (requestBuilder instanceof SmartRequestBuilder) {
