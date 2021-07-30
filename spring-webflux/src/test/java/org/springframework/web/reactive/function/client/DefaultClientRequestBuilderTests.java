@@ -56,6 +56,8 @@ public class DefaultClientRequestBuilderTests {
 		ClientRequest other = ClientRequest.create(GET, URI.create("https://example.com"))
 				.header("foo", "bar")
 				.cookie("baz", "qux")
+				.attribute("attributeKey", "attributeValue")
+				.attribute("anotherAttributeKey", "anotherAttributeValue")
 				.httpRequest(request -> {})
 				.build();
 		ClientRequest result = ClientRequest.from(other)
@@ -69,6 +71,8 @@ public class DefaultClientRequestBuilderTests {
 		assertThat(result.cookies().size()).isEqualTo(1);
 		assertThat(result.cookies().getFirst("baz")).isEqualTo("quux");
 		assertThat(result.httpRequest()).isNotNull();
+		assertThat(result.attributes().get("attributeKey")).isEqualTo("attributeValue");
+		assertThat(result.attributes().get("anotherAttributeKey")).isEqualTo("anotherAttributeValue");
 	}
 
 	@Test
