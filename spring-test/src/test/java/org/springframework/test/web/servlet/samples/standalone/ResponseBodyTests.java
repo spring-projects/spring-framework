@@ -44,10 +44,10 @@ class ResponseBodyTests {
 	void json() throws Exception {
 		standaloneSetup(new PersonController()).defaultResponseCharacterEncoding(UTF_8).build()
 				// We use a name containing an umlaut to test UTF-8 encoding for the request and the response.
-				.perform(get("/person/Jürgen").characterEncoding(UTF_8.name()).accept(MediaType.APPLICATION_JSON))
+				.perform(get("/person/Jürgen").characterEncoding(UTF_8).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType("application/json"))
-				.andExpect(content().encoding(UTF_8.name()))
+				.andExpect(content().encoding(UTF_8))
 				.andExpect(content().string(containsString("Jürgen")))
 				.andExpect(jsonPath("$.name").value("Jürgen"))
 				.andExpect(jsonPath("$.age").value(42))

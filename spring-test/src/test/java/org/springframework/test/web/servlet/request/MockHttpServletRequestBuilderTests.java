@@ -477,11 +477,14 @@ class MockHttpServletRequestBuilderTests {
 	@Test
 	void characterEncoding() {
 		String encoding = "UTF-8";
+
 		this.builder.characterEncoding(encoding);
-
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
-
 		assertThat(request.getCharacterEncoding()).isEqualTo(encoding);
+
+		this.builder.characterEncoding(StandardCharsets.ISO_8859_1);
+		request = this.builder.buildRequest(this.servletContext);
+		assertThat(request.getCharacterEncoding()).isEqualTo(StandardCharsets.ISO_8859_1.name());
 	}
 
 	@Test

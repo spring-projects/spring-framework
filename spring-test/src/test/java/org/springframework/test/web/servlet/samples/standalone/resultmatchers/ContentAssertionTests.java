@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
+import java.nio.charset.StandardCharsets;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
@@ -95,8 +97,16 @@ public class ContentAssertionTests {
 			.andExpect(content().encoding("ISO-8859-1"))
 			.andExpect(content().string(containsString("world")));
 
+		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
+			.andExpect(content().encoding(StandardCharsets.ISO_8859_1))
+			.andExpect(content().string(containsString("world")));
+
 		this.mockMvc.perform(get("/handleUtf8"))
 			.andExpect(content().encoding("UTF-8"))
+			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes("UTF-8")));
+
+		this.mockMvc.perform(get("/handleUtf8"))
+			.andExpect(content().encoding(StandardCharsets.UTF_8))
 			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes("UTF-8")));
 	}
 
