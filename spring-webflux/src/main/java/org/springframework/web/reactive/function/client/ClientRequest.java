@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,8 +125,8 @@ public interface ClientRequest {
 	// Static builder methods
 
 	/**
-	 * Create a builder with the method, URI, headers, and cookies of the given request.
-	 * @param other the request to copy the method, URI, headers, and cookies from
+	 * Create a builder with the method, URI, headers, cookies, attributes, and body of the given request.
+	 * @param other the request to copy the method, URI, headers, cookies, attributes, and body from
 	 * @return the created builder
 	 */
 	static Builder from(ClientRequest other) {

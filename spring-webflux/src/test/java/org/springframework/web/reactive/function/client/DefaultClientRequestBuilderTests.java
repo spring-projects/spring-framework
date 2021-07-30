@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,8 @@ public class DefaultClientRequestBuilderTests {
 		ClientRequest other = ClientRequest.create(GET, URI.create("https://example.com"))
 				.header("foo", "bar")
 				.cookie("baz", "qux")
+				.attribute("attributeKey", "attributeValue")
+				.attribute("anotherAttributeKey", "anotherAttributeValue")
 				.httpRequest(request -> {})
 				.build();
 		ClientRequest result = ClientRequest.from(other)
@@ -69,6 +71,37 @@ public class DefaultClientRequestBuilderTests {
 		assertThat(result.cookies().size()).isEqualTo(1);
 		assertThat(result.cookies().getFirst("baz")).isEqualTo("quux");
 		assertThat(result.httpRequest()).isNotNull();
+		assertThat(result.attributes().get("attributeKey")).isEqualTo("attributeValue");
+		assertThat(result.attributes().get("anotherAttributeKey")).isEqualTo("anotherAttributeValue");
+	}
+
+	@Test
+	public void fromCopiesBody() {
+		String body = "foo";
+		BodyInserter<String, ClientHttpRequest> inserter = (response, strategies) -> {
+			byte[] bodyBytes = body.getBytes(UTF_8);
+			DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bodyBytes);
+
+			return response.writeWith(Mono.just(buffer));
+		};
+
+		ClientRequest other = ClientRequest.create(POST, URI.create("https://example.com"))
+				.body(inserter).build();
+
+		ClientRequest result = ClientRequest.from(other).build();
+
+		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
+		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
+
+		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
+		given(strategies.messageWriters()).willReturn(messageWriters);
+
+		MockClientHttpRequest request = new MockClientHttpRequest(POST, "/");
+		result.writeTo(request, strategies).block();
+
+		String copiedBody = request.getBodyAsString().block();
+
+		assertThat(copiedBody).isEqualTo("foo");
 	}
 
 	@Test
