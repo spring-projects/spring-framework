@@ -78,15 +78,22 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 
 	@Override
 	public String[] getPropertyNames() {
-		Set<String> names = new LinkedHashSet<>();
+		List<String[]> namesList = new ArrayList<>(this.propertySources.size());
+		int total = 0;
 		for (PropertySource<?> propertySource : this.propertySources) {
 			if (!(propertySource instanceof EnumerablePropertySource<?> enumerablePropertySource)) {
 				throw new IllegalStateException(
 						"Failed to enumerate property names due to non-enumerable property source: " + propertySource);
 			}
-			names.addAll(Arrays.asList(enumerablePropertySource.getPropertyNames()));
+			String[] names = enumerablePropertySource.getPropertyNames();
+			namesList.add(names);
+			total += names.length;
 		}
-		return StringUtils.toStringArray(names);
+		Set<String> allNames = new LinkedHashSet<>(total);
+		for (String[] names : namesList) {
+			allNames.addAll(Arrays.asList(names));
+		}
+		return StringUtils.toStringArray(allNames);
 	}
 
 
