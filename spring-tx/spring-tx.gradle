@@ -7,7 +7,6 @@ dependencies {
 	api(project(":spring-core"))
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))  // for JCA, @EnableTransactionManagement
-	optional(project(":kotlin-coroutines"))
 	optional("javax.ejb:javax.ejb-api")
 	optional("javax.interceptor:javax.interceptor-api")
 	optional("javax.resource:javax.resource-api")

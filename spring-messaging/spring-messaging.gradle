@@ -6,7 +6,6 @@ apply plugin: "kotlinx-serialization"
 dependencies {
 	api(project(":spring-beans"))
 	api(project(":spring-core"))
-	compileOnly(project(":kotlin-coroutines"))
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))
 	optional("io.projectreactor.netty:reactor-netty-http")
@@ -19,7 +18,6 @@ dependencies {
 	optional("com.google.protobuf:protobuf-java-util")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-json")
-	testImplementation(project(":kotlin-coroutines"))
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation("javax.inject:javax.inject-tck")
 	testImplementation("javax.servlet:javax.servlet-api")

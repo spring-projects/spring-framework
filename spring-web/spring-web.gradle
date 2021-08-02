@@ -6,7 +6,6 @@ apply plugin: "kotlinx-serialization"
 dependencies {
 	api(project(":spring-beans"))
 	api(project(":spring-core"))
-	compileOnly(project(":kotlin-coroutines"))
 	compileOnly("io.projectreactor.tools:blockhound")
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))

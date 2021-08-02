@@ -7,7 +7,6 @@ dependencies {
 	api(project(":spring-core"))
 	api(project(":spring-web"))
 	api("io.projectreactor:reactor-core")
-	compileOnly(project(":kotlin-coroutines"))
 	optional(project(":spring-context"))
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional("javax.servlet:javax.servlet-api")
@@ -27,7 +26,6 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("com.google.protobuf:protobuf-java-util")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-	testImplementation(project(":kotlin-coroutines"))
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-web")))
