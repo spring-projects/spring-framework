@@ -125,16 +125,17 @@ public interface ClientRequest {
 	// Static builder methods
 
 	/**
-	 * Create a builder with the method, URI, headers, cookies, attributes, and body of the given request.
-	 * @param other the request to copy the method, URI, headers, cookies, attributes, and body from
-	 * @return the created builder
+	 * Create a builder initialized with the HTTP method, url, headers, cookies,
+	 * attributes, and body of the given request.
+	 * @param other the request to copy from
+	 * @return the builder instance
 	 */
 	static Builder from(ClientRequest other) {
 		return new DefaultClientRequestBuilder(other);
 	}
 
 	/**
-	 * Create a builder with the given method and url.
+	 * Create a builder with the given HTTP method and url.
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param url the url (as a URI instance)
 	 * @return the created builder
@@ -146,7 +147,7 @@ public interface ClientRequest {
 	}
 
 	/**
-	 * Create a request builder with the given method and url.
+	 * Create a request builder with the given HTTP method and url.
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param url the url (as a URI instance)
 	 * @return the created builder

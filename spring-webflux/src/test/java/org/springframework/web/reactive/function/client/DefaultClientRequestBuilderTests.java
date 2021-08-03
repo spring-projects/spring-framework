@@ -51,20 +51,24 @@ import static org.springframework.http.HttpMethod.POST;
  */
 public class DefaultClientRequestBuilderTests {
 
+	private static final URI DEFAULT_URL = URI.create("https://example.com");
+
 	@Test
-	public void from() throws URISyntaxException {
-		ClientRequest other = ClientRequest.create(GET, URI.create("https://example.com"))
+	public void from() {
+		ClientRequest other = ClientRequest.create(GET, DEFAULT_URL)
 				.header("foo", "bar")
 				.cookie("baz", "qux")
 				.attribute("attributeKey", "attributeValue")
 				.attribute("anotherAttributeKey", "anotherAttributeValue")
 				.httpRequest(request -> {})
 				.build();
+
 		ClientRequest result = ClientRequest.from(other)
 				.headers(httpHeaders -> httpHeaders.set("foo", "baar"))
 				.cookies(cookies -> cookies.set("baz", "quux"))
 				.build();
-		assertThat(result.url()).isEqualTo(new URI("https://example.com"));
+
+		assertThat(result.url()).isEqualTo(DEFAULT_URL);
 		assertThat(result.method()).isEqualTo(GET);
 		assertThat(result.headers().size()).isEqualTo(1);
 		assertThat(result.headers().getFirst("foo")).isEqualTo("baar");
@@ -81,13 +85,10 @@ public class DefaultClientRequestBuilderTests {
 		BodyInserter<String, ClientHttpRequest> inserter = (response, strategies) -> {
 			byte[] bodyBytes = body.getBytes(UTF_8);
 			DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bodyBytes);
-
 			return response.writeWith(Mono.just(buffer));
 		};
 
-		ClientRequest other = ClientRequest.create(POST, URI.create("https://example.com"))
-				.body(inserter).build();
-
+		ClientRequest other = ClientRequest.create(POST, DEFAULT_URL).body(inserter).build();
 		ClientRequest result = ClientRequest.from(other).build();
 
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
@@ -105,9 +106,8 @@ public class DefaultClientRequestBuilderTests {
 	}
 
 	@Test
-	public void method() throws URISyntaxException {
-		URI url = new URI("https://example.com");
-		ClientRequest.Builder builder = ClientRequest.create(DELETE, url);
+	public void method() {
+		ClientRequest.Builder builder = ClientRequest.create(DELETE, DEFAULT_URL);
 		assertThat(builder.build().method()).isEqualTo(DELETE);
 
 		builder.method(OPTIONS);
@@ -127,18 +127,17 @@ public class DefaultClientRequestBuilderTests {
 
 	@Test
 	public void cookie() {
-		ClientRequest result = ClientRequest.create(GET, URI.create("https://example.com"))
-				.cookie("foo", "bar").build();
+		ClientRequest result = ClientRequest.create(GET, DEFAULT_URL).cookie("foo", "bar").build();
 		assertThat(result.cookies().getFirst("foo")).isEqualTo("bar");
 	}
 
 	@Test
 	public void build() {
-		ClientRequest result = ClientRequest.create(GET, URI.create("https://example.com"))
+		ClientRequest result = ClientRequest.create(GET, DEFAULT_URL)
 				.header("MyKey", "MyValue")
 				.cookie("foo", "bar")
 				.httpRequest(request -> {
-					MockClientHttpRequest nativeRequest = (MockClientHttpRequest) request.getNativeRequest();
+					MockClientHttpRequest nativeRequest = request.getNativeRequest();
 					nativeRequest.getHeaders().add("MyKey2", "MyValue2");
 				})
 				.build();
@@ -158,16 +157,14 @@ public class DefaultClientRequestBuilderTests {
 	@Test
 	public void bodyInserter() {
 		String body = "foo";
-		BodyInserter<String, ClientHttpRequest> inserter =
-				(response, strategies) -> {
-					byte[] bodyBytes = body.getBytes(UTF_8);
-					DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bodyBytes);
+		BodyInserter<String, ClientHttpRequest> inserter = (response, strategies) -> {
+			byte[] bodyBytes = body.getBytes(UTF_8);
+			DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bodyBytes);
 
-					return response.writeWith(Mono.just(buffer));
-				};
+			return response.writeWith(Mono.just(buffer));
+		};
 
-		ClientRequest result = ClientRequest.create(POST, URI.create("https://example.com"))
-				.body(inserter).build();
+		ClientRequest result = ClientRequest.create(POST, DEFAULT_URL).body(inserter).build();
 
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
@@ -179,17 +176,14 @@ public class DefaultClientRequestBuilderTests {
 		result.writeTo(request, strategies).block();
 		assertThat(request.getBody()).isNotNull();
 
-		StepVerifier.create(request.getBody())
-				.expectNextCount(1)
-				.verifyComplete();
+		StepVerifier.create(request.getBody()).expectNextCount(1).verifyComplete();
 	}
 
 	@Test
 	public void bodyClass() {
 		String body = "foo";
 		Publisher<String> publisher = Mono.just(body);
-		ClientRequest result = ClientRequest.create(POST, URI.create("https://example.com"))
-				.body(publisher, String.class).build();
+		ClientRequest result = ClientRequest.create(POST, DEFAULT_URL).body(publisher, String.class).build();
 
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
@@ -201,9 +195,7 @@ public class DefaultClientRequestBuilderTests {
 		result.writeTo(request, strategies).block();
 		assertThat(request.getBody()).isNotNull();
 
-		StepVerifier.create(request.getBody())
-				.expectNextCount(1)
-				.verifyComplete();
+		StepVerifier.create(request.getBody()).expectNextCount(1).verifyComplete();
 	}
 
 	@Test
@@ -211,8 +203,7 @@ public class DefaultClientRequestBuilderTests {
 		String body = "foo";
 		Publisher<String> publisher = Mono.just(body);
 		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
-		ClientRequest result = ClientRequest.create(POST, URI.create("https://example.com"))
-				.body(publisher, typeReference).build();
+		ClientRequest result = ClientRequest.create(POST, DEFAULT_URL).body(publisher, typeReference).build();
 
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
@@ -224,9 +215,7 @@ public class DefaultClientRequestBuilderTests {
 		result.writeTo(request, strategies).block();
 		assertThat(request.getBody()).isNotNull();
 
-		StepVerifier.create(request.getBody())
-				.expectNextCount(1)
-				.verifyComplete();
+		StepVerifier.create(request.getBody()).expectNextCount(1).verifyComplete();
 	}
 
 }
