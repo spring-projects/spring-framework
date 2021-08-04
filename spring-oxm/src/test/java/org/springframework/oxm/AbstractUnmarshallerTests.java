@@ -22,6 +22,8 @@ import java.io.StringReader;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
@@ -98,9 +100,11 @@ public abstract class AbstractUnmarshallerTests<U extends Unmarshaller> {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")  // on JDK 9
 	public void unmarshalSAXSource() throws Exception {
-		XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
+		SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+		saxParserFactory.setNamespaceAware(true);
+		SAXParser saxParser = saxParserFactory.newSAXParser();
+		XMLReader reader = saxParser.getXMLReader();
 		SAXSource source = new SAXSource(reader, new InputSource(new StringReader(INPUT_STRING)));
 		Object flights = unmarshaller.unmarshal(source);
 		testFlights(flights);
