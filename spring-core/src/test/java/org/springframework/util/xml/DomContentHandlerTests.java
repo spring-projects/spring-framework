@@ -20,6 +20,8 @@ import java.io.StringReader;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,13 +64,15 @@ class DomContentHandlerTests {
 
 
 	@BeforeEach
-	@SuppressWarnings("deprecation")  // on JDK 9
 	void setUp() throws Exception {
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		documentBuilderFactory.setNamespaceAware(true);
 		documentBuilder = documentBuilderFactory.newDocumentBuilder();
 		result = documentBuilder.newDocument();
-		xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
+		SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+		saxParserFactory.setNamespaceAware(true);
+		SAXParser saxParser = saxParserFactory.newSAXParser();
+		xmlReader = saxParser.getXMLReader();
 	}
 
 

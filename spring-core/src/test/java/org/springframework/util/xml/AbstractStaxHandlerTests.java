@@ -21,6 +21,8 @@ import java.io.StringWriter;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
@@ -63,9 +65,11 @@ abstract class AbstractStaxHandlerTests {
 
 
 	@BeforeEach
-	@SuppressWarnings("deprecation")  // on JDK 9
 	void createXMLReader() throws Exception {
-		xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
+		SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+		saxParserFactory.setNamespaceAware(true);
+		SAXParser saxParser = saxParserFactory.newSAXParser();
+		xmlReader = saxParser.getXMLReader();
 		xmlReader.setEntityResolver((publicId, systemId) -> new InputSource(new StringReader("")));
 	}
 
