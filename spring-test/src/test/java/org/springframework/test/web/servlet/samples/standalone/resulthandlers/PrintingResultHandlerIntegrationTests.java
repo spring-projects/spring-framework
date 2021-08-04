@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -70,6 +71,7 @@ class PrintingResultHandlerIntegrationTests {
 				.alwaysExpect(content().string("Boom!"))
 				.build()
 				.perform(get("/").content("Hello Request".getBytes()).characterEncoding("ISO-8859-1"));
+			fail("AssertionError is expected to be thrown.");
 		}
 		catch (AssertionError error) {
 			assertThat(error).hasMessageContaining("Boom!");
