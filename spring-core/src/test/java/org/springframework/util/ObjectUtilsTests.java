@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ class ObjectUtilsTests {
 		Set<String> set = new HashSet<>();
 		set.add("foo");
 		assertThat(isEmpty(set)).isFalse();
-		assertThat(isEmpty(Arrays.asList("foo"))).isFalse();
+		assertThat(isEmpty(Collections.singletonList("foo"))).isFalse();
 	}
 
 	@Test
@@ -159,7 +159,7 @@ class ObjectUtilsTests {
 	void toObjectArrayWithEmptyPrimitiveArray() {
 		Object[] objects = ObjectUtils.toObjectArray(new byte[] {});
 		assertThat(objects).isNotNull();
-		assertThat(objects.length).isEqualTo(0);
+		assertThat(objects).hasSize(0);
 	}
 
 	@Test
@@ -179,7 +179,7 @@ class ObjectUtilsTests {
 		String[] array = new String[] {"foo", "bar"};
 		String newElement = "baz";
 		Object[] newArray = ObjectUtils.addObjectToArray(array, newElement);
-		assertThat(newArray.length).isEqualTo(3);
+		assertThat(newArray).hasSize(3);
 		assertThat(newArray[2]).isEqualTo(newElement);
 	}
 
@@ -188,7 +188,7 @@ class ObjectUtilsTests {
 		String[] array = new String[0];
 		String newElement = "foo";
 		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
-		assertThat(newArray.length).isEqualTo(1);
+		assertThat(newArray).hasSize(1);
 		assertThat(newArray[0]).isEqualTo(newElement);
 	}
 
@@ -198,7 +198,7 @@ class ObjectUtilsTests {
 		String[] array = new String[] {existingElement};
 		String newElement = "bar";
 		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
-		assertThat(newArray.length).isEqualTo(2);
+		assertThat(newArray).hasSize(2);
 		assertThat(newArray[0]).isEqualTo(existingElement);
 		assertThat(newArray[1]).isEqualTo(newElement);
 	}
@@ -208,8 +208,8 @@ class ObjectUtilsTests {
 		String[] array = new String[] {null};
 		String newElement = "bar";
 		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
-		assertThat(newArray.length).isEqualTo(2);
-		assertThat(newArray[0]).isEqualTo(null);
+		assertThat(newArray).hasSize(2);
+		assertThat(newArray[0]).isNull();
 		assertThat(newArray[1]).isEqualTo(newElement);
 	}
 
@@ -217,15 +217,15 @@ class ObjectUtilsTests {
 	void addObjectToNullArray() throws Exception {
 		String newElement = "foo";
 		String[] newArray = ObjectUtils.addObjectToArray(null, newElement);
-		assertThat(newArray.length).isEqualTo(1);
+		assertThat(newArray).hasSize(1);
 		assertThat(newArray[0]).isEqualTo(newElement);
 	}
 
 	@Test
 	void addNullObjectToNullArray() throws Exception {
 		Object[] newArray = ObjectUtils.addObjectToArray(null, null);
-		assertThat(newArray.length).isEqualTo(1);
-		assertThat(newArray[0]).isEqualTo(null);
+		assertThat(newArray).hasSize(1);
+		assertThat(newArray[0]).isNull();
 	}
 
 	@Test
@@ -260,7 +260,7 @@ class ObjectUtilsTests {
 	@Deprecated
 	void hashCodeWithFloat() {
 		float flt = 34.8f;
-		int expected = (new Float(flt)).hashCode();
+		int expected = (Float.valueOf(flt)).hashCode();
 		assertThat(ObjectUtils.hashCode(flt)).isEqualTo(expected);
 	}
 
@@ -268,7 +268,7 @@ class ObjectUtilsTests {
 	@Deprecated
 	void hashCodeWithLong() {
 		long lng = 883L;
-		int expected = (new Long(lng)).hashCode();
+		int expected = (Long.valueOf(lng)).hashCode();
 		assertThat(ObjectUtils.hashCode(lng)).isEqualTo(expected);
 	}
 
@@ -282,7 +282,7 @@ class ObjectUtilsTests {
 
 	@Test
 	void identityToStringWithNullObject() {
-		assertThat(ObjectUtils.identityToString(null)).isEqualTo("");
+		assertThat(ObjectUtils.identityToString(null)).isEmpty();
 	}
 
 	@Test

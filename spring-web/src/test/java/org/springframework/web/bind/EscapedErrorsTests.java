@@ -83,7 +83,7 @@ public class EscapedErrorsTests {
 		FieldError ageError = errors.getFieldError("age");
 		assertThat("message: &lt;tag&gt;".equals(ageError.getDefaultMessage())).as("Age error message escaped").isTrue();
 		assertThat("AGE_NOT_SET <tag>".equals(ageError.getCode())).as("Age error code not escaped").isTrue();
-		assertThat((new Integer(0)).equals(errors.getFieldValue("age"))).as("Age value not escaped").isTrue();
+		assertThat((Integer.valueOf(0)).equals(errors.getFieldValue("age"))).as("Age value not escaped").isTrue();
 		FieldError ageErrorInList = errors.getFieldErrors("age").get(0);
 		assertThat(ageError.getDefaultMessage().equals(ageErrorInList.getDefaultMessage())).as("Same name error in list").isTrue();
 		FieldError ageError2 = errors.getFieldErrors("age").get(1);
