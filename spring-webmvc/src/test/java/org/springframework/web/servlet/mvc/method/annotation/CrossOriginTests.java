@@ -159,7 +159,7 @@ class CrossOriginTests {
 		assertThat(config.getAllowCredentials()).isNull();
 		assertThat(config.getAllowedHeaders()).containsExactly("*");
 		assertThat(CollectionUtils.isEmpty(config.getExposedHeaders())).isTrue();
-		assertThat(config.getMaxAge()).isEqualTo(new Long(1800));
+		assertThat(config.getMaxAge()).isEqualTo(Long.valueOf(1800));
 	}
 
 	@PathPatternsParameterizedTest
@@ -173,7 +173,7 @@ class CrossOriginTests {
 		assertThat(config.getAllowedOrigins()).containsExactly("https://site1.com", "https://site2.com");
 		assertThat(config.getAllowedHeaders()).containsExactly("header1", "header2");
 		assertThat(config.getExposedHeaders()).containsExactly("header3", "header4");
-		assertThat(config.getMaxAge()).isEqualTo(new Long(123));
+		assertThat(config.getMaxAge()).isEqualTo(Long.valueOf(123));
 		assertThat(config.getAllowCredentials()).isFalse();
 	}
 
@@ -315,7 +315,7 @@ class CrossOriginTests {
 		assertThat(config.getAllowCredentials()).isNull();
 		assertThat(config.getAllowedHeaders()).containsExactly("*");
 		assertThat(CollectionUtils.isEmpty(config.getExposedHeaders())).isTrue();
-		assertThat(config.getMaxAge()).isEqualTo(new Long(1800));
+		assertThat(config.getMaxAge()).isEqualTo(Long.valueOf(1800));
 	}
 
 	@PathPatternsParameterizedTest
@@ -389,7 +389,7 @@ class CrossOriginTests {
 		assertThat(chain).isNotNull();
 		if (isPreFlightRequest) {
 			Object handler = chain.getHandler();
-			assertThat(handler.getClass().getSimpleName().equals("PreFlightHandler")).isTrue();
+			assertThat(handler.getClass().getSimpleName()).isEqualTo("PreFlightHandler");
 			DirectFieldAccessor accessor = new DirectFieldAccessor(handler);
 			return (CorsConfiguration)accessor.getPropertyValue("config");
 		}
