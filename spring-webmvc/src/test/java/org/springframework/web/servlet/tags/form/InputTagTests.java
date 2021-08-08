@@ -56,7 +56,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		// set up test data
 		this.rob = new TestBean();
 		this.rob.setName("Rob");
-		this.rob.setMyFloat(new Float(12.34));
+		this.rob.setMyFloat(Float.valueOf(12.34f));
 
 		TestBean sally = new TestBean();
 		sally.setName("Sally");

@@ -429,9 +429,9 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setPath("myFloat");
 
 		Float[] array = new Float[] {
-				new Float("12.30"), new Float("12.32"), new Float("12.34"), new Float("12.36"),
-				new Float("12.38"), new Float("12.40"), new Float("12.42"), new Float("12.44"),
-				new Float("12.46"), new Float("12.48")
+				Float.valueOf("12.30"), Float.valueOf("12.32"), Float.valueOf("12.34"), Float.valueOf("12.36"),
+				Float.valueOf("12.38"), Float.valueOf("12.40"), Float.valueOf("12.42"), Float.valueOf("12.44"),
+				Float.valueOf("12.46"), Float.valueOf("12.48")
 		};
 
 		this.tag.setItems(array);
@@ -1010,7 +1010,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.bean.setName("Rob");
 		this.bean.setCountry("UK");
 		this.bean.setSex("M");
-		this.bean.setMyFloat(new Float("12.34"));
+		this.bean.setMyFloat(Float.valueOf("12.34"));
 		this.bean.setSomeIntegerArray(new Integer[]{12, 34});
 		return this.bean;
 	}
