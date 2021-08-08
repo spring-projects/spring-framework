@@ -32,7 +32,6 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import org.springframework.jms.support.converter.MessageConversionException;

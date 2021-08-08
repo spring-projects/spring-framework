@@ -357,7 +357,8 @@ public abstract class AbstractPropertyAccessorTests {
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		try {
 			accessor.getPropertyValue("spouse.bla");
-		} catch (NotReadablePropertyException ex) {
+		}
+		catch (NotReadablePropertyException ex) {
 			assertThat(ex.getMessage().contains(TestBean.class.getName())).isTrue();
 		}
 	}
@@ -912,12 +913,12 @@ public abstract class AbstractPropertyAccessorTests {
 		accessor.setPropertyValue("intArray", new int[]{4, 5, 2, 3});
 		assertThat(target.intArray.length == 4).as("intArray length = 4").isTrue();
 		assertThat(target.intArray[0] == 4 && target.intArray[1] == 5 &&
-				target.intArray[2] == 2 && target.intArray[3] == 3).as("correct values").isTrue();
+		target.intArray[2] == 2 && target.intArray[3] == 3).as("correct values").isTrue();
 
 		accessor.setPropertyValue("intArray", new String[]{"3", "4", "1", "2"});
 		assertThat(target.intArray.length == 4).as("intArray length = 4").isTrue();
 		assertThat(target.intArray[0] == 4 && target.intArray[1] == 5 &&
-				target.intArray[2] == 2 && target.intArray[3] == 3).as("correct values").isTrue();
+		target.intArray[2] == 2 && target.intArray[3] == 3).as("correct values").isTrue();
 
 		accessor.setPropertyValue("intArray", 1);
 		assertThat(target.intArray.length == 1).as("intArray length = 4").isTrue();
@@ -1002,7 +1003,7 @@ public abstract class AbstractPropertyAccessorTests {
 		accessor.setPropertyValue("array[2]", 3);
 		assertThat(target.getArray()).hasSize(3);
 		assertThat(target.getArray()[0] == 1 && target.getArray()[1] == 0 &&
-				target.getArray()[2] == 3).as("correct values").isTrue();
+		target.getArray()[2] == 3).as("correct values").isTrue();
 	}
 
 	@Test
@@ -1267,7 +1268,7 @@ public abstract class AbstractPropertyAccessorTests {
 		badValues.add("map[key2]", "");
 		assertThatExceptionOfType(PropertyBatchUpdateException.class).isThrownBy(() ->
 				accessor.setPropertyValues(badValues))
-				.satisfies(ex -> assertThat(ex.getPropertyAccessException("map[key2]")).isInstanceOf(TypeMismatchException.class));
+			.satisfies(ex -> assertThat(ex.getPropertyAccessException("map[key2]")).isInstanceOf(TypeMismatchException.class));
 	}
 
 	@Test
@@ -1318,7 +1319,7 @@ public abstract class AbstractPropertyAccessorTests {
 		assertThat(((TestBean) target.getMap().get(2)).getName()).isEqualTo("rob");
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"}) // must work with raw map in this test
+	@SuppressWarnings({ "unchecked", "rawtypes" }) // must work with raw map in this test
 	@Test
 	public void setRawMapPropertyWithNoEditorRegistered() {
 		IndexedTestBean target = new IndexedTestBean();

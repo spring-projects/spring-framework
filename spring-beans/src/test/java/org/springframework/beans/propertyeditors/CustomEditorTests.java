@@ -16,10 +16,6 @@
 
 package org.springframework.beans.propertyeditors;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.*;
-import org.springframework.beans.testfixture.beans.*;
-
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
 import java.beans.PropertyVetoException;
@@ -753,7 +749,7 @@ class CustomEditorTests {
 		editor.setAsText(validDate);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setAsText(invalidDate))
-				.withMessageContaining("10");
+			.withMessageContaining("10");
 	}
 
 	@Test
