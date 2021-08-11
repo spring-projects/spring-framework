@@ -40,10 +40,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
+
 
 /**
  * Default implementation of {@link ClientResponse}.
@@ -130,13 +132,21 @@ class DefaultClientResponse implements ClientResponse {
 	public <T> T body(BodyExtractor<T, ? super ClientHttpResponse> extractor) {
 		T result = extractor.extract(this.response, this.bodyExtractorContext);
 		String description = "Body from " + this.requestDescription + " [DefaultClientResponse]";
+
 		if (result instanceof Mono) {
-			return (T) ((Mono<?>) result).checkpoint(description);
+			return (T) ((Mono<?>) result)
+					.checkpoint(description)
+					.onErrorMap(WebClientUtils.WRAP_EXCEPTION_PREDICATE, t -> toException(t, null, null));
 		}
+
 		else if (result instanceof Flux) {
-			return (T) ((Flux<?>) result).checkpoint(description);
+			return (T) ((Flux<?>) result)
+					.checkpoint(description)
+					.onErrorMap(WebClientUtils.WRAP_EXCEPTION_PREDICATE, t -> toException(t, null, null));
 		}
+
 		else {
+			// XXX: is there a way to preemptively handle uncaught exceptions here?
 			return result;
 		}
 	}
@@ -205,18 +215,12 @@ class DefaultClientResponse implements ClientResponse {
 				.defaultIfEmpty(EMPTY)
 				.onErrorReturn(IllegalStateException.class::isInstance, EMPTY)
 				.map(bodyBytes -> {
-					HttpRequest request = this.requestSupplier.get();
-					Charset charset = headers().contentType().map(MimeType::getCharset).orElse(null);
 					int statusCode = rawStatusCode();
 					HttpStatus httpStatus = HttpStatus.resolve(statusCode);
+					Charset charset = headers().contentType().map(MimeType::getCharset).orElse(null);
+
 					if (httpStatus != null) {
-						return WebClientResponseException.create(
-								statusCode,
-								httpStatus.getReasonPhrase(),
-								headers().asHttpHeaders(),
-								bodyBytes,
-								charset,
-								request);
+						return toException(null, bodyBytes, charset);
 					}
 					else {
 						return new UnknownHttpStatusCodeException(
@@ -224,7 +228,8 @@ class DefaultClientResponse implements ClientResponse {
 								headers().asHttpHeaders(),
 								bodyBytes,
 								charset,
-								request);
+								this.requestSupplier.get()
+						);
 					}
 				});
 	}
@@ -237,6 +242,23 @@ class DefaultClientResponse implements ClientResponse {
 	// Used by DefaultClientResponseBuilder
 	HttpRequest request() {
 		return this.requestSupplier.get();
+	}
+
+	private WebClientResponseException toException(
+			@Nullable Throwable cause, @Nullable byte[] bodyBytes, @Nullable Charset charset) {
+
+		WebClientResponseException ex = new WebClientResponseException(
+				this.response.getRawStatusCode(),
+				this.response.getStatusCode().getReasonPhrase(),
+				headers().asHttpHeaders(),
+				bodyBytes,
+				charset,
+				this.requestSupplier.get()
+		);
+
+		ex.initCause(cause);
+
+		return ex;
 	}
 
 	private class DefaultHeaders implements Headers {
@@ -269,5 +291,4 @@ class DefaultClientResponse implements ClientResponse {
 			return (value != -1 ? OptionalLong.of(value) : OptionalLong.empty());
 		}
 	}
-
 }
