@@ -84,7 +84,7 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		return result.getReturnType().getGeneric().toClass() == ServerResponse.class;
+		return ServerResponse.class.isAssignableFrom(result.getReturnType().getGeneric().toClass());
 	}
 
 	@Override
