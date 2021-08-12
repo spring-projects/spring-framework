@@ -38,10 +38,12 @@ abstract class WebClientUtils {
 	private static final String VALUE_NONE = "\n\t\t\n\t\t\n\uE000\uE001\uE002\n\t\t\t\t\n";
 
 	/**
-	 * Predicate that returns true if an exception should be wrapped.
+	 * Predicate that returns true if an exception should be wrapped. This will not catch WebClientException instances,
+	 * nor will it catch CodecExceptions. Error types will not be caught either, as "no reasonable application" should
+	 * attempt to catch these by design, according to the JDK documentation.
 	 */
 	public final static Predicate<? super Throwable> WRAP_EXCEPTION_PREDICATE =
-			t -> !(t instanceof WebClientException) && !(t instanceof CodecException);
+			t -> !(t instanceof WebClientException || t instanceof CodecException || t instanceof Error);
 
 
 	/**
