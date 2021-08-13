@@ -333,7 +333,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Override
 	public ConfigurableEnvironment getEnvironment() {
 		if (this.environment == null) {
-			this.environment = createEnvironment();
+			this.environment = new LazyConfigurableEnvironment(this);
 		}
 		return this.environment;
 	}
