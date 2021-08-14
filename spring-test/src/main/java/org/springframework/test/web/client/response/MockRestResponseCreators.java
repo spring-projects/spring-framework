@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -83,6 +84,13 @@ public abstract class MockRestResponseCreators {
 	}
 
 	/**
+	 * {@code ResponseCreator} for a 202 response (ACCEPTED).
+	 */
+	public static DefaultResponseCreator withAccepted() {
+		return new DefaultResponseCreator(HttpStatus.ACCEPTED);
+	}
+
+	/**
 	 * {@code ResponseCreator} for a 204 response (NO_CONTENT).
 	 */
 	public static DefaultResponseCreator withNoContent() {
@@ -104,10 +112,68 @@ public abstract class MockRestResponseCreators {
 	}
 
 	/**
+	 * {@code ResponseCreator} for a 403 response (FORBIDDEN).
+	 */
+	public static DefaultResponseCreator withForbiddenRequest() {
+		return new DefaultResponseCreator(HttpStatus.FORBIDDEN);
+	}
+
+	/**
+	 * {@code ResponseCreator} for a 404 response (NOT_FOUND).
+	 */
+	public static DefaultResponseCreator withResourceNotFound() {
+		return new DefaultResponseCreator(HttpStatus.NOT_FOUND);
+	}
+
+	/**
+	 * {@code ResponseCreator} for a 409 response (CONFLICT).
+	 */
+	public static DefaultResponseCreator withRequestConflict() {
+		return new DefaultResponseCreator(HttpStatus.CONFLICT);
+	}
+
+	/**
+	 * {@code ResponseCreator} for a 429 ratelimited response (TOO_MANY_REQUESTS).
+	 */
+	public static DefaultResponseCreator withTooManyRequests() {
+		return new DefaultResponseCreator(HttpStatus.TOO_MANY_REQUESTS);
+	}
+
+	/**
+	 * {@code ResponseCreator} for a 429 ratelimited response (TOO_MANY_REQUESTS) with a {@code Retry-After} header
+	 * in seconds.
+	 */
+	public static DefaultResponseCreator withTooManyRequests(int retryAfter) {
+		return new DefaultResponseCreator(HttpStatus.TOO_MANY_REQUESTS)
+				.header(HttpHeaders.RETRY_AFTER, Integer.toString(retryAfter));
+	}
+
+	/**
 	 * {@code ResponseCreator} for a 500 response (SERVER_ERROR).
 	 */
 	public static DefaultResponseCreator withServerError() {
 		return new DefaultResponseCreator(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	/**
+	 * {@code ResponseCreator} for a 502 response (BAD_GATEWAY).
+	 */
+	public static DefaultResponseCreator withBadGateway() {
+		return new DefaultResponseCreator(HttpStatus.BAD_GATEWAY);
+	}
+
+	/**
+	 * {@code ResponseCreator} for a 503 response (SERVICE_UNAVAILABLE).
+	 */
+	public static DefaultResponseCreator withServiceUnavailable() {
+		return new DefaultResponseCreator(HttpStatus.SERVICE_UNAVAILABLE);
+	}
+
+	/**
+	 * {@code ResponseCreator} for a 504 response (GATEWAY_TIMEOUT).
+	 */
+	public static DefaultResponseCreator withGatewayTimeout() {
+		return new DefaultResponseCreator(HttpStatus.GATEWAY_TIMEOUT);
 	}
 
 	/**

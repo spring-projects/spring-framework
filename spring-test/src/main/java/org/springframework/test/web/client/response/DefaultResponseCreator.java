@@ -18,18 +18,25 @@ package org.springframework.test.web.client.response;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 /**
  * A {@code ResponseCreator} with builder-style methods for adding response details.
@@ -67,12 +74,19 @@ public class DefaultResponseCreator implements ResponseCreator {
 		this.statusCode = statusCode;
 	}
 
-
 	/**
 	 * Set the body as a UTF-8 String.
 	 */
 	public DefaultResponseCreator body(String content) {
 		this.content = content.getBytes(StandardCharsets.UTF_8);
+		return this;
+	}
+
+	/**
+	 * Set the body from a string using the given character set.
+	 */
+	public DefaultResponseCreator body(String content, Charset charset) {
+		this.content = content.getBytes(charset);
 		return this;
 	}
 
@@ -85,7 +99,7 @@ public class DefaultResponseCreator implements ResponseCreator {
 	}
 
 	/**
-	 * Set the body as a {@link Resource}.
+	 * Set the body from a {@link Resource}.
 	 */
 	public DefaultResponseCreator body(Resource resource) {
 		this.contentResource = resource;
@@ -109,6 +123,26 @@ public class DefaultResponseCreator implements ResponseCreator {
 	}
 
 	/**
+	 * Add a single header.
+	 */
+	public DefaultResponseCreator header(String name, String value) {
+		// This is really just an alias, but it makes the interface more fluent.
+		return headers(name, value);
+	}
+
+	/**
+	 * Add one or more headers.
+	 */
+	public DefaultResponseCreator headers(String name, String ... value) {
+		List<String> valueList = Stream.of(value)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
+
+		this.headers.addAll(name, valueList);
+		return this;
+	}
+
+	/**
 	 * Copy all given headers.
 	 */
 	public DefaultResponseCreator headers(HttpHeaders headers) {
@@ -116,6 +150,36 @@ public class DefaultResponseCreator implements ResponseCreator {
 		return this;
 	}
 
+	/**
+	 * Add a single cookie.
+	 */
+	public DefaultResponseCreator cookie(ResponseCookie cookie) {
+		// This is really just an alias, but it makes the interface more fluent.
+		return cookies(cookie);
+	}
+
+	/**
+	 * Add one or more cookies.
+	 */
+	public DefaultResponseCreator cookies(ResponseCookie... cookies) {
+		for (ResponseCookie cookie : cookies) {
+			this.headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
+		}
+
+		return this;
+	}
+
+	/**
+	 * Copy all given cookies.
+	 */
+	public DefaultResponseCreator cookies(MultiValueMap<String, ResponseCookie> cookies) {
+		cookies.values()
+				.stream()
+				.flatMap(List::stream)
+				.forEach(cookie -> this.headers.add(HttpHeaders.SET_COOKIE, cookie.toString()));
+
+		return this;
+	}
 
 	@Override
 	public ClientHttpResponse createResponse(@Nullable ClientHttpRequest request) throws IOException {
