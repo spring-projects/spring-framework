@@ -25,6 +25,7 @@ import org.springframework.test.context.TestContext;
 import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.mock;
  * Unit tests for {@link SqlScriptsTestExecutionListener}.
  *
  * @author Sam Brannen
+ * @author Andreas Ahlenstorf
  * @since 4.1
  */
 class SqlScriptsTestExecutionListenerTests {
@@ -56,6 +58,7 @@ class SqlScriptsTestExecutionListenerTests {
 	void missingValueAndScriptsAndStatementsAtMethodLevel() throws Exception {
 		Class<?> clazz = MissingValueAndScriptsAndStatementsAtMethodLevel.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		given(testContext.hasTestMethod()).willReturn(true);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("foo"));
 
 		assertExceptionContains(clazz.getSimpleName() + ".foo" + ".sql");
@@ -102,6 +105,30 @@ class SqlScriptsTestExecutionListenerTests {
 		assertExceptionContains("supply at least a DataSource or PlatformTransactionManager");
 	}
 
+	@Test
+	void beforeTestClassOnMethod() throws Exception {
+		Class<?> clazz = ClassLevelExecutionPhaseOnMethod.class;
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		given(testContext.hasTestMethod()).willReturn(true);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("beforeTestClass"));
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> listener.beforeTestMethod(testContext))
+				.withMessage("BEFORE_TEST_CLASS cannot be used on methods");
+	}
+
+	@Test
+	void afterTestClassOnMethod() throws Exception {
+		Class<?> clazz = ClassLevelExecutionPhaseOnMethod.class;
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		given(testContext.hasTestMethod()).willReturn(true);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("afterTestClass"));
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> listener.beforeTestMethod(testContext))
+				.withMessage("AFTER_TEST_CLASS cannot be used on methods");
+	}
+
 	private void assertExceptionContains(String msg) throws Exception {
 		assertThatIllegalStateException().isThrownBy(() ->
 				listener.beforeTestMethod(testContext))
@@ -146,4 +173,14 @@ class SqlScriptsTestExecutionListenerTests {
 		}
 	}
 
+	static class ClassLevelExecutionPhaseOnMethod {
+
+		@Sql(scripts = "foo.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+		public void beforeTestClass() {
+		}
+
+		@Sql(scripts = "foo.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS)
+		public void afterTestClass() {
+		}
+	}
 }

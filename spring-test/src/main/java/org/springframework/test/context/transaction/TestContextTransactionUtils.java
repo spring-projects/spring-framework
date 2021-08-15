@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Andreas Ahlenstorf
  * @since 4.1
  */
 public abstract class TestContextTransactionUtils {
@@ -227,7 +228,8 @@ public abstract class TestContextTransactionUtils {
 	/**
 	 * Create a delegating {@link TransactionAttribute} for the supplied target
 	 * {@link TransactionAttribute} and {@link TestContext}, using the names of
-	 * the test class and test method to build the name of the transaction.
+	 * the test class and test method (if available) to build the name of the
+	 * transaction.
 	 * @param testContext the {@code TestContext} upon which to base the name
 	 * @param targetAttribute the {@code TransactionAttribute} to delegate to
 	 * @return the delegating {@code TransactionAttribute}
@@ -248,7 +250,13 @@ public abstract class TestContextTransactionUtils {
 
 		public TestContextTransactionAttribute(TransactionAttribute targetAttribute, TestContext testContext) {
 			super(targetAttribute);
-			this.name = ClassUtils.getQualifiedMethodName(testContext.getTestMethod(), testContext.getTestClass());
+
+			if (testContext.hasTestMethod()) {
+				this.name = ClassUtils.getQualifiedMethodName(testContext.getTestMethod(), testContext.getTestClass());
+			}
+			else {
+				this.name = testContext.getTestClass().getName();
+			}
 		}
 
 		@Override
