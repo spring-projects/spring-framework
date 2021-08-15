@@ -111,6 +111,25 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	Object getTestInstance();
 
 	/**
+	 * Tests whether a test method is part of this test context. Returns
+	 * {@code true} if this context has a current test method, {@code false}
+	 * otherwise.
+	 *
+	 * <p>The default implementation of this method always returns {@code false}.
+	 * Custom {@code TestContext} implementations are therefore highly encouraged
+	 * to override this method with a more meaningful implementation. Note that
+	 * the standard {@code TestContext} implementation in Spring overrides this
+	 * method appropriately.
+	 * @return {@code true} if the test execution has already entered a test
+	 * method
+	 * @since 6.1
+	 * @see #getTestMethod()
+	 */
+	default boolean hasTestMethod() {
+		return false;
+	}
+
+	/**
 	 * Get the current {@linkplain Method test method} for this test context.
 	 * <p>Note: this is a mutable property.
 	 * @return the current test method (never {@code null})

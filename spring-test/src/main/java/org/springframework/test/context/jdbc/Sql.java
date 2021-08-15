@@ -33,6 +33,11 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>Method-level declarations override class-level declarations by default,
  * but this behavior can be configured via {@link SqlMergeMode @SqlMergeMode}.
+ * However, this does not apply to class-level declarations that use
+ * {@link ExecutionPhase#BEFORE_TEST_CLASS} or
+ * {@link ExecutionPhase#AFTER_TEST_CLASS}. Such declarations are retained and
+ * scripts and statements are executed once per class in addition to any
+ * method-level annotations.
  *
  * <p>Script execution is performed by the {@link SqlScriptsTestExecutionListener},
  * which is enabled by default.
@@ -160,6 +165,18 @@ public @interface Sql {
 	 * Enumeration of <em>phases</em> that dictate when SQL scripts are executed.
 	 */
 	enum ExecutionPhase {
+
+		/**
+		 * The configured SQL scripts and statements will be executed
+		 * once <em>before</em> any test method is run.
+		 */
+		BEFORE_TEST_CLASS,
+
+		/**
+		 * The configured SQL scripts and statements will be executed
+		 * once <em>after</em> any test method is run.
+		 */
+		AFTER_TEST_CLASS,
 
 		/**
 		 * The configured SQL scripts and statements will be executed

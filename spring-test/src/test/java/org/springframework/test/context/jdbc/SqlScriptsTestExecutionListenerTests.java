@@ -56,6 +56,7 @@ class SqlScriptsTestExecutionListenerTests {
 	void missingValueAndScriptsAndStatementsAtMethodLevel() throws Exception {
 		Class<?> clazz = MissingValueAndScriptsAndStatementsAtMethodLevel.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		given(testContext.hasTestMethod()).willReturn(true);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("foo"));
 
 		assertExceptionContains(clazz.getSimpleName() + ".foo" + ".sql");

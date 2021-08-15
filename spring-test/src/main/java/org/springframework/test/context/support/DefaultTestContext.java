@@ -167,6 +167,11 @@ public class DefaultTestContext implements TestContext {
 	}
 
 	@Override
+	public boolean hasTestMethod() {
+		return this.testMethod != null;
+	}
+
+	@Override
 	public final Method getTestMethod() {
 		Method testMethod = this.testMethod;
 		Assert.state(testMethod != null, "No test method");

@@ -67,10 +67,17 @@ import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
  * {@link Sql#scripts scripts} and inlined {@link Sql#statements statements}
  * configured via the {@link Sql @Sql} annotation.
  *
- * <p>Scripts and inlined statements will be executed {@linkplain #beforeTestMethod(TestContext) before}
- * or {@linkplain #afterTestMethod(TestContext) after} execution of the corresponding
- * {@linkplain java.lang.reflect.Method test method}, depending on the configured
- * value of the {@link Sql#executionPhase executionPhase} flag.
+ * <p>Class-level annotations that are constrained to a class-level execution
+ * phase ({@link ExecutionPhase#BEFORE_TEST_CLASS} or
+ * {@link ExecutionPhase#AFTER_TEST_CLASS}) will be run
+ * {@linkplain #beforeTestClass(TestContext) once before all test methods} or
+ * {@linkplain #afterTestMethod(TestContext) once after all test methods},
+ * respectively. All other scripts and inlined statements will be executed
+ * {@linkplain #beforeTestMethod(TestContext) before} or
+ * {@linkplain #afterTestMethod(TestContext) after} execution of the
+ * corresponding {@linkplain java.lang.reflect.Method test method}, depending
+ * on the configured value of the {@link Sql#executionPhase executionPhase}
+ * flag.
  *
  * <p>Scripts and inlined statements will be executed without a transaction,
  * within an existing Spring-managed transaction, or within an isolated transaction,
@@ -128,6 +135,26 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 	/**
 	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
+	 * {@link TestContext} once per test class <em>before</em> any test method
+	 * is run.
+	 */
+	@Override
+	public void beforeTestClass(TestContext testContext) throws Exception {
+		executeBeforeOrAfterClassSqlScripts(testContext, ExecutionPhase.BEFORE_TEST_CLASS);
+	}
+
+	/**
+	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
+	 * {@link TestContext} once per test class <em>after</em> all test methods
+	 * have been run.
+	 */
+	@Override
+	public void afterTestClass(TestContext testContext) throws Exception {
+		executeBeforeOrAfterClassSqlScripts(testContext, ExecutionPhase.AFTER_TEST_CLASS);
+	}
+
+	/**
+	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
 	 * {@link TestContext} <em>before</em> the current test method.
 	 */
 	@Override
@@ -157,6 +184,17 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		getSqlMethods(testClass).forEach(testMethod ->
 			getSqlAnnotationsFor(testMethod).forEach(sql ->
 				registerClasspathResources(getScripts(sql, testClass, testMethod, false), runtimeHints, classLoader)));
+	}
+
+	/**
+	 * Execute class-level SQL scripts configured via {@link Sql @Sql} for the
+	 * supplied {@link TestContext} and the execution phases
+	 * {@link ExecutionPhase#BEFORE_TEST_CLASS} and
+	 * {@link ExecutionPhase#AFTER_TEST_CLASS}.
+	 */
+	private void executeBeforeOrAfterClassSqlScripts(TestContext testContext, ExecutionPhase executionPhase) {
+		Class<?> testClass = testContext.getTestClass();
+		executeSqlScripts(getSqlAnnotationsFor(testClass), testContext, executionPhase, true);
 	}
 
 	/**
@@ -260,7 +298,12 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 					.formatted(executionPhase, testContext.getTestClass().getName()));
 		}
 
-		String[] scripts = getScripts(sql, testContext.getTestClass(), testContext.getTestMethod(), classLevel);
+		Method testMethod = null;
+		if (testContext.hasTestMethod()) {
+			testMethod = testContext.getTestMethod();
+		}
+
+		String[] scripts = getScripts(sql, testContext.getTestClass(), testMethod, classLevel);
 		List<Resource> scriptResources = TestContextResourceUtils.convertToResourceList(
 				testContext.getApplicationContext(), scripts);
 		for (String stmt : sql.statements()) {
@@ -354,7 +397,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		return null;
 	}
 
-	private String[] getScripts(Sql sql, Class<?> testClass, Method testMethod, boolean classLevel) {
+	private String[] getScripts(Sql sql, Class<?> testClass, @Nullable Method testMethod, boolean classLevel) {
 		String[] scripts = sql.scripts();
 		if (ObjectUtils.isEmpty(scripts) && ObjectUtils.isEmpty(sql.statements())) {
 			scripts = new String[] {detectDefaultScript(testClass, testMethod, classLevel)};
@@ -366,7 +409,11 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * Detect a default SQL script by implementing the algorithm defined in
 	 * {@link Sql#scripts}.
 	 */
-	private String detectDefaultScript(Class<?> testClass, Method testMethod, boolean classLevel) {
+	private String detectDefaultScript(Class<?> testClass, @Nullable Method testMethod, boolean classLevel) {
+		if (!classLevel && testMethod == null) {
+			throw new AssertionError("Method-level @Sql requires a testMethod");
+		}
+
 		String elementType = (classLevel ? "class" : "method");
 		String elementName = (classLevel ? testClass.getName() : testMethod.toString());
 

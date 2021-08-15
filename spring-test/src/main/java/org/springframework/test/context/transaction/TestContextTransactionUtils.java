@@ -227,7 +227,8 @@ public abstract class TestContextTransactionUtils {
 	/**
 	 * Create a delegating {@link TransactionAttribute} for the supplied target
 	 * {@link TransactionAttribute} and {@link TestContext}, using the names of
-	 * the test class and test method to build the name of the transaction.
+	 * the test class and test method (if available) to build the name of the
+	 * transaction.
 	 * @param testContext the {@code TestContext} upon which to base the name
 	 * @param targetAttribute the {@code TransactionAttribute} to delegate to
 	 * @return the delegating {@code TransactionAttribute}
@@ -248,7 +249,13 @@ public abstract class TestContextTransactionUtils {
 
 		public TestContextTransactionAttribute(TransactionAttribute targetAttribute, TestContext testContext) {
 			super(targetAttribute);
-			this.name = ClassUtils.getQualifiedMethodName(testContext.getTestMethod(), testContext.getTestClass());
+
+			if (testContext.hasTestMethod()) {
+				this.name = ClassUtils.getQualifiedMethodName(testContext.getTestMethod(), testContext.getTestClass());
+			}
+			else {
+				this.name = testContext.getTestClass().getName();
+			}
 		}
 
 		@Override
