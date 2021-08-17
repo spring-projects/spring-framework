@@ -67,7 +67,7 @@ configure(allprojects) { project ->
 			dependency "io.reactivex:rxjava:1.3.8"
 			dependency "io.reactivex:rxjava-reactive-streams:1.2.1"
 			dependency "io.reactivex.rxjava2:rxjava:2.2.21"
-			dependency "io.reactivex.rxjava3:rxjava:3.0.13"
+			dependency "io.reactivex.rxjava3:rxjava:3.1.0"
 			dependency "io.projectreactor.tools:blockhound:1.0.4.RELEASE"
 
 			dependency "com.caucho:hessian:4.0.63"
@@ -127,18 +127,18 @@ configure(allprojects) { project ->
 			dependency "org.webjars:webjars-locator-core:0.47"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.50') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.52') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.50') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.52') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.2.9.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.10.Final') {
 				entry 'undertow-core'
 				entry('undertow-websockets-jsr') {
 					exclude group: "org.jboss.spec.javax.websocket", name: "jboss-websocket-api_1.1_spec"
@@ -204,10 +204,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.11.0"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.51.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.52.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.51.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.52.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
@@ -336,7 +336,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.44"
+		toolVersion = "8.45.1"
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
