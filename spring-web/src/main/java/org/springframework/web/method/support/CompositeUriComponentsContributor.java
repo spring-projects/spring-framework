@@ -93,6 +93,7 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	}
 
 	/**
+	 * Check if the list of contributors is empty or not.
 	 * @deprecated in favor of {@link #hasAnyContributors()} as the method name
 	 * is not compliant with its intention and returns 'true' when there are no contributors
 	 */
