@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@link org.springframework.web.method.support.CompositeUriComponentsContributor}.
  *
  * @author Rossen Stoyanchev
+ * @author Safeer Ansari
  */
 public class CompositeUriComponentsContributorTests {
 
@@ -54,6 +55,8 @@ public class CompositeUriComponentsContributorTests {
 		assertThat(contributor.supportsParameter(new MethodParameter(method, 0))).isTrue();
 		assertThat(contributor.supportsParameter(new MethodParameter(method, 1))).isTrue();
 		assertThat(contributor.supportsParameter(new MethodParameter(method, 2))).isFalse();
+		assertThat(contributor.hasContributors()).isFalse();
+		assertThat(contributor.hasAnyContributors()).isTrue();
 	}
 
 

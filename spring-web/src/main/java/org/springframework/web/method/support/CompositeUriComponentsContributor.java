@@ -36,6 +36,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Safeer Ansari
  * @since 4.0
  */
 public class CompositeUriComponentsContributor implements UriComponentsContributor {
@@ -91,9 +92,17 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 		this.conversionService = (cs != null ? cs : new DefaultFormattingConversionService());
 	}
 
-
+	/**
+	 * @deprecated in favor of {@link #hasAnyContributors()} as the method name
+	 * is not compliant with its intention and returns 'true' when there are no contributors
+	 */
+	@Deprecated
 	public boolean hasContributors() {
 		return this.contributors.isEmpty();
+	}
+
+	public boolean hasAnyContributors() {
+		return !this.contributors.isEmpty();
 	}
 
 	@Override
