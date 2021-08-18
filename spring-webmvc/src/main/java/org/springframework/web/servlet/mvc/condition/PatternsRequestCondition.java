@@ -87,7 +87,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	 * Variant of {@link #PatternsRequestCondition(String...)} with a
 	 * {@link UrlPathHelper} and a {@link PathMatcher}, and whether to match
 	 * trailing slashes.
-	 * <p>As of 5.3 the the path is obtained through the static method
+	 * <p>As of 5.3 the path is obtained through the static method
 	 * {@link UrlPathHelper#getResolvedLookupPath} and a {@code UrlPathHelper}
 	 * does not need to be passed in.
 	 * @since 5.2.4
@@ -105,7 +105,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	 * Variant of {@link #PatternsRequestCondition(String...)} with a
 	 * {@link UrlPathHelper} and a {@link PathMatcher}, and flags for matching
 	 * with suffixes and trailing slashes.
-	 * <p>As of 5.3 the the path is obtained through the static method
+	 * <p>As of 5.3 the path is obtained through the static method
 	 * {@link UrlPathHelper#getResolvedLookupPath} and a {@code UrlPathHelper}
 	 * does not need to be passed in.
 	 * @deprecated as of 5.2.4. See class-level note in
@@ -123,7 +123,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	 * Variant of {@link #PatternsRequestCondition(String...)} with a
 	 * {@link UrlPathHelper} and a {@link PathMatcher}, and flags for matching
 	 * with suffixes and trailing slashes, along with specific extensions.
-	 * <p>As of 5.3 the the path is obtained through the static method
+	 * <p>As of 5.3 the path is obtained through the static method
 	 * {@link UrlPathHelper#getResolvedLookupPath} and a {@code UrlPathHelper}
 	 * does not need to be passed in.
 	 * @deprecated as of 5.2.4. See class-level note in

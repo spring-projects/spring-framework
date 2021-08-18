@@ -174,7 +174,7 @@ public class ConcurrentLruCache<K, V> {
 	}
 
 	/**
-	 * Return the the maximum number of entries in the cache
+	 * Return the maximum number of entries in the cache
 	 * (0 indicates no caching, always generating a new value).
 	 * @see #size()
 	 */

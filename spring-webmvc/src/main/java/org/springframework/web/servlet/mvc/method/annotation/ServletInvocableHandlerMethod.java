@@ -194,7 +194,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	}
 
 	/**
-	 * Create a nested ServletInvocableHandlerMethod subclass that returns the
+	 * Create a nested ServletInvocableHandlerMethod subclass that returns
 	 * the given value (or raises an Exception if the value is one) rather than
 	 * actually invoking the controller method. This is useful when processing
 	 * async return values (e.g. Callable, DeferredResult, ListenableFuture).
