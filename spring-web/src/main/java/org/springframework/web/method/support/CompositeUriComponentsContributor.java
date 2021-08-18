@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * A {@link UriComponentsContributor} containing a list of other contributors
- * to delegate and also encapsulating a specific {@link ConversionService} to
- * use for formatting method argument values to Strings.
+ * to delegate to and also encapsulating a specific {@link ConversionService} to
+ * use for formatting method argument values as Strings.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -50,7 +50,7 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	 * {@code HandlerMethodArgumentResolvers} in {@code RequestMappingHandlerAdapter}
 	 * and provide that to this constructor.
 	 * @param contributors a collection of {@link UriComponentsContributor}
-	 * or {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
+	 * or {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}
 	 */
 	public CompositeUriComponentsContributor(UriComponentsContributor... contributors) {
 		Collections.addAll(this.contributors, contributors);
@@ -64,7 +64,7 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	 * {@code HandlerMethodArgumentResolvers} in {@code RequestMappingHandlerAdapter}
 	 * and provide that to this constructor.
 	 * @param contributors a collection of {@link UriComponentsContributor}
-	 * or {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
+	 * or {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}
 	 */
 	public CompositeUriComponentsContributor(Collection<?> contributors) {
 		this(contributors, null);
@@ -80,7 +80,7 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	 * {@link org.springframework.format.support.DefaultFormattingConversionService}
 	 * will be used by default.
 	 * @param contributors a collection of {@link UriComponentsContributor}
-	 * or {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
+	 * or {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}
 	 * @param cs a ConversionService to use when method argument values
 	 * need to be formatted as Strings before being added to the URI
 	 */
@@ -91,9 +91,14 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 		this.conversionService = (cs != null ? cs : new DefaultFormattingConversionService());
 	}
 
-
+	/**
+	 * Determine if this {@code CompositeUriComponentsContributor} has any
+	 * contributors.
+	 * @return {@code true} if this {@code CompositeUriComponentsContributor}
+	 * was created with contributors to delegate to
+	 */
 	public boolean hasContributors() {
-		return this.contributors.isEmpty();
+		return !this.contributors.isEmpty();
 	}
 
 	@Override
@@ -139,7 +144,7 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	public void contributeMethodArgument(MethodParameter parameter, Object value, UriComponentsBuilder builder,
 			Map<String, Object> uriVariables) {
 
-		this.contributeMethodArgument(parameter, value, builder, uriVariables, this.conversionService);
+		contributeMethodArgument(parameter, value, builder, uriVariables, this.conversionService);
 	}
 
 }
