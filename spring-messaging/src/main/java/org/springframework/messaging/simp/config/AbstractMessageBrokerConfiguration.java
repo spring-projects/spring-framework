@@ -82,7 +82,7 @@ import org.springframework.validation.Validator;
  * <li>{@link #userDestinationMessageHandler}</li>
  * </ul>
  *
- * <p>{@link #brokerChannel} delivers messages from within the application to the
+ * <p>{@link #brokerChannel} delivers messages from within the application to
  * the respective message handlers. {@link #brokerMessagingTemplate} can be injected
  * into any application component to send messages.
  *
