@@ -89,7 +89,7 @@ public abstract class AbstractTransactionalDatabaseClientIntegrationTests  {
 	protected abstract ConnectionFactory createConnectionFactory();
 
 	/**
-	 * Return the the CREATE TABLE statement for table {@code legoset} with the following three columns:
+	 * Return the CREATE TABLE statement for table {@code legoset} with the following three columns:
 	 * <ul>
 	 * <li>id integer (primary key), not null</li>
 	 * <li>name varchar(255), nullable</li>
