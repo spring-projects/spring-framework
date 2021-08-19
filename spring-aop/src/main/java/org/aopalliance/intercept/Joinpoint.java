@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
  * terminology).
  *
  * <p>A runtime joinpoint is an <i>event</i> that occurs on a static
- * joinpoint (i.e. a location in a the program). For instance, an
+ * joinpoint (i.e. a location in a program). For instance, an
  * invocation is the runtime joinpoint on a method (static joinpoint).
  * The static part of a given joinpoint can be generically retrieved
  * using the {@link #getStaticPart()} method.
