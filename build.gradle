@@ -289,8 +289,13 @@ configure(allprojects) { project ->
 		}
 		repositories {
 			maven { url "https://maven.aliyun.com/repository/public" }
-			maven { url "https://repo.springsource.org/plugins-release" }
-			maven { url "https://repo.spring.io/libs-spring-framework-build" }
+			mavenCentral()
+			if (version.contains('-')) {
+				maven { url "https://repo.spring.io/milestone" }
+			}
+			if (version.endsWith('-SNAPSHOT')) {
+				maven { url "https://repo.spring.io/snapshot" }
+			}
 		}
 	}
 	configurations.all {
