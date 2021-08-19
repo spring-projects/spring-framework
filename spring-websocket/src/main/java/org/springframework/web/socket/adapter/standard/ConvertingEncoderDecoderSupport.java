@@ -183,7 +183,7 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	}
 
 	/**
-	 * Decode the a message into an object.
+	 * Decode the message into an object.
 	 * @see javax.websocket.Decoder.Text#decode(String)
 	 * @see javax.websocket.Decoder.Binary#decode(ByteBuffer)
 	 */
