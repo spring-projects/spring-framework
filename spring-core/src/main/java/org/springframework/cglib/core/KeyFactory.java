@@ -28,7 +28,7 @@ import org.springframework.cglib.core.internal.CustomizerRegistry;
 
 /**
  * Generates classes to handle multi-valued keys, for use in things such as Maps and Sets.
- * Code for <code>equals</code> and <code>hashCode</code> methods follow
+ * Code for <code>equals</code> and <code>hashCode</code> methods follow the
  * the rules laid out in <i>Effective Java</i> by Joshua Bloch.
  * <p>
  * To generate a <code>KeyFactory</code>, you need to supply an interface which
