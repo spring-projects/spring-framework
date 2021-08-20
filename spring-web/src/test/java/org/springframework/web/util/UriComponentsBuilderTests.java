@@ -28,6 +28,8 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -38,6 +40,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link UriComponentsBuilder}.
@@ -373,10 +376,11 @@ class UriComponentsBuilderTests {
 		assertThat(result.getQuery()).isEqualTo("a=1");
 	}
 
-	@Test  // SPR-12771
-	void fromHttpRequestResetsPortBeforeSettingIt() {
+	@ParameterizedTest // gh-17368, gh-27097
+	@ValueSource(strings = {"https", "wss"})
+	void fromHttpRequestResetsPort443(String protocol) {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addHeader("X-Forwarded-Proto", "https");
+		request.addHeader("X-Forwarded-Proto", protocol);
 		request.addHeader("X-Forwarded-Host", "84.198.58.199");
 		request.addHeader("X-Forwarded-Port", 443);
 		request.setScheme("http");
@@ -387,10 +391,31 @@ class UriComponentsBuilderTests {
 		HttpRequest httpRequest = new ServletServerHttpRequest(request);
 		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
 
-		assertThat(result.getScheme()).isEqualTo("https");
+		assertThat(result.getScheme()).isEqualTo(protocol);
 		assertThat(result.getHost()).isEqualTo("84.198.58.199");
 		assertThat(result.getPort()).isEqualTo(-1);
 		assertThat(result.getPath()).isEqualTo("/rest/mobile/users/1");
+	}
+
+	@ParameterizedTest // gh-27097
+	@ValueSource(strings = {"http", "ws"})
+	void fromHttpRequestResetsPort80(String protocol) {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("X-Forwarded-Proto", protocol);
+		request.addHeader("X-Forwarded-Host", "84.198.58.199");
+		request.addHeader("X-Forwarded-Port", 80);
+		request.setScheme("http");
+		request.setServerName("example.com");
+		request.setServerPort(80);
+		request.setRequestURI("/path");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertThat(result.getScheme()).isEqualTo(protocol);
+		assertThat(result.getHost()).isEqualTo("84.198.58.199");
+		assertThat(result.getPort()).isEqualTo(-1);
+		assertThat(result.getPath()).isEqualTo("/path");
 	}
 
 	@Test  // SPR-14761
@@ -451,6 +476,21 @@ class UriComponentsBuilderTests {
 		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
 
 		assertThat(result.toString()).isEqualTo("http://[1abc:2abc:3abc::5ABC:6abc]:8080/mvc-showcase");
+	}
+
+	@Test  // gh-26748
+	void fromHttpRequestWithForwardedInvalidIPv6Address() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(-1);
+		request.setRequestURI("/mvc-showcase");
+		request.addHeader("X-Forwarded-Host", "2a02:918:175:ab60:45ee:c12c:dac1:808b");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				UriComponentsBuilder.fromHttpRequest(httpRequest).build());
 	}
 
 	@Test
@@ -1256,5 +1296,39 @@ class UriComponentsBuilderTests {
 		String path = UriComponentsBuilder.fromPath("/home/").path("/path").build().getPath();
 		assertThat(path).isEqualTo("/home/path");
 	}
+
+	@Test
+	void validPort() {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://localhost:52567/path").build();
+		assertThat(uriComponents.getPort()).isEqualTo(52567);
+		assertThat(uriComponents.getPath()).isEqualTo("/path");
+
+		uriComponents = UriComponentsBuilder.fromUriString("http://localhost:52567?trace=false").build();
+		assertThat(uriComponents.getPort()).isEqualTo(52567);
+		assertThat(uriComponents.getQuery()).isEqualTo("trace=false");
+
+		uriComponents = UriComponentsBuilder.fromUriString("http://localhost:52567#fragment").build();
+		assertThat(uriComponents.getPort()).isEqualTo(52567);
+		assertThat(uriComponents.getFragment()).isEqualTo("fragment");
+	}
+
+	@Test
+	void verifyInvalidPort() {
+		String url = "http://localhost:port/path";
+		assertThatThrownBy(() -> UriComponentsBuilder.fromUriString(url).build().toUri())
+				.isInstanceOf(NumberFormatException.class);
+		assertThatThrownBy(() -> UriComponentsBuilder.fromHttpUrl(url).build().toUri())
+				.isInstanceOf(NumberFormatException.class);
+	}
+
+	@Test // gh-27039
+	void expandPortAndPathWithoutSeparator() {
+		URI uri = UriComponentsBuilder
+				.fromUriString("ws://localhost:{port}{path}")
+				.buildAndExpand(7777, "/test")
+				.toUri();
+		assertThat(uri.toString()).isEqualTo("ws://localhost:7777/test");
+	}
+
 
 }

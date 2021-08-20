@@ -1,7 +1,5 @@
 [[testing]]
 = Testing
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :doc-spring-boot: {doc-root}/spring-boot/docs/current/reference
 :toc: left
 :toclevels: 4
@@ -7573,9 +7571,9 @@ of testing even within the same project.
 ===== Further Examples
 
 The framework's own tests include
-https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples[
+{spring-framework-main-code}/spring-test/src/test/java/org/springframework/test/web/servlet/samples[
 many sample tests] intended to show how to use MockMvc on its own or through the
-https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples/client[
+{spring-framework-main-code}/spring-test/src/test/java/org/springframework/test/web/servlet/samples/client[
 WebTestClient]. Browse these examples for further ideas.
 
 
@@ -8784,7 +8782,7 @@ configuration. Check for the support for code completion on static members.
 ==== Further Examples of Client-side REST Tests
 
 Spring MVC Test's own tests include
-https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/client/samples[example
+{spring-framework-main-code}/spring-test/src/test/java/org/springframework/test/web/client/samples[example
 tests] of client-side REST tests.
 
 

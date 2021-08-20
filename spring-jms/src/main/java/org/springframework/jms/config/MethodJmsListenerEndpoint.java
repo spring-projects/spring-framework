@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,8 +224,8 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	@Override
 	protected StringBuilder getEndpointDescription() {
 		return super.getEndpointDescription()
-				.append(" | bean='").append(this.bean).append("'")
-				.append(" | method='").append(this.method).append("'");
+				.append(" | bean='").append(this.bean).append('\'')
+				.append(" | method='").append(this.method).append('\'');
 	}
 
 }

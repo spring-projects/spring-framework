@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import org.springframework.core.io.support.EncodedResource;
  * Thrown by {@link ScriptUtils} if a statement in an SQL script failed when
  * executing it against the target database.
  *
+ * @author Juergen Hoeller
+ * @author Sam Brannen
  * @author Mark Paluch
  * @since 5.3
  */

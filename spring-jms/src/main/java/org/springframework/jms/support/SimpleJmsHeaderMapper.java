@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,8 +93,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 					logger.debug("Failed to set JMSType - skipping", ex);
 				}
 			}
-			Set<Map.Entry<String, Object>> entries = headers.entrySet();
-			for (Map.Entry<String, Object> entry : entries) {
+			for (Map.Entry<String, Object> entry : headers.entrySet()) {
 				String headerName = entry.getKey();
 				if (StringUtils.hasText(headerName) && !headerName.startsWith(JmsHeaders.PREFIX)) {
 					Object value = entry.getValue();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,9 +182,9 @@ class DefaultListableBeanFactoryTests {
 
 		assertThat(!DummyFactory.wasPrototypeCreated()).as("prototype not instantiated").isTrue();
 		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
-		assertThat(beanNames.length).isEqualTo(0);
+		assertThat(beanNames).hasSize(0);
 		beanNames = lbf.getBeanNamesForAnnotation(SuppressWarnings.class);
-		assertThat(beanNames.length).isEqualTo(0);
+		assertThat(beanNames).hasSize(0);
 
 		assertThat(lbf.containsSingleton("x1")).isFalse();
 		assertThat(lbf.containsBean("x1")).isTrue();
@@ -216,9 +216,9 @@ class DefaultListableBeanFactoryTests {
 
 		assertThat(!DummyFactory.wasPrototypeCreated()).as("prototype not instantiated").isTrue();
 		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
-		assertThat(beanNames.length).isEqualTo(0);
+		assertThat(beanNames).hasSize(0);
 		beanNames = lbf.getBeanNamesForAnnotation(SuppressWarnings.class);
-		assertThat(beanNames.length).isEqualTo(0);
+		assertThat(beanNames).hasSize(0);
 
 		assertThat(lbf.containsSingleton("x1")).isFalse();
 		assertThat(lbf.containsBean("x1")).isTrue();
@@ -249,9 +249,9 @@ class DefaultListableBeanFactoryTests {
 
 		assertThat(!DummyFactory.wasPrototypeCreated()).as("prototype not instantiated").isTrue();
 		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
-		assertThat(beanNames.length).isEqualTo(0);
+		assertThat(beanNames).hasSize(0);
 		beanNames = lbf.getBeanNamesForAnnotation(SuppressWarnings.class);
-		assertThat(beanNames.length).isEqualTo(0);
+		assertThat(beanNames).hasSize(0);
 
 		assertThat(lbf.containsSingleton("x1")).isFalse();
 		assertThat(lbf.containsBean("x1")).isTrue();
@@ -283,7 +283,7 @@ class DefaultListableBeanFactoryTests {
 
 		assertThat(!DummyFactory.wasPrototypeCreated()).as("prototype not instantiated").isTrue();
 		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
-		assertThat(beanNames.length).isEqualTo(1);
+		assertThat(beanNames).hasSize(1);
 		assertThat(beanNames[0]).isEqualTo("x1");
 		assertThat(lbf.containsSingleton("x1")).isTrue();
 		assertThat(lbf.containsBean("x1")).isTrue();
@@ -337,7 +337,7 @@ class DefaultListableBeanFactoryTests {
 
 		TestBeanFactory.initialized = false;
 		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
-		assertThat(beanNames.length).isEqualTo(1);
+		assertThat(beanNames).hasSize(1);
 		assertThat(beanNames[0]).isEqualTo("x1");
 		assertThat(lbf.containsSingleton("x1")).isFalse();
 		assertThat(lbf.containsBean("x1")).isTrue();
@@ -349,7 +349,7 @@ class DefaultListableBeanFactoryTests {
 		assertThat(lbf.isTypeMatch("x1", TestBean.class)).isTrue();
 		assertThat(lbf.isTypeMatch("&x1", TestBean.class)).isFalse();
 		assertThat(lbf.getType("x1")).isEqualTo(TestBean.class);
-		assertThat(lbf.getType("&x1")).isEqualTo(null);
+		assertThat(lbf.getType("&x1")).isNull();
 		assertThat(TestBeanFactory.initialized).isFalse();
 	}
 
@@ -362,7 +362,7 @@ class DefaultListableBeanFactoryTests {
 
 		TestBeanFactory.initialized = false;
 		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
-		assertThat(beanNames.length).isEqualTo(1);
+		assertThat(beanNames).hasSize(1);
 		assertThat(beanNames[0]).isEqualTo("x1");
 		assertThat(lbf.containsSingleton("x1")).isFalse();
 		assertThat(lbf.containsBean("x1")).isTrue();
@@ -374,7 +374,7 @@ class DefaultListableBeanFactoryTests {
 		assertThat(lbf.isTypeMatch("x1", TestBean.class)).isTrue();
 		assertThat(lbf.isTypeMatch("&x1", TestBean.class)).isFalse();
 		assertThat(lbf.getType("x1")).isEqualTo(TestBean.class);
-		assertThat(lbf.getType("&x1")).isEqualTo(null);
+		assertThat(lbf.getType("&x1")).isNull();
 		assertThat(TestBeanFactory.initialized).isFalse();
 	}
 
@@ -389,7 +389,7 @@ class DefaultListableBeanFactoryTests {
 
 		TestBeanFactory.initialized = false;
 		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
-		assertThat(beanNames.length).isEqualTo(1);
+		assertThat(beanNames).hasSize(1);
 		assertThat(beanNames[0]).isEqualTo("x1");
 		assertThat(lbf.containsSingleton("x1")).isFalse();
 		assertThat(lbf.containsBean("x1")).isTrue();
@@ -401,7 +401,7 @@ class DefaultListableBeanFactoryTests {
 		assertThat(lbf.isTypeMatch("x1", TestBean.class)).isTrue();
 		assertThat(lbf.isTypeMatch("&x1", TestBean.class)).isFalse();
 		assertThat(lbf.getType("x1")).isEqualTo(TestBean.class);
-		assertThat(lbf.getType("&x1")).isEqualTo(null);
+		assertThat(lbf.getType("&x1")).isNull();
 		assertThat(TestBeanFactory.initialized).isFalse();
 	}
 
@@ -417,7 +417,7 @@ class DefaultListableBeanFactoryTests {
 
 		TestBeanFactory.initialized = false;
 		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
-		assertThat(beanNames.length).isEqualTo(1);
+		assertThat(beanNames).hasSize(1);
 		assertThat(beanNames[0]).isEqualTo("x1");
 		assertThat(lbf.containsSingleton("x1")).isFalse();
 		assertThat(lbf.containsBean("x1")).isTrue();
@@ -450,7 +450,7 @@ class DefaultListableBeanFactoryTests {
 		assertThat(lbf.isTypeMatch("x2", Object.class)).isTrue();
 		assertThat(lbf.isTypeMatch("&x2", Object.class)).isFalse();
 		assertThat(lbf.getType("x2")).isEqualTo(TestBean.class);
-		assertThat(lbf.getType("&x2")).isEqualTo(null);
+		assertThat(lbf.getType("&x2")).isNull();
 		assertThat(lbf.getAliases("x1").length).isEqualTo(1);
 		assertThat(lbf.getAliases("x1")[0]).isEqualTo("x2");
 		assertThat(lbf.getAliases("&x1").length).isEqualTo(1);
@@ -3030,7 +3030,7 @@ class DefaultListableBeanFactoryTests {
 		public Object convertIfNecessary(Object value, @Nullable Class requiredType) {
 			if (value instanceof String && Float.class.isAssignableFrom(requiredType)) {
 				try {
-					return new Float(this.numberFormat.parse((String) value).floatValue());
+					return this.numberFormat.parse((String) value).floatValue();
 				}
 				catch (ParseException ex) {
 					throw new TypeMismatchException(value, requiredType, ex);

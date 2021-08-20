@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,6 +178,23 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		return this.cacheConsumers;
 	}
 
+
+	/**
+	 * Return a current session count, indicating the number of sessions currently
+	 * cached by this connection factory.
+	 * @since 5.3.7
+	 */
+	public int getCachedSessionCount() {
+		int count = 0;
+		synchronized (this.cachedSessions) {
+			for (Deque<Session> sessionList : this.cachedSessions.values()) {
+				synchronized (sessionList) {
+					count += sessionList.size();
+				}
+			}
+		}
+		return count;
+	}
 
 	/**
 	 * Resets the Session cache as well.
@@ -406,6 +423,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			return new CachedMessageProducer(producer);
 		}
 
+		@SuppressWarnings("resource")
 		private MessageConsumer getCachedConsumer(Destination dest, @Nullable String selector,
 				@Nullable Boolean noLocal, @Nullable String subscription, boolean durable) throws JMSException {
 

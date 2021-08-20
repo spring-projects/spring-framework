@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ import org.springframework.lang.Nullable;
  * (only applicable when running in a web application context)
  * <li>{@code postProcessBeforeInitialization} methods of BeanPostProcessors
  * <li>InitializingBean's {@code afterPropertiesSet}
- * <li>a custom init-method definition
+ * <li>a custom {@code init-method} definition
  * <li>{@code postProcessAfterInitialization} methods of BeanPostProcessors
  * </ol>
  *
@@ -92,7 +92,7 @@ import org.springframework.lang.Nullable;
  * <ol>
  * <li>{@code postProcessBeforeDestruction} methods of DestructionAwareBeanPostProcessors
  * <li>DisposableBean's {@code destroy}
- * <li>a custom destroy-method definition
+ * <li>a custom {@code destroy-method} definition
  * </ol>
  *
  * @author Rod Johnson
@@ -102,6 +102,8 @@ import org.springframework.lang.Nullable;
  * @see BeanNameAware#setBeanName
  * @see BeanClassLoaderAware#setBeanClassLoader
  * @see BeanFactoryAware#setBeanFactory
+ * @see org.springframework.context.EnvironmentAware#setEnvironment
+ * @see org.springframework.context.EmbeddedValueResolverAware#setEmbeddedValueResolver
  * @see org.springframework.context.ResourceLoaderAware#setResourceLoader
  * @see org.springframework.context.ApplicationEventPublisherAware#setApplicationEventPublisher
  * @see org.springframework.context.MessageSourceAware#setMessageSource
@@ -111,6 +113,7 @@ import org.springframework.lang.Nullable;
  * @see InitializingBean#afterPropertiesSet
  * @see org.springframework.beans.factory.support.RootBeanDefinition#getInitMethodName
  * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessAfterInitialization
+ * @see org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor#postProcessBeforeDestruction
  * @see DisposableBean#destroy
  * @see org.springframework.beans.factory.support.RootBeanDefinition#getDestroyMethodName
  */

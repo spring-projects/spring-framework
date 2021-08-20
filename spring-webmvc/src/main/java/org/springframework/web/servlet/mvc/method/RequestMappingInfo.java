@@ -47,7 +47,7 @@ import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
- * Request mapping information. A composite for the the following conditions:
+ * Request mapping information. A composite for the following conditions:
  * <ol>
  * <li>{@link PathPatternsRequestCondition} with parsed {@code PathPatterns} or
  * {@link PatternsRequestCondition} with String patterns via {@code PathMatcher}
@@ -509,7 +509,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		}
 
 		// Patterns conditions are never empty and have "" (empty path) at least.
-		builder.append(" ").append(getActivePatternsCondition());
+		builder.append(' ').append(getActivePatternsCondition());
 
 		if (!this.paramsCondition.isEmpty()) {
 			builder.append(", params ").append(this.paramsCondition);

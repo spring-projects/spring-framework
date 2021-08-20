@@ -329,7 +329,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 				processor.sourceCompleted = true;
 				// A competing write might have completed very quickly
-				if (processor.state.get().equals(State.REQUESTED)) {
+				if (processor.state.get() == State.REQUESTED) {
 					handleSourceCompleted(processor);
 				}
 			}

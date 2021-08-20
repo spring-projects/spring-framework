@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,13 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
@@ -61,6 +60,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.0
  */
 public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentResolverSupport {
@@ -118,7 +118,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 
 		return valueMono.flatMap(value -> {
 			WebExchangeDataBinder binder = context.createDataBinder(exchange, value, name);
-			return bindRequestParameters(binder, exchange)
+			return (bindingDisabled(parameter) ? Mono.empty() : bindRequestParameters(binder, exchange))
 					.doOnError(bindingResultSink::tryEmitError)
 					.doOnSuccess(aVoid -> {
 						validateIfApplicable(binder, parameter);
@@ -142,6 +142,16 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 						}
 					}));
 		});
+	}
+
+	/**
+	 * Determine if binding should be disabled for the supplied {@link MethodParameter},
+	 * based on the {@link ModelAttribute#binding} annotation attribute.
+	 * @since 5.2.15
+	 */
+	private boolean bindingDisabled(MethodParameter parameter) {
+		ModelAttribute modelAttribute = parameter.getParameterAnnotation(ModelAttribute.class);
+		return (modelAttribute != null && !modelAttribute.binding());
 	}
 
 	/**
@@ -270,16 +280,9 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 
 	private void validateIfApplicable(WebExchangeDataBinder binder, MethodParameter parameter) {
 		for (Annotation ann : parameter.getParameterAnnotations()) {
-			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
-			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
-				Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
-				if (hints != null) {
-					Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
-					binder.validate(validationHints);
-				}
-				else {
-					binder.validate();
-				}
+			Object[] validationHints = ValidationAnnotationUtils.determineValidationHints(ann);
+			if (validationHints != null) {
+				binder.validate(validationHints);
 			}
 		}
 	}

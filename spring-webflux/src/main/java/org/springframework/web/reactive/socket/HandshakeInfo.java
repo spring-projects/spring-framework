@@ -77,7 +77,7 @@ public class HandshakeInfo {
 	}
 
 	/**
-	 * Constructor targeting server-side use with extra information such as the
+	 * Constructor targeting server-side use with extra information such as
 	 * the remote address, attributes, and a log prefix.
 	 * @param uri the endpoint URL
 	 * @param headers server request headers

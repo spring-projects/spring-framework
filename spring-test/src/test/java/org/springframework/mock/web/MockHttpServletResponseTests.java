@@ -196,6 +196,36 @@ class MockHttpServletResponseTests {
 	}
 
 	@Test
+	void defaultCharacterEncoding() {
+		assertThat(response.isCharset()).isFalse();
+		assertThat(response.getContentType()).isNull();
+		assertThat(response.getCharacterEncoding()).isEqualTo("ISO-8859-1");
+
+		response.setDefaultCharacterEncoding("UTF-8");
+		assertThat(response.isCharset()).isFalse();
+		assertThat(response.getContentType()).isNull();
+		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
+
+		response.setContentType("text/plain;charset=UTF-16");
+		assertThat(response.isCharset()).isTrue();
+		assertThat(response.getContentType()).isEqualTo("text/plain;charset=UTF-16");
+		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-16");
+
+		response.reset();
+		assertThat(response.isCharset()).isFalse();
+		assertThat(response.getContentType()).isNull();
+		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
+
+		response.setCharacterEncoding("FOXTROT");
+		assertThat(response.isCharset()).isTrue();
+		assertThat(response.getContentType()).isNull();
+		assertThat(response.getCharacterEncoding()).isEqualTo("FOXTROT");
+
+		response.setDefaultCharacterEncoding("ENIGMA");
+		assertThat(response.getCharacterEncoding()).isEqualTo("FOXTROT");
+	}
+
+	@Test
 	void contentLength() {
 		response.setContentLength(66);
 		assertThat(response.getContentLength()).isEqualTo(66);
@@ -496,7 +526,6 @@ class MockHttpServletResponseTests {
 		String expiryDate = "Tue, 8 Oct 2019 19:50:00 GMT";
 		String cookieValue = "SESSION=123; Path=/; Expires=" + expiryDate;
 		response.addHeader(SET_COOKIE, cookieValue);
-		System.err.println(response.getCookie("SESSION"));
 		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(cookieValue);
 
 		assertNumCookies(1);
@@ -552,6 +581,8 @@ class MockHttpServletResponseTests {
 
 	@Test  // gh-25501
 	void resetResetsCharset() {
+		assertThat(response.getContentType()).isNull();
+		assertThat(response.getCharacterEncoding()).isEqualTo("ISO-8859-1");
 		assertThat(response.isCharset()).isFalse();
 		response.setCharacterEncoding("UTF-8");
 		assertThat(response.isCharset()).isTrue();
@@ -563,6 +594,8 @@ class MockHttpServletResponseTests {
 
 		response.reset();
 
+		assertThat(response.getContentType()).isNull();
+		assertThat(response.getCharacterEncoding()).isEqualTo("ISO-8859-1");
 		assertThat(response.isCharset()).isFalse();
 		// Do not invoke setCharacterEncoding() since that sets the charset flag to true.
 		// response.setCharacterEncoding("UTF-8");

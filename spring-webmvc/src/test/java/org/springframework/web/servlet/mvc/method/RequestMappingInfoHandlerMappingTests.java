@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,8 +32,10 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.RequestPath;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -177,10 +180,11 @@ class RequestMappingInfoHandlerMappingTests {
 
 	@PathPatternsParameterizedTest
 	void getHandlerHttpOptions(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
-		testHttpOptions(mapping, "/foo", "GET,HEAD,OPTIONS");
-		testHttpOptions(mapping, "/person/1", "PUT,OPTIONS");
-		testHttpOptions(mapping, "/persons", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS");
-		testHttpOptions(mapping, "/something", "PUT,POST");
+		testHttpOptions(mapping, "/foo", "GET,HEAD,OPTIONS", null);
+		testHttpOptions(mapping, "/person/1", "PUT,OPTIONS", null);
+		testHttpOptions(mapping, "/persons", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS", null);
+		testHttpOptions(mapping, "/something", "PUT,POST", null);
+		testHttpOptions(mapping, "/qux", "PATCH,GET,HEAD,OPTIONS", new MediaType("foo", "bar"));
 	}
 
 	@PathPatternsParameterizedTest
@@ -401,8 +405,8 @@ class RequestMappingInfoHandlerMappingTests {
 				.satisfies(ex -> assertThat(ex.getSupportedMediaTypes()).containsExactly(MediaType.APPLICATION_XML));
 	}
 
-	private void testHttpOptions(
-			TestRequestMappingInfoHandlerMapping mapping, String requestURI, String allowHeader) throws Exception {
+	private void testHttpOptions(TestRequestMappingInfoHandlerMapping mapping, String requestURI,
+			String allowHeader, @Nullable MediaType acceptPatch) throws Exception {
 
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", requestURI);
 		HandlerMethod handlerMethod = getHandler(mapping, request);
@@ -413,7 +417,15 @@ class RequestMappingInfoHandlerMappingTests {
 
 		assertThat(result).isNotNull();
 		assertThat(result.getClass()).isEqualTo(HttpHeaders.class);
-		assertThat(((HttpHeaders) result).getFirst("Allow")).isEqualTo(allowHeader);
+		HttpHeaders headers = (HttpHeaders) result;
+		Set<HttpMethod> allowedMethods = Arrays.stream(allowHeader.split(","))
+				.map(HttpMethod::valueOf)
+				.collect(Collectors.toSet());
+		assertThat(headers.getAllow()).hasSameElementsAs(allowedMethods);
+
+		if (acceptPatch != null && headers.getAllow().contains(HttpMethod.PATCH) ) {
+			assertThat(headers.getAcceptPatch()).containsExactly(acceptPatch);
+		}
 	}
 
 	private void testHttpMediaTypeNotAcceptableException(TestRequestMappingInfoHandlerMapping mapping, String url) {
@@ -501,6 +513,15 @@ class RequestMappingInfoHandlerMappingTests {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Allow", "PUT,POST");
 			return headers;
+		}
+
+		@RequestMapping(value = "/qux", method = RequestMethod.GET, produces = "application/xml")
+		public String getBaz() {
+			return "";
+		}
+
+		@RequestMapping(value = "/qux", method = RequestMethod.PATCH, consumes = "foo/bar")
+		public void patchBaz(String value) {
 		}
 	}
 

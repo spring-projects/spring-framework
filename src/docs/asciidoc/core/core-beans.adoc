@@ -847,12 +847,12 @@ This approach shows that the factory bean itself can be managed and configured t
 dependency injection (DI). See <<beans-factory-properties-detailed,Dependencies and
 Configuration in Detail>>.
 
-NOTE: In Spring documentation, "`factory bean`" refers to a bean that is configured in
-the Spring container and that creates objects through an
+NOTE: In Spring documentation, "factory bean" refers to a bean that is configured in the
+Spring container and that creates objects through an
 <<beans-factory-class-instance-factory-method,instance>> or
 <<beans-factory-class-static-factory-method,static>> factory method. By contrast,
 `FactoryBean` (notice the capitalization) refers to a Spring-specific
-<<beans-factory-extension-factorybean, `FactoryBean` >> implementation class.
+<<beans-factory-extension-factorybean, `FactoryBean`>> implementation class.
 
 
 [[beans-factory-type-determination]]
@@ -3350,8 +3350,9 @@ of the scope. You can also do the `Scope` registration declaratively, by using t
 	</beans>
 ----
 
-NOTE: When you place `<aop:scoped-proxy/>` in a `FactoryBean` implementation, it is the factory
-bean itself that is scoped, not the object returned from `getObject()`.
+NOTE: When you place `<aop:scoped-proxy/>` within a `<bean>` declaration for a
+`FactoryBean` implementation, it is the factory bean itself that is scoped, not the object
+returned from `getObject()`.
 
 
 
@@ -4539,22 +4540,22 @@ Java as opposed to a (potentially) verbose amount of XML, you can create your ow
 `FactoryBean`, write the complex initialization inside that class, and then plug your
 custom `FactoryBean` into the container.
 
-The `FactoryBean` interface provides three methods:
+The `FactoryBean<T>` interface provides three methods:
 
-* `Object getObject()`: Returns an instance of the object this factory creates. The
+* `T getObject()`: Returns an instance of the object this factory creates. The
   instance can possibly be shared, depending on whether this factory returns singletons
   or prototypes.
 * `boolean isSingleton()`: Returns `true` if this `FactoryBean` returns singletons or
-  `false` otherwise.
-* `Class getObjectType()`: Returns the object type returned by the `getObject()` method
+  `false` otherwise. The default implementation of this method returns `true`.
+* `Class<?> getObjectType()`: Returns the object type returned by the `getObject()` method
   or `null` if the type is not known in advance.
 
-The `FactoryBean` concept and interface is used in a number of places within the Spring
+The `FactoryBean` concept and interface are used in a number of places within the Spring
 Framework. More than 50 implementations of the `FactoryBean` interface ship with Spring
 itself.
 
 When you need to ask a container for an actual `FactoryBean` instance itself instead of
-the bean it produces, preface the bean's `id` with the ampersand symbol (`&`) when
+the bean it produces, prefix the bean's `id` with the ampersand symbol (`&`) when
 calling the `getBean()` method of the `ApplicationContext`. So, for a given `FactoryBean`
 with an `id` of `myBean`, invoking `getBean("myBean")` on the container returns the
 product of the `FactoryBean`, whereas invoking `getBean("&myBean")` returns the
@@ -4607,8 +4608,8 @@ Annotation injection is performed before XML injection. Thus, the XML configurat
 overrides the annotations for properties wired through both approaches.
 ====
 
-As always, you can register them as individual bean definitions, but they can also be
-implicitly registered by including the following tag in an XML-based Spring
+As always, you can register the post-processors as individual bean definitions, but they
+can also be implicitly registered by including the following tag in an XML-based Spring
 configuration (notice the inclusion of the `context` namespace):
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -4627,11 +4628,13 @@ configuration (notice the inclusion of the `context` namespace):
 	</beans>
 ----
 
-(The implicitly registered post-processors include
-{api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`],
-{api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`],
-{api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`], and
-{api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`].)
+The `<context:annotation-config/>` element implicitly registers the following post-processors:
+
+* {api-spring-framework}/context/annotation/ConfigurationClassPostProcessor.html[`ConfigurationClassPostProcessor`]
+* {api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`]
+* {api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`]
+* {api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`]
+* {api-spring-framework}/context/event/EventListenerMethodProcessor.html[`EventListenerMethodProcessor`]
 
 [NOTE]
 ====
@@ -4688,10 +4691,7 @@ references and values even when you use the class outside of a container.
 [TIP]
 ====
 The {api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`]
-must be registered as a bean to enable support for the `@Required` annotation. Note,
-however, that a `RequiredAnnotationBeanPostProcessor` bean is registered automatically
-when using the `<context:annotation-config/>` or `<context:component-scan/>` XML
-namespace elements.
+must be registered as a bean to enable support for the `@Required` annotation.
 ====
 
 [NOTE]
@@ -5388,7 +5388,7 @@ matching an `account` qualifier against beans marked with the same qualifier lab
 
 For beans that are themselves defined as a collection, `Map`, or array type, `@Resource`
 is a fine solution, referring to the specific collection or array bean by unique name.
-That said, as of 4.3, collection, you can match `Map`, and array types through Spring's
+That said, as of 4.3, you can match collection, `Map`, and array types through Spring's
 `@Autowired` type matching algorithm as well, as long as the element type information
 is preserved in `@Bean` return type signatures or collection inheritance hierarchies.
 In this case, you can use qualifier values to select among same-typed collections,
@@ -8238,8 +8238,10 @@ Spring offers a convenient way of working with scoped dependencies through
 <<beans-factory-scopes-other-injection, scoped proxies>>. The easiest way to create
 such a proxy when using the XML configuration is the `<aop:scoped-proxy/>` element.
 Configuring your beans in Java with a `@Scope` annotation offers equivalent support
-with the `proxyMode` attribute. The default is no proxy (`ScopedProxyMode.NO`),
-but you can specify `ScopedProxyMode.TARGET_CLASS` or `ScopedProxyMode.INTERFACES`.
+with the `proxyMode` attribute. The default is `ScopedProxyMode.DEFAULT`, which
+typically indicates that no scoped proxy should be created unless a different default
+has been configured at the component-scan instruction level. You can specify
+`ScopedProxyMode.TARGET_CLASS`, `ScopedProxyMode.INTERFACES` or `ScopedProxyMode.NO`.
 
 If you port the scoped proxy example from the XML reference documentation (see
 <<beans-factory-scopes-other-injection, scoped proxies>>) to our `@Bean` using Java,
@@ -8275,7 +8277,7 @@ it resembles the following:
 	fun userService(): Service {
 		return SimpleUserService().apply {
 			// a reference to the proxied userPreferences bean
-			setUserPreferences(userPreferences()
+			setUserPreferences(userPreferences())
 		}
 	}
 ----
@@ -8386,7 +8388,7 @@ annotation, as the following example shows:
 === Using the `@Configuration` annotation
 
 `@Configuration` is a class-level annotation indicating that an object is a source of
-bean definitions. `@Configuration` classes declare beans through public `@Bean` annotated
+bean definitions. `@Configuration` classes declare beans through `@Bean` annotated
 methods. Calls to `@Bean` methods on `@Configuration` classes can also be used to define
 inter-bean dependencies. See <<beans-java-basic-concepts>> for a general introduction.
 
@@ -10218,8 +10220,8 @@ bean with the same name. If it does, it uses that bean as the `MessageSource`. I
 `DelegatingMessageSource` is instantiated in order to be able to accept calls to the
 methods defined above.
 
-Spring provides two `MessageSource` implementations, `ResourceBundleMessageSource` and
-`StaticMessageSource`. Both implement `HierarchicalMessageSource` in order to do nested
+Spring provides three `MessageSource` implementations, `ResourceBundleMessageSource`, `ReloadableResourceBundleMessageSource`
+and `StaticMessageSource`. All of them implement `HierarchicalMessageSource` in order to do nested
 messaging. The `StaticMessageSource` is rarely used but provides programmatic ways to
 add messages to the source. The following example shows `ResourceBundleMessageSource`:
 
@@ -10403,6 +10405,10 @@ You can also use the `MessageSourceAware` interface to acquire a reference to an
 `MessageSource` that has been defined. Any bean that is defined in an
 `ApplicationContext` that implements the `MessageSourceAware` interface is injected with
 the application context's `MessageSource` when the bean is created and configured.
+
+NOTE: Because Spring's `MessageSource` is based on Java's `ResourceBundle`, it does not merge
+bundles with the same base name, but will only use the first bundle found.
+Subsequent message bundles with the same base name are ignored.
 
 NOTE: As an alternative to `ResourceBundleMessageSource`, Spring provides a
 `ReloadableResourceBundleMessageSource` class. This variant supports the same bundle
@@ -10653,9 +10659,8 @@ architectures that build upon the well-known Spring programming model.
 [[context-functionality-events-annotation]]
 ==== Annotation-based Event Listeners
 
-As of Spring 4.2, you can register an event listener on any public method of a managed
-bean by using the `@EventListener` annotation. The `BlockedListNotifier` can be rewritten as
-follows:
+You can register an event listener on any method of a managed bean by using the
+`@EventListener` annotation. The `BlockedListNotifier` can be rewritten as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -10793,9 +10798,9 @@ method signature to return the event that should be published, as the following 
 NOTE: This feature is not supported for
 <<context-functionality-events-async, asynchronous listeners>>.
 
-This new method publishes a new `ListUpdateEvent` for every `BlockedListEvent` handled by the
-method above. If you need to publish several events, you can return a `Collection` of events
-instead.
+The `handleBlockedListEvent()` method publishes a new `ListUpdateEvent` for every
+`BlockedListEvent` that it handles. If you need to publish several events, you can return
+a `Collection` or an array of events instead.
 
 
 [[context-functionality-events-async]]
@@ -10955,8 +10960,10 @@ location path as a classpath location. You can also use location paths (resource
 with special prefixes to force loading of definitions from the classpath or a URL,
 regardless of the actual context type.
 
+
+
 [[context-functionality-startup]]
-=== Application Startup tracking
+=== Application Startup Tracking
 
 The `ApplicationContext` manages the lifecycle of Spring applications and provides a rich
 programming model around components. As a result, complex applications can have equally

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ import static org.xmlunit.diff.DifferenceEvaluators.downgradeDifferencesToEqual;
  * @author Biju Kunjummen
  * @author Sam Brannen
  */
-public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshaller> {
+class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshaller> {
 
 	private static final String CONTEXT_PATH = "org.springframework.oxm.jaxb.test";
 
@@ -104,7 +104,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 
 
 	@Test
-	public void marshalSAXResult() throws Exception {
+	void marshalSAXResult() throws Exception {
 		ContentHandler contentHandler = mock(ContentHandler.class);
 		SAXResult result = new SAXResult(contentHandler);
 		marshaller.marshal(flights, result);
@@ -124,7 +124,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 	}
 
 	@Test
-	public void lazyInit() throws Exception {
+	void lazyInit() throws Exception {
 		marshaller = new Jaxb2Marshaller();
 		marshaller.setContextPath(CONTEXT_PATH);
 		marshaller.setLazyInit(true);
@@ -137,48 +137,44 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 	}
 
 	@Test
-	public void properties() throws Exception {
+	void properties() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setContextPath(CONTEXT_PATH);
 		marshaller.setMarshallerProperties(
-				Collections.<String, Object>singletonMap(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT,
-						Boolean.TRUE));
+				Collections.singletonMap(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE));
 		marshaller.afterPropertiesSet();
 	}
 
 	@Test
-	public void noContextPathOrClassesToBeBound() throws Exception {
+	void noContextPathOrClassesToBeBound() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-		assertThatIllegalArgumentException().isThrownBy(
-				marshaller::afterPropertiesSet);
+		assertThatIllegalArgumentException().isThrownBy(marshaller::afterPropertiesSet);
 	}
 
 	@Test
-	public void testInvalidContextPath() throws Exception {
+	void testInvalidContextPath() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setContextPath("ab");
-		assertThatExceptionOfType(UncategorizedMappingException.class).isThrownBy(
-				marshaller::afterPropertiesSet);
+		assertThatExceptionOfType(UncategorizedMappingException.class).isThrownBy(marshaller::afterPropertiesSet);
 	}
 
 	@Test
-	public void marshalInvalidClass() throws Exception {
+	void marshalInvalidClass() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(FlightType.class);
 		marshaller.afterPropertiesSet();
 		Result result = new StreamResult(new StringWriter());
 		Flights flights = new Flights();
-		assertThatExceptionOfType(XmlMappingException.class).isThrownBy(() ->
-				marshaller.marshal(flights, result));
+		assertThatExceptionOfType(XmlMappingException.class).isThrownBy(() -> marshaller.marshal(flights, result));
 	}
 
 	@Test
-	public void supportsContextPath() throws Exception {
+	void supportsContextPath() throws Exception {
 		testSupports();
 	}
 
 	@Test
-	public void supportsClassesToBeBound() throws Exception {
+	void supportsClassesToBeBound() throws Exception {
 		marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(Flights.class, FlightType.class);
 		marshaller.afterPropertiesSet();
@@ -186,7 +182,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 	}
 
 	@Test
-	public void supportsPackagesToScan() throws Exception {
+	void supportsPackagesToScan() throws Exception {
 		marshaller = new Jaxb2Marshaller();
 		marshaller.setPackagesToScan(CONTEXT_PATH);
 		marshaller.afterPropertiesSet();
@@ -224,11 +220,11 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 
 	private void testSupportsPrimitives() {
 		final Primitives primitives = new Primitives();
-		ReflectionUtils.doWithMethods(Primitives.class, new ReflectionUtils.MethodCallback() {
-			@Override
-			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+		ReflectionUtils.doWithMethods(Primitives.class, method -> {
 				Type returnType = method.getGenericReturnType();
-				assertThat(marshaller.supports(returnType)).as("Jaxb2Marshaller does not support JAXBElement<" + method.getName().substring(9) + ">").isTrue();
+				assertThat(marshaller.supports(returnType))
+					.as("Jaxb2Marshaller does not support JAXBElement<" + method.getName().substring(9) + ">")
+					.isTrue();
 				try {
 					// make sure the marshalling does not result in errors
 					Object returnValue = method.invoke(primitives);
@@ -237,22 +233,18 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 				catch (InvocationTargetException e) {
 					throw new AssertionError(e.getMessage(), e);
 				}
-			}
-		}, new ReflectionUtils.MethodFilter() {
-			@Override
-			public boolean matches(Method method) {
-				return method.getName().startsWith("primitive");
-			}
-		});
+			},
+			method -> method.getName().startsWith("primitive")
+		);
 	}
 
 	private void testSupportsStandardClasses() throws Exception {
 		final StandardClasses standardClasses = new StandardClasses();
-		ReflectionUtils.doWithMethods(StandardClasses.class, new ReflectionUtils.MethodCallback() {
-			@Override
-			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+		ReflectionUtils.doWithMethods(StandardClasses.class, method -> {
 				Type returnType = method.getGenericReturnType();
-				assertThat(marshaller.supports(returnType)).as("Jaxb2Marshaller does not support JAXBElement<" + method.getName().substring(13) + ">").isTrue();
+				assertThat(marshaller.supports(returnType))
+					.as("Jaxb2Marshaller does not support JAXBElement<" + method.getName().substring(13) + ">")
+					.isTrue();
 				try {
 					// make sure the marshalling does not result in errors
 					Object returnValue = method.invoke(standardClasses);
@@ -261,17 +253,13 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 				catch (InvocationTargetException e) {
 					throw new AssertionError(e.getMessage(), e);
 				}
-			}
-		}, new ReflectionUtils.MethodFilter() {
-			@Override
-			public boolean matches(Method method) {
-				return method.getName().startsWith("standardClass");
-			}
-		});
+			},
+			method -> method.getName().startsWith("standardClass")
+		);
 	}
 
 	@Test
-	public void supportsXmlRootElement() throws Exception {
+	void supportsXmlRootElement() throws Exception {
 		marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(DummyRootElement.class, DummyType.class);
 		marshaller.afterPropertiesSet();
@@ -284,7 +272,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 
 
 	@Test
-	public void marshalAttachments() throws Exception {
+	void marshalAttachments() throws Exception {
 		marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(BinaryObject.class);
 		marshaller.setMtomEnabled(true);
@@ -304,7 +292,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 	}
 
 	@Test  // SPR-10714
-	public void marshalAWrappedObjectHoldingAnXmlElementDeclElement() throws Exception {
+	void marshalAWrappedObjectHoldingAnXmlElementDeclElement() throws Exception {
 		marshaller = new Jaxb2Marshaller();
 		marshaller.setPackagesToScan("org.springframework.oxm.jaxb");
 		marshaller.afterPropertiesSet();
@@ -318,7 +306,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 	}
 
 	@Test  // SPR-10806
-	public void unmarshalStreamSourceWithXmlOptions() throws Exception {
+	void unmarshalStreamSourceWithXmlOptions() throws Exception {
 		final javax.xml.bind.Unmarshaller unmarshaller = mock(javax.xml.bind.Unmarshaller.class);
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller() {
 			@Override
@@ -352,7 +340,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 	}
 
 	@Test  // SPR-10806
-	public void unmarshalSaxSourceWithXmlOptions() throws Exception {
+	void unmarshalSaxSourceWithXmlOptions() throws Exception {
 		final javax.xml.bind.Unmarshaller unmarshaller = mock(javax.xml.bind.Unmarshaller.class);
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller() {
 			@Override

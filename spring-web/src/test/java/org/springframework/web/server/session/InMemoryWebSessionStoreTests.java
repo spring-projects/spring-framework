@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -59,11 +57,10 @@ public class InMemoryWebSessionStoreTests {
 		assertThat(session.isStarted()).isTrue();
 	}
 
-	@Disabled // TODO: remove if/when Blockhound is enabled
-	@Test // gh-24027
+	@Test // gh-24027, gh-26958
 	public void createSessionDoesNotBlock() {
-		Mono.defer(() -> this.store.createWebSession())
-				.subscribeOn(Schedulers.parallel())
+		this.store.createWebSession()
+				.doOnNext(session -> assertThat(Schedulers.isInNonBlockingThread()).isTrue())
 				.block();
 	}
 

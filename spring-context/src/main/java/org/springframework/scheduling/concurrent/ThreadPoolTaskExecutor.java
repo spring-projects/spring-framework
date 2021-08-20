@@ -112,10 +112,10 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	public void setCorePoolSize(int corePoolSize) {
 		synchronized (this.poolSizeMonitor) {
-			this.corePoolSize = corePoolSize;
 			if (this.threadPoolExecutor != null) {
 				this.threadPoolExecutor.setCorePoolSize(corePoolSize);
 			}
+			this.corePoolSize = corePoolSize;
 		}
 	}
 
@@ -135,10 +135,10 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	public void setMaxPoolSize(int maxPoolSize) {
 		synchronized (this.poolSizeMonitor) {
-			this.maxPoolSize = maxPoolSize;
 			if (this.threadPoolExecutor != null) {
 				this.threadPoolExecutor.setMaximumPoolSize(maxPoolSize);
 			}
+			this.maxPoolSize = maxPoolSize;
 		}
 	}
 
@@ -158,10 +158,10 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	public void setKeepAliveSeconds(int keepAliveSeconds) {
 		synchronized (this.poolSizeMonitor) {
-			this.keepAliveSeconds = keepAliveSeconds;
 			if (this.threadPoolExecutor != null) {
 				this.threadPoolExecutor.setKeepAliveTime(keepAliveSeconds, TimeUnit.SECONDS);
 			}
+			this.keepAliveSeconds = keepAliveSeconds;
 		}
 	}
 

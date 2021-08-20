@@ -120,6 +120,39 @@ public class DateFormattingTests {
 	}
 
 	@Test
+	void styleDateWithInvalidFormat() {
+		String propertyName = "styleDate";
+		String propertyValue = "99/01/01";
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add(propertyName, propertyValue);
+		binder.bind(propertyValues);
+		BindingResult bindingResult = binder.getBindingResult();
+		assertThat(bindingResult.getErrorCount()).isEqualTo(1);
+		FieldError fieldError = bindingResult.getFieldError(propertyName);
+		TypeMismatchException exception = fieldError.unwrap(TypeMismatchException.class);
+		assertThat(exception)
+			.hasMessageContaining("for property 'styleDate'")
+			.hasCauseInstanceOf(ConversionFailedException.class).getCause()
+				.hasMessageContaining("for value '99/01/01'")
+				.hasCauseInstanceOf(IllegalArgumentException.class).getCause()
+					.hasMessageContaining("Parse attempt failed for value [99/01/01]")
+					.hasCauseInstanceOf(ParseException.class).getCause()
+						// Unable to parse date time value "99/01/01" using configuration from
+						// @org.springframework.format.annotation.DateTimeFormat(pattern=, style=S-, iso=NONE, fallbackPatterns=[])
+						// We do not check "fallbackPatterns=[]", since the array representation in the toString()
+						// implementation for annotations changed from [] to {} in Java 9. In addition, strings
+						// are enclosed in double quotes beginning with Java 9. Thus, we cannot check directly
+						// for the presence of "style=S-".
+						.hasMessageContainingAll(
+							"Unable to parse date time value \"99/01/01\" using configuration from",
+							"@org.springframework.format.annotation.DateTimeFormat",
+							"style=", "S-", "iso=NONE")
+						.hasCauseInstanceOf(ParseException.class).getCause()
+							.hasMessageStartingWith("Unparseable date: \"99/01/01\"")
+							.hasNoCause();
+	}
+
+	@Test
 	void testBindDateArray() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleDate", new String[]{"10/31/09 12:00 PM"});
@@ -330,7 +363,10 @@ public class DateFormattingTests {
 							.hasMessageContainingAll(
 								"Unable to parse date time value \"210302\" using configuration from",
 								"@org.springframework.format.annotation.DateTimeFormat",
-								"yyyy-MM-dd", "M/d/yy", "yyyyMMdd", "yyyy.MM.dd");
+								"yyyy-MM-dd", "M/d/yy", "yyyyMMdd", "yyyy.MM.dd")
+							.hasCauseInstanceOf(ParseException.class).getCause()
+								.hasMessageStartingWith("Unparseable date: \"210302\"")
+								.hasNoCause();
 		}
 	}
 

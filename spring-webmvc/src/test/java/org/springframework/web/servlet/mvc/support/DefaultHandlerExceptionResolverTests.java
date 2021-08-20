@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,18 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
+	public void patchHttpMediaTypeNotSupported() {
+		HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(new MediaType("text", "plain"),
+				Collections.singletonList(new MediaType("application", "pdf")));
+		MockHttpServletRequest request = new MockHttpServletRequest("PATCH", "/");
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertThat(mav).as("No ModelAndView returned").isNotNull();
+		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
+		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(415);
+		assertThat(response.getHeader("Accept-Patch")).as("Invalid Accept header").isEqualTo("application/pdf");
+	}
+
+	@Test
 	public void handleMissingPathVariable() throws NoSuchMethodException {
 		Method method = getClass().getMethod("handle", String.class);
 		MethodParameter parameter = new MethodParameter(method, 0);
@@ -96,7 +108,8 @@ public class DefaultHandlerExceptionResolverTests {
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(500);
-		assertThat(response.getErrorMessage()).isEqualTo("Missing URI template variable 'foo' for method parameter of type String");
+		assertThat(response.getErrorMessage())
+				.isEqualTo("Required URI template variable 'foo' for method parameter type String is not present");
 	}
 
 	@Test
@@ -106,7 +119,8 @@ public class DefaultHandlerExceptionResolverTests {
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(400);
-		assertThat(response.getErrorMessage()).isEqualTo("Required bar parameter 'foo' is not present");
+		assertThat(response.getErrorMessage()).isEqualTo(
+				"Required request parameter 'foo' for method parameter type bar is not present");
 	}
 
 	@Test

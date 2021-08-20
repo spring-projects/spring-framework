@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,7 @@ suspend fun <T : Any> ClientResponse.awaitBody(clazz: KClass<T>): T =
  * @author Sebastien Deleuze
  * @since 5.2
  */
+@Suppress("DEPRECATION")
 suspend inline fun <reified T : Any> ClientResponse.awaitBodyOrNull(): T? =
 		bodyToMono<T>().awaitSingleOrNull()
 
@@ -124,6 +125,7 @@ suspend inline fun <reified T : Any> ClientResponse.awaitBodyOrNull(): T? =
  * @author Igor Manushin
  * @since 5.3
  */
+@Suppress("DEPRECATION")
 suspend fun <T : Any> ClientResponse.awaitBodyOrNull(clazz: KClass<T>): T? =
 		bodyToMono(clazz.java).awaitSingleOrNull()
 

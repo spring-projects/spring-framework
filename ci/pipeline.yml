@@ -18,9 +18,6 @@ anchors:
     ARTIFACTORY_USERNAME: ((artifactory-username))
     ARTIFACTORY_PASSWORD: ((artifactory-password))
   build-project-task-params: &build-project-task-params
-    privileged: true
-    timeout: ((task-timeout))
-    params:
       BRANCH: ((branch))
       <<: *gradle-enterprise-task-params
   docker-resource-source: &docker-resource-source
@@ -54,6 +51,11 @@ resource_types:
   source:
     repository: dpb587/github-status-resource
     tag: master
+- name: pull-request
+  type: registry-image
+  source:
+    repository: teliaoss/github-pr-resource
+    tag: v0.23.0
 - name: slack-notification
   type: registry-image
   source:
@@ -93,6 +95,14 @@ resources:
     username: ((artifactory-username))
     password: ((artifactory-password))
     build_name: ((build-name))
+- name: git-pull-request
+  type: pull-request
+  icon: source-pull
+  source:
+    access_token: ((github-ci-pull-request-token))
+    repository: ((github-repo-name))
+    base_branch: ((branch))
+    ignore_paths: ["ci/*"]
 - name: repo-status-build
   type: github-status-resource
   icon: eye-check-outline
@@ -162,7 +172,10 @@ jobs:
     - task: build-project
       image: ci-image
       file: git-repo/ci/tasks/build-project.yml
-      <<: *build-project-task-params
+      privileged: true
+      timeout: ((task-timeout))
+      params:
+        <<: *build-project-task-params
     on_failure:
       do:
       - put: repo-status-build
@@ -217,10 +230,11 @@ jobs:
     - task: check-project
       image: ci-image
       file: git-repo/ci/tasks/check-project.yml
+      privileged: true
+      timeout: ((task-timeout))
       params:
-        MAIN_TOOLCHAIN: 8
         TEST_TOOLCHAIN: 11
-      <<: *build-project-task-params
+        <<: *build-project-task-params
     on_failure:
       do:
       - put: repo-status-jdk11-build
@@ -244,10 +258,11 @@ jobs:
       - task: check-project
         image: ci-image
         file: git-repo/ci/tasks/check-project.yml
+        privileged: true
+        timeout: ((task-timeout))
         params:
-          MAIN_TOOLCHAIN: 8
           TEST_TOOLCHAIN: 15
-        <<: *build-project-task-params
+          <<: *build-project-task-params
       on_failure:
         do:
           - put: repo-status-jdk15-build
@@ -257,6 +272,37 @@ jobs:
               <<: *slack-fail-params
     - put: repo-status-jdk15-build
       params: { state: "success", commit: "git-repo" }
+- name: build-pull-requests
+  serial: true
+  public: true
+  plan:
+    - get: ci-image
+    - get: git-repo
+      resource: git-pull-request
+      trigger: true
+      version: every
+    - do:
+      - put: git-pull-request
+        params:
+          path: git-repo
+          status: pending
+      - task: build-pr
+        image: ci-image
+        file: git-repo/ci/tasks/build-pr.yml
+        privileged: true
+        timeout: ((task-timeout))
+        params:
+          <<: *build-project-task-params
+      on_success:
+        put: git-pull-request
+        params:
+          path: git-repo
+          status: success
+      on_failure:
+        put: git-pull-request
+        params:
+          path: git-repo
+          status: failure
 - name: stage-milestone
   serial: true
   plan:
@@ -412,3 +458,5 @@ groups:
   jobs: ["stage-milestone", "stage-rc", "stage-release", "promote-milestone", "promote-rc", "promote-release", "create-github-release"]
 - name: "ci-images"
   jobs: ["build-ci-images"]
+- name: "pull-requests"
+  jobs: [ "build-pull-requests" ]

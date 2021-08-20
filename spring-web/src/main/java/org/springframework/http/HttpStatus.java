@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -416,6 +416,13 @@ public enum HttpStatus {
 	NETWORK_AUTHENTICATION_REQUIRED(511, Series.SERVER_ERROR, "Network Authentication Required");
 
 
+	private static final HttpStatus[] VALUES;
+
+	static {
+		VALUES = values();
+	}
+
+
 	private final int value;
 
 	private final Series series;
@@ -550,7 +557,8 @@ public enum HttpStatus {
 	 */
 	@Nullable
 	public static HttpStatus resolve(int statusCode) {
-		for (HttpStatus status : values()) {
+		// Use cached VALUES instead of values() to prevent array allocation.
+		for (HttpStatus status : VALUES) {
 			if (status.value == statusCode) {
 				return status;
 			}

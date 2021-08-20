@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -315,8 +315,8 @@ public class MockServletContext implements ServletContext {
 			return resourcePaths;
 		}
 		catch (InvalidPathException | IOException ex ) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Could not get resource paths for " +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not get resource paths for " +
 						(resource != null ? resource : resourceLocation), ex);
 			}
 			return null;
@@ -339,8 +339,8 @@ public class MockServletContext implements ServletContext {
 			throw ex;
 		}
 		catch (InvalidPathException | IOException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Could not get URL for resource " +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not get URL for resource " +
 						(resource != null ? resource : resourceLocation), ex);
 			}
 			return null;
@@ -360,8 +360,8 @@ public class MockServletContext implements ServletContext {
 			return resource.getInputStream();
 		}
 		catch (InvalidPathException | IOException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Could not open InputStream for resource " +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not open InputStream for resource " +
 						(resource != null ? resource : resourceLocation), ex);
 			}
 			return null;
@@ -476,8 +476,8 @@ public class MockServletContext implements ServletContext {
 			return resource.getFile().getAbsolutePath();
 		}
 		catch (InvalidPathException | IOException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Could not determine real path of resource " +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not determine real path of resource " +
 						(resource != null ? resource : resourceLocation), ex);
 			}
 			return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -326,12 +326,6 @@ final class QuartzCronField extends CronField {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <T extends Temporal & Comparable<? super T>> T cast(Temporal temporal) {
-		return (T) temporal;
-	}
-
-
 	@Override
 	public <T extends Temporal & Comparable<? super T>> T nextOrSame(T temporal) {
 		T result = adjust(temporal);
@@ -340,6 +334,9 @@ final class QuartzCronField extends CronField {
 				// We ended up before the start, roll forward and try again
 				temporal = this.rollForwardType.rollForward(temporal);
 				result = adjust(temporal);
+				if (result != null) {
+					result = type().reset(result);
+				}
 			}
 		}
 		return result;

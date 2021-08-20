@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,9 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class MvcUriComponentsBuilder {
 
-	/** Well-known name for the {@link CompositeUriComponentsContributor} object in the bean factory. */
+	/**
+	 * Well-known name for the {@link CompositeUriComponentsContributor} object in the bean factory.
+	 */
 	public static final String MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME = "mvcUriComponentsContributor";
 
 
@@ -716,7 +718,7 @@ public class MvcUriComponentsBuilder {
 
 		@Override
 		@Nullable
-		public Object intercept(Object obj, Method method, Object[] args, @Nullable MethodProxy proxy) {
+		public Object intercept(@Nullable Object obj, Method method, Object[] args, @Nullable MethodProxy proxy) {
 			switch (method.getName()) {
 				case "getControllerType": return this.controllerType;
 				case "getControllerMethod": return this.controllerMethod;

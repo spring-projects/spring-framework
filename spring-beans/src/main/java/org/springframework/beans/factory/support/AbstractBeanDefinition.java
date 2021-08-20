@@ -1241,7 +1241,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("class [");
-		sb.append(getBeanClassName()).append("]");
+		sb.append(getBeanClassName()).append(']');
 		sb.append("; scope=").append(this.scope);
 		sb.append("; abstract=").append(this.abstractFlag);
 		sb.append("; lazyInit=").append(this.lazyInit);

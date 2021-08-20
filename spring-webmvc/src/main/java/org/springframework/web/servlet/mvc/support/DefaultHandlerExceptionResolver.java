@@ -281,6 +281,9 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		List<MediaType> mediaTypes = ex.getSupportedMediaTypes();
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			response.setHeader("Accept", MediaType.toString(mediaTypes));
+			if (request.getMethod().equals("PATCH")) {
+				response.setHeader("Accept-Patch", MediaType.toString(mediaTypes));
+			}
 		}
 		response.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 		return new ModelAndView();

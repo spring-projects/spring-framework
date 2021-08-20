@@ -5,12 +5,12 @@
 Spring Web MVC is the original web framework built on the Servlet API and has been included
 in the Spring Framework from the very beginning. The formal name, "`Spring Web MVC,`"
 comes from the name of its source module
-(https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc[`spring-webmvc`]),
+({spring-framework-main-code}/spring-webmvc[`spring-webmvc`]),
 but it is more commonly known as "`Spring MVC`".
 
 Parallel to Spring Web MVC, Spring Framework 5.0 introduced a reactive-stack web framework
 whose name, "`Spring WebFlux,`" is also based on its source module
-(https://github.com/spring-projects/spring-framework/tree/master/spring-webflux[`spring-webflux`]).
+({spring-framework-main-code}/spring-webflux[`spring-webflux`]).
 This section covers Spring Web MVC. The <<web-reactive.adoc#spring-web-reactive, next section>>
 covers Spring WebFlux.
 
@@ -301,7 +301,7 @@ Applications can declare the infrastructure beans listed in <<mvc-servlet-specia
 that are required to process requests. The `DispatcherServlet` checks the
 `WebApplicationContext` for each special bean. If there are no matching bean types,
 it falls back on the default types listed in
-https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/resources/org/springframework/web/servlet/DispatcherServlet.properties[`DispatcherServlet.properties`].
+{spring-framework-main-code}/spring-webmvc/src/main/resources/org/springframework/web/servlet/DispatcherServlet.properties[`DispatcherServlet.properties`].
 
 In most cases, the <<mvc-config>> is the best starting point. It declares the required
 beans in either Java or XML and provides a higher-level configuration callback API to
@@ -527,13 +527,9 @@ The `HandlerExceptionResolver` beans declared in the `WebApplicationContext` are
 resolve exceptions thrown during request processing. Those exception resolvers allow
 customizing the logic to address exceptions. See <<mvc-exceptionhandlers>> for more details.
 
-The Spring `DispatcherServlet` also supports the return of the
-`last-modification-date`, as specified by the Servlet API. The process of determining
-the last modification date for a specific request is straightforward: The
-`DispatcherServlet` looks up an appropriate handler mapping and tests whether the
-handler that is found implements the `LastModified` interface. If so, the value of the
-`long getLastModified(request)` method of the `LastModified` interface is returned to
-the client.
+For HTTP caching support, handlers can use the `checkNotModified` methods of `WebRequest`,
+along with further options for annoated controllers as described in
+<<mvc-caching-etag-lastmodified,HTTP Caching for Controllers>>.
 
 You can customize individual `DispatcherServlet` instances by adding Servlet
 initialization parameters (`init-param` elements) to the Servlet declaration in the
@@ -570,6 +566,56 @@ initialization parameters (`init-param` elements) to the Servlet declaration in 
   also configured, unresolved requests are always forwarded to the default servlet
   and a 404 is never raised.
 |===
+
+
+
+[[mvc-handlermapping-path]]
+=== Path Matching
+
+The Servlet API exposes the full request path as `requestURI` and further sub-divides it
+into `contextPath`, `servletPath`, and `pathInfo` whose values vary depending on how a
+Servlet is mapped. From these inputs, Spring MVC needs to determine the lookup path to
+use for handler mapping, which is the path within the mapping of the `DispatcherServlet`
+itself, excluding the `contextPath` and any `servletMapping` prefix, if present.
+
+The `servletPath` and `pathInfo` are decoded and that makes them impossible to compare
+directly to the full `requestURI` in order to derive the lookupPath and that makes it
+necessary to decode the `requestUri`. However this introduces its own issues because the
+path may contain encoded reserved characters such as `"/"` or `";"` that can in turn
+alter the structure of the path after they are decoded which can also lead to security
+issues. In addition, Servlet containers may normalize the `servletPath` to varying
+degrees which makes it further impossible to perform `startsWith` comparisons against
+the `requestUri`.
+
+This is why it is best to avoid reliance on the `servletPath` which comes with the
+prefix-based `servletPath` mapping type. If the `DispatcherServlet` is mapped as the
+default Servlet with `"/"` or otherwise without a prefix with `"/*"` and the Servlet
+container is 4.0+ then Spring MVC is able to detect the Servlet mapping type and avoid
+use of the `servletPath` and `pathInfo` altogether. On a 3.1 Servlet container,
+assuming the same Servlet mapping types, the equivalent can be achieved by providing
+a `UrlPathHelper` with `alwaysUseFullPath=true` via <<mvc-config-path-matching>> in
+the MVC config.
+
+Fortunately the default Servlet mapping `"/"` is a good choice. However, there is still
+an issue in that the `requestUri` needs to be decoded to make it possible to compare to
+controller mappings. This is again undesirable because of the potential to decode
+reserved characters that alter the path structure. If such characters are not expected,
+then you can reject them (like the Spring Security HTTP firewall), or you can configure
+`UrlPathHelper` with `urlDecode=false` but controller mappings will need to match to the
+encoded path which may not always work well. Furthermore, sometimes the
+`DispatcherServlet` needs to share the URL space with another Servlet and may need to
+be mapped by prefix.
+
+The above issues can be addressed more comprehensively by switching from `PathMatcher` to
+the parsed `PathPattern` available in 5.3 or higher, see
+<<mvc-ann-requestmapping-pattern-comparison>>. Unlike `AntPathMatcher` which needs
+either the lookup path decoded or the controller mapping encoded, a parsed `PathPattern`
+matches to a parsed representation of the path called `RequestPath`, one path segment
+at a time. This allows decoding and sanitizing path segment values individually without
+the risk of altering the structure of the path. Parsed `PathPattern` also supports
+the use of `servletPath` prefix mapping as long as the prefix is kept simple and does
+not have any characters that need to be encoded.
+
 
 
 
@@ -1090,18 +1136,30 @@ another based on Servlet 3.0 multipart request parsing.
 
 To enable multipart handling, you need to declare a `MultipartResolver` bean in your
 `DispatcherServlet` Spring configuration with a name of `multipartResolver`.
-The `DispatcherServlet` detects it and applies it to the incoming request. When a POST with
-content-type of `multipart/form-data` is received, the resolver parses the content and
-wraps the current `HttpServletRequest` as `MultipartHttpServletRequest` to
-provide access to resolved parts in addition to exposing them as request parameters.
+The `DispatcherServlet` detects it and applies it to the incoming request. When a POST
+with a content type of `multipart/form-data` is received, the resolver parses the
+content wraps the current `HttpServletRequest` as a `MultipartHttpServletRequest` to
+provide access to resolved files in addition to exposing parts as request parameters.
 
 
 [[mvc-multipart-resolver-commons]]
 ==== Apache Commons `FileUpload`
 
 To use Apache Commons `FileUpload`, you can configure a bean of type
-`CommonsMultipartResolver` with a name of `multipartResolver`. You also need to
-have `commons-fileupload` as a dependency on your classpath.
+`CommonsMultipartResolver` with a name of `multipartResolver`. You also need to have
+the `commons-fileupload` jar as a dependency on your classpath.
+
+This resolver variant delegates to a local library within the application, providing
+maximum portability across Servlet containers. As an alternative, consider standard
+Servlet multipart resolution through the container's own parser as discussed below.
+
+[NOTE]
+====
+Commons FileUpload traditionally applies to POST requests only but accepts any
+`multipart/` content type. See the
+{api-spring-framework}/web/multipart/commons/CommonsMultipartResolver.html[`CommonsMultipartResolver`]
+javadoc for details and configuration options.
+====
 
 
 [[mvc-multipart-resolver-standard]]
@@ -1149,6 +1207,16 @@ The following example shows how to set a `MultipartConfigElement` on the Servlet
 
 Once the Servlet 3.0 configuration is in place, you can add a bean of type
 `StandardServletMultipartResolver` with a name of `multipartResolver`.
+
+[NOTE]
+====
+This resolver variant uses your Servlet container's multipart parser as-is,
+potentially exposing the application to container implementation differences.
+By default, it will try to parse any `multipart/` content type with any HTTP
+method but this may not be supported across all Servlet containers. See the
+{api-spring-framework}/web/multipart/support/StandardServletMultipartResolver.html[`StandardServletMultipartResolver`]
+javadoc for details and configuration options.
+====
 
 
 
@@ -1618,7 +1686,7 @@ leave that detail out if the names are the same and your code is compiled with d
 information or with the `-parameters` compiler flag on Java 8.
 
 The syntax `{varName:regex}` declares a URI variable with a regular expression that has
-syntax of `{varName:regex}`. For example, given URL `"/spring-web-3.0.5 .jar"`, the following method
+syntax of `{varName:regex}`. For example, given URL `"/spring-web-3.0.5.jar"`, the following method
 extracts the name, version, and file extension:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -1650,7 +1718,7 @@ configuration.
 [.small]#<<web-reactive.adoc#webflux-ann-requestmapping-pattern-comparison, WebFlux>>#
 
 When multiple patterns match a URL, the best match must be selected. This is done with
-one of the following depending on whether parsed `PathPattern`'s are enabled for use or not:
+one of the following depending on whether use of parsed `PathPattern` is enabled for use or not:
 
 * {api-spring-framework}/web/util/pattern/PathPattern.html#SPECIFICITY_COMPARATOR[`PathPattern.SPECIFICITY_COMPARATOR`]
 * {api-spring-framework}/util/AntPathMatcher.html#getPatternComparator-java.lang.String-[`AntPathMatcher.getPatternComparator(String path)`]
@@ -2002,6 +2070,12 @@ and others) and is equivalent to `required=false`.
 
 | `java.security.Principal`
 | Currently authenticated user -- possibly a specific `Principal` implementation class if known.
+
+  Note that this argument is not resolved eagerly, if it is annotated in order to allow a custom resolver to resolve it
+  before falling back on default resolution via `HttpServletRequest#getUserPrincipal`.
+  For example, the Spring Security `Authentication` implements `Principal` and would be injected as such via
+  `HttpServletRequest#getUserPrincipal`, unless it is also annotated with `@AuthenticationPrincipal` in which case it
+  is resolved by a custom Spring Security resolver through `Authentication#getPrincipal`.
 
 | `HttpMethod`
 | The HTTP method of the request.
@@ -2566,33 +2640,41 @@ query parameters and form fields. The following example shows how to do so:
 .Java
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-	public String processSubmit(@ModelAttribute Pet pet) { } <1>
+	public String processSubmit(@ModelAttribute Pet pet) {
+		// method logic...
+	}
 ----
-<1> Bind an instance of `Pet`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 @PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-fun processSubmit(@ModelAttribute pet: Pet): String { } // <1>
+fun processSubmit(@ModelAttribute pet: Pet): String {
+	// method logic...
+}
 ----
-<1> Bind an instance of `Pet`.
 
-The `Pet` instance above is resolved as follows:
+The `Pet` instance above is sourced in one of the following ways:
 
-* From the model if already added by using <<mvc-ann-modelattrib-methods>>.
-* From the HTTP session by using <<mvc-ann-sessionattributes>>.
-* From a URI path variable passed through a `Converter` (see the next example).
-* From the invocation of a default constructor.
-* From the invocation of a "`primary constructor`" with arguments that match to Servlet
-request parameters. Argument names are determined through JavaBeans
-`@ConstructorProperties` or through runtime-retained parameter names in the bytecode.
+* Retrieved from the model where it may have been added by a
+  <<mvc-ann-modelattrib-methods,@ModelAttribute method>>.
+* Retrieved from the HTTP session if the model attribute was listed in
+  the class-level <<mvc-ann-sessionattributes>> annotation.
+* Obtained through a `Converter` where the model attribute name matches the name of a
+  request value such as a path variable or a request parameter (see next example).
+* Instantiated using its default constructor.
+* Instantiated through a "`primary constructor`" with arguments that match to Servlet
+  request parameters. Argument names are determined through JavaBeans
+  `@ConstructorProperties` or through runtime-retained parameter names in the bytecode.
 
-While it is common to use a <<mvc-ann-modelattrib-methods>> to populate the model with
-attributes, one other alternative is to rely on a `Converter<String, T>` in combination
-with a URI path variable convention. In the following example, the model attribute name,
-`account`, matches the URI path variable, `account`, and the `Account` is loaded by passing
-the `String` account number through a registered `Converter<String, Account>`:
+One alternative to using a <<mvc-ann-modelattrib-methods,@ModelAttribute method>> to
+supply it or relying on the framework to create the model attribute, is to have a
+`Converter<String, T>` to provide the instance. This is applied when the model attribute
+name matches to the name of a request value such as a path variable or a request
+parameter, and there is a `Converter` from `String` to the model attribute type.
+In the following example, the model attribute name is `account` which matches the URI
+path variable `account`, and there is a registered `Converter<String, Account>` which
+could load the `Account` from a data store:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -5302,12 +5384,10 @@ The following example shows how to achieve the same configuration in XML:
 You can configure how Spring MVC determines the requested media types from the request
 (for example, `Accept` header, URL path extension, query parameter, and others).
 
-By default, the URL path extension is checked first -- with `json`, `xml`, `rss`, and `atom`
-registered as known extensions (depending on classpath dependencies). The `Accept` header
-is checked second.
+By default, only the `Accept` header is checked.
 
-Consider changing those defaults to `Accept` header only, and, if you must use URL-based
-content type resolution, consider using the query parameter strategy over path extensions. See
+If you must use URL-based content type resolution, consider using the query parameter
+strategy over path extensions. See
 <<mvc-ann-requestmapping-suffix-pattern-match>> and <<mvc-ann-requestmapping-rfd>> for
 more details.
 

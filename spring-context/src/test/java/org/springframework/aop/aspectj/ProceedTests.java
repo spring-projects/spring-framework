@@ -162,13 +162,13 @@ class ProceedTestingAspect implements Ordered {
 
 	public Object doubleOrQuits(ProceedingJoinPoint pjp) throws Throwable {
 		int value = ((Integer) pjp.getArgs()[0]).intValue();
-		pjp.getArgs()[0] = new Integer(value * 2);
+		pjp.getArgs()[0] = Integer.valueOf(value * 2);
 		return pjp.proceed();
 	}
 
 	public Object addOne(ProceedingJoinPoint pjp, Float value) throws Throwable {
 		float fv = value.floatValue();
-		return pjp.proceed(new Object[] {new Float(fv + 1.0F)});
+		return pjp.proceed(new Object[] {Float.valueOf(fv + 1.0F)});
 	}
 
 	public void captureStringArgument(JoinPoint tjp, String arg) {

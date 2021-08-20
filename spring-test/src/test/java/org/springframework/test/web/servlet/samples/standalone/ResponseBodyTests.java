@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.test.web.servlet.samples.standalone;
 
-import javax.validation.constraints.NotNull;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
@@ -25,6 +23,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -42,11 +42,14 @@ class ResponseBodyTests {
 
 	@Test
 	void json() throws Exception {
-		standaloneSetup(new PersonController()).build()
-				.perform(get("/person/Lee").accept(MediaType.APPLICATION_JSON))
+		standaloneSetup(new PersonController()).defaultResponseCharacterEncoding(UTF_8).build()
+				// We use a name containing an umlaut to test UTF-8 encoding for the request and the response.
+				.perform(get("/person/Jürgen").characterEncoding(UTF_8).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType("application/json"))
-				.andExpect(jsonPath("$.name").value("Lee"))
+				.andExpect(content().encoding(UTF_8))
+				.andExpect(content().string(containsString("Jürgen")))
+				.andExpect(jsonPath("$.name").value("Jürgen"))
 				.andExpect(jsonPath("$.age").value(42))
 				.andExpect(jsonPath("$.age").value(42.0f))
 				.andExpect(jsonPath("$.age").value(equalTo(42)))
@@ -70,7 +73,6 @@ class ResponseBodyTests {
 	@SuppressWarnings("unused")
 	private static class Person {
 
-		@NotNull
 		private final String name;
 
 		private int age;

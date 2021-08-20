@@ -8,7 +8,7 @@ apply plugin: "kotlin"
 // cglib itself depends on asm and is therefore further transformed by the ShadowJar task to
 // depend on org.springframework.asm; this avoids including two different copies of asm.
 def cglibVersion = "3.3.0"
-def objenesisVersion = "3.1"
+def objenesisVersion = "3.2"
 
 configurations {
 	cglib
@@ -70,8 +70,8 @@ dependencies {
 
 jar {
 	reproducibleFileOrder = true
-	preserveFileTimestamps = false // maybe not necessary here, but good for reproducibility
-	manifest.attributes["Dependencies"] = "jdk.unsupported" // JBoss modules
+	preserveFileTimestamps = false  // maybe not necessary here, but good for reproducibility
+	manifest.attributes["Dependencies"] = "jdk.unsupported"  // for WildFly (-> Objenesis 3.2)
 
 	// Inline repackaged cglib classes directly into spring-core jar
 	dependsOn cglibRepackJar

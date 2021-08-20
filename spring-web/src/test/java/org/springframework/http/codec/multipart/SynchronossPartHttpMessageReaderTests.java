@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,37 +165,31 @@ public class SynchronossPartHttpMessageReaderTests extends AbstractLeakCheckingT
 
 	@Test
 	void readTooManyParts() {
-		testMultipartExceptions(reader -> reader.setMaxParts(1), ex -> {
-					assertThat(ex)
-							.isInstanceOf(DecodingException.class)
-							.hasMessageStartingWith("Failure while parsing part[2]");
-					assertThat(ex.getCause())
-							.hasMessage("Too many parts (2 allowed)");
-				}
+		testMultipartExceptions(reader -> reader.setMaxParts(1),
+				ex -> assertThat(ex)
+						.isInstanceOf(DecodingException.class)
+						.hasMessageStartingWith("Failure while parsing part[2]")
+						.hasRootCauseMessage("Too many parts: Part[2] but maxParts=1")
 		);
 	}
 
 	@Test
 	void readFilePartTooBig() {
-		testMultipartExceptions(reader -> reader.setMaxDiskUsagePerPart(5), ex -> {
-					assertThat(ex)
-							.isInstanceOf(DecodingException.class)
-							.hasMessageStartingWith("Failure while parsing part[1]");
-					assertThat(ex.getCause())
-							.hasMessage("Part[1] exceeded the disk usage limit of 5 bytes");
-				}
+		testMultipartExceptions(reader -> reader.setMaxDiskUsagePerPart(5),
+				ex -> assertThat(ex)
+						.isInstanceOf(DecodingException.class)
+						.hasMessageStartingWith("Failure while parsing part[1]")
+						.hasRootCauseMessage("Part[1] exceeded the disk usage limit of 5 bytes")
 		);
 	}
 
 	@Test
 	void readPartHeadersTooBig() {
-		testMultipartExceptions(reader -> reader.setMaxInMemorySize(1), ex -> {
-					assertThat(ex)
-							.isInstanceOf(DecodingException.class)
-							.hasMessageStartingWith("Failure while parsing part[1]");
-					assertThat(ex.getCause())
-							.hasMessage("Part[1] exceeded the in-memory limit of 1 bytes");
-				}
+		testMultipartExceptions(reader -> reader.setMaxInMemorySize(1),
+				ex -> assertThat(ex)
+						.isInstanceOf(DecodingException.class)
+						.hasMessageStartingWith("Failure while parsing part[1]")
+						.hasRootCauseMessage("Part[1] exceeded the in-memory limit of 1 bytes")
 		);
 	}
 

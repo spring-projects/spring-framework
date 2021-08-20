@@ -1085,7 +1085,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 
 		DispatcherType dispatchType = request.getDispatcherType();
-		boolean initialDispatch = DispatcherType.REQUEST.equals(request.getDispatcherType());
+		boolean initialDispatch = DispatcherType.REQUEST == dispatchType;
 
 		if (failureCause != null) {
 			if (!initialDispatch) {

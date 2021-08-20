@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import org.springframework.util.Assert;
  * initialization and {@link #setDatabaseCleaner clean up} a database during
  * destruction.
  *
+ * @author Dave Syer
+ * @author Sam Brannen
  * @author Mark Paluch
  * @since 5.3
  * @see DatabasePopulator
@@ -50,7 +52,7 @@ public class ConnectionFactoryInitializer implements InitializingBean, Disposabl
 	 * The {@link ConnectionFactory} for the database to populate when this
 	 * component is initialized and to clean up when this component is shut down.
 	 * <p>This property is mandatory with no default provided.
-	 * @param connectionFactory the R2DBC {@link ConnectionFactory}.
+	 * @param connectionFactory the R2DBC {@link ConnectionFactory}
 	 */
 	public void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
@@ -66,10 +68,9 @@ public class ConnectionFactoryInitializer implements InitializingBean, Disposabl
 	}
 
 	/**
-	 * Set the {@link DatabasePopulator} to execute during the bean destruction phase, cleaning up the database and
-	 * leaving it in a known state for others.
-	 *
-	 * @param databaseCleaner the {@link DatabasePopulator} to use during destruction
+	 * Set the {@link DatabasePopulator} to execute during the bean destruction
+	 * phase, cleaning up the database and leaving it in a known state for others.
+	 * @param databaseCleaner the {@code DatabasePopulator} to use during destruction
 	 * @see #setDatabasePopulator
 	 */
 	public void setDatabaseCleaner(DatabasePopulator databaseCleaner) {
@@ -77,8 +78,8 @@ public class ConnectionFactoryInitializer implements InitializingBean, Disposabl
 	}
 
 	/**
-	 * Flag to explicitly enable or disable the {@link #setDatabasePopulator database populator}
-	 * and {@link #setDatabaseCleaner database cleaner}.
+	 * Flag to explicitly enable or disable the {@linkplain #setDatabasePopulator
+	 * database populator} and {@linkplain #setDatabaseCleaner database cleaner}.
 	 * @param enabled {@code true} if the database populator and database cleaner
 	 * should be called on startup and shutdown, respectively
 	 */
@@ -88,7 +89,8 @@ public class ConnectionFactoryInitializer implements InitializingBean, Disposabl
 
 
 	/**
-	 * Use the {@link #setDatabasePopulator database populator} to set up the database.
+	 * Use the {@linkplain #setDatabasePopulator database populator} to set up
+	 * the database.
 	 */
 	@Override
 	public void afterPropertiesSet() {
@@ -96,7 +98,8 @@ public class ConnectionFactoryInitializer implements InitializingBean, Disposabl
 	}
 
 	/**
-	 * Use the {@link #setDatabaseCleaner database cleaner} to clean up the database.
+	 * Use the {@linkplain #setDatabaseCleaner database cleaner} to clean up the
+	 * database.
 	 */
 	@Override
 	public void destroy() {

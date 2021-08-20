@@ -276,14 +276,14 @@ public class AspectJAdviceParameterNameDiscovererTests {
 
 	private static String format(String[] names) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("(");
+		sb.append('(');
 		for (int i = 0; i < names.length; i++) {
 			sb.append(names[i]);
 			if ((i + 1) < names.length) {
-				sb.append(",");
+				sb.append(',');
 			}
 		}
-		sb.append(")");
+		sb.append(')');
 		return sb.toString();
 	}
 

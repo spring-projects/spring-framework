@@ -1,7 +1,5 @@
 [[spring-integration]]
 = Integration
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :doc-spring-amqp: {doc-root}/spring-amqp/docs/current/reference
 :doc-spring-gemfire: {doc-root}/spring-gemfire/docs/current/reference
 :toc: left
@@ -163,7 +161,7 @@ You can use the `exchange()` methods to specify request headers, as the followin
 	URI uri = UriComponentsBuilder.fromUriString(uriTemplate).build(42);
 
 	RequestEntity<Void> requestEntity = RequestEntity.get(uri)
-			.header(("MyRequestHeader", "MyValue")
+			.header("MyRequestHeader", "MyValue")
 			.build();
 
 	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
@@ -5690,7 +5688,7 @@ method -- if at least one cache is hit, the associated value is returned.
 NOTE: All the other caches that do not contain the value are also updated, even though
 the cached method was not actually invoked.
 
-The following example uses `@Cacheable` on the `findBook` method:
+The following example uses `@Cacheable` on the `findBook` method with multiple caches:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -5837,7 +5835,7 @@ regardless of the content of the annotation.
 
 Similarly to `key` and `keyGenerator`, the `cacheManager` and `cacheResolver`
 parameters are mutually exclusive, and an operation specifying both
-results in an exception. as a custom `CacheManager` is ignored by the
+results in an exception, as a custom `CacheManager` is ignored by the
 `CacheResolver` implementation. This is probably not what you expect.
 ====
 
@@ -5898,9 +5896,11 @@ want to cache paperback books, as the following example does:
 <1> Using the `unless` attribute to block hardbacks.
 
 
-The cache abstraction supports `java.util.Optional`, using its content as the cached value
-only if it is present. `#result` always refers to the business entity and never a
-supported wrapper, so the previous example can be rewritten as follows:
+The cache abstraction supports `java.util.Optional` return types. If an `Optional` value
+is _present_, it will be stored in the associated cache. If an `Optional` value is not
+present, `null` will be stored in the associated cache. `#result` always refers to the
+business entity and never a supported wrapper, so the previous example can be rewritten
+as follows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -5908,8 +5908,8 @@ supported wrapper, so the previous example can be rewritten as follows:
 	public Optional<Book> findBook(String name)
 ----
 
-Note that `result` still refers to `Book` and not `Optional`. As it might be `null`, we
-should use the safe navigation operator.
+Note that `#result` still refers to `Book` and not `Optional<Book>`. Since it might be
+`null`, we use SpEL's <<core.adoc#expressions-operator-safe-navigation, safe navigation operator>>.
 
 [[cache-spel-context]]
 ===== Available Caching SpEL Evaluation Context

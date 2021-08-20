@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,12 @@ import org.springframework.util.Assert;
 
 /**
  * Composite {@link DatabasePopulator} that delegates to a list of given
- * {@link DatabasePopulator} implementations, executing all scripts.
+ * {@code DatabasePopulator} implementations, executing all scripts.
  *
+ * @author Dave Syer
+ * @author Juergen Hoeller
+ * @author Sam Brannen
+ * @author Kazuki Shimizu
  * @author Mark Paluch
  * @since 5.3
  */
@@ -44,14 +48,15 @@ public class CompositeDatabasePopulator implements DatabasePopulator {
 	 * @see #setPopulators
 	 * @see #addPopulators
 	 */
-	public CompositeDatabasePopulator() {}
+	public CompositeDatabasePopulator() {
+	}
 
 	/**
 	 * Create a {@code CompositeDatabasePopulator}. with the given populators.
 	 * @param populators one or more populators to delegate to.
 	 */
 	public CompositeDatabasePopulator(Collection<DatabasePopulator> populators) {
-		Assert.notNull(populators, "Collection of DatabasePopulator must not be null");
+		Assert.notNull(populators, "DatabasePopulators must not be null");
 		this.populators.addAll(populators);
 	}
 

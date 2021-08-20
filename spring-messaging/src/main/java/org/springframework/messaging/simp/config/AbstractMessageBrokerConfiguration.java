@@ -83,7 +83,7 @@ import org.springframework.validation.Validator;
  * </ul>
  *
  * <p>{@link #brokerChannel} delivers messages from within the application to the
- * the respective message handlers. {@link #brokerMessagingTemplate} can be injected
+ * respective message handlers. {@link #brokerMessagingTemplate} can be injected
  * into any application component to send messages.
  *
  * <p>Subclasses are responsible for the parts of the configuration that feed messages

@@ -361,21 +361,27 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 		protected ModelAndView writeToInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
 				Context context) throws ServletException, IOException {
 
-			DeferredResult<?> deferredResult = createDeferredResult(servletRequest, servletResponse, context);
+			DeferredResult<ServerResponse> deferredResult = createDeferredResult(servletRequest, servletResponse, context);
 			DefaultAsyncServerResponse.writeAsync(servletRequest, servletResponse, deferredResult);
 			return null;
 		}
 
-		private DeferredResult<?> createDeferredResult(HttpServletRequest request, HttpServletResponse response,
+		private DeferredResult<ServerResponse> createDeferredResult(HttpServletRequest request, HttpServletResponse response,
 				Context context) {
 
-			DeferredResult<?> result = new DeferredResult<>();
+			DeferredResult<ServerResponse> result = new DeferredResult<>();
 			entity().handle((value, ex) -> {
 				if (ex != null) {
 					if (ex instanceof CompletionException && ex.getCause() != null) {
 						ex = ex.getCause();
 					}
-					result.setErrorResult(ex);
+					ServerResponse errorResponse = errorResponse(ex, request);
+					if (errorResponse != null) {
+						result.setResult(errorResponse);
+					}
+					else {
+						result.setErrorResult(ex);
+					}
 				}
 				else {
 					try {
@@ -468,7 +474,12 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 			@Override
 			public void onError(Throwable t) {
-				this.deferredResult.setErrorResult(t);
+				try {
+					handleError(t, this.servletRequest, this.servletResponse, this.context);
+				}
+				catch (ServletException | IOException handlingThrowable) {
+					this.deferredResult.setErrorResult(handlingThrowable);
+				}
 			}
 
 			@Override

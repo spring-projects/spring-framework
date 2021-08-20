@@ -97,11 +97,12 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 		return this.running;
 	}
 
-	@Nullable
+
 	@Override
+	@Nullable
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		Object handler = super.getHandlerInternal(request);
-		return matchWebSocketUpgrade(handler, request) ? handler : null;
+		return (matchWebSocketUpgrade(handler, request) ? handler : null);
 	}
 
 	private boolean matchWebSocketUpgrade(@Nullable Object handler, HttpServletRequest request) {
