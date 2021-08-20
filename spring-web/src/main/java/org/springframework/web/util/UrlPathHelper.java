@@ -147,7 +147,6 @@ public class UrlPathHelper {
 	 * Whether configured to remove ";" (semicolon) content from the request URI.
 	 */
 	public boolean shouldRemoveSemicolonContent() {
-		checkReadOnly();
 		return this.removeSemicolonContent;
 	}
 
