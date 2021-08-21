@@ -18,7 +18,12 @@ package org.springframework.scheduling.annotation;
 
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
 /**
