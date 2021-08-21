@@ -16,14 +16,10 @@
 
 package org.springframework.scheduling.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+
+import java.lang.annotation.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Annotation that marks a method to be scheduled. Exactly one of the
@@ -101,52 +97,76 @@ public @interface Scheduled {
 	String zone() default "";
 
 	/**
-	 * Execute the annotated method with a fixed period in milliseconds between the
+	 * Execute the annotated method with a fixed period between the
 	 * end of the last invocation and the start of the next.
-	 * @return the delay in milliseconds
+	 * Using milliseconds by default with fixedDelayTimeUnit().
+	 * @return the delay
 	 */
 	long fixedDelay() default -1;
 
 	/**
-	 * Execute the annotated method with a fixed period in milliseconds between the
+	 * Execute the annotated method with a fixed period between the
 	 * end of the last invocation and the start of the next.
-	 * @return the delay in milliseconds as a String value, e.g. a placeholder
+	 * Using milliseconds by default with fixedDelayTimeUnit().
+	 * @return the delay as a String value, e.g. a placeholder
 	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
 	 */
 	String fixedDelayString() default "";
 
 	/**
-	 * Execute the annotated method with a fixed period in milliseconds between
+	 * Specify the {@link TimeUnit} to use for the fixedDelay and the fixedDelayString values.
+	 * @return the {@link TimeUnit}, by default milliseconds will be used.
+	 */
+	TimeUnit fixedDelayTimeUnit() default TimeUnit.MILLISECONDS;
+
+	/**
+	 * Execute the annotated method with a fixed period between
 	 * invocations.
-	 * @return the period in milliseconds
+	 * Using milliseconds by default with fixedRateTimeUnit().
+	 * @return the period
 	 */
 	long fixedRate() default -1;
 
 	/**
-	 * Execute the annotated method with a fixed period in milliseconds between
+	 * Execute the annotated method with a fixed period between
 	 * invocations.
-	 * @return the period in milliseconds as a String value, e.g. a placeholder
+	 * Using milliseconds by default with fixedRateTimeUnit().
+	 * @return the period as a String value, e.g. a placeholder
 	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
 	 */
 	String fixedRateString() default "";
 
 	/**
-	 * Number of milliseconds to delay before the first execution of a
+	 * Specify the {@link TimeUnit} to use for the fixedRate and the fixedRateString values.
+	 * @return the {@link TimeUnit}, by default milliseconds will be used.
+	 */
+	TimeUnit fixedRateTimeUnit() default TimeUnit.MILLISECONDS;
+
+	/**
+	 * Number to delay before the first execution of a
 	 * {@link #fixedRate} or {@link #fixedDelay} task.
-	 * @return the initial delay in milliseconds
+	 * Using milliseconds by default with initialDelayTimeUnit().
+	 * @return the initial
 	 * @since 3.2
 	 */
 	long initialDelay() default -1;
 
 	/**
-	 * Number of milliseconds to delay before the first execution of a
+	 * Number to delay before the first execution of a
 	 * {@link #fixedRate} or {@link #fixedDelay} task.
+	 * Using milliseconds by default with initialDelayTimeUnit().
 	 * @return the initial delay in milliseconds as a String value, e.g. a placeholder
 	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
 	 */
 	String initialDelayString() default "";
+
+	/**
+	 * Specify the {@link TimeUnit} to use for the initialDelay and the initialDelayString values.
+	 * @return the {@link TimeUnit}, by default milliseconds will be used.
+	 */
+	TimeUnit initialDelayTimeUnit() default TimeUnit.MILLISECONDS;
 
 }
