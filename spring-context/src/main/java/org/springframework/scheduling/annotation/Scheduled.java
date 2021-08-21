@@ -16,15 +16,15 @@
 
 package org.springframework.scheduling.annotation;
 
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-
+import java.util.concurrent.TimeUnit;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.concurrent.TimeUnit;
+
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 /**
  * Annotation that marks a method to be scheduled. Exactly one of the
