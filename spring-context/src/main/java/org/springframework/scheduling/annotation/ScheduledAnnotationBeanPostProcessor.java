@@ -16,35 +16,12 @@
 
 package org.springframework.scheduling.annotation;
 
-import java.lang.reflect.Method;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
@@ -64,17 +41,18 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
-import org.springframework.scheduling.config.CronTask;
-import org.springframework.scheduling.config.FixedDelayTask;
-import org.springframework.scheduling.config.FixedRateTask;
-import org.springframework.scheduling.config.ScheduledTask;
-import org.springframework.scheduling.config.ScheduledTaskHolder;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.config.*;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
+
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Bean post-processor that registers methods annotated with @{@link Scheduled}
@@ -398,7 +376,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			Set<ScheduledTask> tasks = new LinkedHashSet<>(4);
 
 			// Determine initial delay
-			long initialDelay = scheduled.initialDelay();
+			long initialDelay = scheduled.initialDelayTimeUnit().toMillis(1) * scheduled.initialDelay();
 			String initialDelayString = scheduled.initialDelayString();
 			if (StringUtils.hasText(initialDelayString)) {
 				Assert.isTrue(initialDelay < 0, "Specify 'initialDelay' or 'initialDelayString', not both");
@@ -407,7 +385,7 @@ public class ScheduledAnnotationBeanPostProcessor
 				}
 				if (StringUtils.hasLength(initialDelayString)) {
 					try {
-						initialDelay = parseDelayAsLong(initialDelayString);
+						initialDelay = scheduled.initialDelayTimeUnit().toMillis(1) * parseDelayAsLong(initialDelayString);
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -446,12 +424,13 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// Check fixed delay
-			long fixedDelay = scheduled.fixedDelay();
+			long fixedDelay = scheduled.fixedDelayTimeUnit().toMillis(1) * scheduled.fixedDelay();
 			if (fixedDelay >= 0) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
 				tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, initialDelay)));
 			}
+
 			String fixedDelayString = scheduled.fixedDelayString();
 			if (StringUtils.hasText(fixedDelayString)) {
 				if (this.embeddedValueResolver != null) {
@@ -461,7 +440,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedDelay = parseDelayAsLong(fixedDelayString);
+						fixedDelay = scheduled.fixedDelayTimeUnit().toMillis(1) * parseDelayAsLong(fixedDelayString);
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -472,7 +451,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// Check fixed rate
-			long fixedRate = scheduled.fixedRate();
+			long fixedRate = scheduled.fixedRateTimeUnit().toMillis(1) * scheduled.fixedRate();
 			if (fixedRate >= 0) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
@@ -487,7 +466,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedRate = parseDelayAsLong(fixedRateString);
+						fixedRate = scheduled.fixedRateTimeUnit().toMillis(1) * parseDelayAsLong(fixedRateString);
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
