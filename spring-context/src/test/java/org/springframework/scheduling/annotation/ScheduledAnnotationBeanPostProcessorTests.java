@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -67,6 +68,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Chris Beams
  * @author Sam Brannen
  * @author Stevo Slavić
+ * @author Victor Brown
  */
 public class ScheduledAnnotationBeanPostProcessorTests {
 
@@ -108,6 +110,62 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	public void fixedDelayWithSecondsTimeUnitTask() {
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(FixedDelayWithSecondsTimeUnitTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertThat(postProcessor.getScheduledTasks().size()).isEqualTo(1);
+
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		@SuppressWarnings("unchecked")
+		List<IntervalTask> fixedDelayTasks = (List<IntervalTask>)
+				new DirectFieldAccessor(registrar).getPropertyValue("fixedDelayTasks");
+		assertThat(fixedDelayTasks.size()).isEqualTo(1);
+		IntervalTask task = fixedDelayTasks.get(0);
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) task.getRunnable();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
+		assertThat(targetObject).isEqualTo(target);
+		assertThat(targetMethod.getName()).isEqualTo("fixedDelay");
+		assertThat(task.getInitialDelay()).isEqualTo(0L);
+		assertThat(task.getInterval()).isEqualTo(5000L);
+	}
+
+	@Test
+	public void fixedDelayWithMinutesTimeUnitTask() {
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(FixedDelayWithMinutesTimeUnitTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertThat(postProcessor.getScheduledTasks().size()).isEqualTo(1);
+
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		@SuppressWarnings("unchecked")
+		List<IntervalTask> fixedDelayTasks = (List<IntervalTask>)
+				new DirectFieldAccessor(registrar).getPropertyValue("fixedDelayTasks");
+		assertThat(fixedDelayTasks.size()).isEqualTo(1);
+		IntervalTask task = fixedDelayTasks.get(0);
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) task.getRunnable();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
+		assertThat(targetObject).isEqualTo(target);
+		assertThat(targetMethod.getName()).isEqualTo("fixedDelay");
+		assertThat(task.getInitialDelay()).isEqualTo(0L);
+		assertThat(task.getInterval()).isEqualTo(180000L);
+	}
+
+	@Test
 	public void fixedRateTask() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRateTestBean.class);
@@ -136,6 +194,62 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	public void fixedRateWithSecondsTimeUnitTask() {
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRateWithSecondsTimeUnitTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertThat(postProcessor.getScheduledTasks().size()).isEqualTo(1);
+
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		@SuppressWarnings("unchecked")
+		List<IntervalTask> fixedRateTasks = (List<IntervalTask>)
+				new DirectFieldAccessor(registrar).getPropertyValue("fixedRateTasks");
+		assertThat(fixedRateTasks.size()).isEqualTo(1);
+		IntervalTask task = fixedRateTasks.get(0);
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) task.getRunnable();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
+		assertThat(targetObject).isEqualTo(target);
+		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
+		assertThat(task.getInitialDelay()).isEqualTo(0L);
+		assertThat(task.getInterval()).isEqualTo(5000L);
+	}
+
+	@Test
+	public void fixedRateWithMinutesTimeUnitTask() {
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRateWithMinutesTimeUnitTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertThat(postProcessor.getScheduledTasks().size()).isEqualTo(1);
+
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		@SuppressWarnings("unchecked")
+		List<IntervalTask> fixedRateTasks = (List<IntervalTask>)
+				new DirectFieldAccessor(registrar).getPropertyValue("fixedRateTasks");
+		assertThat(fixedRateTasks.size()).isEqualTo(1);
+		IntervalTask task = fixedRateTasks.get(0);
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) task.getRunnable();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
+		assertThat(targetObject).isEqualTo(target);
+		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
+		assertThat(task.getInitialDelay()).isEqualTo(0L);
+		assertThat(task.getInterval()).isEqualTo(180000L);
+	}
+
+	@Test
 	public void fixedRateTaskWithInitialDelay() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRateWithInitialDelayTestBean.class);
@@ -161,6 +275,62 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
 		assertThat(task.getInitialDelay()).isEqualTo(1000L);
 		assertThat(task.getInterval()).isEqualTo(3000L);
+	}
+
+	@Test
+	public void fixedRateTaskWithSecondsTimeUnitWithInitialDelay() {
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRateWithSecondsTimeUnitInitialDelayTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertThat(postProcessor.getScheduledTasks().size()).isEqualTo(1);
+
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		@SuppressWarnings("unchecked")
+		List<IntervalTask> fixedRateTasks = (List<IntervalTask>)
+				new DirectFieldAccessor(registrar).getPropertyValue("fixedRateTasks");
+		assertThat(fixedRateTasks.size()).isEqualTo(1);
+		IntervalTask task = fixedRateTasks.get(0);
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) task.getRunnable();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
+		assertThat(targetObject).isEqualTo(target);
+		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
+		assertThat(task.getInitialDelay()).isEqualTo(5000L);
+		assertThat(task.getInterval()).isEqualTo(3000L);
+	}
+
+	@Test
+	public void fixedRateTaskWithMinutesTimeUnitWithInitialDelay() {
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRateWithMinutesTimeUnitInitialDelayTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertThat(postProcessor.getScheduledTasks().size()).isEqualTo(1);
+
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		@SuppressWarnings("unchecked")
+		List<IntervalTask> fixedRateTasks = (List<IntervalTask>)
+				new DirectFieldAccessor(registrar).getPropertyValue("fixedRateTasks");
+		assertThat(fixedRateTasks.size()).isEqualTo(1);
+		IntervalTask task = fixedRateTasks.get(0);
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) task.getRunnable();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
+		assertThat(targetObject).isEqualTo(target);
+		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
+		assertThat(task.getInitialDelay()).isEqualTo(60000L);
+		assertThat(task.getInterval()).isEqualTo(180000L);
 	}
 
 	@Test
@@ -702,10 +872,40 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		}
 	}
 
+	static class FixedDelayWithSecondsTimeUnitTestBean {
+
+		@Scheduled(fixedDelay = 5, timeUnit = TimeUnit.SECONDS)
+		public void fixedDelay() {
+		}
+
+	}
+
+	static class FixedDelayWithMinutesTimeUnitTestBean {
+
+		@Scheduled(fixedDelay = 3, timeUnit = TimeUnit.MINUTES)
+		public void fixedDelay() {
+		}
+
+	}
+
 
 	static class FixedRateTestBean {
 
 		@Scheduled(fixedRate = 3000)
+		public void fixedRate() {
+		}
+	}
+	static class FixedRateWithSecondsTimeUnitTestBean {
+
+		@Scheduled(fixedRate = 5, timeUnit = TimeUnit.SECONDS)
+		public void fixedRate() {
+		}
+	}
+
+
+	static class FixedRateWithMinutesTimeUnitTestBean {
+
+		@Scheduled(fixedRate = 3, timeUnit = TimeUnit.MINUTES)
 		public void fixedRate() {
 		}
 	}
@@ -714,6 +914,20 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	static class FixedRateWithInitialDelayTestBean {
 
 		@Scheduled(fixedRate = 3000, initialDelay = 1000)
+		public void fixedRate() {
+		}
+	}
+
+	static class FixedRateWithSecondsTimeUnitInitialDelayTestBean {
+
+		@Scheduled(fixedRate = 3, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+		public void fixedRate() {
+		}
+	}
+
+	static class FixedRateWithMinutesTimeUnitInitialDelayTestBean {
+
+		@Scheduled(fixedRate = 3, initialDelay = 1, timeUnit = TimeUnit.MINUTES)
 		public void fixedRate() {
 		}
 	}
