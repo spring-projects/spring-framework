@@ -20,7 +20,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
+import org.reactivestreams.Publisher;
+
 import kotlin.Unit;
+import kotlin.coroutines.Continuation;
+import kotlin.coroutines.CoroutineContext;
 import kotlin.jvm.JvmClassMappingKt;
 import kotlin.reflect.KClassifier;
 import kotlin.reflect.KFunction;
@@ -31,10 +35,10 @@ import kotlinx.coroutines.CoroutineStart;
 import kotlinx.coroutines.Deferred;
 import kotlinx.coroutines.Dispatchers;
 import kotlinx.coroutines.GlobalScope;
+import kotlinx.coroutines.Job;
 import kotlinx.coroutines.flow.Flow;
 import kotlinx.coroutines.reactor.MonoKt;
 import kotlinx.coroutines.reactor.ReactorFlowKt;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -71,7 +75,9 @@ public abstract class CoroutinesUtils {
 	public static Publisher<?> invokeSuspendingFunction(Method method, Object target, Object... args) {
 		KFunction<?> function = Objects.requireNonNull(ReflectJvmMapping.getKotlinFunction(method));
 		KClassifier classifier = function.getReturnType().getClassifier();
-		Mono<Object> mono = MonoKt.mono(Dispatchers.getUnconfined(), (scope, continuation) ->
+		Continuation<?> cont = (Continuation<?>) args[args.length - 1];
+		CoroutineContext ctx = Dispatchers.getUnconfined().plus(cont.getContext().minusKey(Job.Key));
+		Mono<Object> mono = MonoKt.mono(ctx, (scope, continuation) ->
 					KCallables.callSuspend(function, getSuspendedFunctionArgs(target, args), continuation))
 				.filter(result -> !Objects.equals(result, Unit.INSTANCE))
 				.onErrorMap(InvocationTargetException.class, InvocationTargetException::getTargetException);
