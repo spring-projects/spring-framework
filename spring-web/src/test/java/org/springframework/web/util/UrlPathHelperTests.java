@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
  * Unit tests for {@link UrlPathHelper}.
@@ -163,6 +164,11 @@ public class UrlPathHelperTests {
 		request.setRequestURI("/petclinic;a=b/welcome.html;c=d");
 
 		assertThat(helper.getLookupPathForRequest(request)).isEqualTo("/welcome.html;c=d");
+	}
+
+	@Test // gh-27303
+	public void shouldRemoveSemicolonContentWithReadOnlyInstance() {
+		assertThatCode(UrlPathHelper.defaultInstance::shouldRemoveSemicolonContent).doesNotThrowAnyException();
 	}
 
 
