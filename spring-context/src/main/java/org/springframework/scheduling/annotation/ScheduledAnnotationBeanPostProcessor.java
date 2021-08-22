@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -397,7 +398,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			Set<ScheduledTask> tasks = new LinkedHashSet<>(4);
 
 			// Determine initial delay
-			long initialDelay = scheduled.initialDelayTimeUnit().toMillis(1) * scheduled.initialDelay();
+			long initialDelay = TimeUnit.MILLISECONDS.convert(scheduled.initialDelay(), scheduled.initialDelayTimeUnit());
 			String initialDelayString = scheduled.initialDelayString();
 			if (StringUtils.hasText(initialDelayString)) {
 				Assert.isTrue(initialDelay < 0, "Specify 'initialDelay' or 'initialDelayString', not both");
@@ -406,7 +407,7 @@ public class ScheduledAnnotationBeanPostProcessor
 				}
 				if (StringUtils.hasLength(initialDelayString)) {
 					try {
-						initialDelay = scheduled.initialDelayTimeUnit().toMillis(1) * parseDelayAsLong(initialDelayString);
+						initialDelay = TimeUnit.MILLISECONDS.convert(parseDelayAsLong(initialDelayString), scheduled.initialDelayTimeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -445,7 +446,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// Check fixed delay
-			long fixedDelay = scheduled.fixedDelayTimeUnit().toMillis(1) * scheduled.fixedDelay();
+			long fixedDelay = TimeUnit.MILLISECONDS.convert(scheduled.fixedDelay(), scheduled.fixedDelayTimeUnit());
 			if (fixedDelay >= 0) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
@@ -461,7 +462,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedDelay = scheduled.fixedDelayTimeUnit().toMillis(1) * parseDelayAsLong(fixedDelayString);
+						fixedDelay = TimeUnit.MILLISECONDS.convert(parseDelayAsLong(fixedDelayString), scheduled.fixedDelayTimeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -472,7 +473,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// Check fixed rate
-			long fixedRate = scheduled.fixedRateTimeUnit().toMillis(1) * scheduled.fixedRate();
+			long fixedRate = TimeUnit.MILLISECONDS.convert(scheduled.fixedRate(), scheduled.fixedRateTimeUnit());
 			if (fixedRate >= 0) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
@@ -487,7 +488,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedRate = scheduled.fixedRateTimeUnit().toMillis(1) * parseDelayAsLong(fixedRateString);
+						fixedRate = TimeUnit.MILLISECONDS.convert(parseDelayAsLong(fixedRateString), scheduled.fixedRateTimeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
