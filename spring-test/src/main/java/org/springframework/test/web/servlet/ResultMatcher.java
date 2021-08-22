@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.servlet;
 
+import org.springframework.test.util.ExceptionCollector;
+
 /**
  * A {@code ResultMatcher} matches the result of an executed request against
  * some expectation.
@@ -81,21 +83,11 @@ public interface ResultMatcher {
 	 */
 	static ResultMatcher matchAllSoftly(ResultMatcher... matchers) {
 		return result -> {
-			String message = "";
+			ExceptionCollector exceptionCollector = new ExceptionCollector();
 			for (ResultMatcher matcher : matchers) {
-				try {
-					matcher.match(result);
-				}
-				catch (Error | Exception ex) {
-					if (!message.isEmpty()) {
-						message += System.lineSeparator();
-					}
-					message += ex.getMessage();
-				}
+				exceptionCollector.execute(() -> matcher.match(result));
 			}
-			if (!message.isEmpty()) {
-				throw new AssertionError(message);
-			}
+			exceptionCollector.assertEmpty();
 		};
 	}
 

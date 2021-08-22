@@ -16,9 +16,9 @@
 
 package org.springframework.test.web.servlet;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
@@ -31,6 +31,8 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
  */
 class ResultMatcherTests {
 
+	private static final String EOL = "\n";
+
 	private final StubMvcResult stubMvcResult = new StubMvcResult(null, null, null, null, null, null, null);
 
 
@@ -42,36 +44,74 @@ class ResultMatcherTests {
 	}
 
 	@Test
-	void softAssertionsWithOneFailure() {
-		String failureMessage = "failure message";
-		ResultMatcher resultMatcher = ResultMatcher.matchAllSoftly(failingMatcher(failureMessage));
+	void softAssertionsWithOneAssertionError() {
+		String failureMessage = "error";
+		ResultMatcher resultMatcher = ResultMatcher.matchAllSoftly(assertionErrorMatcher(failureMessage));
 
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> resultMatcher.match(stubMvcResult))
-				.withMessage(failureMessage);
+				.withMessage(failureMessage)
+				.withNoCause()
+				.satisfies(error -> assertThat(error).hasNoSuppressedExceptions());
+	}
+
+	@Test
+	void softAssertionsWithOneRuntimeException() {
+		String failureMessage = "exception";
+		ResultMatcher resultMatcher = ResultMatcher.matchAllSoftly(uncheckedExceptionMatcher(failureMessage));
+
+		assertThatExceptionOfType(RuntimeException.class)
+				.isThrownBy(() -> resultMatcher.match(stubMvcResult))
+				.withMessage(failureMessage)
+				.withNoCause()
+				.satisfies(error -> assertThat(error).hasNoSuppressedExceptions());
+	}
+
+	@Test
+	void softAssertionsWithOneCheckedException() {
+		String failureMessage = "exception";
+		ResultMatcher resultMatcher = ResultMatcher.matchAllSoftly(checkedExceptionMatcher(failureMessage));
+
+		assertThatExceptionOfType(Exception.class)
+				.isThrownBy(() -> resultMatcher.match(stubMvcResult))
+				.withMessage(failureMessage)
+				.withNoCause()
+				.satisfies(exception -> assertThat(exception).hasNoSuppressedExceptions());
 	}
 
 	@Test
 	void softAssertionsWithTwoFailures() {
 		String firstFailure = "firstFailure";
 		String secondFailure = "secondFailure";
-		ResultMatcher resultMatcher = ResultMatcher.matchAllSoftly(failingMatcher(firstFailure), exceptionalMatcher(secondFailure));
+		String thirdFailure = "thirdFailure";
+		ResultMatcher resultMatcher = ResultMatcher.matchAllSoftly(assertionErrorMatcher(firstFailure),
+			checkedExceptionMatcher(secondFailure), uncheckedExceptionMatcher(thirdFailure));
 
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> resultMatcher.match(stubMvcResult))
-				.withMessage(firstFailure + System.lineSeparator() + secondFailure);
+				.withMessage("Multiple Exceptions (3):" + EOL + firstFailure + EOL + secondFailure + EOL + thirdFailure)
+				.satisfies(error -> assertThat(error.getSuppressed()).hasSize(3));
 	}
 
-	private ResultMatcher failingMatcher(String failureMessage) {
-		return result -> Assertions.fail(failureMessage);
+	private ResultMatcher assertionErrorMatcher(String failureMessage) {
+		return result -> {
+			throw new AssertionError(failureMessage);
+		};
 	}
 
-	private ResultMatcher exceptionalMatcher(String failureMessage) {
+	private ResultMatcher uncheckedExceptionMatcher(String failureMessage) {
 		return result -> {
 			throw new RuntimeException(failureMessage);
 		};
 	}
 
-	void doNothing(MvcResult mvcResult) {}
+	private ResultMatcher checkedExceptionMatcher(String failureMessage) {
+		return result -> {
+			throw new Exception(failureMessage);
+		};
+	}
+
+	void doNothing(MvcResult mvcResult) {
+	}
 
 }
