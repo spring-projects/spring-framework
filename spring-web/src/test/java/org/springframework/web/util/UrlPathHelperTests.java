@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link UrlPathHelper}.
@@ -170,16 +170,16 @@ class UrlPathHelperTests {
 	void defaultInstanceReadOnlyBehavior() {
 		UrlPathHelper helper = UrlPathHelper.defaultInstance;
 
-		assertThatExceptionOfType(IllegalArgumentException.class)
+		assertThatIllegalArgumentException()
 			.isThrownBy(() -> helper.setAlwaysUseFullPath(true))
 			.withMessage("This instance cannot be modified");
-		assertThatExceptionOfType(IllegalArgumentException.class)
+		assertThatIllegalArgumentException()
 			.isThrownBy(() -> helper.setUrlDecode(true))
 			.withMessage("This instance cannot be modified");
-		assertThatExceptionOfType(IllegalArgumentException.class)
+		assertThatIllegalArgumentException()
 			.isThrownBy(() -> helper.setRemoveSemicolonContent(true))
 			.withMessage("This instance cannot be modified");
-		assertThatExceptionOfType(IllegalArgumentException.class)
+		assertThatIllegalArgumentException()
 			.isThrownBy(() -> helper.setDefaultEncoding("UTF-8"))
 			.withMessage("This instance cannot be modified");
 
