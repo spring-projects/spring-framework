@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,10 +86,14 @@ public interface TestExecutionListener {
 	}
 
 	/**
-	 * Prepares the {@link Object test instance} of the supplied
-	 * {@link TestContext test context}, for example by injecting dependencies.
+	 * Prepares the {@linkplain Object test instance} of the supplied
+	 * {@linkplain TestContext test context} &mdash; for example, to inject
+	 * dependencies.
 	 * <p>This method should be called immediately after instantiation of the test
-	 * instance but prior to any framework-specific lifecycle callbacks.
+	 * class or as soon after instantiation as possible (as is the case with the
+	 * {@link org.springframework.test.context.junit4.rules.SpringMethodRule
+	 * SpringMethodRule}). In any case, this method must be called prior to any
+	 * framework-specific lifecycle callbacks.
 	 * <p>The default implementation is <em>empty</em>. Can be overridden by
 	 * concrete classes as necessary.
 	 * @param testContext the test context for the test; never {@code null}
@@ -123,8 +127,8 @@ public interface TestExecutionListener {
 
 	/**
 	 * Pre-processes a test <em>immediately before</em> execution of the
-	 * {@link java.lang.reflect.Method test method} in the supplied
-	 * {@link TestContext test context} &mdash; for example, for timing
+	 * {@linkplain java.lang.reflect.Method test method} in the supplied
+	 * {@linkplain TestContext test context} &mdash; for example, for timing
 	 * or logging purposes.
 	 * <p>This method <strong>must</strong> be called after framework-specific
 	 * <em>before</em> lifecycle callbacks.
@@ -143,8 +147,8 @@ public interface TestExecutionListener {
 
 	/**
 	 * Post-processes a test <em>immediately after</em> execution of the
-	 * {@link java.lang.reflect.Method test method} in the supplied
-	 * {@link TestContext test context} &mdash; for example, for timing
+	 * {@linkplain java.lang.reflect.Method test method} in the supplied
+	 * {@linkplain TestContext test context} &mdash; for example, for timing
 	 * or logging purposes.
 	 * <p>This method <strong>must</strong> be called before framework-specific
 	 * <em>after</em> lifecycle callbacks.
