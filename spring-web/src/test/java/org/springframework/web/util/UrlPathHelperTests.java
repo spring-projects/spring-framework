@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link UrlPathHelper}.
@@ -168,8 +168,24 @@ public class UrlPathHelperTests {
 	}
 
 	@Test // gh-27303
-	public void shouldRemoveSemicolonContentWithReadOnlyInstance() {
-		assertThatCode(UrlPathHelper.defaultInstance::shouldRemoveSemicolonContent).doesNotThrowAnyException();
+	public void defaultInstanceReadOnlyBehavior() {
+		UrlPathHelper helper = UrlPathHelper.defaultInstance;
+
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> helper.setAlwaysUseFullPath(true))
+			.withMessage("This instance cannot be modified");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> helper.setUrlDecode(true))
+			.withMessage("This instance cannot be modified");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> helper.setRemoveSemicolonContent(true))
+			.withMessage("This instance cannot be modified");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> helper.setDefaultEncoding("UTF-8"))
+			.withMessage("This instance cannot be modified");
+
+		assertThat(helper.isUrlDecode()).isTrue();
+		assertThat(helper.shouldRemoveSemicolonContent()).isTrue();
 	}
 
 
