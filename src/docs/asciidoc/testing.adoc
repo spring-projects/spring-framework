@@ -1640,8 +1640,10 @@ before failing.
 times that the test method is to be run is specified in the annotation.
 
 The scope of execution to be repeated includes execution of the test method itself as
-well as any setting up or tearing down of the test fixture. The following example shows
-how to use the `@Repeat` annotation:
+well as any setting up or tearing down of the test fixture. When used with the
+<<testcontext-junit4-rules, `SpringMethodRule`>>, the scope additionally includes
+preparation of the test instance by `TestExecutionListener` implementations. The
+following example shows how to use the `@Repeat` annotation:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
