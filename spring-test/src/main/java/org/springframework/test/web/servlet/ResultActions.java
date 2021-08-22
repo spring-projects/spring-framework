@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,11 @@ public interface ResultActions {
 	/**
 	 * Perform an expectation.
 	 *
-	 * <h4>Example</h4>
+	 * <h4>Examples</h4>
+	 *
+	 * <p>You can invoke {@code andExpect()} multiple times.
 	 * <pre class="code">
-	 * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
+	 * // static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
 	 *
 	 * mockMvc.perform(get("/person/1"))
 	 *   .andExpect(status().isOk())
@@ -42,9 +44,9 @@ public interface ResultActions {
 	 *   .andExpect(jsonPath("$.person.name").value("Jason"));
 	 * </pre>
 	 *
-	 * <p>Either provide all matchers as a vararg:
+	 * <p>You can provide all matchers as a var-arg list with {@code matchAll()}.
 	 * <pre class="code">
-	 * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*, ResultMatcher.matchAll
+	 * // static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*, ResultMatcher.matchAll
 	 *
 	 * mockMvc.perform(post("/form"))
 	 *   .andExpect(matchAll(
@@ -57,13 +59,14 @@ public interface ResultActions {
 	 *   );
 	 * </pre>
 	 *
-	 * <p>Or provide all matchers to be evaluated no matter if one of them fail:
+	 * <p>Alternatively, you can provide all matchers to be evaluated using
+	 * <em>soft assertions</em> with {@code matchAllSoftly()}.
 	 * <pre class="code">
-	 * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*, ResultMatcher.matchAllSoftly
+	 * // static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*, ResultMatcher.matchAllSoftly
 	 * mockMvc.perform(post("/form"))
 	 *   .andExpect(matchAllSoftly(
 	 *       status().isOk(),
-	 *       redirectedUrl("/person/1")
+	 *       redirectedUrl("/person/1"))
 	 *   );
 	 * </pre>
 	 */

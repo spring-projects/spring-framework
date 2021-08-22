@@ -16,51 +16,62 @@
 
 package org.springframework.test.web.servlet;
 
-import org.jetbrains.annotations.NotNull;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
+/**
+ * Unit tests for {@link ResultMatcher}.
+ *
+ * @author Michał Rowicki
+ * @author Sam Brannen
+ * @since 5.3.10
+ */
 class ResultMatcherTests {
 
+	private final StubMvcResult stubMvcResult = new StubMvcResult(null, null, null, null, null, null, null);
+
+
 	@Test
-	void whenProvidedMatcherPassesThenSoftAssertionsAlsoPasses() {
+	void softAssertionsWithNoFailures() {
 		ResultMatcher resultMatcher = ResultMatcher.matchAllSoftly(this::doNothing);
-		StubMvcResult stubMvcResult = new StubMvcResult(null, null, null, null, null, null, null);
 
 		assertThatNoException().isThrownBy(() -> resultMatcher.match(stubMvcResult));
 	}
 
 	@Test
-	void whenOneOfMatcherFailsThenSoftAssertionFailsWithTheVerySameMessage() {
-		String failMessage = "fail message";
-		StubMvcResult stubMvcResult = new StubMvcResult(null, null, null, null, null, null, null);
-		ResultMatcher resultMatcher = ResultMatcher.matchAllSoftly(failMatcher(failMessage));
+	void softAssertionsWithOneFailure() {
+		String failureMessage = "failure message";
+		ResultMatcher resultMatcher = ResultMatcher.matchAllSoftly(failingMatcher(failureMessage));
 
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> resultMatcher.match(stubMvcResult))
-				.withMessage("[0] " + failMessage);
+				.withMessage(failureMessage);
 	}
 
 	@Test
-	void whenMultipleMatchersFailsThenSoftAssertionFailsWithOneErrorWithMessageContainingAllErrorMessagesWithTheSameOrder() {
-		String firstFail = "firstFail";
-		String secondFail = "secondFail";
-		StubMvcResult stubMvcResult = new StubMvcResult(null, null, null, null, null, null, null);
-		ResultMatcher resultMatcher = ResultMatcher.matchAllSoftly(failMatcher(firstFail), failMatcher(secondFail));
+	void softAssertionsWithTwoFailures() {
+		String firstFailure = "firstFailure";
+		String secondFailure = "secondFailure";
+		ResultMatcher resultMatcher = ResultMatcher.matchAllSoftly(failingMatcher(firstFailure), exceptionalMatcher(secondFailure));
 
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> resultMatcher.match(stubMvcResult))
-				.withMessage("[0] " + firstFail + "\n[1] " + secondFail);
+				.withMessage(firstFailure + System.lineSeparator() + secondFailure);
 	}
 
-	@NotNull
-	private ResultMatcher failMatcher(String failMessage) {
+	private ResultMatcher failingMatcher(String failureMessage) {
+		return result -> Assertions.fail(failureMessage);
+	}
+
+	private ResultMatcher exceptionalMatcher(String failureMessage) {
 		return result -> {
-			throw new AssertionError(failMessage);
+			throw new RuntimeException(failureMessage);
 		};
 	}
 
 	void doNothing(MvcResult mvcResult) {}
+
 }

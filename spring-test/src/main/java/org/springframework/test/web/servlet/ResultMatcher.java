@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.springframework.test.web.servlet;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A {@code ResultMatcher} matches the result of an executed request against
@@ -47,6 +44,7 @@ import java.util.List;
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Michał Rowicki
  * @since 3.2
  */
 @FunctionalInterface
@@ -74,27 +72,29 @@ public interface ResultMatcher {
 	}
 
 	/**
-	 * Static method for matching with an array of result matchers whose assertion failures are caught and stored.
-	 * Only when all of them would be called a {@link AssertionError} be thrown containing the error messages of those
-	 * previously caught assertion failures.
+	 * Static method for matching with an array of result matchers whose assertion
+	 * failures are caught and stored. Once all matchers have been called, if any
+	 * failures occurred, an {@link AssertionError} will be thrown containing the
+	 * error messages of all assertion failures.
 	 * @param matchers the matchers
-	 * @author Michał Rowicki
-	 * @since 5.2
+	 * @since 5.3.10
 	 */
 	static ResultMatcher matchAllSoftly(ResultMatcher... matchers) {
 		return result -> {
-			List<String> failedMessages = new ArrayList<>();
-			for (int i = 0; i < matchers.length; i++) {
-				ResultMatcher matcher = matchers[i];
+			String message = "";
+			for (ResultMatcher matcher : matchers) {
 				try {
 					matcher.match(result);
 				}
-				catch (AssertionError assertionException) {
-					failedMessages.add("[" + i + "] " + assertionException.getMessage());
+				catch (Error | Exception ex) {
+					if (!message.isEmpty()) {
+						message += System.lineSeparator();
+					}
+					message += ex.getMessage();
 				}
 			}
-			if (!failedMessages.isEmpty()) {
-				throw new AssertionError(String.join("\n", failedMessages));
+			if (!message.isEmpty()) {
+				throw new AssertionError(message);
 			}
 		};
 	}
