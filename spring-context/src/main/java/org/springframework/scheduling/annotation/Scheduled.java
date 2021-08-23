@@ -16,13 +16,13 @@
 
 package org.springframework.scheduling.annotation;
 
-import java.util.concurrent.TimeUnit;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
@@ -120,12 +120,6 @@ public @interface Scheduled {
 	String fixedDelayString() default "";
 
 	/**
-	 * Specify the {@link TimeUnit} to use for the fixedDelay and the fixedDelayString values.
-	 * @return the {@link TimeUnit}, by default milliseconds will be used.
-	 */
-	TimeUnit fixedDelayTimeUnit() default TimeUnit.MILLISECONDS;
-
-	/**
 	 * Execute the annotated method with a fixed period between
 	 * invocations.
 	 * Using milliseconds by default with fixedRateTimeUnit().
@@ -142,12 +136,6 @@ public @interface Scheduled {
 	 * @since 3.2.2
 	 */
 	String fixedRateString() default "";
-
-	/**
-	 * Specify the {@link TimeUnit} to use for the fixedRate and the fixedRateString values.
-	 * @return the {@link TimeUnit}, by default milliseconds will be used.
-	 */
-	TimeUnit fixedRateTimeUnit() default TimeUnit.MILLISECONDS;
 
 	/**
 	 * Number to delay before the first execution of a
@@ -169,9 +157,9 @@ public @interface Scheduled {
 	String initialDelayString() default "";
 
 	/**
-	 * Specify the {@link TimeUnit} to use for the initialDelay and the initialDelayString values.
+	 * Specify the {@link TimeUnit} to use for initialDelay, fixedRate and fixedDelay values.
 	 * @return the {@link TimeUnit}, by default milliseconds will be used.
 	 */
-	TimeUnit initialDelayTimeUnit() default TimeUnit.MILLISECONDS;
+	TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
 }
