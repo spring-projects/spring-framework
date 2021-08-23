@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server.samples;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -25,42 +25,36 @@ import org.springframework.web.bind.annotation.RestController;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Samples of tests using {@link WebTestClient} with soft assertions.
+ * Integration tests for {@link WebTestClient} with soft assertions.
  *
  * @author Michał Rowicki
- * @since 5.3
+ * @author Sam Brannen
+ * @since 5.3.10
  */
-public class SoftAssertionTests {
+class SoftAssertionTests {
 
-	private WebTestClient client;
-
-
-	@BeforeEach
-	public void setUp() throws Exception {
-		this.client = WebTestClient.bindToController(new TestController()).build();
-	}
+	private final WebTestClient webTestClient = WebTestClient.bindToController(new TestController()).build();
 
 
 	@Test
-	public void test() throws Exception {
-		this.client.get().uri("/test")
-				.exchange()
-				.expectAllSoftly(
-						exchange -> exchange.expectStatus().isOk(),
-						exchange -> exchange.expectBody(String.class).isEqualTo("It works!")
-				);
+	void expectAll() {
+		this.webTestClient.get().uri("/test").exchange()
+			.expectAll(
+				responseSpec -> responseSpec.expectStatus().isOk(),
+				responseSpec -> responseSpec.expectBody(String.class).isEqualTo("hello")
+			);
 	}
 
 	@Test
-	public void testAllFails() throws Exception {
+	void expectAllWithMultipleFailures() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				this.client.get().uri("/test")
-						.exchange()
-						.expectAllSoftly(
-								exchange -> exchange.expectStatus().isBadRequest(),
-								exchange -> exchange.expectBody(String.class).isEqualTo("It won't work :(")
-						)
-		).withMessage("[0] Status expected:<400 BAD_REQUEST> but was:<200 OK>\n[1] Response body expected:<It won't work :(> but was:<It works!>");
+			this.webTestClient.get().uri("/test").exchange()
+				.expectAll(
+					responseSpec -> responseSpec.expectStatus().isBadRequest(),
+					responseSpec -> responseSpec.expectStatus().isOk(),
+					responseSpec -> responseSpec.expectBody(String.class).isEqualTo("bogus")
+				)
+		).withMessage("Multiple Exceptions (2):\nStatus expected:<400 BAD_REQUEST> but was:<200 OK>\nResponse body expected:<bogus> but was:<hello>");
 	}
 
 
@@ -68,8 +62,9 @@ public class SoftAssertionTests {
 	static class TestController {
 
 		@GetMapping("/test")
-		public String handle() {
-			return "It works!";
+		String handle() {
+			return "hello";
 		}
 	}
+
 }

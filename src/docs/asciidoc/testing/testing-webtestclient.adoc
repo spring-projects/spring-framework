@@ -262,19 +262,36 @@ To assert the response status and headers, use the following:
 .Java
 ----
 	client.get().uri("/persons/1")
-				.accept(MediaType.APPLICATION_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON)
+		.accept(MediaType.APPLICATION_JSON)
+		.exchange()
+		.expectStatus().isOk()
+		.expectHeader().contentType(MediaType.APPLICATION_JSON);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	client.get().uri("/persons/1")
-			.accept(MediaType.APPLICATION_JSON)
-			.exchange()
-			.expectStatus().isOk()
-			.expectHeader().contentType(MediaType.APPLICATION_JSON)
+		.accept(MediaType.APPLICATION_JSON)
+		.exchange()
+		.expectStatus().isOk()
+		.expectHeader().contentType(MediaType.APPLICATION_JSON)
+----
+
+If you would like for all expectations to be asserted even if one of them fails, you can
+use `expectAll(..)` instead of multiple chained `expect*(..)` calls. This feature is
+similar to the _soft assertions_ support in AssertJ and the `assertAll()` support in
+JUnit Jupiter.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	client.get().uri("/persons/1")
+		.accept(MediaType.APPLICATION_JSON)
+		.exchange()
+		.expectAll(
+			spec -> spec.expectStatus().isOk(),
+			spec -> spec.expectHeader().contentType(MediaType.APPLICATION_JSON)
+		);
 ----
 
 You can then choose to decode the response body through one of the following:
