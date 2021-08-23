@@ -104,7 +104,7 @@ public @interface Scheduled {
 	/**
 	 * Execute the annotated method with a fixed period between the
 	 * end of the last invocation and the start of the next.
-	 * Using milliseconds by default with fixedDelayTimeUnit().
+	 * Using milliseconds by default with timeUnit().
 	 * @return the delay
 	 */
 	long fixedDelay() default -1;
@@ -122,7 +122,7 @@ public @interface Scheduled {
 	/**
 	 * Execute the annotated method with a fixed period between
 	 * invocations.
-	 * Using milliseconds by default with fixedRateTimeUnit().
+	 * Using milliseconds by default with timeUnit().
 	 * @return the period
 	 */
 	long fixedRate() default -1;
@@ -140,7 +140,7 @@ public @interface Scheduled {
 	/**
 	 * Number to delay before the first execution of a
 	 * {@link #fixedRate} or {@link #fixedDelay} task.
-	 * Using milliseconds by default with initialDelayTimeUnit().
+	 * Using milliseconds by default with timeUnit().
 	 * @return the initial
 	 * @since 3.2
 	 */
