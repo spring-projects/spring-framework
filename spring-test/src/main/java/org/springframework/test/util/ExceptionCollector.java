@@ -118,7 +118,7 @@ public class ExceptionCollector {
 	 * except that an {@code Executable} can throw any kind of exception.
 	 */
 	@FunctionalInterface
-	interface Executable {
+	public interface Executable {
 
 		void execute() throws Throwable;
 
