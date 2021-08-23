@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.servlet;
 
+import org.springframework.test.util.ExceptionCollector;
+
 /**
  * Allows applying actions, such as expectations, on the result of an executed
  * request.
@@ -25,6 +27,8 @@ package org.springframework.test.web.servlet;
  * {@link org.springframework.test.web.servlet.result.MockMvcResultHandlers}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
+ * @author Michał Rowicki
  * @since 3.2
  */
 public interface ResultActions {
@@ -32,9 +36,9 @@ public interface ResultActions {
 	/**
 	 * Perform an expectation.
 	 *
-	 * <h4>Examples</h4>
-	 *
-	 * <p>You can invoke {@code andExpect()} multiple times.
+	 * <h4>Example</h4>
+	 * <p>You can invoke {@code andExpect()} multiple times as in the following
+	 * example.
 	 * <pre class="code">
 	 * // static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
 	 *
@@ -44,33 +48,48 @@ public interface ResultActions {
 	 *   .andExpect(jsonPath("$.person.name").value("Jason"));
 	 * </pre>
 	 *
-	 * <p>You can provide all matchers as a var-arg list with {@code matchAll()}.
-	 * <pre class="code">
-	 * // static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*, ResultMatcher.matchAll
-	 *
-	 * mockMvc.perform(post("/form"))
-	 *   .andExpect(matchAll(
-	 *       status().isOk(),
-	 *       redirectedUrl("/person/1"),
-	 *   	 model().size(1),
-	 *       model().attributeExists("person"),
-	 *       flash().attributeCount(1),
-	 *       flash().attribute("message", "success!"))
-	 *   );
-	 * </pre>
-	 *
-	 * <p>Alternatively, you can provide all matchers to be evaluated using
-	 * <em>soft assertions</em> with {@code matchAllSoftly()}.
-	 * <pre class="code">
-	 * // static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*, ResultMatcher.matchAllSoftly
-	 * mockMvc.perform(post("/form"))
-	 *   .andExpect(matchAllSoftly(
-	 *       status().isOk(),
-	 *       redirectedUrl("/person/1"))
-	 *   );
-	 * </pre>
+	 * @see #andExpectAll(ResultMatcher...)
 	 */
 	ResultActions andExpect(ResultMatcher matcher) throws Exception;
+
+	/**
+	 * Perform multiple expectations, with the guarantee that all expectations
+	 * will be asserted even if one or more expectations fail with an exception.
+	 * <p>If a single {@link Error} or {@link Exception} is thrown, it will
+	 * be rethrown.
+	 * <p>If multiple exceptions are thrown, this method will throw an
+	 * {@link AssertionError} whose error message is a summary of all of the
+	 * exceptions. In addition, each exception will be added as a
+	 * {@linkplain Throwable#addSuppressed(Throwable) suppressed exception} to
+	 * the {@code AssertionError}.
+	 * <p>This feature is similar to the {@code SoftAssertions} support in AssertJ
+	 * and the {@code assertAll()} support in JUnit Jupiter.
+	 *
+	 * <h4>Example</h4>
+	 * <p>Instead of invoking {@code andExpect()} multiple times, you can invoke
+	 * {@code andExpectAll()} as in the following example.
+	 * <pre class="code">
+	 * // static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
+	 *
+	 * mockMvc.perform(get("/person/1"))
+	 *   .andExpectAll(
+	 *       status().isOk(),
+	 *       content().contentType(MediaType.APPLICATION_JSON),
+	 *       jsonPath("$.person.name").value("Jason")
+	 *   );
+	 * </pre>
+	 *
+	 * @since 5.3.10
+	 * @see #andExpect(ResultMatcher)
+	 */
+	default ResultActions andExpectAll(ResultMatcher... matchers) throws Exception {
+		ExceptionCollector exceptionCollector = new ExceptionCollector();
+		for (ResultMatcher matcher : matchers) {
+			exceptionCollector.execute(() -> this.andExpect(matcher));
+		}
+		exceptionCollector.assertEmpty();
+		return this;
+	}
 
 	/**
 	 * Perform a general action.

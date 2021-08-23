@@ -16,8 +16,6 @@
 
 package org.springframework.test.web.servlet;
 
-import org.springframework.test.util.ExceptionCollector;
-
 /**
  * A {@code ResultMatcher} matches the result of an executed request against
  * some expectation.
@@ -40,13 +38,13 @@ import org.springframework.test.util.ExceptionCollector;
  * MockMvc mockMvc = webAppContextSetup(wac).build();
  *
  * mockMvc.perform(get("/form"))
- *   .andExpect(status().isOk())
- *   .andExpect(content().mimeType(MediaType.APPLICATION_JSON));
+ *   .andExpectAll(
+ *       status().isOk(),
+ *       content().mimeType(MediaType.APPLICATION_JSON));
  * </pre>
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
- * @author Michał Rowicki
  * @since 3.2
  */
 @FunctionalInterface
@@ -64,30 +62,15 @@ public interface ResultMatcher {
 	 * Static method for matching with an array of result matchers.
 	 * @param matchers the matchers
 	 * @since 5.1
+	 * @deprecated as of Spring Framework 5.3.10, in favor of
+	 * {@link ResultActions#andExpectAll(ResultMatcher...)}
 	 */
+	@Deprecated
 	static ResultMatcher matchAll(ResultMatcher... matchers) {
 		return result -> {
 			for (ResultMatcher matcher : matchers) {
 				matcher.match(result);
 			}
-		};
-	}
-
-	/**
-	 * Static method for matching with an array of result matchers whose assertion
-	 * failures are caught and stored. Once all matchers have been called, if any
-	 * failures occurred, an {@link AssertionError} will be thrown containing the
-	 * error messages of all assertion failures.
-	 * @param matchers the matchers
-	 * @since 5.3.10
-	 */
-	static ResultMatcher matchAllSoftly(ResultMatcher... matchers) {
-		return result -> {
-			ExceptionCollector exceptionCollector = new ExceptionCollector();
-			for (ResultMatcher matcher : matchers) {
-				exceptionCollector.execute(() -> matcher.match(result));
-			}
-			exceptionCollector.assertEmpty();
 		};
 	}
 
