@@ -48,6 +48,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * @author Dave Syer
  * @author Chris Beams
  * @author Victor Brown
+ * @author Sam Brannen
  * @since 3.0
  * @see EnableScheduling
  * @see ScheduledAnnotationBeanPostProcessor
@@ -103,63 +104,74 @@ public @interface Scheduled {
 	String zone() default "";
 
 	/**
-	 * Execute the annotated method with a fixed period between the
-	 * end of the last invocation and the start of the next.
-	 * Using milliseconds by default with timeUnit().
+	 * Execute the annotated method with a fixed period between the end of the
+	 * last invocation and the start of the next.
+	 * <p>The time unit is milliseconds by default but can be overridden via
+	 * {@link #timeUnit}.
 	 * @return the delay
 	 */
 	long fixedDelay() default -1;
 
 	/**
-	 * Execute the annotated method with a fixed period between the
-	 * end of the last invocation and the start of the next.
-	 * Using milliseconds by default with fixedDelayTimeUnit().
-	 * @return the delay as a String value, e.g. a placeholder
+	 * Execute the annotated method with a fixed period between the end of the
+	 * last invocation and the start of the next.
+	 * <p>The time unit is milliseconds by default but can be overridden via
+	 * {@link #timeUnit}.
+	 * @return the delay as a String value &mdash; for example, a placeholder
 	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
 	 */
 	String fixedDelayString() default "";
 
 	/**
-	 * Execute the annotated method with a fixed period between
-	 * invocations.
-	 * Using milliseconds by default with timeUnit().
+	 * Execute the annotated method with a fixed period between invocations.
+	 * <p>The time unit is milliseconds by default but can be overridden via
+	 * {@link #timeUnit}.
 	 * @return the period
 	 */
 	long fixedRate() default -1;
 
 	/**
-	 * Execute the annotated method with a fixed period between
-	 * invocations.
-	 * Using milliseconds by default with fixedRateTimeUnit().
-	 * @return the period as a String value, e.g. a placeholder
+	 * Execute the annotated method with a fixed period between invocations.
+	 * <p>The time unit is milliseconds by default but can be overridden via
+	 * {@link #timeUnit}.
+	 * @return the period as a String value &mdash; for example, a placeholder
 	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
 	 */
 	String fixedRateString() default "";
 
 	/**
-	 * Number to delay before the first execution of a
+	 * Number of units of time to delay before the first execution of a
 	 * {@link #fixedRate} or {@link #fixedDelay} task.
-	 * Using milliseconds by default with timeUnit().
+	 * <p>The time unit is milliseconds by default but can be overridden via
+	 * {@link #timeUnit}.
 	 * @return the initial
 	 * @since 3.2
 	 */
 	long initialDelay() default -1;
 
 	/**
-	 * Number to delay before the first execution of a
+	 * Number of units of time to delay before the first execution of a
 	 * {@link #fixedRate} or {@link #fixedDelay} task.
-	 * Using milliseconds by default with initialDelayTimeUnit().
-	 * @return the initial delay in milliseconds as a String value, e.g. a placeholder
+	 * <p>The time unit is milliseconds by default but can be overridden via
+	 * {@link #timeUnit}.
+	 * @return the initial delay as a String value &mdash; for example, a placeholder
 	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
 	 */
 	String initialDelayString() default "";
 
 	/**
-	 * Specify the {@link TimeUnit} to use for initialDelay, fixedRate and fixedDelay values.
-	 * @return the {@link TimeUnit}, by default milliseconds will be used.
+	 * The {@link TimeUnit} to use for {@link #fixedDelay}, {@link #fixedDelayString},
+	 * {@link #fixedRate}, {@link #fixedRateString}, {@link #initialDelay}, and
+	 * {@link #initialDelayString}.
+	 * <p>Defaults to {@link TimeUnit#MICROSECONDS}.
+	 * <p>This attribute is ignored for {@linkplain #cron() cron expressions}
+	 * and for {@link java.time.Duration} values supplied via {@link #fixedDelayString},
+	 * {@link #fixedRateString}, or {@link #initialDelayString}.
+	 * @return the {@code TimeUnit} to use
+	 * @since 5.3.10
 	 */
 	TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 

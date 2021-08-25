@@ -4923,37 +4923,54 @@ switching to `aspectj` mode in combination with compile-time or load-time weavin
 ==== The `@Scheduled` annotation
 
 You can add the `@Scheduled` annotation to a method, along with trigger metadata. For
-example, the following method is invoked every five seconds with a fixed delay,
-meaning that the period is measured from the completion time of each preceding
-invocation:
+example, the following method is invoked every five seconds (5000 milliseconds) with a
+fixed delay, meaning that the period is measured from the completion time of each
+preceding invocation.
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	@Scheduled(fixedDelay=5000)
+	@Scheduled(fixedDelay = 5000)
 	public void doSomething() {
 		// something that should run periodically
 	}
 ----
 
-If you need a fixed-rate execution, you can change the property name specified within
-the annotation. The following method is invoked every five seconds (measured between the
-successive start times of each invocation):
+[NOTE]
+====
+By default, milliseconds will be used as the time unit for fixed delay, fixed rate, and
+initial delay values. If you would like to use a different time unit such as seconds or
+minutes, you can configure this via the `timeUnit` attribute in `@Scheduled`.
+
+For example, the previous example can also be written as follows.
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	@Scheduled(fixedRate=5000)
+	@Scheduled(fixedDelay = 5, timeUnit = TimeUnit.SECONDS)
+	public void doSomething() {
+		// something that should run periodically
+	}
+----
+====
+
+If you need a fixed-rate execution, you can use the `fixedRate` attribute within the
+annotation. The following method is invoked every five seconds (measured between the
+successive start times of each invocation).
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(fixedRate = 5, timeUnit = TimeUnit.SECONDS)
 	public void doSomething() {
 		// something that should run periodically
 	}
 ----
 
 For fixed-delay and fixed-rate tasks, you can specify an initial delay by indicating the
-number of milliseconds to wait before the first execution of the method, as the following
-`fixedRate` example shows:
+amount of time to wait before the first execution of the method, as the following
+`fixedRate` example shows.
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	@Scheduled(initialDelay=1000, fixedRate=5000)
+	@Scheduled(initialDelay = 1000, fixedRate = 5000)
 	public void doSomething() {
 		// something that should run periodically
 	}
@@ -4975,7 +4992,7 @@ The following example runs only on weekdays:
 TIP: You can also use the `zone` attribute to specify the time zone in which the cron
 expression is resolved.
 
-Notice that the methods to be scheduled must have void returns and must not expect any
+Notice that the methods to be scheduled must have void returns and must not accept any
 arguments. If the method needs to interact with other objects from the application
 context, those would typically have been provided through dependency injection.
 

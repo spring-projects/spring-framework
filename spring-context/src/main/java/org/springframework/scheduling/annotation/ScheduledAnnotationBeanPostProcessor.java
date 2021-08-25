@@ -96,6 +96,7 @@ import org.springframework.util.StringValueResolver;
  * @author Chris Beams
  * @author Elizabeth Chatman
  * @author Victor Brown
+ * @author Sam Brannen
  * @since 3.0
  * @see Scheduled
  * @see EnableScheduling
@@ -385,7 +386,7 @@ public class ScheduledAnnotationBeanPostProcessor
 
 	/**
 	 * Process the given {@code @Scheduled} method declaration on the given bean.
-	 * @param scheduled the @Scheduled annotation
+	 * @param scheduled the {@code @Scheduled} annotation
 	 * @param method the method that the annotation has been declared on
 	 * @param bean the target bean instance
 	 * @see #createRunnable(Object, Method)
@@ -400,7 +401,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			Set<ScheduledTask> tasks = new LinkedHashSet<>(4);
 
 			// Determine initial delay
-			long initialDelay = TimeUnit.MILLISECONDS.convert(scheduled.initialDelay(), scheduled.timeUnit());
+			long initialDelay = convertToMillis(scheduled.initialDelay(), scheduled.timeUnit());
 			String initialDelayString = scheduled.initialDelayString();
 			if (StringUtils.hasText(initialDelayString)) {
 				Assert.isTrue(initialDelay < 0, "Specify 'initialDelay' or 'initialDelayString', not both");
@@ -409,7 +410,7 @@ public class ScheduledAnnotationBeanPostProcessor
 				}
 				if (StringUtils.hasLength(initialDelayString)) {
 					try {
-						initialDelay = TimeUnit.MILLISECONDS.convert(parseDelayAsLong(initialDelayString), scheduled.timeUnit());
+						initialDelay = convertToMillis(initialDelayString, scheduled.timeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -448,7 +449,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// Check fixed delay
-			long fixedDelay = TimeUnit.MILLISECONDS.convert(scheduled.fixedDelay(), scheduled.timeUnit());
+			long fixedDelay = convertToMillis(scheduled.fixedDelay(), scheduled.timeUnit());
 			if (fixedDelay >= 0) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
@@ -464,7 +465,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedDelay = TimeUnit.MILLISECONDS.convert(parseDelayAsLong(fixedDelayString), scheduled.timeUnit());
+						fixedDelay = convertToMillis(fixedDelayString, scheduled.timeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -475,7 +476,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// Check fixed rate
-			long fixedRate = TimeUnit.MILLISECONDS.convert(scheduled.fixedRate(), scheduled.timeUnit());
+			long fixedRate = convertToMillis(scheduled.fixedRate(), scheduled.timeUnit());
 			if (fixedRate >= 0) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
@@ -490,7 +491,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedRate = TimeUnit.MILLISECONDS.convert(parseDelayAsLong(fixedRateString), scheduled.timeUnit());
+						fixedRate = convertToMillis(fixedRateString, scheduled.timeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -530,11 +531,19 @@ public class ScheduledAnnotationBeanPostProcessor
 		return new ScheduledMethodRunnable(target, invocableMethod);
 	}
 
-	private static long parseDelayAsLong(String value) throws RuntimeException {
-		if (value.length() > 1 && (isP(value.charAt(0)) || isP(value.charAt(1)))) {
+	private static long convertToMillis(long value, TimeUnit timeUnit) {
+		return TimeUnit.MILLISECONDS.convert(value, timeUnit);
+	}
+
+	private static long convertToMillis(String value, TimeUnit timeUnit) {
+		if (isDurationString(value)) {
 			return Duration.parse(value).toMillis();
 		}
-		return Long.parseLong(value);
+		return convertToMillis(Long.parseLong(value), timeUnit);
+	}
+
+	private static boolean isDurationString(String value) {
+		return (value.length() > 1 && (isP(value.charAt(0)) || isP(value.charAt(1))));
 	}
 
 	private static boolean isP(char ch) {
