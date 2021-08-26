@@ -1024,7 +1024,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @throws Exception in case of any kind of processing failure
 	 */
 	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+
 		HttpServletRequest processedRequest = request;
+		//处理程序执行链
 		HandlerExecutionChain mappedHandler = null;
 		boolean multipartRequestParsed = false;
 
