@@ -78,9 +78,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Bean post-processor that registers methods annotated with @{@link Scheduled}
- * to be invoked by a {@link org.springframework.scheduling.TaskScheduler} according
- * to the "fixedRate", "fixedDelay", or "cron" expression provided via the annotation.
+ * Bean post-processor that registers methods annotated with
+ * {@link Scheduled @Scheduled} to be invoked by a
+ * {@link org.springframework.scheduling.TaskScheduler} according to the
+ * "fixedRate", "fixedDelay", or "cron" expression provided via the annotation.
  *
  * <p>This post-processor is automatically registered by Spring's
  * {@code <task:annotation-driven>} XML element, and also by the
@@ -88,8 +89,9 @@ import org.springframework.util.StringValueResolver;
  *
  * <p>Autodetects any {@link SchedulingConfigurer} instances in the container,
  * allowing for customization of the scheduler to be used or for fine-grained
- * control over task registration (e.g. registration of {@link Trigger} tasks.
- * See the @{@link EnableScheduling} javadocs for complete usage details.
+ * control over task registration (e.g. registration of {@link Trigger} tasks).
+ * See the {@link EnableScheduling @EnableScheduling} javadocs for complete usage
+ * details.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -153,7 +155,8 @@ public class ScheduledAnnotationBeanPostProcessor
 	/**
 	 * Create a {@code ScheduledAnnotationBeanPostProcessor} delegating to the
 	 * specified {@link ScheduledTaskRegistrar}.
-	 * @param registrar the ScheduledTaskRegistrar to register @Scheduled tasks on
+	 * @param registrar the ScheduledTaskRegistrar to register {@code @Scheduled}
+	 * tasks on
 	 * @since 5.1
 	 */
 	public ScheduledAnnotationBeanPostProcessor(ScheduledTaskRegistrar registrar) {
