@@ -166,7 +166,7 @@ public @interface Scheduled {
 	 * The {@link TimeUnit} to use for {@link #fixedDelay}, {@link #fixedDelayString},
 	 * {@link #fixedRate}, {@link #fixedRateString}, {@link #initialDelay}, and
 	 * {@link #initialDelayString}.
-	 * <p>Defaults to {@link TimeUnit#MICROSECONDS}.
+	 * <p>Defaults to {@link TimeUnit#MILLISECONDS}.
 	 * <p>This attribute is ignored for {@linkplain #cron() cron expressions}
 	 * and for {@link java.time.Duration} values supplied via {@link #fixedDelayString},
 	 * {@link #fixedRateString}, or {@link #initialDelayString}.
