@@ -276,11 +276,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				obtainApplicationContext().getType((String) handler) : handler.getClass());
 
 		if (handlerType != null) {
+			Object handlerObject = (handler instanceof String ?
+					obtainApplicationContext().getBean((String) handler) : handler);
 			Class<?> userType = ClassUtils.getUserClass(handlerType);
 			Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
 					(MethodIntrospector.MetadataLookup<T>) method -> {
 						try {
-							return getMappingForMethod(method, userType);
+							return getMappingForMethod(method, userType, handlerObject);
 						}
 						catch (Throwable ex) {
 							throw new IllegalStateException("Invalid mapping on handler class [" +
@@ -513,8 +515,23 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * declaring class
 	 * @return the mapping, or {@code null} if the method is not mapped
 	 */
+
 	@Nullable
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
+
+	/**
+	 * Provide the mapping for a handler method. A method for which no
+	 * mapping can be provided is not a handler method.
+	 * @param method the method to provide a mapping for
+	 * @param handlerType the handler type, possibly a sub-type of the method's
+	 * declaring class
+	 * @param handlerObject the handler object
+	 * @return the mapping, or {@code null} if the method is not mapped
+	 */
+	@Nullable
+	protected T getMappingForMethod(Method method, Class<?> handlerType, Object handlerObject) {
+		return this.getMappingForMethod(method, handlerType);
+	}
 
 	/**
 	 * Extract and return the URL paths contained in the supplied mapping.

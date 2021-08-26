@@ -31,14 +31,17 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -111,9 +114,9 @@ public class RequestMappingHandlerMappingTests {
 
 		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping() {
 			@Override
-			protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+			protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType, Object handlerObject) {
 				extensions.addAll(getFileExtensions());
-				return super.getMappingForMethod(method, handlerType);
+				return super.getMappingForMethod(method, handlerType, handlerObject);
 			}
 		};
 
@@ -128,6 +131,8 @@ public class RequestMappingHandlerMappingTests {
 
 		assertThat(extensions).isEqualTo(Collections.singleton("json"));
 	}
+
+
 
 	@Test
 	@SuppressWarnings("deprecation")
@@ -159,6 +164,19 @@ public class RequestMappingHandlerMappingTests {
 		String[] result = mapping.resolveEmbeddedValuesInPatterns(patterns);
 
 		assertThat(result).isEqualTo(new String[] { "/foo", "/foo/bar" });
+	}
+
+	@PathPatternsParameterizedTest // gh-27313
+	void resolveEmbeddedValuesInPatternsWithSpEL(RequestMappingHandlerMapping mapping) {
+
+		mapping.setEmbeddedValueResolver(
+				value -> value
+		);
+
+		String[] patterns = new String[] { "/foo", "/#{entityName}/bar" };
+		String[] result = mapping.resolveEmbeddedValuesInPatterns(patterns, new PrincipalController());
+
+		assertThat(result).isEqualTo(new String[] { "/foo", "/principal/bar" });
 	}
 
 	@PathPatternsParameterizedTest
@@ -353,6 +371,31 @@ public class RequestMappingHandlerMappingTests {
 		}
 	}
 
+	@RequestMapping("/entity")
+	abstract static class EntityController<T> {
+
+		protected final Class<T> entityClass;
+
+		@SuppressWarnings("unchecked")
+		protected EntityController() {
+			ResolvableType rt = ResolvableType.forClass(getClass()).as(EntityController.class);
+			this.entityClass = (Class<T>) rt.getGeneric(0).resolve();
+		}
+
+		public String getEntityName() {
+			return StringUtils.uncapitalize(this.entityClass.getSimpleName());
+		}
+
+		@GetMapping("/#{entityName}/{id}")
+		public T get(@PathVariable Long id) {
+			return mock(this.entityClass);
+		}
+	}
+
+	@RestController
+	static class PrincipalController extends EntityController<Principal> {
+
+	}
 
 	private static class Foo {
 	}

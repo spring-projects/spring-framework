@@ -31,6 +31,9 @@ import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.expression.ParserContext;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -87,7 +90,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
 	@Nullable
-	private StringValueResolver embeddedValueResolver;
+	private HandlerEmbeddedValueResolver embeddedValueResolver;
 
 	private RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
 
@@ -181,7 +184,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
-		this.embeddedValueResolver = resolver;
+		this.embeddedValueResolver = new HandlerEmbeddedValueResolver(resolver);
 	}
 
 	@Override
@@ -241,7 +244,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	@Nullable
 	@Deprecated
-	@SuppressWarnings("deprecation")
 	public List<String> getFileExtensions() {
 		return this.config.getFileExtensions();
 	}
@@ -269,9 +271,23 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	@Nullable
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-		RequestMappingInfo info = createRequestMappingInfo(method);
+		return this.getMappingForMethod(method, handlerType, null);
+	}
+
+	/**
+	 * Uses method and type-level @{@link RequestMapping} annotations to create
+	 * the RequestMappingInfo.
+	 * @return the created RequestMappingInfo, or {@code null} if the method
+	 * does not have a {@code @RequestMapping} annotation.
+	 * @see #getCustomMethodCondition(Method)
+	 * @see #getCustomTypeCondition(Class)
+	 */
+	@Override
+	@Nullable
+	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType, Object handlerObject) {
+		RequestMappingInfo info = createRequestMappingInfo(method, handlerObject);
 		if (info != null) {
-			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
+			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType, handlerObject);
 			if (typeInfo != null) {
 				info = typeInfo.combine(info);
 			}
@@ -305,11 +321,11 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @see #getCustomMethodCondition(Method)
 	 */
 	@Nullable
-	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
+	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element, Object handlerObject) {
 		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
 		RequestCondition<?> condition = (element instanceof Class ?
 				getCustomTypeCondition((Class<?>) element) : getCustomMethodCondition((Method) element));
-		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
+		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition, handlerObject) : null);
 	}
 
 	/**
@@ -352,9 +368,20 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	protected RequestMappingInfo createRequestMappingInfo(
 			RequestMapping requestMapping, @Nullable RequestCondition<?> customCondition) {
+		return this.createRequestMappingInfo(requestMapping, customCondition, null);
+	}
+
+	/**
+	 * Create a {@link RequestMappingInfo} from the supplied
+	 * {@link RequestMapping @RequestMapping} annotation, which is either
+	 * a directly declared annotation, a meta-annotation, or the synthesized
+	 * result of merging annotation attributes within an annotation hierarchy.
+	 */
+	protected RequestMappingInfo createRequestMappingInfo(
+			RequestMapping requestMapping, @Nullable RequestCondition<?> customCondition, Object handlerObject) {
 
 		RequestMappingInfo.Builder builder = RequestMappingInfo
-				.paths(resolveEmbeddedValuesInPatterns(requestMapping.path()))
+				.paths(resolveEmbeddedValuesInPatterns(requestMapping.path(), handlerObject))
 				.methods(requestMapping.method())
 				.params(requestMapping.params())
 				.headers(requestMapping.headers())
@@ -372,10 +399,19 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @return a new array with updated patterns
 	 */
 	protected String[] resolveEmbeddedValuesInPatterns(String[] patterns) {
+		return this.resolveEmbeddedValuesInPatterns(patterns, null);
+	}
+
+	/**
+	 * Resolve placeholder values and SpEL templates in the given array of patterns.
+	 * @return a new array with updated patterns
+	 */
+	protected String[] resolveEmbeddedValuesInPatterns(String[] patterns, Object handlerObject) {
 		if (this.embeddedValueResolver == null) {
 			return patterns;
 		}
 		else {
+			this.embeddedValueResolver.setHandler(handlerObject);
 			String[] resolvedPatterns = new String[patterns.length];
 			for (int i = 0; i < patterns.length; i++) {
 				resolvedPatterns[i] = this.embeddedValueResolver.resolveStringValue(patterns[i]);
@@ -491,4 +527,37 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		}
 	}
 
+	static class HandlerEmbeddedValueResolver implements StringValueResolver {
+
+		private static final SpelExpressionParser PARSER = new SpelExpressionParser();
+
+		private final @Nullable StringValueResolver delegate;
+
+		private @Nullable StandardEvaluationContext context;
+
+		public HandlerEmbeddedValueResolver(@Nullable StringValueResolver delegate) {
+			this.delegate = delegate;
+		}
+
+		public void setHandler(Object handler) {
+			if(handler != null) {
+				this.context = new StandardEvaluationContext(handler);
+			}
+			else {
+				this.context = null;
+			}
+		}
+
+		@Override
+		public String resolveStringValue(String strVal) {
+			if (this.context != null) {
+				strVal = PARSER.parseExpression(strVal, ParserContext.TEMPLATE_EXPRESSION).getValue(this.context).toString();
+			}
+			if (this.delegate != null) {
+				strVal = this.delegate.resolveStringValue(strVal);
+			}
+			return strVal;
+		}
+
+	}
 }
