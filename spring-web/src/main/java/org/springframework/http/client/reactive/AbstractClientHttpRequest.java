@@ -17,7 +17,9 @@
 package org.springframework.http.client.reactive;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -55,6 +57,8 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	private final HttpHeaders headers;
 
 	private final MultiValueMap<String, HttpCookie> cookies;
+	
+	private final Map<String, Object> attributes;
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
@@ -72,6 +76,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		Assert.notNull(headers, "HttpHeaders must not be null");
 		this.headers = headers;
 		this.cookies = new LinkedMultiValueMap<>();
+		this.attributes = new LinkedHashMap<>();
 	}
 
 
@@ -95,6 +100,11 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 			return CollectionUtils.unmodifiableMultiValueMap(this.cookies);
 		}
 		return this.cookies;
+	}
+	
+	@Override
+	public Map<String, Object> getAttributes() {
+		return this.attributes;
 	}
 
 	@Override
@@ -131,6 +141,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 				Mono.fromRunnable(() -> {
 					applyHeaders();
 					applyCookies();
+					applyAttributes();
 					this.state.set(State.COMMITTED);
 				}));
 
@@ -156,5 +167,11 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	 * This method is called once only.
 	 */
 	protected abstract void applyCookies();
+	
+	/**
+	 * Add attributes from {@link #getAttributes()} to the underlying request.
+	 * This method is called once only.
+	 */
+	protected abstract void applyAttributes();
 
 }

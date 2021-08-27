@@ -271,6 +271,13 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 			if (this.httpRequestConsumer != null) {
 				this.httpRequestConsumer.accept(request);
 			}
+			
+			Map<String, Object> requestAttributes = request.getAttributes();
+			if (!this.attributes.isEmpty()) {
+				this.attributes.forEach((name, value) -> {
+					requestAttributes.put(name, value);
+				});
+			}
 
 			return this.body.insert(request, new BodyInserter.Context() {
 				@Override

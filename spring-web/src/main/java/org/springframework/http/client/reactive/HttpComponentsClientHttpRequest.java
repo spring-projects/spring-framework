@@ -150,6 +150,14 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 					cookieStore.addCookie(clientCookie);
 				});
 	}
+	
+	@Override
+	protected void applyAttributes() {
+		getAttributes().forEach((key, value) -> {
+			if(this.context.getAttribute(key) == null) {
+				this.context.setAttribute(key, value);
+			}});
+	}
 
 	public AsyncRequestProducer toRequestProducer() {
 		ReactiveEntityProducer reactiveEntityProducer = null;

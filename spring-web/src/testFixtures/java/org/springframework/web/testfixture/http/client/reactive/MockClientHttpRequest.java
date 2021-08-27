@@ -125,6 +125,10 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest implements 
 		getCookies().values().stream().flatMap(Collection::stream)
 				.forEach(cookie -> getHeaders().add(HttpHeaders.COOKIE, cookie.toString()));
 	}
+	
+	@Override
+	protected void applyAttributes() {
+	}
 
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
