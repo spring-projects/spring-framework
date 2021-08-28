@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import kotlinx.coroutines.Deferred;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -355,6 +357,52 @@ class ReactiveAdapterRegistryTests {
 			assertThat(getAdapter(Deferred.class).getDescriptor().isDeferred()).isEqualTo(true);
 			assertThat(getAdapter(kotlinx.coroutines.flow.Flow.class).getDescriptor().isDeferred()).isEqualTo(true);
 		}
+	}
+
+	// SmallRye Mutiny
+	@Nested
+	class Mutiny {
+
+		@Test
+		void defaultAdapterRegistrations() {
+			assertThat(getAdapter(io.smallrye.mutiny.Uni.class)).isNotNull();
+			assertThat(getAdapter(io.smallrye.mutiny.Multi.class)).isNotNull();
+		}
+
+		@Test
+		void toUni() {
+			Publisher<Integer> source = Mono.just(1);
+			Object target = getAdapter(Uni.class).fromPublisher(source);
+			assertThat(target).isInstanceOf(Uni.class);
+			assertThat(((Uni<Integer>) target).await().atMost(Duration.ofMillis(1000))).isEqualTo(Integer.valueOf(1));
+		}
+
+		@Test
+		void fromUni() {
+			Uni<Integer> source = Uni.createFrom().item(1);
+			Object target = getAdapter(Uni.class).toPublisher(source);
+			assertThat(target).isInstanceOf(Mono.class);
+			assertThat(((Mono<Integer>) target).block(Duration.ofMillis(1000))).isEqualTo(Integer.valueOf(1));
+		}
+
+		@Test
+		void toMulti() {
+			List<Integer> sequence = Arrays.asList(1, 2, 3);
+			Publisher<Integer> source = Flux.fromIterable(sequence);
+			Object target = getAdapter(Multi.class).fromPublisher(source);
+			assertThat(target).isInstanceOf(Multi.class);
+			assertThat(((Multi<Integer>) target).collect().asList().await().atMost(Duration.ofMillis(1000))).isEqualTo(sequence);
+		}
+
+		@Test
+		void fromMulti() {
+			List<Integer> sequence = Arrays.asList(1, 2, 3);
+			Multi<Integer> source = Multi.createFrom().iterable(sequence);
+			Object target = getAdapter(Multi.class).toPublisher(source);
+			assertThat(target).isInstanceOf(Flux.class);
+			assertThat(((Flux<Integer>) target).blockLast(Duration.ofMillis(1000))).isEqualTo(Integer.valueOf(3));
+		}
+
 	}
 
 	private ReactiveAdapter getAdapter(Class<?> reactiveType) {
