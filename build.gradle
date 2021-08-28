@@ -68,6 +68,7 @@ configure(allprojects) { project ->
 			dependency "io.reactivex:rxjava-reactive-streams:1.2.1"
 			dependency "io.reactivex.rxjava2:rxjava:2.2.21"
 			dependency "io.reactivex.rxjava3:rxjava:3.1.1"
+			dependency "io.smallrye.reactive:mutiny:1.0.0"
 			dependency "io.projectreactor.tools:blockhound:1.0.4.RELEASE"
 
 			dependency "com.caucho:hessian:4.0.63"
