@@ -341,6 +341,13 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	public int update(String sql, Map<String, ?> paramMap, KeyHolder generatedKeyHolder)
+			throws DataAccessException {
+
+		return update(sql, paramMap, generatedKeyHolder, null);
+	}
+
+	@Override
 	public int update(
 			String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, @Nullable String[] keyColumnNames)
 			throws DataAccessException {
@@ -354,6 +361,14 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 			}
 		});
 		return getJdbcOperations().update(psc, generatedKeyHolder);
+	}
+
+	@Override
+	public int update(
+			String sql, Map<String, ?> paramMap, KeyHolder generatedKeyHolder, @Nullable String[] keyColumnNames)
+			throws DataAccessException {
+
+		return update(sql, new MapSqlParameterSource(paramMap), generatedKeyHolder, keyColumnNames);
 	}
 
 	@Override

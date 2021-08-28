@@ -514,6 +514,19 @@ public interface NamedParameterJdbcOperations {
 	 * Issue an update via a prepared statement, binding the given arguments,
 	 * returning generated keys.
 	 * @param sql the SQL containing named parameters
+	 * @param paramMap map of parameters to bind to the query
+	 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
+	 * @return the number of rows affected
+	 * @throws DataAccessException if there is any problem issuing the update
+	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 */
+	int update(String sql, Map<String, ?> paramMap, KeyHolder generatedKeyHolder)
+			throws DataAccessException;
+
+	/**
+	 * Issue an update via a prepared statement, binding the given arguments,
+	 * returning generated keys.
+	 * @param sql the SQL containing named parameters
 	 * @param paramSource container of arguments and SQL types to bind to the query
 	 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
 	 * @param keyColumnNames names of the columns that will have keys generated for them
@@ -523,6 +536,20 @@ public interface NamedParameterJdbcOperations {
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
 	 */
 	int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String[] keyColumnNames)
+			throws DataAccessException;
+
+	/**
+	 * Issue an update via a prepared statement, binding the given arguments,
+	 * returning generated keys.
+	 * @param sql the SQL containing named parameters
+	 * @param paramMap map of parameters to bind to the query
+	 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
+	 * @param keyColumnNames names of the columns that will have keys generated for them
+	 * @return the number of rows affected
+	 * @throws DataAccessException if there is any problem issuing the update
+	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 */
+	int update(String sql, Map<String, ?> paramMap, KeyHolder generatedKeyHolder, String[] keyColumnNames)
 			throws DataAccessException;
 
 	/**
