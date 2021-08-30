@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.OrderComparator;
 import org.springframework.lang.Nullable;
@@ -75,8 +72,6 @@ import org.springframework.util.Assert;
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  */
 public abstract class TransactionSynchronizationManager {
-
-	private static final Log logger = LogFactory.getLog(TransactionSynchronizationManager.class);
 
 	private static final ThreadLocal<Map<Object, Object>> resources =
 			new NamedThreadLocal<>("Transactional resources");
