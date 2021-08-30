@@ -735,40 +735,9 @@ public abstract class StringUtils {
 			pathElements.addFirst(CURRENT_PATH);
 		}
 
-		final String joined = joinStrings(pathElements, FOLDER_SEPARATOR);
+		final String joined = collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
 		// avoid string concatenation with empty prefix
 		return prefix.isEmpty() ? joined : prefix + joined;
-	}
-
-	/**
-	 * Convert a {@link Collection Collection&lt;String&gt;} to a delimited {@code String} (e.g. CSV).
-	 * <p>This is an optimized variant of {@link #collectionToDelimitedString(Collection, String)}, which does not
-	 * require dynamic resizing of the StringBuilder's backing array.
-	 * @param coll the {@code Collection Collection&lt;String&gt;} to convert (potentially {@code null} or empty)
-	 * @param delim the delimiter to use (typically a ",")
-	 * @return the delimited {@code String}
-	 */
-	private static String joinStrings(@Nullable Collection<String> coll, String delim) {
-
-		if (CollectionUtils.isEmpty(coll)) {
-			return "";
-		}
-
-		// precompute total length of resulting string
-		int totalLength = (coll.size() - 1) * delim.length();
-		for (String str : coll) {
-			totalLength += str.length();
-		}
-
-		StringBuilder sb = new StringBuilder(totalLength);
-		Iterator<?> it = coll.iterator();
-		while (it.hasNext()) {
-			sb.append(it.next());
-			if (it.hasNext()) {
-				sb.append(delim);
-			}
-		}
-		return sb.toString();
 	}
 
 	/**
@@ -1330,7 +1299,12 @@ public abstract class StringUtils {
 			return "";
 		}
 
-		StringBuilder sb = new StringBuilder();
+		int totalLength = coll.size() * (prefix.length() + suffix.length()) + (coll.size() - 1) * delim.length();
+		for (Object element : coll) {
+			totalLength += element.toString().length();
+		}
+
+		StringBuilder sb = new StringBuilder(totalLength);
 		Iterator<?> it = coll.iterator();
 		while (it.hasNext()) {
 			sb.append(prefix).append(it.next()).append(suffix);
