@@ -582,9 +582,7 @@ public class ResolvableType implements Serializable {
 			}
 			TypeVariable<?> variable = (TypeVariable<?>) this.type;
 			ResolvableType resolved = this.variableResolver.resolveVariable(variable);
-			if (resolved == null || resolved.isUnresolvableTypeVariable()) {
-				return true;
-			}
+			return resolved == null || resolved.isUnresolvableTypeVariable();
 		}
 		return false;
 	}
@@ -598,9 +596,7 @@ public class ResolvableType implements Serializable {
 			WildcardType wt = (WildcardType) this.type;
 			if (wt.getLowerBounds().length == 0) {
 				Type[] upperBounds = wt.getUpperBounds();
-				if (upperBounds.length == 0 || (upperBounds.length == 1 && Object.class == upperBounds[0])) {
-					return true;
-				}
+				return upperBounds.length == 0 || (upperBounds.length == 1 && Object.class == upperBounds[0]);
 			}
 		}
 		return false;
@@ -924,10 +920,7 @@ public class ResolvableType implements Serializable {
 				!ObjectUtils.nullSafeEquals(this.variableResolver.getSource(), otherType.variableResolver.getSource()))) {
 			return false;
 		}
-		if (!ObjectUtils.nullSafeEquals(this.componentType, otherType.componentType)) {
-			return false;
-		}
-		return true;
+		return ObjectUtils.nullSafeEquals(this.componentType, otherType.componentType);
 	}
 
 	@Override
