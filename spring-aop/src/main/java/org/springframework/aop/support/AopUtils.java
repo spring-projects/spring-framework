@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetClassAware;
+import org.springframework.aop.framework.Advised;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.lang.Nullable;
@@ -53,6 +54,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Yanming Zhou
  * @see org.springframework.aop.framework.AopProxyUtils
  */
 public abstract class AopUtils {
@@ -114,6 +116,79 @@ public abstract class AopUtils {
 			result = (isCglibProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
 		}
 		return result;
+	}
+
+
+	/**
+	 * Get the <em>target</em> object of the supplied {@code candidate} object.
+	 * <p>If the supplied {@code candidate} is a Spring
+	 * {@linkplain AopUtils#isAopProxy proxy}, the target of the proxy will
+	 * be returned; otherwise, the {@code candidate} will be returned
+	 * <em>as is</em>.
+	 * @param <T> the type of the target object
+	 * @param candidate the instance to check (potentially a Spring AOP proxy;
+	 * never {@code null})
+	 * @return the target object or the {@code candidate} (never {@code null})
+	 * @throws IllegalStateException if an error occurs while unwrapping a proxy
+	 * @see Advised#getTargetSource()
+	 * @see #getUltimateTargetObject
+	 * @since 6.1
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getTargetObject(Object candidate) {
+		Assert.notNull(candidate, "Candidate must not be null");
+		try {
+			if (AopUtils.isAopProxy(candidate) && candidate instanceof Advised advised) {
+				Object target = advised.getTargetSource().getTarget();
+				if (target != null) {
+					return (T) target;
+				}
+			}
+		}
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to unwrap proxied object", ex);
+		}
+		return (T) candidate;
+	}
+
+	/**
+	 * Get the ultimate <em>target</em> object of the supplied {@code candidate}
+	 * object, unwrapping not only a top-level proxy but also any number of
+	 * nested proxies.
+	 * <p>If the supplied {@code candidate} is a Spring
+	 * {@linkplain AopUtils#isAopProxy proxy}, the ultimate target of all
+	 * nested proxies will be returned; otherwise, the {@code candidate}
+	 * will be returned <em>as is</em>.
+	 * <p>NOTE: If the top-level proxy or a nested proxy is not backed by a
+	 * {@linkplain org.springframework.aop.TargetSource#isStatic() static}
+	 * {@link org.springframework.aop.TargetSource TargetSource}, invocation of
+	 * this utility method may result in undesired behavior such as infinite
+	 * recursion leading to a {@link StackOverflowError}.
+	 * @param <T> the type of the target object
+	 * @param candidate the instance to check (potentially a Spring AOP proxy;
+	 * never {@code null})
+	 * @return the target object or the {@code candidate} (never {@code null})
+	 * @throws IllegalStateException if an error occurs while unwrapping a proxy
+	 * @see Advised#getTargetSource()
+	 * @see org.springframework.aop.TargetSource#isStatic()
+	 * @see org.springframework.aop.framework.AopProxyUtils#ultimateTargetClass
+	 * @since 6.1
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getUltimateTargetObject(Object candidate) {
+		Assert.notNull(candidate, "Candidate must not be null");
+		try {
+			if (AopUtils.isAopProxy(candidate) && candidate instanceof Advised advised) {
+				Object target = advised.getTargetSource().getTarget();
+				if (target != null) {
+					return (T) getUltimateTargetObject(target);
+				}
+			}
+		}
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to unwrap proxied object", ex);
+		}
+		return (T) candidate;
 	}
 
 	/**
