@@ -2613,7 +2613,7 @@ published while invoking a method in a Spring-managed component:
 			// Invoke method in OrderService that publishes an event
 			orderService.submitOrder(new Order(/* ... */));
 			// Verify that an OrderSubmitted event was published
-			int numEvents = events.stream(OrderSubmitted.class).count(); // <3>
+			long numEvents = events.stream(OrderSubmitted.class).count(); // <3>
 			assertThat(numEvents).isEqualTo(1);
 		}
 	}
