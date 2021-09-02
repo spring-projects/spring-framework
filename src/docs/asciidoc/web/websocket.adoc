@@ -1202,7 +1202,7 @@ We can trace the flow through a simple example. Consider the following example, 
 	@Controller
 	public class GreetingController {
 
-		@MessageMapping("/greeting") {
+		@MessageMapping("/greeting")
 		public String handle(String greeting) {
 			return "[" + getTimestamp() + ": " + greeting;
 		}

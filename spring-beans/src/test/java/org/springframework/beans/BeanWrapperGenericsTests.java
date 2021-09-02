@@ -162,10 +162,8 @@ public class BeanWrapperGenericsTests {
 		value2.add(Boolean.TRUE);
 		input.put("2", value2);
 		bw.setPropertyValue("collectionMap", input);
-		boolean condition1 = gb.getCollectionMap().get(1) instanceof HashSet;
-		assertThat(condition1).isTrue();
-		boolean condition = gb.getCollectionMap().get(2) instanceof ArrayList;
-		assertThat(condition).isTrue();
+		assertThat(gb.getCollectionMap().get(1) instanceof HashSet).isTrue();
+		assertThat(gb.getCollectionMap().get(2) instanceof ArrayList).isTrue();
 	}
 
 	@Test
@@ -177,8 +175,7 @@ public class BeanWrapperGenericsTests {
 		HashSet<Integer> value1 = new HashSet<>();
 		value1.add(1);
 		bw.setPropertyValue("collectionMap[1]", value1);
-		boolean condition = gb.getCollectionMap().get(1) instanceof HashSet;
-		assertThat(condition).isTrue();
+		assertThat(gb.getCollectionMap().get(1) instanceof HashSet).isTrue();
 	}
 
 	@Test
@@ -324,14 +321,13 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("mapOfInteger", map);
 
 		Object obj = gb.getMapOfInteger().get("testKey");
-		boolean condition = obj instanceof Integer;
-		assertThat(condition).isTrue();
+		assertThat(obj instanceof Integer).isTrue();
 	}
 
 	@Test
 	public void testGenericTypeNestingMapOfListOfInteger() {
 		Map<String, List<String>> map = new HashMap<>();
-		List<String> list = Arrays.asList(new String[] {"1", "2", "3"});
+		List<String> list = Arrays.asList("1", "2", "3");
 		map.put("testKey", list);
 
 		NestedGenericCollectionBean gb = new NestedGenericCollectionBean();
@@ -362,7 +358,7 @@ public class BeanWrapperGenericsTests {
 	@Test
 	public void testGenericTypeNestingMapOfListOfListOfInteger() {
 		Map<String, List<List<String>>> map = new HashMap<>();
-		List<String> list = Arrays.asList(new String[] {"1", "2", "3"});
+		List<String> list = Arrays.asList("1", "2", "3");
 		map.put("testKey", Collections.singletonList(list));
 
 		NestedGenericCollectionBean gb = new NestedGenericCollectionBean();
