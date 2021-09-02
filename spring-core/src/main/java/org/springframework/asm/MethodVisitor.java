@@ -51,8 +51,8 @@ public abstract class MethodVisitor {
   private static final String REQUIRES_ASM5 = "This feature requires ASM5";
 
   /**
-   * The ASM API version implemented by this visitor. The value of this field must be one of {@link
-   * Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link Opcodes#ASM7}.
+   * The ASM API version implemented by this visitor. The value of this field must be one of the
+   * {@code ASM}<i>x</i> values in {@link Opcodes}.
    */
   protected final int api;
 
@@ -64,8 +64,8 @@ public abstract class MethodVisitor {
   /**
    * Constructs a new {@link MethodVisitor}.
    *
-   * @param api the ASM API version implemented by this visitor. Must be one of {@link
-   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link Opcodes#ASM7}.
+   * @param api the ASM API version implemented by this visitor. Must be one of the {@code
+   *     ASM}<i>x</i> values in {@link Opcodes}.
    */
   public MethodVisitor(final int api) {
     this(api, null);
@@ -74,8 +74,8 @@ public abstract class MethodVisitor {
   /**
    * Constructs a new {@link MethodVisitor}.
    *
-   * @param api the ASM API version implemented by this visitor. Must be one of {@link
-   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link Opcodes#ASM7}.
+   * @param api the ASM API version implemented by this visitor. Must be one of the {@code
+   *     ASM}<i>x</i> values in {@link Opcodes}.
    * @param methodVisitor the method visitor to which this visitor must delegate method calls. May
    *     be null.
    */
