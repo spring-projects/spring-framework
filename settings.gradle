@@ -1,5 +1,7 @@
 pluginManagement {
 	repositories {
+		maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+		maven { url "https://maven.aliyun.com/repository/public" }
 		gradlePluginPortal()
 		maven { url 'https://repo.spring.io/plugins-release' }
 	}
@@ -7,7 +9,8 @@ pluginManagement {
 
 plugins {
 	id "com.gradle.enterprise" version "3.6.1"
-	id "io.spring.ge.conventions" version "0.0.7"
+	//注释掉不然会A build scan was not published as you have not authenticated with server 'ge.spring.io'.
+	// id "io.spring.ge.conventions" version "0.0.7"
 }
 
 include "spring-aop"
@@ -56,3 +59,5 @@ settings.gradle.projectsLoaded {
 		}
 	}
 }
+include 'bat-spring-test'
+

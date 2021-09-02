@@ -1,0 +1,8 @@
+com/bat/spring/service/UserService.java
+ com.bat.spring.service.UserService
+com/bat/spring/test/BatTest.java
+ com.bat.spring.test.BatTest
+com/bat/spring/entity/User.java
+ com.bat.spring.entity.User
+com/bat/spring/service/impl/UserServiceImpl.java
+ com.bat.spring.service.impl.UserServiceImpl

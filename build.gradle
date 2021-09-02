@@ -288,8 +288,14 @@ configure(allprojects) { project ->
 			cacheChangingModulesFor 0, "seconds"
 		}
 		repositories {
+			// 新增2个阿里镜像地址
+			maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+			maven { url 'https://maven.aliyun.com/repository/spring' }
+			maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
 			mavenCentral()
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
+			// 新增spring插件库
+			maven { url "https://repo.spring.io/plugins-release"}
 		}
 	}
 	configurations.all {
