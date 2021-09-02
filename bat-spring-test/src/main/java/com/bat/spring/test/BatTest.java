@@ -13,7 +13,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class BatTest {
 	public static void main(String[] args) {
 		//https://github.com/zhangxiansheng123/spring-framework.git
-		//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
+		//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
 		//https://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@github.com/zhangxiansheng123/spring-framework.git
 		//Spring的HelloWorld就是这几行代码
 		//先思考两个问题:1、容器创建时做了什么? 2、getBean()时又做了什么?
