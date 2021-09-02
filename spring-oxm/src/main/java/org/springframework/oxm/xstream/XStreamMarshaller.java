@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,8 @@ import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 import com.thoughtworks.xstream.mapper.Mapper;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
+import com.thoughtworks.xstream.security.ForbiddenClassException;
+import com.thoughtworks.xstream.security.TypePermission;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -106,7 +108,7 @@ import org.springframework.util.xml.StaxUtils;
  * Therefore, it has limited namespace support. As such, it is rather unsuitable for
  * usage within Web Services.
  *
- * <p>This marshaller requires XStream 1.4.5 or higher, as of Spring 4.3.
+ * <p>This marshaller requires XStream 1.4.7 or higher, as of Spring 5.2.17.
  * Note that {@link XStream} construction has been reworked in 4.0, with the
  * stream driver and the class loader getting passed into XStream itself now.
  *
@@ -145,6 +147,9 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 
 	@Nullable
 	private ConverterMatcher[] converters;
+
+	@Nullable
+	private TypePermission[] typePermissions;
 
 	@Nullable
 	private MarshallingStrategy marshallingStrategy;
@@ -266,6 +271,20 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	 */
 	public void setConverters(ConverterMatcher... converters) {
 		this.converters = converters;
+	}
+
+	/**
+	 * Set XStream type permissions such as
+	 * {@link com.thoughtworks.xstream.security.AnyTypePermission},
+	 * {@link com.thoughtworks.xstream.security.ExplicitTypePermission} etc,
+	 * as an alternative to overriding the {@link #customizeXStream} method.
+	 * <p>Note: As of XStream 1.4.18, the default type permissions are
+	 * restricted to well-known core JDK types. For any custom types,
+	 * explicit type permissions need to be registered.
+	 * @since 5.2.17
+	 */
+	public void setTypePermissions(TypePermission... typePermissions) {
+		this.typePermissions = typePermissions;
 	}
 
 	/**
@@ -407,7 +426,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 
 	@Override
 	public void afterPropertiesSet() {
-		// no-op due to use of SingletonSupplier for the XStream field.
+		// no-op due to use of SingletonSupplier for the XStream field
 	}
 
 	/**
@@ -476,6 +495,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 				else {
 					throw new IllegalArgumentException("Invalid ConverterMatcher [" + this.converters[i] + "]");
 				}
+			}
+		}
+
+		if (this.typePermissions != null) {
+			for (TypePermission permission : this.typePermissions) {
+				xstream.addPermission(permission);
 			}
 		}
 
@@ -844,7 +869,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	 */
 	protected XmlMappingException convertXStreamException(Exception ex, boolean marshalling) {
 		if (ex instanceof StreamException || ex instanceof CannotResolveClassException ||
-				ex instanceof ConversionException) {
+				ex instanceof ForbiddenClassException || ex instanceof ConversionException) {
 			if (marshalling) {
 				return new MarshallingFailureException("XStream marshalling exception",  ex);
 			}
