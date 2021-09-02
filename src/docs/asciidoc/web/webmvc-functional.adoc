@@ -103,7 +103,7 @@ as the following example shows:
 
 
 If you register the `RouterFunction` as a bean, for instance by exposing it in a
-@Configuration class, it will auto-detected by the servlet, as explained in <<webmvc-fn-running>>.
+@Configuration class, it will be auto-detected by the servlet, as explained in <<webmvc-fn-running>>.
 
 
 
@@ -117,7 +117,7 @@ access to the HTTP request and response, including headers, body, method, and st
 
 
 [[webmvc-fn-request]]
-=== `ServerRequest`
+=== ServerRequest
 
 `ServerRequest` provides access to the HTTP method, URI, headers, and query parameters,
 while access to the body is provided through the `body` methods.
@@ -165,7 +165,7 @@ val map = request.params()
 
 
 [[webmvc-fn-response]]
-=== `ServerResponse`
+=== ServerResponse
 
 `ServerResponse` provides access to the HTTP response and, since it is immutable, you can use
 a `build` method to create it. You can use the builder to set the response status, to add response
@@ -714,10 +714,10 @@ For instance, consider the following example:
 				ServerRequest.from(it)
 						.header("X-RequestHeader", "Value").build()
 			}
-			POST("/person", handler::createPerson)
-			after { _, response -> // <2>
-				logResponse(response)
-			}
+		}
+		POST("/person", handler::createPerson)
+		after { _, response -> // <2>
+			logResponse(response)
 		}
 	}
 ----
