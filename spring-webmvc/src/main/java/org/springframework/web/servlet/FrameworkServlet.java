@@ -1085,7 +1085,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 
 		DispatcherType dispatchType = request.getDispatcherType();
-		boolean initialDispatch = DispatcherType.REQUEST == dispatchType;
+		boolean initialDispatch = (dispatchType == DispatcherType.REQUEST);
 
 		if (failureCause != null) {
 			if (!initialDispatch) {
@@ -1109,7 +1109,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 
 		int status = response.getStatus();
-		String headers = ""; // nothing below trace
+		String headers = "";  // nothing below trace
 
 		if (logger.isTraceEnabled()) {
 			Collection<String> names = response.getHeaderNames();
