@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class ResponseStatusException extends NestedRuntimeException {
 	 * @param status the HTTP status (required)
 	 */
 	public ResponseStatusException(HttpStatus status) {
-		this(status, null, null);
+		this(status, null);
 	}
 
 	/**
@@ -57,7 +57,10 @@ public class ResponseStatusException extends NestedRuntimeException {
 	 * @param reason the associated reason (optional)
 	 */
 	public ResponseStatusException(HttpStatus status, @Nullable String reason) {
-		this(status, reason, null);
+		super("");
+		Assert.notNull(status, "HttpStatus is required");
+		this.status = status;
+		this.reason = reason;
 	}
 
 	/**
