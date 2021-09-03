@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
@@ -155,7 +156,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 			throws Exception {
 
 		if (HttpMethod.OPTIONS.matches(request.getMethod())) {
-			response.setHeader("Allow", getAllowHeader());
+			response.setHeader(HttpHeaders.ALLOW, getAllowHeader());
 			return null;
 		}
 

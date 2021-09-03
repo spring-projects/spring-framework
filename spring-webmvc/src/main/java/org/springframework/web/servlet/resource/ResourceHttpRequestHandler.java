@@ -528,7 +528,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 
 		if (HttpMethod.OPTIONS.matches(request.getMethod())) {
-			response.setHeader("Allow", getAllowHeader());
+			response.setHeader(HttpHeaders.ALLOW, getAllowHeader());
 			return;
 		}
 
