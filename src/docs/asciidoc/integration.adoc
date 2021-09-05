@@ -7,8 +7,8 @@
 :tabsize: 4
 :docinfo1:
 
-This part of the reference documentation covers the Spring Framework's integration with
-a number technologies.
+This part of the reference documentation covers Spring Framework's integration with
+a number of technologies.
 
 
 [[rest-client-access]]
@@ -63,7 +63,7 @@ overloaded methods:
 
 | `patchForObject`
 | Updates a resource by using PATCH and returns the representation from the response.
-Note that the JDK `HttpURLConnection` does not support the `PATCH`, but Apache
+Note that the JDK `HttpURLConnection` does not support `PATCH`, but Apache
 HttpComponents and others do.
 
 | `delete`
