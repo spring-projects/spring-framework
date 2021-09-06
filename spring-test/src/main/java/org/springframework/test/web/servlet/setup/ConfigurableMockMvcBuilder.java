@@ -93,7 +93,7 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	 * @since 5.3.10
 	 */
 	default <T extends B> T defaultResponseCharacterEncoding(Charset defaultResponseCharacterEncoding) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("defaultResponseCharacterEncoding is not supported by this MockMvcBuilder");
 	}
 
 	/**
