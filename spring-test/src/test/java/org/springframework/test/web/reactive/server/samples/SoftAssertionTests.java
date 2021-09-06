@@ -46,15 +46,19 @@ class SoftAssertionTests {
 	}
 
 	@Test
-	void expectAllWithMultipleFailures() throws Exception {
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-			this.webTestClient.get().uri("/test").exchange()
-				.expectAll(
-					responseSpec -> responseSpec.expectStatus().isBadRequest(),
-					responseSpec -> responseSpec.expectStatus().isOk(),
-					responseSpec -> responseSpec.expectBody(String.class).isEqualTo("bogus")
+	void expectAllWithMultipleFailures() {
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() ->
+						this.webTestClient.get().uri("/test").exchange()
+								.expectAll(
+										responseSpec -> responseSpec.expectStatus().isBadRequest(),
+										responseSpec -> responseSpec.expectStatus().isOk(),
+										responseSpec -> responseSpec.expectBody(String.class).isEqualTo("bogus")
+								)
 				)
-		).withMessage("Multiple Exceptions (2):\nStatus expected:<400 BAD_REQUEST> but was:<200 OK>\nResponse body expected:<bogus> but was:<hello>");
+				.withMessage("Multiple Exceptions (2):\n" +
+						"Status expected:<400 BAD_REQUEST> but was:<200 OK>\n" +
+						"Response body expected:<bogus> but was:<hello>");
 	}
 
 

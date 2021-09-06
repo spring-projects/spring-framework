@@ -79,6 +79,9 @@ public class ExchangeResult {
 	@Nullable
 	private final Object mockServerResult;
 
+	/** Ensure single logging, e.g. for expectAll. */
+	private boolean diagnosticsLogged;
+
 
 	/**
 	 * Create an instance with an HTTP request and response along with promises
@@ -121,6 +124,7 @@ public class ExchangeResult {
 		this.timeout = other.timeout;
 		this.uriTemplate = other.uriTemplate;
 		this.mockServerResult = other.mockServerResult;
+		this.diagnosticsLogged = other.diagnosticsLogged;
 	}
 
 
@@ -227,7 +231,8 @@ public class ExchangeResult {
 			assertion.run();
 		}
 		catch (AssertionError ex) {
-			if (logger.isErrorEnabled()) {
+			if (!this.diagnosticsLogged && logger.isErrorEnabled()) {
+				this.diagnosticsLogged = true;
 				logger.error("Request details for assertion failure:\n" + this);
 			}
 			throw ex;
