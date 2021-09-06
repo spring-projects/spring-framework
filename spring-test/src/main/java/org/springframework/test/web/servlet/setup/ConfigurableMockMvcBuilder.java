@@ -86,14 +86,14 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 
 	/**
 	 * Define the default character encoding to be applied to every response.
-	 * <p>The default implementation of this method ignores the supplied value.
-	 * Concrete implementations are therefore encouraged to override this method.
+	 * <p>The default implementation of this method throws an
+	 * {@link UnsupportedOperationException}. Concrete implementations are therefore
+	 * encouraged to override this method.
 	 * @param defaultResponseCharacterEncoding the default response character encoding
 	 * @since 5.3.10
 	 */
-	@SuppressWarnings("unchecked")
 	default <T extends B> T defaultResponseCharacterEncoding(Charset defaultResponseCharacterEncoding) {
-		return (T) this;
+		throw new UnsupportedOperationException();
 	}
 
 	/**
