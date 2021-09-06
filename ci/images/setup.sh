@@ -22,7 +22,7 @@ curl --output /opt/concourse-release-scripts.jar https://repo.spring.io/release/
 
 mkdir -p /opt/openjdk
 pushd /opt/openjdk > /dev/null
-for jdk in java8 java11 java15
+for jdk in java8 java11 java16
 do
   JDK_URL=$( /get-jdk-url.sh $jdk )
   mkdir $jdk
