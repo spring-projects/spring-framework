@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.handler;
 
 import java.lang.annotation.ElementType;
@@ -30,7 +31,9 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-@org.junit.jupiter.params.ParameterizedTest
+// Do not auto-close arguments since ConfigurableWebApplicationContext implements
+// AutoCloseable and is shared between parameterized test invocations.
+@org.junit.jupiter.params.ParameterizedTest(autoCloseArguments = false)
 @org.junit.jupiter.params.provider.MethodSource("pathPatternsArguments")
 public @interface PathPatternsParameterizedTest {
 }

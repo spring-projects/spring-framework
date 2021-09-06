@@ -36,7 +36,7 @@ configure(allprojects) { project ->
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.5.30"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.5.2"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.2.2"
-			mavenBom "org.junit:junit-bom:5.7.2"
+			mavenBom "org.junit:junit-bom:5.8.0"
 		}
 		dependencies {
 			dependencySet(group: 'org.apache.logging.log4j', version: '2.14.1') {
@@ -346,6 +346,7 @@ configure([rootProject] + javaProjects) { project ->
 	dependencies {
 		testImplementation("org.junit.jupiter:junit-jupiter-api")
 		testImplementation("org.junit.jupiter:junit-jupiter-params")
+		testImplementation("org.junit.platform:junit-platform-suite-api")
 		testImplementation("org.mockito:mockito-core")
 		testImplementation("org.mockito:mockito-junit-jupiter")
 		testImplementation("io.mockk:mockk")
@@ -353,6 +354,7 @@ configure([rootProject] + javaProjects) { project ->
 		// Pull in the latest JUnit 5 Launcher API to ensure proper support in IDEs.
 		testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 		testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+		testRuntimeOnly("org.junit.platform:junit-platform-suite-engine")
 		testRuntimeOnly("org.apache.logging.log4j:log4j-core")
 		testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j-impl")
 		testRuntimeOnly("org.apache.logging.log4j:log4j-jul")
@@ -381,7 +383,7 @@ configure([rootProject] + javaProjects) { project ->
 			"https://hc.apache.org/httpcomponents-client-5.1.x/current/httpclient5/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
-			"https://junit.org/junit5/docs/5.7.2/api/",
+			"https://junit.org/junit5/docs/5.8.0/api/",
 			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
 			"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
 			"https://r2dbc.io/spec/0.8.5.RELEASE/api/"
