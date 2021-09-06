@@ -10,7 +10,7 @@ dependencies {
 	optional(project(":spring-web"))
 	optional("org.eclipse.persistence:org.eclipse.persistence.jpa")
 	optional("org.hibernate:hibernate-core")
-	optional("javax.servlet:javax.servlet-api:3.1.0")
+	optional("javax.servlet:javax.servlet-api")
 	testCompile(testFixtures(project(":spring-beans")))
 	testCompile(testFixtures(project(":spring-context")))
 	testCompile(testFixtures(project(":spring-core")))
