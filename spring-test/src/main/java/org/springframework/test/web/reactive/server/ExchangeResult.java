@@ -56,7 +56,7 @@ import org.springframework.util.MultiValueMap;
  */
 public class ExchangeResult {
 
-	private static Log logger = LogFactory.getLog(ExchangeResult.class);
+	private static final Log logger = LogFactory.getLog(ExchangeResult.class);
 
 	private static final List<MediaType> PRINTABLE_MEDIA_TYPES = Arrays.asList(
 			MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
@@ -77,7 +77,7 @@ public class ExchangeResult {
 	private final String uriTemplate;
 
 	@Nullable
-	final Object mockServerResult;
+	private final Object mockServerResult;
 
 
 	/**
@@ -218,9 +218,9 @@ public class ExchangeResult {
 	}
 
 	/**
-	 * Execute the given Runnable, catch any {@link AssertionError}, decorate
-	 * with {@code AssertionError} containing diagnostic information about the
-	 * request and response, and then re-throw.
+	 * Execute the given Runnable, catch any {@link AssertionError}, log details
+	 * about the request and response at ERROR level under the class log
+	 * category, and after that re-throw the error.
 	 */
 	public void assertWithDiagnostics(Runnable assertion) {
 		try {
