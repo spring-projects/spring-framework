@@ -54,12 +54,6 @@ public class OptionalDependenciesPlugin implements Plugin<Project> {
 				project.getConfigurations().getByName(sourceSet.getRuntimeClasspathConfigurationName()).extendsFrom(optional);
 			});
 		});
-		project.getPlugins().withType(EclipsePlugin.class, (eclipePlugin) -> {
-			project.getExtensions().getByType(EclipseModel.class)
-					.classpath((classpath) -> {
-						classpath.getPlusConfigurations().add(optional);
-					});
-		});
 	}
 
 }
