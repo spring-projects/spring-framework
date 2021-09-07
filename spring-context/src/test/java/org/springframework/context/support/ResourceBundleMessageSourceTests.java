@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 03.02.2004
  */
 class ResourceBundleMessageSourceTests {
@@ -429,6 +430,35 @@ class ResourceBundleMessageSourceTests {
 		assertThat(rbg.containsKey("code2")).isTrue();
 	}
 
+	@Test
+	void searchingParentFirst() {
+		ResourceBundleMessageSource parent = new ResourceBundleMessageSource();
+		parent.setBasename("org/springframework/context/support/parent-messages");
+		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		ms.setParentMessageSource(parent);
+		ms.setSearchingParentFirst(true);
+		MessageSourceResourceBundle rbe = new MessageSourceResourceBundle(ms, Locale.ENGLISH);
+		assertThat(rbe.containsKey("code1")).isTrue();
+		assertThat(rbe.getString("code1")).isEqualTo("message1 from parent");
+		assertThat(rbe.containsKey("code3")).isTrue();
+		assertThat(rbe.getString("code3")).isEqualTo("message3");
+	}
+
+	@Test
+	void searchingParentLast() {
+		ResourceBundleMessageSource parent = new ResourceBundleMessageSource();
+		parent.setBasename("org/springframework/context/support/parent-messages");
+		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		ms.setParentMessageSource(parent);
+		ms.setSearchingParentFirst(false);
+		MessageSourceResourceBundle rbe = new MessageSourceResourceBundle(ms, Locale.ENGLISH);
+		assertThat(rbe.containsKey("code1")).isTrue();
+		assertThat(rbe.getString("code1")).isEqualTo("message1");
+		assertThat(rbe.containsKey("code3")).isTrue();
+		assertThat(rbe.getString("code3")).isEqualTo("message3");
+	}
 
 	@AfterEach
 	void tearDown() {

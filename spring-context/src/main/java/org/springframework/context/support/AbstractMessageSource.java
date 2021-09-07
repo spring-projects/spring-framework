@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Yanming Zhou
  * @see #resolveCode(String, java.util.Locale)
  * @see #resolveCodeWithoutArguments(String, java.util.Locale)
  * @see #setAlwaysUseMessageFormat
@@ -72,6 +73,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 
 	private boolean useCodeAsDefaultMessage = false;
 
+	private boolean searchingParentFirst = false;
 
 	@Override
 	public void setParentMessageSource(@Nullable MessageSource parent) {
@@ -135,6 +137,22 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 		return this.useCodeAsDefaultMessage;
 	}
 
+	/**
+	 * Set whether to search the message code from parent first.
+	 * @since 6.1
+	 */
+	public void setSearchingParentFirst(boolean searchingParentFirst) {
+		this.searchingParentFirst = searchingParentFirst;
+	}
+
+	/**
+	 * Return whether to search the message code from parent first.
+	 * Default is "false".
+	 * @since 6.1
+	 */
+	protected boolean isSearchingParentFirst() {
+		return this.searchingParentFirst;
+	}
 
 	@Override
 	public final String getMessage(String code, @Nullable Object[] args, @Nullable String defaultMessage, Locale locale) {
@@ -204,6 +222,13 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 		}
 		Object[] argsToUse = args;
 
+		if (isSearchingParentFirst()) {
+			String message = getMessageFromParent(code, argsToUse, locale);
+			if (message != null) {
+				return message;
+			}
+		}
+
 		if (!isAlwaysUseMessageFormat() && ObjectUtils.isEmpty(args)) {
 			// Optimized resolution: no arguments to apply,
 			// therefore no MessageFormat needs to be involved.
@@ -238,8 +263,13 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 			}
 		}
 
-		// Not found -> check parent, if any.
-		return getMessageFromParent(code, argsToUse, locale);
+		if (isSearchingParentFirst()) {
+			return null;
+		}
+		else {
+			// Not found -> check parent, if any.
+			return getMessageFromParent(code, argsToUse, locale);
+		}
 	}
 
 	/**
