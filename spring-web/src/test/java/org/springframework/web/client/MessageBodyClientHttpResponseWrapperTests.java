@@ -13,43 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.client;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.client.ClientHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 /**
- * Unit tests for {MessageBodyClientHttpResponseWrapper}.
+ * Unit tests for {@link MessageBodyClientHttpResponseWrapper}.
  *
+ * @since 5.3.10
  * @author Yin-Jui Liao
  */
 class MessageBodyClientHttpResponseWrapperTests {
 
 	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
 
+	private final MessageBodyClientHttpResponseWrapper responseWrapper = new MessageBodyClientHttpResponseWrapper(response);
+
+
 	@Test
-	void testMessageBodyNotExist() throws IOException {
+	void messageBodyDoesNotExist() throws Exception {
 		given(response.getBody()).willReturn(null);
-		MessageBodyClientHttpResponseWrapper responseWrapper = new MessageBodyClientHttpResponseWrapper(response);
 		assertThat(responseWrapper.hasEmptyMessageBody()).isTrue();
 	}
 
 	@Test
-	void testMessageBodyExist() throws IOException {
-		String body = "Accepted request";
-		InputStream stream = new ByteArrayInputStream(body.getBytes());
+	void messageBodyExists() throws Exception {
+		InputStream stream = new ByteArrayInputStream("content".getBytes());
 		given(response.getBody()).willReturn(stream);
-		MessageBodyClientHttpResponseWrapper responseWrapper = new MessageBodyClientHttpResponseWrapper(response);
 		assertThat(responseWrapper.hasEmptyMessageBody()).isFalse();
 	}
+
 }
