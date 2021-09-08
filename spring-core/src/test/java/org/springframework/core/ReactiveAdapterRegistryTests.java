@@ -40,6 +40,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("unchecked")
 class ReactiveAdapterRegistryTests {
 
+	private static final Duration ONE_SECOND = Duration.ofSeconds(1);
+
+
 	private final ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
 
 
@@ -85,7 +88,7 @@ class ReactiveAdapterRegistryTests {
 			Publisher<Integer> source = io.reactivex.rxjava3.core.Flowable.fromIterable(sequence);
 			Object target = getAdapter(Flux.class).fromPublisher(source);
 			assertThat(target instanceof Flux).isTrue();
-			assertThat(((Flux<Integer>) target).collectList().block(Duration.ofMillis(1000))).isEqualTo(sequence);
+			assertThat(((Flux<Integer>) target).collectList().block(ONE_SECOND)).isEqualTo(sequence);
 		}
 
 		@Test
@@ -93,7 +96,7 @@ class ReactiveAdapterRegistryTests {
 			Publisher<Integer> source = io.reactivex.rxjava3.core.Flowable.fromArray(1, 2, 3);
 			Object target = getAdapter(Mono.class).fromPublisher(source);
 			assertThat(target instanceof Mono).isTrue();
-			assertThat(((Mono<Integer>) target).block(Duration.ofMillis(1000))).isEqualTo(Integer.valueOf(1));
+			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
 		}
 
 		@Test
@@ -110,7 +113,7 @@ class ReactiveAdapterRegistryTests {
 			future.complete(1);
 			Object target = getAdapter(CompletableFuture.class).toPublisher(future);
 			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Mono<Integer>) target).block(Duration.ofMillis(1000))).isEqualTo(Integer.valueOf(1));
+			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
 		}
 	}
 
@@ -155,7 +158,7 @@ class ReactiveAdapterRegistryTests {
 			Object source = rx.Observable.from(sequence);
 			Object target = getAdapter(rx.Observable.class).toPublisher(source);
 			assertThat(target instanceof Flux).as("Expected Flux Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Flux<Integer>) target).collectList().block(Duration.ofMillis(1000))).isEqualTo(sequence);
+			assertThat(((Flux<Integer>) target).collectList().block(ONE_SECOND)).isEqualTo(sequence);
 		}
 
 		@Test
@@ -163,7 +166,7 @@ class ReactiveAdapterRegistryTests {
 			Object source = rx.Single.just(1);
 			Object target = getAdapter(rx.Single.class).toPublisher(source);
 			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Mono<Integer>) target).block(Duration.ofMillis(1000))).isEqualTo(Integer.valueOf(1));
+			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
 		}
 
 		@Test
@@ -171,7 +174,7 @@ class ReactiveAdapterRegistryTests {
 			Object source = rx.Completable.complete();
 			Object target = getAdapter(rx.Completable.class).toPublisher(source);
 			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
-			((Mono<Void>) target).block(Duration.ofMillis(1000));
+			((Mono<Void>) target).block(ONE_SECOND);
 		}
 	}
 
@@ -229,7 +232,7 @@ class ReactiveAdapterRegistryTests {
 			Object source = io.reactivex.Flowable.fromIterable(sequence);
 			Object target = getAdapter(io.reactivex.Flowable.class).toPublisher(source);
 			assertThat(target instanceof Flux).as("Expected Flux Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Flux<Integer>) target).collectList().block(Duration.ofMillis(1000))).isEqualTo(sequence);
+			assertThat(((Flux<Integer>) target).collectList().block(ONE_SECOND)).isEqualTo(sequence);
 		}
 
 		@Test
@@ -238,7 +241,7 @@ class ReactiveAdapterRegistryTests {
 			Object source = io.reactivex.Observable.fromIterable(sequence);
 			Object target = getAdapter(io.reactivex.Observable.class).toPublisher(source);
 			assertThat(target instanceof Flux).as("Expected Flux Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Flux<Integer>) target).collectList().block(Duration.ofMillis(1000))).isEqualTo(sequence);
+			assertThat(((Flux<Integer>) target).collectList().block(ONE_SECOND)).isEqualTo(sequence);
 		}
 
 		@Test
@@ -246,7 +249,7 @@ class ReactiveAdapterRegistryTests {
 			Object source = io.reactivex.Single.just(1);
 			Object target = getAdapter(io.reactivex.Single.class).toPublisher(source);
 			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Mono<Integer>) target).block(Duration.ofMillis(1000))).isEqualTo(Integer.valueOf(1));
+			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
 		}
 
 		@Test
@@ -254,7 +257,7 @@ class ReactiveAdapterRegistryTests {
 			Object source = io.reactivex.Completable.complete();
 			Object target = getAdapter(io.reactivex.Completable.class).toPublisher(source);
 			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
-			((Mono<Void>) target).block(Duration.ofMillis(1000));
+			((Mono<Void>) target).block(ONE_SECOND);
 		}
 	}
 
@@ -312,7 +315,7 @@ class ReactiveAdapterRegistryTests {
 			Object source = io.reactivex.rxjava3.core.Flowable.fromIterable(sequence);
 			Object target = getAdapter(io.reactivex.rxjava3.core.Flowable.class).toPublisher(source);
 			assertThat(target instanceof Flux).as("Expected Flux Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Flux<Integer>) target).collectList().block(Duration.ofMillis(1000))).isEqualTo(sequence);
+			assertThat(((Flux<Integer>) target).collectList().block(ONE_SECOND)).isEqualTo(sequence);
 		}
 
 		@Test
@@ -321,7 +324,7 @@ class ReactiveAdapterRegistryTests {
 			Object source = io.reactivex.rxjava3.core.Observable.fromIterable(sequence);
 			Object target = getAdapter(io.reactivex.rxjava3.core.Observable.class).toPublisher(source);
 			assertThat(target instanceof Flux).as("Expected Flux Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Flux<Integer>) target).collectList().block(Duration.ofMillis(1000))).isEqualTo(sequence);
+			assertThat(((Flux<Integer>) target).collectList().block(ONE_SECOND)).isEqualTo(sequence);
 		}
 
 		@Test
@@ -329,7 +332,7 @@ class ReactiveAdapterRegistryTests {
 			Object source = io.reactivex.rxjava3.core.Single.just(1);
 			Object target = getAdapter(io.reactivex.rxjava3.core.Single.class).toPublisher(source);
 			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Mono<Integer>) target).block(Duration.ofMillis(1000))).isEqualTo(Integer.valueOf(1));
+			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
 		}
 
 		@Test
@@ -337,7 +340,7 @@ class ReactiveAdapterRegistryTests {
 			Object source = io.reactivex.rxjava3.core.Completable.complete();
 			Object target = getAdapter(io.reactivex.rxjava3.core.Completable.class).toPublisher(source);
 			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
-			((Mono<Void>) target).block(Duration.ofMillis(1000));
+			((Mono<Void>) target).block(ONE_SECOND);
 		}
 	}
 
@@ -359,7 +362,6 @@ class ReactiveAdapterRegistryTests {
 		}
 	}
 
-	// SmallRye Mutiny
 	@Nested
 	class Mutiny {
 
@@ -374,7 +376,7 @@ class ReactiveAdapterRegistryTests {
 			Publisher<Integer> source = Mono.just(1);
 			Object target = getAdapter(Uni.class).fromPublisher(source);
 			assertThat(target).isInstanceOf(Uni.class);
-			assertThat(((Uni<Integer>) target).await().atMost(Duration.ofMillis(1000))).isEqualTo(Integer.valueOf(1));
+			assertThat(((Uni<Integer>) target).await().atMost(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
 		}
 
 		@Test
@@ -382,7 +384,7 @@ class ReactiveAdapterRegistryTests {
 			Uni<Integer> source = Uni.createFrom().item(1);
 			Object target = getAdapter(Uni.class).toPublisher(source);
 			assertThat(target).isInstanceOf(Mono.class);
-			assertThat(((Mono<Integer>) target).block(Duration.ofMillis(1000))).isEqualTo(Integer.valueOf(1));
+			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
 		}
 
 		@Test
@@ -391,7 +393,7 @@ class ReactiveAdapterRegistryTests {
 			Publisher<Integer> source = Flux.fromIterable(sequence);
 			Object target = getAdapter(Multi.class).fromPublisher(source);
 			assertThat(target).isInstanceOf(Multi.class);
-			assertThat(((Multi<Integer>) target).collect().asList().await().atMost(Duration.ofMillis(1000))).isEqualTo(sequence);
+			assertThat(((Multi<Integer>) target).collect().asList().await().atMost(ONE_SECOND)).isEqualTo(sequence);
 		}
 
 		@Test
@@ -400,7 +402,7 @@ class ReactiveAdapterRegistryTests {
 			Multi<Integer> source = Multi.createFrom().iterable(sequence);
 			Object target = getAdapter(Multi.class).toPublisher(source);
 			assertThat(target).isInstanceOf(Flux.class);
-			assertThat(((Flux<Integer>) target).blockLast(Duration.ofMillis(1000))).isEqualTo(Integer.valueOf(3));
+			assertThat(((Flux<Integer>) target).blockLast(ONE_SECOND)).isEqualTo(Integer.valueOf(3));
 		}
 
 	}

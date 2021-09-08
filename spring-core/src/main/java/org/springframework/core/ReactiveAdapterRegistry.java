@@ -24,8 +24,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
 import kotlinx.coroutines.CompletableDeferredKt;
 import kotlinx.coroutines.Deferred;
 import org.reactivestreams.Publisher;
@@ -85,7 +83,7 @@ public class ReactiveAdapterRegistry {
 		rxjava3Present = ClassUtils.isPresent("io.reactivex.rxjava3.core.Flowable", classLoader);
 		flowPublisherPresent = ClassUtils.isPresent("java.util.concurrent.Flow.Publisher", classLoader);
 		kotlinCoroutinesPresent = ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt", classLoader);
-		mutinyPresent = ClassUtils.isPresent("io.smallrye.mutiny.Uni", classLoader);
+		mutinyPresent = ClassUtils.isPresent("io.smallrye.mutiny.Multi", classLoader);
 	}
 
 	private final List<ReactiveAdapter> adapters = new ArrayList<>();
@@ -427,19 +425,24 @@ public class ReactiveAdapterRegistry {
 		}
 	}
 
+
 	private static class MutinyRegistrar {
 
 		void registerAdapters(ReactiveAdapterRegistry registry) {
 			registry.registerReactiveType(
-					ReactiveTypeDescriptor.singleOptionalValue(Uni.class, ()-> Uni.createFrom().nothing()),
-					uni ->((Uni<?>)uni).convert().toPublisher(),
-					publisher ->  Uni.createFrom().publisher(publisher)
+					ReactiveTypeDescriptor.singleOptionalValue(
+							io.smallrye.mutiny.Uni.class,
+							() -> io.smallrye.mutiny.Uni.createFrom().nothing()),
+					uni -> ((io.smallrye.mutiny.Uni<?>) uni).convert().toPublisher(),
+					publisher -> io.smallrye.mutiny.Uni.createFrom().publisher(publisher)
 			);
 
 			registry.registerReactiveType(
-					ReactiveTypeDescriptor.multiValue(Multi.class, ()-> Multi.createFrom().empty()),
-					multi -> (Multi<?>) multi,
-					publisher-> Multi.createFrom().publisher(publisher)
+					ReactiveTypeDescriptor.multiValue(
+							io.smallrye.mutiny.Multi.class,
+							() -> io.smallrye.mutiny.Multi.createFrom().empty()),
+					multi -> (io.smallrye.mutiny.Multi<?>) multi,
+					publisher -> io.smallrye.mutiny.Multi.createFrom().publisher(publisher)
 			);
 		}
 	}
