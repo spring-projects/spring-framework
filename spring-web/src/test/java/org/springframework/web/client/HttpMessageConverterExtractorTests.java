@@ -38,6 +38,7 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -192,6 +193,25 @@ public class HttpMessageConverterExtractorTests {
 		assertThatExceptionOfType(RestClientException.class).isThrownBy(() -> extractor.extractData(response))
 			.withMessageContaining("Error while extracting response for type [class java.lang.String] and content type [text/plain]")
 			.withCauseInstanceOf(HttpMessageNotReadableException.class);
+	}
+
+	@Test
+	public void unknownContentTypeExceptionContainsCorrectResponseBody() throws IOException {
+		responseHeaders.setContentType(contentType);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes())  {
+			@Override
+			public boolean markSupported() {
+				return false;
+			}
+		});
+		given(converter.canRead(String.class, contentType)).willReturn(false);
+
+		UnknownContentTypeException unknownContentTypeException =
+				catchThrowableOfType(() -> extractor.extractData(response), UnknownContentTypeException.class);
+		assertThat(unknownContentTypeException).isNotNull();
+		assertThat(unknownContentTypeException.getResponseBodyAsString()).isEqualTo("Foobar");
 	}
 
 }
