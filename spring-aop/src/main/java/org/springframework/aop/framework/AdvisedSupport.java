@@ -521,8 +521,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		copy.copyFrom(this);
 		copy.targetSource = EmptyTargetSource.forClass(getTargetClass(), getTargetSource().isStatic());
 		copy.advisorChainFactory = this.advisorChainFactory;
-		copy.interfaces = this.interfaces;
-		copy.advisors = this.advisors;
+		copy.interfaces = new ArrayList<>(this.interfaces);
+		copy.advisors = new ArrayList<>(this.advisors);
 		return copy;
 	}
 
