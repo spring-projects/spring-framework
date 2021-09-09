@@ -11188,7 +11188,7 @@ The following table lists features provided by the `BeanFactory` and
 | No
 | Yes
 
-| Convenient `MessageSource` access (for internalization)
+| Convenient `MessageSource` access (for internationalization)
 | No
 | Yes
 
