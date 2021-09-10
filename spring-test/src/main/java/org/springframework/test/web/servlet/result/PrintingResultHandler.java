@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,13 +123,10 @@ public class PrintingResultHandler implements ResultHandler {
 
 	protected final HttpHeaders getRequestHeaders(MockHttpServletRequest request) {
 		HttpHeaders headers = new HttpHeaders();
-		Enumeration<?> names = request.getHeaderNames();
+		Enumeration<String> names = request.getHeaderNames();
 		while (names.hasMoreElements()) {
-			String name = (String) names.nextElement();
-			Enumeration<String> values = request.getHeaders(name);
-			while (values.hasMoreElements()) {
-				headers.add(name, values.nextElement());
-			}
+			String name = names.nextElement();
+			headers.put(name, Collections.list(request.getHeaders(name)));
 		}
 		return headers;
 	}
@@ -248,14 +245,11 @@ public class PrintingResultHandler implements ResultHandler {
 	 * Print the response.
 	 */
 	protected void printResponse(MockHttpServletResponse response) throws Exception {
-		String body = (response.getCharacterEncoding() != null ?
-				response.getContentAsString() : MISSING_CHARACTER_ENCODING);
-
 		this.printer.printValue("Status", response.getStatus());
 		this.printer.printValue("Error message", response.getErrorMessage());
 		this.printer.printValue("Headers", getResponseHeaders(response));
 		this.printer.printValue("Content type", response.getContentType());
-		this.printer.printValue("Body", body);
+		this.printer.printValue("Body", response.getContentAsString());
 		this.printer.printValue("Forwarded URL", response.getForwardedUrl());
 		this.printer.printValue("Redirected URL", response.getRedirectedUrl());
 		printCookies(response.getCookies());

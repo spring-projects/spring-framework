@@ -44,6 +44,7 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.AssertionErrors;
+import org.springframework.test.util.ExceptionCollector;
 import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.util.Assert;
@@ -63,6 +64,8 @@ import org.springframework.web.util.UriBuilderFactory;
  * Default implementation of {@link WebTestClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
+ * @author Michał Rowicki
  * @since 5.0
  */
 class DefaultWebTestClient implements WebTestClient {
@@ -506,6 +509,30 @@ class DefaultWebTestClient implements WebTestClient {
 		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef) {
 			Flux<T> body = this.response.bodyToFlux(elementTypeRef);
 			return new FluxExchangeResult<>(this.exchangeResult, body);
+		}
+
+		@Override
+		public ResponseSpec expectAll(ResponseSpecConsumer... consumers) {
+			ExceptionCollector exceptionCollector = new ExceptionCollector();
+			for (ResponseSpecConsumer consumer : consumers) {
+				exceptionCollector.execute(() -> consumer.accept(this));
+			}
+			try {
+				exceptionCollector.assertEmpty();
+			}
+			catch (RuntimeException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				// In theory, a ResponseSpecConsumer should never throw an Exception
+				// that is not a RuntimeException, but since ExceptionCollector may
+				// throw a checked Exception, we handle this to appease the compiler
+				// and in case someone uses a "sneaky throws" technique.
+				AssertionError assertionError = new AssertionError(ex.getMessage());
+				assertionError.initCause(ex);
+				throw assertionError;
+			}
+			return this;
 		}
 	}
 

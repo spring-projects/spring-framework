@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		IJmxTestBean bean = getBean();
 		assertThat(bean).isNotNull();
 		MBeanInfo inf = getMBeanInfo();
-		assertThat(inf.getOperations().length).as("Incorrect number of operations registered").isEqualTo(getExpectedOperationCount());
+		assertThat(inf.getOperations()).as("Incorrect number of operations registered").hasSize(getExpectedOperationCount());
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		IJmxTestBean bean = getBean();
 		assertThat(bean).isNotNull();
 		MBeanInfo inf = getMBeanInfo();
-		assertThat(inf.getAttributes().length).as("Incorrect number of attributes registered").isEqualTo(getExpectedAttributeCount());
+		assertThat(inf.getAttributes()).as("Incorrect number of attributes registered").hasSize(getExpectedAttributeCount());
 	}
 
 	@Test
@@ -81,7 +81,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	public void testGetMBeanAttributeInfo() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		MBeanAttributeInfo[] inf = info.getAttributes();
-		assertThat(inf.length).as("Invalid number of Attributes returned").isEqualTo(getExpectedAttributeCount());
+		assertThat(inf).as("Invalid number of Attributes returned").hasSize(getExpectedAttributeCount());
 
 		for (int x = 0; x < inf.length; x++) {
 			assertThat(inf[x]).as("MBeanAttributeInfo should not be null").isNotNull();
@@ -93,7 +93,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	public void testGetMBeanOperationInfo() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		MBeanOperationInfo[] inf = info.getOperations();
-		assertThat(inf.length).as("Invalid number of Operations returned").isEqualTo(getExpectedOperationCount());
+		assertThat(inf).as("Invalid number of Operations returned").hasSize(getExpectedOperationCount());
 
 		for (int x = 0; x < inf.length; x++) {
 			assertThat(inf[x]).as("MBeanOperationInfo should not be null").isNotNull();
@@ -128,8 +128,8 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	public void testOperationInvocation() throws Exception{
 		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
 		Object result = getServer().invoke(objectName, "add",
-				new Object[] {new Integer(20), new Integer(30)}, new String[] {"int", "int"});
-		assertThat(result).as("Incorrect result").isEqualTo(new Integer(50));
+				new Object[] {20, 30}, new String[] {"int", "int"});
+		assertThat(result).as("Incorrect result").isEqualTo(50);
 	}
 
 	@Test
@@ -150,12 +150,12 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 
 		ModelMBeanOperationInfo get = info.getOperation("getName");
 		assertThat(get).as("get operation should not be null").isNotNull();
-		assertThat(new Integer(4)).as("get operation should have visibility of four").isEqualTo(get.getDescriptor().getFieldValue("visibility"));
+		assertThat(Integer.valueOf(4)).as("get operation should have visibility of four").isEqualTo(get.getDescriptor().getFieldValue("visibility"));
 		assertThat(get.getDescriptor().getFieldValue("role")).as("get operation should have role \"getter\"").isEqualTo("getter");
 
 		ModelMBeanOperationInfo set = info.getOperation("setName");
 		assertThat(set).as("set operation should not be null").isNotNull();
-		assertThat(new Integer(4)).as("set operation should have visibility of four").isEqualTo(set.getDescriptor().getFieldValue("visibility"));
+		assertThat(Integer.valueOf(4)).as("set operation should have visibility of four").isEqualTo(set.getDescriptor().getFieldValue("visibility"));
 		assertThat(set.getDescriptor().getFieldValue("role")).as("set operation should have role \"setter\"").isEqualTo("setter");
 	}
 
@@ -163,12 +163,12 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	public void testNotificationMetadata() throws Exception {
 		ModelMBeanInfo info = (ModelMBeanInfo) getMBeanInfo();
 		MBeanNotificationInfo[] notifications = info.getNotifications();
-		assertThat(notifications.length).as("Incorrect number of notifications").isEqualTo(1);
+		assertThat(notifications).as("Incorrect number of notifications").hasSize(1);
 		assertThat(notifications[0].getName()).as("Incorrect notification name").isEqualTo("My Notification");
 
 		String[] notifTypes = notifications[0].getNotifTypes();
 
-		assertThat(notifTypes.length).as("Incorrect number of notification types").isEqualTo(2);
+		assertThat(notifTypes).as("Incorrect number of notification types").hasSize(2);
 		assertThat(notifTypes[0]).as("Notification type.foo not found").isEqualTo("type.foo");
 		assertThat(notifTypes[1]).as("Notification type.bar not found").isEqualTo("type.bar");
 	}

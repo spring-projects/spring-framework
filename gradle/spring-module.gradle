@@ -8,9 +8,9 @@ apply plugin: 'me.champeau.jmh'
 apply from: "$rootDir/gradle/publications.gradle"
 
 dependencies {
-	jmh 'org.openjdk.jmh:jmh-core:1.28'
-	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.28'
-	jmh 'net.sf.jopt-simple:jopt-simple:4.6'
+	jmh 'org.openjdk.jmh:jmh-core:1.32'
+	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.32'
+	jmh 'net.sf.jopt-simple:jopt-simple'
 }
 
 jmh {

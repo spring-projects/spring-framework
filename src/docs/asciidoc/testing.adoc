@@ -1657,8 +1657,10 @@ before failing.
 times that the test method is to be run is specified in the annotation.
 
 The scope of execution to be repeated includes execution of the test method itself as
-well as any setting up or tearing down of the test fixture. The following example shows
-how to use the `@Repeat` annotation:
+well as any setting up or tearing down of the test fixture. When used with the
+<<testcontext-junit4-rules, `SpringMethodRule`>>, the scope additionally includes
+preparation of the test instance by `TestExecutionListener` implementations. The
+following example shows how to use the `@Repeat` annotation:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -2611,7 +2613,7 @@ published while invoking a method in a Spring-managed component:
 			// Invoke method in OrderService that publishes an event
 			orderService.submitOrder(new Order(/* ... */));
 			// Verify that an OrderSubmitted event was published
-			int numEvents = events.stream(OrderSubmitted.class).count(); // <3>
+			long numEvents = events.stream(OrderSubmitted.class).count(); // <3>
 			assertThat(numEvents).isEqualTo(1);
 		}
 	}
@@ -7217,8 +7219,9 @@ they must be specified on every request.
 [[spring-mvc-test-server-defining-expectations]]
 ===== Defining Expectations
 
-You can define expectations by appending one or more `.andExpect(..)` calls after
-performing a request, as the following example shows:
+You can define expectations by appending one or more `andExpect(..)` calls after
+performing a request, as the following example shows. As soon as one expectation fails,
+no other expectations will be asserted.
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -7236,6 +7239,21 @@ performing a request, as the following example shows:
 	mockMvc.get("/accounts/1").andExpect {
 		status().isOk()
 	}
+----
+
+You can define multiple expectations by appending `andExpectAll(..)` after performing a
+request, as the following example shows. In contrast to `andExpect(..)`,
+`andExpectAll(..)` guarantees that all supplied expectations will be asserted and that
+all failures will be tracked and reported.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// static import of MockMvcRequestBuilders.* and MockMvcResultMatchers.*
+
+	mockMvc.perform(get("/accounts/1")).andExpectAll(
+		status().isOk(),
+		content().contentType("application/json;charset=UTF-8"));
 ----
 
 `MockMvcResultMatchers.*` provides a number of expectations, some of which are further

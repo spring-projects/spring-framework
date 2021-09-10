@@ -86,6 +86,8 @@ import org.springframework.web.util.UriBuilderFactory;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sam Brannen
+ * @author Michał Rowicki
  * @since 5.0
  * @see StatusAssertions
  * @see HeaderAssertions
@@ -782,6 +784,34 @@ public interface WebTestClient {
 	interface ResponseSpec {
 
 		/**
+		 * Apply multiple assertions to a response with the given
+		 * {@linkplain ResponseSpecConsumer consumers}, with the guarantee that
+		 * all assertions will be applied even if one or more assertions fails
+		 * with an exception.
+		 * <p>If a single {@link Error} or {@link RuntimeException} is thrown,
+		 * it will be rethrown.
+		 * <p>If multiple exceptions are thrown, this method will throw an
+		 * {@link AssertionError} whose error message is a summary of all of the
+		 * exceptions. In addition, each exception will be added as a
+		 * {@linkplain Throwable#addSuppressed(Throwable) suppressed exception} to
+		 * the {@code AssertionError}.
+		 * <p>This feature is similar to the {@code SoftAssertions} support in
+		 * AssertJ and the {@code assertAll()} support in JUnit Jupiter.
+		 *
+		 * <h4>Example</h4>
+		 * <pre class="code">
+		 * webTestClient.get().uri("/hello").exchange()
+		 *     .expectAll(
+		 *         responseSpec -> responseSpec.expectStatus().isOk(),
+		 *         responseSpec -> responseSpec.expectBody(String.class).isEqualTo("Hello, World!")
+		 *     );
+		 * </pre>
+		 * @param consumers the list of {@code ResponseSpec} consumers
+		 * @since 5.3.10
+		 */
+		ResponseSpec expectAll(ResponseSpecConsumer... consumers);
+
+		/**
 		 * Assertions on the response status.
 		 */
 		StatusAssertions expectStatus();
@@ -845,6 +875,16 @@ public interface WebTestClient {
 		 * about a target type with generics.
 		 */
 		<T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef);
+
+		/**
+		 * {@link Consumer} of a {@link ResponseSpec}.
+		 * @since 5.3.10
+		 * @see ResponseSpec#expectAll(ResponseSpecConsumer...)
+		 */
+		@FunctionalInterface
+		interface ResponseSpecConsumer extends Consumer<ResponseSpec> {
+		}
+
 	}
 
 

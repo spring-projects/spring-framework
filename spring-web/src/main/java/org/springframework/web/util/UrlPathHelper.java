@@ -147,7 +147,6 @@ public class UrlPathHelper {
 	 * Whether configured to remove ";" (semicolon) content from the request URI.
 	 */
 	public boolean shouldRemoveSemicolonContent() {
-		checkReadOnly();
 		return this.removeSemicolonContent;
 	}
 
@@ -190,7 +189,7 @@ public class UrlPathHelper {
 
 	/**
 	 * {@link #getLookupPathForRequest Resolve} the lookupPath and cache it in a
-	 * a request attribute with the key {@link #PATH_ATTRIBUTE} for subsequent
+	 * request attribute with the key {@link #PATH_ATTRIBUTE} for subsequent
 	 * access via {@link #getResolvedLookupPath(ServletRequest)}.
 	 * @param request the current request
 	 * @return the resolved path

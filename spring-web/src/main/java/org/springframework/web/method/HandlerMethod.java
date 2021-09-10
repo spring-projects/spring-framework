@@ -102,11 +102,20 @@ public class HandlerMethod {
 	 * Create an instance from a bean instance and a method.
 	 */
 	public HandlerMethod(Object bean, Method method) {
+		this(bean, method, null);
+	}
+
+	/**
+	 * Variant of {@link #HandlerMethod(Object, Method)} that
+	 * also accepts a {@link MessageSource} for use from sub-classes.
+	 * @since 5.3.10
+	 */
+	protected HandlerMethod(Object bean, Method method, @Nullable MessageSource messageSource) {
 		Assert.notNull(bean, "Bean is required");
 		Assert.notNull(method, "Method is required");
 		this.bean = bean;
 		this.beanFactory = null;
-		this.messageSource = null;
+		this.messageSource = messageSource;
 		this.beanType = ClassUtils.getUserClass(bean);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);

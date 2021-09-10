@@ -30,8 +30,12 @@ dependencies {
 	optional("org.hamcrest:hamcrest")
 	optional("org.apache.taglibs:taglibs-standard-jstlel")
 	optional("net.sourceforge.htmlunit:htmlunit")
-	optional("org.seleniumhq.selenium:htmlunit-driver")
-	optional("org.seleniumhq.selenium:selenium-java")
+	optional("org.seleniumhq.selenium:htmlunit-driver") {
+		exclude group: "net.bytebuddy", module: "byte-buddy"
+	}
+	optional("org.seleniumhq.selenium:selenium-java") {
+		exclude group: "net.bytebuddy", module: "byte-buddy"
+	}
 	optional("org.xmlunit:xmlunit-matchers")
 	optional("org.skyscreamer:jsonassert")
 	optional("com.jayway.jsonpath:json-path")

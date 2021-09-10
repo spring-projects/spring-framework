@@ -191,7 +191,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * Defaults to UTF-8 as per RFC 7578.
 	 * @param headersCharset the charset to use for decoding headers
 	 * @since 5.3.6
-	 * @see <a href="https://tools.ietf.org/html/rfc7578#section-5.1">RFC-7578 Section 5.2</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7578#section-5.1">RFC-7578 Section 5.1</a>
 	 */
 	public void setHeadersCharset(Charset headersCharset) {
 		Assert.notNull(headersCharset, "HeadersCharset must not be null");

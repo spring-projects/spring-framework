@@ -5386,7 +5386,7 @@ You can configure how Spring MVC determines the requested media types from the r
 
 By default, only the `Accept` header is checked.
 
-If you must use URL-based content type resolution, consider using the query parameten
+If you must use URL-based content type resolution, consider using the query parameter
 strategy over path extensions. See
 <<mvc-ann-requestmapping-suffix-pattern-match>> and <<mvc-ann-requestmapping-rfd>> for
 more details.

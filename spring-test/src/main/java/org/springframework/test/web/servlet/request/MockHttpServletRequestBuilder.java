@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -241,6 +242,17 @@ public class MockHttpServletRequestBuilder
 	public MockHttpServletRequestBuilder secure(boolean secure){
 		this.secure = secure;
 		return this;
+	}
+
+	/**
+	 * Set the character encoding of the request.
+	 * @param encoding the character encoding
+	 * @since 5.3.10
+	 * @see StandardCharsets
+	 * @see #characterEncoding(String)
+	 */
+	public MockHttpServletRequestBuilder characterEncoding(Charset encoding) {
+		return this.characterEncoding(encoding.name());
 	}
 
 	/**
