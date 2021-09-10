@@ -50,7 +50,7 @@ Each `HandlerMapping` can be
 {api-spring-framework}/web/servlet/handler/AbstractHandlerMapping.html#setCorsConfigurations-java.util.Map-[configured]
 individually with URL pattern-based `CorsConfiguration` mappings. In most cases, applications
 use the MVC Java configuration or the XML namespace to declare such mappings, which results
-in a single global map being passed to all `HandlerMappping` instances.
+in a single global map being passed to all `HandlerMapping` instances.
 
 You can combine global CORS configuration at the `HandlerMapping` level with more
 fine-grained, handler-level CORS configuration. For example, annotated controllers can use

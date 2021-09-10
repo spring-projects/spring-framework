@@ -790,7 +790,7 @@ The following example shows how to create your own `PropertyEditorRegistrar` imp
 
 See also the `org.springframework.beans.support.ResourceEditorRegistrar` for an example
 `PropertyEditorRegistrar` implementation. Notice how in its implementation of the
-`registerCustomEditors(..)` method ,it creates new instances of each property editor.
+`registerCustomEditors(..)` method, it creates new instances of each property editor.
 
 The next example shows how to configure a `CustomEditorConfigurer` and inject an instance of our
 `CustomPropertyEditorRegistrar` into it:
@@ -1347,6 +1347,7 @@ listing shows the definition of the `AnnotationFormatterFactory` interface:
 ----
 
 To create an implementation:
+
 . Parameterize A to be the field `annotationType` with which you wish to associate
 formatting  logic -- for example `org.springframework.format.annotation.DateTimeFormat`.
 . Have `getFieldTypes()` return the types of fields on which the annotation can be used.
@@ -1470,7 +1471,7 @@ The following example uses `@DateTimeFormat` to format a `java.util.Date` as an 
 .Kotlin
 ----
 	class MyModel(
-		@DateTimeFormat(iso= ISO.DATE) private val date: Date
+		@DateTimeFormat(iso=ISO.DATE) private val date: Date
 	)
 ----
 
