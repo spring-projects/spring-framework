@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,10 +208,10 @@ public class HttpMessageConverterExtractorTests {
 		});
 		given(converter.canRead(String.class, contentType)).willReturn(false);
 
-		UnknownContentTypeException unknownContentTypeException =
-				catchThrowableOfType(() -> extractor.extractData(response), UnknownContentTypeException.class);
-		assertThat(unknownContentTypeException).isNotNull();
-		assertThat(unknownContentTypeException.getResponseBodyAsString()).isEqualTo("Foobar");
+		UnknownContentTypeException exception = catchThrowableOfType(
+				() -> extractor.extractData(response), UnknownContentTypeException.class);
+		assertThat(exception).isNotNull();
+		assertThat(exception.getResponseBodyAsString()).isEqualTo("Foobar");
 	}
 
 }

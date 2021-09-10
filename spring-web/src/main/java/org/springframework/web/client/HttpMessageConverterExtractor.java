@@ -122,8 +122,8 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 		}
 
 		throw new UnknownContentTypeException(this.responseType, contentType,
-				responseWrapper.getRawStatusCode(), responseWrapper.getStatusText(), responseWrapper.getHeaders(),
-				getResponseBody(responseWrapper));
+				responseWrapper.getRawStatusCode(), responseWrapper.getStatusText(),
+				responseWrapper.getHeaders(), getResponseBody(responseWrapper));
 	}
 
 	/**
