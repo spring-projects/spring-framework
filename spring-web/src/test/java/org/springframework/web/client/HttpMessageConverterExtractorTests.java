@@ -38,7 +38,6 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -51,7 +50,7 @@ import static org.mockito.Mockito.mock;
  * @author Brian Clozel
  * @author Sam Brannen
  */
-public class HttpMessageConverterExtractorTests {
+class HttpMessageConverterExtractorTests {
 
 	@SuppressWarnings("unchecked")
 	private final HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
@@ -62,7 +61,7 @@ public class HttpMessageConverterExtractorTests {
 
 
 	@Test
-	public void constructorPreconditions() {
+	void constructorPreconditions() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> new HttpMessageConverterExtractor<>(String.class, (List<HttpMessageConverter<?>>) null))
 				.withMessage("'messageConverters' must not be empty");
@@ -72,7 +71,7 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test
-	public void noContent() throws IOException {
+	void noContent() throws IOException {
 		given(response.getRawStatusCode()).willReturn(HttpStatus.NO_CONTENT.value());
 
 		Object result = extractor.extractData(response);
@@ -80,7 +79,7 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test
-	public void notModified() throws IOException {
+	void notModified() throws IOException {
 		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_MODIFIED.value());
 
 		Object result = extractor.extractData(response);
@@ -88,7 +87,7 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test
-	public void informational() throws IOException {
+	void informational() throws IOException {
 		given(response.getRawStatusCode()).willReturn(HttpStatus.CONTINUE.value());
 
 		Object result = extractor.extractData(response);
@@ -96,7 +95,7 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test
-	public void zeroContentLength() throws IOException {
+	void zeroContentLength() throws IOException {
 		responseHeaders.setContentLength(0);
 		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		given(response.getHeaders()).willReturn(responseHeaders);
@@ -106,7 +105,7 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test
-	public void emptyMessageBody() throws IOException {
+	void emptyMessageBody() throws IOException {
 		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream("".getBytes()));
@@ -116,7 +115,7 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test // gh-22265
-	public void nullMessageBody() throws IOException {
+	void nullMessageBody() throws IOException {
 		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(null);
@@ -126,7 +125,7 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test
-	public void normal() throws IOException {
+	void normal() throws IOException {
 		responseHeaders.setContentType(contentType);
 		String expected = "Foo";
 		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
@@ -140,7 +139,7 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test
-	public void cannotRead() throws IOException {
+	void cannotRead() throws IOException {
 		responseHeaders.setContentType(contentType);
 		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		given(response.getHeaders()).willReturn(responseHeaders);
@@ -151,7 +150,7 @@ public class HttpMessageConverterExtractorTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void generics() throws IOException {
+	void generics() throws IOException {
 		responseHeaders.setContentType(contentType);
 		String expected = "Foo";
 		ParameterizedTypeReference<List<String>> reference = new ParameterizedTypeReference<List<String>>() {};
@@ -171,7 +170,7 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test  // SPR-13592
-	public void converterThrowsIOException() throws IOException {
+	void converterThrowsIOException() throws IOException {
 		responseHeaders.setContentType(contentType);
 		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		given(response.getHeaders()).willReturn(responseHeaders);
@@ -184,7 +183,7 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test  // SPR-13592
-	public void converterThrowsHttpMessageNotReadableException() throws IOException {
+	void converterThrowsHttpMessageNotReadableException() throws IOException {
 		responseHeaders.setContentType(contentType);
 		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		given(response.getHeaders()).willReturn(responseHeaders);
@@ -196,7 +195,7 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test
-	public void unknownContentTypeExceptionContainsCorrectResponseBody() throws IOException {
+	void unknownContentTypeExceptionContainsCorrectResponseBody() throws IOException {
 		responseHeaders.setContentType(contentType);
 		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		given(response.getHeaders()).willReturn(responseHeaders);
@@ -208,10 +207,8 @@ public class HttpMessageConverterExtractorTests {
 		});
 		given(converter.canRead(String.class, contentType)).willReturn(false);
 
-		UnknownContentTypeException exception = catchThrowableOfType(
-				() -> extractor.extractData(response), UnknownContentTypeException.class);
-		assertThat(exception).isNotNull();
-		assertThat(exception.getResponseBodyAsString()).isEqualTo("Foobar");
+		assertThatExceptionOfType(UnknownContentTypeException.class).isThrownBy(() -> extractor.extractData(response))
+			.satisfies(exception -> assertThat(exception.getResponseBodyAsString()).isEqualTo("Foobar"));
 	}
 
 }
