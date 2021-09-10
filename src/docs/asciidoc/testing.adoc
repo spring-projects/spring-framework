@@ -503,6 +503,7 @@ The following example shows such a case:
 		// class body...
 	}
 ----
+<1> Declaring an initializer class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin

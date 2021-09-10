@@ -580,12 +580,12 @@ itself, excluding the `contextPath` and any `servletMapping` prefix, if present.
 
 The `servletPath` and `pathInfo` are decoded and that makes them impossible to compare
 directly to the full `requestURI` in order to derive the lookupPath and that makes it
-necessary to decode the `requestUri`. However this introduces its own issues because the
+necessary to decode the `requestURI`. However this introduces its own issues because the
 path may contain encoded reserved characters such as `"/"` or `";"` that can in turn
 alter the structure of the path after they are decoded which can also lead to security
 issues. In addition, Servlet containers may normalize the `servletPath` to varying
 degrees which makes it further impossible to perform `startsWith` comparisons against
-the `requestUri`.
+the `requestURI`.
 
 This is why it is best to avoid reliance on the `servletPath` which comes with the
 prefix-based `servletPath` mapping type. If the `DispatcherServlet` is mapped as the
@@ -597,7 +597,7 @@ a `UrlPathHelper` with `alwaysUseFullPath=true` via <<mvc-config-path-matching>>
 the MVC config.
 
 Fortunately the default Servlet mapping `"/"` is a good choice. However, there is still
-an issue in that the `requestUri` needs to be decoded to make it possible to compare to
+an issue in that the `requestURI` needs to be decoded to make it possible to compare to
 controller mappings. This is again undesirable because of the potential to decode
 reserved characters that alter the path structure. If such characters are not expected,
 then you can reject them (like the Spring Security HTTP firewall), or you can configure
@@ -787,7 +787,7 @@ The following table provides more details on the `ViewResolver` hierarchy:
   you can use the `removeFromCache(String viewName, Locale loc)` method.
 
 | `UrlBasedViewResolver`
-| Simple implementation of the `ViewResolver` interface that affects the direct
+| Simple implementation of the `ViewResolver` interface that effects the direct
   resolution of logical view names to URLs without an explicit mapping definition.
   This is appropriate if your logical names match the names of your view resources
   in a straightforward manner, without the need for arbitrary mappings.
@@ -1545,8 +1545,8 @@ There are also HTTP method specific shortcut variants of `@RequestMapping`:
 
 The shortcuts are <<mvc-ann-requestmapping-composed>> that are provided because,
 arguably, most controller methods should be mapped to a specific HTTP method versus
-using `@RequestMapping`, which, by default, matches to all HTTP methods. At the same,
-a `@RequestMapping` is still needed at the class level to express shared mappings.
+using `@RequestMapping`, which, by default, matches to all HTTP methods.
+A `@RequestMapping` is still needed at the class level to express shared mappings.
 
 The following example has type and method level mappings:
 
@@ -1723,7 +1723,7 @@ one of the following depending on whether use of parsed `PathPattern` is enabled
 * {api-spring-framework}/web/util/pattern/PathPattern.html#SPECIFICITY_COMPARATOR[`PathPattern.SPECIFICITY_COMPARATOR`]
 * {api-spring-framework}/util/AntPathMatcher.html#getPatternComparator-java.lang.String-[`AntPathMatcher.getPatternComparator(String path)`]
 
-Both help to sorts patterns with more specific ones on top. A pattern is less specific if
+Both help to sort patterns with more specific ones on top. A pattern is less specific if
 it has a lower count of URI variables (counted as 1), single wildcards (counted as 1),
 and double wildcards (counted as 2). Given an equal score, the longer pattern is chosen.
 Given the same score and length, the pattern with more URI variables than wildcards is
@@ -1752,7 +1752,7 @@ using the `Accept` header should be the preferred choice.
 Over time, the use of file name extensions has proven problematic in a variety of ways.
 It can cause ambiguity when overlain with the use of URI variables, path parameters, and
 URI encoding. Reasoning about URL-based authorization
-and security (see next section for more details) also become more difficult.
+and security (see next section for more details) also becomes more difficult.
 
 To completely disable the use of path extensions in versions prior to 5.3, set the following:
 
@@ -2171,7 +2171,7 @@ and others) and is equivalent to `required=false`.
 | If a method argument is not matched to any of the earlier values in this table and it is
   a simple type (as determined by
 	{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
-  it is a resolved as a `@RequestParam`. Otherwise, it is resolved as a `@ModelAttribute`.
+  it is resolved as a `@RequestParam`. Otherwise, it is resolved as a `@ModelAttribute`.
 |===
 
 
@@ -2300,7 +2300,7 @@ argument as `@Nullable`.
 ====
 As of 5.3, non-null arguments will be enforced even after type conversion. If your handler
 method intends to accept a null value as well, either declare your argument as `@Nullable`
-or mark it as `required=false` in the corresponding `@RequestParam` etc annotation. This is
+or mark it as `required=false` in the corresponding `@RequestParam`, etc. annotation. This is
 a best practice and the recommended solution for regressions encountered in a 5.3 upgrade.
 
 Alternatively, you may specifically handle e.g. the resulting `MissingPathVariableException`
@@ -2777,8 +2777,8 @@ alternatively, set `@ModelAttribute(binding=false)`, as the following example sh
 <1> Setting `@ModelAttribute(binding=false)`.
 
 You can automatically apply validation after data binding by adding the
-`javax.validation.Valid` annotation or Spring's `@Validated` annotation (
-<<core.adoc#validation-beanvalidation, Bean Validation>> and
+`javax.validation.Valid` annotation or Spring's `@Validated` annotation
+(<<core.adoc#validation-beanvalidation, Bean Validation>> and
 <<core.adoc#validation, Spring validation>>). The following example shows how to do so:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -2841,7 +2841,7 @@ The following example uses the `@SessionAttributes` annotation:
 ----
 	@Controller
 	@SessionAttributes("pet") // <1>
-	public class EditPetForm {
+	class EditPetForm {
 		// ...
 	}
 ----
@@ -2866,9 +2866,8 @@ storage, as the following example shows:
 			if (errors.hasErrors) {
 				// ...
 			}
-				status.setComplete(); // <2>
-				// ...
-			}
+			status.setComplete(); // <2>
+			// ...
 		}
 	}
 ----
@@ -4357,7 +4356,7 @@ Spring MVC has an extensive integration with Servlet 3.0 asynchronous request
 <<mvc-ann-async-processing,processing>>:
 
 * <<mvc-ann-async-deferredresult, `DeferredResult`>> and <<mvc-ann-async-callable, `Callable`>>
-return values in controller methods and provide basic support for a single asynchronous
+return values in controller methods provide basic support for a single asynchronous
 return value.
 * Controllers can <<mvc-ann-async-http-streaming,stream>> multiple values, including
 <<mvc-ann-async-sse, SSE>> and <<mvc-ann-async-output-stream, raw data>>.
@@ -4889,7 +4888,7 @@ use case-oriented approach that focuses on the common scenarios:
 	val ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic()
 ----
 
-`WebContentGenerator` also accept a simpler `cachePeriod` property (defined in seconds) that
+`WebContentGenerator` also accepts a simpler `cachePeriod` property (defined in seconds) that
 works as follows:
 
 * A `-1` value does not generate a `Cache-Control` response header.
@@ -4941,7 +4940,7 @@ settings to a `ResponseEntity`, as the following example shows:
 	}
 ----
 
-The preceding example sends an 304 (NOT_MODIFIED) response with an empty body if the comparison
+The preceding example sends a 304 (NOT_MODIFIED) response with an empty body if the comparison
 to the conditional request headers indicates that the content has not changed. Otherwise, the
 `ETag` and `Cache-Control` headers are added to the response.
 
@@ -5104,6 +5103,7 @@ following example shows:
 	@Configuration
 	@EnableWebMvc
 	class WebConfig : WebMvcConfigurer {
+
 		// Implement configuration methods...
 	}
 ----

@@ -1118,7 +1118,7 @@ Contract for sending a message that enables loose coupling between producers and
 `SubscribableChannel` that uses an `Executor` for delivering messages.
 
 Both the Java configuration (that is, `@EnableWebSocketMessageBroker`) and the XML namespace configuration
-(that is,`<websocket:message-broker>`) use the preceding components to assemble a message
+(that is, `<websocket:message-broker>`) use the preceding components to assemble a message
 workflow. The following diagram shows the components used when the simple built-in message
 broker is enabled:
 
@@ -1191,7 +1191,7 @@ is established, STOMP frames begin to flow on it.
 . The client sends a SUBSCRIBE frame with a destination header of `/topic/greeting`. Once received
 and decoded, the message is sent to the `clientInboundChannel` and is then routed to the
 message broker, which stores the client subscription.
-. The client sends a aSEND frame to `/app/greeting`. The `/app` prefix helps to route it to
+. The client sends a SEND frame to `/app/greeting`. The `/app` prefix helps to route it to
 annotated controllers. After the `/app` prefix is stripped, the remaining `/greeting`
 part of the destination is mapped to the `@MessageMapping` method in `GreetingController`.
 . The value returned from `GreetingController` is turned into a Spring `Message` with
@@ -1768,7 +1768,7 @@ WebSocket and SockJS requests.
 
 Therefore, applications that wish to avoid the use of cookies may not have any good
 alternatives for authentication at the HTTP protocol level. Instead of using cookies,
-they may prefer to authenticate with headers at the STOMP messaging protocol level
+they may prefer to authenticate with headers at the STOMP messaging protocol level.
 Doing so requires two simple steps:
 
 . Use the STOMP client to pass authentication headers at connect time.

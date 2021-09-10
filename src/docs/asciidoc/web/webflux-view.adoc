@@ -232,7 +232,7 @@ Java 8+. Using the latest update release available is highly recommended.
  line should be added for Kotlin script support. See
  https://github.com/sdeleuze/kotlin-script-templating[this example] for more detail.
 
-You need to have the script templating library. One way to do that for Javascript is
+You need to have the script templating library. One way to do that for JavaScript is
 through https://www.webjars.org/[WebJars].
 
 

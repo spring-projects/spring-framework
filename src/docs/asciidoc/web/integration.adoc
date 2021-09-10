@@ -29,12 +29,12 @@ entry points into a server-side application, and it delegates to service objects
 (facades) that are defined in a service layer to satisfy business-specific (and
 presentation-technology agnostic) use cases. In Spring, these service objects, any other
 business-specific objects, data-access objects, and others exist in a distinct "`business
-context`", which contains no web or presentation layer objects (presentation objects
-,such as Spring MVC controllers, are typically configured in a distinct "`presentation
+context`", which contains no web or presentation layer objects (presentation objects,
+such as Spring MVC controllers, are typically configured in a distinct "`presentation
 context`"). This section details how you can configure a Spring container (a
 `WebApplicationContext`) that contains all of the 'business beans' in your application.
 
-Moving on to specifics, all you one need to do is declare a
+Moving on to specifics, all you need to do is declare a
 {api-spring-framework}/web/context/ContextLoaderListener.html[`ContextLoaderListener`]
 in the standard Java EE servlet `web.xml` file of your web application and add a
 `contextConfigLocation`<context-param/> section (in the same file) that defines which

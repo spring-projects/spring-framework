@@ -382,7 +382,7 @@ properties:
 ----
 
 The following code snippets show some examples of how to retrieve and manipulate some of
-the properties of instantiated `Companies` and `Employees`:
+the properties of instantiated ``Company``s and ``Employee``s:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -629,7 +629,7 @@ Note that all bean factories and application contexts automatically use a number
 built-in property editors, through their use of a `BeanWrapper` to
 handle property conversions. The standard property editors that the `BeanWrapper`
 registers are listed in the <<beans-beans-conversion, previous section>>.
-Additionally, `ApplicationContexts` also override or add additional editors to handle
+Additionally, ``ApplicationContext``s also override or add additional editors to handle
 resource lookups in a manner appropriate to the specific application context type.
 
 Standard JavaBeans `PropertyEditor` instances are used to convert property values
@@ -790,7 +790,7 @@ The following example shows how to create your own `PropertyEditorRegistrar` imp
 
 See also the `org.springframework.beans.support.ResourceEditorRegistrar` for an example
 `PropertyEditorRegistrar` implementation. Notice how in its implementation of the
-`registerCustomEditors(..)` method ,it creates new instances of each property editor.
+`registerCustomEditors(..)` method, it creates new instances of each property editor.
 
 The next example shows how to configure a `CustomEditorConfigurer` and inject an instance of our
 `CustomPropertyEditorRegistrar` into it:
@@ -1347,6 +1347,7 @@ listing shows the definition of the `AnnotationFormatterFactory` interface:
 ----
 
 To create an implementation:
+
 . Parameterize A to be the field `annotationType` with which you wish to associate
 formatting  logic -- for example `org.springframework.format.annotation.DateTimeFormat`.
 . Have `getFieldTypes()` return the types of fields on which the annotation can be used.
@@ -1470,7 +1471,7 @@ The following example uses `@DateTimeFormat` to format a `java.util.Date` as an 
 .Kotlin
 ----
 	class MyModel(
-		@DateTimeFormat(iso= ISO.DATE) private val date: Date
+		@DateTimeFormat(iso=ISO.DATE) private val date: Date
 	)
 ----
 

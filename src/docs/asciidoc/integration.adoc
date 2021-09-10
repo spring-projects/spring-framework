@@ -390,7 +390,7 @@ model and corresponding services:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	public class Account implements Serializable{
+	public class Account implements Serializable {
 
 		private String name;
 
@@ -445,7 +445,7 @@ section of the Spring AMQP reference.
 [[remoting-autodection-remote-interfaces]]
 [NOTE]
 ====
-Auto-detection is not implemented for remote interfaces
+Auto-detection is not implemented for remote interfaces.
 
 The main reason why auto-detection of implemented interfaces does not occur for remote
 interfaces is to avoid opening too many doors to remote callers. The target object might
@@ -514,7 +514,7 @@ Spring provides full support for the standard Java web services APIs:
 * Accessing web services using JAX-WS
 
 In addition to stock support for JAX-WS in Spring Core, the Spring portfolio also
-features http://www.springframework.org/spring-ws[Spring Web Services], which is a solution for
+features https://projects.spring.io/spring-ws[Spring Web Services], which is a solution for
 contract-first, document-driven web services -- highly recommended for building modern,
 future-proof web services.
 
@@ -711,7 +711,7 @@ as the following example shows:
 ----
 
 NOTE: The above is slightly simplified in that JAX-WS requires endpoint interfaces
-and implementation classes to be annotated with `@WebService`, `@SOAPBinding` etc
+and implementation classes to be annotated with `@WebService`, `@SOAPBinding`, etc.
 annotations. This means that you cannot (easily) use plain Java interfaces and
 implementation classes as JAX-WS endpoint artifacts; you need to annotate them
 accordingly first. Check the JAX-WS documentation for details on those requirements.
@@ -1610,7 +1610,7 @@ cache size is set to `1`. You can use the `sessionCacheSize` property to increas
 cached sessions. Note that the number of actual cached sessions is more than that
 number, as sessions are cached based on their acknowledgment mode, so there can be up to
 four cached session instances (one for each
-acknowledgment mode) when `sessionCacheSize` is set to one . `MessageProducer` and `MessageConsumer` instances are cached within their
+acknowledgment mode) when `sessionCacheSize` is set to one. `MessageProducer` and `MessageConsumer` instances are cached within their
 owning session and also take into account the unique properties of the producers and
 consumers when caching. MessageProducers are cached based on their destination.
 MessageConsumers are cached based on a key composed of the destination, selector,
@@ -1621,7 +1621,7 @@ noLocal delivery flag, and the durable subscription name (if creating durable co
 ==== Destination Management
 
 Destinations, as `ConnectionFactory` instances, are JMS administered objects that you can store
-and retrieved in JNDI. When configuring a Spring application context, you can use the
+and retrieve in JNDI. When configuring a Spring application context, you can use the
 JNDI `JndiObjectFactoryBean` factory class or `<jee:jndi-lookup>` to perform dependency
 injection on your object's references to JMS destinations. However, this strategy
 is often cumbersome if there are a large number of destinations in the application or if there
@@ -1734,7 +1734,7 @@ use a proper cache level in such a case.
 This container also has recoverable capabilities when the broker goes down. By default,
 a simple `BackOff` implementation retries every five seconds. You can specify
 a custom `BackOff` implementation for more fine-grained recovery options. See
-api-spring-framework/util/backoff/ExponentialBackOff.html[`ExponentialBackOff`] for an example.
+{api-spring-framework}/util/backoff/ExponentialBackOff.html[`ExponentialBackOff`] for an example.
 
 NOTE: Like its sibling (<<jms-mdp-simple, `SimpleMessageListenerContainer`>>),
 `DefaultMessageListenerContainer` supports native JMS transactions and allows for
@@ -1747,7 +1747,7 @@ Any such arrangements are significantly more efficient than the alternative:
 wrapping your entire processing with an XA transaction (through configuring your
 `DefaultMessageListenerContainer` with an `JtaTransactionManager`) to cover the
 reception of the JMS message as well as the execution of the business logic in your
-message listener (including database operations etc).
+message listener (including database operations, etc.).
 
 IMPORTANT: The default `AUTO_ACKNOWLEDGE` mode does not provide proper reliability guarantees.
 Messages can get lost when listener execution fails (since the provider automatically
@@ -1864,7 +1864,7 @@ content. The overloaded methods `convertAndSend()` and `receiveAndConvert()` met
 `JmsTemplate` delegate the conversion process to an instance of the `MessageConverter`
 interface. This interface defines a simple contract to convert between Java objects and
 JMS messages. The default implementation (`SimpleMessageConverter`) supports conversion
-between `String` and `TextMessage`, `byte[]` and `BytesMesssage`, and `java.util.Map`
+between `String` and `TextMessage`, `byte[]` and `BytesMessage`, and `java.util.Map`
 and `MapMessage`. By using the converter, you and your application code can focus on the
 business object that is being sent or received through JMS and not be concerned with the
 details of how it is represented as a JMS message.
@@ -4392,7 +4392,7 @@ email when someone places an order:
 					+ order.getCustomer().getLastName()
 					+ ", thank you for placing order. Your order number is "
 					+ order.getOrderNumber());
-			try{
+			try {
 				this.mailSender.send(msg);
 			}
 			catch (MailException ex) {
@@ -5646,15 +5646,16 @@ compliant caches (such as Ehcache 3.x). See <<cache-plug>> for more information 
 plugging in other cache stores and providers.
 
 IMPORTANT: The caching abstraction has no special handling for multi-threaded and
-multi-process environments, as such features are handled by the cache implementation. .
+multi-process environments, as such features are handled by the cache implementation.
 
 If you have a multi-process environment (that is, an application deployed on several nodes),
 you need to configure your cache provider accordingly. Depending on your use cases, a copy
 of the same data on several nodes can be enough. However, if you change the data during
 the course of the application, you may need to enable other propagation mechanisms.
 
-Caching a particular item is a direct equivalent of the typical get-if-not-found-then-
-proceed-and-put-eventually code blocks found with programmatic cache interaction.
+Caching a particular item is a direct equivalent of the typical
+get-if-not-found-then-proceed-and-put-eventually code blocks
+found with programmatic cache interaction.
 No locks are applied, and several threads may try to load the same item concurrently.
 The same applies to eviction. If several threads are trying to update or evict data
 concurrently, you may use stale data. Certain cache providers offer advanced features

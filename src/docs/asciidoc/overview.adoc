@@ -44,7 +44,7 @@ parallel, the Spring WebFlux reactive web framework.
 A note about modules: Spring's framework jars allow for deployment to JDK 9's module path
 ("Jigsaw"). For use in Jigsaw-enabled applications, the Spring Framework 5 jars come with
 "Automatic-Module-Name" manifest entries which define stable language-level module names
-("spring.core", "spring.context" etc) independent from jar artifact names (the jars follow
+("spring.core", "spring.context", etc.) independent from jar artifact names (the jars follow
 the same naming pattern with "-" instead of ".", e.g. "spring-core" and "spring-context").
 Of course, Spring's framework jars keep working fine on the classpath on both JDK 8 and 9+.
 
