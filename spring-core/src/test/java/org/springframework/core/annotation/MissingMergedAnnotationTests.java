@@ -257,7 +257,7 @@ class MissingMergedAnnotationTests {
 
 	@Test
 	void synthesizeThrowsNoSuchElementException() {
-		assertThatNoSuchElementException().isThrownBy(() -> this.missing.synthesize());
+		assertThatNoSuchElementException().isThrownBy(this.missing::synthesize);
 	}
 
 	@Test

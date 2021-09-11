@@ -80,7 +80,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		super.bufferFactory = bufferFactory;
 
 		Flux<DataBuffer> flux = DataBufferUtils.readInputStream(
-				() -> this.resource.getInputStream(), super.bufferFactory, 3);
+				this.resource::getInputStream, super.bufferFactory, 3);
 
 		verifyReadData(flux);
 	}
