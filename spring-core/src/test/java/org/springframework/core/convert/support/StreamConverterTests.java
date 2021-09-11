@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.Converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -134,12 +133,7 @@ class StreamConverterTests {
 	@SuppressWarnings("resource")
 	void convertFromArrayToStream() throws NoSuchFieldException {
 		Integer[] stream = new Integer[] {1, 0, 1};
-		this.conversionService.addConverter(new Converter<Integer, Boolean>() {
-			@Override
-			public Boolean convert(Integer source) {
-				return source == 1;
-			}
-		});
+		this.conversionService.addConverter(Integer.class, Boolean.class, source -> source == 1);
 		TypeDescriptor streamOfBoolean = new TypeDescriptor(Types.class.getField("streamOfBooleans"));
 		Object result = this.conversionService.convert(stream, streamOfBoolean);
 
