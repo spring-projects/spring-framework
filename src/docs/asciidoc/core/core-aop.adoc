@@ -2830,7 +2830,7 @@ The corresponding Spring configuration is as follows:
 	</bean>
 ----
 
-Notice that, for the time, being we assume that all business services are idempotent. If
+Notice that, for the time being, we assume that all business services are idempotent. If
 this is not the case, we can refine the aspect so that it retries only genuinely
 idempotent operations, by introducing an `Idempotent` annotation and using the annotation
 to annotate the implementation of service operations, as the following example shows:
