@@ -1834,7 +1834,7 @@ class SomeClass {
 When the `accounts` property of the `something` bean is prepared for injection, the generics
 information about the element type of the strongly-typed `Map<String, Float>` is
 available by reflection. Thus, Spring's type conversion infrastructure recognizes the
-various value elements as being of type `Float`, and the string values (`9.99, 2.75`, and
+various value elements as being of type `Float`, and the string values (`9.99`, `2.75`, and
 `3.99`) are converted into an actual `Float` type.
 
 
@@ -2503,13 +2503,13 @@ declared return type of the lookup method:
 	public abstract class CommandManager {
 
 		public Object process(Object commandState) {
-			MyCommand command = createCommand();
+			Command command = createCommand();
 			command.setState(commandState);
 			return command.execute();
 		}
 
 		@Lookup
-		protected abstract MyCommand createCommand();
+		protected abstract Command createCommand();
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -3960,7 +3960,7 @@ dependency type. The following table summarizes the most important `Aware` inter
 
 | `BeanFactoryAware`
 | Declaring `BeanFactory`.
-| <<beans-factory-aware>>
+| <<beans-beanfactory>>
 
 | `BeanNameAware`
 | Name of the declaring bean.
@@ -6075,7 +6075,7 @@ will get properties from `application.properties` and `application.yml` files.
 
 Built-in converter support provided by Spring allows simple type conversion (to `Integer`
 or `int` for example) to be automatically handled. Multiple comma-separated values can be
-automatically converted to String array without extra effort.
+automatically converted to `String` array without extra effort.
 
 It is possible to provide a default value as following:
 
@@ -6100,7 +6100,7 @@ It is possible to provide a default value as following:
 ----
 
 A Spring `BeanPostProcessor` uses a `ConversionService` behind the scenes to handle the
-process for converting the String value in `@Value` to the target type. If you want to
+process for converting the `String` value in `@Value` to the target type. If you want to
 provide conversion support for your own custom type, you can provide your own
 `ConversionService` bean instance as the following example shows:
 
@@ -6591,7 +6591,7 @@ and using "`stub`" repositories instead:
 			includeFilters = @Filter(type = FilterType.REGEX, pattern = ".*Stub.*Repository"),
 			excludeFilters = @Filter(Repository.class))
 	public class AppConfig {
-		...
+		// ...
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -7758,7 +7758,7 @@ To enable component scanning, you can annotate your `@Configuration` class as fo
 	@Configuration
 	@ComponentScan(basePackages = "com.acme") // <1>
 	public class AppConfig  {
-		...
+		// ...
 	}
 ----
 <1> This annotation enables component scanning.
@@ -8296,7 +8296,7 @@ as the following example shows:
 	@Configuration
 	public class AppConfig {
 
-		@Bean(name = "myThing")
+		@Bean("myThing")
 		public Thing thing() {
 			return new Thing();
 		}

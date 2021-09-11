@@ -1878,7 +1878,7 @@ rollback rules, timeouts, and other features.
 ==== Transaction Propagation
 
 This section describes some semantics of transaction propagation in Spring. Note
-that this section is not an introduction to transaction propagation proper. Rather, it
+that this section is not a proper introduction to transaction propagation. Rather, it
 details some of the semantics regarding transaction propagation in Spring.
 
 In Spring-managed transactions, be aware of the difference between physical and
@@ -2585,8 +2585,7 @@ following example shows how to do so:
 	TransactionStatus status = txManager.getTransaction(def);
 	try {
 		// put your business logic here
-	}
-	catch (MyException ex) {
+	} catch (MyException ex) {
 		txManager.rollback(status);
 		throw ex;
 	}
@@ -3743,7 +3742,7 @@ See also <<jdbc-JdbcTemplate-idioms>> for guidelines on using the
 ==== Using `SQLExceptionTranslator`
 
 `SQLExceptionTranslator` is an interface to be implemented by classes that can translate
-between `SQLExceptions` and Spring's own `org.springframework.dao.DataAccessException`,
+between ``SQLException``s and Spring's own `org.springframework.dao.DataAccessException`,
 which is agnostic in regard to data access strategy. Implementations can be generic (for
 example, using SQLState codes for JDBC) or proprietary (for example, using Oracle error
 codes) for greater precision.
@@ -6029,7 +6028,7 @@ limit is 1000.
 In addition to the primitive values in the value list, you can create a `java.util.List`
 of object arrays. This list can support multiple expressions being defined for the `in`
 clause, such as `select * from T_ACTOR where (id, last_name) in \((1, 'Johnson'), (2,
-'Harrop'\))`. This, of course, requires that your database supports this syntax.
+'Harrop'))`. This, of course, requires that your database supports this syntax.
 
 
 [[jdbc-complex-types]]
@@ -7091,7 +7090,7 @@ databases, you may want multiple `DatabaseClient` instances, which requires mult
 instances.
 
 [[r2dbc-auto-generated-keys]]
-== Retrieving Auto-generated Keys
+=== Retrieving Auto-generated Keys
 
 `INSERT` statements may generate keys when inserting rows into a table
 that defines an auto-increment or identity column. To get full control over
@@ -7385,7 +7384,9 @@ examples (one for Java configuration and one for XML configuration) show how to 
 ----
 	@Repository
 	class ProductDaoImpl : ProductDao {
+
 		// class body here...
+
 	}
 ----
 

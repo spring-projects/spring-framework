@@ -95,8 +95,8 @@ You can shorten it further still with a full URI template, as the following exam
 .Kotlin
 ----
 	val uri = UriComponentsBuilder
-		.fromUriString("https://example.com/hotels/{hotel}?q={q}")
-		.build("Westin", "123")
+			.fromUriString("https://example.com/hotels/{hotel}?q={q}")
+			.build("Westin", "123")
 ----
 
 

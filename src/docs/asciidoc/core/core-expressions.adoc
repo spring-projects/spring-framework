@@ -465,7 +465,7 @@ following example shows how to do so:
 .Java
 ----
 	SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,
-		this.getClass().getClassLoader());
+			this.getClass().getClassLoader());
 
 	SpelExpressionParser parser = new SpelExpressionParser(config);
 

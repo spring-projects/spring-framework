@@ -1747,7 +1747,7 @@ Any such arrangements are significantly more efficient than the alternative:
 wrapping your entire processing with an XA transaction (through configuring your
 `DefaultMessageListenerContainer` with an `JtaTransactionManager`) to cover the
 reception of the JMS message as well as the execution of the business logic in your
-message listener (including database operations etc).
+message listener (including database operations, etc.).
 
 IMPORTANT: The default `AUTO_ACKNOWLEDGE` mode does not provide proper reliability guarantees.
 Messages can get lost when listener execution fails (since the provider automatically

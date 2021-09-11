@@ -580,12 +580,12 @@ itself, excluding the `contextPath` and any `servletMapping` prefix, if present.
 
 The `servletPath` and `pathInfo` are decoded and that makes them impossible to compare
 directly to the full `requestURI` in order to derive the lookupPath and that makes it
-necessary to decode the `requestUri`. However this introduces its own issues because the
+necessary to decode the `requestURI`. However this introduces its own issues because the
 path may contain encoded reserved characters such as `"/"` or `";"` that can in turn
 alter the structure of the path after they are decoded which can also lead to security
 issues. In addition, Servlet containers may normalize the `servletPath` to varying
 degrees which makes it further impossible to perform `startsWith` comparisons against
-the `requestUri`.
+the `requestURI`.
 
 This is why it is best to avoid reliance on the `servletPath` which comes with the
 prefix-based `servletPath` mapping type. If the `DispatcherServlet` is mapped as the
@@ -597,7 +597,7 @@ a `UrlPathHelper` with `alwaysUseFullPath=true` via <<mvc-config-path-matching>>
 the MVC config.
 
 Fortunately the default Servlet mapping `"/"` is a good choice. However, there is still
-an issue in that the `requestUri` needs to be decoded to make it possible to compare to
+an issue in that the `requestURI` needs to be decoded to make it possible to compare to
 controller mappings. This is again undesirable because of the potential to decode
 reserved characters that alter the path structure. If such characters are not expected,
 then you can reject them (like the Spring Security HTTP firewall), or you can configure
@@ -1545,8 +1545,8 @@ There are also HTTP method specific shortcut variants of `@RequestMapping`:
 
 The shortcuts are <<mvc-ann-requestmapping-composed>> that are provided because,
 arguably, most controller methods should be mapped to a specific HTTP method versus
-using `@RequestMapping`, which, by default, matches to all HTTP methods. At the same,
-a `@RequestMapping` is still needed at the class level to express shared mappings.
+using `@RequestMapping`, which, by default, matches to all HTTP methods.
+A `@RequestMapping` is still needed at the class level to express shared mappings.
 
 The following example has type and method level mappings:
 
@@ -2300,7 +2300,7 @@ argument as `@Nullable`.
 ====
 As of 5.3, non-null arguments will be enforced even after type conversion. If your handler
 method intends to accept a null value as well, either declare your argument as `@Nullable`
-or mark it as `required=false` in the corresponding `@RequestParam` etc annotation. This is
+or mark it as `required=false` in the corresponding `@RequestParam`, etc. annotation. This is
 a best practice and the recommended solution for regressions encountered in a 5.3 upgrade.
 
 Alternatively, you may specifically handle e.g. the resulting `MissingPathVariableException`
@@ -5103,6 +5103,7 @@ following example shows:
 	@Configuration
 	@EnableWebMvc
 	class WebConfig : WebMvcConfigurer {
+
 		// Implement configuration methods...
 	}
 ----
