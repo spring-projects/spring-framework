@@ -332,8 +332,7 @@ class SettableListenableFutureTests {
 	void cancelStateThrowsExceptionWhenCallingGet() throws ExecutionException, InterruptedException {
 		settableListenableFuture.cancel(true);
 
-		assertThatExceptionOfType(CancellationException.class).isThrownBy(() ->
-				settableListenableFuture.get());
+		assertThatExceptionOfType(CancellationException.class).isThrownBy(settableListenableFuture::get);
 
 		assertThat(settableListenableFuture.isCancelled()).isTrue();
 		assertThat(settableListenableFuture.isDone()).isTrue();

@@ -47,8 +47,7 @@ class ProfilesTests {
 
 	@Test
 	void ofWhenEmptyThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				Profiles.of())
+		assertThatIllegalArgumentException().isThrownBy(Profiles::of)
 			.withMessageContaining("Must specify at least one profile");
 	}
 
