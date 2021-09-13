@@ -3,8 +3,8 @@ plugins {
 	id 'io.spring.nohttp' version '0.0.5.RELEASE'
 	id 'org.jetbrains.kotlin.jvm' version '1.5.30' apply false
 	id 'org.jetbrains.dokka' version '1.5.0' apply false
-	id 'org.asciidoctor.jvm.convert' version '3.1.0'
-	id 'org.asciidoctor.jvm.pdf' version '3.1.0'
+	id 'org.asciidoctor.jvm.convert' version '3.3.2'
+	id 'org.asciidoctor.jvm.pdf' version '3.3.2'
 	id 'de.undercouch.download' version '4.1.2'
 	id "io.freefair.aspectj" version '6.1.0' apply false
 	id "com.github.ben-manes.versions" version '0.39.0'
@@ -381,7 +381,10 @@ configure([rootProject] + javaProjects) { project ->
 			"https://hc.apache.org/httpcomponents-client-5.1.x/current/httpclient5/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
-			"https://junit.org/junit5/docs/5.7.2/api/"
+			"https://junit.org/junit5/docs/5.7.2/api/",
+			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
+			"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
+			"https://r2dbc.io/spec/0.8.5.RELEASE/api/"
 	] as String[]
 }
 

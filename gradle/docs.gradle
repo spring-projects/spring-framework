@@ -61,41 +61,14 @@ task api(type: Javadoc) {
 /**
  * Produce KDoc for all Spring Framework modules in "build/docs/kdoc"
  */
-/*
-moduleProjects.each { module ->
-	dokkaHtmlPartial {
-		dokkaSourceSets {
-			configureEach {
-				externalDocumentationLink {
-					url.set(URL("https://docs.spring.io/spring-framework/docs/$version/javadoc-api/"))
-					packageListUrl = new File(buildDir, "docs/javadoc/package-list").toURI().toURL()
-				}
-				externalDocumentationLink {
-					url.set(URL("https://projectreactor.io/docs/core/release/api/"))
-				}
-				externalDocumentationLink {
-					url.set(URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/"))
-				}
-				/*
-			This link causes errors, removing to fix the build.
-			externalDocumentationLink {
-				url.set(URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/"))
-			}
-			//
-				externalDocumentationLink {
-					url.set(URL("https://r2dbc.io/spec/0.8.3.RELEASE/api/"))
-				}
-			}
+pluginManager.withPlugin("kotlin") {
+	tasks.dokkaHtmlMultiModule.configure {
+		dependsOn {
+			tasks.getByName("api")
 		}
+		moduleName.set("spring-framework")
+		outputDirectory.set(project.file("$buildDir/docs/kdoc"))
 	}
-}
-*/
-tasks.dokkaHtmlMultiModule.configure {
-	dependsOn {
-		tasks.getByName("api")
-	}
-	moduleName.set("spring-framework")
-	outputDirectory.set(project.file("$buildDir/docs/kdoc"))
 }
 
 task downloadResources(type: Download) {
@@ -195,7 +168,7 @@ task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'asciidoctorPdf', 'dok
 	from ("$asciidoctorPdf.outputDir") {
 		into "reference/pdf"
 	}
-	from (dokkaHtmlMultiModule) {
+	from (dokkaHtmlMultiModule.outputDirectory) {
 		into "kdoc-api"
 	}
 }
@@ -252,11 +225,11 @@ task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
 		expand(copyright: new Date().format("yyyy"), version: project.version)
 	}
 
-	from(zipTree(docsZip.archivePath)) {
+	from(zipTree(docsZip.archiveFile)) {
 		into "${baseDir}/docs"
 	}
 
-	from(zipTree(schemaZip.archivePath)) {
+	from(zipTree(schemaZip.archiveFile)) {
 		into "${baseDir}/schema"
 	}
 
