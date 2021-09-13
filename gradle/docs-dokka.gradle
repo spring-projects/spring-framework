@@ -17,7 +17,7 @@ tasks.findByName("dokkaHtmlPartial")?.configure {
 				url.set(new URL("https://kotlin.github.io/kotlinx.coroutines/"))
 			}
 			externalDocumentationLink {
-				url.set(new URL("http://hamcrest.org/JavaHamcrest/javadoc/2.1/"))
+				url.set(new URL("https://hamcrest.org/JavaHamcrest/javadoc/2.1/"))
 			}
 			externalDocumentationLink {
 				url.set(new URL("https://javadoc.io/doc/javax.servlet/javax.servlet-api/latest/"))
