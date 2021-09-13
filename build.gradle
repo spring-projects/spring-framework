@@ -27,8 +27,8 @@ configure(allprojects) { project ->
 
 	dependencyManagement {
 		imports {
-			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.4"
-			mavenBom "io.netty:netty-bom:4.1.67.Final"
+			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.5"
+			mavenBom "io.netty:netty-bom:4.1.68.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.10"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR10"
 			mavenBom "io.rsocket:rsocket-bom:1.1.1"
@@ -197,13 +197,13 @@ configure(allprojects) { project ->
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '3.11.0') {
+			dependencySet(group: 'org.mockito', version: '3.12.4') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 				entry 'mockito-junit-jupiter'
 			}
-			dependency "io.mockk:mockk:1.11.0"
+			dependency "io.mockk:mockk:1.12.0"
 
 			dependency("net.sourceforge.htmlunit:htmlunit:2.52.0") {
 				exclude group: "commons-logging", name: "commons-logging"
@@ -216,7 +216,7 @@ configure(allprojects) { project ->
 				exclude group: "io.netty", name: "netty"
 			}
 			dependency "org.skyscreamer:jsonassert:1.5.0"
-			dependency "com.jayway.jsonpath:json-path:2.5.0"
+			dependency "com.jayway.jsonpath:json-path:2.6.0"
 			dependency "org.bouncycastle:bcpkix-jdk15on:1.66"
 
 			dependencySet(group: 'org.apache.tiles', version: '3.0.8') {
