@@ -112,7 +112,7 @@ test {
 
 task aggregateTestReports(type: TestReport) {
 	description = "Aggregates JUnit and TestNG test reports."
-	destinationDir = test.reports.html.destination
+	destinationDir = test.reports.html.outputLocation.get().getAsFile()
 	reportOn junit, testNG
 }
 
