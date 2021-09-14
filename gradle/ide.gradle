@@ -41,20 +41,20 @@ eclipse.classpath.file.beforeMerged { classpath ->
 		}
 	}
 }
-eclipse.classpath.file.whenMerged { classpath ->
-	classpath.entries.findAll{ it instanceof SourceFolder }.each {
+eclipse.classpath.file.whenMerged {
+	entries.findAll{ it instanceof SourceFolder }.each {
 		it.output = 'bin/' + it.path.split('/')[1]
 	}
 }
 
 // Ensure project dependencies come after 3rd-party libs (SPR-11836)
 // https://jira.spring.io/browse/SPR-11836
-eclipse.classpath.file.whenMerged { classpath ->
-	classpath.entries.findAll { it instanceof ProjectDependency }.each {
+eclipse.classpath.file.whenMerged {
+	entries.findAll { it instanceof ProjectDependency }.each {
 		// delete from original position
-		classpath.entries.remove(it)
+		entries.remove(it)
 		// append to end of classpath
-		classpath.entries.add(it)
+		entries.add(it)
 	}
 }
 
@@ -79,34 +79,30 @@ task eclipseSettings(type: Copy) {
 	outputs.upToDateWhen { false }
 }
 
-task eclipseWstComponent(type: Copy) {
+task eclipseJdtSettings(type: Copy) {
+	from rootProject.file('src/eclipse/org.eclipse.jdt.core.prefs')
+	into project.file('.settings/')
+	outputs.upToDateWhen { false }
+}
+
+task eclipseBuildship {
+	dependsOn eclipseSettings, eclipseJdtSettings
+}
+
+task eclipseWstComponentSettings(type: Copy) {
 	from rootProject.files('src/eclipse/org.eclipse.wst.common.component')
 	into project.file('.settings/')
 	expand(deployname: project.name)
 	outputs.upToDateWhen { false }
 }
 
-task eclipseJdtPrepare(type: Copy) {
-	from rootProject.file('src/eclipse/org.eclipse.jdt.core.prefs')
-	into project.file('.settings/')
-	outputs.upToDateWhen { false }
-}
-
-task cleanEclipseJdtUi(type: Delete) {
+task cleanEclipseSettings(type: Delete) {
 	delete project.file('.settings/org.eclipse.jdt.core.prefs')
 	delete project.file('.settings/org.eclipse.jdt.ui.prefs')
 	delete project.file('.settings/org.eclipse.wst.common.component')
 	delete project.file('.settings/org.eclipse.wst.common.project.facet.core.xml')
 }
 
-task eclipseBuildship(type: Copy) {
-	from rootProject.files(
-		'src/eclipse/org.eclipse.jdt.ui.prefs',
-		'src/eclipse/org.eclipse.jdt.core.prefs')
-	into project.file('.settings/')
-	outputs.upToDateWhen { false }
-}
-
-tasks['eclipseJdt'].dependsOn(eclipseJdtPrepare)
-tasks['cleanEclipse'].dependsOn(cleanEclipseJdtUi)
-tasks['eclipse'].dependsOn(eclipseSettings, eclipseWstComponent)
+tasks['eclipse'].dependsOn(eclipseSettings, eclipseJdtSettings, eclipseWstComponentSettings)
+tasks['eclipseJdt'].dependsOn(eclipseJdtSettings)
+tasks['cleanEclipse'].dependsOn(cleanEclipseSettings)
