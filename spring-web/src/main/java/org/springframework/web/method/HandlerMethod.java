@@ -42,6 +42,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -119,6 +120,7 @@ public class HandlerMethod {
 		this.beanType = ClassUtils.getUserClass(bean);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+		ReflectionUtils.makeAccessible(this.bridgedMethod);
 		this.parameters = initMethodParameters();
 		evaluateResponseStatus();
 		this.description = initDescription(this.beanType, this.method);
@@ -137,6 +139,7 @@ public class HandlerMethod {
 		this.beanType = ClassUtils.getUserClass(bean);
 		this.method = bean.getClass().getMethod(methodName, parameterTypes);
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(this.method);
+		ReflectionUtils.makeAccessible(this.bridgedMethod);
 		this.parameters = initMethodParameters();
 		evaluateResponseStatus();
 		this.description = initDescription(this.beanType, this.method);
@@ -172,6 +175,7 @@ public class HandlerMethod {
 		this.beanType = ClassUtils.getUserClass(beanType);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+		ReflectionUtils.makeAccessible(this.bridgedMethod);
 		this.parameters = initMethodParameters();
 		evaluateResponseStatus();
 		this.description = initDescription(this.beanType, this.method);

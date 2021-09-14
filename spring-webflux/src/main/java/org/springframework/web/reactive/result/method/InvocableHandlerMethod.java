@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
@@ -137,7 +136,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return getMethodArgumentValues(exchange, bindingContext, providedArgs).flatMap(args -> {
 			Object value;
 			try {
-				ReflectionUtils.makeAccessible(getBridgedMethod());
 				Method method = getBridgedMethod();
 				if (KotlinDetector.isSuspendingFunction(method)) {
 					value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
