@@ -1,7 +1,7 @@
 import org.gradle.plugins.ide.eclipse.model.ProjectDependency
 import org.gradle.plugins.ide.eclipse.model.SourceFolder
 
-apply plugin: "eclipse"
+apply plugin: 'eclipse'
 
 eclipse.jdt {
 	sourceCompatibility = 1.8
@@ -30,17 +30,17 @@ eclipse.classpath.file.whenMerged { classpath ->
 }
 
 // Use separate main/test outputs (prevents WTP from packaging test classes)
-eclipse.classpath.defaultOutputDir = file(project.name+"/bin/eclipse")
+eclipse.classpath.defaultOutputDir = file(project.name + '/bin/eclipse')
 eclipse.classpath.file.beforeMerged { classpath ->
 	classpath.entries.findAll{ it instanceof SourceFolder }.each {
-		if (it.output.startsWith("bin/")) {
+		if (it.output.startsWith('bin/')) {
 			it.output = null
 		}
 	}
 }
 eclipse.classpath.file.whenMerged { classpath ->
 	classpath.entries.findAll{ it instanceof SourceFolder }.each {
-		it.output = "bin/" + it.path.split("/")[1]
+		it.output = 'bin/' + it.path.split('/')[1]
 	}
 }
 
@@ -65,46 +65,45 @@ eclipse.classpath.file.whenMerged {
 }
 
 // Allow projects to be used as WTP modules
-eclipse.project.natures "org.eclipse.wst.common.project.facet.core.nature"
+eclipse.project.natures 'org.eclipse.wst.common.project.facet.core.nature'
 
 // Include project specific settings
 task eclipseSettings(type: Copy) {
 	from rootProject.files(
-		"src/eclipse/org.eclipse.jdt.ui.prefs",
-		"src/eclipse/org.eclipse.wst.common.project.facet.core.xml")
+		'src/eclipse/org.eclipse.jdt.ui.prefs',
+		'src/eclipse/org.eclipse.wst.common.project.facet.core.xml')
 	into project.file('.settings/')
 	outputs.upToDateWhen { false }
 }
 
 task eclipseWstComponent(type: Copy) {
-	from rootProject.files(
-		"src/eclipse/org.eclipse.wst.common.component")
+	from rootProject.files('src/eclipse/org.eclipse.wst.common.component')
 	into project.file('.settings/')
 	expand(deployname: project.name)
 	outputs.upToDateWhen { false }
 }
 
 task eclipseJdtPrepare(type: Copy) {
-	from rootProject.file("src/eclipse/org.eclipse.jdt.core.prefs")
-	into project.file(".settings/")
-	outputs.upToDateWhen { false }
-}
-
-task cleanEclipseJdtUi(type: Delete) {
-	delete project.file(".settings/org.eclipse.jdt.core.prefs")
-	delete project.file(".settings/org.eclipse.jdt.ui.prefs")
-	delete project.file(".settings/org.eclipse.wst.common.component")
-	delete project.file(".settings/org.eclipse.wst.common.project.facet.core.xml")
-}
-
-task eclipseBuildship(type: Copy) {
-	from rootProject.files(
-		"src/eclipse/org.eclipse.jdt.ui.prefs",
-		"src/eclipse/org.eclipse.jdt.core.prefs")
+	from rootProject.file('src/eclipse/org.eclipse.jdt.core.prefs')
 	into project.file('.settings/')
 	outputs.upToDateWhen { false }
 }
 
-tasks["eclipseJdt"].dependsOn(eclipseJdtPrepare)
-tasks["cleanEclipse"].dependsOn(cleanEclipseJdtUi)
-tasks["eclipse"].dependsOn(eclipseSettings, eclipseWstComponent)
+task cleanEclipseJdtUi(type: Delete) {
+	delete project.file('.settings/org.eclipse.jdt.core.prefs')
+	delete project.file('.settings/org.eclipse.jdt.ui.prefs')
+	delete project.file('.settings/org.eclipse.wst.common.component')
+	delete project.file('.settings/org.eclipse.wst.common.project.facet.core.xml')
+}
+
+task eclipseBuildship(type: Copy) {
+	from rootProject.files(
+		'src/eclipse/org.eclipse.jdt.ui.prefs',
+		'src/eclipse/org.eclipse.jdt.core.prefs')
+	into project.file('.settings/')
+	outputs.upToDateWhen { false }
+}
+
+tasks['eclipseJdt'].dependsOn(eclipseJdtPrepare)
+tasks['cleanEclipse'].dependsOn(cleanEclipseJdtUi)
+tasks['eclipse'].dependsOn(eclipseSettings, eclipseWstComponent)
