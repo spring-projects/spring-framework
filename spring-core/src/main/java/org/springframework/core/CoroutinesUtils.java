@@ -45,10 +45,7 @@ import reactor.core.publisher.Mono;
  * @author Phillip Webb
  * @since 5.2
  */
-public final class CoroutinesUtils {
-
-	private CoroutinesUtils() {
-	}
+public abstract class CoroutinesUtils {
 
 	/**
 	 * Convert a {@link Deferred} instance to a {@link Mono}.
@@ -78,7 +75,7 @@ public final class CoroutinesUtils {
 					KCallables.callSuspend(function, getSuspendedFunctionArgs(target, args), continuation))
 				.filter(result -> !Objects.equals(result, Unit.INSTANCE))
 				.onErrorMap(InvocationTargetException.class, InvocationTargetException::getTargetException);
-		if (classifier.equals(JvmClassMappingKt.getKotlinClass(Flow.class))) {
+		if (classifier != null && classifier.equals(JvmClassMappingKt.getKotlinClass(Flow.class))) {
 			return mono.flatMapMany(CoroutinesUtils::asFlux);
 		}
 		return mono;
