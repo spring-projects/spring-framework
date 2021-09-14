@@ -98,30 +98,31 @@ class BeanUtilsTests {
 		Constructor<BeanWithPrimitiveTypes> constructor = getBeanWithPrimitiveTypesConstructor();
 
 		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() ->
-				BeanUtils.instantiateClass(constructor, null, null, null, null, null, null, null, "foo", null));
+				BeanUtils.instantiateClass(constructor, null, null, null, null, null, null, null, null, "foo", null));
 	}
 
 	@Test  // gh-22531, gh-27390
 	void instantiateClassWithOptionalPrimitiveTypes() throws NoSuchMethodException {
 		Constructor<BeanWithPrimitiveTypes> constructor = getBeanWithPrimitiveTypesConstructor();
 
-		BeanWithPrimitiveTypes bean = BeanUtils.instantiateClass(constructor, null, null, null, null, null, null, null, "foo");
+		BeanWithPrimitiveTypes bean = BeanUtils.instantiateClass(constructor, null, null, null, null, null, null, null, null, "foo");
 
 		assertSoftly(softly -> {
-			softly.assertThat(bean.isFlag()).isEqualTo(false);
+			softly.assertThat(bean.isFlag()).isFalse();
 			softly.assertThat(bean.getByteCount()).isEqualTo((byte) 0);
 			softly.assertThat(bean.getShortCount()).isEqualTo((short) 0);
 			softly.assertThat(bean.getIntCount()).isEqualTo(0);
 			softly.assertThat(bean.getLongCount()).isEqualTo(0L);
 			softly.assertThat(bean.getFloatCount()).isEqualTo(0F);
 			softly.assertThat(bean.getDoubleCount()).isEqualTo(0D);
+			softly.assertThat(bean.getCharacter()).isEqualTo('\0');
 			softly.assertThat(bean.getText()).isEqualTo("foo");
 		});
 	}
 
 	private Constructor<BeanWithPrimitiveTypes> getBeanWithPrimitiveTypesConstructor() throws NoSuchMethodException {
 		return BeanWithPrimitiveTypes.class.getConstructor(boolean.class, byte.class, short.class, int.class,
-				long.class, float.class, double.class, String.class);
+				long.class, float.class, double.class, char.class, String.class);
 	}
 
 	@Test
@@ -659,12 +660,14 @@ class BeanUtilsTests {
 		private long longCount;
 		private float floatCount;
 		private double doubleCount;
+		private char character;
 		private String text;
 
 
 		@SuppressWarnings("unused")
 		public BeanWithPrimitiveTypes(boolean flag, byte byteCount, short shortCount, int intCount, long longCount,
-				float floatCount, double doubleCount, String text) {
+				float floatCount, double doubleCount, char character, String text) {
+
 			this.flag = flag;
 			this.byteCount = byteCount;
 			this.shortCount = shortCount;
@@ -672,6 +675,7 @@ class BeanUtilsTests {
 			this.longCount = longCount;
 			this.floatCount = floatCount;
 			this.doubleCount = doubleCount;
+			this.character = character;
 			this.text = text;
 		}
 
@@ -701,6 +705,10 @@ class BeanUtilsTests {
 
 		public double getDoubleCount() {
 			return doubleCount;
+		}
+
+		public char getCharacter() {
+			return character;
 		}
 
 		public String getText() {

@@ -87,9 +87,10 @@ public abstract class BeanUtils {
 		values.put(byte.class, (byte) 0);
 		values.put(short.class, (short) 0);
 		values.put(int.class, 0);
-		values.put(long.class, (long) 0);
-		values.put(float.class, (float) 0);
-		values.put(double.class, (double) 0);
+		values.put(long.class, 0L);
+		values.put(float.class, 0F);
+		values.put(double.class, 0D);
+		values.put(char.class, '\0');
 		DEFAULT_TYPE_VALUES = Collections.unmodifiableMap(values);
 	}
 
