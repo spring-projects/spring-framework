@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import org.springframework.util.Assert;
  */
 public class ConstructorReference extends SpelNodeImpl {
 
-	private boolean isArrayConstructor = false;
+	private final boolean isArrayConstructor;
 
 	@Nullable
 	private SpelNodeImpl[] dimensions;
@@ -208,14 +208,14 @@ public class ConstructorReference extends SpelNodeImpl {
 		StringBuilder sb = new StringBuilder("new ");
 		int index = 0;
 		sb.append(getChild(index++).toStringAST());
-		sb.append("(");
+		sb.append('(');
 		for (int i = index; i < getChildCount(); i++) {
 			if (i > index) {
-				sb.append(",");
+				sb.append(',');
 			}
 			sb.append(getChild(i).toStringAST());
 		}
-		sb.append(")");
+		sb.append(')');
 		return sb.toString();
 	}
 
@@ -234,6 +234,7 @@ public class ConstructorReference extends SpelNodeImpl {
 					FormatHelper.formatClassNameForMessage(
 							intendedArrayType != null ? intendedArrayType.getClass() : null));
 		}
+
 		String type = (String) intendedArrayType;
 		Class<?> componentType;
 		TypeCode arrayTypeCode = TypeCode.forName(type);
@@ -243,7 +244,8 @@ public class ConstructorReference extends SpelNodeImpl {
 		else {
 			componentType = arrayTypeCode.getType();
 		}
-		Object newArray;
+
+		Object newArray = null;
 		if (!hasInitializer()) {
 			// Confirm all dimensions were specified (for example [3][][5] is missing the 2nd dimension)
 			if (this.dimensions != null) {
@@ -252,23 +254,22 @@ public class ConstructorReference extends SpelNodeImpl {
 						throw new SpelEvaluationException(getStartPosition(), SpelMessage.MISSING_ARRAY_DIMENSION);
 					}
 				}
-			}
-			TypeConverter typeConverter = state.getEvaluationContext().getTypeConverter();
-
-			// Shortcut for 1 dimensional
-			if (this.dimensions.length == 1) {
-				TypedValue o = this.dimensions[0].getTypedValue(state);
-				int arraySize = ExpressionUtils.toInt(typeConverter, o);
-				newArray = Array.newInstance(componentType, arraySize);
-			}
-			else {
-				// Multi-dimensional - hold onto your hat!
-				int[] dims = new int[this.dimensions.length];
-				for (int d = 0; d < this.dimensions.length; d++) {
-					TypedValue o = this.dimensions[d].getTypedValue(state);
-					dims[d] = ExpressionUtils.toInt(typeConverter, o);
+				TypeConverter typeConverter = state.getEvaluationContext().getTypeConverter();
+				if (this.dimensions.length == 1) {
+					// Shortcut for 1-dimensional
+					TypedValue o = this.dimensions[0].getTypedValue(state);
+					int arraySize = ExpressionUtils.toInt(typeConverter, o);
+					newArray = Array.newInstance(componentType, arraySize);
 				}
-				newArray = Array.newInstance(componentType, dims);
+				else {
+					// Multi-dimensional - hold onto your hat!
+					int[] dims = new int[this.dimensions.length];
+					for (int d = 0; d < this.dimensions.length; d++) {
+						TypedValue o = this.dimensions[d].getTypedValue(state);
+						dims[d] = ExpressionUtils.toInt(typeConverter, o);
+					}
+					newArray = Array.newInstance(componentType, dims);
+				}
 			}
 		}
 		else {
