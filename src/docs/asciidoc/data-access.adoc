@@ -6027,7 +6027,7 @@ limit is 1000.
 
 In addition to the primitive values in the value list, you can create a `java.util.List`
 of object arrays. This list can support multiple expressions being defined for the `in`
-clause, such as `select * from T_ACTOR where (id, last_name) in \((1, 'Johnson'), (2,
+clause, such as `select * from T_ACTOR where (id, last_name) in ((1, 'Johnson'), (2,
 'Harrop'))`. This, of course, requires that your database supports this syntax.
 
 
