@@ -18,10 +18,13 @@ eclipse.classpath.file.whenMerged { classpath ->
 		if (matcher) {
 			def projectName = matcher[0][1]
 			def path = "/${projectName}"
-			if(!classpath.entries.find { e -> e instanceof ProjectDependency && e.path == path }) {
-				def dependency = new ProjectDependency(path)
-				dependency.exported = true
-				classpath.entries.add(dependency)
+			if (!classpath.entries.find { e -> e instanceof ProjectDependency && e.path == path }) {
+				// Avoid recursive dependency on current project.
+				if (!entry.path.matches('.+/' + projectName + '/build/([^/]+/)+(?:main|test)')) {
+					def dependency = new ProjectDependency(path)
+					dependency.exported = true
+					classpath.entries.add(dependency)
+				}
 			}
 			classpath.entries.remove(entry)
 		}
