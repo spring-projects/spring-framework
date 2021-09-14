@@ -16,6 +16,7 @@ dependencies {
 xjc {
 	xjcVersion = '2.2'
 }
+
 sourceSets {
 	test {
 		xjcTargetPackage = 'org.springframework.oxm.jaxb.test'
@@ -55,7 +56,7 @@ if ((JavaVersion.current() == JavaVersion.VERSION_1_8) && !project.hasProperty("
 						classpath: configurations.jibx.asPath)
 
 				jibx(verbose: false, load: true, binding: bindingXml) {
-					classpathset(dir: sourceSets.test.java.outputDir) {
+					classpathset(dir: sourceSets.test.java.classesDirectory.get().getAsFile()) {
 						include(name: "**/jibx/**/*")
 					}
 				}
