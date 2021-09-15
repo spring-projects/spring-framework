@@ -99,6 +99,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	private boolean includePayload = false;
 
+	private boolean includeResponseStatus = true;
+
 	@Nullable
 	private Predicate<String> headerPredicate;
 
@@ -181,6 +183,20 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 */
 	protected boolean isIncludePayload() {
 		return this.includePayload;
+	}
+
+	/**
+	 * Set whether the response status should be included in the log message.
+	 */
+	public void setIncludeResponseStatus(boolean includeResponseStatus) {
+		this.includeResponseStatus = includeResponseStatus;
+	}
+
+	/**
+	 * Return whether the response status should be included in the log message.
+	 */
+	protected boolean isIncludeResponseStatus() {
+		return this.includeResponseStatus;
 	}
 
 	/**
@@ -283,14 +299,14 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 		boolean shouldLog = shouldLog(requestToUse);
 		if (shouldLog && isFirstRequest) {
-			beforeRequest(requestToUse, getBeforeMessage(requestToUse));
+			beforeRequest(requestToUse, response, getBeforeMessage(requestToUse));
 		}
 		try {
 			filterChain.doFilter(requestToUse, response);
 		}
 		finally {
 			if (shouldLog && !isAsyncStarted(requestToUse)) {
-				afterRequest(requestToUse, getAfterMessage(requestToUse));
+				afterRequest(requestToUse, response, getAfterMessage(requestToUse, response));
 			}
 		}
 	}
@@ -307,8 +323,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * Get the message to write to the log after the request.
 	 * @see #createMessage
 	 */
-	private String getAfterMessage(HttpServletRequest request) {
-		return createMessage(request, this.afterMessagePrefix, this.afterMessageSuffix);
+	private String getAfterMessage(HttpServletRequest request, HttpServletResponse response) {
+		return createMessage(request, response, this.afterMessagePrefix, this.afterMessageSuffix);
 	}
 
 	/**
@@ -320,6 +336,18 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * the supplied prefix and suffix.
 	 */
 	protected String createMessage(HttpServletRequest request, String prefix, String suffix) {
+		return createMessage(request, (HttpServletResponse)null, prefix, suffix);
+	}
+
+	/**
+	 * Create a log message for the given request, prefix and suffix.
+	 * <p>If {@code includeQueryString} is {@code true}, then the inner part
+	 * of the log message will take the form {@code request_uri?query_string};
+	 * otherwise the message will simply be of the form {@code request_uri}.
+	 * <p>The final message is composed of the inner part as described and
+	 * the supplied prefix and suffix.
+	 */
+	protected String createMessage(HttpServletRequest request, HttpServletResponse response, String prefix, String suffix) {
 		StringBuilder msg = new StringBuilder();
 		msg.append(prefix);
 		msg.append(request.getMethod()).append(' ');
@@ -345,6 +373,10 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 			if (user != null) {
 				msg.append(", user=").append(user);
 			}
+		}
+
+		if (isIncludeResponseStatus() && response != null) {
+			msg.append(", status=").append(response.getStatus());
 		}
 
 		if (isIncludeHeaders()) {
@@ -419,7 +451,19 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * @param request current HTTP request
 	 * @param message the message to log
 	 */
-	protected abstract void beforeRequest(HttpServletRequest request, String message);
+	protected void beforeRequest(HttpServletRequest request, String message) {
+	}
+
+	/**
+	 * Concrete subclasses should implement this method to write a log message
+	 * <i>before</i> the request is processed.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param message the message to log
+	 */
+	protected void beforeRequest(HttpServletRequest request, HttpServletResponse response, String message) {
+		beforeRequest(request, message);
+	}
 
 	/**
 	 * Concrete subclasses should implement this method to write a log message
@@ -427,6 +471,18 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * @param request current HTTP request
 	 * @param message the message to log
 	 */
-	protected abstract void afterRequest(HttpServletRequest request, String message);
+	protected void afterRequest(HttpServletRequest request, String message) {
+	}
+
+	/**
+	 * Concrete subclasses should implement this method to write a log message
+	 * <i>after</i> the request is processed.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param message the message to log
+	 */
+	protected void afterRequest(HttpServletRequest request, HttpServletResponse response, String message) {
+		afterRequest(request, message);
+	}
 
 }
