@@ -93,6 +93,7 @@ test {
 	// the latter results in some tests being executed/reported
 	// multiple times.
 	include(["**/*Tests.class", "**/*Test.class"])
+	filter.excludeTestsMatching("*TestCase")
 	systemProperty("testGroups", project.properties.get("testGroups"))
 	// Java Util Logging for the JUnit Platform.
 	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
