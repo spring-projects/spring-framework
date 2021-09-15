@@ -190,8 +190,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Make the given constructor accessible, explicitly setting it accessible
 	 * if necessary. The {@code setAccessible(true)} method is only called
-	 * when actually necessary, to avoid unnecessary conflicts with a JVM
-	 * SecurityManager (if active).
+	 * when actually necessary, to avoid unnecessary conflicts.
 	 * @param ctor the constructor to make accessible
 	 * @see java.lang.reflect.Constructor#setAccessible
 	 */
@@ -441,10 +440,9 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Variant of {@link Class#getDeclaredMethods()} that uses a local cache in
-	 * order to avoid the JVM's SecurityManager check and new Method instances.
-	 * In addition, it also includes Java 8 default methods from locally
-	 * implemented interfaces, since those are effectively to be treated just
-	 * like declared methods.
+	 * order to avoid new Method instances. In addition, it also includes Java 8
+	 * default methods from locally implemented interfaces, since those are
+	 * effectively to be treated just like declared methods.
 	 * @param clazz the class to introspect
 	 * @return the cached array of methods
 	 * @throws IllegalStateException if introspection fails
@@ -561,8 +559,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Make the given method accessible, explicitly setting it accessible if
 	 * necessary. The {@code setAccessible(true)} method is only called
-	 * when actually necessary, to avoid unnecessary conflicts with a JVM
-	 * SecurityManager (if active).
+	 * when actually necessary, to avoid unnecessary conflicts.
 	 * @param method the method to make accessible
 	 * @see java.lang.reflect.Method#setAccessible
 	 */
@@ -720,7 +717,7 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * This variant retrieves {@link Class#getDeclaredFields()} from a local cache
-	 * in order to avoid the JVM's SecurityManager check and defensive array copying.
+	 * in order to avoid defensive array copying.
 	 * @param clazz the class to introspect
 	 * @return the cached array of fields
 	 * @throws IllegalStateException if introspection fails
@@ -774,8 +771,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Make the given field accessible, explicitly setting it accessible if
 	 * necessary. The {@code setAccessible(true)} method is only called
-	 * when actually necessary, to avoid unnecessary conflicts with a JVM
-	 * SecurityManager (if active).
+	 * when actually necessary, to avoid unnecessary conflicts.
 	 * @param field the field to make accessible
 	 * @see java.lang.reflect.Field#setAccessible
 	 */

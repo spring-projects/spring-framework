@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@ import java.lang.annotation.Annotation;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -296,15 +294,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public void setAutowireCandidateResolver(AutowireCandidateResolver autowireCandidateResolver) {
 		Assert.notNull(autowireCandidateResolver, "AutowireCandidateResolver must not be null");
 		if (autowireCandidateResolver instanceof BeanFactoryAware) {
-			if (System.getSecurityManager() != null) {
-				AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-					((BeanFactoryAware) autowireCandidateResolver).setBeanFactory(this);
-					return null;
-				}, getAccessControlContext());
-			}
-			else {
-				((BeanFactoryAware) autowireCandidateResolver).setBeanFactory(this);
-			}
+			((BeanFactoryAware) autowireCandidateResolver).setBeanFactory(this);
 		}
 		this.autowireCandidateResolver = autowireCandidateResolver;
 	}
@@ -925,16 +915,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
 					if (bean instanceof FactoryBean) {
 						FactoryBean<?> factory = (FactoryBean<?>) bean;
-						boolean isEagerInit;
-						if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
-							isEagerInit = AccessController.doPrivileged(
-									(PrivilegedAction<Boolean>) ((SmartFactoryBean<?>) factory)::isEagerInit,
-									getAccessControlContext());
-						}
-						else {
-							isEagerInit = (factory instanceof SmartFactoryBean &&
-									((SmartFactoryBean<?>) factory).isEagerInit());
-						}
+						boolean isEagerInit = (factory instanceof SmartFactoryBean &&
+								((SmartFactoryBean<?>) factory).isEagerInit());
 						if (isEagerInit) {
 							getBean(beanName);
 						}
@@ -953,15 +935,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				StartupStep smartInitialize = this.getApplicationStartup().start("spring.beans.smart-initialize")
 						.tag("beanName", beanName);
 				SmartInitializingSingleton smartSingleton = (SmartInitializingSingleton) singletonInstance;
-				if (System.getSecurityManager() != null) {
-					AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-						smartSingleton.afterSingletonsInstantiated();
-						return null;
-					}, getAccessControlContext());
-				}
-				else {
-					smartSingleton.afterSingletonsInstantiated();
-				}
+				smartSingleton.afterSingletonsInstantiated();
 				smartInitialize.end();
 			}
 		}

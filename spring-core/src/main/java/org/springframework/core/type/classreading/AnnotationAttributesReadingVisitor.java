@@ -107,9 +107,7 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 		String annotationName = annotationType.getName();
 		if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotationName) && visited.add(annotation)) {
 			try {
-				// Only do attribute scanning for public annotations; we'd run into
-				// IllegalAccessExceptions otherwise, and we don't want to mess with
-				// accessibility in a SecurityManager environment.
+				// Only do attribute scanning for public annotations.
 				if (Modifier.isPublic(annotationType.getModifiers())) {
 					this.attributesMap.add(annotationName,
 							AnnotationUtils.getAnnotationAttributes(annotation, false, true));

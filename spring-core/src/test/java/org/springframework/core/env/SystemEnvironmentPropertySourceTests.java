@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,12 @@
 package org.springframework.core.env;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 /**
  * Unit tests for {@link SystemEnvironmentPropertySource}.
@@ -146,32 +143,6 @@ class SystemEnvironmentPropertySourceTests {
 		assertThat(ps.getProperty("A.HYPHEN-KEY")).isEqualTo("a_hyphen_value");
 		assertThat(ps.getProperty("A_hyphen-KEY")).isEqualTo("a_hyphen_value");
 		assertThat(ps.getProperty("A.hyphen-KEY")).isEqualTo("a_hyphen_value");
-	}
-
-	@Test
-	@SuppressWarnings("serial")
-	void withSecurityConstraints() throws Exception {
-		envMap = new HashMap<String, Object>() {
-			@Override
-			public boolean containsKey(Object key) {
-				throw new UnsupportedOperationException();
-			}
-			@Override
-			public Set<String> keySet() {
-				return new HashSet<>(super.keySet());
-			}
-		};
-		envMap.put("A_KEY", "a_value");
-
-		ps = new SystemEnvironmentPropertySource("sysEnv", envMap) {
-			@Override
-			protected boolean isSecurityManagerPresent() {
-				return true;
-			}
-		};
-
-		assertThat(ps.containsProperty("A_KEY")).isEqualTo(true);
-		assertThat(ps.getProperty("A_KEY")).isEqualTo("a_value");
 	}
 
 }

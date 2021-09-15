@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,6 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyEditor;
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -165,10 +160,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/** Map from scope identifier String to corresponding Scope. */
 	private final Map<String, Scope> scopes = new LinkedHashMap<>(8);
-
-	/** Security context used when running with a SecurityManager. */
-	@Nullable
-	private SecurityContextProvider securityContextProvider;
 
 	/** Map from bean name to merged RootBeanDefinition. */
 	private final Map<String, RootBeanDefinition> mergedBeanDefinitions = new ConcurrentHashMap<>(256);
@@ -495,17 +486,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 		if (isFactoryBean(beanName, mbd)) {
 			FactoryBean<?> fb = (FactoryBean<?>) getBean(FACTORY_BEAN_PREFIX + beanName);
-			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged(
-						(PrivilegedAction<Boolean>) () ->
-								((fb instanceof SmartFactoryBean && ((SmartFactoryBean<?>) fb).isPrototype()) ||
-										!fb.isSingleton()),
-						getAccessControlContext());
-			}
-			else {
-				return ((fb instanceof SmartFactoryBean && ((SmartFactoryBean<?>) fb).isPrototype()) ||
-						!fb.isSingleton());
-			}
+			return ((fb instanceof SmartFactoryBean && ((SmartFactoryBean<?>) fb).isPrototype()) ||
+					!fb.isSingleton());
 		}
 		else {
 			return false;
@@ -1054,15 +1036,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return this.scopes.get(scopeName);
 	}
 
-	/**
-	 * Set the security context provider for this bean factory. If a security manager
-	 * is set, interaction with the user code will be executed using the privileged
-	 * of the provided security context.
-	 */
-	public void setSecurityContextProvider(SecurityContextProvider securityProvider) {
-		this.securityContextProvider = securityProvider;
-	}
-
 	@Override
 	public void setApplicationStartup(ApplicationStartup applicationStartup) {
 		Assert.notNull(applicationStartup, "applicationStartup should not be null");
@@ -1072,17 +1045,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	@Override
 	public ApplicationStartup getApplicationStartup() {
 		return this.applicationStartup;
-	}
-
-	/**
-	 * Delegate the creation of the access control context to the
-	 * {@link #setSecurityContextProvider SecurityContextProvider}.
-	 */
-	@Override
-	public AccessControlContext getAccessControlContext() {
-		return (this.securityContextProvider != null ?
-				this.securityContextProvider.getAccessControlContext() :
-				AccessController.getContext());
 	}
 
 	@Override
@@ -1099,7 +1061,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			this.typeConverter = otherAbstractFactory.typeConverter;
 			this.beanPostProcessors.addAll(otherAbstractFactory.beanPostProcessors);
 			this.scopes.putAll(otherAbstractFactory.scopes);
-			this.securityContextProvider = otherAbstractFactory.securityContextProvider;
 		}
 		else {
 			setTypeConverter(otherFactory.getTypeConverter());
@@ -1222,7 +1183,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected void destroyBean(String beanName, Object bean, RootBeanDefinition mbd) {
 		new DisposableBeanAdapter(
-				bean, beanName, mbd, getBeanPostProcessorCache().destructionAware, getAccessControlContext()).destroy();
+				bean, beanName, mbd, getBeanPostProcessorCache().destructionAware).destroy();
 	}
 
 	@Override
@@ -1526,17 +1487,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (mbd.hasBeanClass()) {
 				return mbd.getBeanClass();
 			}
-			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged((PrivilegedExceptionAction<Class<?>>)
-						() -> doResolveBeanClass(mbd, typesToMatch), getAccessControlContext());
-			}
-			else {
-				return doResolveBeanClass(mbd, typesToMatch);
-			}
-		}
-		catch (PrivilegedActionException pae) {
-			ClassNotFoundException ex = (ClassNotFoundException) pae.getException();
-			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), ex);
+			return doResolveBeanClass(mbd, typesToMatch);
 		}
 		catch (ClassNotFoundException ex) {
 			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), ex);
@@ -1925,14 +1876,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @see #registerDependentBean
 	 */
 	protected void registerDisposableBeanIfNecessary(String beanName, Object bean, RootBeanDefinition mbd) {
-		AccessControlContext acc = (System.getSecurityManager() != null ? getAccessControlContext() : null);
 		if (!mbd.isPrototype() && requiresDestruction(bean, mbd)) {
 			if (mbd.isSingleton()) {
 				// Register a DisposableBean implementation that performs all destruction
 				// work for the given bean: DestructionAwareBeanPostProcessors,
 				// DisposableBean interface, custom destroy method.
 				registerDisposableBean(beanName, new DisposableBeanAdapter(
-						bean, beanName, mbd, getBeanPostProcessorCache().destructionAware, acc));
+						bean, beanName, mbd, getBeanPostProcessorCache().destructionAware));
 			}
 			else {
 				// A bean with a custom scope...
@@ -1941,7 +1891,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					throw new IllegalStateException("No Scope registered for scope name '" + mbd.getScope() + "'");
 				}
 				scope.registerDestructionCallback(beanName, new DisposableBeanAdapter(
-						bean, beanName, mbd, getBeanPostProcessorCache().destructionAware, acc));
+						bean, beanName, mbd, getBeanPostProcessorCache().destructionAware));
 			}
 		}
 	}
