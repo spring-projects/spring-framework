@@ -56,7 +56,7 @@ configure(allprojects) { project ->
 				entry 'aspectjtools'
 				entry 'aspectjweaver'
 			}
-			dependencySet(group: 'org.codehaus.groovy', version: '3.0.8') {
+			dependencySet(group: 'org.codehaus.groovy', version: '3.0.9') {
 				entry 'groovy'
 				entry 'groovy-jsr223'
 				entry 'groovy-templates'  // requires findbugs for warning-free compilation
@@ -123,7 +123,7 @@ configure(allprojects) { project ->
 			dependency "net.sf.ehcache:ehcache:2.10.6"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core:5.4.32.Final"
+			dependency "org.hibernate:hibernate-core:5.5.7.Final"
 			dependency "org.hibernate:hibernate-validator:6.2.0.Final"
 			dependency "org.webjars:webjars-locator-core:0.47"
 			dependency "org.webjars:underscorejs:1.8.3"
@@ -339,7 +339,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.45.1"
+		toolVersion = "9.0"
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
