@@ -2,7 +2,7 @@ anchors:
   git-repo-resource-source: &git-repo-resource-source
     uri: ((github-repo))
     username: ((github-username))
-    password: ((github-password))
+    password: ((github-ci-release-token))
     branch: ((branch))
   gradle-enterprise-task-params: &gradle-enterprise-task-params
     GRADLE_ENTERPRISE_ACCESS_KEY: ((gradle_enterprise_secret_access_key))
