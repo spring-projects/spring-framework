@@ -365,11 +365,10 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	ext.javadocLinks = [
-			"https://docs.oracle.com/javase/8/docs/api/",
-			"https://docs.oracle.com/javaee/7/api/",
+			"https://docs.oracle.com/en/java/javase/17/docs/api/",
+			"https://javaee.github.io/javaee-spec/javadocs/",
 			"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
 			"https://www.ibm.com/docs/api/v1/content/SSEQTP_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/",
-			"https://glassfish.java.net/nonav/docs/v3/api/",
 			"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
 			"https://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",
 			"https://tiles.apache.org/tiles-request/apidocs/",
