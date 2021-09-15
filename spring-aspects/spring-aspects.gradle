@@ -10,6 +10,15 @@ sourceSets.test.java.srcDirs = files()
 
 aspectj.version = dependencyManagement.managedVersions['org.aspectj:aspectjweaver']
 
+compileAspectj {
+	sourceCompatibility "1.8"
+	targetCompatibility "1.8"
+}
+compileTestAspectj {
+	sourceCompatibility "1.8"
+	targetCompatibility "1.8"
+}
+
 dependencies {
 	api("org.aspectj:aspectjweaver")
 	compileOnly("org.aspectj:aspectjrt")

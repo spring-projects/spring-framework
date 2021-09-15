@@ -6,7 +6,7 @@ plugins {
 	id 'org.asciidoctor.jvm.convert' version '3.3.2'
 	id 'org.asciidoctor.jvm.pdf' version '3.3.2'
 	id 'de.undercouch.download' version '4.1.2'
-	id "io.freefair.aspectj" version '6.1.0' apply false
+	id "io.freefair.aspectj" version '6.2.0' apply false
 	id "com.github.ben-manes.versions" version '0.39.0'
 	id "com.github.johnrengelman.shadow" version '7.0.0' apply false
 	id "me.champeau.jmh" version "0.6.6" apply false
