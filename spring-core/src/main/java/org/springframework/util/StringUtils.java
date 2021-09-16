@@ -1301,7 +1301,7 @@ public abstract class StringUtils {
 
 		int totalLength = coll.size() * (prefix.length() + suffix.length()) + (coll.size() - 1) * delim.length();
 		for (Object element : coll) {
-			totalLength += element.toString().length();
+			totalLength += String.valueOf(element).length();
 		}
 
 		StringBuilder sb = new StringBuilder(totalLength);
