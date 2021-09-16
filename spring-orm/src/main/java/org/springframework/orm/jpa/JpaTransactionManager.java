@@ -125,7 +125,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	private final Map<String, Object> jpaPropertyMap = new HashMap<>();
 
 	@Nullable
-	private DataSource dataSource;
+	private ThreadLocal<DataSource> dataSource = new ThreadLocal<DataSource>();
 
 	private JpaDialect jpaDialect = new DefaultJpaDialect();
 
@@ -261,14 +261,15 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
+		this.dataSource.remove();
 		if (dataSource instanceof TransactionAwareDataSourceProxy) {
 			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
 			// for its underlying target DataSource, else data access code won't see
 			// properly exposed transactions (i.e. transactions for the target DataSource).
-			this.dataSource = ((TransactionAwareDataSourceProxy) dataSource).getTargetDataSource();
+			this.dataSource.set(((TransactionAwareDataSourceProxy) dataSource).getTargetDataSource());
 		}
 		else {
-			this.dataSource = dataSource;
+			this.dataSource.set(dataSource);
 		}
 	}
 
@@ -277,7 +278,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	@Nullable
 	public DataSource getDataSource() {
-		return this.dataSource;
+		return this.dataSource.get();
 	}
 
 	/**
