@@ -16,8 +16,7 @@
 
 package org.springframework.web.socket.server.standard;
 
-import javax.websocket.server.ServerEndpoint;
-
+import jakarta.websocket.server.ServerEndpoint;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

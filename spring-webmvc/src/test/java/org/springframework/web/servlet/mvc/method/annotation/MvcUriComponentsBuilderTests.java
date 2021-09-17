@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -202,11 +200,10 @@ public class MvcUriComponentsBuilderTests {
 
 	@Test
 	public void fromMethodNameTwoPathVariables() {
-		DateTime now = DateTime.now();
 		UriComponents uriComponents = fromMethodName(
-				ControllerWithMethods.class, "methodWithTwoPathVariables", 1, now).build();
+				ControllerWithMethods.class, "methodWithTwoPathVariables", 1, "2009-10-31").build();
 
-		assertThat(uriComponents.getPath()).isEqualTo("/something/1/foo/" + ISODateTimeFormat.date().print(now));
+		assertThat(uriComponents.getPath()).isEqualTo("/something/1/foo/2009-10-31");
 	}
 
 	@Test
@@ -549,7 +546,7 @@ public class MvcUriComponentsBuilderTests {
 
 		@RequestMapping("/{id}/foo/{date}")
 		HttpEntity<Void> methodWithTwoPathVariables(
-				@PathVariable Integer id, @DateTimeFormat(iso = ISO.DATE) @PathVariable DateTime date) {
+				@PathVariable Integer id, @DateTimeFormat(iso = ISO.DATE) @PathVariable Date date) {
 			return null;
 		}
 

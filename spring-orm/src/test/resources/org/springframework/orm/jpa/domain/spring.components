@@ -1,2 +1,2 @@
-org.springframework.orm.jpa.domain.Person=javax.persistence.Entity
-org.springframework.orm.jpa.domain.DriversLicense=javax.persistence.Entity
+org.springframework.orm.jpa.domain.Person=jakarta.persistence.Entity
+org.springframework.orm.jpa.domain.DriversLicense=jakarta.persistence.Entity

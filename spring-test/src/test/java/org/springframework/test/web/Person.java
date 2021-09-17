@@ -16,8 +16,8 @@
 
 package org.springframework.test.web;
 
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.validation.constraints.NotNull;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.util.ObjectUtils;
 

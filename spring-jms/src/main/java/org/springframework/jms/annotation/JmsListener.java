@@ -47,8 +47,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * <p>Annotated JMS listener methods are allowed to have flexible signatures similar
  * to what {@link MessageMapping} provides:
  * <ul>
- * <li>{@link javax.jms.Session} to get access to the JMS session</li>
- * <li>{@link javax.jms.Message} or one of its subclasses to get access to the raw JMS message</li>
+ * <li>{@link jakarta.jms.Session} to get access to the JMS session</li>
+ * <li>{@link jakarta.jms.Message} or one of its subclasses to get access to the raw JMS message</li>
  * <li>{@link org.springframework.messaging.Message} to use Spring's messaging abstraction counterpart</li>
  * <li>{@link org.springframework.messaging.handler.annotation.Payload @Payload}-annotated method
  * arguments, including support for validation</li>

@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -128,7 +128,7 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 	/**
 	 * Whether to allow the HTTP session to be created while accessing it.
 	 * <p>By default set to {@code false}.
-	 * @see javax.servlet.http.HttpServletRequest#getSession(boolean)
+	 * @see jakarta.servlet.http.HttpServletRequest#getSession(boolean)
 	 */
 	public void setCreateSession(boolean createSession) {
 		this.createSession = createSession;

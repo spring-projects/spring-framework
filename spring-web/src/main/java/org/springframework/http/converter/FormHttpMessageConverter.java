@@ -29,7 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.mail.internet.MimeUtility;
+import jakarta.mail.internet.MimeUtility;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -287,7 +287,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	/**
 	 * Set the character set to use when writing multipart data to encode file
 	 * names. Encoding is based on the {@code encoded-word} syntax defined in
-	 * RFC 2047 and relies on {@code MimeUtility} from {@code javax.mail}.
+	 * RFC 2047 and relies on {@code MimeUtility} from {@code jakarta.mail}.
 	 * <p>As of 5.0 by default part headers, including {@code Content-Disposition}
 	 * (and its filename parameter) will be encoded based on the setting of
 	 * {@link #setCharset(Charset)} or {@code UTF-8} by default.

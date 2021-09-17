@@ -19,11 +19,11 @@ package org.springframework.web.jsf.el;
 import java.beans.FeatureDescriptor;
 import java.util.Iterator;
 
-import javax.el.ELContext;
-import javax.el.ELException;
-import javax.el.ELResolver;
-import javax.el.PropertyNotWritableException;
-import javax.faces.context.FacesContext;
+import jakarta.el.ELContext;
+import jakarta.el.ELException;
+import jakarta.el.ELResolver;
+import jakarta.el.PropertyNotWritableException;
+import jakarta.faces.context.FacesContext;
 
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.WebApplicationContext;

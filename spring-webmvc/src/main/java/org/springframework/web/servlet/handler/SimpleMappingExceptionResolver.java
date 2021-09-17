@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
@@ -70,7 +70,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	/**
 	 * Set the mappings between exception class names and error view names.
 	 * The exception class name can be a substring, with no wildcard support at present.
-	 * A value of "ServletException" would match {@code javax.servlet.ServletException}
+	 * A value of "ServletException" would match {@code jakarta.servlet.ServletException}
 	 * and subclasses, for example.
 	 * <p><b>NB:</b> Consider carefully how
 	 * specific the pattern is, and whether to include package information (which isn't mandatory).

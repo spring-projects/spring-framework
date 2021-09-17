@@ -37,14 +37,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
-import javax.ejb.EJB;
 import javax.xml.namespace.QName;
-import javax.xml.ws.Service;
-import javax.xml.ws.WebServiceClient;
-import javax.xml.ws.WebServiceRef;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.xml.ws.Service;
+import jakarta.xml.ws.WebServiceClient;
+import jakarta.xml.ws.WebServiceRef;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
@@ -77,35 +78,31 @@ import org.springframework.util.StringValueResolver;
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
  * that supports common Java annotations out of the box, in particular the JSR-250
- * annotations in the {@code javax.annotation} package. These common Java
- * annotations are supported in many Java EE 5 technologies (e.g. JSF 1.2),
+ * annotations in the {@code jakarta.annotation} package. These common Java
+ * annotations are supported in many Jakarta EE technologies (e.g. JSF 1.2),
  * as well as in Java 6's JAX-WS.
  *
- * <p>This post-processor includes support for the {@link javax.annotation.PostConstruct}
- * and {@link javax.annotation.PreDestroy} annotations - as init annotation
+ * <p>This post-processor includes support for the {@link jakarta.annotation.PostConstruct}
+ * and {@link jakarta.annotation.PreDestroy} annotations - as init annotation
  * and destroy annotation, respectively - through inheriting from
  * {@link InitDestroyAnnotationBeanPostProcessor} with pre-configured annotation types.
  *
- * <p>The central element is the {@link javax.annotation.Resource} annotation
+ * <p>The central element is the {@link jakarta.annotation.Resource} annotation
  * for annotation-driven injection of named beans, by default from the containing
  * Spring BeanFactory, with only {@code mappedName} references resolved in JNDI.
  * The {@link #setAlwaysUseJndiLookup "alwaysUseJndiLookup" flag} enforces JNDI lookups
- * equivalent to standard Java EE 5 resource injection for {@code name} references
+ * equivalent to standard Jakarta EE resource injection for {@code name} references
  * and default names as well. The target beans can be simple POJOs, with no special
  * requirements other than the type having to match.
  *
  * <p>The JAX-WS {@link javax.xml.ws.WebServiceRef} annotation is supported too,
- * analogous to {@link javax.annotation.Resource} but with the capability of creating
+ * analogous to {@link jakarta.annotation.Resource} but with the capability of creating
  * specific JAX-WS service endpoints. This may either point to an explicitly defined
  * resource by name or operate on a locally specified JAX-WS service class. Finally,
- * this post-processor also supports the EJB 3 {@link javax.ejb.EJB} annotation,
- * analogous to {@link javax.annotation.Resource} as well, with the capability to
+ * this post-processor also supports the EJB 3 {@link jakarta.ejb.EJB} annotation,
+ * analogous to {@link jakarta.annotation.Resource} as well, with the capability to
  * specify both a local bean name and a global JNDI name for fallback retrieval.
  * The target beans can be plain POJOs as well as EJB 3 Session Beans in this case.
- *
- * <p>The common annotations supported by this post-processor are available in
- * Java 6 (JDK 1.6) as well as in Java EE 5/6 (which provides a standalone jar for
- * its common annotations as well, allowing for use in any Java 5 based application).
  *
  * <p>For default usage, resolving resource names as Spring bean names,
  * simply define the following in your application context:
@@ -114,7 +111,7 @@ import org.springframework.util.StringValueResolver;
  * &lt;bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"/&gt;</pre>
  *
  * For direct JNDI access, resolving resource names as JNDI resource references
- * within the Java EE application's "java:comp/env/" namespace, use the following:
+ * within the Jakarta EE application's "java:comp/env/" namespace, use the following:
  *
  * <pre class="code">
  * &lt;bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"&gt;
@@ -156,7 +153,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	static {
 		webServiceRefClass = loadAnnotationType("javax.xml.ws.WebServiceRef");
-		ejbClass = loadAnnotationType("javax.ejb.EJB");
+		ejbClass = loadAnnotationType("jakarta.ejb.EJB");
 
 		resourceAnnotationTypes.add(Resource.class);
 		if (webServiceRefClass != null) {
@@ -191,7 +188,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	/**
 	 * Create a new CommonAnnotationBeanPostProcessor,
 	 * with the init and destroy annotation types set to
-	 * {@link javax.annotation.PostConstruct} and {@link javax.annotation.PreDestroy},
+	 * {@link jakarta.annotation.PostConstruct} and {@link jakarta.annotation.PreDestroy},
 	 * respectively.
 	 */
 	public CommonAnnotationBeanPostProcessor() {
@@ -229,11 +226,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	/**
-	 * Set whether to always use JNDI lookups equivalent to standard Java EE 5 resource
+	 * Set whether to always use JNDI lookups equivalent to standard Jakarta EE resource
 	 * injection, <b>even for {@code name} attributes and default names</b>.
 	 * <p>Default is "false": Resource names are used for Spring bean lookups in the
 	 * containing BeanFactory; only {@code mappedName} attributes point directly
-	 * into JNDI. Switch this flag to "true" for enforcing Java EE style JNDI lookups
+	 * into JNDI. Switch this flag to "true" for enforcing Jakarta EE style JNDI lookups
 	 * in any case, even for {@code name} attributes and default names.
 	 * @see #setJndiFactory
 	 * @see #setResourceFactory
@@ -249,7 +246,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * This factory will also be used if "alwaysUseJndiLookup" is set to "true" in order
 	 * to enforce JNDI lookups even for {@code name} attributes and default names.
 	 * <p>The default is a {@link org.springframework.jndi.support.SimpleJndiBeanFactory}
-	 * for JNDI lookup behavior equivalent to standard Java EE 5 resource injection.
+	 * for JNDI lookup behavior equivalent to standard Jakarta EE resource injection.
 	 * @see #setResourceFactory
 	 * @see #setAlwaysUseJndiLookup
 	 */
@@ -266,7 +263,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * if any, looking up resource names as Spring bean names. Specify the resource
 	 * factory explicitly for programmatic usage of this post-processor.
 	 * <p>Specifying Spring's {@link org.springframework.jndi.support.SimpleJndiBeanFactory}
-	 * leads to JNDI lookup behavior equivalent to standard Java EE 5 resource injection,
+	 * leads to JNDI lookup behavior equivalent to standard Jakarta EE resource injection,
 	 * even for {@code name} attributes and default names. This is the same behavior
 	 * that the "alwaysUseJndiLookup" flag enables.
 	 * @see #setAlwaysUseJndiLookup

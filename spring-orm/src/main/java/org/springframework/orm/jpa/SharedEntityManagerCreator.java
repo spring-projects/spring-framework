@@ -28,13 +28,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.ParameterMode;
-import javax.persistence.Query;
-import javax.persistence.StoredProcedureQuery;
-import javax.persistence.TransactionRequiredException;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.ParameterMode;
+import jakarta.persistence.Query;
+import jakarta.persistence.StoredProcedureQuery;
+import jakarta.persistence.TransactionRequiredException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -45,8 +44,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
- * Delegate for creating a shareable JPA {@link javax.persistence.EntityManager}
- * reference for a given {@link javax.persistence.EntityManagerFactory}.
+ * Delegate for creating a shareable JPA {@link jakarta.persistence.EntityManager}
+ * reference for a given {@link jakarta.persistence.EntityManagerFactory}.
  *
  * <p>A shared EntityManager will behave just like an EntityManager fetched from
  * an application server's JNDI environment, as defined by the JPA specification.
@@ -54,17 +53,17 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * otherwise it will fall back to a newly created EntityManager per operation.
  *
  * <p>For a behavioral definition of such a shared transactional EntityManager,
- * see {@link javax.persistence.PersistenceContextType#TRANSACTION} and its
+ * see {@link jakarta.persistence.PersistenceContextType#TRANSACTION} and its
  * discussion in the JPA spec document. This is also the default being used
- * for the annotation-based {@link javax.persistence.PersistenceContext#type()}.
+ * for the annotation-based {@link jakarta.persistence.PersistenceContext#type()}.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Oliver Gierke
  * @author Mark Paluch
  * @since 2.0
- * @see javax.persistence.PersistenceContext
- * @see javax.persistence.PersistenceContextType#TRANSACTION
+ * @see jakarta.persistence.PersistenceContext
+ * @see jakarta.persistence.PersistenceContextType#TRANSACTION
  * @see org.springframework.orm.jpa.JpaTransactionManager
  * @see ExtendedEntityManagerCreator
  */

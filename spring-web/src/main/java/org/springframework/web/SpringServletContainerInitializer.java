@@ -23,10 +23,10 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Set;
 
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.HandlesTypes;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.HandlesTypes;
 
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
@@ -43,7 +43,7 @@ import org.springframework.util.ReflectionUtils;
  * method invoked by any Servlet 3.0-compliant container during container startup assuming
  * that the {@code spring-web} module JAR is present on the classpath. This occurs through
  * the JAR Services API {@link ServiceLoader#load(Class)} method detecting the
- * {@code spring-web} module's {@code META-INF/services/javax.servlet.ServletContainerInitializer}
+ * {@code spring-web} module's {@code META-INF/services/jakarta.servlet.ServletContainerInitializer}
  * service provider configuration file. See the
  * <a href="https://download.oracle.com/javase/6/docs/technotes/guides/jar/jar.html#Service%20Provider">
  * JAR Services API documentation</a> as well as section <em>8.2.4</em> of the Servlet 3.0

@@ -21,12 +21,12 @@ package org.springframework.jms;
  *
  * @author Mark Pollack
  * @since 1.1
- * @see javax.jms.IllegalStateException
+ * @see jakarta.jms.IllegalStateException
  */
 @SuppressWarnings("serial")
 public class IllegalStateException extends JmsException {
 
-	public IllegalStateException(javax.jms.IllegalStateException cause) {
+	public IllegalStateException(jakarta.jms.IllegalStateException cause) {
 		super(cause);
 	}
 

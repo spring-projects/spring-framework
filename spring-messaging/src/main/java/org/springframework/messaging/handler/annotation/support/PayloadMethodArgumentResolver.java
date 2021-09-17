@@ -190,7 +190,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 
 	/**
 	 * Validate the payload if applicable.
-	 * <p>The default implementation checks for {@code @javax.validation.Valid},
+	 * <p>The default implementation checks for {@code @jakarta.validation.Valid},
 	 * Spring's {@link Validated},
 	 * and custom annotations whose name starts with "Valid".
 	 * @param message the currently processed message

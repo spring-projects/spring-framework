@@ -16,10 +16,10 @@
 
 package org.springframework.jca.endpoint;
 
-import javax.resource.ResourceException;
-import javax.resource.spi.ActivationSpec;
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.endpoint.MessageEndpointFactory;
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.ActivationSpec;
+import jakarta.resource.spi.ResourceAdapter;
+import jakarta.resource.spi.endpoint.MessageEndpointFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -48,7 +48,7 @@ import org.springframework.util.Assert;
  * 	 &lt;property name="activationSpec"&gt;
  *     &lt;bean class="org.apache.activemq.ra.ActiveMQActivationSpec"&gt;
  *       &lt;property name="destination" value="myQueue"/&gt;
- *       &lt;property name="destinationType" value="javax.jms.Queue"/&gt;
+ *       &lt;property name="destinationType" value="jakarta.jms.Queue"/&gt;
  *     &lt;/bean&gt;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
@@ -56,7 +56,7 @@ import org.springframework.util.Assert;
  * In this example, Spring's own {@link GenericMessageEndpointFactory} is used
  * to point to a standard message listener object that happens to be supported
  * by the specified target ResourceAdapter: in this case, a JMS
- * {@link javax.jms.MessageListener} object as supported by the ActiveMQ
+ * {@link jakarta.jms.MessageListener} object as supported by the ActiveMQ
  * message broker, defined as a Spring bean:
  *
  * <pre class="code">
@@ -84,7 +84,7 @@ import org.springframework.util.Assert;
  * For a different target resource, the configuration would simply point to a
  * different ResourceAdapter and a different ActivationSpec object (which are
  * both specific to the resource provider), and possibly a different message
- * listener (e.g. a CCI {@link javax.resource.cci.MessageListener} for a
+ * listener (e.g. a CCI {@link jakarta.resource.cci.MessageListener} for a
  * resource adapter which is based on the JCA Common Client Interface).
  *
  * <p>The asynchronous execution strategy can be customized through the
@@ -97,7 +97,7 @@ import org.springframework.util.Assert;
  * as built by the specified MessageEndpointFactory. {@link GenericMessageEndpointFactory}
  * supports XA transaction participation through its "transactionManager" property,
  * typically with a Spring {@link org.springframework.transaction.jta.JtaTransactionManager}
- * or a plain {@link javax.transaction.TransactionManager} implementation specified there.
+ * or a plain {@link jakarta.transaction.TransactionManager} implementation specified there.
  *
  * <pre class="code">
  * &lt;bean class="org.springframework.jca.endpoint.GenericMessageEndpointManager"&gt;
@@ -111,7 +111,7 @@ import org.springframework.util.Assert;
  * 	 &lt;property name="activationSpec"&gt;
  *     &lt;bean class="org.apache.activemq.ra.ActiveMQActivationSpec"&gt;
  *       &lt;property name="destination" value="myQueue"/&gt;
- *       &lt;property name="destinationType" value="javax.jms.Queue"/&gt;
+ *       &lt;property name="destinationType" value="jakarta.jms.Queue"/&gt;
  *     &lt;/bean&gt;
  *   &lt;/property&gt;
  * &lt;/bean&gt;
@@ -133,7 +133,7 @@ import org.springframework.util.Assert;
  * 	 &lt;property name="activationSpec"&gt;
  *     &lt;bean class="org.apache.activemq.ra.ActiveMQActivationSpec"&gt;
  *       &lt;property name="destination" value="myQueue"/&gt;
- *       &lt;property name="destinationType" value="javax.jms.Queue"/&gt;
+ *       &lt;property name="destinationType" value="jakarta.jms.Queue"/&gt;
  *       &lt;property name="useRAManagedTransaction" value="true"/&gt;
  *     &lt;/bean&gt;
  *   &lt;/property&gt;
@@ -141,10 +141,10 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 2.5
- * @see javax.resource.spi.ResourceAdapter#endpointActivation
- * @see javax.resource.spi.ResourceAdapter#endpointDeactivation
- * @see javax.resource.spi.endpoint.MessageEndpointFactory
- * @see javax.resource.spi.ActivationSpec
+ * @see jakarta.resource.spi.ResourceAdapter#endpointActivation
+ * @see jakarta.resource.spi.ResourceAdapter#endpointDeactivation
+ * @see jakarta.resource.spi.endpoint.MessageEndpointFactory
+ * @see jakarta.resource.spi.ActivationSpec
  */
 public class GenericMessageEndpointManager implements SmartLifecycle, InitializingBean, DisposableBean {
 

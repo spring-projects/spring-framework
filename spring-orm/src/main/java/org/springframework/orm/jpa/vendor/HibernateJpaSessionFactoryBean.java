@@ -18,8 +18,7 @@ package org.springframework.orm.jpa.vendor;
 
 import java.lang.reflect.Method;
 
-import javax.persistence.EntityManagerFactory;
-
+import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.SessionFactory;
 
 import org.springframework.beans.factory.FactoryBean;

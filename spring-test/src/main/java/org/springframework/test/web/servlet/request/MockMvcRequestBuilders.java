@@ -18,7 +18,7 @@ package org.springframework.test.web.servlet.request;
 
 import java.net.URI;
 
-import javax.servlet.DispatcherType;
+import jakarta.servlet.DispatcherType;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;

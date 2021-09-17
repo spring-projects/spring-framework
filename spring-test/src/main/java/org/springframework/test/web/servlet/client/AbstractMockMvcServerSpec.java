@@ -15,7 +15,7 @@
  */
 package org.springframework.test.web.servlet.client;
 
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.test.web.reactive.server.WebTestClient;

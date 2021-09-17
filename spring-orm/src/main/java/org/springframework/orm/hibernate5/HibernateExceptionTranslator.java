@@ -16,8 +16,7 @@
 
 package org.springframework.orm.hibernate5;
 
-import javax.persistence.PersistenceException;
-
+import jakarta.persistence.PersistenceException;
 import org.hibernate.HibernateException;
 import org.hibernate.JDBCException;
 

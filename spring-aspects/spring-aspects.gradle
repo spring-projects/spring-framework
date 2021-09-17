@@ -29,14 +29,14 @@ dependencies {
 	optional(project(":spring-orm"))  // for JPA exception translation support
 	optional(project(":spring-tx"))  // for JPA, @Transactional support
 	optional("javax.cache:cache-api")  // for JCache aspect
-	optional("javax.transaction:javax.transaction-api")  // for @javax.transaction.Transactional support
+	optional("jakarta.transaction:jakarta.transaction-api")  // for @javax.transaction.Transactional support
 	testImplementation(project(":spring-core"))  // for CodeStyleAspect
 	testImplementation(project(":spring-test"))
 	testImplementation(testFixtures(project(":spring-context")))
 	testImplementation(testFixtures(project(":spring-context-support")))
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-tx")))
-	testImplementation("javax.mail:javax.mail-api")
+	testImplementation("jakarta.mail:jakarta.mail-api")
 	testCompileOnly("org.aspectj:aspectjrt")
 }
 

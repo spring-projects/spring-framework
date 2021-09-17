@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,24 +24,24 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-import javax.el.ELContext;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.PageContext;
+import jakarta.el.ELContext;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.PageContext;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Mock implementation of the {@link javax.servlet.jsp.PageContext} interface.
+ * Mock implementation of the {@link jakarta.servlet.jsp.PageContext} interface.
  * Only necessary for testing applications when testing custom JSP tags.
  *
  * <p>Note: Expects initialization via the constructor rather than via the
@@ -293,8 +293,9 @@ public class MockPageContext extends PageContext {
 
 	@Override
 	@Deprecated
-	public javax.servlet.jsp.el.ExpressionEvaluator getExpressionEvaluator() {
-		return new MockExpressionEvaluator(this);
+	@Nullable
+	public jakarta.servlet.jsp.el.ExpressionEvaluator getExpressionEvaluator() {
+		return null;
 	}
 
 	@Override
@@ -306,7 +307,7 @@ public class MockPageContext extends PageContext {
 	@Override
 	@Deprecated
 	@Nullable
-	public javax.servlet.jsp.el.VariableResolver getVariableResolver() {
+	public jakarta.servlet.jsp.el.VariableResolver getVariableResolver() {
 		return null;
 	}
 

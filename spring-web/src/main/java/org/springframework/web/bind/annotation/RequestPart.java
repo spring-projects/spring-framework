@@ -34,7 +34,7 @@ import org.springframework.web.multipart.MultipartResolver;
  * with a method argument.
  *
  * <p>Supported method argument types include {@link MultipartFile} in conjunction with
- * Spring's {@link MultipartResolver} abstraction, {@code javax.servlet.http.Part} in
+ * Spring's {@link MultipartResolver} abstraction, {@code jakarta.servlet.http.Part} in
  * conjunction with Servlet 3.0 multipart requests, or otherwise for any other method
  * argument, the content of the part is passed through an {@link HttpMessageConverter}
  * taking into consideration the 'Content-Type' header of the request part. This is

@@ -25,8 +25,7 @@ import java.util.Collections;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.beans.DirectFieldAccessor;

@@ -197,8 +197,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * {@link Component @Component} meta-annotation including the
 	 * {@link Repository @Repository}, {@link Service @Service}, and
 	 * {@link Controller @Controller} stereotype annotations.
-	 * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and
-	 * JSR-330's {@link javax.inject.Named} annotations, if available.
+	 * <p>Also supports Jakarta EE's {@link jakarta.annotation.ManagedBean} and
+	 * JSR-330's {@link jakarta.inject.Named} annotations, if available.
 	 *
 	 */
 	@SuppressWarnings("unchecked")
@@ -207,16 +207,16 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
-					((Class<? extends Annotation>) ClassUtils.forName("javax.annotation.ManagedBean", cl)), false));
-			logger.trace("JSR-250 'javax.annotation.ManagedBean' found and supported for component scanning");
+					((Class<? extends Annotation>) ClassUtils.forName("jakarta.annotation.ManagedBean", cl)), false));
+			logger.trace("JSR-250 'jakarta.annotation.ManagedBean' found and supported for component scanning");
 		}
 		catch (ClassNotFoundException ex) {
-			// JSR-250 1.1 API (as included in Java EE 6) not available - simply skip.
+			// JSR-250 1.1 API (as included in Jakarta EE) not available - simply skip.
 		}
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
-					((Class<? extends Annotation>) ClassUtils.forName("javax.inject.Named", cl)), false));
-			logger.trace("JSR-330 'javax.inject.Named' annotation found and supported for component scanning");
+					((Class<? extends Annotation>) ClassUtils.forName("jakarta.inject.Named", cl)), false));
+			logger.trace("JSR-330 'jakarta.inject.Named' annotation found and supported for component scanning");
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - simply skip.

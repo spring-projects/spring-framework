@@ -102,7 +102,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * Specify an external factory to use for creating new Threads,
 	 * instead of relying on the local properties of this executor.
 	 * <p>You may specify an inner ThreadFactory bean or also a ThreadFactory reference
-	 * obtained from JNDI (on a Java EE 6 server) or some other lookup mechanism.
+	 * obtained from JNDI (on a Jakarta EE server) or some other lookup mechanism.
 	 * @see #setThreadNamePrefix
 	 * @see #setThreadPriority
 	 */

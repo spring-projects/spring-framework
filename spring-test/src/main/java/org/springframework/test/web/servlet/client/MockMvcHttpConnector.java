@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import javax.servlet.http.Cookie;
-
+import jakarta.servlet.http.Cookie;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
@@ -166,7 +165,7 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 									buffer.read(partBytes);
 									DataBufferUtils.release(buffer);
 
-									// Adapt to javax.servlet.http.Part...
+									// Adapt to jakarta.servlet.http.Part...
 									MockPart mockPart = (part instanceof FilePart ?
 											new MockPart(part.name(), ((FilePart) part).filename(), partBytes) :
 											new MockPart(part.name(), partBytes));

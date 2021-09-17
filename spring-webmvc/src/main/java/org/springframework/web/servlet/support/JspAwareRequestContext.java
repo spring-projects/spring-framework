@@ -20,16 +20,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.jstl.core.Config;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.jstl.core.Config;
 
 import org.springframework.lang.Nullable;
 
 /**
  * JSP-aware (and JSTL-aware) subclass of RequestContext, allowing for
- * population of the context from a {@code javax.servlet.jsp.PageContext}.
+ * population of the context from a {@code jakarta.servlet.jsp.PageContext}.
  *
  * <p>This context will detect a JSTL locale attribute in page/request/session/application
  * scope, in addition to the fallback locale strategy provided by the base class.

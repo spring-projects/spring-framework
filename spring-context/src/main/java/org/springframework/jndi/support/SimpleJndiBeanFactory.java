@@ -44,7 +44,7 @@ import org.springframework.lang.Nullable;
  * the {@link org.springframework.beans.factory.ListableBeanFactory} interface.
  *
  * <p>This factory resolves given bean names as JNDI names within the
- * Java EE application's "java:comp/env/" namespace. It caches the resolved
+ * Jakarta EE application's "java:comp/env/" namespace. It caches the resolved
  * types for all obtained objects, and optionally also caches shareable
  * objects (if they are explicitly marked as
  * {@link #addShareableResource shareable resource}.

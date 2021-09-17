@@ -21,13 +21,12 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.server.HttpOutput;
 import org.eclipse.jetty.server.Request;
@@ -38,7 +37,6 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -52,10 +50,6 @@ import org.springframework.util.MultiValueMap;
  */
 public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
-	private static final boolean jetty10Present = ClassUtils.isPresent(
-			"org.eclipse.jetty.http.CookieCutter", JettyHttpHandlerAdapter.class.getClassLoader());
-
-
 	public JettyHttpHandlerAdapter(HttpHandler httpHandler) {
 		super(httpHandler);
 	}
@@ -64,11 +58,6 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	@Override
 	protected ServletServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context)
 			throws IOException, URISyntaxException {
-
-		// TODO: need to compile against Jetty 10 to use HttpFields (class->interface)
-		if (jetty10Present) {
-			return super.createRequest(request, context);
-		}
 
 		Assert.notNull(getServletPath(), "Servlet path is not initialized");
 		return new JettyServerHttpRequest(
@@ -79,15 +68,8 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	protected ServletServerHttpResponse createResponse(HttpServletResponse response,
 			AsyncContext context, ServletServerHttpRequest request) throws IOException {
 
-		// TODO: need to compile against Jetty 10 to use HttpFields (class->interface)
-		if (jetty10Present) {
-			return new BaseJettyServerHttpResponse(
-					response, context, getDataBufferFactory(), getBufferSize(), request);
-		}
-		else {
-			return new JettyServerHttpResponse(
-					response, context, getDataBufferFactory(), getBufferSize(), request);
-		}
+		return new JettyServerHttpResponse(
+				response, context, getDataBufferFactory(), getBufferSize(), request);
 	}
 
 
@@ -120,39 +102,10 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 						"] to org.eclipse.jetty.server.Request");
 			}
 		}
-
-
 	}
 
 
-	private static class BaseJettyServerHttpResponse extends ServletServerHttpResponse {
-
-		BaseJettyServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
-				DataBufferFactory bufferFactory, int bufferSize, ServletServerHttpRequest request)
-				throws IOException {
-
-			super(response, asyncContext, bufferFactory, bufferSize, request);
-		}
-
-		BaseJettyServerHttpResponse(HttpHeaders headers, HttpServletResponse response, AsyncContext asyncContext,
-				DataBufferFactory bufferFactory, int bufferSize, ServletServerHttpRequest request)
-				throws IOException {
-
-			super(headers, response, asyncContext, bufferFactory, bufferSize, request);
-		}
-
-		@Override
-		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
-			ByteBuffer input = dataBuffer.asByteBuffer();
-			int len = input.remaining();
-			ServletResponse response = getNativeResponse();
-			((HttpOutput) response.getOutputStream()).write(input);
-			return len;
-		}
-	}
-
-
-	private static final class JettyServerHttpResponse extends BaseJettyServerHttpResponse {
+	private static final class JettyServerHttpResponse extends ServletServerHttpResponse {
 
 		JettyServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
 				DataBufferFactory bufferFactory, int bufferSize, ServletServerHttpRequest request)
@@ -180,6 +133,15 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 				throw new IllegalArgumentException("Cannot convert [" + response.getClass() +
 						"] to org.eclipse.jetty.server.Response");
 			}
+		}
+
+		@Override
+		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
+			ByteBuffer input = dataBuffer.asByteBuffer();
+			int len = input.remaining();
+			ServletResponse response = getNativeResponse();
+			((HttpOutput) response.getOutputStream()).write(input);
+			return len;
 		}
 
 		@Override

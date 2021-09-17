@@ -19,8 +19,8 @@ package org.springframework.web.multipart.support;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.util.LinkedMultiValueMap;

@@ -38,9 +38,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -51,7 +51,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Mock implementation of the {@link javax.servlet.http.HttpServletResponse} interface.
+ * Mock implementation of the {@link jakarta.servlet.http.HttpServletResponse} interface.
  *
  * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
  *
@@ -383,7 +383,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setLocale(@Nullable Locale locale) {
-		// Although the Javadoc for javax.servlet.ServletResponse.setLocale(Locale) does not
+		// Although the Javadoc for jakarta.servlet.ServletResponse.setLocale(Locale) does not
 		// state how a null value for the supplied Locale should be handled, both Tomcat and
 		// Jetty simply ignore a null value. So we do the same here.
 		if (locale == null) {

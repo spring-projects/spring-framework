@@ -19,9 +19,9 @@ package org.springframework.orm.hibernate5;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
+import jakarta.persistence.PersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;

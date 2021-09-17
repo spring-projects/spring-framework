@@ -16,20 +16,20 @@
 
 package org.springframework.transaction.jta;
 
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
+import jakarta.transaction.HeuristicMixedException;
+import jakarta.transaction.HeuristicRollbackException;
+import jakarta.transaction.NotSupportedException;
+import jakarta.transaction.RollbackException;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.UserTransaction;
 
 import org.springframework.util.Assert;
 
 /**
  * Adapter for a JTA UserTransaction handle, taking a JTA
- * {@link javax.transaction.TransactionManager} reference and creating
- * a JTA {@link javax.transaction.UserTransaction} handle for it.
+ * {@link jakarta.transaction.TransactionManager} reference and creating
+ * a JTA {@link jakarta.transaction.UserTransaction} handle for it.
  *
  * <p>The JTA UserTransaction interface is an exact subset of the JTA
  * TransactionManager interface. Unfortunately, it does not serve as

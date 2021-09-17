@@ -19,9 +19,8 @@ package org.springframework.web.servlet.mvc.support;
 import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -463,7 +462,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 	/**
 	 * Handle the case where an {@linkplain RequestPart @RequestPart}, a {@link MultipartFile},
-	 * or a {@code javax.servlet.http.Part} argument is required but is missing.
+	 * or a {@code jakarta.servlet.http.Part} argument is required but is missing.
 	 * <p>By default, an HTTP 400 error is sent back to the client.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -544,12 +543,12 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 	/**
 	 * Invoked to send a server error. Sets the status to 500 and also sets the
-	 * request attribute "javax.servlet.error.exception" to the Exception.
+	 * request attribute "jakarta.servlet.error.exception" to the Exception.
 	 */
 	protected void sendServerError(Exception ex, HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
 
-		request.setAttribute("javax.servlet.error.exception", ex);
+		request.setAttribute("jakarta.servlet.error.exception", ex);
 		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 

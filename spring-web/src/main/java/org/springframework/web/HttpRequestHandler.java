@@ -18,15 +18,15 @@ package org.springframework.web;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Plain handler interface for components that process HTTP requests,
- * analogous to a Servlet. Only declares {@link javax.servlet.ServletException}
+ * analogous to a Servlet. Only declares {@link jakarta.servlet.ServletException}
  * and {@link java.io.IOException}, to allow for usage within any
- * {@link javax.servlet.http.HttpServlet}. This interface is essentially the
+ * {@link jakarta.servlet.http.HttpServlet}. This interface is essentially the
  * direct equivalent of an HttpServlet, reduced to a central handle method.
  *
  * <p>The easiest way to expose an HttpRequestHandler bean in Spring style

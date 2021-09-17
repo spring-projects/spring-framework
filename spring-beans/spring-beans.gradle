@@ -5,13 +5,13 @@ apply plugin: "kotlin"
 
 dependencies {
 	api(project(":spring-core"))
-	optional("javax.inject:javax.inject")
+	optional("jakarta.inject:jakarta.inject-api")
 	optional("org.yaml:snakeyaml")
 	optional("org.codehaus.groovy:groovy-xml")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	testImplementation(testFixtures(project(":spring-core")))
-	testImplementation("javax.annotation:javax.annotation-api")
+	testImplementation("jakarta.annotation:jakarta.annotation-api")
 	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
 	testFixturesImplementation("org.assertj:assertj-core")
 }

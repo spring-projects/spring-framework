@@ -23,8 +23,7 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -52,7 +51,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 	/**
 	 * Create a new ServletContextResourcePatternResolver.
 	 * @param servletContext the ServletContext to load resources with
-	 * @see ServletContextResourceLoader#ServletContextResourceLoader(javax.servlet.ServletContext)
+	 * @see ServletContextResourceLoader#ServletContextResourceLoader(jakarta.servlet.ServletContext)
 	 */
 	public ServletContextResourcePatternResolver(ServletContext servletContext) {
 		super(new ServletContextResourceLoader(servletContext));
@@ -75,7 +74,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 	 * In case of other resources, delegates to the superclass version.
 	 * @see #doRetrieveMatchingServletContextResources
 	 * @see ServletContextResource
-	 * @see javax.servlet.ServletContext#getResourcePaths
+	 * @see jakarta.servlet.ServletContext#getResourcePaths
 	 */
 	@Override
 	protected Set<Resource> doFindPathMatchingFileResources(Resource rootDirResource, String subPattern)
@@ -104,7 +103,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 	 * @param result the Set of matching Resources to add to
 	 * @throws IOException if directory contents could not be retrieved
 	 * @see ServletContextResource
-	 * @see javax.servlet.ServletContext#getResourcePaths
+	 * @see jakarta.servlet.ServletContext#getResourcePaths
 	 */
 	protected void doRetrieveMatchingServletContextResources(
 			ServletContext servletContext, String fullPattern, String dir, Set<Resource> result)

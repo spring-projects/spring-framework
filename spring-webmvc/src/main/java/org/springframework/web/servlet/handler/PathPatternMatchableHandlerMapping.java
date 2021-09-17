@@ -18,7 +18,7 @@ package org.springframework.web.servlet.handler;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;

@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.web.socket;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.lang.Nullable;
@@ -27,7 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * {@link ContextCustomizer} that instantiates a new {@link MockServerContainer}
  * and stores it in the {@code ServletContext} under the attribute named
- * {@code "javax.websocket.server.ServerContainer"}.
+ * {@code "jakarta.websocket.server.ServerContainer"}.
  *
  * @author Sam Brannen
  * @since 4.3.1
@@ -40,7 +40,7 @@ class MockServerContainerContextCustomizer implements ContextCustomizer {
 			WebApplicationContext wac = (WebApplicationContext) context;
 			ServletContext sc = wac.getServletContext();
 			if (sc != null) {
-				sc.setAttribute("javax.websocket.server.ServerContainer", new MockServerContainer());
+				sc.setAttribute("jakarta.websocket.server.ServerContainer", new MockServerContainer());
 			}
 		}
 	}

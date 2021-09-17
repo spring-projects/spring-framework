@@ -86,7 +86,7 @@ import org.springframework.stereotype.Component;
  * <p>{@code @Configuration} is meta-annotated with {@link Component @Component}, therefore
  * {@code @Configuration} classes are candidates for component scanning (typically using
  * Spring XML's {@code <context:component-scan/>} element) and therefore may also take
- * advantage of {@link Autowired @Autowired}/{@link javax.inject.Inject @Inject}
+ * advantage of {@link Autowired @Autowired}/{@link jakarta.inject.Inject @Inject}
  * like any regular {@code @Component}. In particular, if a single constructor is present
  * autowiring semantics will be applied transparently for that constructor:
  *

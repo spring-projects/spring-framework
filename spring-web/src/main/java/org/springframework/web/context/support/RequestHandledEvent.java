@@ -104,7 +104,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	/**
 	 * Return the name of the user that was associated with the request
 	 * (usually the UserPrincipal).
-	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
+	 * @see jakarta.servlet.http.HttpServletRequest#getUserPrincipal()
 	 */
 	@Nullable
 	public String getUserName() {

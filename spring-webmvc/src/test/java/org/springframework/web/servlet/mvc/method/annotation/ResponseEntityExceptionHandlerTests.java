@@ -21,8 +21,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
-import javax.servlet.ServletException;
-
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.ConversionNotSupportedException;
@@ -287,7 +286,7 @@ public class ResponseEntityExceptionHandlerTests {
 
 			// SPR-9653
 			if (HttpStatus.INTERNAL_SERVER_ERROR.equals(responseEntity.getStatusCode())) {
-				assertThat(this.servletRequest.getAttribute("javax.servlet.error.exception")).isSameAs(ex);
+				assertThat(this.servletRequest.getAttribute("jakarta.servlet.error.exception")).isSameAs(ex);
 			}
 
 			this.defaultExceptionResolver.resolveException(this.servletRequest, this.servletResponse, null, ex);

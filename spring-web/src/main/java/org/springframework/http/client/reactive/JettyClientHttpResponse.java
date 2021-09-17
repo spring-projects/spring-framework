@@ -16,13 +16,11 @@
 
 package org.springframework.http.client.reactive;
 
-import java.lang.reflect.Method;
 import java.net.HttpCookie;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.reactive.client.ReactiveResponse;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -32,11 +30,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link ClientHttpResponse} implementation for the Jetty ReactiveStreams HTTP client.
@@ -50,10 +46,6 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 
 	private static final Pattern SAMESITE_PATTERN = Pattern.compile("(?i).*SameSite=(Strict|Lax|None).*");
 
-	private static final ClassLoader classLoader = JettyClientHttpResponse.class.getClassLoader();
-
-	private static final boolean jetty10Present;
-
 
 	private final ReactiveResponse reactiveResponse;
 
@@ -62,25 +54,11 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 	private final HttpHeaders headers;
 
 
-	static {
-		try {
-			Class<?> httpFieldsClass = classLoader.loadClass("org.eclipse.jetty.http.HttpFields");
-			jetty10Present = httpFieldsClass.isInterface();
-		}
-		catch (ClassNotFoundException ex) {
-			throw new IllegalStateException("No compatible Jetty version found", ex);
-		}
-	}
-
-
 	public JettyClientHttpResponse(ReactiveResponse reactiveResponse, Publisher<DataBuffer> content) {
 		this.reactiveResponse = reactiveResponse;
 		this.content = Flux.from(content);
 
-		MultiValueMap<String, String> headers = (jetty10Present ?
-				Jetty10HttpFieldsHelper.getHttpHeaders(reactiveResponse) :
-				new JettyHeadersAdapter(reactiveResponse.getHeaders()));
-
+		MultiValueMap<String, String> headers = new JettyHeadersAdapter(reactiveResponse.getHeaders());
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 	}
 
@@ -130,42 +108,6 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public HttpHeaders getHeaders() {
 		return this.headers;
-	}
-
-
-	private static class Jetty10HttpFieldsHelper {
-
-		private static final Method getHeadersMethod;
-
-		private static final Method getNameMethod;
-
-		private static final Method getValueMethod;
-
-		static {
-			try {
-				getHeadersMethod = Response.class.getMethod("getHeaders");
-				Class<?> type = classLoader.loadClass("org.eclipse.jetty.http.HttpField");
-				getNameMethod = type.getMethod("getName");
-				getValueMethod = type.getMethod("getValue");
-			}
-			catch (ClassNotFoundException | NoSuchMethodException ex) {
-				throw new IllegalStateException("No compatible Jetty version found", ex);
-			}
-		}
-
-		public static HttpHeaders getHttpHeaders(ReactiveResponse response) {
-			HttpHeaders headers = new HttpHeaders();
-			Iterable<?> iterator = (Iterable<?>)
-					ReflectionUtils.invokeMethod(getHeadersMethod, response.getResponse());
-			Assert.notNull(iterator, "Iterator must not be null");
-			for (Object field : iterator) {
-				String name = (String) ReflectionUtils.invokeMethod(getNameMethod, field);
-				Assert.notNull(name, "Header name must not be null");
-				String value = (String) ReflectionUtils.invokeMethod(getValueMethod, field);
-				headers.add(name, value);
-			}
-			return headers;
-		}
 	}
 
 }

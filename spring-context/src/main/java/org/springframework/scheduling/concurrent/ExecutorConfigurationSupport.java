@@ -71,7 +71,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	/**
 	 * Set the ThreadFactory to use for the ExecutorService's thread pool.
 	 * Default is the underlying ExecutorService's default thread factory.
-	 * <p>In a Java EE 7 or other managed environment with JSR-236 support,
+	 * <p>In a Jakarta EE or other managed environment with JSR-236 support,
 	 * consider specifying a JNDI-located ManagedThreadFactory: by default,
 	 * to be found at "java:comp/DefaultManagedThreadFactory".
 	 * Use the "jee:jndi-lookup" namespace element in XML or the programmatic
@@ -79,7 +79,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * Alternatively, consider using Spring's {@link DefaultManagedAwareThreadFactory}
 	 * with its fallback to local threads in case of no managed thread factory found.
 	 * @see java.util.concurrent.Executors#defaultThreadFactory()
-	 * @see javax.enterprise.concurrent.ManagedThreadFactory
+	 * @see jakarta.enterprise.concurrent.ManagedThreadFactory
 	 * @see DefaultManagedAwareThreadFactory
 	 */
 	public void setThreadFactory(@Nullable ThreadFactory threadFactory) {

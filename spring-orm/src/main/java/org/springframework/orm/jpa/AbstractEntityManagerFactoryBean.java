@@ -34,15 +34,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
-import javax.persistence.SynchronizationType;
-import javax.persistence.spi.PersistenceProvider;
-import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.Query;
+import jakarta.persistence.SynchronizationType;
+import jakarta.persistence.spi.PersistenceProvider;
+import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -64,7 +64,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Abstract {@link org.springframework.beans.factory.FactoryBean} that creates
- * a local JPA {@link javax.persistence.EntityManagerFactory} instance within
+ * a local JPA {@link jakarta.persistence.EntityManagerFactory} instance within
  * a Spring application context.
  *
  * <p>Encapsulates the common functionality between the different JPA bootstrap
@@ -149,8 +149,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * taken from the JpaVendorAdapter (if any) or retrieved through scanning
 	 * (as far as possible).
 	 * @see JpaVendorAdapter#getPersistenceProvider()
-	 * @see javax.persistence.spi.PersistenceProvider
-	 * @see javax.persistence.Persistence
+	 * @see jakarta.persistence.spi.PersistenceProvider
+	 * @see jakarta.persistence.Persistence
 	 */
 	public void setPersistenceProviderClass(Class<? extends PersistenceProvider> persistenceProviderClass) {
 		this.persistenceProvider = BeanUtils.instantiateClass(persistenceProviderClass);
@@ -162,8 +162,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * will be taken from the JpaVendorAdapter (if any) or determined
 	 * by the persistence unit deployment descriptor (as far as possible).
 	 * @see JpaVendorAdapter#getPersistenceProvider()
-	 * @see javax.persistence.spi.PersistenceProvider
-	 * @see javax.persistence.Persistence
+	 * @see jakarta.persistence.spi.PersistenceProvider
+	 * @see jakarta.persistence.Persistence
 	 */
 	public void setPersistenceProvider(@Nullable PersistenceProvider persistenceProvider) {
 		this.persistenceProvider = persistenceProvider;
@@ -180,7 +180,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * <p>Default is none, indicating the default EntityManagerFactory
 	 * configuration. The persistence provider will throw an exception if
 	 * ambiguous EntityManager configurations are found.
-	 * @see javax.persistence.Persistence#createEntityManagerFactory(String)
+	 * @see jakarta.persistence.Persistence#createEntityManagerFactory(String)
 	 */
 	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
 		this.persistenceUnitName = persistenceUnitName;
@@ -197,8 +197,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * {@code Persistence.createEntityManagerFactory} (if any).
 	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor) or a
 	 * "props" element in XML bean definitions.
-	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, Map)
-	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(PersistenceUnitInfo, Map)
+	 * @see jakarta.persistence.Persistence#createEntityManagerFactory(String, Map)
+	 * @see jakarta.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(PersistenceUnitInfo, Map)
 	 */
 	public void setJpaProperties(Properties jpaProperties) {
 		CollectionUtils.mergePropertiesIntoMap(jpaProperties, this.jpaPropertyMap);
@@ -208,8 +208,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Specify JPA properties as a Map, to be passed into
 	 * {@code Persistence.createEntityManagerFactory} (if any).
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
-	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, Map)
-	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(PersistenceUnitInfo, Map)
+	 * @see jakarta.persistence.Persistence#createEntityManagerFactory(String, Map)
+	 * @see jakarta.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(PersistenceUnitInfo, Map)
 	 */
 	public void setJpaPropertyMap(@Nullable Map<String, ?> jpaProperties) {
 		if (jpaProperties != null) {
@@ -231,7 +231,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Specify the (potentially vendor-specific) EntityManagerFactory interface
 	 * that this EntityManagerFactory proxy is supposed to implement.
 	 * <p>The default will be taken from the specific JpaVendorAdapter, if any,
-	 * or set to the standard {@code javax.persistence.EntityManagerFactory}
+	 * or set to the standard {@code jakarta.persistence.EntityManagerFactory}
 	 * interface else.
 	 * @see JpaVendorAdapter#getEntityManagerFactoryInterface()
 	 */
@@ -243,7 +243,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Specify the (potentially vendor-specific) EntityManager interface
 	 * that this factory's EntityManagers are supposed to implement.
 	 * <p>The default will be taken from the specific JpaVendorAdapter, if any,
-	 * or set to the standard {@code javax.persistence.EntityManager}
+	 * or set to the standard {@code jakarta.persistence.EntityManager}
 	 * interface else.
 	 * @see JpaVendorAdapter#getEntityManagerInterface()
 	 * @see EntityManagerFactoryInfo#getEntityManagerInterface()
@@ -468,7 +468,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			if (entityManagerFactoryInterface != null) {
 				throw new IllegalStateException("EntityManagerFactory interface [" + entityManagerFactoryInterface +
 						"] seems to conflict with Spring's EntityManagerFactoryInfo mixin - consider resetting the "+
-						"'entityManagerFactoryInterface' property to plain [javax.persistence.EntityManagerFactory]", ex);
+						"'entityManagerFactoryInterface' property to plain [jakarta.persistence.EntityManagerFactory]", ex);
 			}
 			else {
 				throw new IllegalStateException("Conflicting EntityManagerFactory interfaces - " +

@@ -63,7 +63,7 @@ import org.springframework.validation.annotation.Validated;
  * {@link DataBuffer DataBuffer}.
  *
  * <p>Validation is applied if the method argument is annotated with
- * {@code @javax.validation.Valid} or
+ * {@code @jakarta.validation.Valid} or
  * {@link org.springframework.validation.annotation.Validated}. Validation
  * failure results in an {@link MethodArgumentNotValidException}.
  *
@@ -143,7 +143,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 	 * {@link Decoder}.
 	 *
 	 * <p>Validation is applied if the method argument is annotated with
-	 * {@code @javax.validation.Valid} or
+	 * {@code @jakarta.validation.Valid} or
 	 * {@link org.springframework.validation.annotation.Validated}. Validation
 	 * failure results in an {@link MethodArgumentNotValidException}.
 	 *

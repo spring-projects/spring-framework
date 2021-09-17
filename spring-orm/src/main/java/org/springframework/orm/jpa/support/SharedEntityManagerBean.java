@@ -16,8 +16,8 @@
 
 package org.springframework.orm.jpa.support;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -28,10 +28,10 @@ import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.Assert;
 
 /**
- * {@link FactoryBean} that exposes a shared JPA {@link javax.persistence.EntityManager}
+ * {@link FactoryBean} that exposes a shared JPA {@link jakarta.persistence.EntityManager}
  * reference for a given EntityManagerFactory. Typically used for an EntityManagerFactory
  * created by {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean},
- * as direct alternative to a JNDI lookup for a Java EE server's EntityManager reference.
+ * as direct alternative to a JNDI lookup for a Jakarta EE server's EntityManager reference.
  *
  * <p>The shared EntityManager will behave just like an EntityManager fetched from an
  * application server's JNDI environment, as defined by the JPA specification.
@@ -65,9 +65,9 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 	 * Specify the EntityManager interface to expose.
 	 * <p>Default is the EntityManager interface as defined by the
 	 * EntityManagerFactoryInfo, if available. Else, the standard
-	 * {@code javax.persistence.EntityManager} interface will be used.
+	 * {@code jakarta.persistence.EntityManager} interface will be used.
 	 * @see org.springframework.orm.jpa.EntityManagerFactoryInfo#getEntityManagerInterface()
-	 * @see javax.persistence.EntityManager
+	 * @see jakarta.persistence.EntityManager
 	 */
 	public void setEntityManagerInterface(Class<? extends EntityManager> entityManagerInterface) {
 		Assert.notNull(entityManagerInterface, "'entityManagerInterface' must not be null");

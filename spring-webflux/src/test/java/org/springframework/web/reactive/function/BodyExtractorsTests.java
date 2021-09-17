@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,11 +51,11 @@ import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -89,7 +89,7 @@ public class BodyExtractorsTests {
 		messageReaders.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 		messageReaders.add(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
 		messageReaders.add(new FormHttpMessageReader());
-		SynchronossPartHttpMessageReader partReader = new SynchronossPartHttpMessageReader();
+		DefaultPartHttpMessageReader partReader = new DefaultPartHttpMessageReader();
 		messageReaders.add(partReader);
 		messageReaders.add(new MultipartHttpMessageReader(partReader));
 

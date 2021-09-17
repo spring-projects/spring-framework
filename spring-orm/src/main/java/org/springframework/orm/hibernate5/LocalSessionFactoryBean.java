@@ -281,7 +281,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	/**
 	 * Set the Spring {@link org.springframework.transaction.jta.JtaTransactionManager}
-	 * or the JTA {@link javax.transaction.TransactionManager} to be used with Hibernate,
+	 * or the JTA {@link jakarta.transaction.TransactionManager} to be used with Hibernate,
 	 * if any. Implicitly sets up {@code JtaPlatform}.
 	 * @see LocalSessionFactoryBuilder#setJtaTransactionManager
 	 */
@@ -343,8 +343,8 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	/**
 	 * Specify custom type filters for Spring-based scanning for entity classes.
 	 * <p>Default is to search all specified packages for classes annotated with
-	 * {@code @javax.persistence.Entity}, {@code @javax.persistence.Embeddable}
-	 * or {@code @javax.persistence.MappedSuperclass}.
+	 * {@code @jakarta.persistence.Entity}, {@code @jakarta.persistence.Embeddable}
+	 * or {@code @jakarta.persistence.MappedSuperclass}.
 	 * @see #setPackagesToScan
 	 */
 	public void setEntityTypeFilters(TypeFilter... entityTypeFilters) {

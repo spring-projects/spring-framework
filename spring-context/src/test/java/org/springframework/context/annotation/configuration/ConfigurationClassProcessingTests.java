@@ -22,9 +22,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import javax.annotation.Resource;
-import javax.inject.Provider;
-
+import jakarta.annotation.Resource;
+import jakarta.inject.Provider;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;

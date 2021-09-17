@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
  * {@code AnnotationAwareOrderComparator} is an extension of
  * {@link OrderComparator} that supports Spring's
  * {@link org.springframework.core.Ordered} interface as well as the
- * {@link Order @Order} and {@link javax.annotation.Priority @Priority}
+ * {@link Order @Order} and {@link jakarta.annotation.Priority @Priority}
  * annotations, with an order value provided by an {@code Ordered}
  * instance overriding a statically defined annotation value (if any).
  *
@@ -42,7 +42,7 @@ import org.springframework.lang.Nullable;
  * @since 2.0.1
  * @see org.springframework.core.Ordered
  * @see org.springframework.core.annotation.Order
- * @see javax.annotation.Priority
+ * @see jakarta.annotation.Priority
  */
 public class AnnotationAwareOrderComparator extends OrderComparator {
 
@@ -54,7 +54,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 
 	/**
 	 * This implementation checks for {@link Order @Order} or
-	 * {@link javax.annotation.Priority @Priority} on various kinds of
+	 * {@link jakarta.annotation.Priority @Priority} on various kinds of
 	 * elements, in addition to the {@link org.springframework.core.Ordered}
 	 * check in the superclass.
 	 */
@@ -80,7 +80,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	}
 
 	/**
-	 * This implementation retrieves an @{@link javax.annotation.Priority}
+	 * This implementation retrieves an @{@link jakarta.annotation.Priority}
 	 * value, allowing for additional semantics over the regular @{@link Order}
 	 * annotation: typically, selecting one object over another in case of
 	 * multiple matches but only one object to be returned.

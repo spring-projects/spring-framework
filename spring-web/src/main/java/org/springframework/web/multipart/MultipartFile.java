@@ -134,7 +134,7 @@ public interface MultipartFile extends InputStreamSource {
 	 * @throws IllegalStateException if the file has already been moved
 	 * in the filesystem and is not available anymore for another transfer
 	 * @see org.apache.commons.fileupload.FileItem#write(File)
-	 * @see javax.servlet.http.Part#write(String)
+	 * @see jakarta.servlet.http.Part#write(String)
 	 */
 	void transferTo(File dest) throws IOException, IllegalStateException;
 

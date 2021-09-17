@@ -39,6 +39,7 @@ import org.springframework.util.MultiValueMap;
  * <p>There is a duplicate of this class in the server package!
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.3
  */
 class JettyHeadersAdapter implements MultiValueMap<String, String> {
@@ -58,7 +59,10 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public void add(String key, @Nullable String value) {
-		this.headers.add(key, value);
+		if (!(this.headers instanceof HttpFields.Mutable)) {
+			throw new IllegalStateException("Immutable headers");
+		}
+		((HttpFields.Mutable) this.headers).add(key, value);
 	}
 
 	@Override
@@ -73,7 +77,10 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public void set(String key, @Nullable String value) {
-		this.headers.put(key, value);
+		if (!(this.headers instanceof HttpFields.Mutable)) {
+			throw new IllegalStateException("Immutable headers");
+		}
+		((HttpFields.Mutable) this.headers).put(key, value);
 	}
 
 	@Override
@@ -105,7 +112,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String && this.headers.containsKey((String) key));
+		return (key instanceof String && this.headers.contains((String) key));
 	}
 
 	@Override
@@ -126,17 +133,23 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 	@Nullable
 	@Override
 	public List<String> put(String key, List<String> value) {
+		if (!(this.headers instanceof HttpFields.Mutable)) {
+			throw new IllegalStateException("Immutable headers");
+		}
 		List<String> oldValues = get(key);
-		this.headers.put(key, value);
+		((HttpFields.Mutable) this.headers).put(key, value);
 		return oldValues;
 	}
 
 	@Nullable
 	@Override
 	public List<String> remove(Object key) {
+		if (!(this.headers instanceof HttpFields.Mutable)) {
+			throw new IllegalStateException("Immutable headers");
+		}
 		if (key instanceof String) {
 			List<String> oldValues = get(key);
-			this.headers.remove((String) key);
+			((HttpFields.Mutable) this.headers).remove((String) key);
 			return oldValues;
 		}
 		return null;
@@ -149,7 +162,10 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public void clear() {
-		this.headers.clear();
+		if (!(this.headers instanceof HttpFields.Mutable)) {
+			throw new IllegalStateException("Immutable headers");
+		}
+		((HttpFields.Mutable) this.headers).clear();
 	}
 
 	@Override
@@ -221,8 +237,11 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 		@Override
 		public List<String> setValue(List<String> value) {
+			if (!(headers instanceof HttpFields.Mutable)) {
+				throw new IllegalStateException("Immutable headers");
+			}
 			List<String> previousValues = headers.getValuesList(this.key);
-			headers.put(this.key, value);
+			((HttpFields.Mutable) headers).put(this.key, value);
 			return previousValues;
 		}
 	}
@@ -266,13 +285,16 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 		@Override
 		public void remove() {
+			if (!(headers instanceof HttpFields.Mutable)) {
+				throw new IllegalStateException("Immutable headers");
+			}
 			if (this.currentName == null) {
 				throw new IllegalStateException("No current Header in iterator");
 			}
-			if (!headers.containsKey(this.currentName)) {
+			if (!headers.contains(this.currentName)) {
 				throw new IllegalStateException("Header not present: " + this.currentName);
 			}
-			headers.remove(this.currentName);
+			((HttpFields.Mutable) headers).remove(this.currentName);
 		}
 	}
 

@@ -18,21 +18,20 @@ package org.springframework.orm.jpa;
 
 import java.util.Map;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.LockTimeoutException;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.OptimisticLockException;
-import javax.persistence.PersistenceException;
-import javax.persistence.PessimisticLockException;
-import javax.persistence.Query;
-import javax.persistence.QueryTimeoutException;
-import javax.persistence.SynchronizationType;
-import javax.persistence.TransactionRequiredException;
-
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.LockTimeoutException;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.PessimisticLockException;
+import jakarta.persistence.Query;
+import jakarta.persistence.QueryTimeoutException;
+import jakarta.persistence.SynchronizationType;
+import jakarta.persistence.TransactionRequiredException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -168,8 +167,8 @@ public abstract class EntityManagerFactoryUtils {
 	 * @param properties the properties to be passed into the {@code createEntityManager}
 	 * call (may be {@code null})
 	 * @return the EntityManager, or {@code null} if none found
-	 * @throws javax.persistence.PersistenceException if the EntityManager couldn't be created
-	 * @see #getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
+	 * @throws jakarta.persistence.PersistenceException if the EntityManager couldn't be created
+	 * @see #getTransactionalEntityManager(jakarta.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
 	@Nullable
@@ -189,8 +188,8 @@ public abstract class EntityManagerFactoryUtils {
 	 * @param synchronizedWithTransaction whether to automatically join ongoing
 	 * transactions (according to the JPA 2.1 SynchronizationType rules)
 	 * @return the EntityManager, or {@code null} if none found
-	 * @throws javax.persistence.PersistenceException if the EntityManager couldn't be created
-	 * @see #getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
+	 * @throws jakarta.persistence.PersistenceException if the EntityManager couldn't be created
+	 * @see #getTransactionalEntityManager(jakarta.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
 	@Nullable
@@ -334,7 +333,7 @@ public abstract class EntityManagerFactoryUtils {
 
 	/**
 	 * Apply the current transaction timeout, if any, to the given JPA Query object.
-	 * <p>This method sets the JPA 2.0 query hint "javax.persistence.query.timeout" accordingly.
+	 * <p>This method sets the JPA 2.0 query hint "jakarta.persistence.query.timeout" accordingly.
 	 * @param query the JPA Query object
 	 * @param emf the JPA EntityManagerFactory that the Query was created for
 	 */
@@ -343,7 +342,7 @@ public abstract class EntityManagerFactoryUtils {
 		if (emHolder != null && emHolder.hasTimeout()) {
 			int timeoutValue = (int) emHolder.getTimeToLiveInMillis();
 			try {
-				query.setHint("javax.persistence.query.timeout", timeoutValue);
+				query.setHint("jakarta.persistence.query.timeout", timeoutValue);
 			}
 			catch (IllegalArgumentException ex) {
 				// oh well, at least we tried...
@@ -418,7 +417,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * Close the given JPA EntityManager,
 	 * catching and logging any cleanup exceptions thrown.
 	 * @param em the JPA EntityManager to close (may be {@code null})
-	 * @see javax.persistence.EntityManager#close()
+	 * @see jakarta.persistence.EntityManager#close()
 	 */
 	public static void closeEntityManager(@Nullable EntityManager em) {
 		if (em != null) {

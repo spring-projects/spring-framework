@@ -16,9 +16,9 @@
 
 package org.springframework.test.context.junit4.spr8849;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 
+import jakarta.annotation.Resource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

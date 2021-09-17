@@ -41,8 +41,8 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.stereotype.Repository @Repository}) are
  * themselves annotated with {@code @Component}.
  *
- * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and
- * JSR-330's {@link javax.inject.Named} annotations, if available. Note that
+ * <p>Also supports Jakarta EE's {@link jakarta.annotation.ManagedBean} and
+ * JSR-330's {@link jakarta.inject.Named} annotations, if available. Note that
  * Spring component annotations always override such standard annotations.
  *
  * <p>If the annotation's value doesn't indicate a bean name, an appropriate
@@ -58,7 +58,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.stereotype.Repository#value()
  * @see org.springframework.stereotype.Service#value()
  * @see org.springframework.stereotype.Controller#value()
- * @see javax.inject.Named#value()
+ * @see jakarta.inject.Named#value()
  * @see FullyQualifiedAnnotationBeanNameGenerator
  */
 public class AnnotationBeanNameGenerator implements BeanNameGenerator {
@@ -136,8 +136,8 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 		boolean isStereotype = annotationType.equals(COMPONENT_ANNOTATION_CLASSNAME) ||
 				metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) ||
-				annotationType.equals("javax.annotation.ManagedBean") ||
-				annotationType.equals("javax.inject.Named");
+				annotationType.equals("jakarta.annotation.ManagedBean") ||
+				annotationType.equals("jakarta.inject.Named");
 
 		return (isStereotype && attributes != null && attributes.containsKey("value"));
 	}

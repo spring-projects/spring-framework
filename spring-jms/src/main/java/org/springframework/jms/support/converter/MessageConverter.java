@@ -16,9 +16,9 @@
 
 package org.springframework.jms.support.converter;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
 
 /**
  * Strategy interface that specifies a converter between Java objects and JMS messages.
@@ -42,7 +42,7 @@ public interface MessageConverter {
 	 * @param object the object to convert
 	 * @param session the Session to use for creating a JMS Message
 	 * @return the JMS Message
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
 	 * @throws MessageConversionException in case of conversion failure
 	 */
 	Message toMessage(Object object, Session session) throws JMSException, MessageConversionException;
@@ -51,7 +51,7 @@ public interface MessageConverter {
 	 * Convert from a JMS Message to a Java object.
 	 * @param message the message to convert
 	 * @return the converted Java object
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
 	 * @throws MessageConversionException in case of conversion failure
 	 */
 	Object fromMessage(Message message) throws JMSException, MessageConversionException;

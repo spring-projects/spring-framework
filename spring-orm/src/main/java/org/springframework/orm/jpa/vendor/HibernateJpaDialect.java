@@ -19,9 +19,8 @@ package org.springframework.orm.jpa.vendor;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
 import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;

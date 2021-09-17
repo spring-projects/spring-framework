@@ -49,7 +49,7 @@ class StandardStereotypesProvider implements StereotypesProvider {
 		}
 		for (AnnotationMirror annotation : this.typeHelper.getAllAnnotationMirrors(element)) {
 			String type = this.typeHelper.getType(annotation);
-			if (type.startsWith("javax.")) {
+			if (type.startsWith("jakarta.")) {
 				stereotypes.add(type);
 			}
 		}

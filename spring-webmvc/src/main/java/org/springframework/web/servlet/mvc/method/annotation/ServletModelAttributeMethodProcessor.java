@@ -19,7 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.servlet.ServletRequest;
+import jakarta.servlet.ServletRequest;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;

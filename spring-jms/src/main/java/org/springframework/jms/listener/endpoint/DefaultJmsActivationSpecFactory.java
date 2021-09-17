@@ -16,9 +16,8 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import javax.jms.Session;
-import javax.resource.spi.ResourceAdapter;
-
+import jakarta.jms.Session;
+import jakarta.resource.spi.ResourceAdapter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

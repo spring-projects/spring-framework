@@ -17,7 +17,7 @@ package org.springframework.test.web.servlet.client;
 
 import java.util.function.Supplier;
 
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.client.reactive.ClientHttpConnector;

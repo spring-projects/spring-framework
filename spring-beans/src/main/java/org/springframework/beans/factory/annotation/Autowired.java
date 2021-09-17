@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 /**
  * Marks a constructor, field, setter method, or config method as to be autowired by
  * Spring's dependency injection facilities. This is an alternative to the JSR-330
- * {@link javax.inject.Inject} annotation, adding required-vs-optional semantics.
+ * {@link jakarta.inject.Inject} annotation, adding required-vs-optional semantics.
  *
  * <h3>Autowired Constructors</h3>
  * <p>Only one constructor of any given bean class may declare this annotation with the

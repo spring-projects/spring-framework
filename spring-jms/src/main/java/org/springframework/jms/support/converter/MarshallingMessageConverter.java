@@ -22,15 +22,16 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import javax.jms.BytesMessage;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-import javax.jms.TextMessage;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+
+import jakarta.jms.BytesMessage;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
@@ -144,8 +145,8 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 
 
 	/**
-	 * This implementation marshals the given object to a {@link javax.jms.TextMessage} or
-	 * {@link javax.jms.BytesMessage}. The desired message type can be defined by setting
+	 * This implementation marshals the given object to a {@link jakarta.jms.TextMessage} or
+	 * {@link jakarta.jms.BytesMessage}. The desired message type can be defined by setting
 	 * the {@link #setTargetType "marshalTo"} property.
 	 * @see #marshalToTextMessage
 	 * @see #marshalToBytesMessage

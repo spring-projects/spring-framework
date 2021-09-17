@@ -16,7 +16,7 @@
 
 package org.springframework.web.multipart;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * A strategy interface for multipart file upload resolution in accordance
@@ -42,7 +42,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * <p>If a {@link org.springframework.web.servlet.DispatcherServlet} detects a
  * multipart request, it will resolve it via the configured {@link MultipartResolver}
- * and pass on a wrapped {@link javax.servlet.http.HttpServletRequest}. Controllers
+ * and pass on a wrapped {@link jakarta.servlet.http.HttpServletRequest}. Controllers
  * can then cast their given request to the {@link MultipartHttpServletRequest}
  * interface, which allows for access to any {@link MultipartFile MultipartFiles}.
  * Note that this cast is only supported in case of an actual multipart request.
@@ -106,9 +106,9 @@ public interface MultipartResolver {
 	 * @see MultipartHttpServletRequest#getFile
 	 * @see MultipartHttpServletRequest#getFileNames
 	 * @see MultipartHttpServletRequest#getFileMap
-	 * @see javax.servlet.http.HttpServletRequest#getParameter
-	 * @see javax.servlet.http.HttpServletRequest#getParameterNames
-	 * @see javax.servlet.http.HttpServletRequest#getParameterMap
+	 * @see jakarta.servlet.http.HttpServletRequest#getParameter
+	 * @see jakarta.servlet.http.HttpServletRequest#getParameterNames
+	 * @see jakarta.servlet.http.HttpServletRequest#getParameterMap
 	 */
 	MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException;
 

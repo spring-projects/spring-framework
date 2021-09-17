@@ -19,9 +19,9 @@ package org.springframework.orm.jpa.vendor;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.spi.PersistenceUnitInfo;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.spi.PersistenceUnitInfo;
 
 import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.JpaDialect;
@@ -89,7 +89,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	 * persistence provider. For any more advanced needs, specify the appropriate
 	 * vendor-specific settings as "jpaProperties".
 	 * <p><b>NOTE: Do not set this flag to 'true' while also setting JPA 2.1's
-	 * {@code javax.persistence.schema-generation.database.action} property.</b>
+	 * {@code jakarta.persistence.schema-generation.database.action} property.</b>
 	 * These two schema generation mechanisms - standard JPA versus provider-native -
 	 * are mutually exclusive, e.g. with Hibernate 5.
 	 * @see org.springframework.orm.jpa.AbstractEntityManagerFactoryBean#setJpaProperties

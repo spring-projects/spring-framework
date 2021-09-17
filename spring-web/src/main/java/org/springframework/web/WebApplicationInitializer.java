@@ -16,8 +16,8 @@
 
 package org.springframework.web;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 /**
  * Interface to be implemented in Servlet 3.0+ environments in order to configure the

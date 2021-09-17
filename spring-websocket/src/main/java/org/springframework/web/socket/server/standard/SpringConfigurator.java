@@ -20,9 +20,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.websocket.server.ServerEndpoint;
-import javax.websocket.server.ServerEndpointConfig.Configurator;
-
+import jakarta.websocket.server.ServerEndpoint;
+import jakarta.websocket.server.ServerEndpointConfig.Configurator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -35,7 +34,7 @@ import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * A {@link javax.websocket.server.ServerEndpointConfig.Configurator} for initializing
+ * A {@link jakarta.websocket.server.ServerEndpointConfig.Configurator} for initializing
  * {@link ServerEndpoint}-annotated classes through Spring.
  *
  * <p>

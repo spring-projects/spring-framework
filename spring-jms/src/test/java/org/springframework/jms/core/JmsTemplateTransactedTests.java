@@ -16,8 +16,7 @@
 
 package org.springframework.jms.core;
 
-import javax.jms.Session;
-
+import jakarta.jms.Session;
 import org.junit.jupiter.api.BeforeEach;
 
 import static org.mockito.BDDMockito.given;

@@ -16,14 +16,14 @@
 
 package org.springframework.orm.jpa;
 
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
-import javax.persistence.spi.PersistenceProvider;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.spi.PersistenceProvider;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that creates a JPA
- * {@link javax.persistence.EntityManagerFactory} according to JPA's standard
+ * {@link jakarta.persistence.EntityManagerFactory} according to JPA's standard
  * <i>standalone</i> bootstrap contract. This is the simplest way to set up a
  * shared JPA EntityManagerFactory in a Spring application context; the
  * EntityManagerFactory can then be passed to JPA-based DAOs via
@@ -41,7 +41,7 @@ import javax.persistence.spi.PersistenceProvider;
  * <p>This EntityManagerFactory bootstrap is appropriate for standalone applications
  * which solely use JPA for data access. If you want to set up your persistence
  * provider for an external DataSource and/or for global transactions which span
- * multiple resources, you will need to either deploy it into a full Java EE
+ * multiple resources, you will need to either deploy it into a full Jakarta EE
  * application server and access the deployed EntityManagerFactory via JNDI,
  * or use Spring's {@link LocalContainerEntityManagerFactoryBean} with appropriate
  * configuration for local setup according to JPA's container contract.
@@ -65,15 +65,15 @@ import javax.persistence.spi.PersistenceProvider;
  * @see LocalContainerEntityManagerFactoryBean
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see org.springframework.orm.jpa.support.SharedEntityManagerBean
- * @see javax.persistence.Persistence#createEntityManagerFactory
- * @see javax.persistence.spi.PersistenceProvider#createEntityManagerFactory
+ * @see jakarta.persistence.Persistence#createEntityManagerFactory
+ * @see jakarta.persistence.spi.PersistenceProvider#createEntityManagerFactory
  */
 @SuppressWarnings("serial")
 public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
 
 	/**
 	 * Initialize the EntityManagerFactory for the given configuration.
-	 * @throws javax.persistence.PersistenceException in case of JPA initialization errors
+	 * @throws jakarta.persistence.PersistenceException in case of JPA initialization errors
 	 */
 	@Override
 	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {

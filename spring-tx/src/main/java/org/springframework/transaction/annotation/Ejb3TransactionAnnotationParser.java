@@ -19,8 +19,8 @@ package org.springframework.transaction.annotation;
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 
-import javax.ejb.ApplicationException;
-import javax.ejb.TransactionAttributeType;
+import jakarta.ejb.ApplicationException;
+import jakarta.ejb.TransactionAttributeType;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
@@ -28,7 +28,7 @@ import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 
 /**
- * Strategy implementation for parsing EJB3's {@link javax.ejb.TransactionAttribute}
+ * Strategy implementation for parsing EJB3's {@link jakarta.ejb.TransactionAttribute}
  * annotation.
  *
  * @author Juergen Hoeller
@@ -39,13 +39,13 @@ public class Ejb3TransactionAnnotationParser implements TransactionAnnotationPar
 
 	@Override
 	public boolean isCandidateClass(Class<?> targetClass) {
-		return AnnotationUtils.isCandidateClass(targetClass, javax.ejb.TransactionAttribute.class);
+		return AnnotationUtils.isCandidateClass(targetClass, jakarta.ejb.TransactionAttribute.class);
 	}
 
 	@Override
 	@Nullable
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement element) {
-		javax.ejb.TransactionAttribute ann = element.getAnnotation(javax.ejb.TransactionAttribute.class);
+		jakarta.ejb.TransactionAttribute ann = element.getAnnotation(jakarta.ejb.TransactionAttribute.class);
 		if (ann != null) {
 			return parseTransactionAnnotation(ann);
 		}
@@ -54,7 +54,7 @@ public class Ejb3TransactionAnnotationParser implements TransactionAnnotationPar
 		}
 	}
 
-	public TransactionAttribute parseTransactionAnnotation(javax.ejb.TransactionAttribute ann) {
+	public TransactionAttribute parseTransactionAnnotation(jakarta.ejb.TransactionAttribute ann) {
 		return new Ejb3TransactionAttribute(ann.value());
 	}
 

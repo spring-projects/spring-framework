@@ -26,10 +26,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -303,7 +302,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * response.
 	 * <p>Use of this method is typically not necessary since mappings are
 	 * otherwise determined via
-	 * {@link javax.servlet.ServletContext#getMimeType(String)} or via
+	 * {@link jakarta.servlet.ServletContext#getMimeType(String)} or via
 	 * {@link MediaTypeFactory#getMediaType(Resource)}.
 	 * @param mediaTypes media type mappings
 	 * @since 5.2.4
@@ -728,7 +727,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * the following lookups based on the resource filename and its path
 	 * extension:
 	 * <ol>
-	 * <li>{@link javax.servlet.ServletContext#getMimeType(String)}
+	 * <li>{@link jakarta.servlet.ServletContext#getMimeType(String)}
 	 * <li>{@link #getMediaTypes()}
 	 * <li>{@link MediaTypeFactory#getMediaType(String)}
 	 * </ol>

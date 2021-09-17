@@ -16,26 +16,27 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
-import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.eclipse.jetty.websocket.api.WebSocketPolicy;
-import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import reactor.core.publisher.Mono;
 
-import org.springframework.context.Lifecycle;
-import org.springframework.core.NamedThreadLocal;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.ContextWebSocketHandler;
@@ -45,102 +46,46 @@ import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A {@link RequestUpgradeStrategy} for use with Jetty.
+ * A {@link RequestUpgradeStrategy} for Jetty 11.
  *
- * @author Violeta Georgieva
  * @author Rossen Stoyanchev
- * @since 5.0
+ * @since 5.3.4
  */
-public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Lifecycle {
+public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
-	private static final ThreadLocal<WebSocketHandlerContainer> adapterHolder =
-			new NamedThreadLocal<>("JettyWebSocketHandlerAdapter");
+	private static final Class<?> webSocketCreatorClass;
 
+	private static final Method getContainerMethod;
 
-	@Nullable
-	private WebSocketPolicy webSocketPolicy;
+	private static final Method upgradeMethod;
 
-	@Nullable
-	private WebSocketServerFactory factory;
+	private static final Method setAcceptedSubProtocol;
 
-	@Nullable
-	private volatile ServletContext servletContext;
+	static {
+		// TODO: can switch to non-reflective implementation now
 
-	private volatile boolean running;
+		ClassLoader loader = JettyRequestUpgradeStrategy.class.getClassLoader();
+		try {
+			webSocketCreatorClass = loader.loadClass("org.eclipse.jetty.websocket.server.JettyWebSocketCreator");
 
-	private final Object lifecycleMonitor = new Object();
+			Class<?> type = loader.loadClass("org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer");
+			getContainerMethod = type.getMethod("getContainer", ServletContext.class);
+			Method upgrade = ReflectionUtils.findMethod(type, "upgrade", (Class<?>[]) null);
+			Assert.state(upgrade != null, "Upgrade method not found");
+			upgradeMethod = upgrade;
 
-
-	/**
-	 * Configure a {@link WebSocketPolicy} to use to initialize
-	 * {@link WebSocketServerFactory}.
-	 * @param webSocketPolicy the WebSocket settings
-	 */
-	public void setWebSocketPolicy(WebSocketPolicy webSocketPolicy) {
-		this.webSocketPolicy = webSocketPolicy;
-	}
-
-	/**
-	 * Return the configured {@link WebSocketPolicy}, if any.
-	 */
-	@Nullable
-	public WebSocketPolicy getWebSocketPolicy() {
-		return this.webSocketPolicy;
-	}
-
-
-	@Override
-	public void start() {
-		synchronized (this.lifecycleMonitor) {
-			ServletContext servletContext = this.servletContext;
-			if (!isRunning() && servletContext != null) {
-				try {
-					this.factory = (this.webSocketPolicy != null ?
-							new WebSocketServerFactory(servletContext, this.webSocketPolicy) :
-							new WebSocketServerFactory(servletContext));
-					this.factory.setCreator((request, response) -> {
-						WebSocketHandlerContainer container = adapterHolder.get();
-						String protocol = container.getProtocol();
-						if (protocol != null) {
-							response.setAcceptedSubProtocol(protocol);
-						}
-						return container.getAdapter();
-					});
-					this.factory.start();
-					this.running = true;
-				}
-				catch (Throwable ex) {
-					throw new IllegalStateException("Unable to start WebSocketServerFactory", ex);
-				}
-			}
+			type = loader.loadClass("org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse");
+			setAcceptedSubProtocol = type.getMethod("setAcceptedSubProtocol", String.class);
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("No compatible Jetty version found", ex);
 		}
 	}
 
-	@Override
-	public void stop() {
-		synchronized (this.lifecycleMonitor) {
-			if (isRunning()) {
-				if (this.factory != null) {
-					try {
-						this.factory.stop();
-						this.running = false;
-					}
-					catch (Throwable ex) {
-						throw new IllegalStateException("Failed to stop WebSocketServerFactory", ex);
-					}
-				}
-			}
-		}
-	}
 
 	@Override
-	public boolean isRunning() {
-		return this.running;
-	}
-
-
-	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
+	public Mono<Void> upgrade(
+			ServerWebExchange exchange, WebSocketHandler handler,
 			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory) {
 
 		ServerHttpRequest request = exchange.getRequest();
@@ -148,15 +93,10 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 		HttpServletRequest servletRequest = ServerHttpRequestDecorator.getNativeRequest(request);
 		HttpServletResponse servletResponse = ServerHttpResponseDecorator.getNativeResponse(response);
+		ServletContext servletContext = servletRequest.getServletContext();
 
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		DataBufferFactory factory = response.bufferFactory();
-
-		startLazily(servletRequest);
-
-		Assert.state(this.factory != null, "No WebSocketServerFactory available");
-		boolean isUpgrade = this.factory.isUpgradeRequest(servletRequest, servletResponse);
-		Assert.isTrue(isUpgrade, "Not a WebSocket handshake");
 
 		// Trigger WebFlux preCommit actions and upgrade
 		return exchange.getResponse().setComplete()
@@ -166,51 +106,53 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 							session -> new JettyWebSocketSession(session, handshakeInfo, factory));
 
 					try {
-						adapterHolder.set(new WebSocketHandlerContainer(adapter, subProtocol));
-						this.factory.acceptWebSocket(servletRequest, servletResponse);
+						Object creator = createJettyWebSocketCreator(adapter, subProtocol);
+						Object container = ReflectionUtils.invokeMethod(getContainerMethod, null, servletContext);
+						ReflectionUtils.invokeMethod(upgradeMethod, container, creator, servletRequest, servletResponse);
 					}
-					catch (IOException ex) {
+					catch (Exception ex) {
 						return Mono.error(ex);
-					}
-					finally {
-						adapterHolder.remove();
 					}
 					return Mono.empty();
 				}));
 	}
 
-	private void startLazily(HttpServletRequest request) {
-		if (isRunning()) {
-			return;
-		}
-		synchronized (this.lifecycleMonitor) {
-			if (!isRunning()) {
-				this.servletContext = request.getServletContext();
-				start();
-			}
-		}
+	private static Object createJettyWebSocketCreator(
+			JettyWebSocketHandlerAdapter adapter, @Nullable String protocol) {
+
+		ProxyFactory factory = new ProxyFactory(EmptyTargetSource.INSTANCE);
+		factory.addInterface(webSocketCreatorClass);
+		factory.addAdvice(new WebSocketCreatorInterceptor(adapter, protocol));
+		return factory.getProxy();
 	}
 
 
-	private static class WebSocketHandlerContainer {
+	/**
+	 * Proxy for a JettyWebSocketCreator to supply the WebSocket handler and set the sub-protocol.
+	 */
+	private static class WebSocketCreatorInterceptor implements MethodInterceptor {
 
 		private final JettyWebSocketHandlerAdapter adapter;
 
 		@Nullable
 		private final String protocol;
 
-		public WebSocketHandlerContainer(JettyWebSocketHandlerAdapter adapter, @Nullable String protocol) {
+
+		public WebSocketCreatorInterceptor(
+				JettyWebSocketHandlerAdapter adapter, @Nullable String protocol) {
+
 			this.adapter = adapter;
 			this.protocol = protocol;
 		}
 
-		public JettyWebSocketHandlerAdapter getAdapter() {
-			return this.adapter;
-		}
-
 		@Nullable
-		public String getProtocol() {
-			return this.protocol;
+		@Override
+		public Object invoke(@NonNull MethodInvocation invocation) {
+			if (this.protocol != null) {
+				ReflectionUtils.invokeMethod(
+						setAcceptedSubProtocol, invocation.getArguments()[2], this.protocol);
+			}
+			return this.adapter;
 		}
 	}
 

@@ -19,8 +19,8 @@ package org.springframework.orm.jpa;
 import java.io.Serializable;
 import java.sql.SQLException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
@@ -53,7 +53,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * is no state to be kept for a standard JPA transaction. Hence, subclasses do not
 	 * have to care about the return value ({@code null}) of this implementation
 	 * and are free to return their own transaction data Object.
-	 * @see javax.persistence.EntityTransaction#begin
+	 * @see jakarta.persistence.EntityTransaction#begin
 	 * @see org.springframework.transaction.InvalidIsolationLevelException
 	 * @see #cleanupTransaction
 	 */

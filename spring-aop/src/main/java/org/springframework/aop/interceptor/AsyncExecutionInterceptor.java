@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.util.ClassUtils;
  * target method needs to implement the same signature, it will have to return
  * a temporary Future handle that just passes the return value through
  * (like Spring's {@link org.springframework.scheduling.annotation.AsyncResult}
- * or EJB 3.1's {@code javax.ejb.AsyncResult}).
+ * or EJB's {@code jakarta.ejb.AsyncResult}).
  *
  * <p>When the return type is {@code java.util.concurrent.Future}, any exception thrown
  * during the execution can be accessed and managed by the caller. With {@code void}

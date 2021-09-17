@@ -409,7 +409,7 @@ public class MethodParameter {
 
 	/**
 	 * Check whether this method parameter is annotated with any variant of a
-	 * {@code Nullable} annotation, e.g. {@code javax.annotation.Nullable} or
+	 * {@code Nullable} annotation, e.g. {@code jakarta.annotation.Nullable} or
 	 * {@code edu.umd.cs.findbugs.annotations.Nullable}.
 	 */
 	private boolean hasNullableAnnotation() {

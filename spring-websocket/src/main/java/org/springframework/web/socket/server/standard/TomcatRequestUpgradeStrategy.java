@@ -21,12 +21,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.websocket.Endpoint;
-import javax.websocket.Extension;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.Extension;
 import org.apache.tomcat.websocket.server.WsServerContainer;
 
 import org.springframework.http.server.ServerHttpRequest;
@@ -38,10 +37,10 @@ import org.springframework.web.socket.server.HandshakeFailureException;
  * A WebSocket {@code RequestUpgradeStrategy} for Apache Tomcat. Compatible with
  * all versions of Tomcat that support JSR-356, i.e. Tomcat 7.0.47+ and higher.
  *
- * <p>To modify properties of the underlying {@link javax.websocket.server.ServerContainer}
+ * <p>To modify properties of the underlying {@link jakarta.websocket.server.ServerContainer}
  * you can use {@link ServletServerContainerFactoryBean} in XML configuration or,
  * when using Java configuration, access the container instance through the
- * "javax.websocket.server.ServerContainer" ServletContext attribute.
+ * "jakarta.websocket.server.ServerContainer" ServletContext attribute.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
