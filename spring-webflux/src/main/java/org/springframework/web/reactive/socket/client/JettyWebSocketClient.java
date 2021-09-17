@@ -142,6 +142,7 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 			Object jettyHandler = createHandler(
 					url, ContextWebSocketHandler.decorate(handler, contextView), completionSink);
 			ClientUpgradeRequest request = new ClientUpgradeRequest();
+			request.setHeaders(headers);
 			request.setSubProtocols(handler.getSubProtocols());
 			try {
 				this.jettyClient.connect(jettyHandler, url, request);
