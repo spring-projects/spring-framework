@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,18 +23,12 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-
-
-
 
 /**
  * Tests for {@link DateFormatter}.
@@ -135,40 +129,6 @@ public class DateFormatterTests {
 		Date date = getDate(2009, Calendar.JUNE, 1, 14, 23, 5, 3);
 		assertThat(formatter.print(date, Locale.US)).isEqualTo("2009-06-01T14:23:05.003Z");
 		assertThat(formatter.parse("2009-06-01T14:23:05.003Z", Locale.US)).isEqualTo(date);
-	}
-
-	@Test
-	public void shouldSupportJodaStylePatterns() throws Exception {
-		String[] chars = { "S", "M", "-" };
-		for (String d : chars) {
-			for (String t : chars) {
-				String style = d + t;
-				if (!style.equals("--")) {
-					Date date = getDate(2009, Calendar.JUNE, 10, 14, 23, 0, 0);
-					if (t.equals("-")) {
-						date = getDate(2009, Calendar.JUNE, 10);
-					}
-					else if (d.equals("-")) {
-						date = getDate(1970, Calendar.JANUARY, 1, 14, 23, 0, 0);
-					}
-					testJodaStylePatterns(style, Locale.US, date);
-				}
-			}
-		}
-	}
-
-	private void testJodaStylePatterns(String style, Locale locale, Date date) throws Exception {
-		DateFormatter formatter = new DateFormatter();
-		formatter.setTimeZone(UTC);
-		formatter.setStylePattern(style);
-		DateTimeFormatter jodaFormatter = DateTimeFormat.forStyle(style).withLocale(locale).withZone(DateTimeZone.UTC);
-		String jodaPrinted = jodaFormatter.print(date.getTime());
-		assertThat(formatter.print(date, locale))
-				.as("Unable to print style pattern " + style)
-				.isEqualTo(jodaPrinted);
-		assertThat(formatter.parse(jodaPrinted, locale))
-				.as("Unable to parse style pattern " + style)
-				.isEqualTo(date);
 	}
 
 	@Test
