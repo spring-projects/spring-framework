@@ -260,7 +260,7 @@ public class ReflectUtils {
 		return newInstance(getConstructor(type, parameterTypes), args);
 	}
 
-	@SuppressWarnings("deprecation")  // on JDK 9
+	@SuppressWarnings("deprecation")
 	public static Object newInstance(final Constructor cstruct, final Object[] args) {
 		boolean flag = cstruct.isAccessible();
 		try {
@@ -439,7 +439,7 @@ public class ReflectUtils {
 		return defineClass(className, b, loader, protectionDomain, null);
 	}
 
-	@SuppressWarnings("deprecation")  // on JDK 9
+	@SuppressWarnings("deprecation")
 	public static Class defineClass(String className, byte[] b, ClassLoader loader,
 			ProtectionDomain protectionDomain, Class<?> contextClass) throws Exception {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashSet;
@@ -122,10 +121,7 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
 		byteBuffer.put(bytes);
 
-		// Extra cast necessary for compiling on JDK 9 plus running on JDK 8, since
-		// otherwise the overridden ByteBuffer-returning rewind method would be chosen
-		// which isn't available on JDK 8.
-		return ((Buffer) byteBuffer).rewind();
+		return byteBuffer.rewind();
 	}
 
 }

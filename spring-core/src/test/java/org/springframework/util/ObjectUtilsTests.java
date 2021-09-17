@@ -251,7 +251,7 @@ class ObjectUtilsTests {
 	@Deprecated
 	void hashCodeWithDouble() {
 		double dbl = 9830.43;
-		int expected = (new Double(dbl)).hashCode();
+		int expected = Double.valueOf(dbl).hashCode();
 		assertThat(ObjectUtils.hashCode(dbl)).isEqualTo(expected);
 	}
 

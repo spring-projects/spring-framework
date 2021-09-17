@@ -681,7 +681,7 @@ final class LogAdapter {
 			setSourceMethodName(sourceMethodName);
 		}
 
-		@SuppressWarnings("deprecation")  // setMillis is deprecated in JDK 9
+		@SuppressWarnings("deprecation")
 		protected Object writeReplace() {
 			LogRecord serialized = new LogRecord(getLevel(), getMessage());
 			serialized.setLoggerName(getLoggerName());
