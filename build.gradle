@@ -299,6 +299,18 @@ configure([rootProject] + javaProjects) { project ->
 	test {
 		useJUnitPlatform()
 		include(["**/*Tests.class", "**/*Test.class"])
+		// TODO Enable excluded tests (https://github.com/spring-projects/spring-framework/issues/27424)
+		filter {
+			excludeTestsMatching("*ErrorHandlerIntegrationTests")
+			excludeTestsMatching("*RequestPartIntegrationTests")
+			excludeTestsMatching("*WebSocketConfigurationTests")
+			excludeTestsMatching("*WebSocketHandshakeTests")
+			excludeTestsMatching("*StompWebSocketIntegrationTests")
+			excludeTestsMatching("*RequestMappingIntegrationTests")
+			excludeTestsMatching("*CrossOriginAnnotationIntegrationTests")
+			excludeTestsMatching("*NestedRouteIntegrationTests")
+			excludeTestsMatching("*WebSocketIntegrationTests")
+		}
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
 		systemProperty("io.netty.leakDetection.level", "paranoid")
