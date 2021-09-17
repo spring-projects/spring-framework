@@ -84,7 +84,7 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		private static MultiValueMap<String, String> createHeaders(HttpServletRequest servletRequest) {
 			Request request = getRequest(servletRequest);
-			HttpFields fields = request.getMetaData().getFields();
+			HttpFields.Mutable fields = HttpFields.build(request.getHttpFields());
 			return new JettyHeadersAdapter(fields);
 		}
 
@@ -116,7 +116,7 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		private static HttpHeaders createHeaders(HttpServletResponse servletResponse) {
 			Response response = getResponse(servletResponse);
-			HttpFields fields = response.getHttpFields();
+			HttpFields.Mutable fields = response.getHttpFields();
 			return new HttpHeaders(new JettyHeadersAdapter(fields));
 		}
 
