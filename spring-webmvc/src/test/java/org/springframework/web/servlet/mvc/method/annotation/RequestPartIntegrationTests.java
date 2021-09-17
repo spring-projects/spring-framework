@@ -139,17 +139,16 @@ public class RequestPartIntegrationTests {
 
 	@Test  // SPR-13319
 	public void standardMultipartResolverWithEncodedFileName() throws Exception {
-		byte[] boundary = MimeTypeUtils.generateMultipartBoundary();
-		String boundaryText = new String(boundary, "US-ASCII");
+		String boundaryText = MimeTypeUtils.generateMultipartBoundaryString();
 		Map<String, String> params = Collections.singletonMap("boundary", boundaryText);
 
 		String content =
-				"--" + boundaryText + "\n" +
-				"Content-Disposition: form-data; name=\"file\"; filename*=\"utf-8''%C3%A9l%C3%A8ve.txt\"\n" +
-				"Content-Type: text/plain\n" +
-				"Content-Length: 7\n" +
-				"\n" +
-				"content\n" +
+				"--" + boundaryText + "\r\n" +
+				"Content-Disposition: form-data; name=\"file\"; filename*=\"utf-8''%C3%A9l%C3%A8ve.txt\"\r\n" +
+				"Content-Type: text/plain\r\n" +
+				"Content-Length: 7\r\n" +
+				"\r\n" +
+				"content\r\n" +
 				"--" + boundaryText + "--";
 
 		RequestEntity<byte[]> requestEntity =
