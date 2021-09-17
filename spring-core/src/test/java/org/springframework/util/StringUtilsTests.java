@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -775,6 +776,11 @@ class StringUtilsTests {
 		assertThat(StringUtils.split(null, ",")).isNull();
 		assertThat(StringUtils.split("Hello, world", null)).isNull();
 		assertThat(StringUtils.split(null, null)).isNull();
+	}
+
+	@Test
+	void collectionToDelimitedStringWithNullValuesShouldNotFail() {
+		assertThat(StringUtils.collectionToCommaDelimitedString(Collections.singletonList(null))).isEqualTo("null");
 	}
 
 }
