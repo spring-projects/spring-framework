@@ -134,57 +134,56 @@ public class FacesRequestAttributes implements RequestAttributes {
 		if (REFERENCE_REQUEST.equals(key)) {
 			return getExternalContext().getRequest();
 		}
-		else if (REFERENCE_SESSION.equals(key)) {
+		if (REFERENCE_SESSION.equals(key)) {
 			return getExternalContext().getSession(true);
 		}
-		else if ("application".equals(key)) {
+		if ("application".equals(key)) {
 			return getExternalContext().getContext();
 		}
-		else if ("requestScope".equals(key)) {
+		if ("requestScope".equals(key)) {
 			return getExternalContext().getRequestMap();
 		}
-		else if ("sessionScope".equals(key)) {
+		if ("sessionScope".equals(key)) {
 			return getExternalContext().getSessionMap();
 		}
-		else if ("applicationScope".equals(key)) {
+		if ("applicationScope".equals(key)) {
 			return getExternalContext().getApplicationMap();
 		}
-		else if ("facesContext".equals(key)) {
+		if ("facesContext".equals(key)) {
 			return getFacesContext();
 		}
-		else if ("cookie".equals(key)) {
+		if ("cookie".equals(key)) {
 			return getExternalContext().getRequestCookieMap();
 		}
-		else if ("header".equals(key)) {
+		if ("header".equals(key)) {
 			return getExternalContext().getRequestHeaderMap();
 		}
-		else if ("headerValues".equals(key)) {
+		if ("headerValues".equals(key)) {
 			return getExternalContext().getRequestHeaderValuesMap();
 		}
-		else if ("param".equals(key)) {
+		if ("param".equals(key)) {
 			return getExternalContext().getRequestParameterMap();
 		}
-		else if ("paramValues".equals(key)) {
+		if ("paramValues".equals(key)) {
 			return getExternalContext().getRequestParameterValuesMap();
 		}
-		else if ("initParam".equals(key)) {
+		if ("initParam".equals(key)) {
 			return getExternalContext().getInitParameterMap();
 		}
-		else if ("view".equals(key)) {
+		if ("view".equals(key)) {
 			return getFacesContext().getViewRoot();
 		}
-		else if ("viewScope".equals(key)) {
+		if ("viewScope".equals(key)) {
 			return getFacesContext().getViewRoot().getViewMap();
 		}
-		else if ("flash".equals(key)) {
+		if ("flash".equals(key)) {
 			return getExternalContext().getFlash();
 		}
-		else if ("resource".equals(key)) {
+		if ("resource".equals(key)) {
 			return getFacesContext().getApplication().getResourceHandler();
 		}
-		else {
-			return null;
-		}
+
+		return null;
 	}
 
 	@Override
