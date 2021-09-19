@@ -528,18 +528,27 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			prepareBeanFactory(beanFactory);
 
 			try {
+
+				//子类覆盖方法做额外处理
+				/**
+				 * Spring之所以强大，为世人所推崇，除了它功能上位大家提供了便利外，还有一方面它的完美架构，
+				 * 开放式的架构让使用它的程序员很容易根据业务需要扩展已经存在的功能。这种开放式的设计在Spring中
+				 * 随处可见，例如在本例子中就提供了一个空的函数实现postProcessBeanFactory方便程序员在业务上做进一步扩展
+				 */
 				// Allows post-processing of the bean factory in context subclasses.
 				//为容器的某些子类指定特殊的BeanPost事件处理器
 				postProcessBeanFactory(beanFactory);
 
 				// Invoke factory processors registered as beans in the context.
-				//调用所有注册的BeanFactoryPostProcessor的Bean
+				//调用所有注册的BeanFactoryPostProcessor的Bean、激活各种beanFactory
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
+				//注册拦截Bean创建的Bean处理器，这里只是注册，真正的是在getBean时候
 				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
+				//初始化应用广播器，并放入“applicationEventMulticaster”bean中
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
@@ -549,12 +558,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				onRefresh();
 
 				// Check for listener beans and register them.
+				// 在所有注册的bean中查找Listener bean，注册到消息广播中
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
+				//完成刷新过程，通知生命周期处理lifecycleProcessor刷新过程，同事发出ContextRefreshEvent通知别人
 				finishRefresh();
 			}
 
