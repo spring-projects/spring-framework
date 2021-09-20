@@ -38,13 +38,15 @@ import org.springframework.lang.Nullable;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 16.05.2003
  * @see org.springframework.transaction.support.TransactionTemplate
  * @see org.springframework.transaction.interceptor.TransactionInterceptor
+ * 【平台】事务管理器
+ * @since 16.05.2003
  */
 public interface PlatformTransactionManager extends TransactionManager {
 
 	/**
+	 * 获得事务
 	 * Return a currently active transaction or create a new one, according to
 	 * the specified propagation behavior.
 	 * <p>Note that parameters like isolation level or timeout will only be applied
@@ -55,22 +57,25 @@ public interface PlatformTransactionManager extends TransactionManager {
 	 * <p>An exception to the above rule is the read-only flag, which should be
 	 * ignored if no explicit read-only mode is supported. Essentially, the
 	 * read-only flag is just a hint for potential optimization.
+	 *
 	 * @param definition the TransactionDefinition instance (can be {@code null} for defaults),
-	 * describing propagation behavior, isolation level, timeout etc.
+	 *                   describing propagation behavior, isolation level, timeout etc.
 	 * @return transaction status object representing the new or current transaction
-	 * @throws TransactionException in case of lookup, creation, or system errors
+	 * @throws TransactionException             in case of lookup, creation, or system errors
 	 * @throws IllegalTransactionStateException if the given transaction definition
-	 * cannot be executed (for example, if a currently active transaction is in
-	 * conflict with the specified propagation behavior)
+	 *                                          cannot be executed (for example, if a currently active transaction is in
+	 *                                          conflict with the specified propagation behavior)
 	 * @see TransactionDefinition#getPropagationBehavior
 	 * @see TransactionDefinition#getIsolationLevel
 	 * @see TransactionDefinition#getTimeout
 	 * @see TransactionDefinition#isReadOnly
+	 *
 	 */
 	TransactionStatus getTransaction(@Nullable TransactionDefinition definition)
 			throws TransactionException;
 
 	/**
+	 * 提交事务
 	 * Commit the given transaction, with regard to its status. If the transaction
 	 * has been marked rollback-only programmatically, perform a rollback.
 	 * <p>If the transaction wasn't a new one, omit the commit for proper
@@ -86,20 +91,22 @@ public interface PlatformTransactionManager extends TransactionManager {
 	 * database right before commit, with the resulting DataAccessException
 	 * causing the transaction to fail. The original exception will be
 	 * propagated to the caller of this commit method in such a case.
+	 *
 	 * @param status object returned by the {@code getTransaction} method
-	 * @throws UnexpectedRollbackException in case of an unexpected rollback
-	 * that the transaction coordinator initiated
-	 * @throws HeuristicCompletionException in case of a transaction failure
-	 * caused by a heuristic decision on the side of the transaction coordinator
-	 * @throws TransactionSystemException in case of commit or system errors
-	 * (typically caused by fundamental resource failures)
+	 * @throws UnexpectedRollbackException      in case of an unexpected rollback
+	 *                                          that the transaction coordinator initiated
+	 * @throws HeuristicCompletionException     in case of a transaction failure
+	 *                                          caused by a heuristic decision on the side of the transaction coordinator
+	 * @throws TransactionSystemException       in case of commit or system errors
+	 *                                          (typically caused by fundamental resource failures)
 	 * @throws IllegalTransactionStateException if the given transaction
-	 * is already completed (that is, committed or rolled back)
+	 *                                          is already completed (that is, committed or rolled back)
 	 * @see TransactionStatus#setRollbackOnly
 	 */
 	void commit(TransactionStatus status) throws TransactionException;
 
 	/**
+	 * 回滚事务
 	 * Perform a rollback of the given transaction.
 	 * <p>If the transaction wasn't a new one, just set it rollback-only for proper
 	 * participation in the surrounding transaction. If a previous transaction
@@ -109,11 +116,12 @@ public interface PlatformTransactionManager extends TransactionManager {
 	 * The transaction will already have been completed and cleaned up when commit
 	 * returns, even in case of a commit exception. Consequently, a rollback call
 	 * after commit failure will lead to an IllegalTransactionStateException.
+	 *
 	 * @param status object returned by the {@code getTransaction} method
-	 * @throws TransactionSystemException in case of rollback or system errors
-	 * (typically caused by fundamental resource failures)
+	 * @throws TransactionSystemException       in case of rollback or system errors
+	 *                                          (typically caused by fundamental resource failures)
 	 * @throws IllegalTransactionStateException if the given transaction
-	 * is already completed (that is, committed or rolled back)
+	 *                                          is already completed (that is, committed or rolled back)
 	 */
 	void rollback(TransactionStatus status) throws TransactionException;
 

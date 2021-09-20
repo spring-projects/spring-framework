@@ -589,6 +589,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				if (transaction != null) {
 					suspendedResources = doSuspend(transaction);
 				}
+				// 把当前事务挂起，事务挂起的其实就是先获取当前事务的属性，然后把对应的属性值设置为挂起相关的属性
+				// 同时还要把获取的被挂起的事务的属性保存起来返回给调用的方法
 				String name = TransactionSynchronizationManager.getCurrentTransactionName();
 				TransactionSynchronizationManager.setCurrentTransactionName(null);
 				boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();

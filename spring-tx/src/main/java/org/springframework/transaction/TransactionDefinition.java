@@ -40,6 +40,7 @@ import org.springframework.lang.Nullable;
  * @see PlatformTransactionManager#getTransaction(TransactionDefinition)
  * @see org.springframework.transaction.support.DefaultTransactionDefinition
  * @see org.springframework.transaction.interceptor.TransactionAttribute
+ * 务定义信息(事务隔离级别、传播行为、超时、只读、回滚规则)
  */
 public interface TransactionDefinition {
 
@@ -192,6 +193,7 @@ public interface TransactionDefinition {
 
 
 	/**
+	 * 返回事务的传播行为，默认值为 REQUIRED
 	 * Return the propagation behavior.
 	 * <p>Must return one of the {@code PROPAGATION_XXX} constants
 	 * defined on {@link TransactionDefinition this interface}.
@@ -205,6 +207,7 @@ public interface TransactionDefinition {
 	}
 
 	/**
+	 * //返回事务的隔离级别，默认值是 DEFAULT
 	 * Return the isolation level.
 	 * <p>Must return one of the {@code ISOLATION_XXX} constants defined on
 	 * {@link TransactionDefinition this interface}. Those constants are designed
@@ -227,6 +230,8 @@ public interface TransactionDefinition {
 	}
 
 	/**
+	 * 返回事务的超时时间，默认值为-1。如果超过该时间限制但事务还没有完成，则自动回滚事务。
+	 *     int getTimeout();
 	 * Return the transaction timeout.
 	 * <p>Must return a number of seconds, or {@link #TIMEOUT_DEFAULT}.
 	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
@@ -242,6 +247,7 @@ public interface TransactionDefinition {
 	}
 
 	/**
+	 * 返回是否为只读事务，默认值为 false
 	 * Return whether to optimize as a read-only transaction.
 	 * <p>The read-only flag applies to any transaction context, whether backed
 	 * by an actual resource transaction ({@link #PROPAGATION_REQUIRED}/

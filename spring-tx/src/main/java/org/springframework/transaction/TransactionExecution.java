@@ -34,6 +34,7 @@ public interface TransactionExecution {
 	boolean isNewTransaction();
 
 	/**
+	 * 设置状态是否只是回滚
 	 * Set the transaction rollback-only. This instructs the transaction manager
 	 * that the only possible outcome of the transaction may be a rollback, as
 	 * alternative to throwing an exception which would in turn trigger a rollback.
@@ -41,12 +42,14 @@ public interface TransactionExecution {
 	void setRollbackOnly();
 
 	/**
+	 * 状态是否只是回滚
 	 * Return whether the transaction has been marked as rollback-only
 	 * (either by the application or by the transaction infrastructure).
 	 */
 	boolean isRollbackOnly();
 
 	/**
+	 * 是否完成
 	 * Return whether this transaction is completed, that is,
 	 * whether it has already been committed or rolled back.
 	 */
