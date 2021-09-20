@@ -122,6 +122,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				new LazySingletonAspectInstanceFactoryDecorator(aspectInstanceFactory);
 
 		List<Advisor> advisors = new ArrayList<>();
+		// 对aspectClass的每一个带有注解的方法进行循环（带有PointCut注解的方法除外），取得Advisor，并添加到集合里。
+		// (这是里应该是取得Advice，然后取得我们自己定义的切面类中PointCut，组合成Advisor)
 		for (Method method : getAdvisorMethods(aspectClass)) {
 			Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
 			if (advisor != null) {
@@ -244,7 +246,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		}
 
 		AbstractAspectJAdvice springAdvice;
-
+		// 根据不同的注解类型封装不同的增强器
 		switch (aspectJAnnotation.getAnnotationType()) {
 			case AtPointcut:
 				if (logger.isDebugEnabled()) {

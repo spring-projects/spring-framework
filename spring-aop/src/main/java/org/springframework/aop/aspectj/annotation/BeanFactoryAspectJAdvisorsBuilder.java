@@ -89,8 +89,10 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 				if (aspectNames == null) {
 					List<Advisor> advisors = new ArrayList<>();
 					aspectNames = new ArrayList<>();
+					//遍历所有的beanName
 					String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 							this.beanFactory, Object.class, true, false);
+					//遍历所有的beanName 找出增强方法
 					for (String beanName : beanNames) {
 						if (!isEligibleBean(beanName)) {
 							continue;
@@ -101,6 +103,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 						if (beanType == null) {
 							continue;
 						}
+						// 如果存在Aspect注解
 						if (this.advisorFactory.isAspect(beanType)) {
 							aspectNames.add(beanName);
 							AspectMetadata amd = new AspectMetadata(beanType, beanName);
@@ -109,6 +112,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 										new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName);
 								List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
 								if (this.beanFactory.isSingleton(beanName)) {
+									//将增强器存入缓存中，下次可以直接取
 									this.advisorsCache.put(beanName, classAdvisors);
 								}
 								else {
