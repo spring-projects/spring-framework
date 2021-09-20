@@ -70,18 +70,25 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements SingletonBeanRegistry {
 
+
+
+
+	//1.0 spring为了解决单例的循环依赖问题，使用了三级缓存
+
 	/**
-	 * 单例对象的缓存
+	 * 单例对象的缓存 一级缓存
 	 * Cache of singleton objects: bean name to bean instance.
 	 */
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/**
+	 * 单例对象工厂的cache 三级缓存
 	 * Cache of singleton factories: bean name to ObjectFactory.
 	 */
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
 	/**
+	 * 提前曝光的单例对象缓存 二级缓存
 	 * Cache of early singleton objects: bean name to bean instance.
 	 */
 	private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
@@ -169,7 +176,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * Add the given singleton factory for building the specified singleton
 	 * if necessary.
 	 * <p>To be called for eager registration of singletons, e.g. to be able to
-	 * resolve circular references. 可以解决循环依赖问题
+	 * resolve circular references.
 	 *
 	 * @param beanName         the name of the bean
 	 * @param singletonFactory the factory for the singleton object
