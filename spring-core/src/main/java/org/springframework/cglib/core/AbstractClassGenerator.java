@@ -278,50 +278,11 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 		if (t == null) {
 			t = Thread.currentThread().getContextClassLoader();
 		}
-		if (t == null) {
-			throw new IllegalStateException("Cannot determine classloader");
-		}
-		return t;
+	
 	}
 
-	abstract protected ClassLoader getDefaultClassLoader();
-
-	/**
-	 * Returns the protection domain to use when defining the class.
-	 * <p>
-	 * Default implementation returns <code>null</code> for using a default protection domain. Sub-classes may
-	 * override to use a more specific protection domain.
-	 * </p>
-	 * @return the protection domain (<code>null</code> for using a default)
-	 */
-	protected ProtectionDomain getProtectionDomain() {
-		return null;
-	}
-
-	protected Object create(Object key) {
-		try {
-			ClassLoader loader = getClassLoader();
-			Map<ClassLoader, ClassLoaderData> cache = CACHE;
-			ClassLoaderData data = cache.get(loader);
-			if (data == null) {
-				synchronized (AbstractClassGenerator.class) {
-					cache = CACHE;
-					data = cache.get(loader);
-					if (data == null) {
-						Map<ClassLoader, ClassLoaderData> newCache = new WeakHashMap<ClassLoader, ClassLoaderData>(cache);
-						data = new ClassLoaderData(loader);
-						newCache.put(loader, data);
-						CACHE = newCache;
-					}
-				}
-			}
-			this.key = key;
-			Object obj = data.get(this, getUseCache());
-			if (obj instanceof Class) {
-				return firstInstance((Class) obj);
-			}
-			return nextInstance(obj);
-		}
+	
+			
 		catch (RuntimeException | Error ex) {
 			throw ex;
 		}
