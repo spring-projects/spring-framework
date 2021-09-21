@@ -22,7 +22,9 @@ _When instructed to execute `./gradlew` from the command line, be sure to execut
 1. Ensure that the _Forbidden reference (access rule)_ in Eclipse is set to `Info`
 (Preferences &#8594; Java &#8594; Compiler &#8594; Errors/Warnings &#8594; Deprecated and restricted API &#8594; Forbidden reference (access rule)).
 1. Optionally install the [Kotlin Plugin for Eclipse](https://marketplace.eclipse.org/content/kotlin-plugin-eclipse) if you need to execute Kotlin-based tests or develop Kotlin extensions.
-1. Optionally install the [AspectJ Development Tools](https://marketplace.eclipse.org/content/aspectj-development-tools) (_AJDT_) if you need to work with the `spring-aspects` project. The AspectJ Development Tools available in the Eclipse Marketplace have been tested with these instructions using STS 4.5 (Eclipse 4.14).
+   - **NOTE**: As of September 21, 2021, it appears that the Kotlin Plugin for Eclipse does not yet work with Eclipse 4.21.
+1. Optionally install the [AspectJ Development Tools](https://marketplace.eclipse.org/content/aspectj-development-tools) (_AJDT_) if you need to work with the `spring-aspects` project.
+   - **NOTE**: As of September 21, 2021, it appears that the AspectJ Development Tools do not yet work with Eclipse 4.21.
 1. Optionally install the [TestNG plugin](https://testng.org/doc/eclipse.html) in Eclipse if you need to execute individual TestNG test classes or tests in the `spring-test` module.
    - As an alternative to installing the TestNG plugin, you can execute the `org.springframework.test.context.testng.TestNGTestSuite` class as a "JUnit 5" test class in Eclipse.
 1. Build `spring-oxm` from the command line with `./gradlew :spring-oxm:check`.
