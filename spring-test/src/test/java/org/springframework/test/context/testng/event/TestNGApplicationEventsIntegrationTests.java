@@ -72,12 +72,12 @@ class TestNGApplicationEventsIntegrationTests extends AbstractTestNGSpringContex
 	}
 
 	@Test
-	void test1() {
+	public void test1() {
 		assertTestExpectations("test1");
 	}
 
 	@Test
-	void test2() {
+	public void test2() {
 		assertTestExpectations("test2");
 	}
 

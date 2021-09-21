@@ -150,7 +150,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	void verifyBeanNameSet() {
+	public void verifyBeanNameSet() {
 		assertThatTransaction().isNotActive();
 		assertThat(this.beanName)
 			.as("The bean name of this test instance should have been set to the fully qualified class name due to BeanNameAware semantics.")
@@ -159,7 +159,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	void verifyApplicationContextSet() {
+	public void verifyApplicationContextSet() {
 		assertThatTransaction().isNotActive();
 		assertThat(super.applicationContext)
 			.as("The application context should have been set due to ApplicationContextAware semantics.")
@@ -170,7 +170,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	void verifyBeanInitialized() {
+	public void verifyBeanInitialized() {
 		assertThatTransaction().isNotActive();
 		assertThat(beanInitialized)
 			.as("This test instance should have been initialized due to InitializingBean semantics.")
@@ -179,7 +179,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	void verifyAnnotationAutowiredFields() {
+	public void verifyAnnotationAutowiredFields() {
 		assertThatTransaction().isNotActive();
 		assertThat(nonrequiredLong).as("The nonrequiredLong field should NOT have been autowired.").isNull();
 		assertThat(pet).as("The pet field should have been autowired.").isNotNull();
@@ -188,7 +188,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	void verifyAnnotationAutowiredMethods() {
+	public void verifyAnnotationAutowiredMethods() {
 		assertThatTransaction().isNotActive();
 		assertThat(employee).as("The setEmployee() method should have been autowired.").isNotNull();
 		assertThat(employee.getName()).as("employee's name.").isEqualTo("John Smith");
@@ -196,20 +196,20 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	void verifyResourceAnnotationInjectedFields() {
+	public void verifyResourceAnnotationInjectedFields() {
 		assertThatTransaction().isNotActive();
 		assertThat(foo).as("The foo field should have been injected via @Resource.").isEqualTo("Foo");
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	void verifyResourceAnnotationInjectedMethods() {
+	public void verifyResourceAnnotationInjectedMethods() {
 		assertThatTransaction().isNotActive();
 		assertThat(bar).as("The setBar() method should have been injected via @Resource.").isEqualTo("Bar");
 	}
 
 	@Test
-	void modifyTestDataWithinTransaction() {
+	public void modifyTestDataWithinTransaction() {
 		assertThatTransaction().isActive();
 		assertAddPerson(JANE);
 		assertAddPerson(SUE);
