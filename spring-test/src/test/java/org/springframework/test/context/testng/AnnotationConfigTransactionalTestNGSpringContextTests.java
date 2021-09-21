@@ -112,7 +112,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	void autowiringFromConfigClass() {
+	public void autowiringFromConfigClass() {
 		assertThat(employee).as("The employee should have been autowired.").isNotNull();
 		assertThat(employee.getName()).isEqualTo("John Smith");
 
@@ -136,7 +136,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	}
 
 	@Test
-	void modifyTestDataWithinTransaction() {
+	public void modifyTestDataWithinTransaction() {
 		assertThatTransaction().isActive();
 		assertAddPerson(JANE);
 		assertAddPerson(SUE);
