@@ -24,7 +24,7 @@ _When instructed to execute `./gradlew` from the command line, be sure to execut
 1. Optionally install the [Kotlin Plugin for Eclipse](https://marketplace.eclipse.org/content/kotlin-plugin-eclipse) if you need to execute Kotlin-based tests or develop Kotlin extensions.
 1. Optionally install the [AspectJ Development Tools](https://marketplace.eclipse.org/content/aspectj-development-tools) (_AJDT_) if you need to work with the `spring-aspects` project. The AspectJ Development Tools available in the Eclipse Marketplace have been tested with these instructions using STS 4.5 (Eclipse 4.14).
 1. Optionally install the [TestNG plugin](https://testng.org/doc/eclipse.html) in Eclipse if you need to execute individual TestNG test classes or tests in the `spring-test` module.
-  - As an alternative to installing the TestNG plugin, you can execute the `org.springframework.test.context.testng.TestNGTestSuite` class as a "JUnit 5" test class in Eclipse.
+   - As an alternative to installing the TestNG plugin, you can execute the `org.springframework.test.context.testng.TestNGTestSuite` class as a "JUnit 5" test class in Eclipse.
 1. Build `spring-oxm` from the command line with `./gradlew :spring-oxm:check`.
 1. To apply Spring Framework specific settings, run `./gradlew cleanEclipse eclipse` from the command line.
 1. Import all projects into Eclipse (File &#8594; Import &#8594; Gradle &#8594; Existing Gradle Project &#8594; Navigate to the locally cloned `spring-framework` directory &#8594; Select Finish).
