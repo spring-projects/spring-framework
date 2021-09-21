@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.BeanExpressionException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParserContext;
@@ -156,10 +157,10 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 				sec.addPropertyAccessor(new EnvironmentAccessor());
 				sec.setBeanResolver(new BeanFactoryResolver(evalContext.getBeanFactory()));
 				sec.setTypeLocator(new StandardTypeLocator(evalContext.getBeanFactory().getBeanClassLoader()));
-				ConversionService conversionService = evalContext.getBeanFactory().getConversionService();
-				if (conversionService != null) {
-					sec.setTypeConverter(new StandardTypeConverter(conversionService));
-				}
+				sec.setTypeConverter(new StandardTypeConverter(() -> {
+					ConversionService cs = evalContext.getBeanFactory().getConversionService();
+					return (cs != null ? cs : DefaultConversionService.getSharedInstance());
+				}));
 				customizeEvaluationContext(sec);
 				this.evaluationCache.put(evalContext, sec);
 			}

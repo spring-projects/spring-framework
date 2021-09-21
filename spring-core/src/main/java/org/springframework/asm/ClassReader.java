@@ -324,7 +324,9 @@ public class ClassReader {
       }
       outputStream.flush();
       if (readCount == 1) {
-        return data;
+        // SPRING PATCH: some misbehaving InputStreams return -1 but still write to buffer (gh-27429)
+        // return data;
+        // END OF PATCH
       }
       return outputStream.toByteArray();
     } finally {
