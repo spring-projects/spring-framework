@@ -230,7 +230,6 @@ configure(allprojects) { project ->
 			dependency "jakarta.validation:jakarta.validation-api:3.0.0"
 			dependency "jakarta.websocket:jakarta.websocket-api:2.0.0"
 			dependency "jakarta.xml.bind:jakarta.xml.bind-api:3.0.1"
-			dependency "jakarta.xml.ws:jakarta.xml.ws-api:3.0.1"
 
 			dependency "com.sun.activation:jakarta.activation:2.0.1"
 			dependency "com.sun.mail:jakarta.mail:2.0.1"

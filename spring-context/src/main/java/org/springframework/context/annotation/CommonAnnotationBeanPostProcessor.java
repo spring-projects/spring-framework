@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,10 @@ import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -37,15 +34,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.xml.namespace.QName;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
 import jakarta.ejb.EJB;
-import jakarta.xml.ws.Service;
-import jakarta.xml.ws.WebServiceClient;
-import jakarta.xml.ws.WebServiceRef;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
@@ -77,10 +69,9 @@ import org.springframework.util.StringValueResolver;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
- * that supports common Java annotations out of the box, in particular the JSR-250
+ * that supports common Java annotations out of the box, in particular the common
  * annotations in the {@code jakarta.annotation} package. These common Java
- * annotations are supported in many Jakarta EE technologies (e.g. JSF 1.2),
- * as well as in Java 6's JAX-WS.
+ * annotations are supported in many Jakarta EE technologies (e.g. JSF and JAX-RS).
  *
  * <p>This post-processor includes support for the {@link jakarta.annotation.PostConstruct}
  * and {@link jakarta.annotation.PreDestroy} annotations - as init annotation
@@ -95,12 +86,8 @@ import org.springframework.util.StringValueResolver;
  * and default names as well. The target beans can be simple POJOs, with no special
  * requirements other than the type having to match.
  *
- * <p>The JAX-WS {@link javax.xml.ws.WebServiceRef} annotation is supported too,
- * analogous to {@link jakarta.annotation.Resource} but with the capability of creating
- * specific JAX-WS service endpoints. This may either point to an explicitly defined
- * resource by name or operate on a locally specified JAX-WS service class. Finally,
- * this post-processor also supports the EJB 3 {@link jakarta.ejb.EJB} annotation,
- * analogous to {@link jakarta.annotation.Resource} as well, with the capability to
+ * <p>This post-processor also supports the EJB 3 {@link jakarta.ejb.EJB} annotation,
+ * analogous to {@link jakarta.annotation.Resource}, with the capability to
  * specify both a local bean name and a global JNDI name for fallback retrieval.
  * The target beans can be plain POJOs as well as EJB 3 Session Beans in this case.
  *
@@ -143,22 +130,15 @@ import org.springframework.util.StringValueResolver;
 public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Serializable {
 
-	@Nullable
-	private static final Class<? extends Annotation> webServiceRefClass;
+	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = new LinkedHashSet<>(4);
 
 	@Nullable
 	private static final Class<? extends Annotation> ejbClass;
 
-	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = new LinkedHashSet<>(4);
-
 	static {
-		webServiceRefClass = loadAnnotationType("javax.xml.ws.WebServiceRef");
-		ejbClass = loadAnnotationType("jakarta.ejb.EJB");
-
 		resourceAnnotationTypes.add(Resource.class);
-		if (webServiceRefClass != null) {
-			resourceAnnotationTypes.add(webServiceRefClass);
-		}
+
+		ejbClass = loadAnnotationType("jakarta.ejb.EJB");
 		if (ejbClass != null) {
 			resourceAnnotationTypes.add(ejbClass);
 		}
@@ -195,15 +175,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		setOrder(Ordered.LOWEST_PRECEDENCE - 3);
 		setInitAnnotationType(PostConstruct.class);
 		setDestroyAnnotationType(PreDestroy.class);
-		ignoreResourceType("javax.xml.ws.WebServiceContext");
 	}
 
 
 	/**
-	 * Ignore the given resource type when resolving {@code @Resource}
-	 * annotations.
-	 * <p>By default, the {@code javax.xml.ws.WebServiceContext} interface
-	 * will be ignored, since it will be resolved by the JAX-WS runtime.
+	 * Ignore the given resource type when resolving {@code @Resource} annotations.
 	 * @param resourceType the resource type to ignore
 	 */
 	public void ignoreResourceType(String resourceType) {
@@ -361,13 +337,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
-				if (webServiceRefClass != null && field.isAnnotationPresent(webServiceRefClass)) {
-					if (Modifier.isStatic(field.getModifiers())) {
-						throw new IllegalStateException("@WebServiceRef annotation is not supported on static fields");
-					}
-					currElements.add(new WebServiceRefElement(field, field, null));
-				}
-				else if (ejbClass != null && field.isAnnotationPresent(ejbClass)) {
+				if (ejbClass != null && field.isAnnotationPresent(ejbClass)) {
 					if (Modifier.isStatic(field.getModifiers())) {
 						throw new IllegalStateException("@EJB annotation is not supported on static fields");
 					}
@@ -389,17 +359,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					return;
 				}
 				if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-					if (webServiceRefClass != null && bridgedMethod.isAnnotationPresent(webServiceRefClass)) {
-						if (Modifier.isStatic(method.getModifiers())) {
-							throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");
-						}
-						if (method.getParameterCount() != 1) {
-							throw new IllegalStateException("@WebServiceRef annotation requires a single-arg method: " + method);
-						}
-						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-						currElements.add(new WebServiceRefElement(method, bridgedMethod, pd));
-					}
-					else if (ejbClass != null && bridgedMethod.isAnnotationPresent(ejbClass)) {
+					if (ejbClass != null && bridgedMethod.isAnnotationPresent(ejbClass)) {
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("@EJB annotation is not supported on static methods");
 						}
@@ -645,91 +605,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
 			return (this.lazyLookup ? buildLazyResourceProxy(this, requestingBeanName) :
 					getResource(this, requestingBeanName));
-		}
-	}
-
-
-	/**
-	 * Class representing injection information about an annotated field
-	 * or setter method, supporting the @WebServiceRef annotation.
-	 */
-	private class WebServiceRefElement extends LookupElement {
-
-		private final Class<?> elementType;
-
-		private final String wsdlLocation;
-
-		public WebServiceRefElement(Member member, AnnotatedElement ae, @Nullable PropertyDescriptor pd) {
-			super(member, pd);
-			WebServiceRef resource = ae.getAnnotation(WebServiceRef.class);
-			String resourceName = resource.name();
-			Class<?> resourceType = resource.type();
-			this.isDefaultName = !StringUtils.hasLength(resourceName);
-			if (this.isDefaultName) {
-				resourceName = this.member.getName();
-				if (this.member instanceof Method && resourceName.startsWith("set") && resourceName.length() > 3) {
-					resourceName = Introspector.decapitalize(resourceName.substring(3));
-				}
-			}
-			if (Object.class != resourceType) {
-				checkResourceType(resourceType);
-			}
-			else {
-				// No resource type specified... check field/method.
-				resourceType = getResourceType();
-			}
-			this.name = resourceName;
-			this.elementType = resourceType;
-			if (Service.class.isAssignableFrom(resourceType)) {
-				this.lookupType = resourceType;
-			}
-			else {
-				this.lookupType = resource.value();
-			}
-			this.mappedName = resource.mappedName();
-			this.wsdlLocation = resource.wsdlLocation();
-		}
-
-		@Override
-		protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
-			Service service;
-			try {
-				service = (Service) getResource(this, requestingBeanName);
-			}
-			catch (NoSuchBeanDefinitionException notFound) {
-				// Service to be created through generated class.
-				if (Service.class == this.lookupType) {
-					throw new IllegalStateException("No resource with name '" + this.name + "' found in context, " +
-							"and no specific JAX-WS Service subclass specified. The typical solution is to either specify " +
-							"a LocalJaxWsServiceFactoryBean with the given name or to specify the (generated) Service " +
-							"subclass as @WebServiceRef(...) value.");
-				}
-				if (StringUtils.hasLength(this.wsdlLocation)) {
-					try {
-						Constructor<?> ctor = this.lookupType.getConstructor(URL.class, QName.class);
-						WebServiceClient clientAnn = this.lookupType.getAnnotation(WebServiceClient.class);
-						if (clientAnn == null) {
-							throw new IllegalStateException("JAX-WS Service class [" + this.lookupType.getName() +
-									"] does not carry a WebServiceClient annotation");
-						}
-						service = (Service) BeanUtils.instantiateClass(ctor,
-								new URL(this.wsdlLocation), new QName(clientAnn.targetNamespace(), clientAnn.name()));
-					}
-					catch (NoSuchMethodException ex) {
-						throw new IllegalStateException("JAX-WS Service class [" + this.lookupType.getName() +
-								"] does not have a (URL, QName) constructor. Cannot apply specified WSDL location [" +
-								this.wsdlLocation + "].");
-					}
-					catch (MalformedURLException ex) {
-						throw new IllegalArgumentException(
-								"Specified WSDL location [" + this.wsdlLocation + "] isn't a valid URL");
-					}
-				}
-				else {
-					service = (Service) BeanUtils.instantiateClass(this.lookupType);
-				}
-			}
-			return service.getPort(this.elementType);
 		}
 	}
 
