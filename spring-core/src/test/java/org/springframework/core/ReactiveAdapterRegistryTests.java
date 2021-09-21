@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link ReactiveAdapterRegistry}.
+ *
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings("unchecked")
@@ -114,67 +115,6 @@ class ReactiveAdapterRegistryTests {
 			Object target = getAdapter(CompletableFuture.class).toPublisher(future);
 			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
 			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
-		}
-	}
-
-	@Nested
-	class RxJava1 {
-
-		@Test
-		void defaultAdapterRegistrations() {
-			assertThat(getAdapter(rx.Observable.class)).isNotNull();
-			assertThat(getAdapter(rx.Single.class)).isNotNull();
-			assertThat(getAdapter(rx.Completable.class)).isNotNull();
-		}
-
-		@Test
-		void toObservable() {
-			List<Integer> sequence = Arrays.asList(1, 2, 3);
-			Publisher<Integer> source = Flux.fromIterable(sequence);
-			Object target = getAdapter(rx.Observable.class).fromPublisher(source);
-			assertThat(target instanceof rx.Observable).isTrue();
-			assertThat(((rx.Observable<?>) target).toList().toBlocking().first()).isEqualTo(sequence);
-		}
-
-		@Test
-		void toSingle() {
-			Publisher<Integer> source = Flux.fromArray(new Integer[] {1});
-			Object target = getAdapter(rx.Single.class).fromPublisher(source);
-			assertThat(target instanceof rx.Single).isTrue();
-			assertThat(((rx.Single<Integer>) target).toBlocking().value()).isEqualTo(Integer.valueOf(1));
-		}
-
-		@Test
-		void toCompletable() {
-			Publisher<Integer> source = Flux.fromArray(new Integer[] {1, 2, 3});
-			Object target = getAdapter(rx.Completable.class).fromPublisher(source);
-			assertThat(target instanceof rx.Completable).isTrue();
-			assertThat(((rx.Completable) target).get()).isNull();
-		}
-
-		@Test
-		void fromObservable() {
-			List<Integer> sequence = Arrays.asList(1, 2, 3);
-			Object source = rx.Observable.from(sequence);
-			Object target = getAdapter(rx.Observable.class).toPublisher(source);
-			assertThat(target instanceof Flux).as("Expected Flux Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Flux<Integer>) target).collectList().block(ONE_SECOND)).isEqualTo(sequence);
-		}
-
-		@Test
-		void fromSingle() {
-			Object source = rx.Single.just(1);
-			Object target = getAdapter(rx.Single.class).toPublisher(source);
-			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
-		}
-
-		@Test
-		void fromCompletable() {
-			Object source = rx.Completable.complete();
-			Object target = getAdapter(rx.Completable.class).toPublisher(source);
-			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
-			((Mono<Void>) target).block(ONE_SECOND);
 		}
 	}
 
