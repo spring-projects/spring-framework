@@ -23,8 +23,7 @@ sourceSets {
 }
 
 compileGroovy {
-	// Groovy generates Java code with "new Boolean" usage which is deprecated on JDK 17
-	// options.compilerArgs += "-Werror"
+	options.compilerArgs += "-Werror"
 }
 
 // This module also builds Kotlin code and the compileKotlin task naturally depends on
