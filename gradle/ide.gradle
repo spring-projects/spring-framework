@@ -87,10 +87,6 @@ task eclipseJdtSettings(type: Copy) {
 	outputs.upToDateWhen { false }
 }
 
-task eclipseBuildship {
-	dependsOn eclipseSettings, eclipseJdtSettings
-}
-
 task eclipseWstComponentSettings(type: Copy) {
 	from rootProject.files('src/eclipse/org.eclipse.wst.common.component')
 	into project.file('.settings/')
