@@ -30,6 +30,8 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 
+import com.thoughtworks.xstream.io.xml.DomDriver;
+import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 import com.thoughtworks.xstream.security.AnyTypePermission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,6 +57,7 @@ public class XStreamUnmarshallerTests {
 	public void createUnmarshaller() {
 		unmarshaller = new XStreamMarshaller();
 		unmarshaller.setTypePermissions(AnyTypePermission.ANY);
+		unmarshaller.setStreamDriver(new DomDriver("UTF-8", new XmlFriendlyNameCoder()));
 		Map<String, Class<?>> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class);
 		unmarshaller.setAliases(aliases);

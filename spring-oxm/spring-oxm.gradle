@@ -22,7 +22,6 @@ dependencies {
 	optional("com.thoughtworks.xstream:xstream")
 	testImplementation(project(":spring-context"))
 	testImplementation(testFixtures(project(":spring-core")))
-	testImplementation("org.ogce:xpp3")
 	testImplementation("org.codehaus.jettison:jettison") {
 		exclude group: "stax", module: "stax-api"
 	}

@@ -79,6 +79,15 @@ dependencies {
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 }
 
+// Prevent xml-apis from being used so that the corresponding XML APIs from
+// the JDK's `java.xml` module are used instead. This allows spring-test to
+// build in Eclipse IDE which fails to compile if there is a split package
+// between a JDK system module and the unnamed module (for JARs on the
+// classpath).
+configurations.optional {
+	exclude group: "xml-apis", module: "xml-apis"
+}
+
 test {
 	description = "Runs JUnit 4, JUnit Jupiter, and TestNG tests."
 	useJUnitPlatform {

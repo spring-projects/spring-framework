@@ -3,7 +3,7 @@
 This document will guide you through the process of importing the Spring Framework
 projects into Eclipse or the Spring Tool Suite (_STS_). It is recommended that you
 have a recent version of Eclipse. As a bare minimum you will need Eclipse with full Java
-8 support, Eclipse Buildship, and the Groovy plugin.
+17 support, Eclipse Buildship, and the Groovy plugin.
 
 The following instructions have been tested against [STS](https://spring.io/tools) 4.12.0
 ([download](https://github.com/spring-projects/sts4/wiki/Previous-Versions#spring-tools-4120-changelog))
@@ -11,6 +11,10 @@ The following instructions have been tested against [STS](https://spring.io/tool
 The instructions should work with the latest Eclipse distribution as long as you install
 [Buildship](https://marketplace.eclipse.org/content/buildship-gradle-integration). Note
 that STS 4 comes with Buildship preinstalled.
+
+If you are using Eclipse 4.21, you will need to install
+[Java 17 Support for Eclipse 2021-09 (4.21)](https://marketplace.eclipse.org/content/java-17-support-eclipse-2021-09-421)
+from the Eclipse Marketplace.
 
 ## Steps
 
