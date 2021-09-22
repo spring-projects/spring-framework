@@ -319,7 +319,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	@Nullable
 	public <T> T execute(ConnectionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
-
+        // 在这里获取数据库连接
 		Connection con = DataSourceUtils.getConnection(obtainDataSource());
 		try {
 			// Create close-suppressing Connection proxy, also preparing returned Statements.

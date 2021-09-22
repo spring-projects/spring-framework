@@ -329,8 +329,10 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		}
 
 		// If the transaction attribute is null, the method is non-transactional.
+		// 获取类或方法上的事务注解@Transaction的属性
 		TransactionAttributeSource tas = getTransactionAttributeSource();
 		final TransactionAttribute txAttr = (tas != null ? tas.getTransactionAttribute(method, targetClass) : null);
+		//决定使用哪种事务管理器
 		final PlatformTransactionManager tm = determineTransactionManager(txAttr);
 		final String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
@@ -350,6 +352,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				throw ex;
 			}
 			finally {
+				//清理事务信息
 				cleanupTransactionInfo(txInfo);
 			}
 

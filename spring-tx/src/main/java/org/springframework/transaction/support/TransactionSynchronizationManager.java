@@ -150,6 +150,8 @@ public abstract class TransactionSynchronizationManager {
 	 */
 	@Nullable
 	private static Object doGetResource(Object actualKey) {
+		//可以看到这里获取的数据库连接就是前面绑定到本地线程变量resources里面的数据库连接，
+		//这样就保证了数据库连接是同一个
 		Map<Object, Object> map = resources.get();
 		if (map == null) {
 			return null;
@@ -177,6 +179,7 @@ public abstract class TransactionSynchronizationManager {
 	public static void bindResource(Object key, Object value) throws IllegalStateException {
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Assert.notNull(value, "Value must not be null");
+		//Connection 绑定到线程，绑定到线程本地变量resources
 		Map<Object, Object> map = resources.get();
 		// set ThreadLocal Map if none found
 		if (map == null) {

@@ -704,12 +704,14 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	@Override
 	public final void commit(TransactionStatus status) throws TransactionException {
+		//事务已完成，直接抛异常
 		if (status.isCompleted()) {
 			throw new IllegalTransactionStateException(
 					"Transaction is already completed - do not call commit or rollback more than once per transaction");
 		}
 
 		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
+		//事务状态是本地回滚的就执行回滚
 		if (defStatus.isLocalRollbackOnly()) {
 			if (defStatus.isDebug()) {
 				logger.debug("Transactional code has requested rollback");
@@ -717,7 +719,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			processRollback(defStatus, false);
 			return;
 		}
-
+		// 事务状态是全局回滚的就执行回滚
 		if (!shouldCommitOnGlobalRollbackOnly() && defStatus.isGlobalRollbackOnly()) {
 			if (defStatus.isDebug()) {
 				logger.debug("Global transaction is marked as rollback-only but transactional code requested commit");
@@ -725,7 +727,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			processRollback(defStatus, true);
 			return;
 		}
-
+        // 提交事务
 		processCommit(defStatus);
 	}
 
@@ -838,6 +840,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			boolean unexpectedRollback = unexpected;
 
 			try {
+				// 触发完成之前的事务状态
 				triggerBeforeCompletion(status);
                 // 如果status有savePoint，说明此事务是NESTD，且为子事务，只回滚到savePoint
 				if (status.hasSavepoint()) {
