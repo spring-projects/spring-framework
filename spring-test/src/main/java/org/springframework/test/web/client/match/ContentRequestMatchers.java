@@ -240,7 +240,7 @@ public class ContentRequestMatchers {
 					}
 					if (expected instanceof byte[]) {
 						assertTrue("Multipart is not a file", actual instanceof byte[]);
-						assertEquals("Multipart content", expected, (byte[]) actual);
+						assertEquals("Multipart content", expected, actual);
 					}
 					else if (expected instanceof String) {
 						assertTrue("Multipart is not a String", actual instanceof String);
