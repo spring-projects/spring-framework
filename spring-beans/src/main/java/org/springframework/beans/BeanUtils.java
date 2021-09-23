@@ -226,32 +226,46 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Return a resolvable constructor for the provided class, either a primary constructor
-	 * or single public constructor or simply a default constructor. Callers have to be
-	 * prepared to resolve arguments for the returned constructor's parameters, if any.
+	 * Return a resolvable constructor for the provided class, either a primary or single
+	 * public constructor with arguments, or a single non-public constructor with arguments,
+	 * or simply a default constructor. Callers have to be prepared to resolve arguments
+	 * for the returned constructor's parameters, if any.
 	 * @param clazz the class to check
+	 * @throws IllegalStateException in case of no unique constructor found at all
 	 * @since 5.3
 	 * @see #findPrimaryConstructor
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Constructor<T> getResolvableConstructor(Class<T> clazz) {
 		Constructor<T> ctor = findPrimaryConstructor(clazz);
-		if (ctor == null) {
-			Constructor<?>[] ctors = clazz.getConstructors();
+		if (ctor != null) {
+			return ctor;
+		}
+
+		Constructor<?>[] ctors = clazz.getConstructors();
+		if (ctors.length == 1) {
+			// A single public constructor
+			return (Constructor<T>) ctors[0];
+		}
+		else if (ctors.length == 0){
+			ctors = clazz.getDeclaredConstructors();
 			if (ctors.length == 1) {
-				ctor = (Constructor<T>) ctors[0];
-			}
-			else {
-				try {
-					ctor = clazz.getDeclaredConstructor();
-				}
-				catch (NoSuchMethodException ex) {
-					throw new IllegalStateException("No primary or single public constructor found for " +
-							clazz + " - and no default constructor found either");
-				}
+				// A single non-public constructor, e.g. from a non-public record type
+				return (Constructor<T>) ctors[0];
 			}
 		}
-		return ctor;
+		else {
+			// Several public constructors -> let's take the default constructor
+			try {
+				return clazz.getDeclaredConstructor();
+			}
+			catch (NoSuchMethodException ex) {
+				// Giving up...
+			}
+		}
+
+		// No unique constructor at all
+		throw new IllegalStateException("No primary or single unique constructor found for " + clazz);
 	}
 
 	/**
