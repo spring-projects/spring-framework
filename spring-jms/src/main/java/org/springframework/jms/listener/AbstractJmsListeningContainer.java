@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.jms.listener;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.jms.Connection;
@@ -81,9 +81,9 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private boolean active = false;
 
-	private volatile boolean running = false;
+	private volatile boolean running;
 
-	private final List<Object> pausedTasks = new LinkedList<>();
+	private final List<Object> pausedTasks = new ArrayList<>();
 
 	protected final Object lifecycleMonitor = new Object();
 
@@ -582,13 +582,13 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Log a task that has been rejected by {@link #doRescheduleTask}.
 	 * <p>The default implementation simply logs a corresponding message
-	 * at debug level.
+	 * at warn level.
 	 * @param task the rejected task object
 	 * @param ex the exception thrown from {@link #doRescheduleTask}
 	 */
 	protected void logRejectedTask(Object task, RuntimeException ex) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Listener container task [" + task + "] has been rejected and paused: " + ex);
+		if (logger.isWarnEnabled()) {
+			logger.warn("Listener container task [" + task + "] has been rejected and paused: " + ex);
 		}
 	}
 
