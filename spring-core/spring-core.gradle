@@ -48,21 +48,21 @@ dependencies {
 	optional("io.reactivex.rxjava3:rxjava")
 	optional("io.smallrye.reactive:mutiny")
 	optional("io.netty:netty-buffer")
-	testImplementation("io.projectreactor:reactor-test")
-	testImplementation("com.google.code.findbugs:jsr305")
 	testImplementation("jakarta.annotation:jakarta.annotation-api")
 	testImplementation("jakarta.xml.bind:jakarta.xml.bind-api")
+	testImplementation("com.google.code.findbugs:jsr305")
 	testImplementation("com.fasterxml.woodstox:woodstox-core")
 	testImplementation("org.xmlunit:xmlunit-assertj")
 	testImplementation("org.xmlunit:xmlunit-matchers")
+	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("io.projectreactor.tools:blockhound")
-	testFixturesImplementation("io.projectreactor:reactor-test")
 	testFixturesImplementation("com.google.code.findbugs:jsr305")
 	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
 	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
 	testFixturesImplementation("org.junit.jupiter:junit-jupiter-params")
 	testFixturesImplementation("org.assertj:assertj-core")
 	testFixturesImplementation("org.xmlunit:xmlunit-assertj")
+	testFixturesImplementation("io.projectreactor:reactor-test")
 }
 
 jar {
@@ -90,7 +90,7 @@ jar {
 }
 
 test {
-	// Make sure the classes dir is used on the test classpath (required by ResourceTests)
-	// When test fixtures are involved, the JAR is used by default
+	// Make sure the classes dir is used on the test classpath (required by ResourceTests).
+	// When test fixtures are involved, the JAR is used by default.
 	classpath = sourceSets.main.output.classesDirs + classpath - files(jar.archiveFile)
 }

@@ -858,7 +858,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 				Reference<K, V> ref = ConcurrentReferenceHashMap.this.getReference(entry.getKey(), Restructure.NEVER);
 				Entry<K, V> otherEntry = (ref != null ? ref.get() : null);
 				if (otherEntry != null) {
-					return ObjectUtils.nullSafeEquals(otherEntry.getValue(), otherEntry.getValue());
+					return ObjectUtils.nullSafeEquals(entry.getValue(), otherEntry.getValue());
 				}
 			}
 			return false;
@@ -966,6 +966,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		public void remove() {
 			Assert.state(this.last != null, "No element to remove");
 			ConcurrentReferenceHashMap.this.remove(this.last.getKey());
+			this.last = null;
 		}
 	}
 
