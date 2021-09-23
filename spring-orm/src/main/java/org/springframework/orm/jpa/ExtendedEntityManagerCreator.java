@@ -230,10 +230,10 @@ public abstract class ExtendedEntityManagerCreator {
 
 		if (emIfc != null) {
 			interfaces = cachedEntityManagerInterfaces.computeIfAbsent(emIfc, key -> {
-				Set<Class<?>> ifcs = new LinkedHashSet<>(4);
-				ifcs.add(key);
-				ifcs.add(EntityManagerProxy.class);
-				return ClassUtils.toClassArray(ifcs);
+				if (EntityManagerProxy.class.equals(key)) {
+					return new Class<?>[] {key};
+				}
+				return new Class<?>[] {key, EntityManagerProxy.class};
 			});
 		}
 		else {
