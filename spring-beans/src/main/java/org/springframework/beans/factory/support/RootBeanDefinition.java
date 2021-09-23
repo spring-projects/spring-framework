@@ -21,7 +21,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -422,15 +423,21 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		return this.factoryMethodToIntrospect;
 	}
 
+	/**
+	 * Register an externally managed configuration method or field.
+	 */
 	public void registerExternallyManagedConfigMember(Member configMember) {
 		synchronized (this.postProcessingLock) {
 			if (this.externallyManagedConfigMembers == null) {
-				this.externallyManagedConfigMembers = new HashSet<>(1);
+				this.externallyManagedConfigMembers = new LinkedHashSet<>(1);
 			}
 			this.externallyManagedConfigMembers.add(configMember);
 		}
 	}
 
+	/**
+	 * Check whether the given method or field is an externally managed configuration member.
+	 */
 	public boolean isExternallyManagedConfigMember(Member configMember) {
 		synchronized (this.postProcessingLock) {
 			return (this.externallyManagedConfigMembers != null &&
@@ -438,15 +445,33 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		}
 	}
 
+	/**
+	 * Return all externally managed configuration methods and fields (as an immutable Set).
+	 * @since 5.3.11
+	 */
+	public Set<Member> getExternallyManagedConfigMembers() {
+		synchronized (this.postProcessingLock) {
+			return (this.externallyManagedConfigMembers != null ?
+					Collections.unmodifiableSet(new LinkedHashSet<>(this.externallyManagedConfigMembers)) :
+					Collections.emptySet());
+		}
+	}
+
+	/**
+	 * Register an externally managed configuration initialization method.
+	 */
 	public void registerExternallyManagedInitMethod(String initMethod) {
 		synchronized (this.postProcessingLock) {
 			if (this.externallyManagedInitMethods == null) {
-				this.externallyManagedInitMethods = new HashSet<>(1);
+				this.externallyManagedInitMethods = new LinkedHashSet<>(1);
 			}
 			this.externallyManagedInitMethods.add(initMethod);
 		}
 	}
 
+	/**
+	 * Check whether the given method name indicates an externally managed initialization method.
+	 */
 	public boolean isExternallyManagedInitMethod(String initMethod) {
 		synchronized (this.postProcessingLock) {
 			return (this.externallyManagedInitMethods != null &&
@@ -454,19 +479,49 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		}
 	}
 
+	/**
+	 * Return all externally managed initialization methods (as an immutable Set).
+	 * @since 5.3.11
+	 */
+	public Set<String> getExternallyManagedInitMethods() {
+		synchronized (this.postProcessingLock) {
+			return (this.externallyManagedInitMethods != null ?
+					Collections.unmodifiableSet(new LinkedHashSet<>(this.externallyManagedInitMethods)) :
+					Collections.emptySet());
+		}
+	}
+
+	/**
+	 * Register an externally managed configuration destruction method.
+	 */
 	public void registerExternallyManagedDestroyMethod(String destroyMethod) {
 		synchronized (this.postProcessingLock) {
 			if (this.externallyManagedDestroyMethods == null) {
-				this.externallyManagedDestroyMethods = new HashSet<>(1);
+				this.externallyManagedDestroyMethods = new LinkedHashSet<>(1);
 			}
 			this.externallyManagedDestroyMethods.add(destroyMethod);
 		}
 	}
 
+	/**
+	 * Check whether the given method name indicates an externally managed destruction method.
+	 */
 	public boolean isExternallyManagedDestroyMethod(String destroyMethod) {
 		synchronized (this.postProcessingLock) {
 			return (this.externallyManagedDestroyMethods != null &&
 					this.externallyManagedDestroyMethods.contains(destroyMethod));
+		}
+	}
+
+	/**
+	 * Return all externally managed destruction methods (as an immutable Set).
+	 * @since 5.3.11
+	 */
+	public Set<String> getExternallyManagedDestroyMethods() {
+		synchronized (this.postProcessingLock) {
+			return (this.externallyManagedDestroyMethods != null ?
+					Collections.unmodifiableSet(new LinkedHashSet<>(this.externallyManagedDestroyMethods)) :
+					Collections.emptySet());
 		}
 	}
 
