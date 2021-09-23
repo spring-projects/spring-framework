@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,13 @@ import org.springframework.util.comparator.NullSafeComparator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link ConcurrentReferenceHashMap}.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  */
 class ConcurrentReferenceHashMapTests {
 
@@ -466,6 +468,7 @@ class ConcurrentReferenceHashMapTests {
 		iterator.next();
 		iterator.next();
 		iterator.remove();
+		assertThatIllegalStateException().isThrownBy(iterator::remove);
 		iterator.next();
 		assertThat(iterator.hasNext()).isFalse();
 		assertThat(this.map).hasSize(2);
@@ -484,6 +487,26 @@ class ConcurrentReferenceHashMapTests {
 		assertThat(iterator.hasNext()).isFalse();
 		assertThat(this.map).hasSize(3);
 		assertThat(this.map.get(2)).isEqualTo("2b");
+	}
+
+	@Test
+	void containsViaEntrySet() {
+		this.map.put(1, "1");
+		this.map.put(2, "2");
+		this.map.put(3, "3");
+		Set<Map.Entry<Integer, String>> entrySet = this.map.entrySet();
+		Set<Map.Entry<Integer, String>> copy = new HashMap<>(this.map).entrySet();
+		copy.forEach(entry -> assertThat(entrySet.contains(entry)).isTrue());
+		this.map.put(1, "A");
+		this.map.put(2, "B");
+		this.map.put(3, "C");
+		copy.forEach(entry -> assertThat(entrySet.contains(entry)).isFalse());
+		this.map.put(1, "1");
+		this.map.put(2, "2");
+		this.map.put(3, "3");
+		copy.forEach(entry -> assertThat(entrySet.contains(entry)).isTrue());
+		entrySet.clear();
+		copy.forEach(entry -> assertThat(entrySet.contains(entry)).isFalse());
 	}
 
 	@Test
