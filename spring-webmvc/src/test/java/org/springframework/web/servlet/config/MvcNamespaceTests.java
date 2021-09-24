@@ -246,7 +246,7 @@ public class MvcNamespaceTests {
 
 		adapter.handle(request, response, handlerMethod);
 		assertThat(handler.recordedValidationError).isTrue();
-		assertThat(handler.date).isInSameDayAs("2009-10-31");
+		assertThat(handler.date).isInSameDayAs("2009-10-31T00:00:00+00:00");
 		assertThat(handler.percent).isEqualTo(Double.valueOf(0.9999));
 
 		CompositeUriComponentsContributor uriComponentsContributor = this.appContext.getBean(
