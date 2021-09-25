@@ -52,6 +52,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.StreamException;
 import com.thoughtworks.xstream.io.naming.NameCoder;
 import com.thoughtworks.xstream.io.xml.CompactWriter;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.io.xml.DomReader;
 import com.thoughtworks.xstream.io.xml.DomWriter;
 import com.thoughtworks.xstream.io.xml.QNameMap;
@@ -59,7 +60,6 @@ import com.thoughtworks.xstream.io.xml.SaxWriter;
 import com.thoughtworks.xstream.io.xml.StaxReader;
 import com.thoughtworks.xstream.io.xml.StaxWriter;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
-import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 import com.thoughtworks.xstream.mapper.Mapper;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
@@ -111,6 +111,11 @@ import org.springframework.util.xml.StaxUtils;
  * <p>This marshaller requires XStream 1.4.7 or higher, as of Spring 5.2.17.
  * Note that {@link XStream} construction has been reworked in 4.0, with the
  * stream driver and the class loader getting passed into XStream itself now.
+ *
+ * <p>As of Spring Framework 6.0, the default {@link HierarchicalStreamDriver} is
+ * a {@link DomDriver} that uses the configured {@linkplain #setEncoding(String)
+ * encoding} and {@link #setNameCoder(NameCoder) NameCoder}. The driver can be
+ * changed via {@link #setStreamDriver(HierarchicalStreamDriver)}.
  *
  * @author Peter Meijer
  * @author Arjen Poutsma
@@ -205,7 +210,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	}
 
 	/**
-	 * Set a XStream {@link HierarchicalStreamDriver} to be used for readers and writers.
+	 * Set an XStream {@link HierarchicalStreamDriver} to be used for readers and writers.
 	 * <p>As of Spring 4.0, this stream driver will also be passed to the {@link XStream}
 	 * constructor and therefore used by streaming-related native API methods themselves.
 	 */
@@ -216,7 +221,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 
 	private HierarchicalStreamDriver getDefaultDriver() {
 		if (this.defaultDriver == null) {
-			this.defaultDriver = new XppDriver();
+			this.defaultDriver = new DomDriver(this.encoding, this.nameCoder);
 		}
 		return this.defaultDriver;
 	}

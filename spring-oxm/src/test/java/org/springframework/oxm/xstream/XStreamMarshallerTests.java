@@ -43,8 +43,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.json.JsonWriter;
-import com.thoughtworks.xstream.io.xml.DomDriver;
-import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 import com.thoughtworks.xstream.security.AnyTypePermission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -86,7 +84,6 @@ class XStreamMarshallerTests {
 		marshaller = new XStreamMarshaller();
 		marshaller.setTypePermissions(AnyTypePermission.ANY);
 		marshaller.setAliases(Collections.singletonMap("flight", Flight.class.getName()));
-		marshaller.setStreamDriver(new DomDriver("UTF-8", new XmlFriendlyNameCoder()));
 		flight.setFlightNumber(42L);
 	}
 
