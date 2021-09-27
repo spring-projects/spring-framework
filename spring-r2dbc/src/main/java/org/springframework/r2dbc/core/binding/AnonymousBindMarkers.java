@@ -42,7 +42,7 @@ class AnonymousBindMarkers implements BindMarkers {
 
 	// access via COUNTER_INCREMENTER
 	@SuppressWarnings("unused")
-	private volatile int counter = 0;
+	private volatile int counter;
 
 
 	/**

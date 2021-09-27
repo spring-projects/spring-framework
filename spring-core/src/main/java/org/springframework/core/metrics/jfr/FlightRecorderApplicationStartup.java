@@ -38,7 +38,7 @@ import org.springframework.core.metrics.StartupStep;
  */
 public class FlightRecorderApplicationStartup implements ApplicationStartup {
 
-	private final AtomicLong currentSequenceId = new AtomicLong(0);
+	private final AtomicLong currentSequenceId = new AtomicLong();
 
 	private final Deque<Long> currentSteps;
 
