@@ -34,8 +34,6 @@ discussion of mock objects.
 response objects to provide support for testing WebFlux applications without an HTTP
 server. You can use the `WebTestClient` for end-to-end integration tests, too.
 
-
-
 include::rsocket.adoc[leveloffset=+1]
 
 
@@ -51,21 +49,21 @@ it helps to express cardinality -- for example, whether a single or multiple asy
 values are expected, and that can be essential for making decisions (for example, when
 encoding or decoding HTTP messages).
 
-For annotated controllers, WebFlux transparently adapts to the reactive library chosen by
-the application. This is done with the help of the
-{api-spring-framework}/core/ReactiveAdapterRegistry.html[`ReactiveAdapterRegistry`], which
-provides pluggable support for reactive library and other asynchronous types. The registry
-has built-in support for RxJava 2/3, RxJava 1 (via RxJava Reactive Streams bridge), and
-`CompletableFuture`, but you can register others, too.
+For annotated controllers, WebFlux transparently adapts to the reactive library chosen
+by the application. This is done with the help of the
+{api-spring-framework}/core/ReactiveAdapterRegistry.html[`ReactiveAdapterRegistry`]
+which provides pluggable support for reactive library and other asynchronous types.
+The registry has built-in support for RxJava 3, Kotlin coroutines and SmallRye Mutiny,
+but you can register other third-party adapters as well.
 
 [NOTE]
 ====
-As of Spring Framework 5.3, support for RxJava 1 is deprecated.
+As of Spring Framework 5.3.11, support for RxJava 1 and 2 is deprecated, following
+RxJava's own EOL advice and the upgrade recommendation towards RxJava 3.
 ====
 
-
-For functional APIs (such as <<webflux-fn>>, the `WebClient`, and others), the general rules
-for WebFlux APIs apply -- `Flux` and `Mono` as return values and a Reactive Streams
+For functional APIs (such as <<webflux-fn>>, the `WebClient`, and others), the general
+rules for WebFlux APIs apply -- `Flux` and `Mono` as return values and a Reactive Streams
 `Publisher` as input. When a `Publisher`, whether custom or from another reactive library,
 is provided, it can be treated only as a stream with unknown semantics (0..N). If, however,
 the semantics are known, you can wrap it with `Flux` or `Mono.from(Publisher)` instead

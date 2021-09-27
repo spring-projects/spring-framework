@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link ReactiveAdapterRegistry}.
+ *
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings("unchecked")
@@ -42,16 +43,13 @@ class ReactiveAdapterRegistryTests {
 
 	private static final Duration ONE_SECOND = Duration.ofSeconds(1);
 
-
 	private final ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
 
 
 	@Test
 	void getAdapterForReactiveSubType() {
-
 		ReactiveAdapter adapter1 = getAdapter(Flux.class);
 		ReactiveAdapter adapter2 = getAdapter(ExtendedFlux.class);
-
 		assertThat(adapter2).isSameAs(adapter1);
 
 		this.registry.registerReactiveType(
@@ -60,17 +58,32 @@ class ReactiveAdapterRegistryTests {
 				ExtendedFlux::from);
 
 		ReactiveAdapter adapter3 = getAdapter(ExtendedFlux.class);
-
 		assertThat(adapter3).isNotNull();
 		assertThat(adapter3).isNotSameAs(adapter1);
 	}
+
+
+	private ReactiveAdapter getAdapter(Class<?> reactiveType) {
+		ReactiveAdapter adapter = this.registry.getAdapter(reactiveType);
+		assertThat(adapter).isNotNull();
+		return adapter;
+	}
+
+
+	private static class ExtendedFlux<T> extends Flux<T> {
+
+		@Override
+		public void subscribe(CoreSubscriber<? super T> actual) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
 
 	@Nested
 	class Reactor {
 
 		@Test
 		void defaultAdapterRegistrations() {
-
 			// Reactor
 			assertThat(getAdapter(Mono.class)).isNotNull();
 			assertThat(getAdapter(Flux.class)).isNotNull();
@@ -116,6 +129,7 @@ class ReactiveAdapterRegistryTests {
 			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
 		}
 	}
+
 
 	@Nested
 	class RxJava1 {
@@ -178,12 +192,12 @@ class ReactiveAdapterRegistryTests {
 		}
 	}
 
+
 	@Nested
 	class RxJava2 {
 
 		@Test
 		void defaultAdapterRegistrations() {
-
 			// RxJava 2
 			assertThat(getAdapter(io.reactivex.Flowable.class)).isNotNull();
 			assertThat(getAdapter(io.reactivex.Observable.class)).isNotNull();
@@ -261,12 +275,12 @@ class ReactiveAdapterRegistryTests {
 		}
 	}
 
+
 	@Nested
 	class RxJava3 {
 
 		@Test
 		void defaultAdapterRegistrations() {
-
 			// RxJava 3
 			assertThat(getAdapter(io.reactivex.rxjava3.core.Flowable.class)).isNotNull();
 			assertThat(getAdapter(io.reactivex.rxjava3.core.Observable.class)).isNotNull();
@@ -344,12 +358,12 @@ class ReactiveAdapterRegistryTests {
 		}
 	}
 
+
 	@Nested
 	class Kotlin {
 
 		@Test
 		void defaultAdapterRegistrations() {
-
 			// Coroutines
 			assertThat(getAdapter(Deferred.class)).isNotNull();
 		}
@@ -361,6 +375,7 @@ class ReactiveAdapterRegistryTests {
 			assertThat(getAdapter(kotlinx.coroutines.flow.Flow.class).getDescriptor().isDeferred()).isEqualTo(true);
 		}
 	}
+
 
 	@Nested
 	class Mutiny {
@@ -403,22 +418,6 @@ class ReactiveAdapterRegistryTests {
 			Object target = getAdapter(Multi.class).toPublisher(source);
 			assertThat(target).isInstanceOf(Flux.class);
 			assertThat(((Flux<Integer>) target).blockLast(ONE_SECOND)).isEqualTo(Integer.valueOf(3));
-		}
-
-	}
-
-	private ReactiveAdapter getAdapter(Class<?> reactiveType) {
-		ReactiveAdapter adapter = this.registry.getAdapter(reactiveType);
-		assertThat(adapter).isNotNull();
-		return adapter;
-	}
-
-
-	private static class ExtendedFlux<T> extends Flux<T> {
-
-		@Override
-		public void subscribe(CoreSubscriber<? super T> actual) {
-			throw new UnsupportedOperationException();
 		}
 	}
 
