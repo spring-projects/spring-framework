@@ -43,16 +43,13 @@ class ReactiveAdapterRegistryTests {
 
 	private static final Duration ONE_SECOND = Duration.ofSeconds(1);
 
-
 	private final ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
 
 
 	@Test
 	void getAdapterForReactiveSubType() {
-
 		ReactiveAdapter adapter1 = getAdapter(Flux.class);
 		ReactiveAdapter adapter2 = getAdapter(ExtendedFlux.class);
-
 		assertThat(adapter2).isSameAs(adapter1);
 
 		this.registry.registerReactiveType(
@@ -61,17 +58,32 @@ class ReactiveAdapterRegistryTests {
 				ExtendedFlux::from);
 
 		ReactiveAdapter adapter3 = getAdapter(ExtendedFlux.class);
-
 		assertThat(adapter3).isNotNull();
 		assertThat(adapter3).isNotSameAs(adapter1);
 	}
+
+
+	private ReactiveAdapter getAdapter(Class<?> reactiveType) {
+		ReactiveAdapter adapter = this.registry.getAdapter(reactiveType);
+		assertThat(adapter).isNotNull();
+		return adapter;
+	}
+
+
+	private static class ExtendedFlux<T> extends Flux<T> {
+
+		@Override
+		public void subscribe(CoreSubscriber<? super T> actual) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
 
 	@Nested
 	class Reactor {
 
 		@Test
 		void defaultAdapterRegistrations() {
-
 			// Reactor
 			assertThat(getAdapter(Mono.class)).isNotNull();
 			assertThat(getAdapter(Flux.class)).isNotNull();
@@ -118,95 +130,12 @@ class ReactiveAdapterRegistryTests {
 		}
 	}
 
-	@Nested
-	class RxJava2 {
-
-		@Test
-		void defaultAdapterRegistrations() {
-
-			// RxJava 2
-			assertThat(getAdapter(io.reactivex.Flowable.class)).isNotNull();
-			assertThat(getAdapter(io.reactivex.Observable.class)).isNotNull();
-			assertThat(getAdapter(io.reactivex.Single.class)).isNotNull();
-			assertThat(getAdapter(io.reactivex.Maybe.class)).isNotNull();
-			assertThat(getAdapter(io.reactivex.Completable.class)).isNotNull();
-		}
-
-		@Test
-		void toFlowable() {
-			List<Integer> sequence = Arrays.asList(1, 2, 3);
-			Publisher<Integer> source = Flux.fromIterable(sequence);
-			Object target = getAdapter(io.reactivex.Flowable.class).fromPublisher(source);
-			assertThat(target instanceof io.reactivex.Flowable).isTrue();
-			assertThat(((io.reactivex.Flowable<?>) target).toList().blockingGet()).isEqualTo(sequence);
-		}
-
-		@Test
-		void toObservable() {
-			List<Integer> sequence = Arrays.asList(1, 2, 3);
-			Publisher<Integer> source = Flux.fromIterable(sequence);
-			Object target = getAdapter(io.reactivex.Observable.class).fromPublisher(source);
-			assertThat(target instanceof io.reactivex.Observable).isTrue();
-			assertThat(((io.reactivex.Observable<?>) target).toList().blockingGet()).isEqualTo(sequence);
-		}
-
-		@Test
-		void toSingle() {
-			Publisher<Integer> source = Flux.fromArray(new Integer[] {1});
-			Object target = getAdapter(io.reactivex.Single.class).fromPublisher(source);
-			assertThat(target instanceof io.reactivex.Single).isTrue();
-			assertThat(((io.reactivex.Single<Integer>) target).blockingGet()).isEqualTo(Integer.valueOf(1));
-		}
-
-		@Test
-		void toCompletable() {
-			Publisher<Integer> source = Flux.fromArray(new Integer[] {1, 2, 3});
-			Object target = getAdapter(io.reactivex.Completable.class).fromPublisher(source);
-			assertThat(target instanceof io.reactivex.Completable).isTrue();
-			((io.reactivex.Completable) target).blockingAwait();
-		}
-
-		@Test
-		void fromFlowable() {
-			List<Integer> sequence = Arrays.asList(1, 2, 3);
-			Object source = io.reactivex.Flowable.fromIterable(sequence);
-			Object target = getAdapter(io.reactivex.Flowable.class).toPublisher(source);
-			assertThat(target instanceof Flux).as("Expected Flux Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Flux<Integer>) target).collectList().block(ONE_SECOND)).isEqualTo(sequence);
-		}
-
-		@Test
-		void fromObservable() {
-			List<Integer> sequence = Arrays.asList(1, 2, 3);
-			Object source = io.reactivex.Observable.fromIterable(sequence);
-			Object target = getAdapter(io.reactivex.Observable.class).toPublisher(source);
-			assertThat(target instanceof Flux).as("Expected Flux Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Flux<Integer>) target).collectList().block(ONE_SECOND)).isEqualTo(sequence);
-		}
-
-		@Test
-		void fromSingle() {
-			Object source = io.reactivex.Single.just(1);
-			Object target = getAdapter(io.reactivex.Single.class).toPublisher(source);
-			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
-			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
-		}
-
-		@Test
-		void fromCompletable() {
-			Object source = io.reactivex.Completable.complete();
-			Object target = getAdapter(io.reactivex.Completable.class).toPublisher(source);
-			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
-			((Mono<Void>) target).block(ONE_SECOND);
-		}
-	}
 
 	@Nested
 	class RxJava3 {
 
 		@Test
 		void defaultAdapterRegistrations() {
-
 			// RxJava 3
 			assertThat(getAdapter(io.reactivex.rxjava3.core.Flowable.class)).isNotNull();
 			assertThat(getAdapter(io.reactivex.rxjava3.core.Observable.class)).isNotNull();
@@ -284,12 +213,12 @@ class ReactiveAdapterRegistryTests {
 		}
 	}
 
+
 	@Nested
 	class Kotlin {
 
 		@Test
 		void defaultAdapterRegistrations() {
-
 			// Coroutines
 			assertThat(getAdapter(Deferred.class)).isNotNull();
 		}
@@ -301,6 +230,7 @@ class ReactiveAdapterRegistryTests {
 			assertThat(getAdapter(kotlinx.coroutines.flow.Flow.class).getDescriptor().isDeferred()).isEqualTo(true);
 		}
 	}
+
 
 	@Nested
 	class Mutiny {
@@ -343,22 +273,6 @@ class ReactiveAdapterRegistryTests {
 			Object target = getAdapter(Multi.class).toPublisher(source);
 			assertThat(target).isInstanceOf(Flux.class);
 			assertThat(((Flux<Integer>) target).blockLast(ONE_SECOND)).isEqualTo(Integer.valueOf(3));
-		}
-
-	}
-
-	private ReactiveAdapter getAdapter(Class<?> reactiveType) {
-		ReactiveAdapter adapter = this.registry.getAdapter(reactiveType);
-		assertThat(adapter).isNotNull();
-		return adapter;
-	}
-
-
-	private static class ExtendedFlux<T> extends Flux<T> {
-
-		@Override
-		public void subscribe(CoreSubscriber<? super T> actual) {
-			throw new UnsupportedOperationException();
 		}
 	}
 
