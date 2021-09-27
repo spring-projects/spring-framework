@@ -254,14 +254,13 @@ public abstract class BeanUtils {
 				return (Constructor<T>) ctors[0];
 			}
 		}
-		else {
-			// Several public constructors -> let's take the default constructor
-			try {
-				return clazz.getDeclaredConstructor();
-			}
-			catch (NoSuchMethodException ex) {
-				// Giving up...
-			}
+
+		// Several constructors -> let's try to take the default constructor
+		try {
+			return clazz.getDeclaredConstructor();
+		}
+		catch (NoSuchMethodException ex) {
+			// Giving up...
 		}
 
 		// No unique constructor at all

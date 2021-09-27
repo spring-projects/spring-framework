@@ -43,7 +43,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * {@code Observable}, and others.
  *
  * <p>By default, depending on classpath availability, adapters are registered
- * for Reactor, RxJava 2/3, {@link CompletableFuture}, {@code Flow.Publisher},
+ * for Reactor, RxJava 3, {@link CompletableFuture}, {@code Flow.Publisher},
  * and Kotlin Coroutines' {@code Deferred} and {@code Flow}.
  *
  * @author Rossen Stoyanchev
