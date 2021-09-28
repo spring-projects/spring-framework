@@ -681,7 +681,6 @@ final class LogAdapter {
 			setSourceMethodName(sourceMethodName);
 		}
 
-		@SuppressWarnings("deprecation")
 		protected Object writeReplace() {
 			LogRecord serialized = new LogRecord(getLevel(), getMessage());
 			serialized.setLoggerName(getLoggerName());
@@ -691,8 +690,8 @@ final class LogAdapter {
 			serialized.setSourceMethodName(getSourceMethodName());
 			serialized.setSequenceNumber(getSequenceNumber());
 			serialized.setParameters(getParameters());
-			serialized.setThreadID(getThreadID());
-			serialized.setMillis(getMillis());
+			serialized.setLongThreadID(getLongThreadID());
+			serialized.setInstant(getInstant());
 			serialized.setThrown(getThrown());
 			return serialized;
 		}
