@@ -47,6 +47,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.1
  * @see ConfigurableEnvironment
  * @see StandardEnvironment
@@ -127,6 +128,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * {@link #customizePropertySources(MutablePropertySources)} during
 	 * construction to allow subclasses to contribute or manipulate
 	 * {@link PropertySource} instances as appropriate.
+	 * @param propertySources property sources to use
 	 * @since 5.3.4
 	 * @see #customizePropertySources(MutablePropertySources)
 	 */
@@ -135,6 +137,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		this.propertyResolver = createPropertyResolver(propertySources);
 		customizePropertySources(propertySources);
 	}
+
 
 	/**
 	 * Factory method used to create the {@link ConfigurablePropertyResolver}

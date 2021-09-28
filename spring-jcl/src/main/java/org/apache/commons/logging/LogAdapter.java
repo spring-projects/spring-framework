@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -278,7 +278,7 @@ final class LogAdapter {
 
 		protected final String name;
 
-		protected transient T logger;
+		protected final transient T logger;
 
 		public Slf4jLog(T logger) {
 			this.name = logger.getName();
@@ -500,9 +500,9 @@ final class LogAdapter {
 	@SuppressWarnings("serial")
 	private static class JavaUtilLog implements Log, Serializable {
 
-		private String name;
+		private final String name;
 
-		private transient java.util.logging.Logger logger;
+		private final transient java.util.logging.Logger logger;
 
 		public JavaUtilLog(String name) {
 			this.name = name;

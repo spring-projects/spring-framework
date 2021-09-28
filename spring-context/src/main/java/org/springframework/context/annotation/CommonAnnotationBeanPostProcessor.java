@@ -130,6 +130,10 @@ import org.springframework.util.StringValueResolver;
 public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Serializable {
 
+	// Defensive reference to JNDI API for JDK 9+ (optional java.naming module)
+	private static final boolean jndiPresent = ClassUtils.isPresent(
+			"javax.naming.InitialContext", CommonAnnotationBeanPostProcessor.class.getClassLoader());
+
 	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = new LinkedHashSet<>(4);
 
 	@Nullable
@@ -151,7 +155,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	private boolean alwaysUseJndiLookup = false;
 
-	private transient BeanFactory jndiFactory = new SimpleJndiBeanFactory();
+	@Nullable
+	private transient BeanFactory jndiFactory;
 
 	@Nullable
 	private transient BeanFactory resourceFactory;
@@ -175,6 +180,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		setOrder(Ordered.LOWEST_PRECEDENCE - 3);
 		setInitAnnotationType(PostConstruct.class);
 		setDestroyAnnotationType(PreDestroy.class);
+
+		// java.naming module present on JDK 9+?
+		if (jndiPresent) {
+			this.jndiFactory = new SimpleJndiBeanFactory();
+		}
 	}
 
 
@@ -421,6 +431,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			public void releaseTarget(Object target) {
 			}
 		};
+
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTargetSource(ts);
 		if (element.lookupType.isInterface()) {
@@ -441,12 +452,23 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	protected Object getResource(LookupElement element, @Nullable String requestingBeanName)
 			throws NoSuchBeanDefinitionException {
 
+		// JNDI lookup to perform?
+		String jndiName = null;
 		if (StringUtils.hasLength(element.mappedName)) {
-			return this.jndiFactory.getBean(element.mappedName, element.lookupType);
+			jndiName = element.mappedName;
 		}
-		if (this.alwaysUseJndiLookup) {
-			return this.jndiFactory.getBean(element.name, element.lookupType);
+		else if (this.alwaysUseJndiLookup) {
+			jndiName = element.name;
 		}
+		if (jndiName != null) {
+			if (this.jndiFactory == null) {
+				throw new NoSuchBeanDefinitionException(element.lookupType,
+						"No JNDI factory configured - specify the 'jndiFactory' property");
+			}
+			return this.jndiFactory.getBean(jndiName, element.lookupType);
+		}
+
+		// Regular resource autowiring
 		if (this.resourceFactory == null) {
 			throw new NoSuchBeanDefinitionException(element.lookupType,
 					"No resource factory configured - specify the 'resourceFactory' property");
