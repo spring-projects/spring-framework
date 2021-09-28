@@ -120,7 +120,7 @@ public class PathMatchConfigurer {
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
-	 * <p>By default this is set to {@code true}.
+	 * <p>By default this is set to {@code false}.
 	 * <p><strong>Note:</strong> This property is mutually exclusive with and
 	 * ignored when {@link #setPatternParser(PathPatternParser)} is set.
 	 * @deprecated as of 5.2.4. See class-level note in
