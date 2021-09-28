@@ -126,7 +126,7 @@ public class PathMatchConfigurer {
 	 * @deprecated as of 5.2.4. See class-level note in
 	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
 	 * config options. As there is no replacement for this method, in 5.2.x it is
-	 * necessary to set it to {@code false}. In 5.3 the default changes to
+	 * necessary to set it to {@code false}. by default changes to
 	 * {@code false} and use of this property becomes unnecessary.
 	 */
 	@Deprecated
