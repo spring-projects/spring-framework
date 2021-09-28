@@ -39,7 +39,7 @@ import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
 import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 
 /**
- * Parse the {@code view-resolvers} MVC namespace element and register
+ * Parses the {@code view-resolvers} MVC namespace element and registers
  * {@link org.springframework.web.servlet.ViewResolver} bean definitions.
  *
  * <p>All registered resolvers are wrapped in a single (composite) ViewResolver
@@ -49,13 +49,12 @@ import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
  * <p>When content negotiation is enabled the order property is set to highest priority
  * instead with the ContentNegotiatingViewResolver encapsulating all other registered
  * view resolver instances. That way the resolvers registered through the MVC namespace
- * form self-encapsulated resolver chain.
+ * form a self-encapsulated resolver chain.
  *
  * @author Sivaprasad Valluru
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 4.1
- * @see TilesConfigurerBeanDefinitionParser
  * @see FreeMarkerConfigurerBeanDefinitionParser
  * @see GroovyMarkupConfigurerBeanDefinitionParser
  * @see ScriptTemplateConfigurerBeanDefinitionParser

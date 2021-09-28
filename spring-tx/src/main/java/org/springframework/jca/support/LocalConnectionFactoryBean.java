@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,9 +57,8 @@ import org.springframework.lang.Nullable;
  * order to make the connector interact with an XA transaction coordinator.
  * Alternatively, simply use the native local transaction facilities of the
  * exposed API (e.g. CCI local transactions), or use a corresponding
- * implementation of Spring's PlatformTransactionManager SPI
- * (e.g. {@link org.springframework.jca.cci.connection.CciLocalTransactionManager})
- * to drive local transactions.
+ * implementation of Spring's PlatformTransactionManager SPI to drive local
+ * transactions.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -67,7 +66,6 @@ import org.springframework.lang.Nullable;
  * @see #setConnectionManager
  * @see jakarta.resource.cci.ConnectionFactory
  * @see jakarta.resource.cci.Connection#getLocalTransaction
- * @see org.springframework.jca.cci.connection.CciLocalTransactionManager
  */
 public class LocalConnectionFactoryBean implements FactoryBean<Object>, InitializingBean {
 

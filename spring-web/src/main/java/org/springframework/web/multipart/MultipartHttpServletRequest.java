@@ -25,7 +25,8 @@ import org.springframework.lang.Nullable;
 /**
  * Provides additional methods for dealing with multipart content within a
  * servlet request, allowing to access uploaded files.
- * Implementations also need to override the standard
+ *
+ * <p>Implementations also need to override the standard
  * {@link jakarta.servlet.ServletRequest} methods for parameter access, making
  * multipart parameters available.
  *
