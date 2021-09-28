@@ -147,7 +147,13 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		for (String line : lines) {
 			if (line.startsWith("data:")) {
 				data = (data != null ? data : new StringBuilder());
-				data.append(line.substring(5).trim()).append('\n');
+				if (line.charAt(5) != ' ') {
+					data.append(line, 5, line.length());
+				}
+				else {
+					data.append(line, 6, line.length());
+				}
+				data.append('\n');
 			}
 			if (shouldWrap) {
 				if (line.startsWith("id:")) {
