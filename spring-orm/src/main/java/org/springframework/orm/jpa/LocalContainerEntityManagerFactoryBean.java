@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,10 +69,6 @@ import org.springframework.util.ClassUtils;
  * the underlying native EntityManagerFactory returned by the PersistenceProvider,
  * plus the {@link EntityManagerFactoryInfo} interface which exposes additional
  * metadata as assembled by this FactoryBean.
- *
- * <p><b>NOTE: Spring's JPA support requires JPA 2.1 or higher, as of Spring 5.0.</b>
- * JPA 1.0/2.0 based applications are still supported; however, a JPA 2.1 compliant
- * persistence provider is needed at runtime.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
