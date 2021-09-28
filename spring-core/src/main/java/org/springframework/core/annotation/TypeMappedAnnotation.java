@@ -573,7 +573,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		}
 		if (this.source != null) {
 			if (this.source instanceof Class) {
-				return ((Class<?>) source).getClassLoader();
+				return ((Class<?>) this.source).getClassLoader();
 			}
 			if (this.source instanceof Member) {
 				((Member) this.source).getDeclaringClass().getClassLoader();

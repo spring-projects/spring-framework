@@ -324,7 +324,6 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	 * that do not allow to check request origin (Iframe based transports) are
 	 * disabled. As a consequence, IE 6 to 9 are not supported when origins are
 	 * restricted.
-	 *
 	 * @since 4.1.2
 	 * @see #setAllowedOriginPatterns(Collection)
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>

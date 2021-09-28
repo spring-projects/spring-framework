@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.client;
 
 import java.util.function.Supplier;
@@ -112,7 +113,6 @@ public interface MockMvcWebTestClient {
 	/**
 	 * This method can be used to apply further assertions on a given
 	 * {@link ExchangeResult} based the state of the server response.
-	 *
 	 * <p>Normally {@link WebTestClient} is used to assert the client response
 	 * including HTTP status, headers, and body. That is all that is available
 	 * when making a live request over HTTP. However when the server is
@@ -134,7 +134,6 @@ public interface MockMvcWebTestClient {
 	 * 		.andExpect(flash().attributeCount(1))
 	 * 		.andExpect(flash().attribute("message", "success!"));
 	 * </pre>
-	 *
 	 * <p>Note: this method works only if the {@link WebTestClient} used to
 	 * perform the request was initialized through one of bind method in this
 	 * class, and therefore requests are handled by {@link MockMvc}.

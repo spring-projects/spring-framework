@@ -50,7 +50,6 @@ public interface ExchangeFunction {
 	 * propagate it downstream for further handling, for example by the
 	 * {@link WebClient}. Please, see the reference documentation for more
 	 * details on this.
-	 *
 	 * @param request the request to exchange
 	 * @return the delayed response
 	 */
