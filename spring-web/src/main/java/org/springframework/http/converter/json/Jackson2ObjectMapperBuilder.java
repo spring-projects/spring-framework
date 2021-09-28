@@ -83,7 +83,7 @@ import org.springframework.util.xml.StaxUtils;
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>:
  * support for other Java 8 types like {@link java.util.Optional}</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>:
- * support for Java 8 Date & Time API types</li>
+ * support for Java 8 Date &amp; Time API types</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>:
  * support for Joda-Time types</li>
  * <li><a href="https://github.com/FasterXML/jackson-module-kotlin">jackson-module-kotlin</a>:

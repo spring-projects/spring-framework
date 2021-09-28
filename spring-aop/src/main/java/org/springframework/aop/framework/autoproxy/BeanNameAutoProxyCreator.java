@@ -61,7 +61,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	 * FactoryBean will get proxied. This default behavior applies as of Spring 2.0.
 	 * If you intend to proxy a FactoryBean instance itself (a rare use case, but
 	 * Spring 1.2's default behavior), specify the bean name of the FactoryBean
-	 * including the factory-bean prefix "&": e.g. "&myFactoryBean".
+	 * including the factory-bean prefix "&amp;": e.g. "&amp;myFactoryBean".
 	 * @see org.springframework.beans.factory.FactoryBean
 	 * @see org.springframework.beans.factory.BeanFactory#FACTORY_BEAN_PREFIX
 	 */

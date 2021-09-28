@@ -37,7 +37,7 @@ import org.springframework.util.StringValueResolver;
  * as {@code DefaultConversionService} exposes its own
  * {@link DefaultConversionService#addDefaultConverters addDefaultConverters} method.
  *
- * <p>Automatically registers formatters for JSR-354 Money & Currency, JSR-310 Date-Time
+ * <p>Automatically registers formatters for JSR-354 Money &amp; Currency, JSR-310 Date-Time
  * and/or Joda-Time 2.x, depending on the presence of the corresponding API on the classpath.
  *
  * @author Chris Beams
@@ -100,7 +100,7 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 
 	/**
 	 * Add formatters appropriate for most environments: including number formatters,
-	 * JSR-354 Money & Currency formatters, JSR-310 Date-Time and/or Joda-Time formatters,
+	 * JSR-354 Money &amp; Currency formatters, JSR-310 Date-Time and/or Joda-Time formatters,
 	 * depending on the presence of the corresponding API on the classpath.
 	 * @param formatterRegistry the service to register default formatters with
 	 */
