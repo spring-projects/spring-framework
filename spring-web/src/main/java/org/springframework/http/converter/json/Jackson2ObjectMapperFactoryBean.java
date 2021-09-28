@@ -62,54 +62,51 @@ import org.springframework.lang.Nullable;
  * <p>Example usage with
  * {@link MappingJackson2HttpMessageConverter}:
  *
- * <pre class="code">{@code
- * <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
- *   <property name="objectMapper">
- *     <bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
+ * <pre class="code">
+ * &lt;bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"&gt;
+ *   &lt;property name="objectMapper"&gt;
+ *     &lt;bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
  *       p:autoDetectFields="false"
  *       p:autoDetectGettersSetters="false"
- *       p:annotationIntrospector-ref="jaxbAnnotationIntrospector" />
- *   </property>
- * </bean>
- * }</pre>
+ *       p:annotationIntrospector-ref="jaxbAnnotationIntrospector" /&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
  *
  * <p>Example usage with MappingJackson2JsonView:
  *
- * <pre class="code">{@code
- * <bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
- *   <property name="objectMapper">
- *     <bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
+ * <pre class="code">
+ * &lt;bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"&gt;
+ *   &lt;property name="objectMapper"&gt;
+ *     &lt;bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
  *       p:failOnEmptyBeans="false"
- *       p:indentOutput="true">
- *       <property name="serializers">
- *         <array>
- *           <bean class="org.mycompany.MyCustomSerializer" />
- *         </array>
- *       </property>
- *     </bean>
- *   </property>
- * </bean>
- * }</pre>
+ *       p:indentOutput="true"&gt;
+ *       &lt;property name="serializers"&gt;
+ *         &lt;array&gt;
+ *           &lt;bean class="org.mycompany.MyCustomSerializer" /&gt;
+ *         &lt;/array&gt;
+ *       &lt;/property&gt;
+ *     &lt;/bean&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
  *
  * <p>In case there are no specific setters provided (for some rarely used options),
  * you can still use the more general methods  {@link #setFeaturesToEnable} and
  * {@link #setFeaturesToDisable}.
  *
- * <pre class="code">{@code
- * <bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
- *   <property name="featuresToEnable">
- *     <array>
- *       <util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.WRAP_ROOT_VALUE"/>
- *       <util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.CLOSE_CLOSEABLE"/>
- *     </array>
- *   </property>
- *   <property name="featuresToDisable">
- *     <array>
- *       <util:constant static-field="com.fasterxml.jackson.databind.MapperFeature.USE_ANNOTATIONS"/>
- *     </array>
- *   </property>
- * </bean>
- * }</pre>
+ * <pre class="code">
+ * &lt;bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"&gt;
+ *   &lt;property name="featuresToEnable"&gt;
+ *     &lt;array&gt;
+ *       &lt;util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.WRAP_ROOT_VALUE"/&gt;
+ *       &lt;util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.CLOSE_CLOSEABLE"/&gt;
+ *     &lt;/array&gt;
+ *   &lt;/property&gt;
+ *   &lt;property name="featuresToDisable"&gt;
+ *     &lt;array&gt;
+ *       &lt;util:constant static-field="com.fasterxml.jackson.databind.MapperFeature.USE_ANNOTATIONS"/&gt;
+ *     &lt;/array&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
  *
  * <p>It also automatically registers the following well-known modules if they are
  * detected on the classpath:
@@ -120,8 +117,6 @@ import org.springframework.lang.Nullable;
  * support for other Java 8 types like {@link java.util.Optional}</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>:
  * support for Java 8 Date &amp; Time API types</li>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>:
- * support for Joda-Time types</li>
  * <li><a href="https://github.com/FasterXML/jackson-module-kotlin">jackson-module-kotlin</a>:
  * support for Kotlin classes and data classes</li>
  * </ul>
@@ -129,11 +124,10 @@ import org.springframework.lang.Nullable;
  * <p>In case you want to configure Jackson's {@link ObjectMapper} with a custom {@link Module},
  * you can register one or more such Modules by class name via {@link #setModulesToInstall}:
  *
- * <pre class="code">{@code
- * <bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
- *   <property name="modulesToInstall" value="myapp.jackson.MySampleModule,myapp.jackson.MyOtherModule"/>
- * </bean
- * }</pre>
+ * <pre class="code">
+ * &lt;bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"&gt;
+ *   &lt;property name="modulesToInstall" value="myapp.jackson.MySampleModule,myapp.jackson.MyOtherModule"/&gt;
+ * &lt;/bean&gt;</pre>
  *
  * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
  *
