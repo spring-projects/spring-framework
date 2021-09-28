@@ -171,7 +171,6 @@ public final class CronExpression {
 	 * <li>{@code "@daily"} (or {@code "@midnight"}) to run once a day, i.e. {@code "0 0 0 * * *"},</li>
 	 * <li>{@code "@hourly"} to run once an hour, i.e. {@code "0 0 * * * *"}.</li>
 	 * </ul>
-	 *
 	 * @param expression the expression string to parse
 	 * @return the parsed {@code CronExpression} object
 	 * @throws IllegalArgumentException in the expression does not conform to

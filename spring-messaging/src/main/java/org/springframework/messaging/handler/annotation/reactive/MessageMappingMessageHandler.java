@@ -208,7 +208,6 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	 *     // delegate all methods
 	 * }
 	 * </pre>
-	 *
 	 * @param bean the bean to check for {@code @MessageExceptionHandler} methods
 	 * @since 5.3.5
 	 */

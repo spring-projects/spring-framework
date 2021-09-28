@@ -52,7 +52,6 @@ public abstract class TestContextResourceUtils {
 
 	/**
 	 * Convert the supplied paths to classpath resource paths.
-	 *
 	 * <p>Delegates to {@link #convertToClasspathResourcePaths(Class, boolean, String...)}
 	 * with {@code false} supplied for the {@code preservePlaceholders} flag.
 	 * @param clazz the class with which the paths are associated

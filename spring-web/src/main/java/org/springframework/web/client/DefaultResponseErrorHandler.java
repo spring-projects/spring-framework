@@ -169,7 +169,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * {@link HttpClientErrorException#create} for errors in the 4xx range, to
 	 * {@link HttpServerErrorException#create} for errors in the 5xx range,
 	 * or otherwise raises {@link UnknownHttpStatusCodeException}.
-	 *
 	 * @since 5.0
 	 * @see HttpClientErrorException#create
 	 * @see HttpServerErrorException#create

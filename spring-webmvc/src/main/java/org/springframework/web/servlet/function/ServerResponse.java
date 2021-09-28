@@ -367,7 +367,6 @@ public interface ServerResponse {
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
 		 * by the {@code Allow} header.
-		 *
 		 * @param allowedMethods the allowed methods
 		 * @return this builder
 		 * @see HttpHeaders#setAllow(Set)
@@ -492,7 +491,6 @@ public interface ServerResponse {
 		/**
 		 * Set the body of the response to the given {@code Object} and return it. The parameter
 		 * {@code bodyType} is used to capture the generic type.
-		 *
 		 * @param body the body of the response
 		 * @param bodyType the type of the body, used to capture the generic type
 		 * @return the built response

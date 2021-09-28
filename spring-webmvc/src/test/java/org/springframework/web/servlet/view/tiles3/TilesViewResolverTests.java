@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.view.tiles3;
 
 import java.util.Locale;
@@ -69,4 +70,5 @@ public class TilesViewResolverTests {
 		verify(this.renderer).isRenderable(eq("/template.test"), isA(Request.class));
 		verify(this.renderer).isRenderable(eq("/nonexistent.test"), isA(Request.class));
 	}
+
 }

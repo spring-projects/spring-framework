@@ -471,7 +471,6 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * for more advanced scenarios, e.g. discovering handlers through a custom
 	 * stereotype annotation, consider declaring {@code RSocketMessageHandler}
 	 * as a bean, and then obtain the responder from it.
-	 *
 	 * @param strategies the strategies to set on the created
 	 * {@code RSocketMessageHandler}
 	 * @param candidateHandlers a list of Objects and/or Classes with annotated

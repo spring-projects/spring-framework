@@ -45,7 +45,6 @@ public interface ExchangeFilterFunction {
 	 * always consume its content or otherwise propagate it downstream for
 	 * further handling, for example by the {@link WebClient}. Please, see the
 	 * reference documentation for more details on this.
-	 *
 	 * @param request the current request
 	 * @param next the next exchange function in the chain
 	 * @return the filtered response

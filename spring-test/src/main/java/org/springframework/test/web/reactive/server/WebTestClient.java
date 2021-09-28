@@ -862,7 +862,6 @@ public interface WebTestClient {
 		/**
 		 * Exit the chained flow in order to consume the response body
 		 * externally, e.g. via {@link reactor.test.StepVerifier}.
-		 *
 		 * <p>Note that when {@code Void.class} is passed in, the response body
 		 * is consumed and released. If no content is expected, then consider
 		 * using {@code .expectBody().isEmpty()} instead which asserts that

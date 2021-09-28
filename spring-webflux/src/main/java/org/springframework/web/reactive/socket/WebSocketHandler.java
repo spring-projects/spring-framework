@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import reactor.core.publisher.Mono;
  *
  * <pre class="code">
  * class ExampleHandler implements WebSocketHandler {
-
+ *
  * 	&#064;Override
  * 	public Mono&lt;Void&gt; handle(WebSocketSession session) {
  *
@@ -63,7 +63,7 @@ import reactor.core.publisher.Mono;
  *
  * <pre class="code">
  * class ExampleHandler implements WebSocketHandler {
-
+ *
  * 	&#064;Override
  * 	public Mono&lt;Void&gt; handle(WebSocketSession session) {
  *
@@ -110,7 +110,6 @@ public interface WebSocketHandler {
 	 *
 	 * <p>See the class-level doc and the reference manual for more details and
 	 * examples of how to handle the session.
-	 *
 	 * @param session the session to handle
 	 * @return indicates when application handling of the session is complete,
 	 * which should reflect the completion of the inbound message stream

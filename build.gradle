@@ -340,7 +340,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.45.1"
+		toolVersion = "8.41"
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
@@ -362,7 +362,8 @@ configure([rootProject] + javaProjects) { project ->
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305")
 		testCompileOnly("com.google.code.findbugs:jsr305")
-		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.15")
+		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.28")
+		checkstyle("com.puppycrawl.tools:checkstyle:8.41")
 	}
 
 	ext.javadocLinks = [

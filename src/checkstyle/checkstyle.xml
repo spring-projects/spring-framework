@@ -144,9 +144,7 @@
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck">
 			<property name="allowMissingParamTags" value="true"/>
-			<property name="allowMissingThrowsTags" value="true"/>
 			<property name="allowMissingReturnTag" value="true"/>
-			<property name="allowMissingJavadoc" value="true"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocVariableCheck">
 			<property name="scope" value="public"/>

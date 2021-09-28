@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util;
 
 import java.nio.charset.StandardCharsets;
@@ -53,11 +54,10 @@ public abstract class ServletRequestPathUtils {
 	 * {@link RequestPath} and save it in the request attribute
 	 * {@link #PATH_ATTRIBUTE} for subsequent use with
 	 * {@link org.springframework.web.util.pattern.PathPattern parsed patterns}.
-	 * The returned {@code RequestPath} will have both the contextPath and any
+	 * <p>The returned {@code RequestPath} will have both the contextPath and any
 	 * servletPath prefix omitted from the {@link RequestPath#pathWithinApplication()
 	 * pathWithinApplication} it exposes.
-	 *
-	 * <p>This method is typically called by the {@code DispatcherServlet} to
+	 * <p>This method is typically called by the {@code DispatcherServlet} to determine
 	 * if any {@code HandlerMapping} indicates that it uses parsed patterns.
 	 * After that the pre-parsed and cached {@code RequestPath} can be accessed
 	 * through {@link #getParsedRequestPath(ServletRequest)}.
