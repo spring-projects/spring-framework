@@ -412,7 +412,7 @@ public class MvcUriComponentsBuilder {
 	 * A JSP can prepare a URL to the controller method as follows:
 	 *
 	 * <pre class="code">
-	 * <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
+	 * &lt;%@ taglib uri="http://www.springframework.org/tags" prefix="s" %&gt;
 	 *
 	 * &lt;a href="${s:mvcUrl('PC#getPerson').arg(0,"123").build()}"&gt;Get Person&lt;/a&gt;
 	 * </pre>

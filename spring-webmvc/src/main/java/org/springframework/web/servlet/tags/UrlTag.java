@@ -313,7 +313,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 * @param usedParams set of parameter names that have been applied as
 	 * template params
 	 * @param includeQueryStringDelimiter true if the query string should start
-	 * with a '?' instead of '&'
+	 * with a '?' instead of '&amp;'
 	 * @return the query string
 	 */
 	protected String createQueryString(List<Param> params, Set<String> usedParams, boolean includeQueryStringDelimiter)
