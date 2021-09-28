@@ -13,9 +13,7 @@
 		<property name="headerCopyrightPattern" value="20\d\d-20\d\d"/>
 		<property name="packageInfoHeaderType" value="none"/>
 	</module>
-	<module name="com.puppycrawl.tools.checkstyle.checks.NewlineAtEndOfFileCheck">
-		<property name="lineSeparator" value="lf"/>
-	</module>
+	<module name="com.puppycrawl.tools.checkstyle.checks.NewlineAtEndOfFileCheck"/>
 
 	<!-- TreeWalker Checks -->
 	<module name="com.puppycrawl.tools.checkstyle.TreeWalker">
