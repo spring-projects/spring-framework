@@ -17,6 +17,9 @@
 package org.springframework.cache.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
+
+import org.springframework.cache.Cache;
 
 /**
  * Class describing the root object used during the expression evaluation.
@@ -24,47 +27,19 @@ import java.lang.reflect.Method;
  * @author Costin Leau
  * @author Sam Brannen
  * @author Sam Kruglov
- * @since 6.0
+ * @since 3.1
  */
-public class CacheExpressionRootObject {
+public class CacheExpressionRootObjectWithCaches extends CacheExpressionRootObject {
 
-	private final Method method;
+	private final Collection<? extends Cache> caches;
 
-	private final Object[] args;
-
-	private final Object target;
-
-	private final Class<?> targetClass;
-
-
-	public CacheExpressionRootObject(
-			Method method, Object[] args, Object target, Class<?> targetClass) {
-
-		this.method = method;
-		this.target = target;
-		this.targetClass = targetClass;
-		this.args = args;
+	public CacheExpressionRootObjectWithCaches(
+			Collection<? extends Cache> caches, Method method, Object[] args, Object target, Class<?> targetClass) {
+		super(method, args, target, targetClass);
+		this.caches = caches;
 	}
 
-
-	public Method getMethod() {
-		return this.method;
+	public Collection<? extends Cache> getCaches() {
+		return this.caches;
 	}
-
-	public String getMethodName() {
-		return this.method.getName();
-	}
-
-	public Object[] getArgs() {
-		return this.args;
-	}
-
-	public Object getTarget() {
-		return this.target;
-	}
-
-	public Class<?> getTargetClass() {
-		return this.targetClass;
-	}
-
 }

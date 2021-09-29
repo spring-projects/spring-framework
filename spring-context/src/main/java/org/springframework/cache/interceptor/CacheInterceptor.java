@@ -39,10 +39,19 @@ import org.springframework.util.Assert;
  *
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Sam Kruglov
  * @since 3.1
  */
 @SuppressWarnings("serial")
 public class CacheInterceptor extends CacheAspectSupport implements MethodInterceptor, Serializable {
+
+	public CacheInterceptor() {
+		super();
+	}
+
+	public CacheInterceptor(CacheOperationExpressionEvaluator evaluator) {
+		super(evaluator);
+	}
 
 	@Override
 	@Nullable

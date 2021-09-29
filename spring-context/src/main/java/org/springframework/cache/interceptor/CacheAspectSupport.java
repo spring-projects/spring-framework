@@ -78,6 +78,7 @@ import org.springframework.util.function.SupplierUtils;
  * @author Phillip Webb
  * @author Sam Brannen
  * @author Stephane Nicoll
+ * @author Sam Kruglov
  * @since 3.1
  */
 public abstract class CacheAspectSupport extends AbstractCacheInvoker
@@ -87,7 +88,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	private final Map<CacheOperationCacheKey, CacheOperationMetadata> metadataCache = new ConcurrentHashMap<>(1024);
 
-	private final CacheOperationExpressionEvaluator evaluator = new CacheOperationExpressionEvaluator();
+	private final CacheOperationExpressionEvaluator evaluator;
 
 	@Nullable
 	private CacheOperationSource cacheOperationSource;
@@ -102,6 +103,14 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	private boolean initialized = false;
 
+	protected CacheAspectSupport(CacheOperationExpressionEvaluator evaluator) {
+		this.evaluator = evaluator;
+	}
+
+	protected CacheAspectSupport() {
+		this.evaluator = new CacheOperationExpressionEvaluator();
+	}
+
 
 	/**
 	 * Configure this aspect with the given error handler, key generator and cache resolver/manager
@@ -115,7 +124,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		this.errorHandler = new SingletonSupplier<>(errorHandler, SimpleCacheErrorHandler::new);
 		this.keyGenerator = new SingletonSupplier<>(keyGenerator, SimpleKeyGenerator::new);
 		this.cacheResolver = new SingletonSupplier<>(cacheResolver,
-				() -> SimpleCacheResolver.of(SupplierUtils.resolve(cacheManager)));
+				() -> SimpleCacheResolver.of(SupplierUtils.resolve(cacheManager), evaluator, beanFactory));
 	}
 
 
@@ -191,7 +200,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * @see SimpleCacheResolver
 	 */
 	public void setCacheManager(CacheManager cacheManager) {
-		this.cacheResolver = SingletonSupplier.of(new SimpleCacheResolver(cacheManager));
+		this.cacheResolver = SingletonSupplier.of(new SimpleCacheResolver(cacheManager, evaluator, beanFactory));
 	}
 
 	/**

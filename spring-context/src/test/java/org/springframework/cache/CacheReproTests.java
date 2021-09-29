@@ -52,6 +52,7 @@ import static org.mockito.Mockito.verify;
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Sam Kruglov
  */
 public class CacheReproTests {
 
@@ -131,7 +132,7 @@ public class CacheReproTests {
 	}
 
 	@Test
-	public void spr14230AdaptsToOptional() {
+	public void spr14230AdaptsToOptionalAndResolvesCacheWithExpression() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr14230Config.class);
 		Spr14230Service bean = context.getBean(Spr14230Service.class);
 		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
@@ -354,7 +355,7 @@ public class CacheReproTests {
 
 	public static class Spr14230Service {
 
-		@Cacheable("itemCache")
+		@Cacheable("item#{'Cache'}")
 		public Optional<TestBean> findById(String id) {
 			return Optional.of(new TestBean(id));
 		}

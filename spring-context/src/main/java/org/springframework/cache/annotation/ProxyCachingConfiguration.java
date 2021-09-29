@@ -20,6 +20,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.cache.config.CacheManagementConfigUtils;
 import org.springframework.cache.interceptor.BeanFactoryCacheOperationSourceAdvisor;
 import org.springframework.cache.interceptor.CacheInterceptor;
+import org.springframework.cache.interceptor.CacheOperationExpressionEvaluator;
 import org.springframework.cache.interceptor.CacheOperationSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,7 @@ import org.springframework.context.annotation.Role;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Kruglov
  * @since 3.1
  * @see EnableCaching
  * @see CachingConfigurationSelector
@@ -61,8 +63,17 @@ public class ProxyCachingConfiguration extends AbstractCachingConfiguration {
 
 	@Bean
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-	public CacheInterceptor cacheInterceptor(CacheOperationSource cacheOperationSource) {
-		CacheInterceptor interceptor = new CacheInterceptor();
+	public CacheOperationExpressionEvaluator cacheOperationExpressionEvaluator() {
+		return new CacheOperationExpressionEvaluator();
+	}
+
+	@Bean
+	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+	public CacheInterceptor cacheInterceptor(
+			CacheOperationSource cacheOperationSource,
+			CacheOperationExpressionEvaluator cacheOperationExpressionEvaluator
+	) {
+		CacheInterceptor interceptor = new CacheInterceptor(cacheOperationExpressionEvaluator);
 		interceptor.configure(this.errorHandler, this.keyGenerator, this.cacheResolver, this.cacheManager);
 		interceptor.setCacheOperationSource(cacheOperationSource);
 		return interceptor;

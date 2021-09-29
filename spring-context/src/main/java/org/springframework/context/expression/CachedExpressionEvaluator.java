@@ -21,6 +21,7 @@ import java.util.Map;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.Expression;
+import org.springframework.expression.ParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -31,6 +32,7 @@ import org.springframework.util.ObjectUtils;
  * are defined on {@link java.lang.reflect.AnnotatedElement}.
  *
  * @author Stephane Nicoll
+ * @author Sam Kruglov
  * @since 4.2
  * @see AnnotatedElementKey
  */
@@ -82,14 +84,20 @@ public abstract class CachedExpressionEvaluator {
 	 */
 	protected Expression getExpression(Map<ExpressionKey, Expression> cache,
 			AnnotatedElementKey elementKey, String expression) {
+		return cache.computeIfAbsent(createKey(elementKey, expression), k -> parser.parseExpression(expression));
+	}
 
-		ExpressionKey expressionKey = createKey(elementKey, expression);
-		Expression expr = cache.get(expressionKey);
-		if (expr == null) {
-			expr = getParser().parseExpression(expression);
-			cache.put(expressionKey, expr);
-		}
-		return expr;
+	/**
+	 * Return the {@link Expression} for the specified SpEL value
+	 * <p>Parse the expression if it hasn't been already.
+	 * @param elementKey the element on which the expression is defined
+	 */
+	protected Expression getExpression(Map<ExpressionKey, Expression> cache,
+			AnnotatedElementKey elementKey, String expression, ParserContext parserContext) {
+		return cache.computeIfAbsent(
+				createKey(elementKey, expression),
+				k -> parser.parseExpression(expression, parserContext)
+		);
 	}
 
 	private ExpressionKey createKey(AnnotatedElementKey elementKey, String expression) {

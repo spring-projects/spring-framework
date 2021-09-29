@@ -40,14 +40,15 @@ import org.springframework.lang.Nullable;
  * @author Costin Leau
  * @author Stephane Nicoll
  * @author Juergen Hoeller
+ * @author Sam Kruglov
  * @since 3.1
  */
-class CacheEvaluationContext extends MethodBasedEvaluationContext {
+public class CacheEvaluationContext extends MethodBasedEvaluationContext {
 
 	private final Set<String> unavailableVariables = new HashSet<>(1);
 
 
-	CacheEvaluationContext(Object rootObject, Method method, Object[] arguments,
+	public CacheEvaluationContext(Object rootObject, Method method, Object[] arguments,
 			ParameterNameDiscoverer parameterNameDiscoverer) {
 
 		super(rootObject, method, arguments, parameterNameDiscoverer);

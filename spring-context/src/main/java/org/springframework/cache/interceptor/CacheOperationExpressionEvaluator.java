@@ -28,6 +28,7 @@ import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.CachedExpressionEvaluator;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.lang.Nullable;
 
 /**
@@ -41,9 +42,10 @@ import org.springframework.lang.Nullable;
  * @author Phillip Webb
  * @author Sam Brannen
  * @author Stephane Nicoll
+ * @author Sam Kruglov
  * @since 3.1
  */
-class CacheOperationExpressionEvaluator extends CachedExpressionEvaluator {
+public class CacheOperationExpressionEvaluator extends CachedExpressionEvaluator {
 
 	/**
 	 * Indicate that there is no result variable.
@@ -67,6 +69,8 @@ class CacheOperationExpressionEvaluator extends CachedExpressionEvaluator {
 
 	private final Map<ExpressionKey, Expression> unlessCache = new ConcurrentHashMap<>(64);
 
+	private final Map<ExpressionKey, Expression> nameCache = new ConcurrentHashMap<>(64);
+
 
 	/**
 	 * Create an {@link EvaluationContext}.
@@ -79,12 +83,13 @@ class CacheOperationExpressionEvaluator extends CachedExpressionEvaluator {
 	 * {@link #NO_RESULT} if there is no return at this time
 	 * @return the evaluation context
 	 */
-	public EvaluationContext createEvaluationContext(Collection<? extends Cache> caches,
+	public EvaluationContext createEvaluationContext(@Nullable Collection<? extends Cache> caches,
 			Method method, Object[] args, Object target, Class<?> targetClass, Method targetMethod,
 			@Nullable Object result, @Nullable BeanFactory beanFactory) {
 
-		CacheExpressionRootObject rootObject = new CacheExpressionRootObject(
-				caches, method, args, target, targetClass);
+		Object rootObject = caches != null
+				? new CacheExpressionRootObjectWithCaches(caches, method, args, target, targetClass)
+				: new CacheExpressionRootObject(method, args, target, targetClass);
 		CacheEvaluationContext evaluationContext = new CacheEvaluationContext(
 				rootObject, targetMethod, args, getParameterNameDiscoverer());
 		if (result == RESULT_UNAVAILABLE) {
@@ -102,6 +107,12 @@ class CacheOperationExpressionEvaluator extends CachedExpressionEvaluator {
 	@Nullable
 	public Object key(String keyExpression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
 		return getExpression(this.keyCache, methodKey, keyExpression).getValue(evalContext);
+	}
+
+	@Nullable
+	public String cacheName(String expression, AnnotatedElementKey methodKey,
+			EvaluationContext evalContext, TemplateParserContext parserContext) {
+		return getExpression(this.nameCache, methodKey, expression, parserContext).getValue(evalContext, String.class);
 	}
 
 	public boolean condition(String conditionExpression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
