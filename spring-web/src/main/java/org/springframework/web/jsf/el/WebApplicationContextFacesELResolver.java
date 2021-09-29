@@ -45,10 +45,10 @@ import org.springframework.web.jsf.FacesContextUtils;
  * <p>Configure this resolver in your {@code faces-config.xml} file as follows:
  *
  * <pre class="code">
- * &lt;application>
+ * &lt;application&gt;
  *   ...
- *   &lt;el-resolver>org.springframework.web.jsf.el.WebApplicationContextFacesELResolver&lt;/el-resolver>
- * &lt;/application></pre>
+ *   &lt;el-resolver&gt;org.springframework.web.jsf.el.WebApplicationContextFacesELResolver&lt;/el-resolver&gt;
+ * &lt;/application&gt;</pre>
  *
  * @author Juergen Hoeller
  * @since 2.5

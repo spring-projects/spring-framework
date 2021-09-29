@@ -135,7 +135,7 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 	 * Set the base path for context publication. Default is "/".
 	 * <p>For each context publication path, the service name will be
 	 * appended to this base address. E.g. service name "OrderService"
-	 * -> "/OrderService".
+	 * &rarr; "/OrderService".
 	 * @see javax.xml.ws.Endpoint#publish(Object)
 	 * @see javax.jws.WebService#serviceName()
 	 */

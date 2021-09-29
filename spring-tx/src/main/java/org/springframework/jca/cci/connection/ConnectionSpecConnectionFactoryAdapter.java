@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
  * <pre class="code">
  * &lt;bean id="myTargetConnectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
  *   &lt;property name="jndiName" value="java:comp/env/cci/mycf"/&gt;
- * &lt;/bean>
+ * &lt;/bean&gt;
  *
  * &lt;bean id="myConnectionFactory" class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter"&gt;
  *   &lt;property name="targetConnectionFactory" ref="myTargetConnectionFactory"/&gt;

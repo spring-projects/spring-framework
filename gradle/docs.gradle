@@ -46,8 +46,9 @@ task api(type: Javadoc) {
 		stylesheetFile = file("src/docs/api/stylesheet.css")
 		splitIndex = true
 		links(project.ext.javadocLinks)
-		addStringOption('Xdoclint:none', '-quiet')
-		if(JavaVersion.current().isJava9Compatible()) {
+		addBooleanOption('Xdoclint:syntax', true) // only check syntax with doclint
+		addBooleanOption('Xwerror', true) // fail build on Javadoc warnings
+		if (JavaVersion.current().isJava9Compatible()) {
 			addBooleanOption('html5', true)
 		}
 	}

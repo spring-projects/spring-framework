@@ -56,7 +56,7 @@ import org.springframework.util.Assert;
  * For example:
  *
  * <pre class="code">&lt;property name="jndiEnvironment"&gt;
- * 	 &lt;props>
+ * 	 &lt;props&gt;
  *		 &lt;prop key="java.naming.factory.initial"&gt;com.sun.jndi.cosnaming.CNCtxFactory&lt;/prop&gt;
  *		 &lt;prop key="java.naming.provider.url"&gt;iiop://localhost:1050&lt;/prop&gt;
  *	 &lt;/props&gt;

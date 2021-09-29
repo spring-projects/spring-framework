@@ -139,14 +139,14 @@ configure(allprojects) { project ->
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.2.10.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.12.Final') {
 				entry 'undertow-core'
 				entry('undertow-websockets-jsr') {
 					exclude group: "org.jboss.spec.javax.websocket", name: "jboss-websocket-api_1.1_spec"
 				}
 				entry('undertow-servlet') {
-					exclude group: "org.jboss.spec.javax.servlet", name: "jboss-servlet-api_3.1_spec"
-					exclude group: "org.jboss.spec.javax.annotation", name: "jboss-annotations-api_1.2_spec"
+					exclude group: "org.jboss.spec.javax.servlet", name: "jboss-servlet-api_4.0_spec"
+					exclude group: "org.jboss.spec.javax.annotation", name: "jboss-annotations-api_1.3_spec"
 				}
 			}
 
@@ -371,7 +371,6 @@ configure([rootProject] + javaProjects) { project ->
 			"https://docs.oracle.com/javaee/7/api/",
 			"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
 			"https://www.ibm.com/docs/api/v1/content/SSEQTP_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/",
-			"https://glassfish.java.net/nonav/docs/v3/api/",
 			"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
 			"https://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",
 			"https://tiles.apache.org/tiles-request/apidocs/",

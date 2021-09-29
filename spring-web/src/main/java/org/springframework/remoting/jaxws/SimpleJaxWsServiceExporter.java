@@ -52,7 +52,7 @@ public class SimpleJaxWsServiceExporter extends AbstractJaxWsServiceExporter {
 	 * Default is "http://localhost:8080/".
 	 * <p>For each actual publication address, the service name will be
 	 * appended to this base address. E.g. service name "OrderService"
-	 * -> "http://localhost:8080/OrderService".
+	 * &rarr; "http://localhost:8080/OrderService".
 	 * @see javax.xml.ws.Endpoint#publish(String)
 	 * @see javax.jws.WebService#serviceName()
 	 */

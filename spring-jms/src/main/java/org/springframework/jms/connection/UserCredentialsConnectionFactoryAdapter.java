@@ -55,7 +55,7 @@ import org.springframework.util.StringUtils;
  *   &lt;property name="targetConnectionFactory" ref="myTargetConnectionFactory"/&gt;
  *   &lt;property name="username" value="myusername"/&gt;
  *   &lt;property name="password" value="mypassword"/&gt;
- * &lt;/bean></pre>
+ * &lt;/bean&gt;</pre>
  *
  * <p>If the "username" is empty, this proxy will simply delegate to the standard
  * {@code createConnection()} method of the target ConnectionFactory.

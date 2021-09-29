@@ -46,7 +46,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * &lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
  *   ...
  *   &lt;property name="jpaPropertyMap"&gt;
- * 	   &lt;map>
+ * 	   &lt;map&gt;
  *       &lt;entry key="hibernate.resource.beans.container"&gt;
  * 	       &lt;bean class="org.springframework.orm.hibernate5.SpringBeanContainer"/&gt;
  * 	     &lt;/entry&gt;

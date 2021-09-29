@@ -461,7 +461,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 *         RSocketMessageHandler.responder(strategies, new ClientHandler());
 	 *
 	 * RSocketRequester.builder()
-	 *         .rsocketConnector(connector -> connector.acceptor(responder))
+	 *         .rsocketConnector(connector -&gt; connector.acceptor(responder))
 	 *         .connectTcp("localhost", server.address().getPort());
 	 * </pre>
 	 *

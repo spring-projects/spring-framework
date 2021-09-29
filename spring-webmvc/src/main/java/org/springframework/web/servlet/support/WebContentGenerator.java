@@ -244,7 +244,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * <ul>
 	 * <li>seconds == -1 (default value): no generation cache-related headers</li>
 	 * <li>seconds == 0: "Cache-Control: no-store" will prevent caching</li>
-	 * <li>seconds > 0: "Cache-Control: max-age=seconds" will ask to cache content</li>
+	 * <li>seconds &gt; 0: "Cache-Control: max-age=seconds" will ask to cache content</li>
 	 * </ul>
 	 * <p>For more specific needs, a custom {@link org.springframework.http.CacheControl}
 	 * should be used.

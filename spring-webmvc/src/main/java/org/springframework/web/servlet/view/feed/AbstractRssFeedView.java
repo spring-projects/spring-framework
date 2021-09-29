@@ -31,7 +31,7 @@ import org.springframework.http.MediaType;
  * Abstract superclass for RSS Feed views, using the
  * <a href="https://github.com/rometools/rome">ROME</a> package.
  *
- * <p>><b>NOTE: As of Spring 4.1, this is based on the {@code com.rometools}
+ * <p><b>NOTE: As of Spring 4.1, this is based on the {@code com.rometools}
  * variant of ROME, version 1.5. Please upgrade your build dependency.</b>
  *
  * <p>Application-specific view classes will extend this class.

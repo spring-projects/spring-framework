@@ -88,17 +88,17 @@ import org.springframework.web.context.ServletContextAware;
  * <p>A typical TilesConfigurer bean definition looks as follows:
  *
  * <pre class="code">
- * &lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
- *   &lt;property name="definitions">
- *     &lt;list>
- *       &lt;value>/WEB-INF/defs/general.xml&lt;/value>
- *       &lt;value>/WEB-INF/defs/widgets.xml&lt;/value>
- *       &lt;value>/WEB-INF/defs/administrator.xml&lt;/value>
- *       &lt;value>/WEB-INF/defs/customer.xml&lt;/value>
- *       &lt;value>/WEB-INF/defs/templates.xml&lt;/value>
- *     &lt;/list>
- *   &lt;/property>
- * &lt;/bean>
+ * &lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer"&gt;
+ *   &lt;property name="definitions"&gt;
+ *     &lt;list&gt;
+ *       &lt;value&gt;/WEB-INF/defs/general.xml&lt;/value&gt;
+ *       &lt;value&gt;/WEB-INF/defs/widgets.xml&lt;/value&gt;
+ *       &lt;value&gt;/WEB-INF/defs/administrator.xml&lt;/value&gt;
+ *       &lt;value&gt;/WEB-INF/defs/customer.xml&lt;/value&gt;
+ *       &lt;value&gt;/WEB-INF/defs/templates.xml&lt;/value&gt;
+ *     &lt;/list&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;
  * </pre>
  *
  * The values in the list are the actual Tiles XML files containing the definitions.
@@ -108,14 +108,14 @@ import org.springframework.web.context.ServletContextAware;
  * definitions is used to indicate locale information, for example:
  *
  * <pre class="code">
- * &lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
- *   &lt;property name="definitions">
- *     &lt;list>
- *       &lt;value>/WEB-INF/defs/tiles.xml&lt;/value>
- *       &lt;value>/WEB-INF/defs/tiles_fr_FR.xml&lt;/value>
- *     &lt;/list>
- *   &lt;/property>
- * &lt;/bean>
+ * &lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer"&gt;
+ *   &lt;property name="definitions"&gt;
+ *     &lt;list&gt;
+ *       &lt;value&gt;/WEB-INF/defs/tiles.xml&lt;/value&gt;
+ *       &lt;value&gt;/WEB-INF/defs/tiles_fr_FR.xml&lt;/value&gt;
+ *     &lt;/list&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;
  * </pre>
  *
  * @author mick semb wever
