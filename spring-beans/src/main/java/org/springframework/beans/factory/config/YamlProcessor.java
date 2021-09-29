@@ -86,7 +86,7 @@ public abstract class YamlProcessor {
 	 * </pre>
 	 * when mapped with
 	 * <pre class="code">
-	 * setDocumentMatchers(properties ->
+	 * setDocumentMatchers(properties -&gt;
 	 *     ("prod".equals(properties.getProperty("environment")) ? MatchStatus.FOUND : MatchStatus.NOT_FOUND));
 	 * </pre>
 	 * would end up as

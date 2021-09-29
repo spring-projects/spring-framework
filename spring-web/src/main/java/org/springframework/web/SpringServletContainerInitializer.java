@@ -61,8 +61,8 @@ import org.springframework.util.ReflectionUtils;
  *
  * <pre class="code">
  * &lt;absolute-ordering&gt;
- *   &lt;name>some_web_fragment&lt;/name&gt;
- *   &lt;name>spring_web&lt;/name&gt;
+ *   &lt;name&gt;some_web_fragment&lt;/name&gt;
+ *   &lt;name&gt;spring_web&lt;/name&gt;
  * &lt;/absolute-ordering&gt;
  * </pre>
  *

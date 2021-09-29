@@ -51,7 +51,7 @@ import org.springframework.web.util.WebUtils;
  * &lt;/bean&gt;</pre>
  *
  * Every view name returned from a handler will be translated to a JSP
- * resource (for example: "myView" -> "/WEB-INF/jsp/myView.jsp"), using
+ * resource (for example: "myView" &rarr; "/WEB-INF/jsp/myView.jsp"), using
  * this view class by default.
  *
  * @author Rod Johnson

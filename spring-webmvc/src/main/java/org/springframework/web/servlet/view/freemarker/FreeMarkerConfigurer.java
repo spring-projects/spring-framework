@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  *
  * <pre class="code">
  * &lt;bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
- *   &lt;property name="templateLoaderPath"&gt;&lt;value&gt;/WEB-INF/freemarker/&lt;/value>&lt;/property&gt;
+ *   &lt;property name="templateLoaderPath"&gt;&lt;value&gt;/WEB-INF/freemarker/&lt;/value&gt;&lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
  * This bean must be included in the application context of any application

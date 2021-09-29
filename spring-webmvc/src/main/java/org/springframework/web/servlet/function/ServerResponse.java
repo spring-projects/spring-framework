@@ -266,14 +266,14 @@ public interface ServerResponse {
 	 * <p>For example:
 	 * <pre class="code">
 	 * public ServerResponse handleSse(ServerRequest request) {
-	 *     return ServerResponse.sse(sse -> sse.send("Hello World!"));
+	 *     return ServerResponse.sse(sse -&gt; sse.send("Hello World!"));
 	 * }
 	 * </pre>
 	 *
 	 * <p>or, to set both the id and event type:
 	 * <pre class="code">
 	 * public ServerResponse handleSse(ServerRequest request) {
-	 *     return ServerResponse.sse(sse -> sse
+	 *     return ServerResponse.sse(sse -&gt; sse
 	 *         .id("42)
 	 *         .event("event")
 	 *         .send("Hello World!"));
@@ -295,14 +295,14 @@ public interface ServerResponse {
 	 * <p>For example:
 	 * <pre class="code">
 	 * public ServerResponse handleSse(ServerRequest request) {
-	 *     return ServerResponse.sse(sse -> sse.send("Hello World!"));
+	 *     return ServerResponse.sse(sse -&gt; sse.send("Hello World!"));
 	 * }
 	 * </pre>
 	 *
 	 * <p>or, to set both the id and event type:
 	 * <pre class="code">
 	 * public ServerResponse handleSse(ServerRequest request) {
-	 *     return ServerResponse.sse(sse -> sse
+	 *     return ServerResponse.sse(sse -&gt; sse
 	 *         .id("42)
 	 *         .event("event")
 	 *         .send("Hello World!"));

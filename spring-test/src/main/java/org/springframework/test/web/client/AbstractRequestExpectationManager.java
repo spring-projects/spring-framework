@@ -256,7 +256,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		/**
 		 * Invoke this for an expectation that has been matched.
 		 * <p>The count of the given expectation is incremented, then it is
-		 * either stored if remainingCount > 0 or removed otherwise.
+		 * either stored if remainingCount &gt; 0 or removed otherwise.
 		 */
 		public void update(RequestExpectation expectation) {
 			expectation.incrementAndValidate();

@@ -55,7 +55,7 @@ import org.springframework.util.xml.StaxUtils;
  * <p>Given the following XML:
  *
  * <pre class="code">
- * &lt;root>
+ * &lt;root&gt;
  *     &lt;child&gt;foo&lt;/child&gt;
  *     &lt;child&gt;bar&lt;/child&gt;
  * &lt;/root&gt;

@@ -128,10 +128,12 @@ configure(allprojects) { project ->
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.2.10.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.12.Final') {
 				entry 'undertow-core'
-				entry('undertow-servlet-jakartaee9')
-				entry('undertow-websockets-jsr-jakartaee9')
+				entry('undertow-servlet-jakartaee9') {
+					exclude group: "org.jboss.spec.javax.annotation", name: "jboss-annotations-api_1.3_spec"
+				}
+				entry 'undertow-websockets-jsr-jakartaee9'
 			}
 
 			dependencySet(group: 'com.squareup.okhttp3', version: '3.14.9') {
@@ -345,7 +347,12 @@ configure([rootProject] + javaProjects) { project ->
 			"https://hc.apache.org/httpcomponents-client-5.1.x/current/httpclient5/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
-			"https://junit.org/junit5/docs/5.8.1/api/",
+			// TODO Uncomment link to JUnit 5 docs once we have sorted out
+			// the following warning in the build.
+			//
+			// warning: The code being documented uses packages in the unnamed module, but the packages defined in https://junit.org/junit5/docs/5.8.1/api/ are in named modules.
+			//
+			// "https://junit.org/junit5/docs/5.8.1/api/",
 			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
 			"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
 			"https://r2dbc.io/spec/0.8.5.RELEASE/api/"

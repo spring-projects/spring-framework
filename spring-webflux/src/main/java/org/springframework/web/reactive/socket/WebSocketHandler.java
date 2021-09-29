@@ -45,13 +45,13 @@ import reactor.core.publisher.Mono;
  * 	public Mono&lt;Void&gt; handle(WebSocketSession session) {
  *
  * 		Flux&lt;WebSocketMessage&gt; output = session.receive()
- *			.doOnNext(message -> {
+ *			.doOnNext(message -&gt; {
  * 				// ...
  * 			})
- * 			.concatMap(message -> {
+ * 			.concatMap(message -&gt; {
  * 				// ...
  * 			})
- * 			.map(value -> session.textMessage("Echo " + value));
+ * 			.map(value -&gt; session.textMessage("Echo " + value));
  *
  * 		return session.send(output);
  * 	}
@@ -68,10 +68,10 @@ import reactor.core.publisher.Mono;
  * 	public Mono&lt;Void&gt; handle(WebSocketSession session) {
  *
  * 		Mono&lt;Void&gt; input = session.receive()
- *			.doOnNext(message -> {
+ *			.doOnNext(message -&gt; {
  * 				// ...
  * 			})
- * 			.concatMap(message -> {
+ * 			.concatMap(message -&gt; {
  * 				// ...
  * 			})
  * 			.then();

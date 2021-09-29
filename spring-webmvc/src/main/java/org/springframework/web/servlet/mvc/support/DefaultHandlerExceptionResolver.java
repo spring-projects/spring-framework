@@ -60,7 +60,6 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  * <p>This exception resolver is enabled by default in the common Spring
  * {@link org.springframework.web.servlet.DispatcherServlet}.
  *
- * <p>
  * <table>
  * <caption>Supported Exceptions</caption>
  * <thead>

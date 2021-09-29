@@ -32,7 +32,7 @@ import reactor.core.publisher.Mono;
  *
  * Mono&lt;String&gt; bodyMono = exchangeFunction
  *     .exchange(request)
- *     .flatMap(response -> response.bodyToMono(String.class));
+ *     .flatMap(response -&gt; response.bodyToMono(String.class));
  * </pre>
  *
  * @author Arjen Poutsma

@@ -303,7 +303,7 @@ public class ModelAndView {
 
 	/**
 	 * Add all attributes contained in the provided Map to the model.
-	 * @param modelMap a Map of attributeName -> attributeValue pairs
+	 * @param modelMap a Map of attributeName &rarr; attributeValue pairs
 	 * @see ModelMap#addAllAttributes(Map)
 	 * @see #getModelMap()
 	 */
