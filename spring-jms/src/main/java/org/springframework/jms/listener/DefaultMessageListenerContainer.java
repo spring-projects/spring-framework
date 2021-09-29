@@ -62,11 +62,10 @@ import org.springframework.util.backoff.FixedBackOff;
  * abstraction. By default, the specified number of invoker tasks will be created
  * on startup, according to the {@link #setConcurrentConsumers "concurrentConsumers"}
  * setting. Specify an alternative {@code TaskExecutor} to integrate with an existing
- * thread pool facility (such as a Jakarta EE server's), for example using a
- * {@link org.springframework.scheduling.commonj.WorkManagerTaskExecutor CommonJ WorkManager}.
- * With a native JMS setup, each of those listener threads is going to use a
- * cached JMS {@code Session} and {@code MessageConsumer} (only refreshed in case
- * of failure), using the JMS provider's resources as efficiently as possible.
+ * thread pool facility (such as a Jakarta EE server's). With a native JMS setup,
+ * each of those listener threads is going to use a cached JMS {@code Session} and
+ * {@code MessageConsumer} (only refreshed in case of failure), using the JMS provider's
+ * resources as efficiently as possible.
  *
  * <p>Message reception and listener execution can automatically be wrapped
  * in transactions by passing a Spring
@@ -224,7 +223,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * will occupy a number of threads for its entire lifetime.
 	 * @see #setConcurrentConsumers
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
-	 * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
 	 */
 	public void setTaskExecutor(Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;

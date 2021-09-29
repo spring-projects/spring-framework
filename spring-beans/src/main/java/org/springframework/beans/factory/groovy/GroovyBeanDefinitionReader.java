@@ -75,18 +75,18 @@ import org.springframework.util.StringUtils;
  *
  * def reader = new GroovyBeanDefinitionReader(myApplicationContext)
  * reader.beans {
- *     dataSource(BasicDataSource) {                  // <--- invokeMethod
+ *     dataSource(BasicDataSource) {                  // &lt;--- invokeMethod
  *         driverClassName = "org.hsqldb.jdbcDriver"
  *         url = "jdbc:hsqldb:mem:grailsDB"
- *         username = "sa"                            // <-- setProperty
+ *         username = "sa"                            // &lt;-- setProperty
  *         password = ""
  *         settings = [mynew:"setting"]
  *     }
  *     sessionFactory(SessionFactory) {
- *         dataSource = dataSource                    // <-- getProperty for retrieving references
+ *         dataSource = dataSource                    // &lt;-- getProperty for retrieving references
  *     }
  *     myService(MyService) {
- *         nestedBean = { AnotherBean bean ->         // <-- setProperty with closure for nested bean
+ *         nestedBean = { AnotherBean bean -&gt;         // &lt;-- setProperty with closure for nested bean
  *             dataSource = dataSource
  *         }
  *     }
@@ -113,7 +113,7 @@ import org.springframework.util.StringUtils;
  *         dataSource = dataSource
  *     }
  *     myService(MyService) {
- *         nestedBean = { AnotherBean bean ->
+ *         nestedBean = { AnotherBean bean -&gt;
  *             dataSource = dataSource
  *         }
  *     }

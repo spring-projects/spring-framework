@@ -34,11 +34,8 @@ import org.springframework.web.multipart.MultipartResolver;
  *
  * <p>This resolver variant uses your Servlet container's multipart parser as-is,
  * potentially exposing the application to container implementation differences.
- * See {@link org.springframework.web.multipart.commons.CommonsMultipartResolver}
- * for an alternative implementation using a local Commons FileUpload library
- * within the application, providing maximum portability across Servlet containers.
  * Also, see this resolver's configuration option for
- * {@link #setStrictServletCompliance strict Servlet compliance}, narrowing the
+ * {@linkplain #setStrictServletCompliance strict Servlet compliance}, narrowing the
  * applicability of Spring's {@link MultipartHttpServletRequest} to form data only.
  *
  * <p><b>Note:</b> In order to use Servlet 3.0 based multipart parsing,
@@ -52,21 +49,19 @@ import org.springframework.web.multipart.MultipartResolver;
  *
  * <pre class="code">
  * public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
- *	 // ...
- *	 &#064;Override
- *	 protected void customizeRegistration(ServletRegistration.Dynamic registration) {
+ *   // ...
+ *   &#064;Override
+ *   protected void customizeRegistration(ServletRegistration.Dynamic registration) {
  *     // Optionally also set maxFileSize, maxRequestSize, fileSizeThreshold
  *     registration.setMultipartConfig(new MultipartConfigElement("/tmp"));
  *   }
- * }
- * </pre>
+ * }</pre>
  *
  * @author Juergen Hoeller
  * @since 3.1
  * @see #setResolveLazily
  * @see #setStrictServletCompliance
  * @see HttpServletRequest#getParts()
- * @see org.springframework.web.multipart.commons.CommonsMultipartResolver
  */
 public class StandardServletMultipartResolver implements MultipartResolver {
 
@@ -99,10 +94,6 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 	 * switch this flag to "true": Only "multipart/form-data" requests will be
 	 * wrapped with a {@link MultipartHttpServletRequest} then; other kinds of
 	 * requests will be left as-is, allowing for custom processing in user code.
-	 * <p>Note that Commons FileUpload and therefore
-	 * {@link org.springframework.web.multipart.commons.CommonsMultipartResolver}
-	 * supports any "multipart/" request type. However, it restricts processing
-	 * to POST requests which standard Servlet multipart parsers might not do.
 	 * @since 5.3.9
 	 */
 	public void setStrictServletCompliance(boolean strictServletCompliance) {

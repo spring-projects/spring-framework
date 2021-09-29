@@ -139,6 +139,20 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 	}
 
 	@Test
+	public void trimWhitespace() {
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.body(Mono.just(stringBuffer("data: \tfoo \ndata:bar\t\n\n")));
+
+		Flux<String> data = reader.read(ResolvableType.forClass(String.class),
+				request, Collections.emptyMap()).cast(String.class);
+
+		StepVerifier.create(data)
+				.expectNext("\tfoo \nbar\t")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
 	public void readPojo() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.body(Mono.just(stringBuffer(
