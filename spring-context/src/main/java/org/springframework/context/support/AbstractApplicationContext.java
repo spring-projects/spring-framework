@@ -589,9 +589,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void prepareRefresh() {
 		// Switch to active.
+		//记录开始时间
 		this.startupDate = System.currentTimeMillis();
-		this.closed.set(false);
-		this.active.set(true);
+		this.closed.set(false);//设置关闭
+		this.active.set(true);//激活状态
 
 		if (logger.isDebugEnabled()) {
 			if (logger.isTraceEnabled()) {
