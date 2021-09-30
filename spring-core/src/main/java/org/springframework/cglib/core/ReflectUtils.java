@@ -514,7 +514,7 @@ public class ReflectUtils {
 				// in case of plain LinkageError (class already defined)
 				// or IllegalArgumentException (class in different package):
 				// fall through to traditional ClassLoader.defineClass below
-				t = ex;
+				t = target;
 			}
 			catch (Throwable ex) {
 				throw new CodeGenerationException(ex);
