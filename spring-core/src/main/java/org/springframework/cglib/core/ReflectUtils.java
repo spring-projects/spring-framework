@@ -63,9 +63,9 @@ public class ReflectUtils {
 
 	private static final Method classLoaderDefineClassMethod;
 
-	private static final ProtectionDomain PROTECTION_DOMAIN;
-
 	private static final Throwable THROWABLE;
+
+	private static final ProtectionDomain PROTECTION_DOMAIN;
 
 	private static final List<Method> OBJECT_METHODS = new ArrayList<Method>();
 
@@ -73,7 +73,6 @@ public class ReflectUtils {
 		Method privateLookupIn;
 		Method lookupDefineClass;
 		Method classLoaderDefineClass;
-		ProtectionDomain protectionDomain;
 		Throwable throwable = null;
 		try {
 			privateLookupIn = (Method) AccessController.doPrivileged(new PrivilegedExceptionAction() {
@@ -102,39 +101,37 @@ public class ReflectUtils {
 							String.class, byte[].class, Integer.TYPE, Integer.TYPE, ProtectionDomain.class);
 				}
 			});
-			protectionDomain = getProtectionDomain(ReflectUtils.class);
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws Exception {
-					Method[] methods = Object.class.getDeclaredMethods();
-					for (Method method : methods) {
-						if ("finalize".equals(method.getName())
-								|| (method.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) > 0) {
-							continue;
-						}
-						OBJECT_METHODS.add(method);
-					}
-					return null;
-				}
-			});
 		}
 		catch (Throwable t) {
 			privateLookupIn = null;
 			lookupDefineClass = null;
 			classLoaderDefineClass = null;
-			protectionDomain = null;
 			throwable = t;
 		}
+
 		privateLookupInMethod = privateLookupIn;
 		lookupDefineClassMethod = lookupDefineClass;
 		classLoaderDefineClassMethod = classLoaderDefineClass;
-		PROTECTION_DOMAIN = protectionDomain;
 		THROWABLE = throwable;
+		PROTECTION_DOMAIN = getProtectionDomain(ReflectUtils.class);
+
+		AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				Method[] methods = Object.class.getDeclaredMethods();
+				for (Method method : methods) {
+					if ("finalize".equals(method.getName())
+							|| (method.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) > 0) {
+						continue;
+					}
+					OBJECT_METHODS.add(method);
+				}
+				return null;
+			}
+		});
 	}
 	// SPRING PATCH END
 
-	private static final String[] CGLIB_PACKAGES = {
-			"java.lang",
-	};
+	private static final String[] CGLIB_PACKAGES = {"java.lang"};
 
 	static {
 		primitives.put("byte", Byte.TYPE);
@@ -499,6 +496,7 @@ public class ReflectUtils {
 			ProtectionDomain protectionDomain, Class<?> contextClass) throws Exception {
 
 		Class c = null;
+		Throwable t = THROWABLE;
 
 		// Preferred option: JDK 9+ Lookup.defineClass API if ClassLoader matches
 		if (contextClass != null && contextClass.getClassLoader() == loader &&
@@ -516,6 +514,7 @@ public class ReflectUtils {
 				// in case of plain LinkageError (class already defined)
 				// or IllegalArgumentException (class in different package):
 				// fall through to traditional ClassLoader.defineClass below
+				t = ex;
 			}
 			catch (Throwable ex) {
 				throw new CodeGenerationException(ex);
@@ -539,9 +538,11 @@ public class ReflectUtils {
 					throw new CodeGenerationException(ex.getTargetException());
 				}
 				// in case of UnsupportedOperationException, fall through
+				t = ex.getTargetException();
 			}
 			catch (Throwable ex) {
 				// publicDefineClass method not available -> fall through
+				t = ex;
 			}
 
 			// Classic option: protected ClassLoader.defineClass method
@@ -562,6 +563,7 @@ public class ReflectUtils {
 					if (!ex.getClass().getName().endsWith("InaccessibleObjectException")) {
 						throw new CodeGenerationException(ex);
 					}
+					t = ex;
 				}
 			}
 		}
@@ -584,7 +586,7 @@ public class ReflectUtils {
 
 		// No defineClass variant available at all?
 		if (c == null) {
-			throw new CodeGenerationException(THROWABLE);
+			throw new CodeGenerationException(t);
 		}
 
 		// Force static initializers to run.
