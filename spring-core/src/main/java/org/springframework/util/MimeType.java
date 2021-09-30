@@ -637,14 +637,14 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			else if (mimeType2.isWildcardType() && !mimeType1.isWildcardType()) {  // audio/* > */*
 				return -1;
 			}
-			else {  // mediaType1.getType().equals(mediaType2.getType())
+			else {
 				if (mimeType1.isWildcardSubtype() && !mimeType2.isWildcardSubtype()) {  // audio/* < audio/basic
 					return 1;
 				}
 				else if (mimeType2.isWildcardSubtype() && !mimeType1.isWildcardSubtype()) {  // audio/basic > audio/*
 					return -1;
 				}
-				else {  // mediaType2.getSubtype().equals(mediaType2.getSubtype())
+				else {
 					return compareParameters(mimeType1, mimeType2);
 				}
 			}
