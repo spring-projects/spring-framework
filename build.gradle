@@ -45,7 +45,7 @@ configure(allprojects) { project ->
 				entry 'log4j-jul'
 				entry 'log4j-slf4j-impl'
 			}
-			dependency "org.slf4j:slf4j-api:1.7.30"
+			dependency "org.slf4j:slf4j-api:1.7.32"
 			dependency("com.google.code.findbugs:findbugs:3.0.1") {
 				exclude group: "dom4j", name: "dom4j"
 			}
