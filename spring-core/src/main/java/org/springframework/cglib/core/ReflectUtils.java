@@ -63,6 +63,8 @@ public class ReflectUtils {
 
 	// SPRING PATCH BEGIN
 	static {
+		// Resolve protected ClassLoader.defineClass method for fallback use
+		// (even if JDK 9+ Lookup.defineClass is preferably used below)
 		Method classLoaderDefineClass;
 		Throwable throwable = null;
 		try {
@@ -453,7 +455,7 @@ public class ReflectUtils {
 				// in case of plain LinkageError (class already defined)
 				// or IllegalArgumentException (class in different package):
 				// fall through to traditional ClassLoader.defineClass below
-				t = target;
+				t = ex;
 			}
 			catch (Throwable ex) {
 				throw new CodeGenerationException(ex);
