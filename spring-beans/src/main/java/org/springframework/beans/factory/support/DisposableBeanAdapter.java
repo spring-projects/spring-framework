@@ -62,6 +62,8 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
+	private static final String DESTROY_METHOD_NAME = "destroy";
+
 	private static final String CLOSE_METHOD_NAME = "close";
 
 	private static final String SHUTDOWN_METHOD_NAME = "shutdown";
@@ -104,13 +106,16 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		Assert.notNull(bean, "Disposable bean must not be null");
 		this.bean = bean;
 		this.beanName = beanName;
-		this.invokeDisposableBean =
-				(this.bean instanceof DisposableBean && !beanDefinition.isExternallyManagedDestroyMethod("destroy"));
+		this.invokeDisposableBean = (bean instanceof DisposableBean &&
+				!beanDefinition.isExternallyManagedDestroyMethod(DESTROY_METHOD_NAME));
 		this.nonPublicAccessAllowed = beanDefinition.isNonPublicAccessAllowed();
 		this.acc = acc;
+
 		String destroyMethodName = inferDestroyMethodIfNecessary(bean, beanDefinition);
-		if (destroyMethodName != null && !(this.invokeDisposableBean && "destroy".equals(destroyMethodName)) &&
+		if (destroyMethodName != null &&
+				!(this.invokeDisposableBean && DESTROY_METHOD_NAME.equals(destroyMethodName)) &&
 				!beanDefinition.isExternallyManagedDestroyMethod(destroyMethodName)) {
+
 			this.destroyMethodName = destroyMethodName;
 			Method destroyMethod = determineDestroyMethod(destroyMethodName);
 			if (destroyMethod == null) {
@@ -135,6 +140,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 			this.destroyMethod = destroyMethod;
 		}
+
 		this.beanPostProcessors = filterPostProcessors(postProcessors, bean);
 	}
 
@@ -349,8 +355,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			destroyMethodName = beanDefinition.getDestroyMethodName();
 			if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName) ||
 					(destroyMethodName == null && bean instanceof AutoCloseable)) {
-				// Only perform destroy method inference or Closeable detection
-				// in case of the bean not explicitly implementing DisposableBean
+				// Only perform destroy method inference in case of the bean
+				// not explicitly implementing the DisposableBean interface
 				destroyMethodName = null;
 				if (!(bean instanceof DisposableBean)) {
 					try {
