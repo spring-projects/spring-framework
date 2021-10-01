@@ -6641,8 +6641,7 @@ tend to be simple https://en.wikipedia.org/wiki/Adapter_pattern[adapters] that m
 caching abstraction framework on top of the storage API, as the _Caffeine_ classes do.
 Most `CacheManager` classes can use the classes in the
 `org.springframework.cache.support` package (such as `AbstractCacheManager` which takes
-care of the boiler-plate code, leaving only the actual mapping to be completed). We hope
-that, in time, all relevant caches will offer JSR-107 support.
+care of the boiler-plate code, leaving only the actual mapping to be completed).
 
 
 
