@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final String HOST_PATTERN = "(" + HOST_IPV6_PATTERN + "|" + HOST_IPV4_PATTERN + ")";
 
-	private static final String PORT_PATTERN = "(\\d*(?:\\{[^/]+?})?)";
+	private static final String PORT_PATTERN = "(\\d*(?:\\{[^/]+?\\})?)";
 
 	private static final String PATH_PATTERN = "([^?#]*)";
 
