@@ -48,7 +48,7 @@ import org.springframework.util.MultiValueMap;
 public abstract class UriComponents implements Serializable {
 
 	/** Captures URI template variable names. */
-	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)}");
+	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 
 	@Nullable
