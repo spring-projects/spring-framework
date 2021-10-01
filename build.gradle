@@ -112,9 +112,9 @@ configure(allprojects) { project ->
 			dependency "org.quartz-scheduler:quartz:2.3.2"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core-jakarta:5.5.7.Final"
+			dependency "org.hibernate:hibernate-core-jakarta:5.6.0.CR1"
 			dependency "org.hibernate:hibernate-validator:7.0.1.Final"
-			dependency "org.webjars:webjars-locator-core:0.47"
+			dependency "org.webjars:webjars-locator-core:0.48"
 			dependency "org.webjars:underscorejs:1.8.3"
 
 			dependencySet(group: 'org.apache.tomcat', version: '10.0.11') {
@@ -150,7 +150,7 @@ configure(allprojects) { project ->
 			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.1.1'
 			dependency "org.eclipse.jetty:jetty-reactive-httpclient:3.0.4"
 
-			dependency "org.jruby:jruby:9.2.19.0"
+			dependency "org.jruby:jruby:9.3.0.0"
 			dependency "org.python:jython-standalone:2.7.1"
 			dependency "org.mozilla:rhino:1.7.11"
 
@@ -189,10 +189,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.12.0"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.52.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.53.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.52.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.53.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
