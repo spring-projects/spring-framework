@@ -5627,7 +5627,7 @@ invoke the method again. The caching logic is applied transparently without any
 interference to the invoker.
 
 IMPORTANT: This approach works only for methods that are guaranteed to return the same
-output (result) for a given input (or arguments) no matter how many times it is invoked.
+output (result) for a given input (or arguments) no matter how many times they are invoked.
 
 The caching abstraction provides other cache-related operations, such as the ability
 to update the content of the cache or to remove one or all entries. These are useful if
@@ -5640,10 +5640,10 @@ provide the actual data store. This abstraction is materialized by the
 `org.springframework.cache.Cache` and `org.springframework.cache.CacheManager` interfaces.
 
 Spring provides <<cache-store-configuration, a few implementations>> of that abstraction:
-JDK `java.util.concurrent.ConcurrentMap` based caches, https://www.ehcache.org/[Ehcache 2.x],
-Gemfire cache, https://github.com/ben-manes/caffeine/wiki[Caffeine], and JSR-107
-compliant caches (such as Ehcache 3.x). See <<cache-plug>> for more information on
-plugging in other cache stores and providers.
+JDK `java.util.concurrent.ConcurrentMap` based caches, Gemfire cache,
+https://github.com/ben-manes/caffeine/wiki[Caffeine], and JSR-107 compliant caches (such
+as Ehcache 3.x). See <<cache-plug>> for more information on plugging in other cache
+stores and providers.
 
 IMPORTANT: The caching abstraction has no special handling for multi-threaded and
 multi-process environments, as such features are handled by the cache implementation.
@@ -5663,7 +5663,7 @@ in that area. See the documentation of your cache provider for more details.
 
 To use the cache abstraction, you need to take care of two aspects:
 
-* Caching declaration: Identify the methods that need to be cached and their policy.
+* Caching declaration: Identify the methods that need to be cached and their policies.
 * Cache configuration: The backing cache where the data is stored and from which it is read.
 
 
@@ -6526,28 +6526,11 @@ and is very fast, but it does not provide any management, persistence capabiliti
 or eviction contracts.
 
 
-[[cache-store-configuration-ehcache]]
+[[cache-store-configuration-eviction]]
 ==== Ehcache-based Cache
 
-NOTE: Ehcache 3.x is fully JSR-107 compliant and no dedicated support is required for it.
-
-The Ehcache 2.x implementation is located in the `org.springframework.cache.ehcache`
-package. Again, to use it, you need to declare the appropriate `CacheManager`.
-The following example shows how to do so:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="cacheManager"
-			class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
-
-	<!-- EhCache library setup -->
-	<bean id="ehcache"
-			class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>
-----
-
-This setup bootstraps the ehcache library inside the Spring IoC (through the `ehcache`
-bean), which is then wired into the dedicated `CacheManager` implementation. Note that
-the entire Ehcache-specific configuration is read from `ehcache.xml`.
+Ehcache 3.x is fully JSR-107 compliant and no dedicated support is required for it. See
+<<cache-store-configuration-jsr107>> for details.
 
 
 [[cache-store-configuration-caffeine]]
@@ -6655,7 +6638,7 @@ Clearly, there are plenty of caching products out there that you can use as a ba
 store. For those that do not support JSR-107 you need to provide a `CacheManager` and a
 `Cache` implementation. This may sound harder than it is, since, in practice, the classes
 tend to be simple https://en.wikipedia.org/wiki/Adapter_pattern[adapters] that map the
-caching abstraction framework on top of the storage API, as the `ehcache` classes do.
+caching abstraction framework on top of the storage API, as the _Caffeine_ classes do.
 Most `CacheManager` classes can use the classes in the
 `org.springframework.cache.support` package (such as `AbstractCacheManager` which takes
 care of the boiler-plate code, leaving only the actual mapping to be completed). We hope
