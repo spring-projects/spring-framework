@@ -6,7 +6,7 @@ plugins {
 	id 'org.asciidoctor.jvm.convert' version '3.3.2'
 	id 'org.asciidoctor.jvm.pdf' version '3.3.2'
 	id 'de.undercouch.download' version '4.1.2'
-	id "io.freefair.aspectj" version '6.1.0' apply false
+	id "io.freefair.aspectj" version '6.2.0' apply false
 	id "com.github.ben-manes.versions" version '0.39.0'
 	id "com.github.johnrengelman.shadow" version '7.0.0' apply false
 	id "me.champeau.jmh" version "0.6.6" apply false
@@ -83,7 +83,7 @@ configure(allprojects) { project ->
 				exclude group: "xpp3", name: "xpp3_min"
 				exclude group: "xmlpull", name: "xmlpull"
 			}
-			dependency "org.apache.johnzon:johnzon-jsonb:1.2.10"
+			dependency "org.apache.johnzon:johnzon-jsonb:1.2.14"
 			dependency("org.codehaus.jettison:jettison:1.3.8") {
 				exclude group: "stax", name: "stax-api"
 			}
@@ -99,7 +99,7 @@ configure(allprojects) { project ->
 			dependency "com.github.librepdf:openpdf:1.3.26"
 			dependency "com.rometools:rome:1.16.0"
 			dependency "commons-io:commons-io:2.5"
-			dependency "io.vavr:vavr:0.10.3"
+			dependency "io.vavr:vavr:0.10.4"
 			dependency "net.sf.jopt-simple:jopt-simple:5.0.4"
 			dependencySet(group: 'org.apache.activemq', version: '5.16.2') {
 				entry 'activemq-broker'
@@ -125,7 +125,7 @@ configure(allprojects) { project ->
 			dependency "org.ehcache:ehcache:3.4.0"
 			dependency "org.hibernate:hibernate-core:5.4.32.Final"
 			dependency "org.hibernate:hibernate-validator:6.2.0.Final"
-			dependency "org.webjars:webjars-locator-core:0.47"
+			dependency "org.webjars:webjars-locator-core:0.48"
 			dependency "org.webjars:underscorejs:1.8.3"
 
 			dependencySet(group: 'org.apache.tomcat', version: '9.0.53') {
@@ -206,10 +206,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.12.0"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.52.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.53.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.52.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.53.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {

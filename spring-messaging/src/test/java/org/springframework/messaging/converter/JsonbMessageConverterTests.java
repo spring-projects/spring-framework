@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ public class JsonbMessageConverterTests {
 		String payload = "H\u00e9llo W\u00f6rld";
 		Message<?> message = converter.toMessage(payload, headers);
 
-		assertThat(new String((byte[]) message.getPayload(), StandardCharsets.UTF_16BE)).isEqualTo(payload);
+		assertThat(new String((byte[]) message.getPayload(), StandardCharsets.UTF_16BE)).isEqualTo("\"" + payload + "\"");
 		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE)).isEqualTo(contentType);
 	}
 
@@ -181,7 +181,7 @@ public class JsonbMessageConverterTests {
 		String payload = "H\u00e9llo W\u00f6rld";
 		Message<?> message = converter.toMessage(payload, headers);
 
-		assertThat(message.getPayload()).isEqualTo(payload);
+		assertThat(message.getPayload()).isEqualTo("\"" + payload + "\"");
 		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE)).isEqualTo(contentType);
 	}
 
