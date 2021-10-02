@@ -85,6 +85,7 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
@@ -257,6 +258,25 @@ class Jackson2ObjectMapperBuilderTests {
 		assertThat(serializers.findSerializer(null, SimpleType.construct(Integer.class), null).getClass()).isSameAs(CustomIntegerSerializer.class);
 	}
 
+	static class ParameterModuleDto {
+
+		int x;
+		int y;
+
+		ParameterModuleDto(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+
+		int getX() {
+			return x;
+		}
+
+		int getY() {
+			return y;
+		}
+	}
+
 	@Test
 	void wellKnownModules() throws JsonProcessingException, UnsupportedEncodingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
@@ -266,6 +286,9 @@ class Jackson2ObjectMapperBuilderTests {
 
 		Optional<String> optional = Optional.of("test");
 		assertThat(new String(objectMapper.writeValueAsBytes(optional), "UTF-8")).isEqualTo("\"test\"");
+
+
+		assertThatCode(() -> objectMapper.readValue("{\"x\":1,\"y\":2}", ParameterModuleDto.class)).doesNotThrowAnyException();
 
 		// Kotlin module
 		IntRange range = new IntRange(1, 3);
