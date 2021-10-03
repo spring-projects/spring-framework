@@ -57,6 +57,7 @@ import org.springframework.lang.Nullable;
  * @author Sam Brannen
  * @author Colin Sampaleanu
  * @author Rob Harrop
+ * @author Andrey Nagorniy
  * @since 1.1.2
  */
 public abstract class Assert {
@@ -148,6 +149,36 @@ public abstract class Assert {
 	@Deprecated
 	public static void isTrue(boolean expression) {
 		isTrue(expression, "[Assertion failed] - this expression must be true");
+	}
+
+	/**
+	 * Assert a boolean expression, throwing an {@code IllegalArgumentException}
+	 * if the expression evaluates to {@code true}.
+	 * <pre class="code">Assert.isFalse(i == 0, "The value '" + i + "' must not be as zero");</pre>
+	 * @param expression a boolean expression
+	 * @param message the exception message to use if the assertion fails
+	 * @throws IllegalArgumentException if {@code expression} is {@code true}
+	 */
+	public static void isFalse(boolean expression, String message) {
+		if (expression) {
+			throw new IllegalArgumentException(message);
+		}
+	}
+
+	/**
+	 * Assert a boolean expression, throwing an {@code IllegalArgumentException}
+	 * if the expression evaluates to {@code true}.
+	 * <pre class="code">Assert.isFalse(i == 0, () -&gt; "The value '" + i + "' must not be as zero");</pre>
+	 * @param expression a boolean expression
+	 * @param messageSupplier a supplier for the exception message to use if the
+	 * assertion fails
+	 * @throws IllegalArgumentException if {@code expression} is {@code true}
+	 * @since 5.0
+	 */
+	public static void isFalse(boolean expression, Supplier<String> messageSupplier) {
+		if (expression) {
+			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+		}
 	}
 
 	/**

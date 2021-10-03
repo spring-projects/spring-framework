@@ -40,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Arjen Poutsma
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Andrey Nagorniy
  */
 class AssertTests {
 
@@ -102,6 +103,37 @@ class AssertTests {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				Assert.isTrue(false, (Supplier<String>) null))
 			.withMessage(null);
+	}
+
+	@Test
+	void isFalseWithMessage() {
+		Assert.isFalse(false, "enigma");
+	}
+
+	@Test
+	void isFalseWithTrue() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+						Assert.isFalse(true, "enigma"))
+				.withMessageContaining("enigma");
+	}
+
+	@Test
+	void isFalseWithMessageSupplier() {
+		Assert.isFalse(false, () -> "enigma");
+	}
+
+	@Test
+	void isFalseWithTrueAndMessageSupplier() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+						Assert.isFalse(true, () -> "enigma"))
+				.withMessageContaining("enigma");
+	}
+
+	@Test
+	void isFalseWithTrueAndNullMessageSupplier() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+						Assert.isFalse(true, (Supplier<String>) null))
+				.withMessage(null);
 	}
 
 	@Test
