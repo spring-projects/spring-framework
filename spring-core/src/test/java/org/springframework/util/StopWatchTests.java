@@ -40,7 +40,7 @@ class StopWatchTests {
 
 	private static final long duration1 = 200;
 	private static final long duration2 = 100;
-	private static final long fudgeFactor = 100;
+	// private static final long fudgeFactor = 100;
 
 	private final StopWatch stopWatch = new StopWatch(ID);
 
