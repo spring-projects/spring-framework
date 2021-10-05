@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.transaction.*
 import org.springframework.transaction.reactive.TransactionContext
 import reactor.core.publisher.Mono
 import reactor.core.publisher.SynchronousSink
-import reactor.util.context.Context
+import reactor.util.context.ContextView
 import java.lang.reflect.Method
 import kotlin.coroutines.Continuation
 
@@ -299,14 +299,15 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		}
 	}
 
-	@Suppress("DEPRECATION")
 	private fun checkReactiveTransaction(expected: Boolean) {
-		Mono.subscriberContext().handle { context: Context, sink: SynchronousSink<Any?> ->
-			if (context.hasKey(TransactionContext::class.java) != expected) {
-				Fail.fail<Any>("Should have thrown NoTransactionException")
-			}
-			sink.complete()
-		}.block()
+		Mono.deferContextual{context -> Mono.just(context)}
+				.handle { context: ContextView, sink: SynchronousSink<Any?> ->
+					if (context.hasKey(TransactionContext::class.java) != expected) {
+						Fail.fail<Any>("Should have thrown NoTransactionException")
+					}
+					sink.complete()
+				}
+				.block()
 	}
 
 	protected open fun advised(target: Any, rtm: ReactiveTransactionManager, tas: Array<TransactionAttributeSource>): Any {
