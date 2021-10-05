@@ -180,9 +180,6 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		return main;
 	}
 
-	private static void touch(DataBuffer buffer, Map<String, Object> hints) {
-	}
-
 	private boolean isStreamingMediaType(@Nullable MediaType mediaType) {
 		if (mediaType == null || !(this.encoder instanceof HttpMessageEncoder)) {
 			return false;

@@ -75,7 +75,6 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	 * handle unexpected exception thrown by asynchronous method executions
 	 * @see AnnotationAsyncExecutionInterceptor#getDefaultExecutor(BeanFactory)
 	 */
-	@SuppressWarnings("unchecked")
 	public AsyncAnnotationAdvisor(
 			@Nullable Executor executor, @Nullable AsyncUncaughtExceptionHandler exceptionHandler) {
 

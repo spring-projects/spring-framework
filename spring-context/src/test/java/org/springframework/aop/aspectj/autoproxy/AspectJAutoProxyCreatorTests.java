@@ -48,7 +48,6 @@ import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -308,12 +307,6 @@ public class AspectJAutoProxyCreatorTests {
 	 */
 	private String qName(String fileSuffix) {
 		return String.format("%s-%s", getClass().getSimpleName(), fileSuffix);
-	}
-
-	private void assertStopWatchTimeLimit(final StopWatch sw, final long maxTimeMillis) {
-		long totalTimeMillis = sw.getTotalTimeMillis();
-		assertThat(totalTimeMillis < maxTimeMillis).as("'" + sw.getLastTaskName() + "' took too long: expected less than<" + maxTimeMillis +
-				"> ms, actual<" + totalTimeMillis + "> ms.").isTrue();
 	}
 
 }
