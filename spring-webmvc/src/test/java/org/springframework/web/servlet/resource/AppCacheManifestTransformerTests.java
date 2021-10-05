@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("deprecation")
 public class AppCacheManifestTransformerTests {
 
-	private AppCacheManifestTransformer transformer;
+	private final AppCacheManifestTransformer transformer = new AppCacheManifestTransformer();
 
 	private ResourceTransformerChain chain;
 
@@ -59,7 +60,6 @@ public class AppCacheManifestTransformerTests {
 		ResourceResolverChain resolverChain = new DefaultResourceResolverChain(resolvers);
 
 		this.chain = new DefaultResourceTransformerChain(resolverChain, Collections.emptyList());
-		this.transformer = new AppCacheManifestTransformer();
 		this.transformer.setResourceUrlProvider(createUrlProvider(resolvers));
 	}
 

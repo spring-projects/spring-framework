@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 
 	@Override
 	@Test
+	@SuppressWarnings("deprecation")
 	public void canEncode() {
 		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
 		assertThat(this.encoder.canEncode(pojoType, APPLICATION_JSON)).isTrue();
@@ -84,12 +85,11 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 
 		// SPR-15910
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Object.class), APPLICATION_OCTET_STREAM)).isFalse();
-
-
 	}
 
 	@Override
 	@Test
+	@SuppressWarnings("deprecation")
 	public void encode() throws Exception {
 		Flux<Object> input = Flux.just(new Pojo("foo", "bar"),
 				new Pojo("foofoo", "barbar"),
@@ -257,7 +257,6 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
 				.verifyComplete(),
 				new MimeType("application", "json", StandardCharsets.US_ASCII), null);
-
 	}
 
 

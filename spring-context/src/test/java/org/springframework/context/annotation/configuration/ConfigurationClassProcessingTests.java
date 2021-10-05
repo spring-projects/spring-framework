@@ -42,7 +42,6 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.ListFactoryBean;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -247,7 +246,9 @@ public class ConfigurationClassProcessingTests {
 	public void configurationWithPostProcessor() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithPostProcessor.class);
-		RootBeanDefinition placeholderConfigurer = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
+		@SuppressWarnings("deprecation")
+		RootBeanDefinition placeholderConfigurer = new RootBeanDefinition(
+				org.springframework.beans.factory.config.PropertyPlaceholderConfigurer.class);
 		placeholderConfigurer.getPropertyValues().add("properties", "myProp=myValue");
 		ctx.registerBeanDefinition("placeholderConfigurer", placeholderConfigurer);
 		ctx.refresh();
@@ -536,6 +537,7 @@ public class ConfigurationClassProcessingTests {
 
 				String nameSuffix = "-processed-" + myProp;
 
+				@SuppressWarnings("unused")
 				public void setNameSuffix(String nameSuffix) {
 					this.nameSuffix = nameSuffix;
 				}
@@ -551,10 +553,6 @@ public class ConfigurationClassProcessingTests {
 				@Override
 				public Object postProcessAfterInitialization(Object bean, String beanName) {
 					return bean;
-				}
-
-				public int getOrder() {
-					return 0;
 				}
 			};
 		}

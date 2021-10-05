@@ -158,6 +158,8 @@ public class ResourceUrlProviderTests {
 		assertThat(parentUrlProvider.getHandlerMap()).isEmpty();
 		ResourceUrlProvider childUrlProvider = childContext.getBean(ResourceUrlProvider.class);
 		assertThat(childUrlProvider.getHandlerMap()).hasKeySatisfying(pathPatternStringOf("/resources/**"));
+		childContext.close();
+		parentContext.close();
 	}
 
 

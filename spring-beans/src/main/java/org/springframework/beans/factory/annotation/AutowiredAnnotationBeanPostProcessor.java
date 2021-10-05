@@ -539,8 +539,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	 */
 	@SuppressWarnings({"deprecation", "cast"})
 	protected boolean determineRequiredStatus(MergedAnnotation<?> ann) {
-		// The following (AnnotationAttributes) cast is required on JDK 9+.
-		return determineRequiredStatus((AnnotationAttributes)
+		return determineRequiredStatus(
 				ann.asMap(mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType())));
 	}
 

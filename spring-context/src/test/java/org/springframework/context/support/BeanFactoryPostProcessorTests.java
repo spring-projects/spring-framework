@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -75,6 +74,7 @@ public class BeanFactoryPostProcessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testMultipleDefinedBeanFactoryPostProcessors() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb1", TestBean.class);
@@ -84,7 +84,7 @@ public class BeanFactoryPostProcessorTests {
 		ac.registerSingleton("bfpp1", TestBeanFactoryPostProcessor.class, pvs1);
 		MutablePropertyValues pvs2 = new MutablePropertyValues();
 		pvs2.add("properties", "key=value");
-		ac.registerSingleton("bfpp2", PropertyPlaceholderConfigurer.class, pvs2);
+		ac.registerSingleton("bfpp2", org.springframework.beans.factory.config.PropertyPlaceholderConfigurer.class, pvs2);
 		ac.refresh();
 		TestBeanFactoryPostProcessor bfpp = (TestBeanFactoryPostProcessor) ac.getBean("bfpp1");
 		assertThat(bfpp.initValue).isEqualTo("value");
