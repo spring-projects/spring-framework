@@ -42,6 +42,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
+import reactor.util.context.Context;
 
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -111,6 +112,11 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 			sink.onRequest(l -> generator.requestToken());
 			tokens.subscribe(generator);
 		});
+	}
+
+	@Override
+	public Context currentContext() {
+		return this.sink.currentContext();
 	}
 
 	@Override
