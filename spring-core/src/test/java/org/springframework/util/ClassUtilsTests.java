@@ -154,7 +154,7 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.isCacheSafe(composite, childLoader3)).isTrue();
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "''{0}'' -> {1}")
 	@CsvSource(textBlock = """
 		boolean, boolean
 		byte, byte
@@ -172,7 +172,7 @@ class ClassUtilsTests {
 		[J, long[]
 		[F, float[]
 		[D, double[]
-	""")
+		""")
 	void resolvePrimitiveClassName(String input, Class<?> output) {
 		assertThat(ClassUtils.resolvePrimitiveClassName(input)).isEqualTo(output);
 	}
