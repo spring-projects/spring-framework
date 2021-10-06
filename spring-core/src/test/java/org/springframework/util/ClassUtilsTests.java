@@ -154,7 +154,7 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.isCacheSafe(composite, childLoader3)).isTrue();
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "''{0}'' -> {1}")
 	@CsvSource({
 		"boolean, boolean",
 		"byte, byte",
