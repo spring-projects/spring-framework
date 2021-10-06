@@ -469,10 +469,10 @@ public interface WebClient {
 		/**
 		 * Provide a function to populate the Reactor {@code Context}.
 		 * @param contextModifier the function to modify the context with
+		 * @since 5.3.1
 		 * @deprecated in 5.3.2 to be removed soon after; this method cannot
 		 * provide context to downstream (nested or subsequent) requests and is
 		 * of limited value.
-		 * @since 5.3.1
 		 */
 		@Deprecated
 		S context(Function<Context, Context> contextModifier);

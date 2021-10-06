@@ -34,16 +34,16 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @deprecated as of 5.3.9 in favor of using the {@code checkNotModified} methods
- * in {@link org.springframework.web.context.request.WebRequest}, or from an
- * annotated controller method, returning a
- * {@link org.springframework.http.ResponseEntity} with an "ETag" and/or
- * "Last-Modified" headers set.
  * @see javax.servlet.http.HttpServlet#getLastModified
  * @see Controller
  * @see SimpleControllerHandlerAdapter
  * @see org.springframework.web.HttpRequestHandler
  * @see HttpRequestHandlerAdapter
+ * @deprecated as of 5.3.9 in favor of using the {@code checkNotModified} methods
+ * in {@link org.springframework.web.context.request.WebRequest}, or from an
+ * annotated controller method, returning a
+ * {@link org.springframework.http.ResponseEntity} with an "ETag" and/or
+ * "Last-Modified" headers set.
  */
 @Deprecated
 public interface LastModified {

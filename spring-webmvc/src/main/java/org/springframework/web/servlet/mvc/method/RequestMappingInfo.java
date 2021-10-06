@@ -912,9 +912,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		/**
 		 * Set a custom UrlPathHelper to use for the PatternsRequestCondition.
 		 * <p>By default this is not set.
+		 * @since 4.2.8
 		 * @deprecated as of 5.3, the path is resolved externally and obtained with
 		 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
-		 * @since 4.2.8
 		 */
 		@Deprecated
 		public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {

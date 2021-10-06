@@ -68,8 +68,8 @@ public class MockCookie extends Cookie {
 
 	/**
 	 * Get the "Expires" attribute for this cookie.
-	 * @since 5.1.11
 	 * @return the "Expires" attribute for this cookie, or {@code null} if not set
+	 * @since 5.1.11
 	 */
 	@Nullable
 	public ZonedDateTime getExpires() {

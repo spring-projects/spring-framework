@@ -209,10 +209,13 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * </pre>
 	 *
 	 * <p>The search order is now C, D, A, B as desired.
+	 *
 	 * <p>Beyond these recommendations, subclasses may use any of the {@code add*},
 	 * {@code remove}, or {@code replace} methods exposed by {@link MutablePropertySources}
 	 * in order to create the exact arrangement of property sources desired.
+	 *
 	 * <p>The base implementation registers no property sources.
+	 *
 	 * <p>Note that clients of any {@link ConfigurableEnvironment} may further customize
 	 * property sources via the {@link #getPropertySources()} accessor, typically within
 	 * an {@link org.springframework.context.ApplicationContextInitializer

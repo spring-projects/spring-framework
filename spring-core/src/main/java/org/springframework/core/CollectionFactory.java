@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,14 +169,14 @@ public final class CollectionFactory {
 	 * (note: only relevant for {@link EnumSet} creation)
 	 * @param capacity the initial capacity
 	 * @return a new collection instance
+	 * @throws IllegalArgumentException if the supplied {@code collectionType} is
+	 * {@code null}; or if the desired {@code collectionType} is {@link EnumSet} and
+	 * the supplied {@code elementType} is not a subtype of {@link Enum}
 	 * @since 4.1.3
 	 * @see java.util.LinkedHashSet
 	 * @see java.util.ArrayList
 	 * @see java.util.TreeSet
 	 * @see java.util.EnumSet
-	 * @throws IllegalArgumentException if the supplied {@code collectionType} is
-	 * {@code null}; or if the desired {@code collectionType} is {@link EnumSet} and
-	 * the supplied {@code elementType} is not a subtype of {@link Enum}
 	 */
 	@SuppressWarnings({"unchecked", "cast"})
 	public static <E> Collection<E> createCollection(Class<?> collectionType, @Nullable Class<?> elementType, int capacity) {
@@ -285,14 +285,14 @@ public final class CollectionFactory {
 	 * (note: only relevant for {@link EnumMap} creation)
 	 * @param capacity the initial capacity
 	 * @return a new map instance
+	 * @throws IllegalArgumentException if the supplied {@code mapType} is
+	 * {@code null}; or if the desired {@code mapType} is {@link EnumMap} and
+	 * the supplied {@code keyType} is not a subtype of {@link Enum}
 	 * @since 4.1.3
 	 * @see java.util.LinkedHashMap
 	 * @see java.util.TreeMap
 	 * @see org.springframework.util.LinkedMultiValueMap
 	 * @see java.util.EnumMap
-	 * @throws IllegalArgumentException if the supplied {@code mapType} is
-	 * {@code null}; or if the desired {@code mapType} is {@link EnumMap} and
-	 * the supplied {@code keyType} is not a subtype of {@link Enum}
 	 */
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> Map<K, V> createMap(Class<?> mapType, @Nullable Class<?> keyType, int capacity) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,20 +230,20 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/stream+json}.
-	 * @deprecated as of 5.3, see notice on {@link #APPLICATION_STREAM_JSON_VALUE}.
 	 * @since 5.0
+	 * @deprecated as of 5.3, see notice on {@link #APPLICATION_STREAM_JSON_VALUE}.
 	 */
 	@Deprecated
 	public static final MediaType APPLICATION_STREAM_JSON;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_STREAM_JSON}.
+	 * @since 5.0
 	 * @deprecated as of 5.3 since it originates from the W3C Activity Streams
 	 * specification which has a more specific purpose and has been since
 	 * replaced with a different mime type. Use {@link #APPLICATION_NDJSON} as
 	 * a replacement or any other line-delimited JSON format (e.g. JSON Lines,
 	 * JSON Text Sequences).
-	 * @since 5.0
 	 */
 	@Deprecated
 	public static final String APPLICATION_STREAM_JSON_VALUE = "application/stream+json";

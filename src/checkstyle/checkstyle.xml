@@ -160,7 +160,7 @@
 		</module>
  		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.AtclauseOrderCheck">
 			<property name="target" value="METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
-    		<property name="tagOrder" value="@param, @return, @throws, @since, @deprecated, @see"/>
+    		<property name="tagOrder" value="@param, @return, @throws, @since, @see, @deprecated"/>
 		</module>
 
 		<!-- Miscellaneous -->

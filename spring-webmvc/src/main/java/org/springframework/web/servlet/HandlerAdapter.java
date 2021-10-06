@@ -70,9 +70,9 @@ public interface HandlerAdapter {
 	 * @param handler the handler to use. This object must have previously been passed
 	 * to the {@code supports} method of this interface, which must have
 	 * returned {@code true}.
-	 * @throws Exception in case of errors
 	 * @return a ModelAndView object with the name of the view and the required
 	 * model data, or {@code null} if the request has been handled directly
+	 * @throws Exception in case of errors
 	 */
 	@Nullable
 	ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception;
