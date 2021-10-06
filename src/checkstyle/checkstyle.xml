@@ -156,11 +156,11 @@
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.AtclauseOrderCheck">
 			<property name="target" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF"/>
-    		<property name="tagOrder" value="@author, @since, @param, @see, @version, @serial, @deprecated"/>
+			<property name="tagOrder" value="@author, @since, @param, @see, @version, @serial, @deprecated"/>
 		</module>
- 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.AtclauseOrderCheck">
+		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.AtclauseOrderCheck">
 			<property name="target" value="METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
-    		<property name="tagOrder" value="@param, @return, @throws, @since, @see, @deprecated"/>
+			<property name="tagOrder" value="@param, @return, @throws, @since, @see, @deprecated"/>
 		</module>
 
 		<!-- Miscellaneous -->
