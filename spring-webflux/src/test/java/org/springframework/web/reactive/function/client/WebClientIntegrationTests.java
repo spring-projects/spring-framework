@@ -42,14 +42,10 @@ import java.util.stream.Stream;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import okhttp3.mockwebserver.SocketPolicy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.util.SocketUtils;
-import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
@@ -73,7 +69,9 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.util.SocketUtils;
 import org.springframework.web.reactive.function.BodyExtractors;
+import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1220,63 +1218,9 @@ class WebClientIntegrationTests {
 				.verify();
 	}
 
-	static Stream<Arguments> socketFaultArguments() {
-		Stream.Builder<Arguments> argumentsBuilder = Stream.builder();
-		arguments().forEach(arg -> {
-			argumentsBuilder.accept(Arguments.of(arg, SocketPolicy.DISCONNECT_AT_START));
-			argumentsBuilder.accept(Arguments.of(arg, SocketPolicy.DISCONNECT_DURING_REQUEST_BODY));
-			argumentsBuilder.accept(Arguments.of(arg, SocketPolicy.DISCONNECT_AFTER_REQUEST));
-		});
-		return argumentsBuilder.build();
-	}
-
-	@ParameterizedTest(name = "[{index}] {displayName} [{0}, {1}]")
-	@MethodSource("socketFaultArguments")
-	void prematureClosureFault(ClientHttpConnector connector, SocketPolicy socketPolicy) {
-		startServer(connector);
-
-		prepareResponse(response -> response
-				.setSocketPolicy(socketPolicy)
-				.setStatus("HTTP/1.1 200 OK")
-				.setHeader("Response-Header-1", "value 1")
-				.setHeader("Response-Header-2", "value 2")
-				.setBody("{\"message\": \"Hello, World!\"}"));
-
-		String uri = "/test";
-		Mono<String> result = this.webClient
-				.post()
-				.uri(uri)
-				// Random non-empty body to allow us to interrupt.
-				.bodyValue("{\"action\": \"Say hello!\"}")
-				.retrieve()
-				.bodyToMono(String.class);
-
-		StepVerifier.create(result)
-				.expectErrorSatisfies(throwable -> {
-					assertThat(throwable).isInstanceOf(WebClientRequestException.class);
-					WebClientRequestException ex = (WebClientRequestException) throwable;
-					// Varies between connector providers.
-					assertThat(ex.getCause()).isInstanceOf(IOException.class);
-				})
-				.verify();
-	}
-
-	static Stream<Arguments> malformedResponseChunkArguments() {
-		return Stream.of(
-				Arguments.of(new ReactorClientHttpConnector(), true),
-				Arguments.of(new JettyClientHttpConnector(), true),
-				// Apache injects the Transfer-Encoding header for us, and complains with an exception if we also
-				// add it. The other two connectors do not add the header at all. We need this header for the test
-				// case to work correctly.
-				Arguments.of(new HttpComponentsClientHttpConnector(), false)
-		);
-	}
-
-	@ParameterizedTest(name = "[{index}] {displayName} [{0}, {1}]")
-	@MethodSource("malformedResponseChunkArguments")
-	void malformedResponseChunksOnBodilessEntity(ClientHttpConnector connector, boolean addTransferEncodingHeader) {
-		Mono<?> result = doMalformedResponseChunks(connector, addTransferEncodingHeader, ResponseSpec::toBodilessEntity);
-
+	@ParameterizedWebClientTest
+	void malformedResponseChunksOnBodilessEntity(ClientHttpConnector connector) {
+		Mono<?> result = doMalformedChunkedResponseTest(connector, ResponseSpec::toBodilessEntity);
 		StepVerifier.create(result)
 				.expectErrorSatisfies(throwable -> {
 					assertThat(throwable).isInstanceOf(WebClientException.class);
@@ -1286,11 +1230,9 @@ class WebClientIntegrationTests {
 				.verify();
 	}
 
-	@ParameterizedTest(name = "[{index}] {displayName} [{0}, {1}]")
-	@MethodSource("malformedResponseChunkArguments")
-	void malformedResponseChunksOnEntityWithBody(ClientHttpConnector connector, boolean addTransferEncodingHeader) {
-		Mono<?> result = doMalformedResponseChunks(connector, addTransferEncodingHeader, spec -> spec.toEntity(String.class));
-
+	@ParameterizedWebClientTest
+	void malformedResponseChunksOnEntityWithBody(ClientHttpConnector connector) {
+		Mono<?> result = doMalformedChunkedResponseTest(connector, spec -> spec.toEntity(String.class));
 		StepVerifier.create(result)
 				.expectErrorSatisfies(throwable -> {
 					assertThat(throwable).isInstanceOf(WebClientException.class);
@@ -1300,17 +1242,13 @@ class WebClientIntegrationTests {
 				.verify();
 	}
 
-	private <T> Mono<T> doMalformedResponseChunks(
-			ClientHttpConnector connector,
-			boolean addTransferEncodingHeader,
-			Function<ResponseSpec, Mono<T>> responseHandler
-	) {
+	private <T> Mono<T> doMalformedChunkedResponseTest(
+			ClientHttpConnector connector, Function<ResponseSpec, Mono<T>> handler) {
+
 		int port = SocketUtils.findAvailableTcpPort();
 
 		Thread serverThread = new Thread(() -> {
-			// This exists separately to the main mock server, as I had a really hard time getting that to send the
-			// chunked responses correctly, flushing the socket each time. This was the only way I was able to replicate
-			// the issue of the client not handling malformed response chunks correctly.
+			// No way to simulate a malformed chunked response through MockWebServer.
 			try (ServerSocket serverSocket = new ServerSocket(port)) {
 				Socket socket = serverSocket.accept();
 				InputStream is = socket.getInputStream();
@@ -1324,30 +1262,20 @@ class WebClientIntegrationTests {
 				os.write("\r\n".getBytes(StandardCharsets.UTF_8));
 				os.write("lskdu018973t09sylgasjkfg1][]'./.sdlv".getBytes(StandardCharsets.UTF_8));
 				socket.close();
-			} catch (IOException ex) {
+			}
+			catch (IOException ex) {
 				throw new RuntimeException(ex);
 			}
 		});
 
-		serverThread.setDaemon(true);
 		serverThread.start();
 
-		ResponseSpec spec = WebClient
-				.builder()
+		WebClient client = WebClient.builder()
 				.clientConnector(connector)
 				.baseUrl("http://localhost:" + port)
-				.build()
-				.post()
-				.headers(headers -> {
-					if (addTransferEncodingHeader) {
-						headers.add(HttpHeaders.TRANSFER_ENCODING, "chunked");
-					}
-				})
-				.retrieve();
+				.build();
 
-		return responseHandler
-				.apply(spec)
-				.doFinally(signal -> serverThread.stop());
+		return handler.apply(client.post().retrieve());
 	}
 
 	private void prepareResponse(Consumer<MockResponse> consumer) {
