@@ -11,12 +11,12 @@ sourceSets.test.java.srcDirs = files()
 aspectj.version = dependencyManagement.managedVersions['org.aspectj:aspectjweaver']
 
 compileAspectj {
-	sourceCompatibility "1.8"
-	targetCompatibility "1.8"
+	sourceCompatibility "17"
+	targetCompatibility "17"
 }
 compileTestAspectj {
-	sourceCompatibility "1.8"
-	targetCompatibility "1.8"
+	sourceCompatibility "17"
+	targetCompatibility "17"
 }
 
 dependencies {
