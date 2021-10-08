@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,15 +194,15 @@ public class RequestEntity<T> extends HttpEntity<T> {
 			return false;
 		}
 		RequestEntity<?> otherEntity = (RequestEntity<?>) other;
-		return (ObjectUtils.nullSafeEquals(getMethod(), otherEntity.getMethod()) &&
-				ObjectUtils.nullSafeEquals(getUrl(), otherEntity.getUrl()));
+		return (ObjectUtils.nullSafeEquals(this.method, otherEntity.method) &&
+				ObjectUtils.nullSafeEquals(this.url, otherEntity.url));
 	}
 
 	@Override
 	public int hashCode() {
 		int hashCode = super.hashCode();
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.method);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getUrl());
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.url);
 		return hashCode;
 	}
 
@@ -544,13 +544,13 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		private final URI uri;
 
 		@Nullable
-		String uriTemplate;
+		private final String uriTemplate;
 
 		@Nullable
-		private Object[] uriVarsArray;
+		private final Object[] uriVarsArray;
 
 		@Nullable
-		Map<String, ?> uriVarsMap;
+		private final Map<String, ?> uriVarsMap;
 
 		DefaultBodyBuilder(HttpMethod method, URI url) {
 			this.method = method;
@@ -661,7 +661,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 			return buildInternal(body, type);
 		}
 
-		private <T> RequestEntity<T>  buildInternal(@Nullable T body, @Nullable Type type) {
+		private <T> RequestEntity<T> buildInternal(@Nullable T body, @Nullable Type type) {
 			if (this.uri != null) {
 				return new RequestEntity<>(body, this.headers, this.method, this.uri, type);
 			}
@@ -714,6 +714,25 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		@Nullable
 		public Map<String, ?> getVarsMap() {
 			return this.uriVarsMap;
+		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!super.equals(other)) {
+				return false;
+			}
+			UriTemplateRequestEntity<?> otherEntity = (UriTemplateRequestEntity<?>) other;
+			return (ObjectUtils.nullSafeEquals(this.uriTemplate, otherEntity.uriTemplate) &&
+					ObjectUtils.nullSafeEquals(this.uriVarsArray, otherEntity.uriVarsArray) &&
+					ObjectUtils.nullSafeEquals(this.uriVarsMap, otherEntity.uriVarsMap));
+		}
+
+		@Override
+		public int hashCode() {
+			return (29 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.uriTemplate));
 		}
 
 		@Override

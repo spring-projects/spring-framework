@@ -157,12 +157,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	public void afterPropertiesSet() {
-
 		initHandlerMethods();
 
-		// Total includes detected mappings + explicit registrations via registerMapping..
-		int total = this.getHandlerMethods().size();
-
+		// Total includes detected mappings + explicit registrations via registerMapping
+		int total = getHandlerMethods().size();
 		if ((logger.isTraceEnabled() && total == 0) || (logger.isDebugEnabled() && total > 0) ) {
 			logger.debug(total + " mappings in " + formatMappingName());
 		}
