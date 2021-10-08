@@ -344,13 +344,6 @@ to `multipart/form-data` by the `FormHttpMessageConverter`. If the `MultiValueMa
 If necessary the `Content-Type` may also be set explicitly.
 
 
-[[rest-async-resttemplate]]
-=== Using `AsyncRestTemplate` (Deprecated)
-
-The `AsyncRestTemplate` is deprecated. For all use cases where you might consider using
-`AsyncRestTemplate`, use the <<web-reactive.adoc#webflux-client, WebClient>> instead.
-
-
 
 [[remoting]]
 == Remoting and Web Services
