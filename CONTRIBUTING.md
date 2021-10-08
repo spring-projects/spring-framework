@@ -40,16 +40,16 @@ Reporting an issue or making a feature request is a great way to contribute. You
 and the conversations that result from it provide a continuous flow of ideas. However,
 before creating a ticket, please take the time to [ask and research](#ask-questions) first.
 
-If creating an issue after a discussion on Stack Overflow, please provide a description
+If you create an issue after a discussion on Stack Overflow, please provide a description
 in the issue instead of simply referring to Stack Overflow. The issue tracker is an
 important place of record for design discussions and should be self-sufficient.
 
 Once you're ready, create an issue on [GitHub](https://github.com/spring-projects/spring-framework/issues).
 
-Many issues are caused by subtle behavior, typos and unintended configuration.
+Many issues are caused by subtle behavior, typos, and unintended configuration.
 Creating a [Minimal Reproducible Example](https://stackoverflow.com/help/minimal-reproducible-example)
 (starting with https://start.spring.io for example) of the problem helps the team
-triage quickly your issue adn get to the core of the problem.
+quickly triage your issue and get to the core of the problem.
 
 #### Issue Lifecycle
 
