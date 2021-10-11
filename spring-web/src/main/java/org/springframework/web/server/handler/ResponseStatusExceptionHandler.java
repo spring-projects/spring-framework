@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -81,9 +82,10 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 
 
 	private String formatError(Throwable ex, ServerHttpRequest request) {
-		String reason = ex.getClass().getSimpleName() + ": " + ex.getMessage();
+		String className = ex.getClass().getSimpleName();
+		String message = LogFormatUtils.formatValue(ex.getMessage(), -1, true);
 		String path = request.getURI().getRawPath();
-		return "Resolved [" + reason + "] for HTTP " + request.getMethod() + " " + path;
+		return "Resolved [" + className + ": " + message + "] for HTTP " + request.getMethod() + " " + path;
 	}
 
 	private boolean updateResponse(ServerHttpResponse response, Throwable ex) {
