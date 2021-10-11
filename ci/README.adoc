@@ -2,7 +2,7 @@
 
 The Spring Framework uses https://concourse-ci.org/[Concourse] for its CI build and other automated tasks.
 The Spring team has a dedicated Concourse instance available at https://ci.spring.io with a build pipeline
-for https://ci.spring.io/teams/spring-framework/pipelines/spring-framework-5.3.x[Spring Framework 5.3.x].
+for https://ci.spring.io/teams/spring-framework/pipelines/spring-framework-6.0.x[Spring Framework 6.0.x].
 
 === Setting up your development environment
 
@@ -51,7 +51,7 @@ The pipeline can be deployed using the following command:
 
 [source]
 ----
-$ fly -t spring set-pipeline -p spring-framework-5.3.x -c ci/pipeline.yml -l ci/parameters.yml
+$ fly -t spring set-pipeline -p spring-framework-6.0.x -c ci/pipeline.yml -l ci/parameters.yml
 ----
 
 NOTE: This assumes that you have credhub integration configured with the appropriate secrets.
