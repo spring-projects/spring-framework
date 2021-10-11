@@ -43,7 +43,7 @@ public abstract class LogFormatUtils {
 	 * @return the formatted value
 	 */
 	public static String formatValue(@Nullable Object value, boolean limitLength) {
-		return formatValue(value, 100, limitLength);
+		return formatValue(value, (limitLength ? 100 : -1), limitLength);
 	}
 
 	/**
