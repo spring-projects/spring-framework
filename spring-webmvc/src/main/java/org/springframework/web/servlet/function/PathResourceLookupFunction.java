@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 
 		try {
 			Resource resource = this.location.createRelative(path);
-			if (resource.exists() && resource.isReadable() && isResourceUnderLocation(resource)) {
+			if (resource.isReadable() && isResourceUnderLocation(resource)) {
 				return Optional.of(resource);
 			}
 			else {
@@ -110,10 +110,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 				return true;
 			}
 		}
-		if (path.contains("..") && StringUtils.cleanPath(path).contains("../")) {
-				return true;
-			}
-		return false;
+		return path.contains("..") && StringUtils.cleanPath(path).contains("../");
 	}
 
 	private boolean isResourceUnderLocation(Resource resource) throws IOException {
@@ -144,10 +141,8 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 		if (!resourcePath.startsWith(locationPath)) {
 			return false;
 		}
-		if (resourcePath.contains("%") && StringUtils.uriDecode(resourcePath, StandardCharsets.UTF_8).contains("../")) {
-			return false;
-		}
-		return true;
+		return !resourcePath.contains("%") ||
+				!StringUtils.uriDecode(resourcePath, StandardCharsets.UTF_8).contains("../");
 	}
 
 
