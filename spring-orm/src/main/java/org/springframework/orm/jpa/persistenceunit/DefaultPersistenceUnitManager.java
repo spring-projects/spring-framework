@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -498,7 +499,7 @@ public class DefaultPersistenceUnitManager
 	 * as defined in the JPA specification.
 	 */
 	private List<SpringPersistenceUnitInfo> readPersistenceUnitInfos() {
-		List<SpringPersistenceUnitInfo> infos = new LinkedList<>();
+		List<SpringPersistenceUnitInfo> infos = new ArrayList<>(1);
 		String defaultName = this.defaultPersistenceUnitName;
 		boolean buildDefaultUnit = (this.packagesToScan != null || this.mappingResources != null);
 		boolean foundDefaultUnit = false;
@@ -585,7 +586,7 @@ public class DefaultPersistenceUnitManager
 			Resource[] resources = this.resourcePatternResolver.getResources(pattern);
 			MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
 			for (Resource resource : resources) {
-				if (resource.isReadable()) {
+				try {
 					MetadataReader reader = readerFactory.getMetadataReader(resource);
 					String className = reader.getClassMetadata().getClassName();
 					if (matchesFilter(reader, readerFactory)) {
@@ -601,6 +602,9 @@ public class DefaultPersistenceUnitManager
 						scannedUnit.addManagedPackage(
 								className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
 					}
+				}
+				catch (FileNotFoundException ex) {
+					// Ignore non-readable resource
 				}
 			}
 		}

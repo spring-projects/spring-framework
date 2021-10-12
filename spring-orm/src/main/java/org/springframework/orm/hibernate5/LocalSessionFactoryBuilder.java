@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.orm.hibernate5;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -349,7 +350,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 				Resource[] resources = this.resourcePatternResolver.getResources(pattern);
 				MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
 				for (Resource resource : resources) {
-					if (resource.isReadable()) {
+					try {
 						MetadataReader reader = readerFactory.getMetadataReader(resource);
 						String className = reader.getClassMetadata().getClassName();
 						if (matchesEntityTypeFilter(reader, readerFactory)) {
@@ -361,6 +362,9 @@ public class LocalSessionFactoryBuilder extends Configuration {
 						else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
 							packageNames.add(className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
 						}
+					}
+					catch (FileNotFoundException ex) {
+						// Ignore non-readable resource
 					}
 				}
 			}
