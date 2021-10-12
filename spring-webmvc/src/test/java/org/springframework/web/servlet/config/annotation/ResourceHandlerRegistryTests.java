@@ -27,7 +27,6 @@ import org.mockito.Mockito;
 
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.CacheControl;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.support.GenericWebApplicationContext;
@@ -64,7 +63,7 @@ public class ResourceHandlerRegistryTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	public void setup() {
 		GenericWebApplicationContext appContext = new GenericWebApplicationContext();
 		appContext.refresh();
 
@@ -76,8 +75,14 @@ public class ResourceHandlerRegistryTests {
 		this.response = new MockHttpServletResponse();
 	}
 
+	private ResourceHttpRequestHandler getHandler(String pathPattern) {
+		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.registry.getHandlerMapping();
+		return (ResourceHttpRequestHandler) hm.getUrlMap().get(pathPattern);
+	}
+
+
 	@Test
-	public void noResourceHandlers() throws Exception {
+	public void noResourceHandlers() {
 		this.registry = new ResourceHandlerRegistry(new GenericWebApplicationContext(), new MockServletContext());
 		assertThat((Object) this.registry.getHandlerMapping()).isNull();
 	}
@@ -126,7 +131,7 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void resourceChain() throws Exception {
+	public void resourceChain() {
 		ResourceResolver mockResolver = Mockito.mock(ResourceResolver.class);
 		ResourceTransformer mockTransformer = Mockito.mock(ResourceTransformer.class);
 		this.registration.resourceChain(true).addResolver(mockResolver).addTransformer(mockTransformer);
@@ -148,7 +153,7 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void resourceChainWithoutCaching() throws Exception {
+	public void resourceChainWithoutCaching() {
 		this.registration.resourceChain(false);
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
@@ -163,7 +168,7 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void resourceChainWithVersionResolver() throws Exception {
+	public void resourceChainWithVersionResolver() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver()
 				.addFixedVersionStrategy("fixed", "/**/*.js")
 				.addContentVersionStrategy("/**");
@@ -188,7 +193,7 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void resourceChainWithOverrides() throws Exception {
+	public void resourceChainWithOverrides() {
 		CachingResourceResolver cachingResolver = Mockito.mock(CachingResourceResolver.class);
 		VersionResourceResolver versionResolver = Mockito.mock(VersionResourceResolver.class);
 		WebJarsResourceResolver webjarsResolver = Mockito.mock(WebJarsResourceResolver.class);
@@ -224,13 +229,11 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void urlResourceWithCharset() throws Exception {
+	public void urlResourceWithCharset()  {
 		this.registration.addResourceLocations("[charset=ISO-8859-1]file:///tmp");
 		this.registration.resourceChain(true);
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
-		UrlResource resource = (UrlResource) handler.getLocations().get(1);
-		assertThat(resource.getURL().toString()).isEqualTo("file:/tmp");
 		assertThat(handler.getUrlPathHelper()).isNotNull();
 
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
@@ -241,15 +244,10 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	void lastModifiedDisabled() {
+	public void lastModifiedDisabled() {
 		this.registration.setUseLastModified(false);
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		assertThat(handler.isUseLastModified()).isFalse();
-	}
-
-	private ResourceHttpRequestHandler getHandler(String pathPattern) {
-		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.registry.getHandlerMapping();
-		return (ResourceHttpRequestHandler) hm.getUrlMap().get(pathPattern);
 	}
 
 }

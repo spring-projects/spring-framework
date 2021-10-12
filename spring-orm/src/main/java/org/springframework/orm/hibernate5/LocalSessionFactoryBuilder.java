@@ -16,6 +16,7 @@
 
 package org.springframework.orm.hibernate5;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -319,7 +320,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 				Resource[] resources = this.resourcePatternResolver.getResources(pattern);
 				MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
 				for (Resource resource : resources) {
-					if (resource.isReadable()) {
+					try {
 						MetadataReader reader = readerFactory.getMetadataReader(resource);
 						String className = reader.getClassMetadata().getClassName();
 						if (matchesEntityTypeFilter(reader, readerFactory)) {
@@ -331,6 +332,9 @@ public class LocalSessionFactoryBuilder extends Configuration {
 						else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
 							packageNames.add(className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
 						}
+					}
+					catch (FileNotFoundException ex) {
+						// Ignore non-readable resource
 					}
 				}
 			}
