@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -424,6 +425,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	private void resolveResourceLocations() {
+		List<Resource> result = new ArrayList<>();
 		if (!this.locationValues.isEmpty()) {
 			ApplicationContext applicationContext = obtainApplicationContext();
 			for (String location : this.locationValues) {
@@ -452,7 +454,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 									"but resolved to a Resource of type: " + resource.getClass() + ". " +
 									"If this is intentional, please pass it as a pre-configured Resource via setLocations.");
 				}
-				this.locationsToUse.add(resource);
+				result.add(resource);
 				if (charset != null) {
 					if (!(resource instanceof UrlResource)) {
 						throw new IllegalArgumentException("Unexpected charset for non-UrlResource: " + resource);
@@ -461,7 +463,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				}
 			}
 		}
-		this.locationsToUse.addAll(this.locationResources);
+
+		result.addAll(this.locationResources);
+		result = result.stream().filter(Resource::exists).collect(Collectors.toList());
+
+		this.locationsToUse.addAll(result);
 	}
 
 	/**
