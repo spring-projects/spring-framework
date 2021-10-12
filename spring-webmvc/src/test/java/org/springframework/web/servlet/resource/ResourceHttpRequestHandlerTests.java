@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -309,6 +309,24 @@ public class ResourceHttpRequestHandlerTests {
 
 		assertThat(this.response.getContentType()).isEqualTo("foo/bar");
 		assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");
+	}
+
+	@Test // gh-27538
+	public void filterNonExistingLocations() throws Exception {
+		List<Resource> inputLocations = Arrays.asList(
+				new ClassPathResource("test/", getClass()),
+				new ClassPathResource("testalternatepath/", getClass()),
+				new ClassPathResource("nosuchpath/", getClass()));
+
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.setServletContext(new MockServletContext());
+		handler.setLocations(inputLocations);
+		handler.afterPropertiesSet();
+
+		List<Resource> actual = handler.getLocations();
+		assertThat(actual).hasSize(2);
+		assertThat(actual.get(0).getURL().toString()).endsWith("test/");
+		assertThat(actual.get(1).getURL().toString()).endsWith("testalternatepath/");
 	}
 
 	@Test
