@@ -21,6 +21,7 @@ from the Eclipse Marketplace.
 _When instructed to execute `./gradlew` from the command line, be sure to execute it within your locally cloned `spring-framework` working directory._
 
 1. Install the [Groovy Development Tools](https://marketplace.eclipse.org/content/groovy-development-tools).
+   - **NOTE**: As of October 12, 2021, the Groovy Development Tools do not work in Eclipse 2021-09 (4.21). See [Groovy Eclipse #1303](https://github.com/groovy/groovy-eclipse/issues/1303) for details.
 1. Switch to Groovy 3.0 in Eclipse (Preferences &#8594; Groovy &#8594; Compiler &#8594; Switch to 3.0...).
    - If you encounter build errors stating something similar to _"Groovy: compiler mismatch: project level is 2.5, workspace level is 3.0"_, change the Groovy compiler version to 3.0 for each affected project.
 1. Ensure that the _Forbidden reference (access rule)_ in Eclipse is set to `Info`
