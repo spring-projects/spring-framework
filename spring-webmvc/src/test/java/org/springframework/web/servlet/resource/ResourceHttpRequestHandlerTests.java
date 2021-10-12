@@ -290,7 +290,6 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test  // SPR-14368
 	public void getResourceWithMediaTypeResolvedThroughServletContext() throws Exception {
-
 		MockServletContext servletContext = new MockServletContext() {
 			@Override
 			public String getMimeType(String filePath) {
@@ -312,7 +311,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");
 	}
 
-	@Test // gh-27538
+	@Test  // gh-27538
 	public void filterNonExistingLocations() throws Exception {
 		List<Resource> inputLocations = Arrays.asList(
 				new ClassPathResource("test/", getClass()),
@@ -332,7 +331,6 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test
 	public void testInvalidPath() throws Exception {
-
 		// Use mock ResourceResolver: i.e. we're only testing upfront validations...
 
 		Resource resource = mock(Resource.class);
@@ -678,7 +676,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(ranges[11]).isEqualTo("t.");
 	}
 
-	@Test // gh-25976
+	@Test  // gh-25976
 	public void partialContentByteRangeWithEncodedResource(GzipSupport.GzippedFiles gzippedFiles) throws Exception {
 		String path = "js/foo.js";
 		gzippedFiles.create(path);
@@ -707,7 +705,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.getHeaderValues("Vary")).containsExactly("Accept-Encoding");
 	}
 
-	@Test // gh-25976
+	@Test  // gh-25976
 	public void partialContentWithHttpHead() throws Exception {
 		this.request.setMethod("HEAD");
 		this.request.addHeader("Range", "bytes=0-1");
