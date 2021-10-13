@@ -189,6 +189,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * locations provided via {@link #setLocations(List) setLocations}.
 	 * <p>Note that the returned list is fully initialized only after
 	 * initialization via {@link #afterPropertiesSet()}.
+	 * <p><strong>Note:</strong> As of 5.3.11 the list of locations is filtered
+	 * to exclude those that don't actually exist and therefore the list returned
+	 * from this method may be a subset of all given locations.
 	 * @see #setLocationValues
 	 * @see #setLocations
 	 */
@@ -467,6 +470,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		result.addAll(this.locationResources);
 		result = result.stream().filter(Resource::exists).collect(Collectors.toList());
 
+		this.locationsToUse.clear();
 		this.locationsToUse.addAll(result);
 	}
 

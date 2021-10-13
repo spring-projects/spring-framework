@@ -253,6 +253,23 @@ public class ResourceWebHandlerTests {
 		assertResponseBody(exchange, "h1 { color:red; }");
 	}
 
+	@Test  // gh-27538
+	public void filterNonExistingLocations() throws Exception {
+		List<Resource> inputLocations = Arrays.asList(
+				new ClassPathResource("test/", getClass()),
+				new ClassPathResource("testalternatepath/", getClass()),
+				new ClassPathResource("nosuchpath/", getClass()));
+
+		ResourceWebHandler handler = new ResourceWebHandler();
+		handler.setLocations(inputLocations);
+		handler.afterPropertiesSet();
+
+		List<Resource> actual = handler.getLocations();
+		assertThat(actual).hasSize(2);
+		assertThat(actual.get(0).getURL().toString()).endsWith("test/");
+		assertThat(actual.get(1).getURL().toString()).endsWith("testalternatepath/");
+	}
+
 	@Test // SPR-14577
 	public void getMediaTypeWithFavorPathExtensionOff() throws Exception {
 		List<Resource> paths = Collections.singletonList(new ClassPathResource("test/", getClass()));
