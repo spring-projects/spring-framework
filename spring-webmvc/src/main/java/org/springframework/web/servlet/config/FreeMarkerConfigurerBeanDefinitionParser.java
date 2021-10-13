@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,9 +60,6 @@ public class FreeMarkerConfigurerBeanDefinitionParser extends AbstractSingleBean
 			List<String> locations = new ArrayList<>(childElements.size());
 			for (Element childElement : childElements) {
 				locations.add(childElement.getAttribute("location"));
-			}
-			if (locations.isEmpty()) {
-				locations.add("/WEB-INF/");
 			}
 			builder.addPropertyValue("templateLoaderPaths", StringUtils.toStringArray(locations));
 		}
