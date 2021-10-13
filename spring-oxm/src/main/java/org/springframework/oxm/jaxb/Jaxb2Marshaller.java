@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -1025,12 +1024,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		public DataHandler getAttachmentAsDataHandler(String contentId) {
 			if (contentId.startsWith(CID)) {
 				contentId = contentId.substring(CID.length());
-				try {
-					contentId = URLDecoder.decode(contentId, "UTF-8");
-				}
-				catch (UnsupportedEncodingException ex) {
-					// ignore
-				}
+				contentId = URLDecoder.decode(contentId, StandardCharsets.UTF_8);
 				contentId = '<' + contentId + '>';
 			}
 			DataHandler dataHandler = this.mimeContainer.getAttachment(contentId);
