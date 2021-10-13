@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,11 @@
 
 package org.springframework.web.client;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -135,31 +132,17 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 			int rawStatusCode, String statusText, @Nullable byte[] responseBody, @Nullable Charset charset) {
 
 		String preface = rawStatusCode + " " + statusText + ": ";
+
 		if (ObjectUtils.isEmpty(responseBody)) {
 			return preface + "[no body]";
 		}
 
-		if (charset == null) {
-			charset = StandardCharsets.UTF_8;
-		}
-		int maxChars = 200;
+		charset = (charset != null ? charset : StandardCharsets.UTF_8);
 
-		if (responseBody.length < maxChars * 2) {
-			return preface + "[" + new String(responseBody, charset) + "]";
-		}
+		String bodyText = new String(responseBody, charset);
+		bodyText = LogFormatUtils.formatValue(bodyText, -1, true);
 
-		try {
-			Reader reader = new InputStreamReader(new ByteArrayInputStream(responseBody), charset);
-			CharBuffer buffer = CharBuffer.allocate(maxChars);
-			reader.read(buffer);
-			reader.close();
-			buffer.flip();
-			return preface + "[" + buffer.toString() + "... (" + responseBody.length + " bytes)]";
-		}
-		catch (IOException ex) {
-			// should never happen
-			throw new IllegalStateException(ex);
-		}
+		return preface + bodyText;
 	}
 
 	/**
