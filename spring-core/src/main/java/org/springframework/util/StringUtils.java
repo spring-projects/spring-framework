@@ -735,9 +735,31 @@ public abstract class StringUtils {
 			pathElements.addFirst(CURRENT_PATH);
 		}
 
-		final String joined = collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
+		final String joined = joinStrings(pathElements, FOLDER_SEPARATOR);
 		// avoid string concatenation with empty prefix
 		return prefix.isEmpty() ? joined : prefix + joined;
+	}
+
+	/**
+	 * Convert a {@link Collection} of strings to a delimited {@code String} (e.g. CSV).
+	 * @param coll the {@code Collection} to convert (potentially {@code null} or empty)
+	 * @param delim the delimiter to use (typically a ",")
+	 * @return the delimited {@code String}
+	 */
+	private static String joinStrings(@Nullable Collection<String> coll, String delim) {
+
+		if (CollectionUtils.isEmpty(coll)) {
+			return "";
+		}
+
+		int totalLength = (coll.size() - 1) * delim.length();
+		for (String element : coll) {
+			totalLength += String.valueOf(element).length();
+		}
+
+		StringBuilder sb = new StringBuilder(totalLength);
+		collectDelimitedString(sb, coll, delim, "", "");
+		return sb.toString();
 	}
 
 	/**
@@ -1299,20 +1321,32 @@ public abstract class StringUtils {
 			return "";
 		}
 
-		int totalLength = coll.size() * (prefix.length() + suffix.length()) + (coll.size() - 1) * delim.length();
-		for (Object element : coll) {
-			totalLength += String.valueOf(element).length();
-		}
+		// Pre-allocate pessimistically with one char per item, minimum 16 chars
+		int totalLength = coll.size() * (1 + prefix.length() + suffix.length()) + (coll.size() - 1) * delim.length();
+		StringBuilder sb = new StringBuilder(Math.max(16, totalLength));
+		collectDelimitedString(sb, coll, delim, prefix, suffix);
+		return sb.toString();
+	}
 
-		StringBuilder sb = new StringBuilder(totalLength);
+	/**
+	 * Convert a {@link Collection} to a delimited {@code String} (e.g. CSV).
+	 * <p>Useful for {@code toString()} implementations.
+	 * @param stringBuilder the (pre-sized) {@code StringBuilder} to collect the final string
+	 * @param coll the {@code Collection} to convert
+	 * @param delim the delimiter to use (typically a ",")
+	 * @param prefix the {@code String} to start each element with
+	 * @param suffix the {@code String} to end each element with
+	 */
+	private static void collectDelimitedString(
+			StringBuilder stringBuilder, Collection<?> coll, String delim, String prefix, String suffix) {
+
 		Iterator<?> it = coll.iterator();
 		while (it.hasNext()) {
-			sb.append(prefix).append(it.next()).append(suffix);
+			stringBuilder.append(prefix).append(it.next()).append(suffix);
 			if (it.hasNext()) {
-				sb.append(delim);
+				stringBuilder.append(delim);
 			}
 		}
-		return sb.toString();
 	}
 
 	/**
