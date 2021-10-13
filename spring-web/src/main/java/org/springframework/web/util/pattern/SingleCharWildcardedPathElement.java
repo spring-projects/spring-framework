@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ class SingleCharWildcardedPathElement extends PathElement {
 			return false;
 		}
 
-		char[] data = ((PathSegment)element).valueToMatchAsChars();
+		char[] data = ((PathSegment) element).valueToMatchAsChars();
 		if (this.caseSensitive) {
 			for (int i = 0; i < this.len; i++) {
 				char ch = this.text[i];
@@ -125,15 +125,15 @@ class SingleCharWildcardedPathElement extends PathElement {
 		return this.len;
 	}
 
+	@Override
+	public char[] getChars() {
+		return this.text;
+	}
+
 
 	@Override
 	public String toString() {
 		return "SingleCharWildcarded(" + String.valueOf(this.text) + ")";
-	}
-
-	@Override
-	public char[] getChars() {
-		return this.text;
 	}
 
 }
