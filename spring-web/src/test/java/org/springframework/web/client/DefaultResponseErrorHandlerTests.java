@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,8 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -75,25 +73,7 @@ public class DefaultResponseErrorHandlerTests {
 		assertThatExceptionOfType(HttpClientErrorException.class)
 				.isThrownBy(() -> handler.handleError(response))
 				.satisfies(ex -> assertThat(ex.getResponseHeaders()).isSameAs(headers))
-				.satisfies(ex -> assertThat(ex.getMessage()).isEqualTo("404 Not Found: [Hello World]"));
-	}
-
-	@Test
-	public void handleErrorWithLongBody() throws Exception {
-
-		Function<Integer, String> bodyGenerator =
-				size -> Flux.just("a").repeat(size-1).reduce((s, s2) -> s + s2).block();
-
-		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
-		given(response.getStatusText()).willReturn("Not Found");
-		given(response.getHeaders()).willReturn(new HttpHeaders());
-		given(response.getBody()).willReturn(
-				new ByteArrayInputStream(bodyGenerator.apply(500).getBytes(StandardCharsets.UTF_8)));
-
-		assertThatExceptionOfType(HttpClientErrorException.class)
-				.isThrownBy(() -> handler.handleError(response))
-				.satisfies(ex -> assertThat(ex.getMessage()).isEqualTo(
-						"404 Not Found: [" + bodyGenerator.apply(200) + "... (500 bytes)]"));
+				.withMessage("404 Not Found: \"Hello World\"");
 	}
 
 	@Test

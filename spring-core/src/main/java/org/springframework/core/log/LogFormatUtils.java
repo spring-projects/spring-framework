@@ -60,22 +60,20 @@ public abstract class LogFormatUtils {
 			return "";
 		}
 		String result;
-		if (value instanceof CharSequence) {
-			result = "\"" + value + "\"";
+		try {
+			result = value.toString();
 		}
-		else {
-			try {
-				result = value.toString();
-			}
-			catch (Throwable ex) {
-				result = ex.toString();
-			}
+		catch (Throwable ex) {
+			result = ex.toString();
 		}
 		if (maxLength != -1) {
 			result = (result.length() > maxLength ? result.substring(0, maxLength) + " (truncated)..." : result);
 		}
 		if (replaceNewlines) {
 			result = result.replace("\n", "<LF>").replace("\r", "<CR>");
+		}
+		if (value instanceof CharSequence) {
+			result = "\"" + result + "\"";
 		}
 		return result;
 	}
