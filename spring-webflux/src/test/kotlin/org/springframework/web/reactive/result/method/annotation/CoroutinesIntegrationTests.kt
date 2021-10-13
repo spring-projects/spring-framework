@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,20 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.reactive.config.EnableWebFlux
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer
 
 class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 
@@ -61,6 +63,15 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		val entity = performGet<String>("/deferred", HttpHeaders.EMPTY, String::class.java)
 		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(entity.body).isEqualTo("foo")
+	}
+
+	@ParameterizedHttpServerTest  // gh-27292
+	fun `Suspending ResponseEntity handler method`(httpServer: HttpServer) {
+		startServer(httpServer)
+
+		val entity = performGet<String>("/suspend-response-entity", HttpHeaders.EMPTY, String::class.java)
+		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(entity.body).isEqualTo("{\"value\":\"foo\"}")
 	}
 
 	@ParameterizedHttpServerTest
@@ -119,6 +130,12 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 			"foo"
 		}
 
+		@GetMapping("/suspend-response-entity")
+		suspend fun suspendingResponseEntityEndpoint(): ResponseEntity<FooContainer<String>> {
+			delay(1)
+			return ResponseEntity.ok(FooContainer("foo"))
+		}
+
 		@GetMapping("/flow")
 		fun flowEndpoint()= flow {
 			emit("foo")
@@ -151,4 +168,8 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		}
 
 	}
+
+
+	class FooContainer<T>(val value: T)
+
 }
