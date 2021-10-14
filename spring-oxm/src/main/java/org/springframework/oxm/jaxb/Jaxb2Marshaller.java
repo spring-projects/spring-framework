@@ -111,6 +111,7 @@ import org.springframework.util.xml.StaxUtils;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.0
  * @see #setContextPath
  * @see #setClassesToBeBound
@@ -607,25 +608,21 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 	@Override
 	public boolean supports(Type genericType) {
-		if (genericType instanceof ParameterizedType) {
-			ParameterizedType parameterizedType = (ParameterizedType) genericType;
+		if (genericType instanceof ParameterizedType parameterizedType) {
 			if (JAXBElement.class == parameterizedType.getRawType() &&
 					parameterizedType.getActualTypeArguments().length == 1) {
 				Type typeArgument = parameterizedType.getActualTypeArguments()[0];
-				if (typeArgument instanceof Class) {
-					Class<?> classArgument = (Class<?>) typeArgument;
+				if (typeArgument instanceof Class<?> classArgument) {
 					return ((classArgument.isArray() && Byte.TYPE == classArgument.getComponentType()) ||
 							isPrimitiveWrapper(classArgument) || isStandardClass(classArgument) ||
 							supportsInternal(classArgument, false));
 				}
-				else if (typeArgument instanceof GenericArrayType) {
-					GenericArrayType arrayType = (GenericArrayType) typeArgument;
+				else if (typeArgument instanceof GenericArrayType arrayType) {
 					return (Byte.TYPE == arrayType.getGenericComponentType());
 				}
 			}
 		}
-		else if (genericType instanceof Class) {
-			Class<?> clazz = (Class<?>) genericType;
+		else if (genericType instanceof Class<?> clazz) {
 			return supportsInternal(clazz, this.checkForXmlRootElement);
 		}
 		return false;
@@ -866,13 +863,11 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		XMLReader xmlReader = null;
 		InputSource inputSource = null;
 
-		if (source instanceof SAXSource) {
-			SAXSource saxSource = (SAXSource) source;
+		if (source instanceof SAXSource saxSource) {
 			xmlReader = saxSource.getXMLReader();
 			inputSource = saxSource.getInputSource();
 		}
-		else if (source instanceof StreamSource) {
-			StreamSource streamSource = (StreamSource) source;
+		else if (source instanceof StreamSource streamSource) {
 			if (streamSource.getInputStream() != null) {
 				inputSource = new InputSource(streamSource.getInputStream());
 			}

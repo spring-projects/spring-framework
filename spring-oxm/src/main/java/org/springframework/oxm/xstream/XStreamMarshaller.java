@@ -253,8 +253,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	 */
 	public void setConverterLookup(ConverterLookup converterLookup) {
 		this.converterLookup = converterLookup;
-		if (converterLookup instanceof ConverterRegistry) {
-			this.converterRegistry = (ConverterRegistry) converterLookup;
+		if (converterLookup instanceof ConverterRegistry registry) {
+			this.converterRegistry = registry;
 		}
 	}
 
@@ -491,11 +491,11 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	protected void configureXStream(XStream xstream) {
 		if (this.converters != null) {
 			for (int i = 0; i < this.converters.length; i++) {
-				if (this.converters[i] instanceof Converter) {
-					xstream.registerConverter((Converter) this.converters[i], i);
+				if (this.converters[i] instanceof Converter converter) {
+					xstream.registerConverter(converter, i);
 				}
-				else if (this.converters[i] instanceof SingleValueConverter) {
-					xstream.registerConverter((SingleValueConverter) this.converters[i], i);
+				else if (this.converters[i] instanceof SingleValueConverter converter) {
+					xstream.registerConverter(converter, i);
 				}
 				else {
 					throw new IllegalArgumentException("Invalid ConverterMatcher [" + this.converters[i] + "]");
@@ -553,26 +553,23 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		}
 		if (this.useAttributeFor != null) {
 			for (Map.Entry<?, ?> entry : this.useAttributeFor.entrySet()) {
-				if (entry.getKey() instanceof String) {
-					if (entry.getValue() instanceof Class) {
-						xstream.useAttributeFor((String) entry.getKey(), (Class<?>) entry.getValue());
+				if (entry.getKey() instanceof String key) {
+					if (entry.getValue() instanceof Class<?> clazz) {
+						xstream.useAttributeFor(key, clazz);
 					}
 					else {
 						throw new IllegalArgumentException(
 								"'useAttributesFor' takes Map<String, Class> when using a map key of type String");
 					}
 				}
-				else if (entry.getKey() instanceof Class) {
-					Class<?> key = (Class<?>) entry.getKey();
-					if (entry.getValue() instanceof String) {
-						xstream.useAttributeFor(key, (String) entry.getValue());
+				else if (entry.getKey() instanceof Class<?> key) {
+					if (entry.getValue() instanceof String value) {
+						xstream.useAttributeFor(key, value);
 					}
-					else if (entry.getValue() instanceof List) {
-						@SuppressWarnings("unchecked")
-						List<Object> listValue = (List<Object>) entry.getValue();
+					else if (entry.getValue() instanceof List<?> listValue) {
 						for (Object element : listValue) {
-							if (element instanceof String) {
-								xstream.useAttributeFor(key, (String) element);
+							if (element instanceof String value) {
+								xstream.useAttributeFor(key, value);
 							}
 						}
 					}
@@ -619,11 +616,10 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 			String key = entry.getKey();
 			Object value = entry.getValue();
 			Class<?> type;
-			if (value instanceof Class) {
-				type = (Class<?>) value;
+			if (value instanceof Class<?> clazz) {
+				type = clazz;
 			}
-			else if (value instanceof String) {
-				String className = (String) value;
+			else if (value instanceof String className) {
 				type = ClassUtils.forName(className, this.beanClassLoader);
 			}
 			else {
@@ -676,11 +672,11 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	@Override
 	protected void marshalDomNode(Object graph, Node node) throws XmlMappingException {
 		HierarchicalStreamWriter streamWriter;
-		if (node instanceof Document) {
-			streamWriter = new DomWriter((Document) node, this.nameCoder);
+		if (node instanceof Document document) {
+			streamWriter = new DomWriter(document, this.nameCoder);
 		}
-		else if (node instanceof Element) {
-			streamWriter = new DomWriter((Element) node, node.getOwnerDocument(), this.nameCoder);
+		else if (node instanceof Element element) {
+			streamWriter = new DomWriter(element, node.getOwnerDocument(), this.nameCoder);
 		}
 		else {
 			throw new IllegalArgumentException("DOMResult contains neither Document nor Element");
@@ -691,10 +687,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	@Override
 	protected void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter) throws XmlMappingException {
 		ContentHandler contentHandler = StaxUtils.createContentHandler(eventWriter);
-		LexicalHandler lexicalHandler = null;
-		if (contentHandler instanceof LexicalHandler) {
-			lexicalHandler = (LexicalHandler) contentHandler;
-		}
+		LexicalHandler lexicalHandler = (contentHandler instanceof LexicalHandler handler ? handler : null);
 		marshalSaxHandlers(graph, contentHandler, lexicalHandler);
 	}
 
@@ -789,11 +782,11 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	@Override
 	protected Object unmarshalDomNode(Node node) throws XmlMappingException {
 		HierarchicalStreamReader streamReader;
-		if (node instanceof Document) {
-			streamReader = new DomReader((Document) node, this.nameCoder);
+		if (node instanceof Document document) {
+			streamReader = new DomReader(document, this.nameCoder);
 		}
-		else if (node instanceof Element) {
-			streamReader = new DomReader((Element) node, this.nameCoder);
+		else if (node instanceof Element element) {
+			streamReader = new DomReader(element, this.nameCoder);
 		}
 		else {
 			throw new IllegalArgumentException("DOMSource contains neither Document nor Element");
