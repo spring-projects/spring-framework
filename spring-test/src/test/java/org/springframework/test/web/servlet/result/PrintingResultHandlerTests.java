@@ -347,7 +347,7 @@ public class PrintingResultHandlerTests {
 
 			private String printedHeading;
 
-			private Map<String, Map<String, Object>> printedValues = new HashMap<>();
+			private final Map<String, Map<String, Object>> printedValues = new HashMap<>();
 
 			@Override
 			public void printHeading(String heading) {

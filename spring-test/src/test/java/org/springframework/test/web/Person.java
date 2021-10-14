@@ -70,10 +70,9 @@ public class Person {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof Person)) {
+		if (!(other instanceof Person otherPerson)) {
 			return false;
 		}
-		Person otherPerson = (Person) other;
 		return (ObjectUtils.nullSafeEquals(this.name, otherPerson.name) &&
 				ObjectUtils.nullSafeEquals(this.someDouble, otherPerson.someDouble) &&
 				ObjectUtils.nullSafeEquals(this.someBoolean, otherPerson.someBoolean));

@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class MockHttpSessionTests {
 
-	private MockHttpSession session = new MockHttpSession();
+	private final MockHttpSession session = new MockHttpSession();
 
 
 	@Test
