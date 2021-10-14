@@ -18,6 +18,7 @@ package org.springframework.scheduling.quartz;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
@@ -30,6 +31,7 @@ import org.quartz.SchedulerContext;
 import org.quartz.SchedulerFactory;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.SchedulerRepository;
+import org.quartz.impl.jdbcjobstore.JobStoreTX;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -40,6 +42,8 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -394,6 +398,29 @@ public class QuartzSupportTests {
 				assertTrue("DummyJob should have been executed at least once.", DummyJob.count > 0);
 			 */
 		}
+	}
+
+	@Test
+	public void schedulerFactoryBeanWithCustomJobStore() throws Exception {
+		StaticApplicationContext context = new StaticApplicationContext();
+
+		final String dbName = "mydb";
+		final EmbeddedDatabase database = new EmbeddedDatabaseBuilder().setName(dbName).build();
+
+		final Properties properties = new Properties();
+		properties.setProperty("org.quartz.jobStore.class", JobStoreTX.class.getName());
+		properties.setProperty("org.quartz.jobStore.dataSource", dbName);
+
+		BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(SchedulerFactoryBean.class)
+				.addPropertyValue("autoStartup", false)
+				.addPropertyValue("dataSource", database)
+				.addPropertyValue("quartzProperties", properties)
+				.getBeanDefinition();
+		context.registerBeanDefinition("scheduler", beanDefinition);
+
+		Scheduler bean = context.getBean("scheduler", Scheduler.class);
+
+		assertThat(bean.getMetaData().getJobStoreClass()).isEqualTo(JobStoreTX.class);
 	}
 
 	private ClassPathXmlApplicationContext context(String path) {
