@@ -59,8 +59,7 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 		NodeList childNodes = element.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node node = childNodes.item(i);
-			if (node instanceof Element) {
-				Element includeElement = (Element) node;
+			if (node instanceof Element includeElement) {
 				TypedStringValue valueHolder = new TypedStringValue(includeElement.getAttribute("name"));
 				valueHolder.setSource(parserContext.extractSource(includeElement));
 				includePatterns.add(valueHolder);

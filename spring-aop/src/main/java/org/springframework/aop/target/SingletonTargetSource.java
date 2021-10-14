@@ -85,10 +85,9 @@ public class SingletonTargetSource implements TargetSource, Serializable {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof SingletonTargetSource)) {
+		if (!(other instanceof SingletonTargetSource otherTargetSource)) {
 			return false;
 		}
-		SingletonTargetSource otherTargetSource = (SingletonTargetSource) other;
 		return this.target.equals(otherTargetSource.target);
 	}
 

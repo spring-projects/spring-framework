@@ -61,9 +61,9 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 	 */
 	private final Map<Object, Object> delegateMap = new WeakHashMap<>();
 
-	private Class<?> defaultImplType;
+	private final Class<?> defaultImplType;
 
-	private Class<?> interfaceType;
+	private final Class<?> interfaceType;
 
 
 	public DelegatePerTargetObjectIntroductionInterceptor(Class<?> defaultImplType, Class<?> interfaceType) {

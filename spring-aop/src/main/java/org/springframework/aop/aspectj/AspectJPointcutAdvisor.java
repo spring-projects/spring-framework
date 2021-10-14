@@ -97,10 +97,9 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof AspectJPointcutAdvisor)) {
+		if (!(other instanceof AspectJPointcutAdvisor otherAdvisor)) {
 			return false;
 		}
-		AspectJPointcutAdvisor otherAdvisor = (AspectJPointcutAdvisor) other;
 		return this.advice.equals(otherAdvisor.advice);
 	}
 

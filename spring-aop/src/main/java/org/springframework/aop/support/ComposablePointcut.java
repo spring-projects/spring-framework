@@ -188,10 +188,9 @@ public class ComposablePointcut implements Pointcut, Serializable {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ComposablePointcut)) {
+		if (!(other instanceof ComposablePointcut otherPointcut)) {
 			return false;
 		}
-		ComposablePointcut otherPointcut = (ComposablePointcut) other;
 		return (this.classFilter.equals(otherPointcut.classFilter) &&
 				this.methodMatcher.equals(otherPointcut.methodMatcher));
 	}

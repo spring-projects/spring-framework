@@ -85,11 +85,9 @@ public class ScopedProxyFactoryBean extends ProxyConfig
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (!(beanFactory instanceof ConfigurableBeanFactory)) {
+		if (!(beanFactory instanceof ConfigurableBeanFactory cbf)) {
 			throw new IllegalStateException("Not running in a ConfigurableBeanFactory: " + beanFactory);
 		}
-		ConfigurableBeanFactory cbf = (ConfigurableBeanFactory) beanFactory;
-
 		this.scopedTargetSource.setBeanFactory(beanFactory);
 
 		ProxyFactory pf = new ProxyFactory();

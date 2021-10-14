@@ -146,10 +146,9 @@ public abstract class MethodMatchers {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof UnionMethodMatcher)) {
+			if (!(other instanceof UnionMethodMatcher that)) {
 				return false;
 			}
-			UnionMethodMatcher that = (UnionMethodMatcher) other;
 			return (this.mm1.equals(that.mm1) && this.mm2.equals(that.mm2));
 		}
 
@@ -223,8 +222,7 @@ public abstract class MethodMatchers {
 			}
 			ClassFilter otherCf1 = ClassFilter.TRUE;
 			ClassFilter otherCf2 = ClassFilter.TRUE;
-			if (other instanceof ClassFilterAwareUnionMethodMatcher) {
-				ClassFilterAwareUnionMethodMatcher cfa = (ClassFilterAwareUnionMethodMatcher) other;
+			if (other instanceof ClassFilterAwareUnionMethodMatcher cfa) {
 				otherCf1 = cfa.cf1;
 				otherCf2 = cfa.cf2;
 			}
@@ -312,10 +310,9 @@ public abstract class MethodMatchers {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof IntersectionMethodMatcher)) {
+			if (!(other instanceof IntersectionMethodMatcher that)) {
 				return false;
 			}
-			IntersectionMethodMatcher that = (IntersectionMethodMatcher) other;
 			return (this.mm1.equals(that.mm1) && this.mm2.equals(that.mm2));
 		}
 

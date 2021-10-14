@@ -68,10 +68,9 @@ public abstract class ExposeBeanNameAdvisors {
 	 * @throws IllegalStateException if the bean name has not been exposed
 	 */
 	public static String getBeanName(MethodInvocation mi) throws IllegalStateException {
-		if (!(mi instanceof ProxyMethodInvocation)) {
+		if (!(mi instanceof ProxyMethodInvocation pmi)) {
 			throw new IllegalArgumentException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 		}
-		ProxyMethodInvocation pmi = (ProxyMethodInvocation) mi;
 		String beanName = (String) pmi.getUserAttribute(BEAN_NAME_ATTRIBUTE);
 		if (beanName == null) {
 			throw new IllegalStateException("Cannot get bean name; not set on MethodInvocation: " + mi);
@@ -113,10 +112,9 @@ public abstract class ExposeBeanNameAdvisors {
 		@Override
 		@Nullable
 		public Object invoke(MethodInvocation mi) throws Throwable {
-			if (!(mi instanceof ProxyMethodInvocation)) {
+			if (!(mi instanceof ProxyMethodInvocation pmi)) {
 				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 			}
-			ProxyMethodInvocation pmi = (ProxyMethodInvocation) mi;
 			pmi.setUserAttribute(BEAN_NAME_ATTRIBUTE, this.beanName);
 			return mi.proceed();
 		}
@@ -138,10 +136,9 @@ public abstract class ExposeBeanNameAdvisors {
 		@Override
 		@Nullable
 		public Object invoke(MethodInvocation mi) throws Throwable {
-			if (!(mi instanceof ProxyMethodInvocation)) {
+			if (!(mi instanceof ProxyMethodInvocation pmi)) {
 				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 			}
-			ProxyMethodInvocation pmi = (ProxyMethodInvocation) mi;
 			pmi.setUserAttribute(BEAN_NAME_ATTRIBUTE, this.beanName);
 			return super.invoke(mi);
 		}

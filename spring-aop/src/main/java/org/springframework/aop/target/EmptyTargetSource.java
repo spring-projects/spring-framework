@@ -135,10 +135,9 @@ public final class EmptyTargetSource implements TargetSource, Serializable {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof EmptyTargetSource)) {
+		if (!(other instanceof EmptyTargetSource otherTs)) {
 			return false;
 		}
-		EmptyTargetSource otherTs = (EmptyTargetSource) other;
 		return (ObjectUtils.nullSafeEquals(this.targetClass, otherTs.targetClass) && this.isStatic == otherTs.isStatic);
 	}
 

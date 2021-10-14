@@ -78,10 +78,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 */
 	public static JoinPoint currentJoinPoint() {
 		MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
-		if (!(mi instanceof ProxyMethodInvocation)) {
+		if (!(mi instanceof ProxyMethodInvocation pmi)) {
 			throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 		}
-		ProxyMethodInvocation pmi = (ProxyMethodInvocation) mi;
 		JoinPoint jp = (JoinPoint) pmi.getUserAttribute(JOIN_POINT_KEY);
 		if (jp == null) {
 			jp = new MethodInvocationProceedingJoinPoint(pmi);
@@ -714,10 +713,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof AdviceExcludingMethodMatcher)) {
+			if (!(other instanceof AdviceExcludingMethodMatcher otherMm)) {
 				return false;
 			}
-			AdviceExcludingMethodMatcher otherMm = (AdviceExcludingMethodMatcher) other;
 			return this.adviceMethod.equals(otherMm.adviceMethod);
 		}
 

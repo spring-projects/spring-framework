@@ -125,10 +125,9 @@ public class AnnotationMatchingPointcut implements Pointcut {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof AnnotationMatchingPointcut)) {
+		if (!(other instanceof AnnotationMatchingPointcut otherPointcut)) {
 			return false;
 		}
-		AnnotationMatchingPointcut otherPointcut = (AnnotationMatchingPointcut) other;
 		return (this.classFilter.equals(otherPointcut.classFilter) &&
 				this.methodMatcher.equals(otherPointcut.methodMatcher));
 	}
@@ -189,10 +188,9 @@ public class AnnotationMatchingPointcut implements Pointcut {
 			if (this == obj) {
 				return true;
 			}
-			if (!(obj instanceof AnnotationCandidateClassFilter)) {
+			if (!(obj instanceof AnnotationCandidateClassFilter that)) {
 				return false;
 			}
-			AnnotationCandidateClassFilter that = (AnnotationCandidateClassFilter) obj;
 			return this.annotationType.equals(that.annotationType);
 		}
 

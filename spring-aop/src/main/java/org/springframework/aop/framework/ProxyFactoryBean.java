@@ -479,8 +479,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		Advisor[] advisors = getAdvisors();
 		List<Advisor> freshAdvisors = new ArrayList<>(advisors.length);
 		for (Advisor advisor : advisors) {
-			if (advisor instanceof PrototypePlaceholderAdvisor) {
-				PrototypePlaceholderAdvisor pa = (PrototypePlaceholderAdvisor) advisor;
+			if (advisor instanceof PrototypePlaceholderAdvisor pa) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Refreshing bean named '" + pa.getBeanName() + "'");
 				}

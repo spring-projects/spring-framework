@@ -284,8 +284,7 @@ public abstract class AopUtils {
 		if (advisor instanceof IntroductionAdvisor) {
 			return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
 		}
-		else if (advisor instanceof PointcutAdvisor) {
-			PointcutAdvisor pca = (PointcutAdvisor) advisor;
+		else if (advisor instanceof PointcutAdvisor pca) {
 			return canApply(pca.getPointcut(), targetClass, hasIntroductions);
 		}
 		else {

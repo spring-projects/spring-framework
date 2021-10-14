@@ -69,10 +69,9 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof PointcutAdvisor)) {
+		if (!(other instanceof PointcutAdvisor otherAdvisor)) {
 			return false;
 		}
-		PointcutAdvisor otherAdvisor = (PointcutAdvisor) other;
 		return (ObjectUtils.nullSafeEquals(getAdvice(), otherAdvisor.getAdvice()) &&
 				ObjectUtils.nullSafeEquals(getPointcut(), otherAdvisor.getPointcut()));
 	}

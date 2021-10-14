@@ -72,10 +72,9 @@ public class AnnotationClassFilter implements ClassFilter {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof AnnotationClassFilter)) {
+		if (!(other instanceof AnnotationClassFilter otherCf)) {
 			return false;
 		}
-		AnnotationClassFilter otherCf = (AnnotationClassFilter) other;
 		return (this.annotationType.equals(otherCf.annotationType) && this.checkInherited == otherCf.checkInherited);
 	}
 

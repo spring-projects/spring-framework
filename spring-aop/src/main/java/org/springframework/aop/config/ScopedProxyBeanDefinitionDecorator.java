@@ -42,8 +42,7 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 	@Override
 	public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 		boolean proxyTargetClass = true;
-		if (node instanceof Element) {
-			Element ele = (Element) node;
+		if (node instanceof Element ele) {
 			if (ele.hasAttribute(PROXY_TARGET_CLASS)) {
 				proxyTargetClass = Boolean.parseBoolean(ele.getAttribute(PROXY_TARGET_CLASS));
 			}

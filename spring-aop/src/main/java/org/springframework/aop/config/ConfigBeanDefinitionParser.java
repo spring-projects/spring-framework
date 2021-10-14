@@ -93,7 +93,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private static final int POINTCUT_INDEX = 1;
 	private static final int ASPECT_INSTANCE_FACTORY_INDEX = 2;
 
-	private ParseState parseState = new ParseState();
+	private final ParseState parseState = new ParseState();
 
 
 	@Override

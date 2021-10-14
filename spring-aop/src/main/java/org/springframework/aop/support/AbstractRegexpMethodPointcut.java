@@ -200,10 +200,9 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof AbstractRegexpMethodPointcut)) {
+		if (!(other instanceof AbstractRegexpMethodPointcut otherPointcut)) {
 			return false;
 		}
-		AbstractRegexpMethodPointcut otherPointcut = (AbstractRegexpMethodPointcut) other;
 		return (Arrays.equals(this.patterns, otherPointcut.patterns) &&
 				Arrays.equals(this.excludedPatterns, otherPointcut.excludedPatterns));
 	}
