@@ -392,11 +392,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	public void afterPropertiesSet() throws Exception {
 		resolveResourceLocations();
 
-		if (logger.isWarnEnabled() && CollectionUtils.isEmpty(getLocations())) {
-			logger.warn("Locations list is empty. No resources will be served unless a " +
-					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
-		}
-
 		if (this.resourceResolvers.isEmpty()) {
 			this.resourceResolvers.add(new PathResourceResolver());
 		}
@@ -472,6 +467,12 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 		this.locationsToUse.clear();
 		this.locationsToUse.addAll(result);
+
+		if (logger.isInfoEnabled()) {
+			logger.info(!this.locationsToUse.isEmpty() ?
+					"Locations in use: " + locationToString(this.locationsToUse) :
+					"0 locations in use.");
+		}
 	}
 
 	/**
@@ -810,10 +811,13 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	@Override
 	public String toString() {
-		return "ResourceHttpRequestHandler " +
-				getLocations().toString()
-						.replaceAll("class path resource", "Classpath")
-						.replaceAll("ServletContext resource", "ServletContext");
+		return "ResourceHttpRequestHandler " + locationToString(getLocations());
+	}
+
+	private String locationToString(List<Resource> locations) {
+		return locations.toString()
+				.replaceAll("class path resource", "classpath")
+				.replaceAll("ServletContext resource", "ServletContext");
 	}
 
 }

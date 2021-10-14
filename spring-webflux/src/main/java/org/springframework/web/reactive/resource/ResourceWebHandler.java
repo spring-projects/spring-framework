@@ -304,11 +304,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	public void afterPropertiesSet() throws Exception {
 		resolveResourceLocations();
 
-		if (logger.isWarnEnabled() && CollectionUtils.isEmpty(getLocations())) {
-			logger.warn("Locations list is empty. No resources will be served unless a " +
-					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
-		}
-
 		if (this.resourceResolvers.isEmpty()) {
 			this.resourceResolvers.add(new PathResourceResolver());
 		}
@@ -341,6 +336,12 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 		this.locationsToUse.clear();
 		this.locationsToUse.addAll(result);
+
+		if (logger.isInfoEnabled()) {
+			logger.info(!this.locationsToUse.isEmpty() ?
+					"Locations in use: " + locationToString(this.locationsToUse) :
+					"0 locations in use.");
+		}
 	}
 
 	/**
@@ -350,10 +351,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 */
 	protected void initAllowedLocations() {
 		if (CollectionUtils.isEmpty(getLocations())) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Locations list is empty. No resources will be served unless a " +
-						"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
-			}
 			return;
 		}
 		for (int i = getResourceResolvers().size() - 1; i >= 0; i--) {
@@ -621,18 +618,13 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	@Override
 	public String toString() {
-		return "ResourceWebHandler " + formatLocations();
+		return "ResourceWebHandler " + locationToString(getLocations());
 	}
 
-	private Object formatLocations() {
-		if (!this.locationValues.isEmpty()) {
-			return this.locationValues.stream().collect(Collectors.joining("\", \"", "[\"", "\"]"));
-		}
-		if (!getLocations().isEmpty()) {
-			return "[" + getLocations().toString()
-					.replaceAll("class path resource", "Classpath")
-					.replaceAll("ServletContext resource", "ServletContext") + "]";
-		}
-		return Collections.emptyList();
+	private String locationToString(List<Resource> locations) {
+		return locations.toString()
+				.replaceAll("class path resource", "classpath")
+				.replaceAll("ServletContext resource", "ServletContext");
 	}
+
 }
