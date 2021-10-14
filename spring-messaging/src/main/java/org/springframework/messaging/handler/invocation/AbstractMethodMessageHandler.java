@@ -478,8 +478,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		if (CollectionUtils.isEmpty(this.destinationPrefixes)) {
 			return destination;
 		}
-		for (int i = 0; i < this.destinationPrefixes.size(); i++) {
-			String prefix = this.destinationPrefixes.get(i);
+		for (String prefix : this.destinationPrefixes) {
 			if (destination.startsWith(prefix)) {
 				return destination.substring(prefix.length());
 			}

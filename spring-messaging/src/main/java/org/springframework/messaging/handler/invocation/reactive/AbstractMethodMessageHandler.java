@@ -512,7 +512,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		for (T mapping : mappingsToCheck) {
 			T match = getMatchingMapping(mapping, message);
 			if (match != null) {
-				matches.add(new Match<T>(match, this.handlerMethods.get(mapping)));
+				matches.add(new Match<>(match, this.handlerMethods.get(mapping)));
 			}
 		}
 	}
