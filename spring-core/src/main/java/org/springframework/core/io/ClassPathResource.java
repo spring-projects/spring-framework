@@ -267,10 +267,9 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ClassPathResource)) {
+		if (!(other instanceof ClassPathResource otherRes)) {
 			return false;
 		}
-		ClassPathResource otherRes = (ClassPathResource) other;
 		return (this.path.equals(otherRes.path) &&
 				ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
 				ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));

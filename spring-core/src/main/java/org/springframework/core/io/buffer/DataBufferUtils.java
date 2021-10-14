@@ -513,8 +513,7 @@ public abstract class DataBufferUtils {
 	 * @return {@code true} if the buffer was released; {@code false} otherwise.
 	 */
 	public static boolean release(@Nullable DataBuffer dataBuffer) {
-		if (dataBuffer instanceof PooledDataBuffer) {
-			PooledDataBuffer pooledDataBuffer = (PooledDataBuffer) dataBuffer;
+		if (dataBuffer instanceof PooledDataBuffer pooledDataBuffer) {
 			if (pooledDataBuffer.isAllocated()) {
 				try {
 					return pooledDataBuffer.release();

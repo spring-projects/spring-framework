@@ -88,8 +88,7 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 	@Nullable
 	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		boolean byteBufferTarget = targetType.isAssignableTo(BYTE_BUFFER_TYPE);
-		if (source instanceof ByteBuffer) {
-			ByteBuffer buffer = (ByteBuffer) source;
+		if (source instanceof ByteBuffer buffer) {
 			return (byteBufferTarget ? buffer.duplicate() : convertFromByteBuffer(buffer, targetType));
 		}
 		if (byteBufferTarget) {

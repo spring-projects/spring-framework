@@ -431,10 +431,9 @@ public class DefaultDataBuffer implements DataBuffer {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof DefaultDataBuffer)) {
+		if (!(other instanceof DefaultDataBuffer otherBuffer)) {
 			return false;
 		}
-		DefaultDataBuffer otherBuffer = (DefaultDataBuffer) other;
 		return (this.readPosition == otherBuffer.readPosition &&
 				this.writePosition == otherBuffer.writePosition &&
 				this.byteBuffer.equals(otherBuffer.byteBuffer));
