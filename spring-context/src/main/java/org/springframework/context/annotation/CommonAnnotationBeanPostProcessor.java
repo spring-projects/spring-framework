@@ -266,8 +266,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		if (this.resourceFactory == null) {
 			this.resourceFactory = beanFactory;
 		}
-		if (beanFactory instanceof ConfigurableBeanFactory) {
-			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
+		if (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory) {
+			this.embeddedValueResolver = new EmbeddedValueResolver(configurableBeanFactory);
 		}
 	}
 
@@ -437,8 +437,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		if (element.lookupType.isInterface()) {
 			pf.addInterface(element.lookupType);
 		}
-		ClassLoader classLoader = (this.beanFactory instanceof ConfigurableBeanFactory ?
-				((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader() : null);
+		ClassLoader classLoader = (this.beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory ?
+				configurableBeanFactory.getBeanClassLoader() : null);
 		return pf.getProxy(classLoader);
 	}
 
@@ -492,18 +492,17 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		Set<String> autowiredBeanNames;
 		String name = element.name;
 
-		if (factory instanceof AutowireCapableBeanFactory) {
-			AutowireCapableBeanFactory beanFactory = (AutowireCapableBeanFactory) factory;
+		if (factory instanceof AutowireCapableBeanFactory autowireCapableBeanFactory) {
 			DependencyDescriptor descriptor = element.getDependencyDescriptor();
 			if (this.fallbackToDefaultTypeMatch && element.isDefaultName && !factory.containsBean(name)) {
 				autowiredBeanNames = new LinkedHashSet<>();
-				resource = beanFactory.resolveDependency(descriptor, requestingBeanName, autowiredBeanNames, null);
+				resource = autowireCapableBeanFactory.resolveDependency(descriptor, requestingBeanName, autowiredBeanNames, null);
 				if (resource == null) {
 					throw new NoSuchBeanDefinitionException(element.getLookupType(), "No resolvable resource object");
 				}
 			}
 			else {
-				resource = beanFactory.resolveBeanByName(name, descriptor);
+				resource = autowireCapableBeanFactory.resolveBeanByName(name, descriptor);
 				autowiredBeanNames = Collections.singleton(name);
 			}
 		}
@@ -512,11 +511,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			autowiredBeanNames = Collections.singleton(name);
 		}
 
-		if (factory instanceof ConfigurableBeanFactory) {
-			ConfigurableBeanFactory beanFactory = (ConfigurableBeanFactory) factory;
+		if (factory instanceof ConfigurableBeanFactory configurableBeanFactory) {
 			for (String autowiredBeanName : autowiredBeanNames) {
-				if (requestingBeanName != null && beanFactory.containsBean(autowiredBeanName)) {
-					beanFactory.registerDependentBean(autowiredBeanName, requestingBeanName);
+				if (requestingBeanName != null && configurableBeanFactory.containsBean(autowiredBeanName)) {
+					configurableBeanFactory.registerDependentBean(autowiredBeanName, requestingBeanName);
 				}
 			}
 		}
@@ -671,8 +669,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				if (beanFactory != null && beanFactory.containsBean(this.beanName)) {
 					// Local match found for explicitly specified local bean name.
 					Object bean = beanFactory.getBean(this.beanName, this.lookupType);
-					if (requestingBeanName != null && beanFactory instanceof ConfigurableBeanFactory) {
-						((ConfigurableBeanFactory) beanFactory).registerDependentBean(this.beanName, requestingBeanName);
+					if (requestingBeanName != null && beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory) {
+						configurableBeanFactory.registerDependentBean(this.beanName, requestingBeanName);
 					}
 					return bean;
 				}

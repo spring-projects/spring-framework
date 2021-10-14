@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,7 +155,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType) {
-		return new ObjectProvider<T>() {
+		return new ObjectProvider<>() {
 			@Override
 			public T getObject() throws BeansException {
 				return getBean(requiredType);

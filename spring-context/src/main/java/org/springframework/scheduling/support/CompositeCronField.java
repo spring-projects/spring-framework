@@ -81,10 +81,9 @@ final class CompositeCronField extends CronField {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof CompositeCronField)) {
+		if (!(o instanceof CompositeCronField other)) {
 			return false;
 		}
-		CompositeCronField other = (CompositeCronField) o;
 		return type() == other.type() &&
 				this.value.equals(other.value);
 	}

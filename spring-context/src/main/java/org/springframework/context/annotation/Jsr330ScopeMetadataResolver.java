@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,8 +87,7 @@ public class Jsr330ScopeMetadataResolver implements ScopeMetadataResolver {
 	public ScopeMetadata resolveScopeMetadata(BeanDefinition definition) {
 		ScopeMetadata metadata = new ScopeMetadata();
 		metadata.setScopeName(BeanDefinition.SCOPE_PROTOTYPE);
-		if (definition instanceof AnnotatedBeanDefinition) {
-			AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
+		if (definition instanceof AnnotatedBeanDefinition annDef) {
 			Set<String> annTypes = annDef.getMetadata().getAnnotationTypes();
 			String found = null;
 			for (String annType : annTypes) {

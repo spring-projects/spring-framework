@@ -58,6 +58,7 @@ import org.springframework.validation.SmartValidator;
  * Bean Validation 1.1 as well as 2.0.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see SmartValidator
  * @see CustomValidatorBean
@@ -136,8 +137,8 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 	private Class<?>[] asValidationGroups(Object... validationHints) {
 		Set<Class<?>> groups = new LinkedHashSet<>(4);
 		for (Object hint : validationHints) {
-			if (hint instanceof Class) {
-				groups.add((Class<?>) hint);
+			if (hint instanceof Class<?> clazz) {
+				groups.add(clazz);
 			}
 		}
 		return ClassUtils.toClassArray(groups);
@@ -159,10 +160,9 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 					ConstraintDescriptor<?> cd = violation.getConstraintDescriptor();
 					String errorCode = determineErrorCode(cd);
 					Object[] errorArgs = getArgumentsForConstraint(errors.getObjectName(), field, cd);
-					if (errors instanceof BindingResult) {
+					if (errors instanceof BindingResult bindingResult) {
 						// Can do custom FieldError registration with invalid value from ConstraintViolation,
 						// as necessary for Hibernate Validator compatibility (non-indexed set path in field)
-						BindingResult bindingResult = (BindingResult) errors;
 						String nestedField = bindingResult.getNestedPath() + field;
 						if (nestedField.isEmpty()) {
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
@@ -269,8 +269,8 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 		Map<String, Object> attributesToExpose = new TreeMap<>();
 		descriptor.getAttributes().forEach((attributeName, attributeValue) -> {
 			if (!internalAnnotationAttributes.contains(attributeName)) {
-				if (attributeValue instanceof String) {
-					attributeValue = new ResolvableAttribute(attributeValue.toString());
+				if (attributeValue instanceof String str) {
+					attributeValue = new ResolvableAttribute(str);
 				}
 				attributesToExpose.put(attributeName, attributeValue);
 			}

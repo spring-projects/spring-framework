@@ -130,7 +130,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 			this.propertySources = new MutablePropertySources();
 			if (this.environment != null) {
 				this.propertySources.addLast(
-					new PropertySource<Environment>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
+					new PropertySource<>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
 						@Override
 						@Nullable
 						public String getProperty(String key) {
