@@ -31,7 +31,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
  */
 public class MockEnvironment extends AbstractEnvironment {
 
-	private MockPropertySource propertySource = new MockPropertySource();
+	private final MockPropertySource propertySource = new MockPropertySource();
 
 	/**
 	 * Create a new {@code MockEnvironment} with a single {@link MockPropertySource}.

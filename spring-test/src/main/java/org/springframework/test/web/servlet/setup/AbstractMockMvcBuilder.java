@@ -56,7 +56,7 @@ import org.springframework.web.context.WebApplicationContext;
 public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>>
 		extends MockMvcBuilderSupport implements ConfigurableMockMvcBuilder<B> {
 
-	private List<Filter> filters = new ArrayList<>();
+	private final List<Filter> filters = new ArrayList<>();
 
 	@Nullable
 	private RequestBuilder defaultRequestBuilder;

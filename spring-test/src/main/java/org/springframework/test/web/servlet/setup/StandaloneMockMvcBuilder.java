@@ -137,7 +137,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	@Nullable
 	private Boolean removeSemicolonContent;
 
-	private Map<String, String> placeholderValues = new HashMap<>();
+	private final Map<String, String> placeholderValues = new HashMap<>();
 
 	private Supplier<RequestMappingHandlerMapping> handlerMappingFactory = RequestMappingHandlerMapping::new;
 

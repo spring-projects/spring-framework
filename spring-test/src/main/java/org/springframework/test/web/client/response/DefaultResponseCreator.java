@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
  */
 public class DefaultResponseCreator implements ResponseCreator {
 
-	private HttpStatus statusCode;
+	private final HttpStatus statusCode;
 
 	private byte[] content = new byte[0];
 
