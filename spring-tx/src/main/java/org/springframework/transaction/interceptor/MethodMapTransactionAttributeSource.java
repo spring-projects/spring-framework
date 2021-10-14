@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,8 +199,8 @@ public class MethodMapTransactionAttributeSource
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding transactional method [" + method + "] with attribute [" + attr + "]");
 		}
-		if (this.embeddedValueResolver != null && attr instanceof DefaultTransactionAttribute) {
-			((DefaultTransactionAttribute) attr).resolveAttributeStrings(this.embeddedValueResolver);
+		if (this.embeddedValueResolver != null && attr instanceof DefaultTransactionAttribute dta) {
+			dta.resolveAttributeStrings(this.embeddedValueResolver);
 		}
 		this.transactionAttributeMap.put(method, attr);
 	}
@@ -242,10 +242,9 @@ public class MethodMapTransactionAttributeSource
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof MethodMapTransactionAttributeSource)) {
+		if (!(other instanceof MethodMapTransactionAttributeSource otherTas)) {
 			return false;
 		}
-		MethodMapTransactionAttributeSource otherTas = (MethodMapTransactionAttributeSource) other;
 		return ObjectUtils.nullSafeEquals(this.methodMap, otherTas.methodMap);
 	}
 
