@@ -474,7 +474,7 @@ public abstract class DataSourceUtils {
 
 		private final DataSource dataSource;
 
-		private int order;
+		private final int order;
 
 		private boolean holderActive = true;
 

@@ -56,7 +56,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 	/** the name of the user currently connected. */
 	@Nullable
-	private String userName;
+	private final String userName;
 
 	/** indicates whether the identifiers are uppercased. */
 	private boolean storesUpperCaseIdentifiers = true;
@@ -71,11 +71,11 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	private boolean generatedKeysColumnNameArraySupported = true;
 
 	/** database products we know not supporting the use of a String[] for generated keys. */
-	private List<String> productsNotSupportingGeneratedKeysColumnNameArray =
+	private final List<String> productsNotSupportingGeneratedKeysColumnNameArray =
 			Arrays.asList("Apache Derby", "HSQL Database Engine");
 
 	/** Collection of TableParameterMetaData objects. */
-	private List<TableParameterMetaData> tableParameterMetaData = new ArrayList<>();
+	private final List<TableParameterMetaData> tableParameterMetaData = new ArrayList<>();
 
 
 	/**
