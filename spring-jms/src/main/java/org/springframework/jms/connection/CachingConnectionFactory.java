@@ -598,10 +598,9 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof ConsumerCacheKey)) {
+			if (!(other instanceof ConsumerCacheKey otherKey)) {
 				return false;
 			}
-			ConsumerCacheKey otherKey = (ConsumerCacheKey) other;
 			return (destinationEquals(otherKey) &&
 					ObjectUtils.nullSafeEquals(this.selector, otherKey.selector) &&
 					ObjectUtils.nullSafeEquals(this.noLocal, otherKey.noLocal) &&

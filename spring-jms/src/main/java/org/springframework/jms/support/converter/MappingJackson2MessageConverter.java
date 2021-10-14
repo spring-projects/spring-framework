@@ -85,7 +85,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 
 	private Map<String, Class<?>> idClassMappings = new HashMap<>();
 
-	private Map<Class<?>, String> classIdMappings = new HashMap<>();
+	private final Map<Class<?>, String> classIdMappings = new HashMap<>();
 
 	@Nullable
 	private ClassLoader beanClassLoader;
@@ -476,8 +476,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 */
 	@Nullable
 	protected Class<?> getSerializationView(@Nullable Object conversionHint) {
-		if (conversionHint instanceof MethodParameter) {
-			MethodParameter methodParam = (MethodParameter) conversionHint;
+		if (conversionHint instanceof MethodParameter methodParam) {
 			JsonView annotation = methodParam.getParameterAnnotation(JsonView.class);
 			if (annotation == null) {
 				annotation = methodParam.getMethodAnnotation(JsonView.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.jms.support.SimpleJmsHeaderMapper;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.core.AbstractMessagingTemplate;
+import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
@@ -107,7 +107,7 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 		}
 		Message<?> input = (Message<?>) object;
 		MessageHeaders headers = input.getHeaders();
-		Object conversionHint = headers.get(AbstractMessagingTemplate.CONVERSION_HINT_HEADER);
+		Object conversionHint = headers.get(AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER);
 		jakarta.jms.Message reply = createMessageForPayload(input.getPayload(), session, conversionHint);
 		this.headerMapper.fromHeaders(headers, reply);
 		return reply;
