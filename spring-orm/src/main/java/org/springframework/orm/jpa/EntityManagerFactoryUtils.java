@@ -302,8 +302,7 @@ public abstract class EntityManagerFactoryUtils {
 	 */
 	@Nullable
 	private static Object prepareTransaction(EntityManager em, EntityManagerFactory emf) {
-		if (emf instanceof EntityManagerFactoryInfo) {
-			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
+		if (emf instanceof EntityManagerFactoryInfo emfInfo) {
 			JpaDialect jpaDialect = emfInfo.getJpaDialect();
 			if (jpaDialect != null) {
 				return jpaDialect.prepareTransaction(em,
@@ -322,8 +321,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see JpaDialect#cleanupTransaction
 	 */
 	private static void cleanupTransaction(@Nullable Object transactionData, EntityManagerFactory emf) {
-		if (emf instanceof EntityManagerFactoryInfo) {
-			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
+		if (emf instanceof EntityManagerFactoryInfo emfInfo) {
 			JpaDialect jpaDialect = emfInfo.getJpaDialect();
 			if (jpaDialect != null) {
 				jpaDialect.cleanupTransaction(transactionData);

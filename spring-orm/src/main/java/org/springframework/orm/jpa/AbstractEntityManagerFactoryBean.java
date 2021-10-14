@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -501,12 +501,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		if (args != null) {
 			for (int i = 0; i < args.length; i++) {
 				Object arg = args[i];
-				if (arg instanceof Query && Proxy.isProxyClass(arg.getClass())) {
+				if (arg instanceof Query query && Proxy.isProxyClass(arg.getClass())) {
 					// Assumably a Spring-generated proxy from SharedEntityManagerCreator:
 					// since we're passing it back to the native EntityManagerFactory,
 					// let's unwrap it to the original Query object from the provider.
 					try {
-						args[i] = ((Query) arg).unwrap(null);
+						args[i] = query.unwrap(null);
 					}
 					catch (RuntimeException ex) {
 						// Ignore - simply proceed with given Query object then
@@ -517,9 +517,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 		// Standard delegation to the native factory, just post-processing EntityManager return values
 		Object retVal = method.invoke(getNativeEntityManagerFactory(), args);
-		if (retVal instanceof EntityManager) {
+		if (retVal instanceof EntityManager rawEntityManager) {
 			// Any other createEntityManager variant - expecting non-synchronized semantics
-			EntityManager rawEntityManager = (EntityManager) retVal;
 			postProcessEntityManager(rawEntityManager);
 			retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, false);
 		}
@@ -568,9 +567,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			}
 			catch (ExecutionException ex) {
 				Throwable cause = ex.getCause();
-				if (cause instanceof PersistenceException) {
+				if (cause instanceof PersistenceException persistenceException) {
 					// Rethrow a provider configuration exception (possibly with a nested cause) directly
-					throw (PersistenceException) cause;
+					throw persistenceException;
 				}
 				throw new IllegalStateException("Failed to asynchronously initialize native EntityManagerFactory: " +
 						ex.getMessage(), cause);

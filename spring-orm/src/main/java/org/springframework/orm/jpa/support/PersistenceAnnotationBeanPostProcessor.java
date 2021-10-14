@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -324,8 +324,8 @@ public class PersistenceAnnotationBeanPostProcessor
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (beanFactory instanceof ListableBeanFactory) {
-			this.beanFactory = (ListableBeanFactory) beanFactory;
+		if (beanFactory instanceof ListableBeanFactory lbf) {
+			this.beanFactory = lbf;
 		}
 	}
 
@@ -543,8 +543,8 @@ public class PersistenceAnnotationBeanPostProcessor
 		Assert.state(this.beanFactory != null, "ListableBeanFactory required for EntityManagerFactory bean lookup");
 
 		EntityManagerFactory emf = EntityManagerFactoryUtils.findEntityManagerFactory(this.beanFactory, unitName);
-		if (requestingBeanName != null && this.beanFactory instanceof ConfigurableBeanFactory) {
-			((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(unitName, requestingBeanName);
+		if (requestingBeanName != null && this.beanFactory instanceof ConfigurableBeanFactory cbf) {
+			cbf.registerDependentBean(unitName, requestingBeanName);
 		}
 		return emf;
 	}
@@ -559,9 +559,8 @@ public class PersistenceAnnotationBeanPostProcessor
 
 		Assert.state(this.beanFactory != null, "ListableBeanFactory required for EntityManagerFactory bean lookup");
 
-		if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
+		if (this.beanFactory instanceof ConfigurableListableBeanFactory clbf) {
 			// Fancy variant with dependency registration
-			ConfigurableListableBeanFactory clbf = (ConfigurableListableBeanFactory) this.beanFactory;
 			NamedBeanHolder<EntityManagerFactory> emfHolder = clbf.resolveNamedBean(EntityManagerFactory.class);
 			if (requestingBeanName != null) {
 				clbf.registerDependentBean(emfHolder.getBeanName(), requestingBeanName);
@@ -596,11 +595,11 @@ public class PersistenceAnnotationBeanPostProcessor
 
 		public <T> T lookup(String jndiName, Class<T> requiredType) throws Exception {
 			JndiLocatorDelegate locator = new JndiLocatorDelegate();
-			if (jndiEnvironment instanceof JndiTemplate) {
-				locator.setJndiTemplate((JndiTemplate) jndiEnvironment);
+			if (jndiEnvironment instanceof JndiTemplate jndiTemplate) {
+				locator.setJndiTemplate(jndiTemplate);
 			}
-			else if (jndiEnvironment instanceof Properties) {
-				locator.setJndiEnvironment((Properties) jndiEnvironment);
+			else if (jndiEnvironment instanceof Properties properties) {
+				locator.setJndiEnvironment(properties);
 			}
 			else if (jndiEnvironment != null) {
 				throw new IllegalStateException("Illegal 'jndiEnvironment' type: " + jndiEnvironment.getClass());
@@ -696,8 +695,7 @@ public class PersistenceAnnotationBeanPostProcessor
 					emf = findEntityManagerFactory(this.unitName, requestingBeanName);
 				}
 				// Inject a shared transactional EntityManager proxy.
-				if (emf instanceof EntityManagerFactoryInfo &&
-						((EntityManagerFactoryInfo) emf).getEntityManagerInterface() != null) {
+				if (emf instanceof EntityManagerFactoryInfo emfInfo && emfInfo.getEntityManagerInterface() != null) {
 					// Create EntityManager based on the info's vendor-specific type
 					// (which might be more specific than the field's type).
 					em = SharedEntityManagerCreator.createSharedEntityManager(
@@ -727,9 +725,9 @@ public class PersistenceAnnotationBeanPostProcessor
 				em = ExtendedEntityManagerCreator.createContainerManagedEntityManager(
 						emf, this.properties, this.synchronizedWithTransaction);
 			}
-			if (em instanceof EntityManagerProxy && beanFactory != null && requestingBeanName != null &&
+			if (em instanceof EntityManagerProxy emp && beanFactory != null && requestingBeanName != null &&
 					beanFactory.containsBean(requestingBeanName) && !beanFactory.isPrototype(requestingBeanName)) {
-				extendedEntityManagersToClose.put(target, ((EntityManagerProxy) em).getTargetEntityManager());
+				extendedEntityManagersToClose.put(target, emp.getTargetEntityManager());
 			}
 			return em;
 		}
