@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import jakarta.activation.FileTypeMap;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
+import jakarta.mail.Part;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeBodyPart;
@@ -91,6 +92,7 @@ import org.springframework.util.Assert;
  * on the MULTIPART_MODE constants contains more detailed information.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 19.01.2004
  * @see #setText(String, boolean)
  * @see #setText(String, String)
@@ -427,8 +429,8 @@ public class MimeMessageHelper {
 	 */
 	@Nullable
 	protected String getDefaultEncoding(MimeMessage mimeMessage) {
-		if (mimeMessage instanceof SmartMimeMessage) {
-			return ((SmartMimeMessage) mimeMessage).getDefaultEncoding();
+		if (mimeMessage instanceof SmartMimeMessage smartMimeMessage) {
+			return smartMimeMessage.getDefaultEncoding();
 		}
 		return null;
 	}
@@ -449,8 +451,8 @@ public class MimeMessageHelper {
 	 * @see ConfigurableMimeFileTypeMap
 	 */
 	protected FileTypeMap getDefaultFileTypeMap(MimeMessage mimeMessage) {
-		if (mimeMessage instanceof SmartMimeMessage) {
-			FileTypeMap fileTypeMap = ((SmartMimeMessage) mimeMessage).getDefaultFileTypeMap();
+		if (mimeMessage instanceof SmartMimeMessage smartMimeMessage) {
+			FileTypeMap fileTypeMap = smartMimeMessage.getDefaultFileTypeMap();
 			if (fileTypeMap != null) {
 				return fileTypeMap;
 			}
@@ -908,7 +910,7 @@ public class MimeMessageHelper {
 		Assert.notNull(contentId, "Content ID must not be null");
 		Assert.notNull(dataSource, "DataSource must not be null");
 		MimeBodyPart mimeBodyPart = new MimeBodyPart();
-		mimeBodyPart.setDisposition(MimeBodyPart.INLINE);
+		mimeBodyPart.setDisposition(Part.INLINE);
 		mimeBodyPart.setContentID("<" + contentId + ">");
 		mimeBodyPart.setDataHandler(new DataHandler(dataSource));
 		getMimeMultipart().addBodyPart(mimeBodyPart);
@@ -990,7 +992,7 @@ public class MimeMessageHelper {
 			throws MessagingException {
 
 		Assert.notNull(inputStreamSource, "InputStreamSource must not be null");
-		if (inputStreamSource instanceof Resource && ((Resource) inputStreamSource).isOpen()) {
+		if (inputStreamSource instanceof Resource resource && resource.isOpen()) {
 			throw new IllegalArgumentException(
 					"Passed-in Resource contains an open stream: invalid argument. " +
 					"JavaMail requires an InputStreamSource that creates a fresh stream for every call.");
@@ -1018,7 +1020,7 @@ public class MimeMessageHelper {
 		Assert.notNull(dataSource, "DataSource must not be null");
 		try {
 			MimeBodyPart mimeBodyPart = new MimeBodyPart();
-			mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
+			mimeBodyPart.setDisposition(Part.ATTACHMENT);
 			mimeBodyPart.setFileName(isEncodeFilenames() ?
 					MimeUtility.encodeText(attachmentFilename) : attachmentFilename);
 			mimeBodyPart.setDataHandler(new DataHandler(dataSource));
@@ -1095,7 +1097,7 @@ public class MimeMessageHelper {
 			throws MessagingException {
 
 		Assert.notNull(inputStreamSource, "InputStreamSource must not be null");
-		if (inputStreamSource instanceof Resource && ((Resource) inputStreamSource).isOpen()) {
+		if (inputStreamSource instanceof Resource resource && resource.isOpen()) {
 			throw new IllegalArgumentException(
 					"Passed-in Resource contains an open stream: invalid argument. " +
 					"JavaMail requires an InputStreamSource that creates a fresh stream for every call.");
