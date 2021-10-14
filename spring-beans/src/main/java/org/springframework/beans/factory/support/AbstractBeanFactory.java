@@ -1054,8 +1054,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		setCacheBeanMetadata(otherFactory.isCacheBeanMetadata());
 		setBeanExpressionResolver(otherFactory.getBeanExpressionResolver());
 		setConversionService(otherFactory.getConversionService());
-		if (otherFactory instanceof AbstractBeanFactory) {
-			AbstractBeanFactory otherAbstractFactory = (AbstractBeanFactory) otherFactory;
+		if (otherFactory instanceof AbstractBeanFactory otherAbstractFactory) {
 			this.propertyEditorRegistrars.addAll(otherAbstractFactory.propertyEditorRegistrars);
 			this.customEditors.putAll(otherAbstractFactory.customEditors);
 			this.typeConverter = otherAbstractFactory.typeConverter;
@@ -1512,8 +1511,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (tempClassLoader != null) {
 				dynamicLoader = tempClassLoader;
 				freshResolve = true;
-				if (tempClassLoader instanceof DecoratingClassLoader) {
-					DecoratingClassLoader dcl = (DecoratingClassLoader) tempClassLoader;
+				if (tempClassLoader instanceof DecoratingClassLoader dcl) {
 					for (Class<?> typeToMatch : typesToMatch) {
 						dcl.excludeClass(typeToMatch.getName());
 					}

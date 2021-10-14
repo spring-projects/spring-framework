@@ -310,8 +310,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
 		super.copyConfigurationFrom(otherFactory);
-		if (otherFactory instanceof DefaultListableBeanFactory) {
-			DefaultListableBeanFactory otherListableFactory = (DefaultListableBeanFactory) otherFactory;
+		if (otherFactory instanceof DefaultListableBeanFactory otherListableFactory) {
 			this.allowBeanDefinitionOverriding = otherListableFactory.allowBeanDefinitionOverriding;
 			this.allowEagerClassLoading = otherListableFactory.allowEagerClassLoading;
 			this.dependencyComparator = otherListableFactory.dependencyComparator;
@@ -389,7 +388,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType, boolean allowEagerInit) {
-		return new BeanObjectProvider<T>() {
+		return new BeanObjectProvider<>() {
 			@Override
 			public T getObject() throws BeansException {
 				T resolved = resolveBean(requiredType, null, false);
@@ -1248,7 +1247,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (bean instanceof NullBean) {
 			return null;
 		}
-		return new NamedBeanHolder<T>(beanName, adaptBeanInstance(beanName, bean, requiredType.toClass()));
+		return new NamedBeanHolder<>(beanName, adaptBeanInstance(beanName, bean, requiredType.toClass()));
 	}
 
 	@Override

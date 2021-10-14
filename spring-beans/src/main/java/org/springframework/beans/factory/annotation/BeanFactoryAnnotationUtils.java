@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,8 +166,7 @@ public abstract class BeanFactoryAnnotationUtils {
 				if (beanFactory instanceof ConfigurableBeanFactory) {
 					BeanDefinition bd = ((ConfigurableBeanFactory) beanFactory).getMergedBeanDefinition(beanName);
 					// Explicit qualifier metadata on bean definition? (typically in XML definition)
-					if (bd instanceof AbstractBeanDefinition) {
-						AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
+					if (bd instanceof AbstractBeanDefinition abd) {
 						AutowireCandidateQualifier candidate = abd.getQualifier(Qualifier.class.getName());
 						if (candidate != null) {
 							Object value = candidate.getAttribute(AutowireCandidateQualifier.VALUE_KEY);

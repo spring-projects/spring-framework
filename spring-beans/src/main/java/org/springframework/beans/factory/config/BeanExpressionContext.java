@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,10 +73,9 @@ public class BeanExpressionContext {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof BeanExpressionContext)) {
+		if (!(other instanceof BeanExpressionContext otherContext)) {
 			return false;
 		}
-		BeanExpressionContext otherContext = (BeanExpressionContext) other;
 		return (this.beanFactory == otherContext.beanFactory && this.scope == otherContext.scope);
 	}
 

@@ -394,10 +394,9 @@ public class InitDestroyAnnotationBeanPostProcessor
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof LifecycleElement)) {
+			if (!(other instanceof LifecycleElement otherElement)) {
 				return false;
 			}
-			LifecycleElement otherElement = (LifecycleElement) other;
 			return (this.identifier.equals(otherElement.identifier));
 		}
 

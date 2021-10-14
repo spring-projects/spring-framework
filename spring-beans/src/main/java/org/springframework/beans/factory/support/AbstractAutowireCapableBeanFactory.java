@@ -303,9 +303,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	@Override
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
 		super.copyConfigurationFrom(otherFactory);
-		if (otherFactory instanceof AbstractAutowireCapableBeanFactory) {
-			AbstractAutowireCapableBeanFactory otherAutowireFactory =
-					(AbstractAutowireCapableBeanFactory) otherFactory;
+		if (otherFactory instanceof AbstractAutowireCapableBeanFactory otherAutowireFactory) {
 			this.instantiationStrategy = otherAutowireFactory.instantiationStrategy;
 			this.allowCircularReferences = otherAutowireFactory.allowCircularReferences;
 			this.ignoredDependencyTypes.addAll(otherAutowireFactory.ignoredDependencyTypes);
@@ -344,8 +342,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		markBeanAsCreated(beanName);
 		BeanDefinition mbd = getMergedBeanDefinition(beanName);
 		RootBeanDefinition bd = null;
-		if (mbd instanceof RootBeanDefinition) {
-			RootBeanDefinition rbd = (RootBeanDefinition) mbd;
+		if (mbd instanceof RootBeanDefinition rbd) {
 			bd = (rbd.isPrototype() ? rbd : rbd.cloneBeanDefinition());
 		}
 		if (bd == null) {

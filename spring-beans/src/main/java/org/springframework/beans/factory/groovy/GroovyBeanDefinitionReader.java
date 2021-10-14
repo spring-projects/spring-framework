@@ -244,7 +244,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		}
 
 		@SuppressWarnings("serial")
-		Closure<Object> beans = new Closure<Object>(this) {
+		Closure<Object> beans = new Closure<>(this) {
 			@Override
 			public Object call(Object... args) {
 				invokeBeanDefiningClosure((Closure<?>) args[0]);
