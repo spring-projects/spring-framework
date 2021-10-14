@@ -94,8 +94,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 
 		ApplicationContext applicationContext;
 
-		if (contextLoader instanceof SmartContextLoader) {
-			SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
+		if (contextLoader instanceof SmartContextLoader smartContextLoader) {
 			applicationContext = smartContextLoader.loadContext(mergedContextConfiguration);
 		}
 		else {

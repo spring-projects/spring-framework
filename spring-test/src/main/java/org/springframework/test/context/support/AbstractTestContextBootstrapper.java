@@ -352,8 +352,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				logger.trace(String.format("Processing locations and classes for context configuration attributes %s",
 						configAttributes));
 			}
-			if (contextLoader instanceof SmartContextLoader) {
-				SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
+			if (contextLoader instanceof SmartContextLoader smartContextLoader) {
 				smartContextLoader.processContextConfiguration(configAttributes);
 				locations.addAll(0, Arrays.asList(configAttributes.getLocations()));
 				classes.addAll(0, Arrays.asList(configAttributes.getClasses()));

@@ -179,8 +179,7 @@ public class PrintingResultHandler implements ResultHandler {
 			this.printer.printValue("Type", null);
 		}
 		else {
-			if (handler instanceof HandlerMethod) {
-				HandlerMethod handlerMethod = (HandlerMethod) handler;
+			if (handler instanceof HandlerMethod handlerMethod) {
 				this.printer.printValue("Type", handlerMethod.getBeanType().getName());
 				this.printer.printValue("Method", handlerMethod);
 			}

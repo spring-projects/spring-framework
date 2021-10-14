@@ -370,8 +370,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			});
 		});
 		for (NameValuePair param : this.webRequest.getRequestParameters()) {
-			if (param instanceof KeyDataPair) {
-				KeyDataPair pair = (KeyDataPair) param;
+			if (param instanceof KeyDataPair pair) {
 				File file = pair.getFile();
 				MockPart part;
 				if (file != null) {

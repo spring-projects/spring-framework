@@ -188,8 +188,7 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 
 		ApplicationContext context = testContext.getApplicationContext();
 
-		if (context instanceof WebApplicationContext) {
-			WebApplicationContext wac = (WebApplicationContext) context;
+		if (context instanceof WebApplicationContext wac) {
 			ServletContext servletContext = wac.getServletContext();
 			Assert.state(servletContext instanceof MockServletContext, () -> String.format(
 						"The WebApplicationContext for test context %s must be configured with a MockServletContext.",
@@ -211,9 +210,7 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 			testContext.setAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 			testContext.setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 
-			if (wac instanceof ConfigurableApplicationContext) {
-				@SuppressWarnings("resource")
-				ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) wac;
+			if (wac instanceof ConfigurableApplicationContext configurableApplicationContext) {
 				ConfigurableListableBeanFactory bf = configurableApplicationContext.getBeanFactory();
 				bf.registerResolvableDependency(MockHttpServletResponse.class, response);
 				bf.registerResolvableDependency(ServletWebRequest.class, servletWebRequest);

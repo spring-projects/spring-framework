@@ -122,9 +122,7 @@ public class DefaultTestContext implements TestContext {
 	@Override
 	public ApplicationContext getApplicationContext() {
 		ApplicationContext context = this.cacheAwareContextLoaderDelegate.loadContext(this.mergedContextConfiguration);
-		if (context instanceof ConfigurableApplicationContext) {
-			@SuppressWarnings("resource")
-			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
+		if (context instanceof ConfigurableApplicationContext cac) {
 			Assert.state(cac.isActive(), () ->
 					"The ApplicationContext loaded for [" + this.mergedContextConfiguration +
 					"] is not active. This may be due to one of the following reasons: " +

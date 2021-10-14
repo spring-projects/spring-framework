@@ -45,6 +45,7 @@ abstract class AbstractMockMvcServerSpec<B extends MockMvcWebTestClient.MockMvcS
 		return self();
 	}
 
+	@Override
 	public final <T extends B> T filter(Filter filter, String... urlPatterns) {
 		getMockMvcBuilder().addFilter(filter, urlPatterns);
 		return self();

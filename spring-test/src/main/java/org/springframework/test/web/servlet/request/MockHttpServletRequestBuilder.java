@@ -561,11 +561,9 @@ public class MockHttpServletRequestBuilder
 		if (parent == null) {
 			return this;
 		}
-		if (!(parent instanceof MockHttpServletRequestBuilder)) {
+		if (!(parent instanceof MockHttpServletRequestBuilder parentBuilder)) {
 			throw new IllegalArgumentException("Cannot merge with [" + parent.getClass().getName() + "]");
 		}
-		MockHttpServletRequestBuilder parentBuilder = (MockHttpServletRequestBuilder) parent;
-
 		if (!StringUtils.hasText(this.contextPath)) {
 			this.contextPath = parentBuilder.contextPath;
 		}

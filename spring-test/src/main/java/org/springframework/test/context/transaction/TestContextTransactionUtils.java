@@ -106,9 +106,7 @@ public abstract class TestContextTransactionUtils {
 		}
 
 		try {
-			if (bf instanceof ListableBeanFactory) {
-				ListableBeanFactory lbf = (ListableBeanFactory) bf;
-
+			if (bf instanceof ListableBeanFactory lbf) {
 				// Look up single bean by type
 				Map<String, DataSource> dataSources =
 						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, DataSource.class);
@@ -180,9 +178,7 @@ public abstract class TestContextTransactionUtils {
 		}
 
 		try {
-			if (bf instanceof ListableBeanFactory) {
-				ListableBeanFactory lbf = (ListableBeanFactory) bf;
-
+			if (bf instanceof ListableBeanFactory lbf) {
 				// Look up single TransactionManagementConfigurer
 				Map<String, TransactionManagementConfigurer> configurers =
 						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, TransactionManagementConfigurer.class);

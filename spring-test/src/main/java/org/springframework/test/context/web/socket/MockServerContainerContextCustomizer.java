@@ -36,8 +36,7 @@ class MockServerContainerContextCustomizer implements ContextCustomizer {
 
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
-		if (context instanceof WebApplicationContext) {
-			WebApplicationContext wac = (WebApplicationContext) context;
+		if (context instanceof WebApplicationContext wac) {
 			ServletContext sc = wac.getServletContext();
 			if (sc != null) {
 				sc.setAttribute("jakarta.websocket.server.ServerContainer", new MockServerContainer());
