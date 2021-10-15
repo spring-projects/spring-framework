@@ -830,7 +830,7 @@ public class ResolvableType implements Serializable {
 	 * <p>Note: The returned {@link ResolvableType} should only be used as an intermediary
 	 * as it cannot be serialized.
 	 */
-	ResolvableType resolveType() {
+	private ResolvableType resolveType() {
 		if (this.type instanceof ParameterizedType) {
 			return forType(((ParameterizedType) this.type).getRawType(), this.variableResolver);
 		}
