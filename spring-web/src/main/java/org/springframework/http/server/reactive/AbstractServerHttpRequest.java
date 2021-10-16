@@ -16,9 +16,9 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -160,13 +160,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 	@SuppressWarnings("deprecation")
 	private String decodeQueryParam(String value) {
-		try {
-			return URLDecoder.decode(value, "UTF-8");
-		}
-		catch (UnsupportedEncodingException ex) {
-			// Should never happen but we got a platform default fallback anyway.
-			return URLDecoder.decode(value);
-		}
+		return URLDecoder.decode(value, StandardCharsets.UTF_8);
 	}
 
 	@Override

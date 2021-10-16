@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -32,6 +31,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -972,12 +972,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			String host = getHost(elementNamespace, dataHandler);
 			String contentId = UUID.randomUUID() + "@" + host;
 			this.mimeContainer.addAttachment("<" + contentId + ">", dataHandler);
-			try {
-				contentId = URLEncoder.encode(contentId, "UTF-8");
-			}
-			catch (UnsupportedEncodingException ex) {
-				// ignore
-			}
+			contentId = URLEncoder.encode(contentId, StandardCharsets.UTF_8);
 			return CID + contentId;
 		}
 
@@ -1029,12 +1024,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		public DataHandler getAttachmentAsDataHandler(String contentId) {
 			if (contentId.startsWith(CID)) {
 				contentId = contentId.substring(CID.length());
-				try {
-					contentId = URLDecoder.decode(contentId, "UTF-8");
-				}
-				catch (UnsupportedEncodingException ex) {
-					// ignore
-				}
+				contentId = URLDecoder.decode(contentId, StandardCharsets.UTF_8);
 				contentId = '<' + contentId + '>';
 			}
 			DataHandler dataHandler = this.mimeContainer.getAttachment(contentId);

@@ -396,12 +396,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 	private String urlDecode(String value) {
-		try {
-			return URLDecoder.decode(value, "UTF-8");
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw new IllegalStateException(ex);
-		}
+		return URLDecoder.decode(value, StandardCharsets.UTF_8);
 	}
 
 	private byte[] readAllBytes(File file) {

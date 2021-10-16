@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.support;
 
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -290,8 +291,8 @@ public class FlashMapManagerTests {
 	}
 
 	@Test // SPR-12569
-	public void flashAttributesWithQueryParamsWithSpace() throws Exception {
-		String encodedValue = URLEncoder.encode("1 2", "UTF-8");
+	public void flashAttributesWithQueryParamsWithSpace() {
+		String encodedValue = URLEncoder.encode("1 2", StandardCharsets.UTF_8);
 
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("key", "value");
