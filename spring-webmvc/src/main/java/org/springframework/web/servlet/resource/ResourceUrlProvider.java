@@ -154,8 +154,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		for (SimpleUrlHandlerMapping mapping : mappings) {
 			for (String pattern : mapping.getHandlerMap().keySet()) {
 				Object handler = mapping.getHandlerMap().get(pattern);
-				if (handler instanceof ResourceHttpRequestHandler) {
-					ResourceHttpRequestHandler resourceHandler = (ResourceHttpRequestHandler) handler;
+				if (handler instanceof ResourceHttpRequestHandler resourceHandler) {
 					this.handlerMap.put(pattern, resourceHandler);
 				}
 			}

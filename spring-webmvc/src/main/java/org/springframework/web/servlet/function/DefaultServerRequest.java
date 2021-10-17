@@ -70,6 +70,7 @@ import org.springframework.web.util.UriBuilder;
  * {@code ServerRequest} implementation based on a {@link HttpServletRequest}.
  *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 5.2
  */
 class DefaultServerRequest implements ServerRequest {
@@ -171,14 +172,12 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	static Class<?> bodyClass(Type type) {
-		if (type instanceof Class) {
-			return (Class<?>) type;
+		if (type instanceof Class<?> clazz) {
+			return clazz;
 		}
-		if (type instanceof ParameterizedType) {
-			ParameterizedType parameterizedType = (ParameterizedType) type;
-			if (parameterizedType.getRawType() instanceof Class) {
-				return (Class<?>) parameterizedType.getRawType();
-			}
+		if (type instanceof ParameterizedType parameterizedType &&
+				parameterizedType.getRawType() instanceof Class<?> rawType) {
+			return rawType;
 		}
 		return Object.class;
 	}
@@ -188,11 +187,9 @@ class DefaultServerRequest implements ServerRequest {
 		MediaType contentType = this.headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
 
 		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-			if (messageConverter instanceof GenericHttpMessageConverter) {
-				GenericHttpMessageConverter<T> genericMessageConverter =
-						(GenericHttpMessageConverter<T>) messageConverter;
+			if (messageConverter instanceof GenericHttpMessageConverter<?> genericMessageConverter) {
 				if (genericMessageConverter.canRead(bodyType, bodyClass, contentType)) {
-					return genericMessageConverter.read(bodyType, bodyClass, this.serverHttpRequest);
+					return (T) genericMessageConverter.read(bodyType, bodyClass, this.serverHttpRequest);
 				}
 			}
 			if (messageConverter.canRead(bodyClass, contentType)) {

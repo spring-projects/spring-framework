@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.web.servlet.support.BindStatus;
  *
  * <p><h1><a name="equality-contract">Equality Contract</a></h1>
  * For single-valued objects equality is first tested using standard {@link Object#equals Java equality}. As
- * such, user code should endeavour to implement {@link Object#equals} to speed up the comparison process. If
+ * such, user code should endeavor to implement {@link Object#equals} to speed up the comparison process. If
  * {@link Object#equals} returns {@code false} then an attempt is made at an
  * {@link #exhaustiveCompare exhaustive comparison} with the aim being to <strong>prove</strong> equality rather
  * than disprove it.
@@ -86,11 +86,11 @@ abstract class SelectedValueComparator {
 			if (boundValue.getClass().isArray()) {
 				selected = collectionCompare(CollectionUtils.arrayToList(boundValue), candidateValue, bindStatus);
 			}
-			else if (boundValue instanceof Collection) {
-				selected = collectionCompare((Collection<?>) boundValue, candidateValue, bindStatus);
+			else if (boundValue instanceof Collection<?> collection) {
+				selected = collectionCompare(collection, candidateValue, bindStatus);
 			}
-			else if (boundValue instanceof Map) {
-				selected = mapCompare((Map<?, ?>) boundValue, candidateValue, bindStatus);
+			else if (boundValue instanceof Map<?, ?> map) {
+				selected = mapCompare(map, candidateValue, bindStatus);
 			}
 		}
 		if (!selected) {
@@ -163,9 +163,8 @@ abstract class SelectedValueComparator {
 			return true;
 		}
 
-		if (editor != null && candidate instanceof String) {
+		if (editor != null && candidate instanceof String candidateAsString) {
 			// Try PE-based comparison (PE should *not* be allowed to escape creating thread)
-			String candidateAsString = (String) candidate;
 			Object candidateAsValue;
 			if (convertedValueCache != null && convertedValueCache.containsKey(editor)) {
 				candidateAsValue = convertedValueCache.get(editor);

@@ -484,8 +484,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			return;
 		}
 		for (int i = getResourceResolvers().size() - 1; i >= 0; i--) {
-			if (getResourceResolvers().get(i) instanceof PathResourceResolver) {
-				PathResourceResolver pathResolver = (PathResourceResolver) getResourceResolvers().get(i);
+			if (getResourceResolvers().get(i) instanceof PathResourceResolver pathResolver) {
 				if (ObjectUtils.isEmpty(pathResolver.getAllowedLocations())) {
 					pathResolver.setAllowedLocations(getLocations().toArray(new Resource[0]));
 				}
@@ -681,11 +680,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 					return true;
 				}
 			}
-			catch (IllegalArgumentException ex) {
-				// May not be possible to decode...
-			}
-			catch (UnsupportedEncodingException ex) {
-				// Should never happen...
+			catch (IllegalArgumentException | UnsupportedEncodingException ex) {
+				// May not be possible to decode... | Should never happen...
 			}
 		}
 		return false;
@@ -788,8 +784,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			response.setContentType(mediaType.toString());
 		}
 
-		if (resource instanceof HttpResource) {
-			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
+		if (resource instanceof HttpResource httpResource) {
+			HttpHeaders resourceHeaders = httpResource.getResponseHeaders();
 			resourceHeaders.forEach((headerName, headerValues) -> {
 				boolean first = true;
 				for (String headerValue : headerValues) {

@@ -67,8 +67,7 @@ public class ParameterizableViewController extends AbstractController {
 	 */
 	@Nullable
 	public String getViewName() {
-		if (this.view instanceof String) {
-			String viewName = (String) this.view;
+		if (this.view instanceof String viewName) {
 			if (getStatusCode() != null && getStatusCode().is3xxRedirection()) {
 				return viewName.startsWith("redirect:") ? viewName : "redirect:" + viewName;
 			}

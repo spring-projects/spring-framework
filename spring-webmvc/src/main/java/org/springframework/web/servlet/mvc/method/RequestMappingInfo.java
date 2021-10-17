@@ -470,10 +470,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof RequestMappingInfo)) {
+		if (!(other instanceof RequestMappingInfo otherInfo)) {
 			return false;
 		}
-		RequestMappingInfo otherInfo = (RequestMappingInfo) other;
 		return (getActivePatternsCondition().equals(otherInfo.getActivePatternsCondition()) &&
 				this.methodsCondition.equals(otherInfo.methodsCondition) &&
 				this.paramsCondition.equals(otherInfo.paramsCondition) &&

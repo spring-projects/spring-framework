@@ -95,15 +95,15 @@ public class RequestContext {
 	protected static final boolean jstlPresent = ClassUtils.isPresent(
 			"jakarta.servlet.jsp.jstl.core.Config", RequestContext.class.getClassLoader());
 
-	private HttpServletRequest request;
+	private final HttpServletRequest request;
 
 	@Nullable
-	private HttpServletResponse response;
+	private final HttpServletResponse response;
 
 	@Nullable
-	private Map<String, Object> model;
+	private final Map<String, Object> model;
 
-	private WebApplicationContext webApplicationContext;
+	private final WebApplicationContext webApplicationContext;
 
 	@Nullable
 	private Locale locale;
@@ -118,7 +118,7 @@ public class RequestContext {
 	private Boolean defaultHtmlEscape;
 
 	@Nullable
-	private Boolean responseEncodedHtmlEscape;
+	private final Boolean responseEncodedHtmlEscape;
 
 	private UrlPathHelper urlPathHelper;
 

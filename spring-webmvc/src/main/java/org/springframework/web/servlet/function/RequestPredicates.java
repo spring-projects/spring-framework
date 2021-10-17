@@ -65,6 +65,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * request matching operations, such as matching based on path, HTTP method, etc.
  *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 5.2
  */
 public abstract class RequestPredicates {
@@ -792,11 +793,11 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void changeParser(PathPatternParser parser) {
-			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) this.left).changeParser(parser);
+			if (this.left instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
-			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) this.right).changeParser(parser);
+			if (this.right instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
 		}
 
@@ -837,8 +838,8 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void changeParser(PathPatternParser parser) {
-			if (this.delegate instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) this.delegate).changeParser(parser);
+			if (this.delegate instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
 		}
 
@@ -904,11 +905,11 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void changeParser(PathPatternParser parser) {
-			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) this.left).changeParser(parser);
+			if (this.left instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
-			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) this.right).changeParser(parser);
+			if (this.right instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
 		}
 
@@ -923,7 +924,7 @@ public abstract class RequestPredicates {
 
 		private final ServerRequest request;
 
-		private RequestPath requestPath;
+		private final RequestPath requestPath;
 
 		private final Map<String, Object> attributes;
 

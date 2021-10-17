@@ -237,12 +237,12 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			resourcePath = resource.getURL().toExternalForm();
 			locationPath = StringUtils.cleanPath(location.getURL().toString());
 		}
-		else if (resource instanceof ClassPathResource) {
-			resourcePath = ((ClassPathResource) resource).getPath();
+		else if (resource instanceof ClassPathResource classPathResource) {
+			resourcePath = classPathResource.getPath();
 			locationPath = StringUtils.cleanPath(((ClassPathResource) location).getPath());
 		}
-		else if (resource instanceof ServletContextResource) {
-			resourcePath = ((ServletContextResource) resource).getPath();
+		else if (resource instanceof ServletContextResource servletContextResource) {
+			resourcePath = servletContextResource.getPath();
 			locationPath = StringUtils.cleanPath(((ServletContextResource) location).getPath());
 		}
 		else {
@@ -301,11 +301,8 @@ public class PathResourceResolver extends AbstractResourceResolver {
 					return true;
 				}
 			}
-			catch (IllegalArgumentException ex) {
-				// May not be possible to decode...
-			}
-			catch (UnsupportedEncodingException ex) {
-				// Should never happen...
+			catch (IllegalArgumentException | UnsupportedEncodingException ex) {
+				// May not be possible to decode... | Should never happen...
 			}
 		}
 		return false;
