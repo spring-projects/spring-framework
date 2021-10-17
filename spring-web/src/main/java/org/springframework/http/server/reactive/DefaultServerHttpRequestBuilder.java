@@ -45,7 +45,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	private URI uri;
 
-	private HttpHeaders headers;
+	private final HttpHeaders headers;
 
 	private String httpMethodValue;
 
@@ -61,7 +61,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	@Nullable
 	private InetSocketAddress remoteAddress;
 
-	private Flux<DataBuffer> body;
+	private final Flux<DataBuffer> body;
 
 	private final ServerHttpRequest originalRequest;
 
@@ -182,7 +182,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		private final SslInfo sslInfo;
 
 		@Nullable
-		private InetSocketAddress remoteAddress;
+		private final InetSocketAddress remoteAddress;
 
 		private final Flux<DataBuffer> body;
 

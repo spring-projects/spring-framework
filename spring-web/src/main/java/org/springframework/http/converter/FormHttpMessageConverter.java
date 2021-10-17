@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -274,8 +274,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 */
 	private void applyDefaultCharset() {
 		for (HttpMessageConverter<?> candidate : this.partConverters) {
-			if (candidate instanceof AbstractHttpMessageConverter) {
-				AbstractHttpMessageConverter<?> converter = (AbstractHttpMessageConverter<?>) candidate;
+			if (candidate instanceof AbstractHttpMessageConverter<?> converter) {
 				// Only override default charset if the converter operates with a charset to begin with...
 				if (converter.getDefaultCharset() != null) {
 					converter.setDefaultCharset(this.charset);
@@ -400,8 +399,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		byte[] bytes = serializeForm(formData, charset).getBytes(charset);
 		outputMessage.getHeaders().setContentLength(bytes.length);
 
-		if (outputMessage instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
+		if (outputMessage instanceof StreamingHttpOutputMessage streamingOutputMessage) {
 			streamingOutputMessage.setBody(outputStream -> StreamUtils.copy(bytes, outputStream));
 		}
 		else {
@@ -486,8 +484,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		contentType = new MediaType(contentType, parameters);
 		outputMessage.getHeaders().setContentType(contentType);
 
-		if (outputMessage instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
+		if (outputMessage instanceof StreamingHttpOutputMessage streamingOutputMessage) {
 			streamingOutputMessage.setBody(outputStream -> {
 				writeParts(outputStream, parts, boundary);
 				writeEnd(outputStream, boundary);
@@ -562,7 +559,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * or a newly built {@link HttpEntity} wrapper for that part
 	 */
 	protected HttpEntity<?> getHttpEntity(Object part) {
-		return (part instanceof HttpEntity ? (HttpEntity<?>) part : new HttpEntity<>(part));
+		return (part instanceof HttpEntity<?> httpEntity ? httpEntity : new HttpEntity<>(part));
 	}
 
 	/**
@@ -575,8 +572,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 */
 	@Nullable
 	protected String getFilename(Object part) {
-		if (part instanceof Resource) {
-			Resource resource = (Resource) part;
+		if (part instanceof Resource resource) {
 			String filename = resource.getFilename();
 			if (filename != null && this.multipartCharset != null) {
 				filename = MimeDelegate.encode(filename, this.multipartCharset.name());

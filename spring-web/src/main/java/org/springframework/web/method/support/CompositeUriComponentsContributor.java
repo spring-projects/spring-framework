@@ -36,6 +36,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.0
  */
 public class CompositeUriComponentsContributor implements UriComponentsContributor {
@@ -104,13 +105,13 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		for (Object contributor : this.contributors) {
-			if (contributor instanceof UriComponentsContributor) {
-				if (((UriComponentsContributor) contributor).supportsParameter(parameter)) {
+			if (contributor instanceof UriComponentsContributor ucc) {
+				if (ucc.supportsParameter(parameter)) {
 					return true;
 				}
 			}
-			else if (contributor instanceof HandlerMethodArgumentResolver) {
-				if (((HandlerMethodArgumentResolver) contributor).supportsParameter(parameter)) {
+			else if (contributor instanceof HandlerMethodArgumentResolver resolver) {
+				if (resolver.supportsParameter(parameter)) {
 					return false;
 				}
 			}
@@ -123,15 +124,14 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
 		for (Object contributor : this.contributors) {
-			if (contributor instanceof UriComponentsContributor) {
-				UriComponentsContributor ucc = (UriComponentsContributor) contributor;
+			if (contributor instanceof UriComponentsContributor ucc) {
 				if (ucc.supportsParameter(parameter)) {
 					ucc.contributeMethodArgument(parameter, value, builder, uriVariables, conversionService);
 					break;
 				}
 			}
-			else if (contributor instanceof HandlerMethodArgumentResolver) {
-				if (((HandlerMethodArgumentResolver) contributor).supportsParameter(parameter)) {
+			else if (contributor instanceof HandlerMethodArgumentResolver resolver) {
+				if (resolver.supportsParameter(parameter)) {
 					break;
 				}
 			}

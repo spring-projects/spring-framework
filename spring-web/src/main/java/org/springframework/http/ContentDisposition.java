@@ -212,10 +212,9 @@ public final class ContentDisposition {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ContentDisposition)) {
+		if (!(other instanceof ContentDisposition otherCd)) {
 			return false;
 		}
-		ContentDisposition otherCd = (ContentDisposition) other;
 		return (ObjectUtils.nullSafeEquals(this.type, otherCd.type) &&
 				ObjectUtils.nullSafeEquals(this.name, otherCd.name) &&
 				ObjectUtils.nullSafeEquals(this.filename, otherCd.filename) &&

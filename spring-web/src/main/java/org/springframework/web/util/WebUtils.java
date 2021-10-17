@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,11 +48,12 @@ import org.springframework.util.StringUtils;
 
 /**
  * Miscellaneous utilities for web applications.
- * Used by various framework classes.
+ * <p>Used by various framework classes.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  */
 public abstract class WebUtils {
 
@@ -460,8 +461,8 @@ public abstract class WebUtils {
 			if (requiredType.isInstance(request)) {
 				return (T) request;
 			}
-			else if (request instanceof ServletRequestWrapper) {
-				return getNativeRequest(((ServletRequestWrapper) request).getRequest(), requiredType);
+			else if (request instanceof ServletRequestWrapper wrapper) {
+				return getNativeRequest(wrapper.getRequest(), requiredType);
 			}
 		}
 		return null;
@@ -482,8 +483,8 @@ public abstract class WebUtils {
 			if (requiredType.isInstance(response)) {
 				return (T) response;
 			}
-			else if (response instanceof ServletResponseWrapper) {
-				return getNativeResponse(((ServletResponseWrapper) response).getResponse(), requiredType);
+			else if (response instanceof ServletResponseWrapper wrapper) {
+				return getNativeResponse(wrapper.getResponse(), requiredType);
 			}
 		}
 		return null;
@@ -649,8 +650,7 @@ public abstract class WebUtils {
 	public static String findParameterValue(Map<String, ?> parameters, String name) {
 		// First try to get it as a normal name=value parameter
 		Object value = parameters.get(name);
-		if (value instanceof String[]) {
-			String[] values = (String[]) value;
+		if (value instanceof String[] values) {
 			return (values.length > 0 ? values[0] : null);
 		}
 		else if (value != null) {
@@ -801,9 +801,9 @@ public abstract class WebUtils {
 		String scheme;
 		String host;
 		int port;
-		if (request instanceof ServletServerHttpRequest) {
+		if (request instanceof ServletServerHttpRequest servletServerHttpRequest) {
 			// Build more efficiently if we can: we only need scheme, host, port for origin comparison
-			HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
+			HttpServletRequest servletRequest = servletServerHttpRequest.getServletRequest();
 			scheme = servletRequest.getScheme();
 			host = servletRequest.getServerName();
 			port = servletRequest.getServerPort();

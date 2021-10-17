@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,11 +37,12 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * Implementation of {@link HttpMessageConverter} that can write a single {@link ResourceRegion},
- * or Collections of {@link ResourceRegion ResourceRegions}.
+ * Implementation of {@link HttpMessageConverter} that can write a single
+ * {@link ResourceRegion} or Collections of {@link ResourceRegion ResourceRegions}.
  *
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.3
  */
 public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
@@ -55,8 +56,8 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	@SuppressWarnings("unchecked")
 	protected MediaType getDefaultContentType(Object object) {
 		Resource resource = null;
-		if (object instanceof ResourceRegion) {
-			resource = ((ResourceRegion) object).getResource();
+		if (object instanceof ResourceRegion resourceRegion) {
+			resource = resourceRegion.getResource();
 		}
 		else {
 			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
@@ -98,15 +99,12 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 
 	@Override
 	public boolean canWrite(@Nullable Type type, @Nullable Class<?> clazz, @Nullable MediaType mediaType) {
-		if (!(type instanceof ParameterizedType)) {
-			return (type instanceof Class && ResourceRegion.class.isAssignableFrom((Class<?>) type));
+		if (!(type instanceof ParameterizedType parameterizedType)) {
+			return (type instanceof Class<?> c && ResourceRegion.class.isAssignableFrom(c));
 		}
-
-		ParameterizedType parameterizedType = (ParameterizedType) type;
-		if (!(parameterizedType.getRawType() instanceof Class)) {
+		if (!(parameterizedType.getRawType() instanceof Class<?> rawType)) {
 			return false;
 		}
-		Class<?> rawType = (Class<?>) parameterizedType.getRawType();
 		if (!(Collection.class.isAssignableFrom(rawType))) {
 			return false;
 		}
@@ -114,11 +112,9 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 			return false;
 		}
 		Type typeArgument = parameterizedType.getActualTypeArguments()[0];
-		if (!(typeArgument instanceof Class)) {
+		if (!(typeArgument instanceof Class<?> typeArgumentClass)) {
 			return false;
 		}
-
-		Class<?> typeArgumentClass = (Class<?>) typeArgument;
 		return ResourceRegion.class.isAssignableFrom(typeArgumentClass);
 	}
 
@@ -127,8 +123,8 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	protected void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
-		if (object instanceof ResourceRegion) {
-			writeResourceRegion((ResourceRegion) object, outputMessage);
+		if (object instanceof ResourceRegion resourceRegion) {
+			writeResourceRegion(resourceRegion, outputMessage);
 		}
 		else {
 			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
@@ -136,7 +132,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 				writeResourceRegion(regions.iterator().next(), outputMessage);
 			}
 			else {
-				writeResourceRegionCollection((Collection<ResourceRegion>) object, outputMessage);
+				writeResourceRegionCollection(regions, outputMessage);
 			}
 		}
 	}

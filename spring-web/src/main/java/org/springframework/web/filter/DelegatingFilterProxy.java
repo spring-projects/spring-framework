@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -300,12 +300,9 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	protected WebApplicationContext findWebApplicationContext() {
 		if (this.webApplicationContext != null) {
 			// The user has injected a context at construction time -> use it...
-			if (this.webApplicationContext instanceof ConfigurableApplicationContext) {
-				ConfigurableApplicationContext cac = (ConfigurableApplicationContext) this.webApplicationContext;
-				if (!cac.isActive()) {
-					// The context has not yet been refreshed -> do so before returning it...
-					cac.refresh();
-				}
+			if (this.webApplicationContext instanceof ConfigurableApplicationContext cac && !cac.isActive()) {
+				// The context has not yet been refreshed -> do so before returning it...
+				cac.refresh();
 			}
 			return this.webApplicationContext;
 		}

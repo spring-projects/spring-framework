@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,8 +70,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 	@Nullable
 	public Object getValue(ELContext elContext, @Nullable Object base, Object property) throws ELException {
 		if (base != null) {
-			if (base instanceof WebApplicationContext) {
-				WebApplicationContext wac = (WebApplicationContext) base;
+			if (base instanceof WebApplicationContext wac) {
 				String beanName = property.toString();
 				if (logger.isTraceEnabled()) {
 					logger.trace("Attempting to resolve property '" + beanName + "' in root WebApplicationContext");
@@ -108,8 +107,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 	@Nullable
 	public Class<?> getType(ELContext elContext, @Nullable Object base, Object property) throws ELException {
 		if (base != null) {
-			if (base instanceof WebApplicationContext) {
-				WebApplicationContext wac = (WebApplicationContext) base;
+			if (base instanceof WebApplicationContext wac) {
 				String beanName = property.toString();
 				if (logger.isDebugEnabled()) {
 					logger.debug("Attempting to resolve property '" + beanName + "' in root WebApplicationContext");

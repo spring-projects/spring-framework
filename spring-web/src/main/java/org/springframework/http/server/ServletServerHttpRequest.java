@@ -216,11 +216,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public ServerHttpAsyncRequestControl getAsyncRequestControl(ServerHttpResponse response) {
 		if (this.asyncRequestControl == null) {
-			if (!(response instanceof ServletServerHttpResponse)) {
+			if (!(response instanceof ServletServerHttpResponse servletServerResponse)) {
 				throw new IllegalArgumentException(
 						"Response must be a ServletServerHttpResponse: " + response.getClass());
 			}
-			ServletServerHttpResponse servletServerResponse = (ServletServerHttpResponse) response;
 			this.asyncRequestControl = new ServletServerHttpAsyncRequestControl(this, servletServerResponse);
 		}
 		return this.asyncRequestControl;

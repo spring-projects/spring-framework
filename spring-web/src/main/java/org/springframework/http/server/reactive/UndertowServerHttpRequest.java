@@ -175,7 +175,7 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		@Nullable
 		protected DataBuffer read() throws IOException {
 			PooledByteBuffer pooledByteBuffer = this.byteBufferPool.allocate();
-			try {
+			try (pooledByteBuffer) {
 				ByteBuffer byteBuffer = pooledByteBuffer.getBuffer();
 				int read = this.channel.read(byteBuffer);
 
@@ -193,9 +193,6 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 					onAllDataRead();
 				}
 				return null;
-			}
-			finally {
-				pooledByteBuffer.close();
 			}
 		}
 

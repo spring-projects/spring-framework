@@ -691,8 +691,8 @@ public class MediaType extends MimeType implements Serializable {
 	 * @since 5.0
 	 */
 	public static MediaType asMediaType(MimeType mimeType) {
-		if (mimeType instanceof MediaType) {
-			return (MediaType) mimeType;
+		if (mimeType instanceof MediaType mediaType) {
+			return mediaType;
 		}
 		return new MediaType(mimeType.getType(), mimeType.getSubtype(), mimeType.getParameters());
 	}
@@ -817,7 +817,7 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * Comparator used by {@link #sortBySpecificity(List)}.
 	 */
-	public static final Comparator<MediaType> SPECIFICITY_COMPARATOR = new SpecificityComparator<MediaType>() {
+	public static final Comparator<MediaType> SPECIFICITY_COMPARATOR = new SpecificityComparator<>() {
 
 		@Override
 		protected int compareParameters(MediaType mediaType1, MediaType mediaType2) {

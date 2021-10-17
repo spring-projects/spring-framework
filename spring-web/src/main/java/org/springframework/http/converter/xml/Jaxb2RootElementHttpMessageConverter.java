@@ -151,8 +151,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 
 	@SuppressWarnings("deprecation")
 	protected Source processSource(Source source) {
-		if (source instanceof StreamSource) {
-			StreamSource streamSource = (StreamSource) source;
+		if (source instanceof StreamSource streamSource) {
 			InputSource inputSource = new InputSource(streamSource.getInputStream());
 			try {
 				XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();

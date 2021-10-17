@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,10 +241,9 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ServletContextResource)) {
+		if (!(other instanceof ServletContextResource otherRes)) {
 			return false;
 		}
-		ServletContextResource otherRes = (ServletContextResource) other;
 		return (this.servletContext.equals(otherRes.servletContext) && this.path.equals(otherRes.path));
 	}
 

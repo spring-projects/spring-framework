@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,10 +135,9 @@ public abstract class DecoratingNavigationHandler extends NavigationHandler {
 
 		NavigationHandler decoratedNavigationHandler = getDecoratedNavigationHandler();
 
-		if (decoratedNavigationHandler instanceof DecoratingNavigationHandler) {
+		if (decoratedNavigationHandler instanceof DecoratingNavigationHandler decHandler) {
 			// DecoratingNavigationHandler specified through constructor argument:
 			// Call it with original NavigationHandler passed in.
-			DecoratingNavigationHandler decHandler = (DecoratingNavigationHandler) decoratedNavigationHandler;
 			decHandler.handleNavigation(facesContext, fromAction, outcome, originalNavigationHandler);
 		}
 		else if (decoratedNavigationHandler != null) {

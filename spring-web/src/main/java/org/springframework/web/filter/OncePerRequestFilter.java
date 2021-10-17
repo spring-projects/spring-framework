@@ -64,6 +64,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 06.12.2003
  */
 public abstract class OncePerRequestFilter extends GenericFilterBean {
@@ -88,22 +89,18 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	public final void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
+		if (!((request instanceof HttpServletRequest httpRequest) && (response instanceof HttpServletResponse httpResponse))) {
 			throw new ServletException("OncePerRequestFilter just supports HTTP requests");
 		}
-		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
 		String alreadyFilteredAttributeName = getAlreadyFilteredAttributeName();
 		boolean hasAlreadyFilteredAttribute = request.getAttribute(alreadyFilteredAttributeName) != null;
 
 		if (skipDispatch(httpRequest) || shouldNotFilter(httpRequest)) {
-
 			// Proceed without invoking this filter...
 			filterChain.doFilter(request, response);
 		}
 		else if (hasAlreadyFilteredAttribute) {
-
 			if (DispatcherType.ERROR.equals(request.getDispatcherType())) {
 				doFilterNestedErrorDispatch(httpRequest, httpResponse, filterChain);
 				return;

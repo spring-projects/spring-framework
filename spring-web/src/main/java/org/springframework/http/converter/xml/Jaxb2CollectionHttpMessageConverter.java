@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import org.springframework.util.xml.StaxUtils;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  * @param <T> the converted object type
  */
@@ -86,14 +87,12 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	 */
 	@Override
 	public boolean canRead(Type type, @Nullable Class<?> contextClass, @Nullable MediaType mediaType) {
-		if (!(type instanceof ParameterizedType)) {
+		if (!(type instanceof ParameterizedType parameterizedType)) {
 			return false;
 		}
-		ParameterizedType parameterizedType = (ParameterizedType) type;
-		if (!(parameterizedType.getRawType() instanceof Class)) {
+		if (!(parameterizedType.getRawType() instanceof Class<?> rawType)) {
 			return false;
 		}
-		Class<?> rawType = (Class<?>) parameterizedType.getRawType();
 		if (!(Collection.class.isAssignableFrom(rawType))) {
 			return false;
 		}
@@ -101,10 +100,9 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 			return false;
 		}
 		Type typeArgument = parameterizedType.getActualTypeArguments()[0];
-		if (!(typeArgument instanceof Class)) {
+		if (!(typeArgument instanceof Class<?> typeArgumentClass)) {
 			return false;
 		}
-		Class<?> typeArgumentClass = (Class<?>) typeArgument;
 		return (typeArgumentClass.isAnnotationPresent(XmlRootElement.class) ||
 				typeArgumentClass.isAnnotationPresent(XmlType.class)) && canRead(mediaType);
 	}

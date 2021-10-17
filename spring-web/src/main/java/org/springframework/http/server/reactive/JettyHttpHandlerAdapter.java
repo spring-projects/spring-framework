@@ -89,11 +89,10 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		}
 
 		private static Request getRequest(HttpServletRequest request) {
-			if (request instanceof Request) {
-				return (Request) request;
+			if (request instanceof Request jettyRequest) {
+				return jettyRequest;
 			}
-			else if (request instanceof HttpServletRequestWrapper) {
-				HttpServletRequestWrapper wrapper = (HttpServletRequestWrapper) request;
+			else if (request instanceof HttpServletRequestWrapper wrapper) {
 				HttpServletRequest wrappedRequest = (HttpServletRequest) wrapper.getRequest();
 				return getRequest(wrappedRequest);
 			}
@@ -121,11 +120,10 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		}
 
 		private static Response getResponse(HttpServletResponse response) {
-			if (response instanceof Response) {
-				return (Response) response;
+			if (response instanceof Response jettyResponse) {
+				return jettyResponse;
 			}
-			else if (response instanceof HttpServletResponseWrapper) {
-				HttpServletResponseWrapper wrapper = (HttpServletResponseWrapper) response;
+			else if (response instanceof HttpServletResponseWrapper wrapper) {
 				HttpServletResponse wrappedResponse = (HttpServletResponse) wrapper.getResponse();
 				return getResponse(wrappedResponse);
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.web.WebApplicationInitializer;
  * the {@link ServletHttpHandlerAdapter}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0.2
  */
 public abstract class AbstractReactiveWebInitializer implements WebApplicationInitializer {
@@ -108,11 +109,8 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 	 * Refresh the given application context, if necessary.
 	 */
 	protected void refreshApplicationContext(ApplicationContext context) {
-		if (context instanceof ConfigurableApplicationContext) {
-			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
-			if (!cac.isActive()) {
-				cac.refresh();
-			}
+		if (context instanceof ConfigurableApplicationContext cac && !cac.isActive()) {
+			cac.refresh();
 		}
 	}
 
@@ -124,10 +122,8 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 	 * closed when {@code servletContext} is destroyed
 	 */
 	protected void registerCloseListener(ServletContext servletContext, ApplicationContext applicationContext) {
-		if (applicationContext instanceof ConfigurableApplicationContext) {
-			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) applicationContext;
-			ServletContextDestroyedListener listener = new ServletContextDestroyedListener(cac);
-			servletContext.addListener(listener);
+		if (applicationContext instanceof ConfigurableApplicationContext cac) {
+			servletContext.addListener(new ServletContextDestroyedListener(cac));
 		}
 	}
 
