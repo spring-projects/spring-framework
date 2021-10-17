@@ -209,8 +209,8 @@ public interface ClientRequest {
 		/**
 		 * Manipulate this request's cookies with the given consumer. The
 		 * map provided to the consumer is "live", so that the consumer can be used to
-		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
-		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing cookie values,
+		 * {@linkplain MultiValueMap#remove(Object) remove} cookies, or use any of the other
 		 * {@link MultiValueMap} methods.
 		 * @param cookiesConsumer a function that consumes the cookies map
 		 * @return this builder
