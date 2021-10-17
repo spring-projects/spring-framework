@@ -354,8 +354,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			return;
 		}
 		for (int i = getResourceResolvers().size() - 1; i >= 0; i--) {
-			if (getResourceResolvers().get(i) instanceof PathResourceResolver) {
-				PathResourceResolver resolver = (PathResourceResolver) getResourceResolvers().get(i);
+			if (getResourceResolvers().get(i) instanceof PathResourceResolver resolver) {
 				if (ObjectUtils.isEmpty(resolver.getAllowedLocations())) {
 					resolver.setAllowedLocations(getLocations().toArray(new Resource[0]));
 				}
@@ -522,10 +521,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 					return true;
 				}
 			}
-			catch (IllegalArgumentException ex) {
-				// May not be possible to decode...
-			}
-			catch (UnsupportedEncodingException ex) {
+			catch (IllegalArgumentException | UnsupportedEncodingException ex) {
 				// Should never happen...
 			}
 		}
@@ -609,9 +605,8 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			headers.setContentType(mediaType);
 		}
 
-		if (resource instanceof HttpResource) {
-			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
-			exchange.getResponse().getHeaders().putAll(resourceHeaders);
+		if (resource instanceof HttpResource httpResource) {
+			exchange.getResponse().getHeaders().putAll(httpResource.getResponseHeaders());
 		}
 	}
 
