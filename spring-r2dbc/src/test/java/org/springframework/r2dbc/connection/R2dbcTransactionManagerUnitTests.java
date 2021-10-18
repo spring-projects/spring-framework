@@ -264,7 +264,7 @@ class R2dbcTransactionManagerUnitTests {
 				.doOnNext(connection -> connection.createStatement("foo")).then()
 				.as(operator::transactional)
 				.as(StepVerifier::create)
-				.verifyError(IllegalTransactionStateException.class);
+				.verifyError(BadSqlGrammarException.class);
 
 		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
@@ -317,7 +317,7 @@ class R2dbcTransactionManagerUnitTests {
 			return ConnectionFactoryUtils.getConnection(connectionFactoryMock)
 					.doOnNext(connection -> connection.createStatement("foo")).then();
 		}).as(StepVerifier::create)
-				.verifyError(IllegalTransactionStateException.class);
+				.verifyError(BadSqlGrammarException.class);
 
 		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));

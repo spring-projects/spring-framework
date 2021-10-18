@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
  *
  * @author Mark Paluch
  * @author Juergen Hoeller
+ * @author Enric Sala
  * @since 5.2
  * @see #execute
  * @see ReactiveTransactionManager
@@ -71,39 +72,15 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 	}
 
 	@Override
-	public <T> Mono<T> transactional(Mono<T> mono) {
-		return TransactionContextManager.currentContext().flatMap(context -> {
-			Mono<ReactiveTransaction> status = this.transactionManager.getReactiveTransaction(this.transactionDefinition);
-			// This is an around advice: Invoke the next interceptor in the chain.
-			// This will normally result in a target object being invoked.
-			// Need re-wrapping of ReactiveTransaction until we get hold of the exception
-			// through usingWhen.
-			return status.flatMap(it -> Mono.usingWhen(Mono.just(it), ignore -> mono,
-					this.transactionManager::commit, (res, err) -> Mono.empty(), this.transactionManager::rollback)
-					.onErrorResume(ex -> rollbackOnException(it, ex).then(Mono.error(ex))));
-		})
-		.contextWrite(TransactionContextManager.getOrCreateContext())
-		.contextWrite(TransactionContextManager.getOrCreateContextHolder());
-	}
-
-	@Override
 	public <T> Flux<T> execute(TransactionCallback<T> action) throws TransactionException {
-		return TransactionContextManager.currentContext().flatMapMany(context -> {
-			Mono<ReactiveTransaction> status = this.transactionManager.getReactiveTransaction(this.transactionDefinition);
-			// This is an around advice: Invoke the next interceptor in the chain.
-			// This will normally result in a target object being invoked.
-			// Need re-wrapping of ReactiveTransaction until we get hold of the exception
-			// through usingWhen.
-			return status.flatMapMany(it -> Flux
-					.usingWhen(
-							Mono.just(it),
-							action::doInTransaction,
-							this.transactionManager::commit,
-							(tx, ex) -> Mono.empty(),
-							this.transactionManager::rollback)
-					.onErrorResume(ex ->
-							rollbackOnException(it, ex).then(Mono.error(ex))));
-		})
+		return TransactionContextManager.currentContext().flatMapMany(context ->
+			Flux.usingWhen(
+				this.transactionManager.getReactiveTransaction(this.transactionDefinition),
+				action::doInTransaction,
+				this.transactionManager::commit,
+				this::rollbackOnException,
+				this.transactionManager::rollback)
+			.onErrorMap(this::unwrapIfResourceCleanupFailure))
 		.contextWrite(TransactionContextManager.getOrCreateContext())
 		.contextWrite(TransactionContextManager.getOrCreateContextHolder());
 	}
@@ -121,9 +98,26 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 					if (ex2 instanceof TransactionSystemException tse) {
 						tse.initApplicationException(ex);
 					}
+					else {
+						ex2.addSuppressed(ex);
+					}
 					return ex2;
 				}
 		);
+	}
+
+	/**
+	 * Unwrap the cause of a throwable, if produced by a failure
+	 * during the async resource cleanup in {@link Flux#usingWhen}.
+	 * @param ex the throwable to try to unwrap
+	 */
+	private Throwable unwrapIfResourceCleanupFailure(Throwable ex) {
+		if (ex instanceof RuntimeException &&
+				ex.getCause() != null &&
+				ex.getMessage().startsWith("Async resource cleanup failed")) {
+			return ex.getCause();
+		}
+		return ex;
 	}
 
 
