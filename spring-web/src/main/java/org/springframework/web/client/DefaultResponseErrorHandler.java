@@ -123,7 +123,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 	/**
-	 * Return error message with details from the response body:
+	 * Return error message with details from the response body. For example:
 	 * <pre>
 	 * 404 Not Found: [{'id': 123, 'message': 'my message'}]
 	 * </pre>
