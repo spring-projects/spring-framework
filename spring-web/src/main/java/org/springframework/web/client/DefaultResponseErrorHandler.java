@@ -123,9 +123,9 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 	/**
-	 * Return error message with details from the response body, possibly truncated:
+	 * Return error message with details from the response body:
 	 * <pre>
-	 * 404 Not Found: [{'id': 123, 'message': 'my very long... (500 bytes)]
+	 * 404 Not Found: [{'id': 123, 'message': 'my message'}]
 	 * </pre>
 	 */
 	private String getErrorMessage(
