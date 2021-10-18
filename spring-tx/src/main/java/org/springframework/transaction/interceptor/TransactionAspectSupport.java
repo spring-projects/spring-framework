@@ -84,6 +84,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @author Mark Paluch
  * @author Sebastien Deleuze
+ * @author Enric Sala
  * @since 1.1
  * @see PlatformTransactionManager
  * @see ReactiveTransactionManager
@@ -919,60 +920,41 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					!COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()))) {
 
 				return TransactionContextManager.currentContext().flatMap(context ->
-						createTransactionIfNecessary(rtm, txAttr, joinpointIdentification).flatMap(it -> {
-							try {
-								// Need re-wrapping until we get hold of the exception through usingWhen.
-								return Mono.<Object, ReactiveTransactionInfo>usingWhen(
-										Mono.just(it),
-										txInfo -> {
-											try {
-												return (Mono<?>) invocation.proceedWithInvocation();
-											}
-											catch (Throwable ex) {
-												return Mono.error(ex);
-											}
-										},
-										this::commitTransactionAfterReturning,
-										(txInfo, err) -> Mono.empty(),
-										this::rollbackTransactionOnCancel)
-										.onErrorResume(ex ->
-												completeTransactionAfterThrowing(it, ex).then(Mono.error(ex)));
-							}
-							catch (Throwable ex) {
-								// target invocation exception
-								return completeTransactionAfterThrowing(it, ex).then(Mono.error(ex));
-							}
-						})).contextWrite(TransactionContextManager.getOrCreateContext())
+							Mono.<Object, ReactiveTransactionInfo>usingWhen(
+								createTransactionIfNecessary(rtm, txAttr, joinpointIdentification),
+								tx -> {
+									try {
+										return (Mono<?>) invocation.proceedWithInvocation();
+									}
+									catch (Throwable ex) {
+										return Mono.error(ex);
+									}
+								},
+								this::commitTransactionAfterReturning,
+								this::completeTransactionAfterThrowing,
+								this::rollbackTransactionOnCancel)
+							.onErrorMap(this::unwrapIfResourceCleanupFailure))
+						.contextWrite(TransactionContextManager.getOrCreateContext())
 						.contextWrite(TransactionContextManager.getOrCreateContextHolder());
 			}
 
 			// Any other reactive type, typically a Flux
 			return this.adapter.fromPublisher(TransactionContextManager.currentContext().flatMapMany(context ->
-					createTransactionIfNecessary(rtm, txAttr, joinpointIdentification).flatMapMany(it -> {
-						try {
-							// Need re-wrapping until we get hold of the exception through usingWhen.
-							return Flux
-									.usingWhen(
-											Mono.just(it),
-											txInfo -> {
-												try {
-													return this.adapter.toPublisher(invocation.proceedWithInvocation());
-												}
-												catch (Throwable ex) {
-													return Mono.error(ex);
-												}
-											},
-											this::commitTransactionAfterReturning,
-											(txInfo, ex) -> Mono.empty(),
-											this::rollbackTransactionOnCancel)
-									.onErrorResume(ex ->
-											completeTransactionAfterThrowing(it, ex).then(Mono.error(ex)));
-						}
-						catch (Throwable ex) {
-							// target invocation exception
-							return completeTransactionAfterThrowing(it, ex).then(Mono.error(ex));
-						}
-					})).contextWrite(TransactionContextManager.getOrCreateContext())
+						Flux.usingWhen(
+							createTransactionIfNecessary(rtm, txAttr, joinpointIdentification),
+							tx -> {
+								try {
+									return this.adapter.toPublisher(invocation.proceedWithInvocation());
+								}
+								catch (Throwable ex) {
+									return Mono.error(ex);
+								}
+							},
+							this::commitTransactionAfterReturning,
+							this::completeTransactionAfterThrowing,
+							this::rollbackTransactionOnCancel)
+						.onErrorMap(this::unwrapIfResourceCleanupFailure))
+					.contextWrite(TransactionContextManager.getOrCreateContext())
 					.contextWrite(TransactionContextManager.getOrCreateContextHolder()));
 		}
 
@@ -1053,6 +1035,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 								if (ex2 instanceof TransactionSystemException systemException) {
 									systemException.initApplicationException(ex);
 								}
+								else {
+									ex2.addSuppressed(ex);
+								}
 								return ex2;
 							}
 					);
@@ -1065,12 +1050,29 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 								if (ex2 instanceof TransactionSystemException systemException) {
 									systemException.initApplicationException(ex);
 								}
+								else {
+									ex2.addSuppressed(ex);
+								}
 								return ex2;
 							}
 					);
 				}
 			}
 			return Mono.empty();
+		}
+
+		/**
+		 * Unwrap the cause of a throwable, if produced by a failure
+		 * during the async resource cleanup in {@link Flux#usingWhen}.
+		 * @param ex the throwable to try to unwrap
+		 */
+		private Throwable unwrapIfResourceCleanupFailure(Throwable ex) {
+			if (ex instanceof RuntimeException &&
+					ex.getCause() != null &&
+					ex.getMessage().startsWith("Async resource cleanup failed")) {
+				return ex.getCause();
+			}
+			return ex;
 		}
 	}
 
