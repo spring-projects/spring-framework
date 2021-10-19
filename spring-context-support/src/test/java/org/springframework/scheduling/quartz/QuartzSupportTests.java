@@ -31,8 +31,8 @@ import org.quartz.SchedulerContext;
 import org.quartz.SchedulerFactory;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.SchedulerRepository;
-
 import org.quartz.impl.jdbcjobstore.JobStoreTX;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -404,11 +404,11 @@ public class QuartzSupportTests {
 	public void schedulerFactoryBeanWithCustomJobStore() throws Exception {
 		StaticApplicationContext context = new StaticApplicationContext();
 
-		String dbName = "mydb";
+		final String dbName = "mydb";
 		final EmbeddedDatabase database = new EmbeddedDatabaseBuilder().setName(dbName).build();
 
 		final Properties properties = new Properties();
-		properties.setProperty("org.quartz.jobStore.class", "org.quartz.impl.jdbcjobstore.JobStoreTX");
+		properties.setProperty("org.quartz.jobStore.class", JobStoreTX.class.getName());
 		properties.setProperty("org.quartz.jobStore.dataSource", dbName);
 
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(SchedulerFactoryBean.class)
