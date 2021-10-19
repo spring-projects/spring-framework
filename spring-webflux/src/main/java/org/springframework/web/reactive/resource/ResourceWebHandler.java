@@ -336,12 +336,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 		this.locationsToUse.clear();
 		this.locationsToUse.addAll(result);
-
-		if (logger.isInfoEnabled()) {
-			logger.info(!this.locationsToUse.isEmpty() ?
-					"Locations in use: " + locationToString(this.locationsToUse) :
-					"0 locations in use.");
-		}
 	}
 
 	/**
