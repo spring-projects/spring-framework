@@ -87,6 +87,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
  * Abstract implementation of the {@link org.springframework.context.ApplicationContext}
