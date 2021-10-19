@@ -70,6 +70,7 @@ import org.springframework.context.weaving.LoadTimeWeaverAwareProcessor;
 import org.springframework.core.NativeDetector;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.SpringProperties;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -87,7 +88,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
  * Abstract implementation of the {@link org.springframework.context.ApplicationContext}
