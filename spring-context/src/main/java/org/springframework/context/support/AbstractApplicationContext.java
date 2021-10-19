@@ -522,9 +522,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Return the list of BeanFactoryPostProcessors that will get applied
 	 * to the internal BeanFactory.
 	 */
-	public List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() {
-	    // respecting explicit order 
-	    AnnotationAwareOrderComparator.sort(this.beanFactoryPostProcessors);
+	public List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() { 
+		AnnotationAwareOrderComparator.sort(this.beanFactoryPostProcessors);
 		return this.beanFactoryPostProcessors;
 	}
 
