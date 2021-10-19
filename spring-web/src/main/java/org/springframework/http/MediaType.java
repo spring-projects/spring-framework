@@ -798,7 +798,7 @@ public class MediaType extends MimeType implements Serializable {
 		else if (mediaType2.isWildcardType() && !mediaType1.isWildcardType()) {  // audio/* > */*
 			return -1;
 		}
-		else {
+		else {  // mediaType1.getType().equals(mediaType2.getType())
 			if (mediaType1.isWildcardSubtype() && !mediaType2.isWildcardSubtype()) {  // audio/* < audio/basic
 				return 1;
 			}
