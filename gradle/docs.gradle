@@ -49,9 +49,6 @@ task api(type: Javadoc) {
 		links(project.ext.javadocLinks)
 		addBooleanOption('Xdoclint:syntax', true) // only check syntax with doclint
 		addBooleanOption('Werror', true) // fail build on Javadoc warnings
-		if (JavaVersion.current().isJava9Compatible()) {
-			addBooleanOption('html5', true)
-		}
 	}
 	source moduleProjects.collect { project ->
 		project.sourceSets.main.allJava
