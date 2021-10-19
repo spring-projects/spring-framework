@@ -43,7 +43,8 @@ task api(type: Javadoc) {
 		header = rootProject.description
 		use = true
 		overview = "src/docs/api/overview.html"
-		stylesheetFile = file("src/docs/api/stylesheet.css")
+		// Disable custom stylesheet until we resolve https://github.com/spring-projects/spring-framework/issues/27496
+		// stylesheetFile = file("src/docs/api/stylesheet.css")
 		splitIndex = true
 		links(project.ext.javadocLinks)
 		addBooleanOption('Xdoclint:syntax', true) // only check syntax with doclint
