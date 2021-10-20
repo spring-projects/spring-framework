@@ -61,6 +61,7 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 import org.springframework.web.util.UriTemplateHandler;
@@ -878,8 +879,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 						.filter(converter -> canReadResponse(this.responseType, converter))
 						.flatMap((HttpMessageConverter<?> converter) -> getSupportedMediaTypes(this.responseType, converter))
 						.distinct()
-						.sorted(MediaType.SPECIFICITY_COMPARATOR)
 						.collect(Collectors.toList());
+				MimeTypeUtils.sortBySpecificity(allSupportedMediaTypes);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Accept=" + allSupportedMediaTypes);
 				}

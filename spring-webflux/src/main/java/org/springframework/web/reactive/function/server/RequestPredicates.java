@@ -51,6 +51,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.reactive.function.BodyExtractor;
@@ -630,7 +631,7 @@ public abstract class RequestPredicates {
 				acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
 			}
 			else {
-				MediaType.sortBySpecificityAndQuality(acceptedMediaTypes);
+				MimeTypeUtils.sortBySpecificity(acceptedMediaTypes);
 			}
 			return acceptedMediaTypes;
 		}

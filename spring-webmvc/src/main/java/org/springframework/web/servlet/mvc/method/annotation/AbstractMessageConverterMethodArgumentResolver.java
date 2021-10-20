@@ -48,6 +48,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.ValidationAnnotationUtils;
@@ -263,7 +264,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 	/**
 	 * Return the media types supported by all provided message converters sorted
-	 * by specificity via {@link MediaType#sortBySpecificity(List)}.
+	 * by specificity via {@link MimeTypeUtils#sortBySpecificity(List)}.
 	 * @since 5.3.4
 	 */
 	protected List<MediaType> getSupportedMediaTypes(Class<?> clazz) {
@@ -272,7 +273,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			mediaTypeSet.addAll(converter.getSupportedMediaTypes(clazz));
 		}
 		List<MediaType> result = new ArrayList<>(mediaTypeSet);
-		MediaType.sortBySpecificity(result);
+		MimeTypeUtils.sortBySpecificity(result);
 		return result;
 	}
 

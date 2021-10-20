@@ -57,6 +57,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -203,10 +204,12 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	private List<MediaType> getSupportedMediaTypes(Class<?> bodyClass) {
-		return this.messageConverters.stream()
-				.flatMap(converter -> converter.getSupportedMediaTypes(bodyClass).stream())
-				.sorted(MediaType.SPECIFICITY_COMPARATOR)
-				.collect(Collectors.toList());
+		List<MediaType> result = new ArrayList<>(this.messageConverters.size());
+		for (HttpMessageConverter<?> converter : this.messageConverters) {
+			result.addAll(converter.getSupportedMediaTypes(bodyClass));
+		}
+		MimeTypeUtils.sortBySpecificity(result);
+		return result;
 	}
 
 	@Override
