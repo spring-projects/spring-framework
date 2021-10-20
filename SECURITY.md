@@ -8,4 +8,4 @@ wiki page.
 
 ## Reporting a Vulnerability
 
-Please see https://pivotal.io/security.
+Please see https://spring.io/security-policy.
