@@ -28,7 +28,7 @@ import org.springframework.util.ObjectUtils;
  * <pre class="code">
  * HttpHeaders headers = new HttpHeaders();
  * headers.setContentType(MediaType.TEXT_PLAIN);
- * HttpEntity&lt;String&gt; entity = new HttpEntity&lt;String&gt;(helloWorld, headers);
+ * HttpEntity&lt;String&gt; entity = new HttpEntity&lt;String&gt;("helloWorld", headers);
  * URI location = template.postForLocation("https://example.com", entity);
  * </pre>
  * or
