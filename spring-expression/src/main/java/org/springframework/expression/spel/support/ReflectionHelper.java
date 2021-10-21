@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.util.MethodInvoker;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public abstract class ReflectionHelper {
@@ -281,25 +282,32 @@ public abstract class ReflectionHelper {
 				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
 				conversionOccurred |= (argument != arguments[i]);
 			}
+
 			MethodParameter methodParam = MethodParameter.forExecutable(executable, varargsPosition);
+
+			// If the target is varargs and there is just one more argument, then convert it here.
 			if (varargsPosition == arguments.length - 1) {
-				// If the target is varargs and there is just one more argument
-				// then convert it here
-				TypeDescriptor targetType = new TypeDescriptor(methodParam);
 				Object argument = arguments[varargsPosition];
+				TypeDescriptor targetType = new TypeDescriptor(methodParam);
 				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
-				arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);
-				// Three outcomes of that previous line:
-				// 1) the input argument was already compatible (ie. array of valid type) and nothing was done
-				// 2) the input argument was correct type but not in an array so it was made into an array
-				// 3) the input argument was the wrong type and got converted and put into an array
+				// If the argument type is equal to the varargs element type, there is no need
+				// to convert it or wrap it in an array. For example, using StringToArrayConverter
+				// to convert a String containing a comma would result in the String being split
+				// and repackaged in an array when it should be used as-is.
+				if (!sourceType.equals(targetType.getElementTypeDescriptor())) {
+					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);
+				}
+				// Three outcomes of the above if-block:
+				// 1) the input argument was correct type but not wrapped in an array, and nothing was done.
+				// 2) the input argument was already compatible (i.e., array of valid type), and nothing was done.
+				// 3) the input argument was the wrong type and got converted and wrapped in an array.
 				if (argument != arguments[varargsPosition] &&
 						!isFirstEntryInArray(argument, arguments[varargsPosition])) {
 					conversionOccurred = true; // case 3
 				}
 			}
+			// Otherwise, convert remaining arguments to the varargs element type.
 			else {
-				// Convert remaining arguments to the varargs element type
 				TypeDescriptor targetType = new TypeDescriptor(methodParam).getElementTypeDescriptor();
 				Assert.state(targetType != null, "No element type");
 				for (int i = varargsPosition; i < arguments.length; i++) {
