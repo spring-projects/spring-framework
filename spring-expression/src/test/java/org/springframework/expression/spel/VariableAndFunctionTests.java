@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Tests the evaluation of expressions that access variables and functions (lambda/java).
  *
  * @author Andy Clement
+ * @author Sam Brannen
  */
 public class VariableAndFunctionTests extends AbstractExpressionTests {
 
@@ -58,12 +59,17 @@ public class VariableAndFunctionTests extends AbstractExpressionTests {
 
 	@Test
 	public void testCallVarargsFunction() {
+		evaluate("#varargsFunctionReverseStringsAndMerge('a,b')", "a,b", String.class);
+		evaluate("#varargsFunctionReverseStringsAndMerge('a', 'b,c', 'd')", "db,ca", String.class);
 		evaluate("#varargsFunctionReverseStringsAndMerge('a','b','c')", "cba", String.class);
 		evaluate("#varargsFunctionReverseStringsAndMerge('a')", "a", String.class);
 		evaluate("#varargsFunctionReverseStringsAndMerge()", "", String.class);
 		evaluate("#varargsFunctionReverseStringsAndMerge('b',25)", "25b", String.class);
 		evaluate("#varargsFunctionReverseStringsAndMerge(25)", "25", String.class);
+
+		evaluate("#varargsFunctionReverseStringsAndMerge2(1, 'a,b')", "1a,b", String.class);
 		evaluate("#varargsFunctionReverseStringsAndMerge2(1,'a','b','c')", "1cba", String.class);
+		evaluate("#varargsFunctionReverseStringsAndMerge2(1, 'a', 'b,c', 'd')", "1db,ca", String.class);
 		evaluate("#varargsFunctionReverseStringsAndMerge2(2,'a')", "2a", String.class);
 		evaluate("#varargsFunctionReverseStringsAndMerge2(3)", "3", String.class);
 		evaluate("#varargsFunctionReverseStringsAndMerge2(4,'b',25)", "425b", String.class);
