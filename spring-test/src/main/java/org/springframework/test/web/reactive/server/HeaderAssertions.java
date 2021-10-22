@@ -115,7 +115,7 @@ public class HeaderAssertions {
 	/**
 	 * Match all values of the response header with the given regex
 	 * patterns which are applied to the values of the header in the
-	 * same order. Note that the number of pattenrs must match the
+	 * same order. Note that the number of patterns must match the
 	 * number of actual values.
 	 * @param name the header name
 	 * @param patterns one or more regex patterns, one per expected value
