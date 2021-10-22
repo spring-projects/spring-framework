@@ -21,9 +21,8 @@ import java.io.IOException;
 import java.net.BindException;
 import java.net.SocketException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;

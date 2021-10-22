@@ -16,12 +16,12 @@
 
 package org.springframework.jms.support.converter;
 
-import javax.jms.BytesMessage;
-import javax.jms.Session;
-import javax.jms.TextMessage;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 
+import jakarta.jms.BytesMessage;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

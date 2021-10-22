@@ -445,7 +445,7 @@ relevant `TransactionManager`.
 [[tx-resource-synchronization-high]]
 ==== High-level Synchronization Approach
 
-The preferred approach is to use Spring's highest-level template based persistence
+The preferred approach is to use Spring's highest-level template-based persistence
 integration APIs or to use native ORM APIs with transaction-aware factory beans or
 proxies for managing the native resource factories. These transaction-aware solutions
 internally handle resource creation and reuse, cleanup, optional transaction
@@ -1878,7 +1878,7 @@ rollback rules, timeouts, and other features.
 ==== Transaction Propagation
 
 This section describes some semantics of transaction propagation in Spring. Note
-that this section is not an introduction to transaction propagation proper. Rather, it
+that this section is not a proper introduction to transaction propagation. Rather, it
 details some of the semantics regarding transaction propagation in Spring.
 
 In Spring-managed transactions, be aware of the difference between physical and
@@ -2121,7 +2121,7 @@ declarative approach:
 
 		<aop:config>
 			<aop:pointcut id="entryPointMethod" expression="execution(* x.y..*Service.*(..))"/>
-			<!-- runs after the profiling advice (c.f. the order attribute) -->
+			<!-- runs after the profiling advice (cf. the order attribute) -->
 
 			<aop:advisor advice-ref="txAdvice" pointcut-ref="entryPointMethod" order="2"/>
 			<!-- order value is higher than the profiling aspect -->
@@ -2164,7 +2164,7 @@ container by means of an AspectJ aspect. To do so, first annotate your classes
 (and optionally your classes' methods) with the `@Transactional` annotation,
 and then link (weave) your application with the
 `org.springframework.transaction.aspectj.AnnotationTransactionAspect` defined in the
-`spring-aspects.jar` file. You must also configure The aspect with a transaction
+`spring-aspects.jar` file. You must also configure the aspect with a transaction
 manager. You can use the Spring Framework's IoC container to take care of
 dependency-injecting the aspect. The simplest way to configure the transaction
 management aspect is to use the `<tx:annotation-driven/>` element and specify the `mode`
@@ -2585,8 +2585,7 @@ following example shows how to do so:
 	TransactionStatus status = txManager.getTransaction(def);
 	try {
 		// put your business logic here
-	}
-	catch (MyException ex) {
+	} catch (MyException ex) {
 		txManager.rollback(status);
 		throw ex;
 	}
@@ -3295,7 +3294,7 @@ For example, it may be better to write the preceding code snippet as follows:
 	};
 
 	public List<Actor> findAllActors() {
-		return this.jdbcTemplate.query( "select first_name, last_name from t_actor", actorRowMapper);
+		return this.jdbcTemplate.query("select first_name, last_name from t_actor", actorRowMapper);
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -3605,7 +3604,7 @@ variable and the corresponding value that is plugged into the `namedParameters`
 variable (of type `MapSqlParameterSource`).
 
 Alternatively, you can pass along named parameters and their corresponding values to a
-`NamedParameterJdbcTemplate` instance by using the `Map`-based style.The remaining
+`NamedParameterJdbcTemplate` instance by using the `Map`-based style. The remaining
 methods exposed by the `NamedParameterJdbcOperations` and implemented by the
 `NamedParameterJdbcTemplate` class follow a similar pattern and are not covered here.
 
@@ -3743,7 +3742,7 @@ See also <<jdbc-JdbcTemplate-idioms>> for guidelines on using the
 ==== Using `SQLExceptionTranslator`
 
 `SQLExceptionTranslator` is an interface to be implemented by classes that can translate
-between `SQLExceptions` and Spring's own `org.springframework.dao.DataAccessException`,
+between ``SQLException``s and Spring's own `org.springframework.dao.DataAccessException`,
 which is agnostic in regard to data access strategy. Implementations can be generic (for
 example, using SQLState codes for JDBC) or proprietary (for example, using Oracle error
 codes) for greater precision.
@@ -3799,9 +3798,9 @@ You can extend `SQLErrorCodeSQLExceptionTranslator`, as the following example sh
 
 		override fun customTranslate(task: String, sql: String?, sqlEx: SQLException): DataAccessException? {
 			if (sqlEx.errorCode == -12345) {
-					return DeadlockLoserDataAccessException(task, sqlEx)
-				}
-				return null;
+				return DeadlockLoserDataAccessException(task, sqlEx)
+			}
+			return null
 		}
 	}
 ----
@@ -4034,7 +4033,7 @@ The following example updates a column for a certain primary key:
 
 In the preceding example,
 an SQL statement has placeholders for row parameters. You can pass the parameter values
-in as varargs or ,alternatively, as an array of objects. Thus, you should explicitly wrap primitives
+in as varargs or, alternatively, as an array of objects. Thus, you should explicitly wrap primitives
 in the primitive wrapper classes, or you should use auto-boxing.
 
 
@@ -4577,7 +4576,7 @@ The following example shows a batch update that uses a batch size of 100:
 	}
 ----
 
-The batch update methods for this call returns an array of `int` arrays that contains an
+The batch update method for this call returns an array of `int` arrays that contains an
 array entry for each batch with an array of the number of affected rows for each update.
 The top-level array's length indicates the number of batches run, and the second level
 array's length indicates the number of updates in that batch. The number of updates in
@@ -5173,11 +5172,9 @@ as the following example shows:
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcCall funcGetActorName;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 			jdbcTemplate.setResultsMapCaseInsensitive(true);
 			this.funcGetActorName = new SimpleJdbcCall(jdbcTemplate)
@@ -5443,7 +5440,7 @@ example shows such a method:
 The `SqlUpdate` class encapsulates an SQL update. As with a query, an update object is
 reusable, and, as with all `RdbmsOperation` classes, an update can have parameters and is
 defined in SQL. This class provides a number of `update(..)` methods analogous to the
-`execute(..)` methods of query objects. The `SQLUpdate` class is concrete. It can be
+`execute(..)` methods of query objects. The `SqlUpdate` class is concrete. It can be
 subclassed -- for example, to add a custom update method.
 However, you do not have to subclass the `SqlUpdate`
 class, since it can easily be parameterized by setting SQL and declaring parameters.
@@ -6030,8 +6027,8 @@ limit is 1000.
 
 In addition to the primitive values in the value list, you can create a `java.util.List`
 of object arrays. This list can support multiple expressions being defined for the `in`
-clause, such as `select * from T_ACTOR where (id, last_name) in \((1, 'Johnson'), (2,
-'Harrop'\))`. This, of course, requires that your database supports this syntax.
+clause, such as `+++select * from T_ACTOR where (id, last_name) in ((1, 'Johnson'), (2,
+'Harrop'))+++`. This, of course, requires that your database supports this syntax.
 
 
 [[jdbc-complex-types]]
@@ -7093,7 +7090,7 @@ databases, you may want multiple `DatabaseClient` instances, which requires mult
 instances.
 
 [[r2dbc-auto-generated-keys]]
-== Retrieving Auto-generated Keys
+=== Retrieving Auto-generated Keys
 
 `INSERT` statements may generate keys when inserting rows into a table
 that defines an auto-increment or identity column. To get full control over
@@ -7387,7 +7384,9 @@ examples (one for Java configuration and one for XML configuration) show how to 
 ----
 	@Repository
 	class ProductDaoImpl : ProductDao {
+
 		// class body here...
+
 	}
 ----
 
@@ -7427,7 +7426,7 @@ cover the other ORM technologies and show brief examples.
 
 NOTE: As of Spring Framework 5.3, Spring requires Hibernate ORM 5.2+ for Spring's
 `HibernateJpaVendorAdapter` as well as for a native Hibernate `SessionFactory` setup.
-Is is strongly recommended to go with Hibernate ORM 5.4 for a newly started application.
+It is strongly recommended to go with Hibernate ORM 5.4 for a newly started application.
 For use with `HibernateJpaVendorAdapter`, Hibernate Search needs to be upgraded to 5.11.6.
 
 
@@ -7958,7 +7957,7 @@ persistence unit name. The following XML example configures such a bean:
 This form of JPA deployment is the simplest and the most limited. You cannot refer to an
 existing JDBC `DataSource` bean definition, and no support for global transactions
 exists. Furthermore, weaving (byte-code transformation) of persistent classes is
-provider-specific, often requiring a specific JVM agent to specified on startup. This
+provider-specific, often requiring a specific JVM agent to be specified on startup. This
 option is sufficient only for stand-alone applications and test environments, for which
 the JPA specification is designed.
 
@@ -8093,7 +8092,7 @@ more insight regarding the `LoadTimeWeaver` implementations and their setup, eit
 generic or customized to various platforms (such as Tomcat, JBoss and WebSphere).
 
 As described in <<core.adoc#aop-aj-ltw-spring, Spring configuration>>, you can configure
-a context-wide `LoadTimeWeaver` by using the `@EnableLoadTimeWeaving` annotation of the
+a context-wide `LoadTimeWeaver` by using the `@EnableLoadTimeWeaving` annotation or the
 `context:load-time-weaver` XML element. Such a global weaver is automatically picked up
 by all JPA `LocalContainerEntityManagerFactoryBean` instances. The following example
 shows the preferred way of setting up a load-time weaver, delivering auto-detection

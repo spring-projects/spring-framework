@@ -16,8 +16,8 @@
 
 package org.springframework.web.context;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 
 /**
  * Bootstrap listener to start up and shut down Spring's root {@link WebApplicationContext}.
@@ -59,7 +59,7 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	/**
 	 * Create a new {@code ContextLoaderListener} with the given application context. This
 	 * constructor is useful in Servlet 3.0+ environments where instance-based
-	 * registration of listeners is possible through the {@link javax.servlet.ServletContext#addListener}
+	 * registration of listeners is possible through the {@link jakarta.servlet.ServletContext#addListener}
 	 * API.
 	 * <p>The context may or may not yet be {@linkplain
 	 * org.springframework.context.ConfigurableApplicationContext#refresh() refreshed}. If it

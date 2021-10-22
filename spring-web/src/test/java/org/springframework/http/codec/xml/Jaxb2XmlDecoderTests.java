@@ -253,7 +253,7 @@ public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 	}
 
 
-	@javax.xml.bind.annotation.XmlType(name = "pojo")
+	@jakarta.xml.bind.annotation.XmlType(name = "pojo")
 	public static class TypePojo {
 
 		private String foo;

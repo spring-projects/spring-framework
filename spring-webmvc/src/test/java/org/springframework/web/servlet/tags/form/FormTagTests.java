@@ -18,9 +18,8 @@ package org.springframework.web.servlet.tags.form;
 
 import java.util.Collections;
 
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.tagext.Tag;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.servlet.support.RequestDataValueProcessor;

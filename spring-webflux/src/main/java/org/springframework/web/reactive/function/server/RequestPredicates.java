@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -796,10 +796,10 @@ public abstract class RequestPredicates {
 		@Override
 		public void changeParser(PathPatternParser parser) {
 			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+				((ChangePathPatternParserVisitor.Target) this.left).changeParser(parser);
 			}
 			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+				((ChangePathPatternParserVisitor.Target) this.right).changeParser(parser);
 			}
 		}
 
@@ -841,7 +841,7 @@ public abstract class RequestPredicates {
 		@Override
 		public void changeParser(PathPatternParser parser) {
 			if (this.delegate instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) delegate).changeParser(parser);
+				((ChangePathPatternParserVisitor.Target) this.delegate).changeParser(parser);
 			}
 		}
 
@@ -908,10 +908,10 @@ public abstract class RequestPredicates {
 		@Override
 		public void changeParser(PathPatternParser parser) {
 			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+				((ChangePathPatternParserVisitor.Target) this.left).changeParser(parser);
 			}
 			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+				((ChangePathPatternParserVisitor.Target) this.right).changeParser(parser);
 			}
 		}
 

@@ -20,10 +20,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.hamcrest.Matcher;
 import org.w3c.dom.Node;
 

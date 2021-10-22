@@ -336,18 +336,18 @@ public class PathPattern implements Comparable<PathPattern> {
 		PathContainer resultPath = null;
 		if (multipleAdjacentSeparators) {
 			// Need to rebuild the path without the duplicate adjacent separators
-			StringBuilder buf = new StringBuilder();
+			StringBuilder sb = new StringBuilder();
 			int i = startIndex;
 			while (i < endIndex) {
 				Element e = pathElements.get(i++);
-				buf.append(e.value());
+				sb.append(e.value());
 				if (e instanceof Separator) {
 					while (i < endIndex && (pathElements.get(i) instanceof Separator)) {
 						i++;
 					}
 				}
 			}
-			resultPath = PathContainer.parsePath(buf.toString(), this.pathOptions);
+			resultPath = PathContainer.parsePath(sb.toString(), this.pathOptions);
 		}
 		else if (startIndex >= endIndex) {
 			resultPath = PathContainer.parsePath("");
@@ -430,10 +430,9 @@ public class PathPattern implements Comparable<PathPattern> {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (!(other instanceof PathPattern)) {
+		if (!(other instanceof PathPattern otherPattern)) {
 			return false;
 		}
-		PathPattern otherPattern = (PathPattern) other;
 		return (this.patternString.equals(otherPattern.getPatternString()) &&
 				getSeparator() == otherPattern.getSeparator() &&
 				this.caseSensitive == otherPattern.caseSensitive);
@@ -491,13 +490,13 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @return the string form of the pattern
 	 */
 	String computePatternString() {
-		StringBuilder buf = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		PathElement pe = this.head;
 		while (pe != null) {
-			buf.append(pe.getChars());
+			sb.append(pe.getChars());
 			pe = pe.next;
 		}
-		return buf.toString();
+		return sb.toString();
 	}
 
 	@Nullable
@@ -726,10 +725,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		 */
 		String pathElementValue(int pathIndex) {
 			Element element = (pathIndex < this.pathLength) ? this.pathElements.get(pathIndex) : null;
-			if (element instanceof PathContainer.PathSegment) {
-				return ((PathContainer.PathSegment)element).valueToMatch();
-			}
-			return "";
+			return (element instanceof PathContainer.PathSegment pathSegment ? pathSegment.valueToMatch() : "");
 		}
 	}
 

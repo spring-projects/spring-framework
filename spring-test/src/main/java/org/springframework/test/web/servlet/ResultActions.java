@@ -47,7 +47,6 @@ public interface ResultActions {
 	 *   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 	 *   .andExpect(jsonPath("$.person.name").value("Jason"));
 	 * </pre>
-	 *
 	 * @see #andExpectAll(ResultMatcher...)
 	 */
 	ResultActions andExpect(ResultMatcher matcher) throws Exception;
@@ -78,7 +77,6 @@ public interface ResultActions {
 	 *       jsonPath("$.person.name").value("Jason")
 	 *   );
 	 * </pre>
-	 *
 	 * @since 5.3.10
 	 * @see #andExpect(ResultMatcher)
 	 */
@@ -105,7 +103,6 @@ public interface ResultActions {
 
 	/**
 	 * Return the result of the executed request for direct access to the results.
-	 *
 	 * @return the result of the request
 	 */
 	MvcResult andReturn();

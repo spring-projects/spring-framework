@@ -366,7 +366,7 @@ the https://www.eclipse.org/aspectj/doc/released/progguide/index.html[AspectJ
 Programming Guide] (and, for extensions, the
 https://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html[AspectJ 5
 Developer's Notebook]) or one of the books on AspectJ (such as _Eclipse AspectJ_, by Colyer
-et. al., or _AspectJ in Action_, by Ramnivas Laddad).
+et al., or _AspectJ in Action_, by Ramnivas Laddad).
 
 
 [[aop-pointcuts-designators]]
@@ -893,7 +893,7 @@ scoping). You can include the contextual designators to match based on
 join point context or bind that context for use in the advice. Supplying only a
 kinded designator or only a contextual designator works but could affect weaving
 performance (time and memory used), due to extra processing and analysis. Scoping
-designators are very fast to match, and using them usage means AspectJ can very quickly
+designators are very fast to match, and using them means AspectJ can very quickly
 dismiss groups of join points that should not be further processed. A good
 pointcut should always include one if possible.
 
@@ -2830,7 +2830,7 @@ The corresponding Spring configuration is as follows:
 	</bean>
 ----
 
-Notice that, for the time, being we assume that all business services are idempotent. If
+Notice that, for the time being, we assume that all business services are idempotent. If
 this is not the case, we can refine the aspect so that it retries only genuinely
 idempotent operations, by introducing an `Idempotent` annotation and using the annotation
 to annotate the implementation of service operations, as the following example shows:

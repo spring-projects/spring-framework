@@ -16,8 +16,8 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
@@ -27,6 +27,7 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiPropertySource;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ConfigurableWebEnvironment;
 
 /**
@@ -39,6 +40,7 @@ import org.springframework.web.context.ConfigurableWebEnvironment;
  * documentation for details.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see StandardEnvironment
  */
@@ -52,6 +54,11 @@ public class StandardServletEnvironment extends StandardEnvironment implements C
 
 	/** JNDI property source name: {@value}. */
 	public static final String JNDI_PROPERTY_SOURCE_NAME = "jndiProperties";
+
+
+	// Defensive reference to JNDI API for JDK 9+ (optional java.naming module)
+	private static final boolean jndiPresent = ClassUtils.isPresent(
+			"javax.naming.InitialContext", StandardServletEnvironment.class.getClassLoader());
 
 
 	/**
@@ -100,7 +107,7 @@ public class StandardServletEnvironment extends StandardEnvironment implements C
 	protected void customizePropertySources(MutablePropertySources propertySources) {
 		propertySources.addLast(new StubPropertySource(SERVLET_CONFIG_PROPERTY_SOURCE_NAME));
 		propertySources.addLast(new StubPropertySource(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
-		if (JndiLocatorDelegate.isDefaultJndiEnvironmentAvailable()) {
+		if (jndiPresent && JndiLocatorDelegate.isDefaultJndiEnvironmentAvailable()) {
 			propertySources.addLast(new JndiPropertySource(JNDI_PROPERTY_SOURCE_NAME));
 		}
 		super.customizePropertySources(propertySources);

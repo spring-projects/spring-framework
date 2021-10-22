@@ -236,8 +236,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		setSource(original.getSource());
 		copyAttributesFrom(original);
 
-		if (original instanceof AbstractBeanDefinition) {
-			AbstractBeanDefinition originalAbd = (AbstractBeanDefinition) original;
+		if (original instanceof AbstractBeanDefinition originalAbd) {
 			if (originalAbd.hasBeanClass()) {
 				setBeanClass(originalAbd.getBeanClass());
 			}
@@ -313,8 +312,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		setSource(other.getSource());
 		copyAttributesFrom(other);
 
-		if (other instanceof AbstractBeanDefinition) {
-			AbstractBeanDefinition otherAbd = (AbstractBeanDefinition) other;
+		if (other instanceof AbstractBeanDefinition otherAbd) {
 			if (otherAbd.hasBeanClass()) {
 				setBeanClass(otherAbd.getBeanClass());
 			}
@@ -1178,10 +1176,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof AbstractBeanDefinition)) {
+		if (!(other instanceof AbstractBeanDefinition that)) {
 			return false;
 		}
-		AbstractBeanDefinition that = (AbstractBeanDefinition) other;
 		return (ObjectUtils.nullSafeEquals(getBeanClassName(), that.getBeanClassName()) &&
 				ObjectUtils.nullSafeEquals(this.scope, that.scope) &&
 				this.abstractFlag == that.abstractFlag &&

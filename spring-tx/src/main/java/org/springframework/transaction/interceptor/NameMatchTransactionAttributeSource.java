@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,8 +101,8 @@ public class NameMatchTransactionAttributeSource
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding transactional method [" + methodName + "] with attribute [" + attr + "]");
 		}
-		if (this.embeddedValueResolver != null && attr instanceof DefaultTransactionAttribute) {
-			((DefaultTransactionAttribute) attr).resolveAttributeStrings(this.embeddedValueResolver);
+		if (this.embeddedValueResolver != null && attr instanceof DefaultTransactionAttribute dta) {
+			dta.resolveAttributeStrings(this.embeddedValueResolver);
 		}
 		this.nameMap.put(methodName, attr);
 	}
@@ -115,8 +115,8 @@ public class NameMatchTransactionAttributeSource
 	@Override
 	public void afterPropertiesSet()  {
 		for (TransactionAttribute attr : this.nameMap.values()) {
-			if (attr instanceof DefaultTransactionAttribute) {
-				((DefaultTransactionAttribute) attr).resolveAttributeStrings(this.embeddedValueResolver);
+			if (attr instanceof DefaultTransactionAttribute dta) {
+				dta.resolveAttributeStrings(this.embeddedValueResolver);
 			}
 		}
 	}
@@ -167,10 +167,9 @@ public class NameMatchTransactionAttributeSource
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof NameMatchTransactionAttributeSource)) {
+		if (!(other instanceof NameMatchTransactionAttributeSource otherTas)) {
 			return false;
 		}
-		NameMatchTransactionAttributeSource otherTas = (NameMatchTransactionAttributeSource) other;
 		return ObjectUtils.nullSafeEquals(this.nameMap, otherTas.nameMap);
 	}
 

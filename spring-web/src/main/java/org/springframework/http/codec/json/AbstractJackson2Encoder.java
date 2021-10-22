@@ -202,11 +202,10 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		}
 		Class<?> jsonView = null;
 		FilterProvider filters = null;
-		if (value instanceof MappingJacksonValue) {
-			MappingJacksonValue container = (MappingJacksonValue) value;
-			value = container.getValue();
-			jsonView = container.getSerializationView();
-			filters = container.getFilters();
+		if (value instanceof MappingJacksonValue mappingJacksonValue) {
+			value = mappingJacksonValue.getValue();
+			jsonView = mappingJacksonValue.getSerializationView();
+			filters = mappingJacksonValue.getFilters();
 		}
 		ObjectWriter writer = createObjectWriter(mapper, valueType, mimeType, jsonView, hints);
 		if (filters != null) {

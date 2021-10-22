@@ -46,6 +46,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.1.3
  * @see <a href="https://tools.ietf.org/html/rfc3986#section-1.2.3">Hierarchical URIs</a>
  */
@@ -552,10 +553,9 @@ final class HierarchicalUriComponents extends UriComponents {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof HierarchicalUriComponents)) {
+		if (!(other instanceof HierarchicalUriComponents otherComp)) {
 			return false;
 		}
-		HierarchicalUriComponents otherComp = (HierarchicalUriComponents) other;
 		return (ObjectUtils.nullSafeEquals(getScheme(), otherComp.getScheme()) &&
 				ObjectUtils.nullSafeEquals(getUserInfo(), otherComp.getUserInfo()) &&
 				ObjectUtils.nullSafeEquals(getHost(), otherComp.getHost()) &&
@@ -925,8 +925,8 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof FullPathComponent &&
-					getPath().equals(((FullPathComponent) other).getPath())));
+			return (this == other || (other instanceof FullPathComponent fullPathComponent &&
+					getPath().equals(fullPathComponent.getPath())));
 		}
 
 		@Override
@@ -999,8 +999,8 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof PathSegmentComponent &&
-					getPathSegments().equals(((PathSegmentComponent) other).getPathSegments())));
+			return (this == other || (other instanceof PathSegmentComponent pathSegmentComponent &&
+					getPathSegments().equals(pathSegmentComponent.getPathSegments())));
 		}
 
 		@Override

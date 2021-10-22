@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,8 +61,7 @@ abstract class AnnotationReadingVisitorUtils {
 					value = convertClassValues(
 							annotatedElement, classLoader, (AnnotationAttributes) value, classValuesAsString);
 				}
-				else if (value instanceof AnnotationAttributes[]) {
-					AnnotationAttributes[] values = (AnnotationAttributes[]) value;
+				else if (value instanceof AnnotationAttributes[] values) {
 					for (int i = 0; i < values.length; i++) {
 						values[i] = convertClassValues(annotatedElement, classLoader, values[i], classValuesAsString);
 					}
@@ -72,8 +71,7 @@ abstract class AnnotationReadingVisitorUtils {
 					value = (classValuesAsString ? ((Type) value).getClassName() :
 							ClassUtils.forName(((Type) value).getClassName(), classLoader));
 				}
-				else if (value instanceof Type[]) {
-					Type[] array = (Type[]) value;
+				else if (value instanceof Type[] array) {
 					Object[] convArray =
 							(classValuesAsString ? new String[array.length] : new Class<?>[array.length]);
 					for (int i = 0; i < array.length; i++) {

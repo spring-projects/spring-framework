@@ -260,10 +260,9 @@ final class BitsCronField extends CronField {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof BitsCronField)) {
+		if (!(o instanceof BitsCronField other)) {
 			return false;
 		}
-		BitsCronField other = (BitsCronField) o;
 		return type() == other.type() && this.bits == other.bits;
 	}
 

@@ -16,7 +16,6 @@
 
 package org.springframework.core.env;
 
-import java.security.AccessControlException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -48,6 +47,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.1
  * @see ConfigurableEnvironment
  * @see StandardEnvironment
@@ -60,8 +60,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * <p>The default is "false", falling back to system environment variable checks if a
 	 * Spring environment property (e.g. a placeholder in a configuration String) isn't
 	 * resolvable otherwise. Consider switching this flag to "true" if you experience
-	 * log warnings from {@code getenv} calls coming from Spring, e.g. on WebSphere
-	 * with strict SecurityManager settings and AccessControlExceptions warnings.
+	 * log warnings from {@code getenv} calls coming from Spring.
 	 * @see #suppressGetenvAccess()
 	 */
 	public static final String IGNORE_GETENV_PROPERTY_NAME = "spring.getenv.ignore";
@@ -129,6 +128,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * {@link #customizePropertySources(MutablePropertySources)} during
 	 * construction to allow subclasses to contribute or manipulate
 	 * {@link PropertySource} instances as appropriate.
+	 * @param propertySources property sources to use
 	 * @since 5.3.4
 	 * @see #customizePropertySources(MutablePropertySources)
 	 */
@@ -168,6 +168,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * sources using {@link MutablePropertySources#addLast(PropertySource)} such that
 	 * further subclasses may call {@code super.customizePropertySources()} with
 	 * predictable results. For example:
+	 *
 	 * <pre class="code">
 	 * public class Level1Environment extends AbstractEnvironment {
 	 *     &#064;Override
@@ -187,11 +188,13 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 *     }
 	 * }
 	 * </pre>
-	 * In this arrangement, properties will be resolved against sources A, B, C, D in that
+	 *
+	 * <p>In this arrangement, properties will be resolved against sources A, B, C, D in that
 	 * order. That is to say that property source "A" has precedence over property source
 	 * "D". If the {@code Level2Environment} subclass wished to give property sources C
 	 * and D higher precedence than A and B, it could simply call
 	 * {@code super.customizePropertySources} after, rather than before adding its own:
+	 *
 	 * <pre class="code">
 	 * public class Level2Environment extends Level1Environment {
 	 *     &#064;Override
@@ -202,9 +205,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 *     }
 	 * }
 	 * </pre>
-	 * The search order is now C, D, A, B as desired.
 	 *
-	 * <p>Beyond these recommendations, subclasses may use any of the {@code add&#42;},
+	 * <p>The search order is now C, D, A, B as desired.
+	 *
+	 * <p>Beyond these recommendations, subclasses may use any of the {@code add*},
 	 * {@code remove}, or {@code replace} methods exposed by {@link MutablePropertySources}
 	 * in order to create the exact arrangement of property sources desired.
 	 *
@@ -214,13 +218,14 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * property sources via the {@link #getPropertySources()} accessor, typically within
 	 * an {@link org.springframework.context.ApplicationContextInitializer
 	 * ApplicationContextInitializer}. For example:
+	 *
 	 * <pre class="code">
 	 * ConfigurableEnvironment env = new StandardEnvironment();
 	 * env.getPropertySources().addLast(new PropertySourceX(...));
 	 * </pre>
 	 *
 	 * <h2>A warning about instance variable access</h2>
-	 * Instance variables declared in subclasses and having default initial values should
+	 * <p>Instance variables declared in subclasses and having default initial values should
 	 * <em>not</em> be accessed from within this method. Due to Java object creation
 	 * lifecycle constraints, any initial value will not yet be assigned when this
 	 * callback is invoked by the {@link #AbstractEnvironment()} constructor, which may
@@ -229,7 +234,6 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * property source manipulation and instance variable access directly within the
 	 * subclass constructor. Note that <em>assigning</em> values to instance variables is
 	 * not problematic; it is only attempting to read default values that must be avoided.
-	 *
 	 * @see MutablePropertySources
 	 * @see PropertySourcesPropertyResolver
 	 * @see org.springframework.context.ApplicationContextInitializer
@@ -438,27 +442,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public Map<String, Object> getSystemProperties() {
-		try {
-			return (Map) System.getProperties();
-		}
-		catch (AccessControlException ex) {
-			return (Map) new ReadOnlySystemAttributesMap() {
-				@Override
-				@Nullable
-				protected String getSystemAttribute(String attributeName) {
-					try {
-						return System.getProperty(attributeName);
-					}
-					catch (AccessControlException ex) {
-						if (logger.isInfoEnabled()) {
-							logger.info("Caught AccessControlException when accessing system property '" +
-									attributeName + "'; its value will be returned [null]. Reason: " + ex.getMessage());
-						}
-						return null;
-					}
-				}
-			};
-		}
+		return (Map) System.getProperties();
 	}
 
 	@Override
@@ -467,27 +451,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		if (suppressGetenvAccess()) {
 			return Collections.emptyMap();
 		}
-		try {
-			return (Map) System.getenv();
-		}
-		catch (AccessControlException ex) {
-			return (Map) new ReadOnlySystemAttributesMap() {
-				@Override
-				@Nullable
-				protected String getSystemAttribute(String attributeName) {
-					try {
-						return System.getenv(attributeName);
-					}
-					catch (AccessControlException ex) {
-						if (logger.isInfoEnabled()) {
-							logger.info("Caught AccessControlException when accessing system environment variable '" +
-									attributeName + "'; its value will be returned [null]. Reason: " + ex.getMessage());
-						}
-						return null;
-					}
-				}
-			};
-		}
+		return (Map) System.getenv();
 	}
 
 	/**

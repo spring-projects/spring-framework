@@ -16,10 +16,9 @@
 
 package org.springframework.validation.beanvalidation;
 
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
+import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
@@ -99,7 +98,7 @@ public class BeanValidationPostProcessorTests {
 		bd.getPropertyValues().add("stringValue", "s");
 		ac.registerBeanDefinition("bean", bd);
 		assertThatExceptionOfType(BeanCreationException.class)
-			.isThrownBy(() -> ac.refresh())
+			.isThrownBy(ac::refresh)
 			.havingRootCause()
 			.withMessageContainingAll("stringValue", "invalid");
 		ac.close();

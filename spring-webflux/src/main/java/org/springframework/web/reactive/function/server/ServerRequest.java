@@ -310,7 +310,7 @@ public interface ServerRequest {
 	 * public Mono&lt;ServerResponse&gt; myHandleMethod(ServerRequest request) {
 	 *   Instant lastModified = // application-specific calculation
 	 *	 return request.checkNotModified(lastModified)
-	 *	   .switchIfEmpty(Mono.defer(() -> {
+	 *	   .switchIfEmpty(Mono.defer(() -&gt; {
 	 *	     // further request processing, actually building content
 	 *		 return ServerResponse.ok().body(...);
 	 *	   }));
@@ -344,7 +344,7 @@ public interface ServerRequest {
 	 * public Mono&lt;ServerResponse&gt; myHandleMethod(ServerRequest request) {
 	 *   String eTag = // application-specific calculation
 	 *	 return request.checkNotModified(eTag)
-	 *	   .switchIfEmpty(Mono.defer(() -> {
+	 *	   .switchIfEmpty(Mono.defer(() -&gt; {
 	 *	     // further request processing, actually building content
 	 *		 return ServerResponse.ok().body(...);
 	 *	   }));
@@ -381,7 +381,7 @@ public interface ServerRequest {
 	 *   Instant lastModified = // application-specific calculation
 	 *   String eTag = // application-specific calculation
 	 *	 return request.checkNotModified(lastModified, eTag)
-	 *	   .switchIfEmpty(Mono.defer(() -> {
+	 *	   .switchIfEmpty(Mono.defer(() -&gt; {
 	 *	     // further request processing, actually building content
 	 *		 return ServerResponse.ok().body(...);
 	 *	   }));

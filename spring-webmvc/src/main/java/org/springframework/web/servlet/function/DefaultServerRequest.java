@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.function;
 
 import java.io.IOException;
@@ -37,13 +38,13 @@ import java.util.OptionalLong;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -69,6 +70,7 @@ import org.springframework.web.util.UriBuilder;
  * {@code ServerRequest} implementation based on a {@link HttpServletRequest}.
  *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 5.2
  */
 class DefaultServerRequest implements ServerRequest {
@@ -170,14 +172,12 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	static Class<?> bodyClass(Type type) {
-		if (type instanceof Class) {
-			return (Class<?>) type;
+		if (type instanceof Class<?> clazz) {
+			return clazz;
 		}
-		if (type instanceof ParameterizedType) {
-			ParameterizedType parameterizedType = (ParameterizedType) type;
-			if (parameterizedType.getRawType() instanceof Class) {
-				return (Class<?>) parameterizedType.getRawType();
-			}
+		if (type instanceof ParameterizedType parameterizedType &&
+				parameterizedType.getRawType() instanceof Class<?> rawType) {
+			return rawType;
 		}
 		return Object.class;
 	}
@@ -187,11 +187,9 @@ class DefaultServerRequest implements ServerRequest {
 		MediaType contentType = this.headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
 
 		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-			if (messageConverter instanceof GenericHttpMessageConverter) {
-				GenericHttpMessageConverter<T> genericMessageConverter =
-						(GenericHttpMessageConverter<T>) messageConverter;
+			if (messageConverter instanceof GenericHttpMessageConverter<?> genericMessageConverter) {
 				if (genericMessageConverter.canRead(bodyType, bodyClass, contentType)) {
-					return genericMessageConverter.read(bodyType, bodyClass, this.serverHttpRequest);
+					return (T) genericMessageConverter.read(bodyType, bodyClass, this.serverHttpRequest);
 				}
 			}
 			if (messageConverter.canRead(bodyClass, contentType)) {

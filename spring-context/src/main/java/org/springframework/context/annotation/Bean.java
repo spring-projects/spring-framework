@@ -99,7 +99,7 @@ import org.springframework.core.annotation.AliasFor;
  * <p><b>NOTE:</b> {@code @Order} values may influence priorities at injection points,
  * but please be aware that they do not influence singleton startup order which is an
  * orthogonal concern determined by dependency relationships and {@code @DependsOn}
- * declarations as mentioned above. Also, {@link javax.annotation.Priority} is not
+ * declarations as mentioned above. Also, {@link jakarta.annotation.Priority} is not
  * available at this level since it cannot be declared on methods; its semantics can
  * be modeled through {@code @Order} values in combination with {@code @Primary} on
  * a single bean per type.

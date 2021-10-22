@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Map;
@@ -400,28 +397,19 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 				final String resourceName = toResourceName(bundleName, "properties");
 				final ClassLoader classLoader = loader;
 				final boolean reloadFlag = reload;
-				InputStream inputStream;
-				try {
-					inputStream = AccessController.doPrivileged((PrivilegedExceptionAction<InputStream>) () -> {
-						InputStream is = null;
-						if (reloadFlag) {
-							URL url = classLoader.getResource(resourceName);
-							if (url != null) {
-								URLConnection connection = url.openConnection();
-								if (connection != null) {
-									connection.setUseCaches(false);
-									is = connection.getInputStream();
-								}
-							}
+				InputStream inputStream = null;
+				if (reloadFlag) {
+					URL url = classLoader.getResource(resourceName);
+					if (url != null) {
+						URLConnection connection = url.openConnection();
+						if (connection != null) {
+							connection.setUseCaches(false);
+							inputStream = connection.getInputStream();
 						}
-						else {
-							is = classLoader.getResourceAsStream(resourceName);
-						}
-						return is;
-					});
+					}
 				}
-				catch (PrivilegedActionException ex) {
-					throw (IOException) ex.getException();
+				else {
+					inputStream = classLoader.getResourceAsStream(resourceName);
 				}
 				if (inputStream != null) {
 					String encoding = getDefaultEncoding();

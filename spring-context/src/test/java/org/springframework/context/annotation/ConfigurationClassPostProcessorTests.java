@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,7 @@ import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
+import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -1956,6 +1955,7 @@ class ConfigurationClassPostProcessorTests {
 		}
 
 		// Unrelated, not to be considered as a factory method
+		@SuppressWarnings("unused")
 		private boolean testBean(boolean param) {
 			return param;
 		}
@@ -1985,6 +1985,7 @@ class ConfigurationClassPostProcessorTests {
 		}
 
 		// Unrelated, not to be considered as a factory method
+		@SuppressWarnings("unused")
 		private boolean testBean(boolean param) {
 			return param;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ package org.springframework.validation;
  * wholly of whitespace), and that any password that is present is
  * at least {@code 'MINIMUM_PASSWORD_LENGTH'} characters in length.
  *
- * <pre class="code"> public class UserLoginValidator implements Validator {
+ * <pre class="code">public class UserLoginValidator implements Validator {
  *
  *    private static final int MINIMUM_PASSWORD_LENGTH = 6;
  *
@@ -46,7 +46,7 @@ package org.springframework.validation;
  *       ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "field.required");
  *       UserLogin login = (UserLogin) target;
  *       if (login.getPassword() != null
- *             && login.getPassword().trim().length() < MINIMUM_PASSWORD_LENGTH) {
+ *             &amp;&amp; login.getPassword().trim().length() &lt; MINIMUM_PASSWORD_LENGTH) {
  *          errors.rejectValue("password", "field.min.length",
  *                new Object[]{Integer.valueOf(MINIMUM_PASSWORD_LENGTH)},
  *                "The password must be at least [" + MINIMUM_PASSWORD_LENGTH + "] characters in length.");

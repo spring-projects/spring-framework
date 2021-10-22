@@ -448,15 +448,15 @@ public interface WebTestClient {
 		 * <pre>
 		 * client.get().uri("/accounts/1")
 		 *         .exchange()
-		 *         .expectBody(Person.class).consumeWith(exchangeResult -> ... ));
+		 *         .expectBody(Person.class).consumeWith(exchangeResult -&gt; ... ));
 		 *
 		 * client.get().uri("/accounts")
 		 *         .exchange()
-		 *         .expectBodyList(Person.class).consumeWith(exchangeResult -> ... ));
+		 *         .expectBodyList(Person.class).consumeWith(exchangeResult -&gt; ... ));
 		 *
 		 * client.get().uri("/accounts/1")
 		 *         .exchange()
-		 *         .expectBody().consumeWith(exchangeResult -> ... ));
+		 *         .expectBody().consumeWith(exchangeResult -&gt; ... ));
 		 * </pre>
 		 * <p>Note that the configured consumer does not apply to responses
 		 * decoded to {@code Flux<T>} which can be consumed outside the workflow
@@ -802,8 +802,8 @@ public interface WebTestClient {
 		 * <pre class="code">
 		 * webTestClient.get().uri("/hello").exchange()
 		 *     .expectAll(
-		 *         responseSpec -> responseSpec.expectStatus().isOk(),
-		 *         responseSpec -> responseSpec.expectBody(String.class).isEqualTo("Hello, World!")
+		 *         responseSpec -&gt; responseSpec.expectStatus().isOk(),
+		 *         responseSpec -&gt; responseSpec.expectBody(String.class).isEqualTo("Hello, World!")
 		 *     );
 		 * </pre>
 		 * @param consumers the list of {@code ResponseSpec} consumers
@@ -862,7 +862,6 @@ public interface WebTestClient {
 		/**
 		 * Exit the chained flow in order to consume the response body
 		 * externally, e.g. via {@link reactor.test.StepVerifier}.
-		 *
 		 * <p>Note that when {@code Void.class} is passed in, the response body
 		 * is consumed and released. If no content is expected, then consider
 		 * using {@code .expectBody().isEmpty()} instead which asserts that

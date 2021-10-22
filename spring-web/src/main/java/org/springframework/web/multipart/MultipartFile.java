@@ -61,8 +61,6 @@ public interface MultipartFile extends InputStreamSource {
 	 * this one one somewhere for reference, if necessary.
 	 * @return the original filename, or the empty String if no file has been chosen
 	 * in the multipart form, or {@code null} if not defined or not available
-	 * @see org.apache.commons.fileupload.FileItem#getName()
-	 * @see org.springframework.web.multipart.commons.CommonsMultipartFile#setPreserveFilename
 	 * @see <a href="https://tools.ietf.org/html/rfc7578#section-4.2">RFC 7578, Section 4.2</a>
 	 * @see <a href="https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload">Unrestricted File Upload</a>
 	 */
@@ -133,8 +131,7 @@ public interface MultipartFile extends InputStreamSource {
 	 * @throws IOException in case of reading or writing errors
 	 * @throws IllegalStateException if the file has already been moved
 	 * in the filesystem and is not available anymore for another transfer
-	 * @see org.apache.commons.fileupload.FileItem#write(File)
-	 * @see javax.servlet.http.Part#write(String)
+	 * @see jakarta.servlet.http.Part#write(String)
 	 */
 	void transferTo(File dest) throws IOException, IllegalStateException;
 

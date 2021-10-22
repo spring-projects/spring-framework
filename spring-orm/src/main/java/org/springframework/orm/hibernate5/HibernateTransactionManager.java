@@ -20,9 +20,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.function.Consumer;
 
-import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
+import jakarta.persistence.PersistenceException;
 import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;

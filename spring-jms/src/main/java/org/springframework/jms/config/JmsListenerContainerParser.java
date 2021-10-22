@@ -16,8 +16,7 @@
 
 package org.springframework.jms.config;
 
-import javax.jms.Session;
-
+import jakarta.jms.Session;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.MutablePropertyValues;

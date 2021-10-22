@@ -523,10 +523,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof AspectJExpressionPointcut)) {
+		if (!(other instanceof AspectJExpressionPointcut otherPc)) {
 			return false;
 		}
-		AspectJExpressionPointcut otherPc = (AspectJExpressionPointcut) other;
 		return ObjectUtils.nullSafeEquals(this.getExpression(), otherPc.getExpression()) &&
 				ObjectUtils.nullSafeEquals(this.pointcutDeclarationScope, otherPc.pointcutDeclarationScope) &&
 				ObjectUtils.nullSafeEquals(this.pointcutParameterNames, otherPc.pointcutParameterNames) &&

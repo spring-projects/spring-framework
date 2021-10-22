@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	private final List<String> locationValues = new ArrayList<>(4);
 
-	private final List<Resource> locations = new ArrayList<>(4);
+	private final List<Resource> locationResources = new ArrayList<>(4);
+
+	private final List<Resource> locationsToUse = new ArrayList<>(4);
 
 	private final List<ResourceResolver> resourceResolvers = new ArrayList<>(4);
 
@@ -147,9 +149,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * for serving static resources.
 	 */
 	public void setLocations(@Nullable List<Resource> locations) {
-		this.locations.clear();
+		this.locationResources.clear();
 		if (locations != null) {
-			this.locations.addAll(locations);
+			this.locationResources.addAll(locations);
 		}
 	}
 
@@ -159,11 +161,18 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * <p>Note that if {@link #setLocationValues(List) locationValues} are provided,
 	 * instead of loaded Resource-based locations, this method will return
 	 * empty until after initialization via {@link #afterPropertiesSet()}.
+	 * <p><strong>Note:</strong> As of 5.3.11 the list of locations is filtered
+	 * to exclude those that don't actually exist and therefore the list returned
+	 * from this method may be a subset of all given locations.
 	 * @see #setLocationValues
 	 * @see #setLocations
 	 */
 	public List<Resource> getLocations() {
-		return this.locations;
+		if (this.locationsToUse.isEmpty()) {
+			// Possibly not yet initialized, return only what we have so far
+			return this.locationResources;
+		}
+		return this.locationsToUse;
 	}
 
 	/**
@@ -295,11 +304,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	public void afterPropertiesSet() throws Exception {
 		resolveResourceLocations();
 
-		if (logger.isWarnEnabled() && CollectionUtils.isEmpty(this.locations)) {
-			logger.warn("Locations list is empty. No resources will be served unless a " +
-					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
-		}
-
 		if (this.resourceResolvers.isEmpty()) {
 			this.resourceResolvers.add(new PathResourceResolver());
 		}
@@ -316,21 +320,22 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	}
 
 	private void resolveResourceLocations() {
-		if (CollectionUtils.isEmpty(this.locationValues)) {
-			return;
-		}
-		else if (!CollectionUtils.isEmpty(this.locations)) {
-			throw new IllegalArgumentException("Please set either Resource-based \"locations\" or " +
-					"String-based \"locationValues\", but not both.");
+		List<Resource> result = new ArrayList<>(this.locationResources);
+
+		if (!this.locationValues.isEmpty()) {
+			Assert.notNull(this.resourceLoader,
+					"ResourceLoader is required when \"locationValues\" are configured.");
+			Assert.isTrue(CollectionUtils.isEmpty(this.locationResources), "Please set " +
+					"either Resource-based \"locations\" or String-based \"locationValues\", but not both.");
+			for (String location : this.locationValues) {
+				result.add(this.resourceLoader.getResource(location));
+			}
 		}
 
-		Assert.notNull(this.resourceLoader,
-				"ResourceLoader is required when \"locationValues\" are configured.");
+		result = result.stream().filter(Resource::exists).collect(Collectors.toList());
 
-		for (String location : this.locationValues) {
-			Resource resource = this.resourceLoader.getResource(location);
-			this.locations.add(resource);
-		}
+		this.locationsToUse.clear();
+		this.locationsToUse.addAll(result);
 	}
 
 	/**
@@ -339,16 +344,11 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * match the {@link #setLocations locations} configured on this class.
 	 */
 	protected void initAllowedLocations() {
-		if (CollectionUtils.isEmpty(this.locations)) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Locations list is empty. No resources will be served unless a " +
-						"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
-			}
+		if (CollectionUtils.isEmpty(getLocations())) {
 			return;
 		}
 		for (int i = getResourceResolvers().size() - 1; i >= 0; i--) {
-			if (getResourceResolvers().get(i) instanceof PathResourceResolver) {
-				PathResourceResolver resolver = (PathResourceResolver) getResourceResolvers().get(i);
+			if (getResourceResolvers().get(i) instanceof PathResourceResolver resolver) {
 				if (ObjectUtils.isEmpty(resolver.getAllowedLocations())) {
 					resolver.setAllowedLocations(getLocations().toArray(new Resource[0]));
 				}
@@ -515,10 +515,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 					return true;
 				}
 			}
-			catch (IllegalArgumentException ex) {
-				// May not be possible to decode...
-			}
-			catch (UnsupportedEncodingException ex) {
+			catch (IllegalArgumentException | UnsupportedEncodingException ex) {
 				// Should never happen...
 			}
 		}
@@ -602,27 +599,21 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			headers.setContentType(mediaType);
 		}
 
-		if (resource instanceof HttpResource) {
-			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
-			exchange.getResponse().getHeaders().putAll(resourceHeaders);
+		if (resource instanceof HttpResource httpResource) {
+			exchange.getResponse().getHeaders().putAll(httpResource.getResponseHeaders());
 		}
 	}
 
 
 	@Override
 	public String toString() {
-		return "ResourceWebHandler " + formatLocations();
+		return "ResourceWebHandler " + locationToString(getLocations());
 	}
 
-	private Object formatLocations() {
-		if (!this.locationValues.isEmpty()) {
-			return this.locationValues.stream().collect(Collectors.joining("\", \"", "[\"", "\"]"));
-		}
-		else if (!this.locations.isEmpty()) {
-			return "[" + this.locations.toString()
-					.replaceAll("class path resource", "Classpath")
-					.replaceAll("ServletContext resource", "ServletContext") + "]";
-		}
-		return Collections.emptyList();
+	private String locationToString(List<Resource> locations) {
+		return locations.toString()
+				.replaceAll("class path resource", "classpath")
+				.replaceAll("ServletContext resource", "ServletContext");
 	}
+
 }

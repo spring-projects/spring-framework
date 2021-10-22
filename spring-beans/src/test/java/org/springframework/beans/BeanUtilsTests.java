@@ -49,6 +49,7 @@ import org.springframework.lang.Nullable;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 /**
  * Unit tests for {@link BeanUtils}.
@@ -85,19 +86,43 @@ class BeanUtilsTests {
 	}
 
 	@Test  // gh-22531
-	void instantiateClassWithOptionalPrimitiveType() throws NoSuchMethodException {
-		Constructor<BeanWithPrimitiveTypes> ctor = BeanWithPrimitiveTypes.class.getDeclaredConstructor(int.class, boolean.class, String.class);
-		BeanWithPrimitiveTypes bean = BeanUtils.instantiateClass(ctor, null, null, "foo");
-		assertThat(bean.getCounter()).isEqualTo(0);
-		assertThat(bean.isFlag()).isEqualTo(false);
-		assertThat(bean.getValue()).isEqualTo("foo");
+	void instantiateClassWithFewerArgsThanParameters() throws NoSuchMethodException {
+		Constructor<BeanWithPrimitiveTypes> constructor = getBeanWithPrimitiveTypesConstructor();
+
+		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() ->
+				BeanUtils.instantiateClass(constructor, null, null, "foo"));
 	}
 
 	@Test  // gh-22531
 	void instantiateClassWithMoreArgsThanParameters() throws NoSuchMethodException {
-		Constructor<BeanWithPrimitiveTypes> ctor = BeanWithPrimitiveTypes.class.getDeclaredConstructor(int.class, boolean.class, String.class);
+		Constructor<BeanWithPrimitiveTypes> constructor = getBeanWithPrimitiveTypesConstructor();
+
 		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() ->
-				BeanUtils.instantiateClass(ctor, null, null, "foo", null));
+				BeanUtils.instantiateClass(constructor, null, null, null, null, null, null, null, null, "foo", null));
+	}
+
+	@Test  // gh-22531, gh-27390
+	void instantiateClassWithOptionalPrimitiveTypes() throws NoSuchMethodException {
+		Constructor<BeanWithPrimitiveTypes> constructor = getBeanWithPrimitiveTypesConstructor();
+
+		BeanWithPrimitiveTypes bean = BeanUtils.instantiateClass(constructor, null, null, null, null, null, null, null, null, "foo");
+
+		assertSoftly(softly -> {
+			softly.assertThat(bean.isFlag()).isFalse();
+			softly.assertThat(bean.getByteCount()).isEqualTo((byte) 0);
+			softly.assertThat(bean.getShortCount()).isEqualTo((short) 0);
+			softly.assertThat(bean.getIntCount()).isEqualTo(0);
+			softly.assertThat(bean.getLongCount()).isEqualTo(0L);
+			softly.assertThat(bean.getFloatCount()).isEqualTo(0F);
+			softly.assertThat(bean.getDoubleCount()).isEqualTo(0D);
+			softly.assertThat(bean.getCharacter()).isEqualTo('\0');
+			softly.assertThat(bean.getText()).isEqualTo("foo");
+		});
+	}
+
+	private Constructor<BeanWithPrimitiveTypes> getBeanWithPrimitiveTypesConstructor() throws NoSuchMethodException {
+		return BeanWithPrimitiveTypes.class.getConstructor(boolean.class, byte.class, short.class, int.class,
+				long.class, float.class, double.class, char.class, String.class);
 	}
 
 	@Test
@@ -628,30 +653,68 @@ class BeanUtilsTests {
 
 	private static class BeanWithPrimitiveTypes {
 
-		private int counter;
-
 		private boolean flag;
+		private byte byteCount;
+		private short shortCount;
+		private int intCount;
+		private long longCount;
+		private float floatCount;
+		private double doubleCount;
+		private char character;
+		private String text;
 
-		private String value;
 
 		@SuppressWarnings("unused")
-		public BeanWithPrimitiveTypes(int counter, boolean flag, String value) {
-			this.counter = counter;
-			this.flag = flag;
-			this.value = value;
-		}
+		public BeanWithPrimitiveTypes(boolean flag, byte byteCount, short shortCount, int intCount, long longCount,
+				float floatCount, double doubleCount, char character, String text) {
 
-		public int getCounter() {
-			return counter;
+			this.flag = flag;
+			this.byteCount = byteCount;
+			this.shortCount = shortCount;
+			this.intCount = intCount;
+			this.longCount = longCount;
+			this.floatCount = floatCount;
+			this.doubleCount = doubleCount;
+			this.character = character;
+			this.text = text;
 		}
 
 		public boolean isFlag() {
 			return flag;
 		}
 
-		public String getValue() {
-			return value;
+		public byte getByteCount() {
+			return byteCount;
 		}
+
+		public short getShortCount() {
+			return shortCount;
+		}
+
+		public int getIntCount() {
+			return intCount;
+		}
+
+		public long getLongCount() {
+			return longCount;
+		}
+
+		public float getFloatCount() {
+			return floatCount;
+		}
+
+		public double getDoubleCount() {
+			return doubleCount;
+		}
+
+		public char getCharacter() {
+			return character;
+		}
+
+		public String getText() {
+			return text;
+		}
+
 	}
 
 	private static class PrivateBeanWithPrivateConstructor {

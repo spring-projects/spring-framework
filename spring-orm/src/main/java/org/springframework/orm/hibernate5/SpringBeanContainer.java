@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
- * Spring's implementation of Hibernate 5.3's {@link BeanContainer} SPI,
+ * Spring's implementation of Hibernate's {@link BeanContainer} SPI,
  * delegating to a Spring {@link ConfigurableListableBeanFactory}.
  *
  * <p>Auto-configured by {@link LocalSessionFactoryBean#setBeanFactory},
@@ -46,7 +46,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * &lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
  *   ...
  *   &lt;property name="jpaPropertyMap"&gt;
- * 	   &lt;map>
+ * 	   &lt;map&gt;
  *       &lt;entry key="hibernate.resource.beans.container"&gt;
  * 	       &lt;bean class="org.springframework.orm.hibernate5.SpringBeanContainer"/&gt;
  * 	     &lt;/entry&gt;
@@ -62,10 +62,10 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * </pre>
  *
  * Please note that Spring's {@link LocalSessionFactoryBean} is an immediate alternative
- * to {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean} for common
- * JPA purposes: In particular with Hibernate 5.3/5.4, the Hibernate {@code SessionFactory}
- * will natively expose the JPA {@code EntityManagerFactory} interface as well, and
- * Hibernate {@code BeanContainer} integration will be registered out of the box.
+ * to {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean} for
+ * common JPA purposes: The Hibernate {@code SessionFactory} will natively expose the JPA
+ * {@code EntityManagerFactory} interface as well, and Hibernate {@code BeanContainer}
+ * integration will be registered out of the box.
  *
  * @author Juergen Hoeller
  * @since 5.1

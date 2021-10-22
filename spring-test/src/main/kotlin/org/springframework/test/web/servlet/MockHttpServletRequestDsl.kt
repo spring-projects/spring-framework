@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor
 import org.springframework.util.MultiValueMap
 import java.security.Principal
 import java.util.*
-import javax.servlet.http.Cookie
+import jakarta.servlet.http.Cookie
 
 /**
  * Provide a [MockHttpServletRequestBuilder] Kotlin DSL in order to be able to write idiomatic Kotlin code.

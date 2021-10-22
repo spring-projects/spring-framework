@@ -615,7 +615,7 @@ Java 8+. Using the latest update release available is highly recommended.
  line should be added for Kotlin script support. See
  https://github.com/sdeleuze/kotlin-script-templating[this example] for more details.
 
-You need to have the script templating library. One way to do that for Javascript is
+You need to have the script templating library. One way to do that for JavaScript is
 through https://www.webjars.org/[WebJars].
 
 
@@ -1697,7 +1697,7 @@ located in the `WEB-INF/defs` directory. At initialization of the `WebApplicatio
 the files are loaded, and the definitions factory are initialized. After that has
 been done, the Tiles included in the definition files can be used as views within your
 Spring web application. To be able to use the views, you have to have a `ViewResolver`
-as with any other view technology in Spring : typically a convenient `TilesViewResolver`.
+as with any other view technology in Spring: typically a convenient `TilesViewResolver`.
 
 You can specify locale-specific Tiles definitions by adding an underscore and then
 the locale, as the following example shows:

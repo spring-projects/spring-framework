@@ -16,9 +16,9 @@
 
 package org.springframework.web.socket.server.standard;
 
-import javax.servlet.ServletContext;
-import javax.websocket.WebSocketContainer;
-import javax.websocket.server.ServerContainer;
+import jakarta.servlet.ServletContext;
+import jakarta.websocket.WebSocketContainer;
+import jakarta.websocket.server.ServerContainer;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -27,9 +27,9 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 
 /**
- * A {@link FactoryBean} for configuring {@link javax.websocket.server.ServerContainer}.
+ * A {@link FactoryBean} for configuring {@link jakarta.websocket.server.ServerContainer}.
  * Since there is usually only one {@code ServerContainer} instance accessible under a
- * well-known {@code javax.servlet.ServletContext} attribute, simply declaring this
+ * well-known {@code jakarta.servlet.ServletContext} attribute, simply declaring this
  * FactoryBean and using its setters allows for configuring the {@code ServerContainer}
  * through Spring configuration.
  *
@@ -111,11 +111,11 @@ public class ServletServerContainerFactoryBean
 	@Override
 	public void afterPropertiesSet() {
 		Assert.state(this.servletContext != null,
-				"A ServletContext is required to access the javax.websocket.server.ServerContainer instance");
+				"A ServletContext is required to access the jakarta.websocket.server.ServerContainer instance");
 		this.serverContainer = (ServerContainer) this.servletContext.getAttribute(
-				"javax.websocket.server.ServerContainer");
+				"jakarta.websocket.server.ServerContainer");
 		Assert.state(this.serverContainer != null,
-				"Attribute 'javax.websocket.server.ServerContainer' not found in ServletContext");
+				"Attribute 'jakarta.websocket.server.ServerContainer' not found in ServletContext");
 
 		if (this.asyncSendTimeout != null) {
 			this.serverContainer.setAsyncSendTimeout(this.asyncSendTimeout);

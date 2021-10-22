@@ -22,8 +22,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspTagException;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
@@ -227,7 +227,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 * Set PageContext attribute name under which to expose
 	 * a variable that contains the resolved message.
 	 * @see #setScope
-	 * @see javax.servlet.jsp.PageContext#setAttribute
+	 * @see jakarta.servlet.jsp.PageContext#setAttribute
 	 */
 	public void setVar(String var) {
 		this.var = var;
@@ -238,7 +238,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 * Default is SCOPE_PAGE ("page").
 	 * @see #setVar
 	 * @see org.springframework.web.util.TagUtils#SCOPE_PAGE
-	 * @see javax.servlet.jsp.PageContext#setAttribute
+	 * @see jakarta.servlet.jsp.PageContext#setAttribute
 	 */
 	public void setScope(String scope) {
 		this.scope = scope;

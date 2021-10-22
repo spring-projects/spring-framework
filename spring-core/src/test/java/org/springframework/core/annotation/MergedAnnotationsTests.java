@@ -35,8 +35,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Resource;
-
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
@@ -3011,14 +3010,14 @@ class MergedAnnotationsTests {
 	}
 
 	/**
-	 * Mimics javax.persistence.Id
+	 * Mimics jakarta.persistence.Id
 	 */
 	@Retention(RUNTIME)
 	@interface Id {
 	}
 
 	/**
-	 * Mimics javax.persistence.GeneratedValue
+	 * Mimics jakarta.persistence.GeneratedValue
 	 */
 	@Retention(RUNTIME)
 	@interface GeneratedValue {

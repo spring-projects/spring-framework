@@ -43,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sam Brannen
  * @see org.springframework.beans.factory.config.PropertyResourceConfigurerTests
  */
+@SuppressWarnings("deprecation")
 public class PropertyResourceConfigurerIntegrationTests {
 
 	@Test

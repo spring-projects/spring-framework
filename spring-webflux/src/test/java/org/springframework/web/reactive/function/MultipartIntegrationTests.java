@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.Map;
 
 import reactor.core.publisher.Mono;
@@ -72,7 +73,8 @@ class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 		StepVerifier
 				.create(result)
 				.consumeNextWith(entity -> assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK))
-				.verifyComplete();
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@ParameterizedHttpServerTest
@@ -89,7 +91,8 @@ class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 		StepVerifier
 				.create(result)
 				.consumeNextWith(entity -> assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK))
-				.verifyComplete();
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@ParameterizedHttpServerTest
@@ -119,7 +122,8 @@ class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 						fail("IOException", ex);
 					}
 				})
-				.verifyComplete();
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
 	}
 
 	private MultiValueMap<String, HttpEntity<?>> generateBody() {
@@ -193,8 +197,7 @@ class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 				catch (IOException ex) {
 					return Mono.error(ex);
 				}
-			})
-					.subscribeOn(Schedulers.boundedElastic());
+			}).subscribeOn(Schedulers.boundedElastic());
 		}
 
 	}

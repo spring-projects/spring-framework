@@ -143,6 +143,18 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	}
 
 	/**
+	 * This implementation checks for the resolution of a resource URL upfront,
+	 * then proceeding with {@link AbstractFileResolvingResource}'s length check.
+	 * @see java.lang.ClassLoader#getResource(String)
+	 * @see java.lang.Class#getResource(String)
+	 */
+	@Override
+	public boolean isReadable() {
+		URL url = resolveURL();
+		return (url != null && checkReadable(url));
+	}
+
+	/**
 	 * Resolves a URL for the underlying class path resource.
 	 * @return the resolved URL, or {@code null} if not resolvable
 	 */
@@ -255,10 +267,9 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ClassPathResource)) {
+		if (!(other instanceof ClassPathResource otherRes)) {
 			return false;
 		}
-		ClassPathResource otherRes = (ClassPathResource) other;
 		return (this.path.equals(otherRes.path) &&
 				ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
 				ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));

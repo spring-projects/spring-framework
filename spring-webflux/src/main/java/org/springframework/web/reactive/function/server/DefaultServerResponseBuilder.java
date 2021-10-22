@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,8 +78,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		Assert.notNull(other, "ServerResponse must not be null");
 		this.headers.addAll(other.headers());
 		this.cookies.addAll(other.cookies());
-		if (other instanceof AbstractServerResponse) {
-			AbstractServerResponse abstractOther = (AbstractServerResponse) other;
+		if (other instanceof AbstractServerResponse abstractOther) {
 			this.statusCode = abstractOther.statusCode;
 			this.hints.putAll(abstractOther.hints);
 		}

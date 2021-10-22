@@ -30,18 +30,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-import javax.jms.TemporaryQueue;
-import javax.jms.TemporaryTopic;
-import javax.jms.Topic;
-import javax.jms.TopicSession;
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.QueueSession;
+import jakarta.jms.Session;
+import jakarta.jms.TemporaryQueue;
+import jakarta.jms.TemporaryTopic;
+import jakarta.jms.Topic;
+import jakarta.jms.TopicSession;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -49,8 +49,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * {@link SingleConnectionFactory} subclass that adds {@link javax.jms.Session}
- * caching as well {@link javax.jms.MessageProducer} caching. This ConnectionFactory
+ * {@link SingleConnectionFactory} subclass that adds {@link jakarta.jms.Session}
+ * caching as well {@link jakarta.jms.MessageProducer} caching. This ConnectionFactory
  * also switches the {@link #setReconnectOnException "reconnectOnException" property}
  * to "true" by default, allowing for automatic recovery of the underlying Connection.
  *
@@ -598,10 +598,9 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof ConsumerCacheKey)) {
+			if (!(other instanceof ConsumerCacheKey otherKey)) {
 				return false;
 			}
-			ConsumerCacheKey otherKey = (ConsumerCacheKey) other;
 			return (destinationEquals(otherKey) &&
 					ObjectUtils.nullSafeEquals(this.selector, otherKey.selector) &&
 					ObjectUtils.nullSafeEquals(this.noLocal, otherKey.noLocal) &&

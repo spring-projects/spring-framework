@@ -22,7 +22,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;

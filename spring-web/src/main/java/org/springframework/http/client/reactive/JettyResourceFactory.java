@@ -132,7 +132,7 @@ public class JettyResourceFactory implements InitializingBean, DisposableBean {
 		if (this.byteBufferPool == null) {
 			this.byteBufferPool = new MappedByteBufferPool(2048,
 					this.executor instanceof ThreadPool.SizedThreadPool
-							? ((ThreadPool.SizedThreadPool) executor).getMaxThreads() / 2
+							? ((ThreadPool.SizedThreadPool) this.executor).getMaxThreads() / 2
 							: ProcessorUtils.availableProcessors() * 2);
 		}
 		if (this.scheduler == null) {

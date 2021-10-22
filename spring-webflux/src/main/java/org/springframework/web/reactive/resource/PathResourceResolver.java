@@ -42,6 +42,7 @@ import org.springframework.web.util.UriUtils;
  * expected to be configured at the end in a chain of resolvers.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public class PathResourceResolver extends AbstractResourceResolver {
@@ -119,11 +120,12 @@ public class PathResourceResolver extends AbstractResourceResolver {
 					return Mono.just(resource);
 				}
 				else if (logger.isWarnEnabled()) {
-					Resource[] allowedLocations = getAllowedLocations();
-					logger.warn("Resource path \"" + resourcePath + "\" was successfully resolved " +
-							"but resource \"" + resource.getURL() + "\" is neither under the " +
-							"current location \"" + location.getURL() + "\" nor under any of the " +
-							"allowed locations " + (allowedLocations != null ? Arrays.asList(allowedLocations) : "[]"));
+					Object allowedLocationsText = (getAllowedLocations() != null ? Arrays.asList(getAllowedLocations()) : "[]");
+					logger.warn("""
+							Resource path "%s" was successfully resolved, but resource \
+							"%s" is neither under the current location "%s" nor under any \
+							of the allowed locations %s"\
+							""".formatted(resourcePath, resource.getURL(),location.getURL(), allowedLocationsText));
 				}
 			}
 			return Mono.empty();
@@ -177,8 +179,8 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			resourcePath = resource.getURL().toExternalForm();
 			locationPath = StringUtils.cleanPath(location.getURL().toString());
 		}
-		else if (resource instanceof ClassPathResource) {
-			resourcePath = ((ClassPathResource) resource).getPath();
+		else if (resource instanceof ClassPathResource classPathResource) {
+			resourcePath = classPathResource.getPath();
 			locationPath = StringUtils.cleanPath(((ClassPathResource) location).getPath());
 		}
 		else {
@@ -203,10 +205,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 					return true;
 				}
 			}
-			catch (IllegalArgumentException ex) {
-				// May not be possible to decode...
-			}
-			catch (UnsupportedEncodingException ex) {
+			catch (IllegalArgumentException | UnsupportedEncodingException ex) {
 				// Should never happen...
 			}
 		}

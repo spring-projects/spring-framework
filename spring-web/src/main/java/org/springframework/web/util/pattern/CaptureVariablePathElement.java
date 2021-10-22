@@ -35,7 +35,7 @@ class CaptureVariablePathElement extends PathElement {
 	private final String variableName;
 
 	@Nullable
-	private Pattern constraintPattern;
+	private final Pattern constraintPattern;
 
 
 	/**
@@ -55,6 +55,7 @@ class CaptureVariablePathElement extends PathElement {
 		if (colon == -1) {
 			// no constraint
 			this.variableName = new String(captureDescriptor, 1, captureDescriptor.length - 2);
+			this.constraintPattern = null;
 		}
 		else {
 			this.variableName = new String(captureDescriptor, 1, colon - 1);
@@ -135,6 +136,18 @@ class CaptureVariablePathElement extends PathElement {
 	}
 
 	@Override
+	public char[] getChars() {
+		StringBuilder sb = new StringBuilder();
+		sb.append('{');
+		sb.append(this.variableName);
+		if (this.constraintPattern != null) {
+			sb.append(':').append(this.constraintPattern.pattern());
+		}
+		sb.append('}');
+		return sb.toString().toCharArray();
+	}
+
+	@Override
 	public int getWildcardCount() {
 		return 0;
 	}
@@ -154,18 +167,6 @@ class CaptureVariablePathElement extends PathElement {
 	public String toString() {
 		return "CaptureVariable({" + this.variableName +
 				(this.constraintPattern != null ? ":" + this.constraintPattern.pattern() : "") + "})";
-	}
-
-	@Override
-	public char[] getChars() {
-		StringBuilder b = new StringBuilder();
-		b.append('{');
-		b.append(this.variableName);
-		if (this.constraintPattern != null) {
-			b.append(':').append(this.constraintPattern.pattern());
-		}
-		b.append('}');
-		return b.toString().toCharArray();
 	}
 
 }

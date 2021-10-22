@@ -56,8 +56,8 @@ public class MethodArgumentNotValidException extends BindException {
 	@Override
 	public String getMessage() {
 		StringBuilder sb = new StringBuilder("Validation failed for argument [")
-			.append(this.parameter.getParameterIndex()).append("] in ")
-			.append(this.parameter.getExecutable().toGenericString());
+				.append(this.parameter.getParameterIndex()).append("] in ")
+				.append(this.parameter.getExecutable().toGenericString());
 		BindingResult bindingResult = getBindingResult();
 		if (bindingResult.getErrorCount() > 1) {
 			sb.append(" with ").append(bindingResult.getErrorCount()).append(" errors");

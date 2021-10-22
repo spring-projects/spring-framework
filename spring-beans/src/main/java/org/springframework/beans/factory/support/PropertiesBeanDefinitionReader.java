@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -363,10 +363,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		int beanCount = 0;
 
 		for (Object key : map.keySet()) {
-			if (!(key instanceof String)) {
+			if (!(key instanceof String keyString)) {
 				throw new IllegalArgumentException("Illegal key [" + key + "]: only Strings allowed");
 			}
-			String keyString = (String) key;
 			if (keyString.startsWith(prefix)) {
 				// Key is of form: prefix<name>.property
 				String nameAndProperty = keyString.substring(prefix.length());
@@ -519,8 +518,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 */
 	private Object readValue(Map.Entry<?, ?> entry) {
 		Object val = entry.getValue();
-		if (val instanceof String) {
-			String strVal = (String) val;
+		if (val instanceof String strVal) {
 			// If it starts with a reference prefix...
 			if (strVal.startsWith(REF_PREFIX)) {
 				// Expand the reference.

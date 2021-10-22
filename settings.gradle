@@ -1,7 +1,7 @@
 pluginManagement {
 	repositories {
 		gradlePluginPortal()
-		maven { url 'https://repo.spring.io/plugins-release' }
+		maven { url "https://repo.spring.io/plugins-release" }
 	}
 }
 
@@ -17,8 +17,6 @@ include "spring-context"
 include "spring-context-indexer"
 include "spring-context-support"
 include "spring-core"
-include "kotlin-coroutines"
-project(':kotlin-coroutines').projectDir = file('spring-core/kotlin-coroutines')
 include "spring-expression"
 include "spring-instrument"
 include "spring-jcl"
@@ -51,7 +49,7 @@ settings.gradle.projectsLoaded {
 			buildScanPublished { scan ->
 				if (buildDir.exists()) {
 					new File(buildDir, "build-scan-uri.txt").text = "${scan.buildScanUri}\n"
-				} 
+				}
 			}
 		}
 	}

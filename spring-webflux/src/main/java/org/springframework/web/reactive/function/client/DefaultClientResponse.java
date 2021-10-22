@@ -203,7 +203,7 @@ class DefaultClientResponse implements ClientResponse {
 					return bytes;
 				})
 				.defaultIfEmpty(EMPTY)
-				.onErrorReturn(IllegalStateException.class::isInstance, EMPTY)
+				.onErrorReturn(ex -> !(ex instanceof Error), EMPTY)
 				.map(bodyBytes -> {
 					HttpRequest request = this.requestSupplier.get();
 					Charset charset = headers().contentType().map(MimeType::getCharset).orElse(null);

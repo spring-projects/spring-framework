@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -91,10 +92,16 @@ public abstract class AnnotationConfigUtils {
 			"org.springframework.context.annotation.internalRequiredAnnotationProcessor";
 
 	/**
-	 * The bean name of the internally managed JSR-250 annotation processor.
+	 * The bean name of the internally managed common annotation processor.
 	 */
 	public static final String COMMON_ANNOTATION_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.annotation.internalCommonAnnotationProcessor";
+
+	/**
+	 * The bean name of the internally managed JSR-250 annotation processor.
+	 */
+	private static final String JSR250_ANNOTATION_PROCESSOR_BEAN_NAME =
+			"org.springframework.context.annotation.internalJsr250AnnotationProcessor";
 
 	/**
 	 * The bean name of the internally managed JPA annotation processor.
@@ -117,16 +124,18 @@ public abstract class AnnotationConfigUtils {
 	public static final String EVENT_LISTENER_FACTORY_BEAN_NAME =
 			"org.springframework.context.event.internalEventListenerFactory";
 
-	private static final boolean jsr250Present;
 
-	private static final boolean jpaPresent;
+	private static final ClassLoader classLoader = AnnotationConfigUtils.class.getClassLoader();
 
-	static {
-		ClassLoader classLoader = AnnotationConfigUtils.class.getClassLoader();
-		jsr250Present = ClassUtils.isPresent("javax.annotation.Resource", classLoader);
-		jpaPresent = ClassUtils.isPresent("javax.persistence.EntityManagerFactory", classLoader) &&
-				ClassUtils.isPresent(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME, classLoader);
-	}
+	private static final boolean jakartaAnnotationsPresent =
+			ClassUtils.isPresent("jakarta.annotation.PostConstruct", classLoader);
+
+	private static final boolean jsr250Present =
+			ClassUtils.isPresent("javax.annotation.PostConstruct", classLoader);
+
+	private static final boolean jpaPresent =
+			ClassUtils.isPresent("jakarta.persistence.EntityManagerFactory", classLoader) &&
+					ClassUtils.isPresent(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME, classLoader);
 
 
 	/**
@@ -172,11 +181,26 @@ public abstract class AnnotationConfigUtils {
 			beanDefs.add(registerPostProcessor(registry, def, AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
-		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
-		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+		// Check for Jakarta Annotations support, and if present add the CommonAnnotationBeanPostProcessor.
+		if (jakartaAnnotationsPresent && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
+		}
+
+		// Check for JSR-250 support, and if present add an InitDestroyAnnotationBeanPostProcessor
+		// for the javax variant of PostConstruct/PreDestroy.
+		if (jsr250Present && !registry.containsBeanDefinition(JSR250_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			try {
+				RootBeanDefinition def = new RootBeanDefinition(InitDestroyAnnotationBeanPostProcessor.class);
+				def.getPropertyValues().add("initAnnotationType", classLoader.loadClass("javax.annotation.PostConstruct"));
+				def.getPropertyValues().add("destroyAnnotationType", classLoader.loadClass("javax.annotation.PreDestroy"));
+				def.setSource(source);
+				beanDefs.add(registerPostProcessor(registry, def, JSR250_ANNOTATION_PROCESSOR_BEAN_NAME));
+			}
+			catch (ClassNotFoundException ex) {
+				// Failed to load javax variants of the annotation types -> ignore.
+			}
 		}
 
 		// Check for JPA support, and if present add the PersistenceAnnotationBeanPostProcessor.

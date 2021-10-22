@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,12 @@ import java.util.Map;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileUpload;
-import org.apache.commons.fileupload.RequestContext;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.FileItemFactory;
+import org.apache.tomcat.util.http.fileupload.FileUpload;
+import org.apache.tomcat.util.http.fileupload.RequestContext;
+import org.apache.tomcat.util.http.fileupload.UploadContext;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -48,8 +49,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.http.MediaType.MULTIPART_MIXED;
@@ -226,10 +225,9 @@ public class FormHttpMessageConverterTests {
 		item = items.get(5);
 		assertThat(item.getFieldName()).isEqualTo("xml");
 		assertThat(item.getContentType()).isEqualTo("text/xml");
-		verify(outputMessage.getBody(), never()).close();
 	}
 
-	@Test // SPR-13309
+	@Test  // SPR-13309
 	public void writeMultipartOrder() throws Exception {
 		MyBean myBean = new MyBean();
 		myBean.setString("foo");
@@ -330,15 +328,16 @@ public class FormHttpMessageConverterTests {
 	}
 
 
-	private static class MockHttpOutputMessageRequestContext implements RequestContext {
+	private static class MockHttpOutputMessageRequestContext implements UploadContext {
 
 		private final MockHttpOutputMessage outputMessage;
 
+		private final byte[] body;
 
 		private MockHttpOutputMessageRequestContext(MockHttpOutputMessage outputMessage) {
 			this.outputMessage = outputMessage;
+			this.body = this.outputMessage.getBodyAsBytes();
 		}
-
 
 		@Override
 		public String getCharacterEncoding() {
@@ -353,16 +352,16 @@ public class FormHttpMessageConverterTests {
 		}
 
 		@Override
-		@Deprecated
-		public int getContentLength() {
-			return this.outputMessage.getBodyAsBytes().length;
+		public InputStream getInputStream() throws IOException {
+			return new ByteArrayInputStream(body);
 		}
 
 		@Override
-		public InputStream getInputStream() throws IOException {
-			return new ByteArrayInputStream(this.outputMessage.getBodyAsBytes());
+		public long contentLength() {
+			return body.length;
 		}
 	}
+
 
 	public static class MyBean {
 

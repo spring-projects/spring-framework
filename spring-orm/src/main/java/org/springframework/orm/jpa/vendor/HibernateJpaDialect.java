@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,8 @@ package org.springframework.orm.jpa.vendor;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
 import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
@@ -74,7 +73,7 @@ import org.springframework.transaction.support.ResourceTransactionDefinition;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for
- * Hibernate EntityManager. Developed against Hibernate 5.2/5.3/5.4.
+ * Hibernate EntityManager.
  *
  * @author Juergen Hoeller
  * @author Costin Leau
@@ -242,8 +241,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	 * @return the corresponding DataAccessException instance
 	 */
 	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
-		if (this.jdbcExceptionTranslator != null && ex instanceof JDBCException) {
-			JDBCException jdbcEx = (JDBCException) ex;
+		if (this.jdbcExceptionTranslator != null && ex instanceof JDBCException jdbcEx) {
 			DataAccessException dae = this.jdbcExceptionTranslator.translate(
 					"Hibernate operation: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
 			if (dae != null) {
@@ -254,29 +252,23 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		if (ex instanceof JDBCConnectionException) {
 			return new DataAccessResourceFailureException(ex.getMessage(), ex);
 		}
-		if (ex instanceof SQLGrammarException) {
-			SQLGrammarException jdbcEx = (SQLGrammarException) ex;
+		if (ex instanceof SQLGrammarException jdbcEx) {
 			return new InvalidDataAccessResourceUsageException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof QueryTimeoutException) {
-			QueryTimeoutException jdbcEx = (QueryTimeoutException) ex;
+		if (ex instanceof QueryTimeoutException jdbcEx) {
 			return new org.springframework.dao.QueryTimeoutException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof LockAcquisitionException) {
-			LockAcquisitionException jdbcEx = (LockAcquisitionException) ex;
+		if (ex instanceof LockAcquisitionException jdbcEx) {
 			return new CannotAcquireLockException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof PessimisticLockException) {
-			PessimisticLockException jdbcEx = (PessimisticLockException) ex;
+		if (ex instanceof PessimisticLockException jdbcEx) {
 			return new PessimisticLockingFailureException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof ConstraintViolationException) {
-			ConstraintViolationException jdbcEx = (ConstraintViolationException) ex;
+		if (ex instanceof ConstraintViolationException jdbcEx) {
 			return new DataIntegrityViolationException(ex.getMessage()  + "; SQL [" + jdbcEx.getSQL() +
 					"]; constraint [" + jdbcEx.getConstraintName() + "]", ex);
 		}
-		if (ex instanceof DataException) {
-			DataException jdbcEx = (DataException) ex;
+		if (ex instanceof DataException jdbcEx) {
 			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
 		// end of JDBCException subclass handling
@@ -302,16 +294,13 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		if (ex instanceof ObjectDeletedException) {
 			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
-		if (ex instanceof UnresolvableObjectException) {
-			UnresolvableObjectException hibEx = (UnresolvableObjectException) ex;
+		if (ex instanceof UnresolvableObjectException hibEx) {
 			return new ObjectRetrievalFailureException(hibEx.getEntityName(), hibEx.getIdentifier(), ex.getMessage(), ex);
 		}
-		if (ex instanceof WrongClassException) {
-			WrongClassException hibEx = (WrongClassException) ex;
+		if (ex instanceof WrongClassException hibEx) {
 			return new ObjectRetrievalFailureException(hibEx.getEntityName(), hibEx.getIdentifier(), ex.getMessage(), ex);
 		}
-		if (ex instanceof StaleObjectStateException) {
-			StaleObjectStateException hibEx = (StaleObjectStateException) ex;
+		if (ex instanceof StaleObjectStateException hibEx) {
 			return new ObjectOptimisticLockingFailureException(hibEx.getEntityName(), hibEx.getIdentifier(), ex);
 		}
 		if (ex instanceof StaleStateException) {

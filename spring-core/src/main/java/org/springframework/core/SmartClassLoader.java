@@ -91,7 +91,6 @@ public interface SmartClassLoader {
 	 * not being possible (thrown by the default implementation in this interface)
 	 * @since 5.3.4
 	 * @see ClassLoader#defineClass(String, byte[], int, int, ProtectionDomain)
-	 * @see java.lang.invoke.MethodHandles.Lookup#defineClass(byte[])
 	 */
 	default Class<?> publicDefineClass(String name, byte[] b, @Nullable ProtectionDomain protectionDomain) {
 		throw new UnsupportedOperationException();

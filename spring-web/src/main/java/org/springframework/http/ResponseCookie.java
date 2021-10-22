@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,8 +120,8 @@ public final class ResponseCookie extends HttpCookie {
 	 * Return the cookie "SameSite" attribute, or {@code null} if not set.
 	 * <p>This limits the scope of the cookie such that it will only be attached to
 	 * same site requests if {@code "Strict"} or cross-site requests if {@code "Lax"}.
-	 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis#section-4.1.2.7">RFC6265 bis</a>
 	 * @since 5.1
+	 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis#section-4.1.2.7">RFC6265 bis</a>
 	 */
 	@Nullable
 	public String getSameSite() {
@@ -134,10 +134,9 @@ public final class ResponseCookie extends HttpCookie {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ResponseCookie)) {
+		if (!(other instanceof ResponseCookie otherCookie)) {
 			return false;
 		}
-		ResponseCookie otherCookie = (ResponseCookie) other;
 		return (getName().equalsIgnoreCase(otherCookie.getName()) &&
 				ObjectUtils.nullSafeEquals(this.path, otherCookie.getPath()) &&
 				ObjectUtils.nullSafeEquals(this.domain, otherCookie.getDomain()));

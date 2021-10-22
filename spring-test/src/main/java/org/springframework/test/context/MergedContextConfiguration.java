@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -372,8 +372,8 @@ public class MergedContextConfiguration implements Serializable {
 	 * Get the {@link MergedContextConfiguration} for the parent application context
 	 * in a context hierarchy.
 	 * @return the parent configuration or {@code null} if there is no parent
-	 * @see #getParentApplicationContext()
 	 * @since 3.2.2
+	 * @see #getParentApplicationContext()
 	 */
 	@Nullable
 	public MergedContextConfiguration getParent() {
@@ -386,8 +386,8 @@ public class MergedContextConfiguration implements Serializable {
 	 * <p>If the parent context has not yet been loaded, it will be loaded, stored
 	 * in the cache, and then returned.
 	 * @return the parent {@code ApplicationContext} or {@code null} if there is no parent
-	 * @see #getParent()
 	 * @since 3.2.2
+	 * @see #getParent()
 	 */
 	@Nullable
 	public ApplicationContext getParentApplicationContext() {

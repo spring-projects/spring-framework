@@ -20,8 +20,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.server.ServerHttpRequest;

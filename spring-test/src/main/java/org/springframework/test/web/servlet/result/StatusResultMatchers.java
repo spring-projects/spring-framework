@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -390,8 +390,8 @@ public class StatusResultMatchers {
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.REQUEST_ENTITY_TOO_LARGE} (413).
-	 * @deprecated matching the deprecation of {@code HttpStatus.REQUEST_ENTITY_TOO_LARGE}
 	 * @see #isPayloadTooLarge()
+	 * @deprecated matching the deprecation of {@code HttpStatus.REQUEST_ENTITY_TOO_LARGE}
 	 */
 	@Deprecated
 	public ResultMatcher isRequestEntityTooLarge() {
@@ -408,8 +408,8 @@ public class StatusResultMatchers {
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.REQUEST_URI_TOO_LONG} (414).
-	 * @deprecated matching the deprecation of {@code HttpStatus.REQUEST_URI_TOO_LONG}
 	 * @see #isUriTooLong()
+	 * @deprecated matching the deprecation of {@code HttpStatus.REQUEST_URI_TOO_LONG}
 	 */
 	@Deprecated
 	public ResultMatcher isRequestUriTooLong() {

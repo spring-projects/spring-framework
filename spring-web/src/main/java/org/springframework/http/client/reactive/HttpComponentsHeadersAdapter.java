@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ class HttpComponentsHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String && this.response.containsHeader((String) key));
+		return (key instanceof String headerName && this.response.containsHeader(headerName));
 	}
 
 	@Override
@@ -136,9 +136,9 @@ class HttpComponentsHeadersAdapter implements MultiValueMap<String, String> {
 	@Nullable
 	@Override
 	public List<String> remove(Object key) {
-		if (key instanceof String) {
+		if (key instanceof String headerName) {
 			List<String> oldValues = get(key);
-			this.response.removeHeaders((String) key);
+			this.response.removeHeaders(headerName);
 			return oldValues;
 		}
 		return null;
@@ -174,7 +174,7 @@ class HttpComponentsHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
-		return new AbstractSet<Entry<String, List<String>>>() {
+		return new AbstractSet<>() {
 			@Override
 			public Iterator<Entry<String, List<String>>> iterator() {
 				return new EntryIterator();
@@ -196,7 +196,7 @@ class HttpComponentsHeadersAdapter implements MultiValueMap<String, String> {
 
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
-		private Iterator<Header> iterator = response.headerIterator();
+		private final Iterator<Header> iterator = response.headerIterator();
 
 		@Override
 		public boolean hasNext() {

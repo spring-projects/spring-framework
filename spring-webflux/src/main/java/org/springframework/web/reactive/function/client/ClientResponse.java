@@ -193,9 +193,9 @@ public interface ClientResponse {
 	String logPrefix();
 
 	/**
-	 * Return a builder to mutate the this response, for example to change
+	 * Return a builder to mutate this response, for example to change
 	 * the status, headers, cookies, and replace or transform the body.
-	 * @return a builder to mutate the request with
+	 * @return a builder to mutate the response with
 	 * @since 5.3
 	 */
 	default Builder mutate() {

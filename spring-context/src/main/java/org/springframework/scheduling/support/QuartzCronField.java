@@ -360,10 +360,9 @@ final class QuartzCronField extends CronField {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof QuartzCronField)) {
+		if (!(o instanceof QuartzCronField other)) {
 			return false;
 		}
-		QuartzCronField other = (QuartzCronField) o;
 		return type() == other.type() &&
 				this.value.equals(other.value);
 	}

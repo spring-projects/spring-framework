@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.core.type.classreading;
 
 import java.lang.reflect.Field;
-import java.security.AccessControlException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -97,7 +96,7 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 		catch (ClassNotFoundException | NoClassDefFoundError ex) {
 			logger.debug("Failed to classload enum type while reading annotation metadata", ex);
 		}
-		catch (IllegalAccessException | AccessControlException ex) {
+		catch (IllegalAccessException ex) {
 			logger.debug("Could not access enum value while reading annotation metadata", ex);
 		}
 		return valueToUse;

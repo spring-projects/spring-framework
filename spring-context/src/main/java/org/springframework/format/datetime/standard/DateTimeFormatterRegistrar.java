@@ -50,7 +50,6 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
  * @see #setUseIsoFormat
  * @see org.springframework.format.FormatterRegistrar#registerFormatters
  * @see org.springframework.format.datetime.DateFormatterRegistrar
- * @see org.springframework.format.datetime.joda.DateTimeFormatterFactoryBean
  */
 public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 

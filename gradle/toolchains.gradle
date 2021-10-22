@@ -11,7 +11,7 @@
  *     <li>a JDK11 toolchain for compiling and running the test SourceSet
  * </ul>
  *
- * By default, the build will fall back to using the current JDK and 1.8 language level for all sourceSets.
+ * By default, the build will fall back to using the current JDK and 17 language level for all sourceSets.
  *
  * Gradle will automatically detect JDK distributions in well-known locations.
  * The following command will list the detected JDKs on the host.
@@ -44,7 +44,7 @@ def mainToolchainLanguageVersion() {
 	if (mainToolchainConfigured()) {
 		return JavaLanguageVersion.of(project.mainToolchain.toString())
 	}
-	return JavaLanguageVersion.of(8)
+	return JavaLanguageVersion.of(17)
 }
 
 def testToolchainLanguageVersion() {
@@ -64,9 +64,9 @@ plugins.withType(JavaPlugin) {
 		}
 	}
 	else {
-		// Fallback to JDK8
+		// Fallback to JDK17
 		java {
-			sourceCompatibility = JavaVersion.VERSION_1_8
+			sourceCompatibility = JavaVersion.VERSION_17
 		}
 	}
 	// Configure a specific Java Toolchain for compiling and running tests if the 'testToolchain' property is defined
@@ -86,10 +86,10 @@ plugins.withType(JavaPlugin) {
 }
 
 plugins.withType(GroovyPlugin) {
-	// Fallback to JDK8
+	// Fallback to JDK17
 	if (!mainToolchainConfigured()) {
 		compileGroovy {
-			sourceCompatibility = JavaVersion.VERSION_1_8
+			sourceCompatibility = JavaVersion.VERSION_17
 		}
 	}
 }
@@ -102,7 +102,7 @@ pluginManager.withPlugin("kotlin") {
 			languageVersion = mainLanguageVersion
 		}
 		// See https://kotlinlang.org/docs/gradle.html#attributes-specific-for-jvm
-		def javaVersion = mainLanguageVersion.toString() == '8' ? '1.8' : mainLanguageVersion.toString()
+		def javaVersion = mainLanguageVersion.toString()
 		compileKotlin {
 			kotlinOptions {
 				jvmTarget = javaVersion
@@ -118,7 +118,7 @@ pluginManager.withPlugin("kotlin") {
 		}
 	}
 	else {
-		// Fallback to JDK8
+		// Fallback to JDK11
 		compileKotlin {
 			kotlinOptions {
 				jvmTarget = '1.8'

@@ -285,8 +285,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 */
 	@Nullable
 	protected Class<?> getSerializationView(@Nullable Object conversionHint) {
-		if (conversionHint instanceof MethodParameter) {
-			MethodParameter param = (MethodParameter) conversionHint;
+		if (conversionHint instanceof MethodParameter param) {
 			JsonView annotation = (param.getParameterIndex() >= 0 ?
 					param.getParameterAnnotation(JsonView.class) : param.getMethodAnnotation(JsonView.class));
 			if (annotation != null) {

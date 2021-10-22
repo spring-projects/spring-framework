@@ -200,7 +200,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	 * {@code @ControllerAdvice} bean. You can use the following adapter code
 	 * to register {@code @ControllerAdvice} beans here:
 	 * <pre>
-	 * ControllerAdviceBean.findAnnotatedBeans(context).forEach(bean ->
+	 * ControllerAdviceBean.findAnnotatedBeans(context).forEach(bean -&gt;
 	 *         messageHandler.registerMessagingAdvice(new ControllerAdviceWrapper(bean));
 	 *
 	 * public class ControllerAdviceWrapper implements MessagingAdviceBean {
@@ -208,7 +208,6 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	 *     // delegate all methods
 	 * }
 	 * </pre>
-	 *
 	 * @param bean the bean to check for {@code @MessageExceptionHandler} methods
 	 * @since 5.3.5
 	 */

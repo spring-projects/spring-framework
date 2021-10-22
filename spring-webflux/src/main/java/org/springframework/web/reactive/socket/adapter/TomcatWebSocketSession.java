@@ -18,8 +18,7 @@ package org.springframework.web.reactive.socket.adapter;
 
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
-import javax.websocket.Session;
-
+import jakarta.websocket.Session;
 import org.apache.tomcat.websocket.WsSession;
 import reactor.core.publisher.Sinks;
 
@@ -29,7 +28,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Spring {@link WebSocketSession} adapter for Tomcat's
- * {@link javax.websocket.Session}.
+ * {@link jakarta.websocket.Session}.
  *
  * @author Violeta Georgieva
  * @since 5.0

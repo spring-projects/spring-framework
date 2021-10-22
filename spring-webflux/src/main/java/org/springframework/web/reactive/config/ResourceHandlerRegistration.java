@@ -75,15 +75,13 @@ public class ResourceHandlerRegistration {
 
 	/**
 	 * Add one or more resource locations from which to serve static content.
-	 * Each location must point to a valid directory. Multiple locations may
+	 * <p>Each location must point to a valid directory. Multiple locations may
 	 * be specified as a comma-separated list, and the locations will be checked
 	 * for a given resource in the order specified.
-	 *
-	 * <p>For example, {{@code "/"},
-	 * {@code "classpath:/META-INF/public-web-resources/"}} allows resources to
-	 * be served both from the web application root and from any JAR on the
-	 * classpath that contains a {@code /META-INF/public-web-resources/} directory,
-	 * with resources in the web application root taking precedence.
+	 * <p>For example, {@code "/", "classpath:/META-INF/public-web-resources/"}
+	 * allows resources to be served both from the web application root and from
+	 * any JAR on the classpath that contains a {@code /META-INF/public-web-resources/}
+	 * directory, with resources in the web application root taking precedence.
 	 * @return the same {@link ResourceHandlerRegistration} instance, for
 	 * chained method invocation
 	 */

@@ -41,7 +41,7 @@
 			<props>
 				<prop key="setA*">PROPAGATION_REQUIRED</prop>
 				<prop key="rollbackOnly">PROPAGATION_REQUIRED</prop>
-				<prop key="echoException">PROPAGATION_REQUIRED,+javax.servlet.ServletException,-java.lang.Exception</prop>
+				<prop key="echoException">PROPAGATION_REQUIRED,+jakarta.servlet.ServletException,-java.lang.Exception</prop>
 			</props>
 		</property>
 	</bean>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class RollbackRuleAttribute implements Serializable{
 	 * for the given {@code exceptionName}.
 	 * <p>This can be a substring, with no wildcard support at present. A value
 	 * of "ServletException" would match
-	 * {@code javax.servlet.ServletException} and subclasses, for example.
+	 * {@code jakarta.servlet.ServletException} and subclasses, for example.
 	 * <p><b>NB:</b> Consider carefully how specific the pattern is, and
 	 * whether to include package information (which is not mandatory). For
 	 * example, "Exception" will match nearly anything, and will probably hide
@@ -129,10 +129,9 @@ public class RollbackRuleAttribute implements Serializable{
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof RollbackRuleAttribute)) {
+		if (!(other instanceof RollbackRuleAttribute rhs)) {
 			return false;
 		}
-		RollbackRuleAttribute rhs = (RollbackRuleAttribute) other;
 		return this.exceptionName.equals(rhs.exceptionName);
 	}
 

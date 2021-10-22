@@ -357,7 +357,7 @@ the list:
 	// Turn on:
 	// - auto null reference initialization
 	// - auto collection growing
-	SpelParserConfiguration config = new SpelParserConfiguration(true,true);
+	SpelParserConfiguration config = new SpelParserConfiguration(true, true);
 
 	ExpressionParser parser = new SpelExpressionParser(config);
 
@@ -465,7 +465,7 @@ following example shows how to do so:
 .Java
 ----
 	SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,
-		this.getClass().getClassLoader());
+			this.getClass().getClassLoader());
 
 	SpelExpressionParser parser = new SpelExpressionParser(config);
 

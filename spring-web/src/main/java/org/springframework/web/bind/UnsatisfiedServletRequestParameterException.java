@@ -107,7 +107,7 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 
 	/**
 	 * Return the actual parameter Map associated with the ServletRequest.
-	 * @see javax.servlet.ServletRequest#getParameterMap()
+	 * @see jakarta.servlet.ServletRequest#getParameterMap()
 	 */
 	public final Map<String, String[]> getActualParams() {
 		return this.actualParams;

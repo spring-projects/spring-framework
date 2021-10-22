@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,7 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 	@Override
 	public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 		boolean proxyTargetClass = true;
-		if (node instanceof Element) {
-			Element ele = (Element) node;
+		if (node instanceof Element ele) {
 			if (ele.hasAttribute(PROXY_TARGET_CLASS)) {
 				proxyTargetClass = Boolean.parseBoolean(ele.getAttribute(PROXY_TARGET_CLASS));
 			}

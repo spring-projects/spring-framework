@@ -212,10 +212,9 @@ public final class ContentDisposition {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ContentDisposition)) {
+		if (!(other instanceof ContentDisposition otherCd)) {
 			return false;
 		}
-		ContentDisposition otherCd = (ContentDisposition) other;
 		return (ObjectUtils.nullSafeEquals(this.type, otherCd.type) &&
 				ObjectUtils.nullSafeEquals(this.name, otherCd.name) &&
 				ObjectUtils.nullSafeEquals(this.filename, otherCd.filename) &&
@@ -576,14 +575,13 @@ public final class ContentDisposition {
 		Builder filename(String filename);
 
 		/**
-		 * Set the value of the {@literal filename*} that will be encoded as
-		 * defined in the RFC 5987. Only the US-ASCII, UTF-8 and ISO-8859-1
+		 * Set the value of the {@code filename} that will be encoded as
+		 * defined in RFC 5987. Only the US-ASCII, UTF-8, and ISO-8859-1
 		 * charsets are supported.
 		 * <p><strong>Note:</strong> Do not use this for a
-		 * {@code "multipart/form-data"} requests as per
-		 * <a link="https://tools.ietf.org/html/rfc7578#section-4.2">RFC 7578, Section 4.2</a>
-		 * and also RFC 5987 itself mentions it does not apply to multipart
-		 * requests.
+		 * {@code "multipart/form-data"} request since
+		 * <a href="https://tools.ietf.org/html/rfc7578#section-4.2">RFC 7578, Section 4.2</a>
+		 * and also RFC 5987 mention it does not apply to multipart requests.
 		 */
 		Builder filename(String filename, Charset charset);
 

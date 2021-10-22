@@ -47,6 +47,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
+import reactor.util.context.Context;
 
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
@@ -512,8 +513,7 @@ public abstract class DataBufferUtils {
 	 * @return {@code true} if the buffer was released; {@code false} otherwise.
 	 */
 	public static boolean release(@Nullable DataBuffer dataBuffer) {
-		if (dataBuffer instanceof PooledDataBuffer) {
-			PooledDataBuffer pooledDataBuffer = (PooledDataBuffer) dataBuffer;
+		if (dataBuffer instanceof PooledDataBuffer pooledDataBuffer) {
 			if (pooledDataBuffer.isAllocated()) {
 				try {
 					return pooledDataBuffer.release();
@@ -1057,6 +1057,12 @@ public abstract class DataBufferUtils {
 		protected void hookOnComplete() {
 			this.sink.complete();
 		}
+
+		@Override
+		public Context currentContext() {
+			return this.sink.currentContext();
+		}
+
 	}
 
 
@@ -1148,6 +1154,12 @@ public abstract class DataBufferUtils {
 			this.sink.next(dataBuffer);
 			this.dataBuffer.set(null);
 		}
+
+		@Override
+		public Context currentContext() {
+			return this.sink.currentContext();
+		}
+
 	}
 
 }

@@ -216,7 +216,7 @@ public class DefaultHandlerExceptionResolverTests {
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(500);
 
 		// SPR-9653
-		assertThat(request.getAttribute("javax.servlet.error.exception")).isSameAs(ex);
+		assertThat(request.getAttribute("jakarta.servlet.error.exception")).isSameAs(ex);
 	}
 
 	@Test  // SPR-14669

@@ -18,7 +18,7 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.Collections;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;

@@ -392,10 +392,9 @@ public class ConstructorArgumentValues {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ConstructorArgumentValues)) {
+		if (!(other instanceof ConstructorArgumentValues that)) {
 			return false;
 		}
-		ConstructorArgumentValues that = (ConstructorArgumentValues) other;
 		if (this.genericArgumentValues.size() != that.genericArgumentValues.size() ||
 				this.indexedArgumentValues.size() != that.indexedArgumentValues.size()) {
 			return false;

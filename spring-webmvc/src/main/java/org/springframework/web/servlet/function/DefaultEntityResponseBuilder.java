@@ -30,12 +30,11 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -203,8 +202,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public EntityResponse<T> build() {
-		if (this.entity instanceof CompletionStage) {
-			CompletionStage completionStage = (CompletionStage) this.entity;
+		if (this.entity instanceof CompletionStage completionStage) {
 			return new CompletionStageEntityResponse(this.status, this.headers, this.cookies,
 					completionStage, this.entityType);
 		}
@@ -265,7 +263,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			return null;
 		}
 
-		@SuppressWarnings({ "unchecked", "resource" })
+		@SuppressWarnings({ "unchecked", "resource", "rawtypes" })
 		protected void writeEntityWithMessageConverters(Object entity, HttpServletRequest request,
 				HttpServletResponse response, ServerResponse.Context context)
 				throws ServletException, IOException {
@@ -295,16 +293,14 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			}
 
 			for (HttpMessageConverter<?> messageConverter : context.messageConverters()) {
-				if (messageConverter instanceof GenericHttpMessageConverter<?>) {
-					GenericHttpMessageConverter<Object> genericMessageConverter =
-							(GenericHttpMessageConverter<Object>) messageConverter;
+				if (messageConverter instanceof GenericHttpMessageConverter genericMessageConverter) {
 					if (genericMessageConverter.canWrite(entityType, entityClass, contentType)) {
 						genericMessageConverter.write(entity, entityType, contentType, serverResponse);
 						return;
 					}
 				}
 				if (messageConverter.canWrite(entityClass, contentType)) {
-					((HttpMessageConverter<Object>)messageConverter).write(entity, contentType, serverResponse);
+					((HttpMessageConverter<Object>) messageConverter).write(entity, contentType, serverResponse);
 					return;
 				}
 			}

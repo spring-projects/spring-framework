@@ -28,9 +28,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -70,7 +69,7 @@ import org.springframework.web.multipart.support.StandardServletPartUtils;
  * <p>Model attributes are obtained from the model or created with a default
  * constructor (and then added to the model). Once created the attribute is
  * populated via data binding to Servlet request parameters. Validation may be
- * applied if the argument is annotated with {@code @javax.validation.Valid}.
+ * applied if the argument is annotated with {@code @jakarta.validation.Valid}.
  * or Spring's own {@code @org.springframework.validation.annotation.Validated}.
  *
  * <p>When this handler is created with {@code annotationNotRequired=true}
@@ -367,7 +366,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 	/**
 	 * Validate the model attribute if applicable.
-	 * <p>The default implementation checks for {@code @javax.validation.Valid},
+	 * <p>The default implementation checks for {@code @jakarta.validation.Valid},
 	 * Spring's {@link org.springframework.validation.annotation.Validated},
 	 * and custom annotations whose name starts with "Valid".
 	 * @param binder the DataBinder to be used
@@ -387,7 +386,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 	/**
 	 * Validate the specified candidate value if applicable.
-	 * <p>The default implementation checks for {@code @javax.validation.Valid},
+	 * <p>The default implementation checks for {@code @jakarta.validation.Valid},
 	 * Spring's {@link org.springframework.validation.annotation.Validated},
 	 * and custom annotations whose name starts with "Valid".
 	 * @param binder the DataBinder to be used

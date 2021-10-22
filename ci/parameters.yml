@@ -1,12 +1,9 @@
-email-server: "smtp.svc.pivotal.io"
-email-from: "ci@spring.io"
-email-to: ["spring-framework-dev@pivotal.io"]
 github-repo: "https://github.com/spring-projects/spring-framework.git"
 github-repo-name: "spring-projects/spring-framework"
 docker-hub-organization: "springci"
 artifactory-server: "https://repo.spring.io"
 branch: "main"
-milestone: "5.3.x"
+milestone: "6.0.x"
 build-name: "spring-framework"
 pipeline-name: "spring-framework"
 concourse-url: "https://ci.spring.io"

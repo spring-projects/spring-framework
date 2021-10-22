@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.joda.time.DateTime;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -437,7 +436,7 @@ public class WebMvcConfigurationSupportTests {
 
 		@RequestMapping("/foo/{id}/bar/{date}")
 		public HttpEntity<Void> methodWithTwoPathVariables(@PathVariable Integer id,
-				@DateTimeFormat(iso = ISO.DATE) @PathVariable DateTime date) {
+				@DateTimeFormat(iso = ISO.DATE) @PathVariable Date date) {
 			return null;
 		}
 	}

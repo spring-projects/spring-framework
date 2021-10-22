@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;

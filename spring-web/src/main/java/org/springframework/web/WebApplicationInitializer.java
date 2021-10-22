@@ -16,8 +16,8 @@
 
 package org.springframework.web;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 /**
  * Interface to be implemented in Servlet 3.0+ environments in order to configure the
@@ -36,15 +36,15 @@ import javax.servlet.ServletException;
  * follows:
  * <pre class="code">
  * &lt;servlet&gt;
- *   &lt;servlet-name>dispatcher&lt;/servlet-name&gt;
+ *   &lt;servlet-name&gt;dispatcher&lt;/servlet-name&gt;
  *   &lt;servlet-class&gt;
  *     org.springframework.web.servlet.DispatcherServlet
  *   &lt;/servlet-class&gt;
- *   &lt;init-param>
- *     &lt;param-name>contextConfigLocation&lt;/param-name&gt;
- *     &lt;param-value>/WEB-INF/spring/dispatcher-config.xml&lt;/param-value&gt;
+ *   &lt;init-param&gt;
+ *     &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+ *     &lt;param-value&gt;/WEB-INF/spring/dispatcher-config.xml&lt;/param-value&gt;
  *   &lt;/init-param&gt;
- *   &lt;load-on-startup>1&lt;/load-on-startup&gt;
+ *   &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
  * &lt;/servlet&gt;
  *
  * &lt;servlet-mapping&gt;

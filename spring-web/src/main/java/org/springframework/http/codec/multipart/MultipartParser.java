@@ -29,6 +29,7 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.util.context.Context;
 
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -96,6 +97,11 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 			sink.onRequest(n -> parser.requestBuffer());
 			buffers.subscribe(parser);
 		});
+	}
+
+	@Override
+	public Context currentContext() {
+		return this.sink.currentContext();
 	}
 
 	@Override

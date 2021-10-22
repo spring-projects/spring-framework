@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.transaction.aspectj;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -29,4 +30,5 @@ public class ClassWithProtectedAnnotatedMember {
 
 	@Transactional
 	protected void doInTransaction() {}
+
 }

@@ -21,8 +21,8 @@ import java.io.Writer;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;

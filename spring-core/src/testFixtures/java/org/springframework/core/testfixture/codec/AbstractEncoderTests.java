@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ import static org.springframework.core.io.buffer.DataBufferUtils.release;
 
 /**
  * Abstract base class for {@link Encoder} unit tests. Subclasses need to implement
- * {@link #canEncode()} and {@link #encode()}, possibly using the wide
- *  * variety of helper methods like {@link #testEncodeAll}.
+ * {@link #canEncode()} and {@link #encode()}, possibly using the wide variety of
+ * helper methods like {@link #testEncodeAll}.
  *
  * @author Arjen Poutsma
  * @since 5.1.3
@@ -58,9 +58,7 @@ public abstract class AbstractEncoderTests<E extends Encoder<?>> extends Abstrac
 	 * @param encoder the encoder
 	 */
 	protected AbstractEncoderTests(E encoder) {
-
 		Assert.notNull(encoder, "Encoder must not be null");
-
 		this.encoder = encoder;
 	}
 
@@ -253,13 +251,11 @@ public abstract class AbstractEncoderTests<E extends Encoder<?>> extends Abstrac
 			release(dataBuffer);
 			assertThat(actual).isEqualTo(expected);
 		};
-
 	}
 
 	@SuppressWarnings("unchecked")
 	private <T> Encoder<T> encoder() {
 		return (Encoder<T>) this.encoder;
-
 	}
 
 	/**

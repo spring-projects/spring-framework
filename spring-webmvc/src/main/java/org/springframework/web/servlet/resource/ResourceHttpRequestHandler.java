@@ -25,11 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -188,6 +188,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * locations provided via {@link #setLocations(List) setLocations}.
 	 * <p>Note that the returned list is fully initialized only after
 	 * initialization via {@link #afterPropertiesSet()}.
+	 * <p><strong>Note:</strong> As of 5.3.11 the list of locations is filtered
+	 * to exclude those that don't actually exist and therefore the list returned
+	 * from this method may be a subset of all given locations.
 	 * @see #setLocationValues
 	 * @see #setLocations
 	 */
@@ -303,7 +306,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * response.
 	 * <p>Use of this method is typically not necessary since mappings are
 	 * otherwise determined via
-	 * {@link javax.servlet.ServletContext#getMimeType(String)} or via
+	 * {@link jakarta.servlet.ServletContext#getMimeType(String)} or via
 	 * {@link MediaTypeFactory#getMediaType(Resource)}.
 	 * @param mediaTypes media type mappings
 	 * @since 5.2.4
@@ -388,11 +391,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	public void afterPropertiesSet() throws Exception {
 		resolveResourceLocations();
 
-		if (logger.isWarnEnabled() && CollectionUtils.isEmpty(getLocations())) {
-			logger.warn("Locations list is empty. No resources will be served unless a " +
-					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
-		}
-
 		if (this.resourceResolvers.isEmpty()) {
 			this.resourceResolvers.add(new PathResourceResolver());
 		}
@@ -424,6 +422,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	private void resolveResourceLocations() {
+		List<Resource> result = new ArrayList<>();
 		if (!this.locationValues.isEmpty()) {
 			ApplicationContext applicationContext = obtainApplicationContext();
 			for (String location : this.locationValues) {
@@ -452,7 +451,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 									"but resolved to a Resource of type: " + resource.getClass() + ". " +
 									"If this is intentional, please pass it as a pre-configured Resource via setLocations.");
 				}
-				this.locationsToUse.add(resource);
+				result.add(resource);
 				if (charset != null) {
 					if (!(resource instanceof UrlResource)) {
 						throw new IllegalArgumentException("Unexpected charset for non-UrlResource: " + resource);
@@ -461,7 +460,12 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				}
 			}
 		}
-		this.locationsToUse.addAll(this.locationResources);
+
+		result.addAll(this.locationResources);
+		result = result.stream().filter(Resource::exists).collect(Collectors.toList());
+
+		this.locationsToUse.clear();
+		this.locationsToUse.addAll(result);
 	}
 
 	/**
@@ -474,8 +478,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			return;
 		}
 		for (int i = getResourceResolvers().size() - 1; i >= 0; i--) {
-			if (getResourceResolvers().get(i) instanceof PathResourceResolver) {
-				PathResourceResolver pathResolver = (PathResourceResolver) getResourceResolvers().get(i);
+			if (getResourceResolvers().get(i) instanceof PathResourceResolver pathResolver) {
 				if (ObjectUtils.isEmpty(pathResolver.getAllowedLocations())) {
 					pathResolver.setAllowedLocations(getLocations().toArray(new Resource[0]));
 				}
@@ -671,11 +674,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 					return true;
 				}
 			}
-			catch (IllegalArgumentException ex) {
-				// May not be possible to decode...
-			}
-			catch (UnsupportedEncodingException ex) {
-				// Should never happen...
+			catch (IllegalArgumentException | UnsupportedEncodingException ex) {
+				// May not be possible to decode... | Should never happen...
 			}
 		}
 		return false;
@@ -728,7 +728,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * the following lookups based on the resource filename and its path
 	 * extension:
 	 * <ol>
-	 * <li>{@link javax.servlet.ServletContext#getMimeType(String)}
+	 * <li>{@link jakarta.servlet.ServletContext#getMimeType(String)}
 	 * <li>{@link #getMediaTypes()}
 	 * <li>{@link MediaTypeFactory#getMediaType(String)}
 	 * </ol>
@@ -778,8 +778,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			response.setContentType(mediaType.toString());
 		}
 
-		if (resource instanceof HttpResource) {
-			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
+		if (resource instanceof HttpResource httpResource) {
+			HttpHeaders resourceHeaders = httpResource.getResponseHeaders();
 			resourceHeaders.forEach((headerName, headerValues) -> {
 				boolean first = true;
 				for (String headerValue : headerValues) {
@@ -800,10 +800,13 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	@Override
 	public String toString() {
-		return "ResourceHttpRequestHandler " +
-				getLocations().toString()
-						.replaceAll("class path resource", "Classpath")
-						.replaceAll("ServletContext resource", "ServletContext");
+		return "ResourceHttpRequestHandler " + locationToString(getLocations());
+	}
+
+	private String locationToString(List<Resource> locations) {
+		return locations.toString()
+				.replaceAll("class path resource", "classpath")
+				.replaceAll("ServletContext resource", "ServletContext");
 	}
 
 }

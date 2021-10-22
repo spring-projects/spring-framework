@@ -4,14 +4,14 @@ apply plugin: "groovy"
 apply plugin: "kotlin"
 
 dependencies {
-	compile(project(":spring-core"))
-	optional("javax.inject:javax.inject")
+	api(project(":spring-core"))
+	optional("jakarta.inject:jakarta.inject-api")
 	optional("org.yaml:snakeyaml")
 	optional("org.codehaus.groovy:groovy-xml")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
-	testCompile(testFixtures(project(":spring-core")))
-	testCompile("javax.annotation:javax.annotation-api")
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation("jakarta.annotation:jakarta.annotation-api")
 	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
 	testFixturesImplementation("org.assertj:assertj-core")
 }

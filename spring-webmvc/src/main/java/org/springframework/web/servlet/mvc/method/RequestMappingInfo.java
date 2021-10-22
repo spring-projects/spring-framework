@@ -19,8 +19,8 @@ package org.springframework.web.servlet.mvc.method;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -470,10 +470,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof RequestMappingInfo)) {
+		if (!(other instanceof RequestMappingInfo otherInfo)) {
 			return false;
 		}
-		RequestMappingInfo otherInfo = (RequestMappingInfo) other;
 		return (getActivePatternsCondition().equals(otherInfo.getActivePatternsCondition()) &&
 				this.methodsCondition.equals(otherInfo.methodsCondition) &&
 				this.paramsCondition.equals(otherInfo.paramsCondition) &&
@@ -912,9 +911,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		/**
 		 * Set a custom UrlPathHelper to use for the PatternsRequestCondition.
 		 * <p>By default this is not set.
+		 * @since 4.2.8
 		 * @deprecated as of 5.3, the path is resolved externally and obtained with
 		 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
-		 * @since 4.2.8
 		 */
 		@Deprecated
 		public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {

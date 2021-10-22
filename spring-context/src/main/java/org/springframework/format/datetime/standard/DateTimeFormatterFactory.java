@@ -183,6 +183,15 @@ public class DateTimeFormatterFactory {
 			dateTimeFormatter = DateTimeFormatterUtils.createStrictDateTimeFormatter(this.pattern);
 		}
 		else if (this.iso != null && this.iso != ISO.NONE) {
+			// TODO Use switch expression once spring-javaformat 0.0.30 has been released.
+			// See https://github.com/spring-io/spring-javaformat/issues/300
+			//
+			// dateTimeFormatter = switch (this.iso) {
+			// 	case DATE -> DateTimeFormatter.ISO_DATE;
+			// 	case TIME -> DateTimeFormatter.ISO_TIME;
+			// 	case DATE_TIME -> DateTimeFormatter.ISO_DATE_TIME;
+			// 	default -> throw new IllegalStateException("Unsupported ISO format: " + this.iso);
+			// };
 			switch (this.iso) {
 				case DATE:
 					dateTimeFormatter = DateTimeFormatter.ISO_DATE;

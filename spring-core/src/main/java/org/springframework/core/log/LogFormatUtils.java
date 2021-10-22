@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,30 +36,46 @@ import org.springframework.lang.Nullable;
 public abstract class LogFormatUtils {
 
 	/**
-	 * Format the given value via {@code toString()}, quoting it if it is a
-	 * {@link CharSequence}, and possibly truncating at 100 if limitLength is
-	 * set to true.
+	 * Variant of {@link #formatValue(Object, int, boolean)} and a convenience
+	 * method that truncates at 100 characters when {@code limitLength} is set.
 	 * @param value the value to format
-	 * @param limitLength whether to truncate large formatted values (over 100)
+	 * @param limitLength whether to truncate the value at a length of 100
 	 * @return the formatted value
 	 */
 	public static String formatValue(@Nullable Object value, boolean limitLength) {
+		return formatValue(value, (limitLength ? 100 : -1), limitLength);
+	}
+
+	/**
+	 * Format the given value via {@code toString()}, quoting it if it is a
+	 * {@link CharSequence}, truncating at the specified {@code maxLength}, and
+	 * compacting it into a single line when {@code replaceNewLines} is set.
+	 * @param value the value to be formatted
+	 * @param maxLength the max length, after which to truncate, or -1 for unlimited
+	 * @param replaceNewlines whether to replace newline characters with placeholders
+	 * @return the formatted value
+	 */
+	public static String formatValue(@Nullable Object value, int maxLength, boolean replaceNewlines) {
 		if (value == null) {
 			return "";
 		}
-		String str;
+		String result;
+		try {
+			result = value.toString();
+		}
+		catch (Throwable ex) {
+			result = ex.toString();
+		}
+		if (maxLength != -1) {
+			result = (result.length() > maxLength ? result.substring(0, maxLength) + " (truncated)..." : result);
+		}
+		if (replaceNewlines) {
+			result = result.replace("\n", "<LF>").replace("\r", "<CR>");
+		}
 		if (value instanceof CharSequence) {
-			str = "\"" + value + "\"";
+			result = "\"" + result + "\"";
 		}
-		else {
-			try {
-				str = value.toString();
-			}
-			catch (Throwable ex) {
-				str = ex.toString();
-			}
-		}
-		return (limitLength && str.length() > 100 ? str.substring(0, 100) + " (truncated)..." : str);
+		return result;
 	}
 
 	/**

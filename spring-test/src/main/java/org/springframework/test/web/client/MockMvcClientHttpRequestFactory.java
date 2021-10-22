@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.test.web.client;
 
-import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -39,18 +38,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 /**
  * A {@link ClientHttpRequestFactory} for requests executed via {@link MockMvc}.
  *
- * <p>As of 5.0 this class also implements
- * {@link org.springframework.http.client.AsyncClientHttpRequestFactory
- * AsyncClientHttpRequestFactory}. However note that
- * {@link org.springframework.web.client.AsyncRestTemplate} and related classes
- * have been deprecated at the same time.
- *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-@SuppressWarnings("deprecation")
-public class MockMvcClientHttpRequestFactory
-		implements ClientHttpRequestFactory, org.springframework.http.client.AsyncClientHttpRequestFactory {
+public class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory {
 
 	private final MockMvc mockMvc;
 
@@ -65,18 +56,8 @@ public class MockMvcClientHttpRequestFactory
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) {
 		return new MockClientHttpRequest(httpMethod, uri) {
 			@Override
-			public ClientHttpResponse executeInternal() throws IOException {
+			public ClientHttpResponse executeInternal() {
 				return getClientHttpResponse(httpMethod, uri, getHeaders(), getBodyAsBytes());
-			}
-		};
-	}
-
-	@Override
-	public org.springframework.http.client.AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod method) {
-		return new org.springframework.mock.http.client.MockAsyncClientHttpRequest(method, uri) {
-			@Override
-			protected ClientHttpResponse executeInternal() throws IOException {
-				return getClientHttpResponse(method, uri, getHeaders(), getBodyAsBytes());
 			}
 		};
 	}

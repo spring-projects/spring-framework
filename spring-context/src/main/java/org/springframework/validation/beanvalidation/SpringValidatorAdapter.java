@@ -25,13 +25,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ElementKind;
-import javax.validation.Path;
-import javax.validation.ValidationException;
-import javax.validation.executable.ExecutableValidator;
-import javax.validation.metadata.BeanDescriptor;
-import javax.validation.metadata.ConstraintDescriptor;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ElementKind;
+import jakarta.validation.Path;
+import jakarta.validation.ValidationException;
+import jakarta.validation.executable.ExecutableValidator;
+import jakarta.validation.metadata.BeanDescriptor;
+import jakarta.validation.metadata.ConstraintDescriptor;
 
 import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.context.MessageSourceResolvable;
@@ -58,12 +58,13 @@ import org.springframework.validation.SmartValidator;
  * Bean Validation 1.1 as well as 2.0.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see SmartValidator
  * @see CustomValidatorBean
  * @see LocalValidatorFactoryBean
  */
-public class SpringValidatorAdapter implements SmartValidator, javax.validation.Validator {
+public class SpringValidatorAdapter implements SmartValidator, jakarta.validation.Validator {
 
 	private static final Set<String> internalAnnotationAttributes = new HashSet<>(4);
 
@@ -74,14 +75,14 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	}
 
 	@Nullable
-	private javax.validation.Validator targetValidator;
+	private jakarta.validation.Validator targetValidator;
 
 
 	/**
 	 * Create a new SpringValidatorAdapter for the given JSR-303 Validator.
 	 * @param targetValidator the JSR-303 Validator to wrap
 	 */
-	public SpringValidatorAdapter(javax.validation.Validator targetValidator) {
+	public SpringValidatorAdapter(jakarta.validation.Validator targetValidator) {
 		Assert.notNull(targetValidator, "Target Validator must not be null");
 		this.targetValidator = targetValidator;
 	}
@@ -89,7 +90,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	SpringValidatorAdapter() {
 	}
 
-	void setTargetValidator(javax.validation.Validator targetValidator) {
+	void setTargetValidator(jakarta.validation.Validator targetValidator) {
 		this.targetValidator = targetValidator;
 	}
 
@@ -136,8 +137,8 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	private Class<?>[] asValidationGroups(Object... validationHints) {
 		Set<Class<?>> groups = new LinkedHashSet<>(4);
 		for (Object hint : validationHints) {
-			if (hint instanceof Class) {
-				groups.add((Class<?>) hint);
+			if (hint instanceof Class<?> clazz) {
+				groups.add(clazz);
 			}
 		}
 		return ClassUtils.toClassArray(groups);
@@ -159,10 +160,9 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 					ConstraintDescriptor<?> cd = violation.getConstraintDescriptor();
 					String errorCode = determineErrorCode(cd);
 					Object[] errorArgs = getArgumentsForConstraint(errors.getObjectName(), field, cd);
-					if (errors instanceof BindingResult) {
+					if (errors instanceof BindingResult bindingResult) {
 						// Can do custom FieldError registration with invalid value from ConstraintViolation,
 						// as necessary for Hibernate Validator compatibility (non-indexed set path in field)
-						BindingResult bindingResult = (BindingResult) errors;
 						String nestedField = bindingResult.getNestedPath() + field;
 						if (nestedField.isEmpty()) {
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
@@ -199,7 +199,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 * @param violation the current JSR-303 ConstraintViolation
 	 * @return the Spring-reported field (for use with {@link Errors})
 	 * @since 4.2
-	 * @see javax.validation.ConstraintViolation#getPropertyPath()
+	 * @see jakarta.validation.ConstraintViolation#getPropertyPath()
 	 * @see org.springframework.validation.FieldError#getField()
 	 */
 	protected String determineField(ConstraintViolation<Object> violation) {
@@ -239,7 +239,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 * @param descriptor the JSR-303 ConstraintDescriptor for the current violation
 	 * @return a corresponding error code (for use with {@link Errors})
 	 * @since 4.2
-	 * @see javax.validation.metadata.ConstraintDescriptor#getAnnotation()
+	 * @see jakarta.validation.metadata.ConstraintDescriptor#getAnnotation()
 	 * @see org.springframework.validation.MessageCodesResolver
 	 */
 	protected String determineErrorCode(ConstraintDescriptor<?> descriptor) {
@@ -269,8 +269,8 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 		Map<String, Object> attributesToExpose = new TreeMap<>();
 		descriptor.getAttributes().forEach((attributeName, attributeValue) -> {
 			if (!internalAnnotationAttributes.contains(attributeName)) {
-				if (attributeValue instanceof String) {
-					attributeValue = new ResolvableAttribute(attributeValue.toString());
+				if (attributeValue instanceof String str) {
+					attributeValue = new ResolvableAttribute(str);
 				}
 				attributesToExpose.put(attributeName, attributeValue);
 			}
@@ -305,7 +305,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 * which contains the current field's value
 	 * @return the invalid value to expose as part of the field error
 	 * @since 4.2
-	 * @see javax.validation.ConstraintViolation#getInvalidValue()
+	 * @see jakarta.validation.ConstraintViolation#getInvalidValue()
 	 * @see org.springframework.validation.FieldError#getRejectedValue()
 	 */
 	@Nullable
@@ -387,7 +387,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 		}
 		catch (ValidationException ex) {
 			// Ignore if just being asked for plain JSR-303 Validator
-			if (javax.validation.Validator.class == type) {
+			if (jakarta.validation.Validator.class == type) {
 				return (T) this.targetValidator;
 			}
 			throw ex;

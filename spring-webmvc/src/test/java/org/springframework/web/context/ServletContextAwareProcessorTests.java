@@ -16,9 +16,8 @@
 
 package org.springframework.web.context;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.context.support.ServletContextAwareProcessor;

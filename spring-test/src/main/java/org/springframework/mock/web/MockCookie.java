@@ -20,7 +20,7 @@ import java.time.DateTimeException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
@@ -68,8 +68,8 @@ public class MockCookie extends Cookie {
 
 	/**
 	 * Get the "Expires" attribute for this cookie.
-	 * @since 5.1.11
 	 * @return the "Expires" attribute for this cookie, or {@code null} if not set
+	 * @since 5.1.11
 	 */
 	@Nullable
 	public ZonedDateTime getExpires() {

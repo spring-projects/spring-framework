@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
@@ -111,7 +111,7 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	}
 
 	/**
-	 * Same contract as for {@link javax.servlet.http.HttpServlet#getLastModified(HttpServletRequest)}.
+	 * Same contract as for {@link jakarta.servlet.http.HttpServlet#getLastModified(HttpServletRequest)}.
 	 * @param request current HTTP request
 	 * @param handlerMethod handler method to use
 	 * @return the lastModified value for the given handler

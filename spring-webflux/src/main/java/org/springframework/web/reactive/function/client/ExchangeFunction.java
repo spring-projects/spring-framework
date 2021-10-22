@@ -32,7 +32,7 @@ import reactor.core.publisher.Mono;
  *
  * Mono&lt;String&gt; bodyMono = exchangeFunction
  *     .exchange(request)
- *     .flatMap(response -> response.bodyToMono(String.class));
+ *     .flatMap(response -&gt; response.bodyToMono(String.class));
  * </pre>
  *
  * @author Arjen Poutsma
@@ -50,7 +50,6 @@ public interface ExchangeFunction {
 	 * propagate it downstream for further handling, for example by the
 	 * {@link WebClient}. Please, see the reference documentation for more
 	 * details on this.
-	 *
 	 * @param request the request to exchange
 	 * @return the delayed response
 	 */

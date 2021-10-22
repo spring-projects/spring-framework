@@ -16,8 +16,8 @@
 
 package org.springframework.jms.connection;
 
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
+import jakarta.jms.ExceptionListener;
+import jakarta.jms.JMSException;
 
 /**
  * @author Juergen Hoeller

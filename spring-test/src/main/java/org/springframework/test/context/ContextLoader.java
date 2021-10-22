@@ -72,8 +72,8 @@ public interface ContextLoader {
 	 * contexts} loaded by this ContextLoader. Beans will therefore automatically
 	 * be candidates for annotation-based dependency injection using
 	 * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
-	 * {@link javax.annotation.Resource @Resource}, and
-	 * {@link javax.inject.Inject @Inject}.
+	 * {@link jakarta.annotation.Resource @Resource}, and
+	 * {@link jakarta.inject.Inject @Inject}.
 	 * <p>Any ApplicationContext loaded by a ContextLoader <strong>must</strong>
 	 * register a JVM shutdown hook for itself. Unless the context gets closed
 	 * early, all context instances will be automatically closed on JVM

@@ -16,8 +16,8 @@
 
 package org.springframework.jms.core;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 
 /**
  * To be used with JmsTemplate's send method that converts an object to a message.
@@ -30,7 +30,7 @@ import javax.jms.Message;
  * @author Mark Pollack
  * @since 1.1
  * @see JmsTemplate#convertAndSend(String, Object, MessagePostProcessor)
- * @see JmsTemplate#convertAndSend(javax.jms.Destination, Object, MessagePostProcessor)
+ * @see JmsTemplate#convertAndSend(jakarta.jms.Destination, Object, MessagePostProcessor)
  * @see org.springframework.jms.support.converter.MessageConverter
  */
 @FunctionalInterface
@@ -42,7 +42,7 @@ public interface MessagePostProcessor {
 	 * @param message the JMS message from the MessageConverter
 	 * @return a post-processed variant of the message, or simply the incoming
 	 * message; never {@code null}
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
 	 */
 	Message postProcessMessage(Message message) throws JMSException;
 
