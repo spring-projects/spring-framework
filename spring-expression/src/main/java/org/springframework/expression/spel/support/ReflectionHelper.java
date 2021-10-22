@@ -332,8 +332,8 @@ public abstract class ReflectionHelper {
 	}
 
 	/**
-	 * Package up the arguments so that they correctly match what is expected in parameterTypes.
-	 * For example, if parameterTypes is {@code (int, String[])} because the second parameter
+	 * Package up the arguments so that they correctly match what is expected in requiredParameterTypes.
+	 * <p>For example, if requiredParameterTypes is {@code (int, String[])} because the second parameter
 	 * was declared {@code String...}, then if arguments is {@code [1,"a","b"]} then it must be
 	 * repackaged as {@code [1,new String[]{"a","b"}]} in order to match the expected types.
 	 * @param requiredParameterTypes the types of the parameters for the invocation
@@ -350,23 +350,24 @@ public abstract class ReflectionHelper {
 				requiredParameterTypes[parameterCount - 1] !=
 						(args[argumentCount - 1] != null ? args[argumentCount - 1].getClass() : null)) {
 
-			int arraySize = 0;  // zero size array if nothing to pass as the varargs parameter
-			if (argumentCount >= parameterCount) {
-				arraySize = argumentCount - (parameterCount - 1);
-			}
-
-			// Create an array for the varargs arguments
+			// Create an array for the leading arguments plus the varargs array argument.
 			Object[] newArgs = new Object[parameterCount];
+			// Copy all leading arguments to the new array, omitting the varargs array argument.
 			System.arraycopy(args, 0, newArgs, 0, newArgs.length - 1);
 
 			// Now sort out the final argument, which is the varargs one. Before entering this method,
 			// the arguments should have been converted to the box form of the required type.
-			Class<?> componentType = requiredParameterTypes[parameterCount - 1].getComponentType();
-			Object repackagedArgs = Array.newInstance(componentType, arraySize);
-			for (int i = 0; i < arraySize; i++) {
-				Array.set(repackagedArgs, i, args[parameterCount - 1 + i]);
+			int varargsArraySize = 0;  // zero size array if nothing to pass as the varargs parameter
+			if (argumentCount >= parameterCount) {
+				varargsArraySize = argumentCount - (parameterCount - 1);
 			}
-			newArgs[newArgs.length - 1] = repackagedArgs;
+			Class<?> componentType = requiredParameterTypes[parameterCount - 1].getComponentType();
+			Object varargsArray = Array.newInstance(componentType, varargsArraySize);
+			for (int i = 0; i < varargsArraySize; i++) {
+				Array.set(varargsArray, i, args[parameterCount - 1 + i]);
+			}
+			// Finally, add the varargs array to the new arguments array.
+			newArgs[newArgs.length - 1] = varargsArray;
 			return newArgs;
 		}
 		return args;
