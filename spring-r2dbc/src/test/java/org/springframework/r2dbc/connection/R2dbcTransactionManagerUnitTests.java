@@ -264,7 +264,9 @@ class R2dbcTransactionManagerUnitTests {
 				.doOnNext(connection -> connection.createStatement("foo")).then()
 				.as(operator::transactional)
 				.as(StepVerifier::create)
-				.verifyError(BadSqlGrammarException.class);
+				.verifyErrorSatisfies(ex -> assertThat(ex)
+						.isExactlyInstanceOf(RuntimeException.class)
+						.hasCauseInstanceOf(BadSqlGrammarException.class));
 
 		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
@@ -317,7 +319,9 @@ class R2dbcTransactionManagerUnitTests {
 			return ConnectionFactoryUtils.getConnection(connectionFactoryMock)
 					.doOnNext(connection -> connection.createStatement("foo")).then();
 		}).as(StepVerifier::create)
-				.verifyError(BadSqlGrammarException.class);
+				.verifyErrorSatisfies(ex -> assertThat(ex)
+						.isExactlyInstanceOf(RuntimeException.class)
+						.hasCauseInstanceOf(BadSqlGrammarException.class));
 
 		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));

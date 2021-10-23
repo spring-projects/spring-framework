@@ -79,8 +79,7 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 				action::doInTransaction,
 				this.transactionManager::commit,
 				this::rollbackOnException,
-				this.transactionManager::rollback)
-			.onErrorMap(this::unwrapIfResourceCleanupFailure))
+				this.transactionManager::rollback))
 		.contextWrite(TransactionContextManager.getOrCreateContext())
 		.contextWrite(TransactionContextManager.getOrCreateContextHolder());
 	}
@@ -98,26 +97,9 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 					if (ex2 instanceof TransactionSystemException tse) {
 						tse.initApplicationException(ex);
 					}
-					else {
-						ex2.addSuppressed(ex);
-					}
 					return ex2;
 				}
 		);
-	}
-
-	/**
-	 * Unwrap the cause of a throwable, if produced by a failure
-	 * during the async resource cleanup in {@link Flux#usingWhen}.
-	 * @param ex the throwable to try to unwrap
-	 */
-	private Throwable unwrapIfResourceCleanupFailure(Throwable ex) {
-		if (ex instanceof RuntimeException &&
-				ex.getCause() != null &&
-				ex.getMessage().startsWith("Async resource cleanup failed")) {
-			return ex.getCause();
-		}
-		return ex;
 	}
 
 
