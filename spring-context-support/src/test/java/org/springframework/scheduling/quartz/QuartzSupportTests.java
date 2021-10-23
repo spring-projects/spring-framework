@@ -61,10 +61,10 @@ import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
  * @author Sam Brannen
  * @since 20.02.2004
  */
-public class QuartzSupportTests {
+class QuartzSupportTests {
 
 	@Test
-	public void schedulerFactoryBeanWithApplicationContext() throws Exception {
+	void schedulerFactoryBeanWithApplicationContext() throws Exception {
 		TestBean tb = new TestBean("tb", 99);
 		StaticApplicationContext ac = new StaticApplicationContext();
 
@@ -101,7 +101,7 @@ public class QuartzSupportTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void schedulerWithTaskExecutor() throws Exception {
+	void schedulerWithTaskExecutor() throws Exception {
 		CountingTaskExecutor taskExecutor = new CountingTaskExecutor();
 		DummyJob.count = 0;
 
@@ -134,7 +134,7 @@ public class QuartzSupportTests {
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void jobDetailWithRunnableInsteadOfJob() {
+	void jobDetailWithRunnableInsteadOfJob() {
 		JobDetailImpl jobDetail = new JobDetailImpl();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				jobDetail.setJobClass((Class) DummyRunnable.class));
@@ -142,7 +142,7 @@ public class QuartzSupportTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void schedulerWithQuartzJobBean() throws Exception {
+	void schedulerWithQuartzJobBean() throws Exception {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -175,7 +175,7 @@ public class QuartzSupportTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void schedulerWithSpringBeanJobFactory() throws Exception {
+	void schedulerWithSpringBeanJobFactory() throws Exception {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -210,7 +210,7 @@ public class QuartzSupportTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void schedulerWithSpringBeanJobFactoryAndParamMismatchNotIgnored() throws Exception {
+	void schedulerWithSpringBeanJobFactoryAndParamMismatchNotIgnored() throws Exception {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -246,7 +246,7 @@ public class QuartzSupportTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void schedulerWithSpringBeanJobFactoryAndQuartzJobBean() throws Exception {
+	void schedulerWithSpringBeanJobFactoryAndQuartzJobBean() throws Exception {
 		DummyJobBean.param = 0;
 		DummyJobBean.count = 0;
 
@@ -280,7 +280,7 @@ public class QuartzSupportTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void schedulerWithSpringBeanJobFactoryAndJobSchedulingData() throws Exception {
+	void schedulerWithSpringBeanJobFactoryAndJobSchedulingData() throws Exception {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -298,7 +298,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test  // SPR-772
-	public void multipleSchedulers() throws Exception {
+	void multipleSchedulers() throws Exception {
 		try (ClassPathXmlApplicationContext ctx = context("multipleSchedulers.xml")) {
 			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
 			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
@@ -309,7 +309,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test  // SPR-16884
-	public void multipleSchedulersWithQuartzProperties() throws Exception {
+	void multipleSchedulersWithQuartzProperties() throws Exception {
 		try (ClassPathXmlApplicationContext ctx = context("multipleSchedulersWithQuartzProperties.xml")) {
 			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
 			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
@@ -321,11 +321,12 @@ public class QuartzSupportTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void twoAnonymousMethodInvokingJobDetailFactoryBeans() throws Exception {
-		Thread.sleep(3000);
+	void twoAnonymousMethodInvokingJobDetailFactoryBeans() throws Exception {
 		try (ClassPathXmlApplicationContext ctx = context("multipleAnonymousMethodInvokingJobDetailFB.xml")) {
 			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
 			QuartzTestBean importService = (QuartzTestBean) ctx.getBean("importService");
+
+			Thread.sleep(400);
 
 			assertThat(exportService.getImportCount()).as("doImport called exportService").isEqualTo(0);
 			assertThat(exportService.getExportCount()).as("doExport not called on exportService").isEqualTo(2);
@@ -336,11 +337,12 @@ public class QuartzSupportTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void schedulerAccessorBean() throws Exception {
-		Thread.sleep(3000);
+	void schedulerAccessorBean() throws Exception {
 		try (ClassPathXmlApplicationContext ctx = context("schedulerAccessorBean.xml")) {
 			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
 			QuartzTestBean importService = (QuartzTestBean) ctx.getBean("importService");
+
+			Thread.sleep(400);
 
 			assertThat(exportService.getImportCount()).as("doImport called exportService").isEqualTo(0);
 			assertThat(exportService.getExportCount()).as("doExport not called on exportService").isEqualTo(2);
@@ -351,7 +353,7 @@ public class QuartzSupportTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void schedulerAutoStartsOnContextRefreshedEventByDefault() throws Exception {
+	void schedulerAutoStartsOnContextRefreshedEventByDefault() throws Exception {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerBeanDefinition("scheduler", new RootBeanDefinition(SchedulerFactoryBean.class));
 		Scheduler bean = context.getBean("scheduler", Scheduler.class);
@@ -362,7 +364,7 @@ public class QuartzSupportTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void schedulerAutoStartupFalse() throws Exception {
+	void schedulerAutoStartupFalse() throws Exception {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(SchedulerFactoryBean.class)
 				.addPropertyValue("autoStartup", false).getBeanDefinition();
@@ -374,7 +376,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	public void schedulerRepositoryExposure() throws Exception {
+	void schedulerRepositoryExposure() throws Exception {
 		try (ClassPathXmlApplicationContext ctx = context("schedulerRepositoryExposure.xml")) {
 			assertThat(ctx.getBean("scheduler")).isSameAs(SchedulerRepository.getInstance().lookup("myScheduler"));
 		}
@@ -385,7 +387,7 @@ public class QuartzSupportTests {
 	 * TODO: Against Quartz 2.2, this test's job doesn't actually execute anymore...
 	 */
 	@Test
-	public void schedulerWithHsqlDataSource() throws Exception {
+	void schedulerWithHsqlDataSource() throws Exception {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -401,13 +403,14 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	public void schedulerFactoryBeanWithCustomJobStore() throws Exception {
+	@SuppressWarnings("resource")
+	void schedulerFactoryBeanWithCustomJobStore() throws Exception {
 		StaticApplicationContext context = new StaticApplicationContext();
 
-		final String dbName = "mydb";
-		final EmbeddedDatabase database = new EmbeddedDatabaseBuilder().setName(dbName).build();
+		String dbName = "mydb";
+		EmbeddedDatabase database = new EmbeddedDatabaseBuilder().setName(dbName).build();
 
-		final Properties properties = new Properties();
+		Properties properties = new Properties();
 		properties.setProperty("org.quartz.jobStore.class", JobStoreTX.class.getName());
 		properties.setProperty("org.quartz.jobStore.dataSource", dbName);
 
@@ -418,9 +421,9 @@ public class QuartzSupportTests {
 				.getBeanDefinition();
 		context.registerBeanDefinition("scheduler", beanDefinition);
 
-		Scheduler bean = context.getBean("scheduler", Scheduler.class);
+		Scheduler scheduler = context.getBean(Scheduler.class);
 
-		assertThat(bean.getMetaData().getJobStoreClass()).isEqualTo(JobStoreTX.class);
+		assertThat(scheduler.getMetaData().getJobStoreClass()).isEqualTo(JobStoreTX.class);
 	}
 
 	private ClassPathXmlApplicationContext context(String path) {
@@ -428,7 +431,7 @@ public class QuartzSupportTests {
 	}
 
 
-	public static class CountingTaskExecutor implements TaskExecutor {
+	private static class CountingTaskExecutor implements TaskExecutor {
 
 		private int count;
 
@@ -440,12 +443,14 @@ public class QuartzSupportTests {
 	}
 
 
-	public static class DummyJob implements Job {
+	private static class DummyJob implements Job {
 
 		private static int param;
 
 		private static int count;
 
+		@SuppressWarnings("unused")
+		// Must be public
 		public void setParam(int value) {
 			if (param > 0) {
 				throw new IllegalStateException("Param already set");
@@ -460,12 +465,13 @@ public class QuartzSupportTests {
 	}
 
 
-	public static class DummyJobBean extends QuartzJobBean {
+	private static class DummyJobBean extends QuartzJobBean {
 
 		private static int param;
 
 		private static int count;
 
+		@SuppressWarnings("unused")
 		public void setParam(int value) {
 			if (param > 0) {
 				throw new IllegalStateException("Param already set");
@@ -480,7 +486,7 @@ public class QuartzSupportTests {
 	}
 
 
-	public static class DummyRunnable implements Runnable {
+	private static class DummyRunnable implements Runnable {
 
 		@Override
 		public void run() {
