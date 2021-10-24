@@ -21,9 +21,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.core.SmartClassLoader;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * Base class for {@link BeanPostProcessor} implementations that apply a
@@ -33,7 +38,7 @@ import org.springframework.lang.Nullable;
  * @since 3.2
  */
 @SuppressWarnings("serial")
-public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSupport implements BeanPostProcessor {
+public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSupport implements BeanPostProcessor, SmartInstantiationAwareBeanPostProcessor {
 
 	@Nullable
 	protected Advisor advisor;
@@ -42,6 +47,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 
 	private final Map<Class<?>, Boolean> eligibleBeans = new ConcurrentHashMap<>(256);
 
+	private final Map<Object, Object> earlyProxyReferences = new ConcurrentHashMap<>(16);
 
 	/**
 	 * Set whether this post-processor's advisor is supposed to apply before
@@ -62,8 +68,24 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 		return bean;
 	}
 
+	public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
+		Object cacheKey = getCacheKey(bean.getClass(), beanName);
+		this.earlyProxyReferences.put(cacheKey, bean);
+		return wrapIfNecessary(bean, beanName);
+	}
+
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
+		if (bean != null) {
+			Object cacheKey = getCacheKey(bean.getClass(), beanName);
+			if (this.earlyProxyReferences.remove(cacheKey) != bean) {
+				return wrapIfNecessary(bean, beanName);
+			}
+		}
+		return bean;
+	}
+
+	protected Object wrapIfNecessary(Object bean, String beanName) {
 		if (this.advisor == null || bean instanceof AopInfrastructureBean) {
 			// Ignore AOP infrastructure such as scoped proxies.
 			return bean;
@@ -101,6 +123,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 		// No proxy needed.
 		return bean;
 	}
+
 
 	/**
 	 * Check whether the given bean is eligible for advising with this
@@ -173,6 +196,27 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 	 * @see #prepareProxyFactory
 	 */
 	protected void customizeProxyFactory(ProxyFactory proxyFactory) {
+	}
+
+	/**
+	 * Build a cache key for the given bean class and bean name.
+	 * <p>Note: As of 4.2.3, this implementation does not return a concatenated
+	 * class/name String anymore but rather the most efficient cache key possible:
+	 * a plain bean name, prepended with {@link BeanFactory#FACTORY_BEAN_PREFIX}
+	 * in case of a {@code FactoryBean}; or if no bean name specified, then the
+	 * given bean {@code Class} as-is.
+	 * @param beanClass the bean class
+	 * @param beanName the bean name
+	 * @return the cache key for the given class and name
+	 */
+	protected Object getCacheKey(Class<?> beanClass, @Nullable String beanName) {
+		if (StringUtils.hasLength(beanName)) {
+			return (FactoryBean.class.isAssignableFrom(beanClass) ?
+					BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
+		}
+		else {
+			return beanClass;
+		}
 	}
 
 }
