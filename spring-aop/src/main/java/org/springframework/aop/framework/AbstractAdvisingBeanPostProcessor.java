@@ -68,14 +68,12 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 		return bean;
 	}
 
-	
 	public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
 		Object cacheKey = getCacheKey(bean.getClass(), beanName);
 		this.earlyProxyReferences.put(cacheKey, bean);
 		return wrapIfNecessary(bean, beanName);
 	}
-	
-	
+
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		if (bean != null) {
@@ -86,7 +84,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 		}
         return bean;
 	}
-	
+
 	protected Object wrapIfNecessary(Object bean, String beanName) {
 		if (this.advisor == null || bean instanceof AopInfrastructureBean) {
 			// Ignore AOP infrastructure such as scoped proxies.
@@ -125,7 +123,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 		// No proxy needed.
 		return bean;
 	}
-	
+
 
 	/**
 	 * Check whether the given bean is eligible for advising with this
@@ -220,5 +218,5 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 			return beanClass;
 		}
 	}
-	
+
 }
