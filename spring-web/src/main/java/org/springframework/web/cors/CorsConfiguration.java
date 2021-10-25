@@ -242,7 +242,7 @@ public class CorsConfiguration {
 		if (this.allowedOriginPatterns == null) {
 			this.allowedOriginPatterns = new ArrayList<>(4);
 		}
-		Arrays.stream(originPattern).map(this::trimTrailingSlash).forEach(allowedOrigins::add);
+		Arrays.stream(originPattern).map(this::trimTrailingSlash).forEach(allowedOriginPatterns::add);
 		if (this.allowedOrigins == DEFAULT_PERMIT_ALL) {
 			this.allowedOrigins = null;
 		}
