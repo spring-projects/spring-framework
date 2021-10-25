@@ -229,7 +229,7 @@ public class CorsConfiguration {
 	 * @since 5.3
 	 */
 	public void addAllowedOriginPattern(@Nullable String originPattern) {
-		this.addAllowedOriginPattern(originPattern.split(","));
+		this.addAllowedOriginPatterns(originPattern.split(","));
 	}
 
 	/**
@@ -237,14 +237,14 @@ public class CorsConfiguration {
 	 * example
 	 * @since 5.3
 	 */
-	public void addAllowedOriginPattern(@Nullable String... originPattern) {
+	public void addAllowedOriginPatterns(@Nullable String... originPattern) {
 		if (originPattern == null) {
 			return;
 		}
 		if (this.allowedOriginPatterns == null) {
 			this.allowedOriginPatterns = new ArrayList<>(4);
 		}
-		Arrays.stream(originPattern).forEach(allowedOrigins::add);
+		Arrays.stream(originPattern).map(this::trimTrailingSlash).forEach(allowedOrigins::add);
 		if (this.allowedOrigins == DEFAULT_PERMIT_ALL) {
 			this.allowedOrigins = null;
 		}
