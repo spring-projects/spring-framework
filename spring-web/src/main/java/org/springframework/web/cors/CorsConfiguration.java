@@ -157,6 +157,13 @@ public class CorsConfiguration {
 	 * Variant of {@link #setAllowedOrigins} for adding one origin at a time.
 	 */
 	public void addAllowedOrigin(@Nullable String origin) {
+		this.addAllowedOrigin(origin.split(","));
+	}
+
+	/**
+	 * Variant of {@link #setAllowedOrigins} for adding one origin at a time.
+	 */
+	public void addAllowedOrigin(@Nullable String... origins) {
 		if (origin == null) {
 			return;
 		}
@@ -166,7 +173,7 @@ public class CorsConfiguration {
 		else if (this.allowedOrigins == DEFAULT_PERMIT_ALL && CollectionUtils.isEmpty(this.allowedOriginPatterns)) {
 			setAllowedOrigins(DEFAULT_PERMIT_ALL);
 		}
-		origin = trimTrailingSlash(origin)
+		origin = trimTrailingSlash(origin);
 		this.allowedOrigins.add(origin);
 	}
 
