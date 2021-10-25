@@ -18,6 +18,7 @@ package org.springframework.web.servlet.i18n;
 
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.function.Function;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,6 +51,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
+ * @author Vedran Pavic
  * @since 27.02.2003
  * @see #setDefaultLocale
  * @see #setDefaultTimeZone
@@ -94,6 +96,15 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	@Nullable
 	private TimeZone defaultTimeZone;
 
+	private Function<HttpServletRequest, Locale> defaultLocaleFunction = request -> {
+		Locale defaultLocale = getDefaultLocale();
+		if (defaultLocale == null) {
+			defaultLocale = request.getLocale();
+		}
+		return defaultLocale;
+	};
+
+	private Function<HttpServletRequest, TimeZone> defaultTimeZoneFunction = request -> getDefaultTimeZone();
 
 	/**
 	 * Create a new instance of {@link CookieLocaleResolver} using the
@@ -137,8 +148,8 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * @since 5.1.7
 	 * @see #setDefaultLocale
 	 * @see #setDefaultTimeZone
-	 * @see #determineDefaultLocale
-	 * @see #determineDefaultTimeZone
+	 * @see #setDefaultLocaleFunction(Function)
+	 * @see #setDefaultTimeZoneFunction(Function)
 	 */
 	public void setRejectInvalidCookies(boolean rejectInvalidCookies) {
 		this.rejectInvalidCookies = rejectInvalidCookies;
@@ -184,6 +195,35 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	@Nullable
 	protected TimeZone getDefaultTimeZone() {
 		return this.defaultTimeZone;
+	}
+
+	/**
+	 * Set the function used to determine the default locale for the given request,
+	 * called if no {@link Locale} session attribute has been found.
+	 * <p>The default implementation returns the specified default locale,
+	 * if any, else falls back to the request's accept-header locale.
+	 * @param defaultLocaleFunction the function used to determine the default locale
+	 * @since 6.0
+	 * @see #setDefaultLocale
+	 * @see jakarta.servlet.http.HttpServletRequest#getLocale()
+	 */
+	public void setDefaultLocaleFunction(Function<HttpServletRequest, Locale> defaultLocaleFunction) {
+		Assert.notNull(defaultLocaleFunction, "defaultLocaleFunction must not be null");
+		this.defaultLocaleFunction = defaultLocaleFunction;
+	}
+
+	/**
+	 * Set the function used to determine the default time zone for the given request,
+	 * called if no {@link TimeZone} session attribute has been found.
+	 * <p>The default implementation returns the specified default time zone,
+	 * if any, or {@code null} otherwise.
+	 * @param defaultTimeZoneFunction the function used to determine the default time zone
+	 * @since 6.0
+	 * @see #setDefaultTimeZone
+	 */
+	public void setDefaultTimeZoneFunction(Function<HttpServletRequest, TimeZone> defaultTimeZoneFunction) {
+		Assert.notNull(defaultTimeZoneFunction, "defaultTimeZoneFunction must not be null");
+		this.defaultTimeZoneFunction = defaultTimeZoneFunction;
 	}
 
 
@@ -260,9 +300,9 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 			}
 
 			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME,
-					(locale != null ? locale : determineDefaultLocale(request)));
+					(locale != null ? locale : this.defaultLocaleFunction.apply(request)));
 			request.setAttribute(TIME_ZONE_REQUEST_ATTRIBUTE_NAME,
-					(timeZone != null ? timeZone : determineDefaultTimeZone(request)));
+					(timeZone != null ? timeZone : this.defaultTimeZoneFunction.apply(request)));
 		}
 	}
 
@@ -291,9 +331,9 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 			removeCookie(response);
 		}
 		request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME,
-				(locale != null ? locale : determineDefaultLocale(request)));
+				(locale != null ? locale : this.defaultLocaleFunction.apply(request)));
 		request.setAttribute(TIME_ZONE_REQUEST_ATTRIBUTE_NAME,
-				(timeZone != null ? timeZone : determineDefaultTimeZone(request)));
+				(timeZone != null ? timeZone : this.defaultTimeZoneFunction.apply(request)));
 	}
 
 
@@ -335,13 +375,11 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * @return the default locale (never {@code null})
 	 * @see #setDefaultLocale
 	 * @see jakarta.servlet.http.HttpServletRequest#getLocale()
+	 * @deprecated as of 6.0, in favor of {@link #setDefaultLocaleFunction(Function)}
 	 */
+	@Deprecated
 	protected Locale determineDefaultLocale(HttpServletRequest request) {
-		Locale defaultLocale = getDefaultLocale();
-		if (defaultLocale == null) {
-			defaultLocale = request.getLocale();
-		}
-		return defaultLocale;
+		return this.defaultLocaleFunction.apply(request);
 	}
 
 	/**
@@ -352,10 +390,12 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * @param request the request to resolve the time zone for
 	 * @return the default time zone (or {@code null} if none defined)
 	 * @see #setDefaultTimeZone
+	 * @deprecated as of 6.0, in favor of {@link #setDefaultTimeZoneFunction(Function)}
 	 */
+	@Deprecated
 	@Nullable
 	protected TimeZone determineDefaultTimeZone(HttpServletRequest request) {
-		return getDefaultTimeZone();
+		return this.defaultTimeZoneFunction.apply(request);
 	}
 
 }

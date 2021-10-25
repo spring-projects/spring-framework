@@ -17,10 +17,12 @@
 package org.springframework.web.servlet.i18n;
 
 import java.util.Locale;
+import java.util.TimeZone;
 
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
@@ -31,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Vedran Pavic
  */
 class SessionLocaleResolverTests {
 
@@ -92,6 +95,27 @@ class SessionLocaleResolverTests {
 		request.setSession(session);
 		resolver = new SessionLocaleResolver();
 		assertThat(resolver.resolveLocale(request)).isEqualTo(Locale.TAIWAN);
+	}
+
+	@Test
+	void testCustomDefaultLocaleFunction() {
+		request.addPreferredLocale(Locale.TAIWAN);
+
+		SessionLocaleResolver resolver = new SessionLocaleResolver();
+		resolver.setDefaultLocaleFunction(request -> Locale.GERMAN);
+
+		assertThat(resolver.resolveLocale(request)).isEqualTo(Locale.GERMAN);
+	}
+
+	@Test
+	void testCustomDefaultTimeZoneFunction() {
+		request.addPreferredLocale(Locale.TAIWAN);
+
+		resolver.setDefaultTimeZoneFunction(request -> TimeZone.getTimeZone("GMT+1"));
+
+		TimeZoneAwareLocaleContext context = (TimeZoneAwareLocaleContext) resolver.resolveLocaleContext(request);
+		assertThat(context.getLocale()).isEqualTo(Locale.TAIWAN);
+		assertThat(context.getTimeZone()).isEqualTo(TimeZone.getTimeZone("GMT+1"));
 	}
 
 }
