@@ -232,7 +232,7 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Support of {@CrossOrigin(originPatterns="${originPatterns}"}} for adding multi origin at a time.
+	 * Support of {@CrossOrigin(originPatterns = "${originPatterns}")} for adding multi origin at a time.
 	 * @since 5.3
 	 */
 	public void addAllowedOriginPatterns(@Nullable String... originPatterns) {
