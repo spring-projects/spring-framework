@@ -41,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Sam Brannen
+ * @author Vedran Pavic
  */
 class CookieLocaleResolverTests {
 
@@ -408,6 +409,26 @@ class CookieLocaleResolverTests {
 		Cookie localeCookie = cookies[0];
 		assertThat(localeCookie.getName()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
 		assertThat(localeCookie.getValue()).isEqualTo("");
+	}
+
+	@Test
+	void testCustomDefaultLocaleFunction() {
+		request.addPreferredLocale(Locale.TAIWAN);
+
+		resolver.setDefaultLocaleFunction(request -> Locale.GERMAN);
+
+		assertThat(resolver.resolveLocale(request)).isEqualTo(Locale.GERMAN);
+	}
+
+	@Test
+	void testCustomDefaultTimeZoneFunction() {
+		request.addPreferredLocale(Locale.TAIWAN);
+
+		resolver.setDefaultTimeZoneFunction(request -> TimeZone.getTimeZone("GMT+1"));
+
+		TimeZoneAwareLocaleContext context = (TimeZoneAwareLocaleContext) resolver.resolveLocaleContext(request);
+		assertThat(context.getLocale()).isEqualTo(Locale.TAIWAN);
+		assertThat(context.getTimeZone()).isEqualTo(TimeZone.getTimeZone("GMT+1"));
 	}
 
 }
