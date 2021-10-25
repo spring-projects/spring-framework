@@ -299,13 +299,6 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Add an Request method to allow.
-	 */
-	public void addAllowedMethod(RequestMethod method) {
-		addAllowedMethod(method.name());
-	}
-
-	/**
 	 * Add an HTTP method to allow.
 	 */
 	public void addAllowedMethod(String method) {
