@@ -157,7 +157,7 @@ public class CorsConfiguration {
 	 * Variant of {@link #setAllowedOrigins} for adding one origin at a time.
 	 */
 	public void addAllowedOrigin(@Nullable String origin) {
-		this.addAllowedOrigins(origin.split(","));
+		this.addAllowedOrigins(origin.split(";"));
 	}
 
 	/**
@@ -228,7 +228,7 @@ public class CorsConfiguration {
 	 * @since 5.3
 	 */
 	public void addAllowedOriginPattern(@Nullable String originPattern) {
-		this.addAllowedOriginPatterns(originPattern.split(","));
+		this.addAllowedOriginPatterns(originPattern.split(";"));
 	}
 
 	/**
