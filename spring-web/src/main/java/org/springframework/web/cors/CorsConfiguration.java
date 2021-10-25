@@ -164,7 +164,7 @@ public class CorsConfiguration {
 	 * Variant of {@link #addAllowedOrigin} for adding multi origin at a time.
 	 */
 	public void addAllowedOrigins(@Nullable String... origins) {
-		if (origin == null) {
+		if (origins == null) {
 			return;
 		}
 		if (this.allowedOrigins == null) {
