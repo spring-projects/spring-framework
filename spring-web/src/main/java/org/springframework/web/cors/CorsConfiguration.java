@@ -166,7 +166,6 @@ public class CorsConfiguration {
 		else if (this.allowedOrigins == DEFAULT_PERMIT_ALL && CollectionUtils.isEmpty(this.allowedOriginPatterns)) {
 			setAllowedOrigins(DEFAULT_PERMIT_ALL);
 		}
-		String[] origins = origin.
 		origin = trimTrailingSlash(origin)
 		this.allowedOrigins.add(origin);
 	}
