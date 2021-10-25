@@ -22,11 +22,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link LocaleResolver} that adds support for a rich locale context
  * (potentially including locale and time zone information).
+ *
+ * <p>Also provides pre-implemented versions of {@link #resolveLocale} and {@link #setLocale},
+ * delegating to {@link #resolveLocaleContext} and {@link #setLocaleContext}.
  *
  * @author Juergen Hoeller
  * @since 4.0
@@ -72,5 +76,16 @@ public interface LocaleContextResolver extends LocaleResolver {
 	 */
 	void setLocaleContext(HttpServletRequest request, @Nullable HttpServletResponse response,
 			@Nullable LocaleContext localeContext);
+
+	@Override
+	default Locale resolveLocale(HttpServletRequest request) {
+		Locale locale = resolveLocaleContext(request).getLocale();
+		return (locale != null ? locale : request.getLocale());
+	}
+
+	@Override
+	default void setLocale(HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable Locale locale) {
+		setLocaleContext(request, response, (locale != null ? new SimpleLocaleContext(locale) : null));
+	}
 
 }
