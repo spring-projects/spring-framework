@@ -166,7 +166,8 @@ public class CorsConfiguration {
 		else if (this.allowedOrigins == DEFAULT_PERMIT_ALL && CollectionUtils.isEmpty(this.allowedOriginPatterns)) {
 			setAllowedOrigins(DEFAULT_PERMIT_ALL);
 		}
-		origin = trimTrailingSlash(origin);
+		String[] origins = origin.
+		origin = trimTrailingSlash(origin)
 		this.allowedOrigins.add(origin);
 	}
 
@@ -222,14 +223,22 @@ public class CorsConfiguration {
 	 * @since 5.3
 	 */
 	public void addAllowedOriginPattern(@Nullable String originPattern) {
+		this.addAllowedOriginPattern(originPattern.split(","));
+	}
+
+	/**
+	 * Variant of {@CrossOrigin(originPatterns="${originPatterns}"}} for adding multi origin at a time.
+	 * example
+	 * @since 5.3
+	 */
+	public void addAllowedOriginPattern(@Nullable String... originPattern) {
 		if (originPattern == null) {
 			return;
 		}
 		if (this.allowedOriginPatterns == null) {
 			this.allowedOriginPatterns = new ArrayList<>(4);
 		}
-		originPattern = trimTrailingSlash(originPattern);
-		this.allowedOriginPatterns.add(new OriginPattern(originPattern));
+		Arrays.stream(originPattern).forEach(allowedOrigins::add);
 		if (this.allowedOrigins == DEFAULT_PERMIT_ALL) {
 			this.allowedOrigins = null;
 		}
@@ -282,6 +291,13 @@ public class CorsConfiguration {
 	 * Add an HTTP method to allow.
 	 */
 	public void addAllowedMethod(HttpMethod method) {
+		addAllowedMethod(method.name());
+	}
+
+	/**
+	 * Add an Request method to allow.
+	 */
+	public void addAllowedMethod(RequestMethod method) {
 		addAllowedMethod(method.name());
 	}
 
