@@ -157,13 +157,13 @@ public class CorsConfiguration {
 	 * Variant of {@link #setAllowedOrigins} for adding one origin at a time.
 	 */
 	public void addAllowedOrigin(@Nullable String origin) {
-		this.addAllowedOrigin(origin.split(","));
+		this.addAllowedOrigins(origin.split(","));
 	}
 
 	/**
-	 * Variant of {@link #setAllowedOrigins} for adding one origin at a time.
+	 * Variant of {@link #addAllowedOrigin} for adding multi origin at a time.
 	 */
-	public void addAllowedOrigin(@Nullable String... origins) {
+	public void addAllowedOrigins(@Nullable String... origins) {
 		if (origin == null) {
 			return;
 		}
@@ -173,8 +173,7 @@ public class CorsConfiguration {
 		else if (this.allowedOrigins == DEFAULT_PERMIT_ALL && CollectionUtils.isEmpty(this.allowedOriginPatterns)) {
 			setAllowedOrigins(DEFAULT_PERMIT_ALL);
 		}
-		origin = trimTrailingSlash(origin);
-		this.allowedOrigins.add(origin);
+		Arrays.stream(origins).map(this::trimTrailingSlash).forEach(allowedOrigins::add);
 	}
 
 	/**
@@ -233,8 +232,7 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Variant of {@CrossOrigin(originPatterns="${originPatterns}"}} for adding multi origin at a time.
-	 * example
+	 * Support of {@CrossOrigin(originPatterns="${originPatterns}"}} for adding multi origin at a time.
 	 * @since 5.3
 	 */
 	public void addAllowedOriginPatterns(@Nullable String... originPattern) {
