@@ -235,14 +235,15 @@ public class CorsConfiguration {
 	 * Support of {@CrossOrigin(originPatterns="${originPatterns}"}} for adding multi origin at a time.
 	 * @since 5.3
 	 */
-	public void addAllowedOriginPatterns(@Nullable String... originPattern) {
-		if (originPattern == null) {
+	public void addAllowedOriginPatterns(@Nullable String... originPatterns) {
+		if (originPatterns == null) {
 			return;
 		}
 		if (this.allowedOriginPatterns == null) {
 			this.allowedOriginPatterns = new ArrayList<>(4);
 		}
-		Arrays.stream(originPattern).map(this::trimTrailingSlash).forEach(allowedOriginPatterns::add);
+		Arrays.stream(originPatterns).map(this::trimTrailingSlash)
+				.forEach(originPattern -> allowedOriginPatterns.add(new OriginPattern(originPattern)));
 		if (this.allowedOrigins == DEFAULT_PERMIT_ALL) {
 			this.allowedOrigins = null;
 		}
