@@ -173,7 +173,7 @@ public class CorsConfiguration {
 		else if (this.allowedOrigins == DEFAULT_PERMIT_ALL && CollectionUtils.isEmpty(this.allowedOriginPatterns)) {
 			setAllowedOrigins(DEFAULT_PERMIT_ALL);
 		}
-		Arrays.stream(origins).map(this::trimTrailingSlash).forEach(allowedOrigins::add);
+		Arrays.stream(origins).map(this::trimTrailingSlash).forEach(this.allowedOrigins::add);
 	}
 
 	/**
@@ -232,7 +232,8 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Support of {@CrossOrigin(originPatterns = "${originPatterns}")} for adding multi origin at a time.
+	 * Adding multi origin at a time.
+	 * <P>Support of @CrossOrigin(originPatterns = "${originPatterns}")
 	 * @since 5.3
 	 */
 	public void addAllowedOriginPatterns(@Nullable String... originPatterns) {
@@ -243,7 +244,7 @@ public class CorsConfiguration {
 			this.allowedOriginPatterns = new ArrayList<>(4);
 		}
 		Arrays.stream(originPatterns).map(this::trimTrailingSlash)
-				.forEach(originPattern -> allowedOriginPatterns.add(new OriginPattern(originPattern)));
+				.forEach(originPattern -> this.allowedOriginPatterns.add(new OriginPattern(originPattern)));
 		if (this.allowedOrigins == DEFAULT_PERMIT_ALL) {
 			this.allowedOrigins = null;
 		}
