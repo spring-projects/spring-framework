@@ -287,7 +287,7 @@ class CorsConfigurationTests {
         assertThat(config.getAllowedOrigins().size() == 2);
         config.addAllowedOrigin("https://c.domain.com");
         assertThat(config.getAllowedOrigins().size() == 3);
-        config.addAllowedOriginPattern("https://*.domain.com;httsp://a.domain.*");
+        config.addAllowedOriginPattern("https://*.domain.com;https://a.domain.*");
         assertThat(config.getAllowedOrigins() == null);
         assertThat(config.getAllowedOriginPatterns().size() == 2);
         config = new CorsConfiguration();
