@@ -280,6 +280,21 @@ class CorsConfigurationTests {
 		assertThat(config.getAllowedOriginPatterns()).containsExactly("http://*.domain1.com", "http://*.domain2.com");
 	}
 
+    @Test
+    void checkAddMultiOriginAllowed() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.addAllowedOrigin("http://a.domain.com;http://b.domain.com");
+        assertThat(config.getAllowedOrigins().size() == 2);
+        config.addAllowedOrigin("http://c.domain.com");
+        assertThat(config.getAllowedOrigins().size() == 3);
+        config.addAllowedOriginPattern("http://*.domain.com;http://a.domain.*");
+        assertThat(config.getAllowedOrigins() == null);
+        assertThat(config.getAllowedOriginPatterns().size() == 2);
+		config = new CorsConfiguration();
+		config.addAllowedOriginPattern("http://*.domain.com;");
+		assertThat(config.getAllowedOriginPatterns().size() == 1);
+    }
+
 	@Test
 	void checkOriginAllowed() {
 		// "*" matches
