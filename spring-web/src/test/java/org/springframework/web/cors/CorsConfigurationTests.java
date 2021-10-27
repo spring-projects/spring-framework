@@ -280,20 +280,20 @@ class CorsConfigurationTests {
 		assertThat(config.getAllowedOriginPatterns()).containsExactly("http://*.domain1.com", "http://*.domain2.com");
 	}
 
-    @Test
-    void checkAddMultiOriginAllowed() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("https://a.domain.com;https://b.domain.com");
-        assertThat(config.getAllowedOrigins().size() == 2);
-        config.addAllowedOrigin("https://c.domain.com");
-        assertThat(config.getAllowedOrigins().size() == 3);
-        config.addAllowedOriginPattern("https://*.domain.com;https://a.domain.*");
-        assertThat(config.getAllowedOrigins() == null);
-        assertThat(config.getAllowedOriginPatterns().size() == 2);
-        config = new CorsConfiguration();
-        config.addAllowedOriginPattern("https://*.domain.com;");
-        assertThat(config.getAllowedOriginPatterns().size() == 1);
-    }
+	@Test
+	void checkAddMultiOriginAllowed() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.addAllowedOrigin("https://a.domain.com;https://b.domain.com");
+		assertThat(config.getAllowedOrigins().size() == 2);
+		config.addAllowedOrigin("https://c.domain.com");
+		assertThat(config.getAllowedOrigins().size() == 3);
+		config.addAllowedOriginPattern("https://*.domain.com;https://a.domain.*");
+		assertThat(config.getAllowedOrigins() == null);
+		assertThat(config.getAllowedOriginPatterns().size() == 2);
+		config = new CorsConfiguration();
+		config.addAllowedOriginPattern("https://*.domain.com;");
+		assertThat(config.getAllowedOriginPatterns().size() == 1);
+	}
 
 	@Test
 	void checkOriginAllowed() {
