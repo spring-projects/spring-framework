@@ -290,9 +290,9 @@ class CorsConfigurationTests {
         config.addAllowedOriginPattern("http://*.domain.com;http://a.domain.*");
         assertThat(config.getAllowedOrigins() == null);
         assertThat(config.getAllowedOriginPatterns().size() == 2);
-		config = new CorsConfiguration();
-		config.addAllowedOriginPattern("http://*.domain.com;");
-		assertThat(config.getAllowedOriginPatterns().size() == 1);
+        config = new CorsConfiguration();
+        config.addAllowedOriginPattern("http://*.domain.com;");
+        assertThat(config.getAllowedOriginPatterns().size() == 1);
     }
 
 	@Test
