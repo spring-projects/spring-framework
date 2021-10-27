@@ -86,7 +86,7 @@ public abstract class CachedExpressionEvaluator {
 		ExpressionKey expressionKey = createKey(elementKey, expression);
 		Expression expr = cache.get(expressionKey);
 		if (expr == null) {
-			expr = getParser().parseExpression(expression);
+			expr = parseExpression(expression);
 			cache.put(expressionKey, expr);
 		}
 		return expr;
@@ -96,6 +96,13 @@ public abstract class CachedExpressionEvaluator {
 		return new ExpressionKey(elementKey, expression);
 	}
 
+	/**
+	 * Parse the expression
+	 * @param expression the expression to parse
+	 */
+	protected Expression parseExpression(String expression) {
+		return getParser().parseExpression(expression);
+	}
 
 	/**
 	 * An expression key.
