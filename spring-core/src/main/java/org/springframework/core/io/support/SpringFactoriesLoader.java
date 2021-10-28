@@ -157,8 +157,7 @@ public final class SpringFactoriesLoader {
 			}
 
 			// Replace all lists with unmodifiable lists containing unique elements
-			result.replaceAll((factoryType, implementations) -> implementations.stream().distinct()
-					.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList)));
+			result.replaceAll((factoryType, implementations) -> implementations.stream().distinct().toList());
 			cache.put(classLoader, result);
 		}
 		catch (IOException ex) {
