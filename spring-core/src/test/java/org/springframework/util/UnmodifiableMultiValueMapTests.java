@@ -33,11 +33,15 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
+ * Unit tests for {@link UnmodifiableMultiValueMap}.
+ *
  * @author Arjen Poutsma
+ * @since 6.0
  */
 class UnmodifiableMultiValueMapTests {
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void delegation() {
 		MultiValueMap<String, String> mock = mock(MultiValueMap.class);
 		UnmodifiableMultiValueMap<String, String> map = new UnmodifiableMultiValueMap<>(mock);
@@ -95,6 +99,7 @@ class UnmodifiableMultiValueMapTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void entrySetDelegation() {
 		MultiValueMap<String, String> mockMap = mock(MultiValueMap.class);
 		Set<Map.Entry<String, List<String>>> mockSet = mock(Set.class);
@@ -107,8 +112,9 @@ class UnmodifiableMultiValueMapTests {
 		given(mockSet.isEmpty()).willReturn(false);
 		assertThat(set.isEmpty()).isFalse();
 
-		given(mockSet.contains("foo")).willReturn(true);
-		assertThat(set.contains("foo")).isTrue();
+		Map.Entry<String, List<String>> mockedEntry = mock(Map.Entry.class);
+		given(mockSet.contains(mockedEntry)).willReturn(true);
+		assertThat(set.contains(mockedEntry)).isTrue();
 
 		List<Map.Entry<String, List<String>>> mockEntries = List.of(mock(Map.Entry.class));
 		given(mockSet.containsAll(mockEntries)).willReturn(true);
@@ -121,11 +127,12 @@ class UnmodifiableMultiValueMapTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void entrySetUnsupported() {
 		Set<Map.Entry<String, List<String>>> set = new UnmodifiableMultiValueMap<String, String>(new LinkedMultiValueMap<>()).entrySet();
 
 		assertThatUnsupportedOperationException().isThrownBy(() -> set.add(mock(Map.Entry.class)));
-		assertThatUnsupportedOperationException().isThrownBy(() -> set.remove("foo"));
+		assertThatUnsupportedOperationException().isThrownBy(() -> set.remove(mock(Map.Entry.class)));
 		assertThatUnsupportedOperationException().isThrownBy(() -> set.removeIf(e -> true));
 		assertThatUnsupportedOperationException().isThrownBy(() -> set.addAll(mock(List.class)));
 		assertThatUnsupportedOperationException().isThrownBy(() -> set.retainAll(mock(List.class)));
@@ -134,6 +141,7 @@ class UnmodifiableMultiValueMapTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void valuesDelegation() {
 		MultiValueMap<String, String> mockMap = mock(MultiValueMap.class);
 		Collection<List<String>> mockValues = mock(Collection.class);
