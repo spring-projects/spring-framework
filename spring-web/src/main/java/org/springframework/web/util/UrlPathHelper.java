@@ -404,16 +404,17 @@ public class UrlPathHelper {
 	 * </ul>
 	 */
 	private static String getSanitizedPath(final String path) {
-		int index = path.indexOf("//");
-		if (index >= 0) {
-			StringBuilder sanitized = new StringBuilder(path);
-			while (index != -1) {
-				sanitized.deleteCharAt(index);
-				index = sanitized.indexOf("//", index);
-			}
-			return sanitized.toString();
+		if (path.length() == 0) {
+			return path;
 		}
-		return path;
+		char[] arr = path.toCharArray();
+		int slowIndex = 0;
+		for (int fastIndex = 1; fastIndex < arr.length; fastIndex++) {
+			if (arr[fastIndex] != '/' || arr[slowIndex] != '/') {
+				arr[++slowIndex] = arr[fastIndex];
+			}
+		}
+		return new String(arr, 0, slowIndex + 1);
 	}
 
 	/**
@@ -531,7 +532,7 @@ public class UrlPathHelper {
 	 */
 	public String getOriginatingQueryString(HttpServletRequest request) {
 		if ((request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE) != null) ||
-			(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) != null)) {
+				(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) != null)) {
 			return (String) request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE);
 		}
 		else {
