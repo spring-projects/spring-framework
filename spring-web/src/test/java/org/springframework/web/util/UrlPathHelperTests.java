@@ -246,6 +246,12 @@ class UrlPathHelperTests {
 		request.setRequestURI("/SPR-12372/foo/bar//");
 
 		assertThat(helper.getLookupPathForRequest(request)).isEqualTo("/foo/bar//");
+
+		// "enhance" case
+		request.setServletPath("/foo/bar//");
+		request.setRequestURI("/SPR-12372////////////////////////foo//////////////////bar////////////////////");
+
+		assertThat(helper.getLookupPathForRequest(request)).isEqualTo("/foo/bar//");
 	}
 
 	@Test
