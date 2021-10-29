@@ -527,14 +527,14 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 	}
 
 
-	private static class UnmodifiableValueCollection<T> implements Collection<List<T>>, Serializable {
+	private static class UnmodifiableValueCollection<V> implements Collection<List<V>>, Serializable {
 
 		private static final long serialVersionUID = 5518377583904339588L;
 
-		private final Collection<List<T>> delegate;
+		private final Collection<List<V>> delegate;
 
 
-		public UnmodifiableValueCollection(Collection<List<T>> delegate) {
+		public UnmodifiableValueCollection(Collection<List<V>> delegate) {
 			this.delegate = delegate;
 		}
 
@@ -583,8 +583,8 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 		}
 
 		@Override
-		public Iterator<List<T>> iterator() {
-			Iterator<List<T>> iterator = this.delegate.iterator();
+		public Iterator<List<V>> iterator() {
+			Iterator<List<V>> iterator = this.delegate.iterator();
 			return new Iterator<>() {
 				@Override
 				public boolean hasNext() {
@@ -592,29 +592,29 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 				}
 
 				@Override
-				public List<T> next() {
+				public List<V> next() {
 					return Collections.unmodifiableList(iterator.next());
 				}
 			};
 		}
 
 		@Override
-		public void forEach(Consumer<? super List<T>> action) {
+		public void forEach(Consumer<? super List<V>> action) {
 			this.delegate.forEach(list -> action.accept(Collections.unmodifiableList(list)));
 		}
 
 		@Override
-		public Spliterator<List<T>> spliterator() {
+		public Spliterator<List<V>> spliterator() {
 			return new UnmodifiableValueSpliterator<>(this.delegate.spliterator());
 		}
 
 		@Override
-		public Stream<List<T>> stream() {
+		public Stream<List<V>> stream() {
 			return StreamSupport.stream(spliterator(), false);
 		}
 
 		@Override
-		public Stream<List<T>> parallelStream() {
+		public Stream<List<V>> parallelStream() {
 			return StreamSupport.stream(spliterator(), true);
 		}
 
@@ -636,7 +636,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 		// unsupported
 
 		@Override
-		public boolean add(List<T> ts) {
+		public boolean add(List<V> ts) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -646,7 +646,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 		}
 
 		@Override
-		public boolean addAll(Collection<? extends List<T>> c) {
+		public boolean addAll(Collection<? extends List<V>> c) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -661,7 +661,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 		}
 
 		@Override
-		public boolean removeIf(Predicate<? super List<T>> filter) {
+		public boolean removeIf(Predicate<? super List<V>> filter) {
 			throw new UnsupportedOperationException();
 		}
 
