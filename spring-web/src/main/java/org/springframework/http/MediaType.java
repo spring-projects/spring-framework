@@ -218,6 +218,18 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_PROBLEM_XML_VALUE = "application/problem+xml";
 
 	/**
+	 * Public constant media type for {@code application/x-protobuf}.
+	 * @since 6.0
+	 */
+	public static final MediaType APPLICATION_PROTOBUF;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_PROTOBUF}.
+	 * @since 6.0
+	 */
+	public static final String APPLICATION_PROTOBUF_VALUE = "application/x-protobuf";
+
+	/**
 	 * Public constant media type for {@code application/rss+xml}.
 	 * @since 4.3.6
 	 */
@@ -418,6 +430,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_PROBLEM_JSON = new MediaType("application", "problem+json");
 		APPLICATION_PROBLEM_JSON_UTF8 = new MediaType("application", "problem+json", StandardCharsets.UTF_8);
 		APPLICATION_PROBLEM_XML = new MediaType("application", "problem+xml");
+		APPLICATION_PROTOBUF = new MediaType("application", "x-protobuf");
 		APPLICATION_RSS_XML = new MediaType("application", "rss+xml");
 		APPLICATION_STREAM_JSON = new MediaType("application", "stream+json");
 		APPLICATION_XHTML_XML = new MediaType("application", "xhtml+xml");

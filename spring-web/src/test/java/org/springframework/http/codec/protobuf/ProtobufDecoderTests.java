@@ -33,7 +33,6 @@ import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.http.MediaType;
 import org.springframework.protobuf.Msg;
 import org.springframework.protobuf.SecondMsg;
-import org.springframework.util.MimeType;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,8 +46,6 @@ import static org.springframework.core.io.buffer.DataBufferUtils.release;
  * @author Sebastien Deleuze
  */
 public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
-
-	private final static MimeType PROTOBUF_MIME_TYPE = new MimeType("application", "x-protobuf");
 
 	private final SecondMsg secondMsg = SecondMsg.newBuilder().setBlah(123).build();
 
@@ -72,10 +69,10 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 	@Override
 	public void canDecode() {
 		assertThat(this.decoder.canDecode(forClass(Msg.class), null)).isTrue();
-		assertThat(this.decoder.canDecode(forClass(Msg.class), PROTOBUF_MIME_TYPE)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_PROTOBUF)).isTrue();
 		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_OCTET_STREAM)).isTrue();
 		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_JSON)).isFalse();
-		assertThat(this.decoder.canDecode(forClass(Object.class), PROTOBUF_MIME_TYPE)).isFalse();
+		assertThat(this.decoder.canDecode(forClass(Object.class), MediaType.APPLICATION_PROTOBUF)).isFalse();
 	}
 
 	@Test

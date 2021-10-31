@@ -14,35 +14,33 @@
  * limitations under the License.
  */
 
-package org.springframework.http.codec.json;
+package org.springframework.http.codec.cbor;
 
-import kotlinx.serialization.json.Json;
+import kotlinx.serialization.cbor.Cbor;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.KotlinSerializationStringEncoder;
+import org.springframework.http.codec.KotlinSerializationBinaryEncoder;
 
 /**
- * Encode from an {@code Object} stream to a byte stream of JSON objects using
+ * Encode from an {@code Object} stream to a byte stream of CBOR objects using
  * <a href="https://github.com/Kotlin/kotlinx.serialization">kotlinx.serialization</a>.
  *
  * <p>This encoder can be used to bind {@code @Serializable} Kotlin classes,
  * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphic serialization</a>
  * is not supported.
- * It supports {@code application/json} and {@code application/*+json} with
- * various character sets, {@code UTF-8} being the default.
+ * It supports {@code application/cbor}.
  *
- * @author Sebastien Deleuze
  * @author Iain Henderson
- * @since 5.3
+ * @since 6.0
  */
-public class KotlinSerializationJsonEncoder extends KotlinSerializationStringEncoder<Json> {
+public class KotlinSerializationCborEncoder extends KotlinSerializationBinaryEncoder<Cbor> {
 
-	public KotlinSerializationJsonEncoder() {
-		this(Json.Default);
+	public KotlinSerializationCborEncoder() {
+		this(Cbor.Default);
 	}
 
-	public KotlinSerializationJsonEncoder(Json json) {
-		super(json, MediaType.APPLICATION_JSON, new MediaType("application", "*+json"));
+	public KotlinSerializationCborEncoder(Cbor cbor) {
+		super(cbor, MediaType.APPLICATION_CBOR);
 	}
 
 }

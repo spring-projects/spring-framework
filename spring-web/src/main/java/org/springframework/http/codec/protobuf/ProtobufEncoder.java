@@ -17,6 +17,7 @@
 package org.springframework.http.codec.protobuf;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -56,8 +57,7 @@ import org.springframework.util.MimeType;
  */
 public class ProtobufEncoder extends ProtobufCodecSupport implements HttpMessageEncoder<Message> {
 
-	private static final List<MediaType> streamingMediaTypes = MIME_TYPES
-			.stream()
+	private static final List<MediaType> streamingMediaTypes = Arrays.stream(MIME_TYPES)
 			.map(mimeType -> new MediaType(mimeType.getType(), mimeType.getSubtype(),
 					Collections.singletonMap(DELIMITED_KEY, DELIMITED_VALUE)))
 			.toList();

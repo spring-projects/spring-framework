@@ -14,43 +14,36 @@
  * limitations under the License.
  */
 
-package org.springframework.http.converter.json;
+package org.springframework.http.converter.protobuf;
 
-import kotlinx.serialization.json.Json;
+import kotlinx.serialization.protobuf.ProtoBuf;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.KotlinSerializationStringHttpMessageConverter;
+import org.springframework.http.converter.KotlinSerializationBinaryHttpMessageConverter;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
- * that can read and write JSON using
+ * that can read and write Protocol Buffers using
  * <a href="https://github.com/Kotlin/kotlinx.serialization">kotlinx.serialization</a>.
  *
  * <p>This converter can be used to bind {@code @Serializable} Kotlin classes,
  * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphic serialization</a>
  * is not supported.
- * It supports {@code application/json} and {@code application/*+json} with
- * various character sets, {@code UTF-8} being the default.
+ * It supports {@code application/x-protobuf}, {@code application/octet-stream}, and {@code application/vnd.google.protobuf}.
  *
- * @author Andreas Ahlenstorf
- * @author Sebastien Deleuze
- * @author Juergen Hoeller
  * @author Iain Henderson
- * @since 5.3
+ * @since 6.0
  */
-public class KotlinSerializationJsonHttpMessageConverter extends KotlinSerializationStringHttpMessageConverter<Json> {
+public class KotlinSerializationProtobufHttpMessageConverter extends
+		KotlinSerializationBinaryHttpMessageConverter<ProtoBuf> {
 
-	/**
-	 * Construct a new {@code KotlinSerializationJsonHttpMessageConverter} with the default configuration.
-	 */
-	public KotlinSerializationJsonHttpMessageConverter() {
-		this(Json.Default);
+	public KotlinSerializationProtobufHttpMessageConverter() {
+		this(ProtoBuf.Default);
 	}
 
-	/**
-	 * Construct a new {@code KotlinSerializationJsonHttpMessageConverter} with a custom configuration.
-	 */
-	public KotlinSerializationJsonHttpMessageConverter(Json json) {
-		super(json, MediaType.APPLICATION_JSON, new MediaType("application", "*+json"));
+	public KotlinSerializationProtobufHttpMessageConverter(ProtoBuf protobuf) {
+		super(protobuf, MediaType.APPLICATION_PROTOBUF, MediaType.APPLICATION_OCTET_STREAM,
+				new MediaType("application", "vnd.google.protobuf"));
 	}
+
 }

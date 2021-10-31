@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-package org.springframework.http.codec.json;
+package org.springframework.http.codec.protobuf;
 
-import kotlinx.serialization.json.Json;
+import kotlinx.serialization.protobuf.ProtoBuf;
 
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.KotlinSerializationStringEncoder;
+import org.springframework.http.codec.KotlinSerializationBinaryDecoder;
 
 /**
- * Encode from an {@code Object} stream to a byte stream of JSON objects using
+ * Decode a byte stream into a protocol Buffer and convert to Objects with
  * <a href="https://github.com/Kotlin/kotlinx.serialization">kotlinx.serialization</a>.
  *
- * <p>This encoder can be used to bind {@code @Serializable} Kotlin classes,
+ * <p>This decoder can be used to bind {@code @Serializable} Kotlin classes,
  * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphic serialization</a>
  * is not supported.
- * It supports {@code application/json} and {@code application/*+json} with
- * various character sets, {@code UTF-8} being the default.
+ * It supports {@code application/x-protobuf}, {@code application/octet-stream}, and {@code application/vnd.google.protobuf}.
  *
- * @author Sebastien Deleuze
+ * <p>Decoding streams is not supported yet, see
+ * <a href="https://github.com/Kotlin/kotlinx.serialization/issues/1073">kotlinx.serialization/issues/1073</a>
+ * related issue.
+ *
  * @author Iain Henderson
- * @since 5.3
+ * @since 6.0
  */
-public class KotlinSerializationJsonEncoder extends KotlinSerializationStringEncoder<Json> {
+public class KotlinSerializationProtobufDecoder extends KotlinSerializationBinaryDecoder<ProtoBuf> {
 
-	public KotlinSerializationJsonEncoder() {
-		this(Json.Default);
+	public KotlinSerializationProtobufDecoder() {
+		this(ProtoBuf.Default);
 	}
 
-	public KotlinSerializationJsonEncoder(Json json) {
-		super(json, MediaType.APPLICATION_JSON, new MediaType("application", "*+json"));
+	public KotlinSerializationProtobufDecoder(ProtoBuf protobuf) {
+		super(protobuf, ProtobufCodecSupport.MIME_TYPES);
 	}
-
 }
