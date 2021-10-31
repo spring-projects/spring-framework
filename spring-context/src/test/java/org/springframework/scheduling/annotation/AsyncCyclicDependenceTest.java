@@ -17,7 +17,7 @@ import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AsyncCyclicDependenceTests {
+class AsyncCyclicDependenceTests {
 
 	@Test
 	public void asyncCyclicDependence() throws ExecutionException, InterruptedException {
@@ -43,6 +43,7 @@ public class AsyncCyclicDependenceTests {
 
 		@Async
 		public Future<String> async() {
+			System.out.println(asyncService);
 			// System.out.println("async => " + Thread.currentThread().getName());
 			return new AsyncResult<>(Thread.currentThread().getName());
 		}
