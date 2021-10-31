@@ -16,20 +16,22 @@
 
 package org.springframework.http.converter.json
 
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
+import java.nio.charset.StandardCharsets
+
 import kotlinx.serialization.Serializable
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
+import kotlin.reflect.javaType
+import kotlin.reflect.typeOf
+
 import org.springframework.core.Ordered
 import org.springframework.http.MediaType
 import org.springframework.http.MockHttpInputMessage
 import org.springframework.http.MockHttpOutputMessage
 import org.springframework.http.converter.HttpMessageNotReadableException
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
-import java.nio.charset.StandardCharsets
-import kotlin.reflect.javaType
-import kotlin.reflect.typeOf
 
 /**
  * Tests for the JSON conversion using kotlinx.serialization.

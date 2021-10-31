@@ -199,6 +199,18 @@ public class MediaType extends MimeType implements Serializable {
 	public static final MediaType APPLICATION_PROBLEM_XML;
 
 	/**
+	 * Public constant media type for {@code application/x-protobuf}.
+	 * @since 5.3
+	 */
+	public static final MediaType APPLICATION_X_PROTOBUF;
+
+	/**
+	 * Public constant media type for {@code application/x-protobuf;charset=UTF-8}.
+	 * @since 5.3
+	 */
+	public static final MediaType APPLICATION_X_PROTOBUF_UTF8;
+
+	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_XML}.
 	 * @since 5.0
 	 */
@@ -247,6 +259,12 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	@Deprecated
 	public static final String APPLICATION_STREAM_JSON_VALUE = "application/stream+json";
+
+	/**
+	 * Public constant media type for {@code application/vnd.google.protobuf}.
+	 * @since 5.3
+	 */
+	public static final MediaType APPLICATION_VND_GOOGLE_PROTOBUF;
 
 	/**
 	 * Public constant media type for {@code application/xhtml+xml}.
@@ -401,11 +419,14 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_NDJSON = new MediaType("application", "x-ndjson");
 		APPLICATION_OCTET_STREAM = new MediaType("application", "octet-stream");
 		APPLICATION_PDF = new MediaType("application", "pdf");
+		APPLICATION_X_PROTOBUF = new MediaType("application", "x-protobuf");
+		APPLICATION_X_PROTOBUF_UTF8 = new MediaType("application", "x-protobuf", StandardCharsets.UTF_8);
 		APPLICATION_PROBLEM_JSON = new MediaType("application", "problem+json");
 		APPLICATION_PROBLEM_JSON_UTF8 = new MediaType("application", "problem+json", StandardCharsets.UTF_8);
 		APPLICATION_PROBLEM_XML = new MediaType("application", "problem+xml");
 		APPLICATION_RSS_XML = new MediaType("application", "rss+xml");
 		APPLICATION_STREAM_JSON = new MediaType("application", "stream+json");
+		APPLICATION_VND_GOOGLE_PROTOBUF = new MediaType("application", "vnd.google.protobuf");
 		APPLICATION_XHTML_XML = new MediaType("application", "xhtml+xml");
 		APPLICATION_XML = new MediaType("application", "xml");
 		IMAGE_GIF = new MediaType("image", "gif");
