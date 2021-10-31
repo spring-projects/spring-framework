@@ -256,9 +256,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 				.as(StepVerifier::create)
 				.expectErrorSatisfies(actual -> {
 					if (rollbackException) {
-						assertThat(actual)
-								.isExactlyInstanceOf(RuntimeException.class)
-								.hasCause(tex);
+						assertThat(actual).isEqualTo(tex);
 					}
 					else {
 						assertThat(actual).isEqualTo(ex);
@@ -337,9 +335,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 
 		Mono.from(itb.setName(name))
 				.as(StepVerifier::create)
-				.verifyErrorSatisfies(actual -> assertThat(actual)
-						.isExactlyInstanceOf(RuntimeException.class)
-						.hasCause(ex));
+				.verifyErrorSatisfies(actual -> assertThat(actual).isEqualTo(ex));
 
 		// Should have invoked target and changed name
 

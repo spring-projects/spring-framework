@@ -119,9 +119,7 @@ public class TransactionalOperatorTests {
 		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		Mono.just(true).as(operator::transactional)
 				.as(StepVerifier::create)
-				.verifyErrorSatisfies(ex ->	assertThat(ex)
-						.isExactlyInstanceOf(RuntimeException.class)
-						.hasCauseInstanceOf(IOException.class));
+				.verifyError(IOException.class);
 		assertThat(commit.subscribeCount()).isEqualTo(1);
 		rollback.assertWasNotSubscribed();
 	}
@@ -140,8 +138,7 @@ public class TransactionalOperatorTests {
 		Mono.error(actionFailure).as(operator::transactional)
 				.as(StepVerifier::create)
 				.verifyErrorSatisfies(ex -> assertThat(ex)
-						.isExactlyInstanceOf(RuntimeException.class)
-						.hasCauseInstanceOf(IOException.class)
+						.isInstanceOf(IOException.class)
 						.hasSuppressedException(actionFailure));
 		commit.assertWasNotSubscribed();
 		assertThat(rollback.subscribeCount()).isEqualTo(1);
@@ -181,9 +178,7 @@ public class TransactionalOperatorTests {
 		Flux.just(1, 2, 3, 4).as(operator::transactional)
 				.as(StepVerifier::create)
 				.expectNextCount(4)
-				.verifyErrorSatisfies(ex ->	assertThat(ex)
-						.isExactlyInstanceOf(RuntimeException.class)
-						.hasCauseInstanceOf(IOException.class));
+				.verifyError(IOException.class);
 		assertThat(commit.subscribeCount()).isEqualTo(1);
 		rollback.assertWasNotSubscribed();
 	}
@@ -203,8 +198,7 @@ public class TransactionalOperatorTests {
 				.as(StepVerifier::create)
 				.expectNextCount(3)
 				.verifyErrorSatisfies(ex -> assertThat(ex)
-						.isExactlyInstanceOf(RuntimeException.class)
-						.hasCauseInstanceOf(IOException.class)
+						.isInstanceOf(IOException.class)
 						.hasSuppressedException(actionFailure));
 		commit.assertWasNotSubscribed();
 		assertThat(rollback.subscribeCount()).isEqualTo(1);
