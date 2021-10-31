@@ -193,6 +193,22 @@ public interface CodecConfigurer {
 		void kotlinSerializationJsonEncoder(Encoder<?> encoder);
 
 		/**
+		 * Override the default Kotlin Serialization Protobuf {@code Decoder}.
+		 * @param decoder the decoder instance to use
+		 * @since 5.3
+		 * @see org.springframework.http.codec.protobuf.KotlinSerializationProtobufDecoder
+		 */
+		void kotlinSerializationProtobufDecoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default Kotlin Serialization Protobuf {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @since 5.3
+		 * @see org.springframework.http.codec.protobuf.KotlinSerializationProtobufEncoder
+		 */
+		void kotlinSerializationProtobufEncoder(Encoder<?> encoder);
+
+		/**
 		 * Register a consumer to apply to default config instances. This can be
 		 * used to configure rather than replace a specific codec or multiple
 		 * codecs. The consumer is applied to every default {@link Encoder},

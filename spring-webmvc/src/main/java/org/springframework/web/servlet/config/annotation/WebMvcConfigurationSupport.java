@@ -46,6 +46,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.ResourceRegionHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter;
 import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
@@ -213,6 +214,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private static final boolean jsonbPresent;
 
+	private static final boolean kotlinSerializationCborPresent;
+
 	private static final boolean kotlinSerializationJsonPresent;
 
 	static {
@@ -226,6 +229,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
+		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 	}
 
@@ -461,13 +465,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (!shouldIgnoreXml && (jaxb2Present || jackson2XmlPresent)) {
 			map.put("xml", MediaType.APPLICATION_XML);
 		}
-		if (jackson2Present || gsonPresent || jsonbPresent) {
+		if (jackson2Present || gsonPresent || jsonbPresent || kotlinSerializationJsonPresent) {
 			map.put("json", MediaType.APPLICATION_JSON);
 		}
 		if (jackson2SmilePresent) {
 			map.put("smile", MediaType.valueOf("application/x-jackson-smile"));
 		}
-		if (jackson2CborPresent) {
+		if (jackson2CborPresent || kotlinSerializationCborPresent) {
 			map.put("cbor", MediaType.APPLICATION_CBOR);
 		}
 		return map;
@@ -931,9 +935,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			}
 		}
 
+		if (kotlinSerializationCborPresent) {
+			this.messageConverters.add(new KotlinSerializationCborHttpMessageConverter());
+		}
 		if (kotlinSerializationJsonPresent) {
 			messageConverters.add(new KotlinSerializationJsonHttpMessageConverter());
 		}
+
 		if (jackson2Present) {
 			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json();
 			if (this.applicationContext != null) {

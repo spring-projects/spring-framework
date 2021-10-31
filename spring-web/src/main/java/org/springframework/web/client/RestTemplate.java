@@ -46,6 +46,7 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter;
 import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
@@ -53,6 +54,7 @@ import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.JsonbHttpMessageConverter;
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.protobuf.KotlinSerializationProtobufHttpMessageConverter;
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
@@ -116,7 +118,11 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	private static final boolean jsonbPresent;
 
+	private static final boolean kotlinSerializationCborPresent;
+
 	private static final boolean kotlinSerializationJsonPresent;
+
+	private static final boolean kotlinSerializationProtobufPresent;
 
 	static {
 		ClassLoader classLoader = RestTemplate.class.getClassLoader();
@@ -129,7 +135,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
+		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
+		kotlinSerializationProtobufPresent = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
 	}
 
 
@@ -174,6 +182,10 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			}
 		}
 
+		if (kotlinSerializationProtobufPresent) {
+			this.messageConverters.add(new KotlinSerializationProtobufHttpMessageConverter());
+		}
+
 		if (jackson2Present) {
 			this.messageConverters.add(new MappingJackson2HttpMessageConverter());
 		}
@@ -187,11 +199,15 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			this.messageConverters.add(new KotlinSerializationJsonHttpMessageConverter());
 		}
 
+
 		if (jackson2SmilePresent) {
 			this.messageConverters.add(new MappingJackson2SmileHttpMessageConverter());
 		}
 		if (jackson2CborPresent) {
 			this.messageConverters.add(new MappingJackson2CborHttpMessageConverter());
+		}
+		else if (kotlinSerializationCborPresent) {
+			this.messageConverters.add(new KotlinSerializationCborHttpMessageConverter());
 		}
 
 		this.uriTemplateHandler = initUriTemplateHandler();

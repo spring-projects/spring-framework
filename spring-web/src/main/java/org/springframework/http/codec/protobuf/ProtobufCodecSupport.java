@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
@@ -33,9 +34,10 @@ public abstract class ProtobufCodecSupport {
 
 	static final List<MimeType> MIME_TYPES = Collections.unmodifiableList(
 			Arrays.asList(
-					new MimeType("application", "x-protobuf"),
-					new MimeType("application", "octet-stream"),
-					new MimeType("application", "vnd.google.protobuf")));
+					MediaType.APPLICATION_X_PROTOBUF,
+					MediaType.APPLICATION_OCTET_STREAM,
+					MediaType.APPLICATION_VND_GOOGLE_PROTOBUF
+					));
 
 	static final String DELIMITED_KEY = "delimited";
 

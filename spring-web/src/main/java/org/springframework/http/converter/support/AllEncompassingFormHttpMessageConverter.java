@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package org.springframework.http.converter.support;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.JsonbHttpMessageConverter;
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.protobuf.KotlinSerializationProtobufHttpMessageConverter;
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
@@ -58,7 +60,11 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 
 	private static final boolean jsonbPresent;
 
+	private static final boolean kotlinSerializationCborPresent;
+
 	private static final boolean kotlinSerializationJsonPresent;
+
+	private static final boolean kotlinSerializationProtobufPresent;
 
 	static {
 		ClassLoader classLoader = AllEncompassingFormHttpMessageConverter.class.getClassLoader();
@@ -69,7 +75,9 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
+		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
+		kotlinSerializationProtobufPresent = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
 	}
 
 
@@ -106,6 +114,14 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 
 		if (jackson2SmilePresent) {
 			addPartConverter(new MappingJackson2SmileHttpMessageConverter());
+		}
+
+		if (kotlinSerializationCborPresent) {
+			addPartConverter(new KotlinSerializationCborHttpMessageConverter());
+		}
+
+		if (kotlinSerializationProtobufPresent) {
+			addPartConverter(new KotlinSerializationProtobufHttpMessageConverter());
 		}
 	}
 

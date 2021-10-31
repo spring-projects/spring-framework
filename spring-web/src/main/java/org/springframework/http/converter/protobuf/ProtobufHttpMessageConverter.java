@@ -93,7 +93,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	/**
 	 * The media-type for protobuf {@code application/x-protobuf}.
 	 */
-	public static final MediaType PROTOBUF = new MediaType("application", "x-protobuf", DEFAULT_CHARSET);
+	public static final MediaType PROTOBUF = MediaType.APPLICATION_X_PROTOBUF_UTF8;
 
 	/**
 	 * The HTTP header containing the protobuf schema.
