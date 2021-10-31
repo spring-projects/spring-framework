@@ -3,7 +3,9 @@ package org.springframework.scheduling.annotation;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+
 import org.junit.jupiter.api.Test;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -15,10 +17,10 @@ import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AsyncCyclicDependenceTest {
+public class AsyncCyclicDependenceTests {
 
 	@Test
-	public void testAsyncCyclicDependenceTest() throws ExecutionException, InterruptedException {
+	public void asyncCyclicDependence() throws ExecutionException, InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AsyncConfig.class, AsyncService.class, AopAspect.class);
 		ctx.refresh();
@@ -48,7 +50,7 @@ public class AsyncCyclicDependenceTest {
 
 	@Aspect
 	static class AopAspect {
-		@Around("execution(* org.springframework.scheduling.annotation.AsyncCyclicDependenceTest.AsyncService.*(..))")
+		@Around("execution(* org.springframework.scheduling.annotation.AsyncCyclicDependenceTests.AsyncService.*(..))")
 		public Object logAspect(ProceedingJoinPoint joinPoint) throws Throwable {
 			Object[] args = joinPoint.getArgs();
 			Object result = joinPoint.proceed(args);
