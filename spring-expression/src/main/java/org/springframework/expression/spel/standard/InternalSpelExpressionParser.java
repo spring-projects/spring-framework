@@ -721,14 +721,40 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	 */
 	private SpelNodeImpl eatPossiblyQualifiedId() {
 		Deque<SpelNodeImpl> qualifiedIdPieces = new ArrayDeque<>();
-		Token node = peekToken();
-		while (isValidQualifiedId(node)) {
-			nextToken();
-			if (node.kind != TokenKind.DOT) {
-				qualifiedIdPieces.add(new Identifier(node.stringValue(), node.startPos, node.endPos));
-			}
-			node = peekToken();
+
+		checkValidQualifiedId(qualifiedIdPieces);
+
+		return new QualifiedIdentifier(qualifiedIdPieces.getFirst().getStartPosition(),
+				qualifiedIdPieces.getLast().getEndPosition(), qualifiedIdPieces.toArray(new SpelNodeImpl[0]));
+	}
+
+	private boolean isValidIdent(Token node) {
+		if (node == null || node.kind == TokenKind.LITERAL_STRING) {
+			return false;
 		}
+		String value = node.stringValue();
+		return StringUtils.hasLength(value) && VALID_QUALIFIED_ID_PATTERN.matcher(value).matches();
+	}
+
+	private void checkValidQualifiedId(Deque<SpelNodeImpl> qualifiedIdPieces) {
+		Token node = peekToken();
+		if(isValidIdent(node)) {
+			qualifiedIdPieces.add(new Identifier(node.stringValue(), node.startPos, node.endPos));
+			nextToken();
+			node = peekToken();
+			while(node != null && node.kind == TokenKind.DOT) {
+				nextToken();
+				node = peekToken();
+				if(isValidIdent(node)) {
+					qualifiedIdPieces.add(new Identifier(node.stringValue(), node.startPos, node.endPos));
+					nextToken();
+				} else {
+					break;
+				}
+				node = peekToken();
+			}
+		}
+
 		if (qualifiedIdPieces.isEmpty()) {
 			if (node == null) {
 				throw internalException( this.expressionString.length(), SpelMessage.OOD);
@@ -736,19 +762,6 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			throw internalException(node.startPos, SpelMessage.NOT_EXPECTED_TOKEN,
 					"qualified ID", node.getKind().toString().toLowerCase());
 		}
-		return new QualifiedIdentifier(qualifiedIdPieces.getFirst().getStartPosition(),
-				qualifiedIdPieces.getLast().getEndPosition(), qualifiedIdPieces.toArray(new SpelNodeImpl[0]));
-	}
-
-	private boolean isValidQualifiedId(@Nullable Token node) {
-		if (node == null || node.kind == TokenKind.LITERAL_STRING) {
-			return false;
-		}
-		if (node.kind == TokenKind.DOT || node.kind == TokenKind.IDENTIFIER) {
-			return true;
-		}
-		String value = node.stringValue();
-		return (StringUtils.hasLength(value) && VALID_QUALIFIED_ID_PATTERN.matcher(value).matches());
 	}
 
 	// This is complicated due to the support for dollars in identifiers.

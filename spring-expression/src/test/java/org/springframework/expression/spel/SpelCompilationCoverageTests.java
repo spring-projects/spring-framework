@@ -45,9 +45,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testdata.PersonInOtherPackage;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.within;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Checks SpelCompiler behavior. This should cover compilation all compiled node types.
@@ -126,6 +124,19 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	private SpelNodeImpl ast;
 
+
+	@Test
+	void malformedIdentifiers() {
+		assertThatThrownBy(() -> {
+			parse("T(java lang String)");
+		}).isInstanceOf(SpelParseException.class);
+
+		assertThatThrownBy(() -> {
+			parse("T(...java.lang.String)");
+		}).isInstanceOf(SpelParseException.class);
+
+		assertThat(parse("T(java.lang.String)").getValue()).isEqualTo(String.class);
+	}
 
 	@Test
 	void typeReference() {
