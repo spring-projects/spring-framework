@@ -57,7 +57,7 @@ abstract class DefaultParts {
 	 * @param content the content of the part
 	 * @return {@link Part} or {@link FilePart}, depending on {@link HttpHeaders#getContentDisposition()}
 	 */
-	public static Part part(HttpHeaders headers, Flux<DataBuffer> content) {
+	public static Part part(HttpHeaders headers, Content content) {
 		Assert.notNull(headers, "Headers must not be null");
 		Assert.notNull(content, "Content must not be null");
 
@@ -142,16 +142,21 @@ abstract class DefaultParts {
 	 */
 	private static class DefaultPart extends AbstractPart {
 
-		private final Flux<DataBuffer> content;
+		private final Content content;
 
-		public DefaultPart(HttpHeaders headers, Flux<DataBuffer> content) {
+		public DefaultPart(HttpHeaders headers, Content content) {
 			super(headers);
 			this.content = content;
 		}
 
 		@Override
 		public Flux<DataBuffer> content() {
-			return this.content;
+			return this.content.content();
+		}
+
+		@Override
+		public Mono<Void> delete() {
+			return this.content.delete();
 		}
 
 		@Override
@@ -171,9 +176,9 @@ abstract class DefaultParts {
 	/**
 	 * Default implementation of {@link FilePart}.
 	 */
-	private static class DefaultFilePart extends DefaultPart implements FilePart {
+	private static final class DefaultFilePart extends DefaultPart implements FilePart {
 
-		public DefaultFilePart(HttpHeaders headers, Flux<DataBuffer> content) {
+		public DefaultFilePart(HttpHeaders headers, Content content) {
 			super(headers, content);
 		}
 
