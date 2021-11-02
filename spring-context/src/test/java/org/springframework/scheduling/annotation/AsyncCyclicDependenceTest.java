@@ -55,7 +55,6 @@ class AsyncCyclicDependenceTests {
 	static class AsyncService {
 		@Autowired
 		private AsyncService asyncService;
-
 		@Async
 		public Future<String> async() {
 			System.out.println(asyncService);
