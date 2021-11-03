@@ -160,7 +160,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 					requestToken();
 				}
 			});
-			emitPart(DefaultParts.part(headers, Content.fromFlux(streamingContent)));
+			emitPart(DefaultParts.part(headers, streamingContent));
 		}
 	}
 
@@ -518,7 +518,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 			}
 			this.content.clear();
 			Flux<DataBuffer> content = Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(bytes));
-			emitPart(DefaultParts.part(this.headers, Content.fromFlux(content)));
+			emitPart(DefaultParts.part(this.headers, content));
 		}
 
 		@Override
@@ -674,8 +674,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		@Override
 		public void partComplete(boolean finalPart) {
 			MultipartUtils.closeChannel(this.channel);
-			emitPart(DefaultParts.part(this.headers,
-					Content.fromFile(this.file, PartGenerator.this.blockingOperationScheduler)));
+			emitPart(DefaultParts.part(this.headers, this.file, PartGenerator.this.blockingOperationScheduler));
 			if (finalPart) {
 				emitComplete();
 			}
