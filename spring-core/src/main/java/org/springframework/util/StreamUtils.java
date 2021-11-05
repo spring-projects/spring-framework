@@ -105,14 +105,8 @@ public abstract class StreamUtils {
 	public static String copyToString(ByteArrayOutputStream baos, Charset charset) {
 		Assert.notNull(baos, "No ByteArrayOutputStream specified");
 		Assert.notNull(charset, "No Charset specified");
-		try {
-			// Can be replaced with toString(Charset) call in Java 10+
-			return baos.toString(charset.name());
-		}
-		catch (UnsupportedEncodingException ex) {
-			// Should never happen
-			throw new IllegalArgumentException("Invalid charset name: " + charset, ex);
-		}
+
+		return baos.toString(charset);
 	}
 
 	/**
