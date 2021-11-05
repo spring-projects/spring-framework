@@ -43,7 +43,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  * HashMap, which will still preserve column order but requires the application
  * to specify the column names in the same casing as exposed by the driver.
  *
- * @author Mark Paluch
+ * @author Mark Paluch 16K
  * @since 5.3
  */
 public class ColumnMapRowMapper implements BiFunction<Row, RowMetadata, Map<String, Object>> {
@@ -57,10 +57,11 @@ public class ColumnMapRowMapper implements BiFunction<Row, RowMetadata, Map<Stri
 		Collection<String> columns = rowMetadata.getColumnNames();
 		int columnCount = columns.size();
 		Map<String, Object> mapOfColValues = createColumnMap(columnCount);
-		int index = 0;
+		//int index = 0;
 		for (String column : columns) {
 			String key = getColumnKey(column);
-			Object obj = getColumnValue(row, index++);
+			//Object obj = getColumnValue(row, index++);
+			Object obj = getColumnValue(row,column);
 			mapOfColValues.put(key, obj);
 		}
 		return mapOfColValues;
@@ -97,6 +98,18 @@ public class ColumnMapRowMapper implements BiFunction<Row, RowMetadata, Map<Stri
 	@Nullable
 	protected Object getColumnValue(Row row, int index) {
 		return row.get(index);
+	}
+	
+	/**
+	 * Retrieve a R2DBC object value for the specified columnName.
+	 * <p>The default implementation uses the {@link Row#get(String)} method.
+	 * @param row is the {@link Row} holding the data
+	 * @param columnName the column name as returned by the {@link Row}
+	 * @return the Object returned
+	 */
+	@Nullable
+	protected Object getColumnValue(Row row, String columnName) {
+		return row.get(columnName);
 	}
 
 }
