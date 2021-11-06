@@ -310,7 +310,7 @@ class DefaultDatabaseClientUnitTests {
 
 		Statement statement = mockStatement();
 		MockResult result = mockSingleColumnResult(
-				MockRow.builder().identified(0, Object.class, "Walter"));
+				MockRow.builder().identified("name", Object.class, "Walter"));
 
 		DatabaseClient databaseClient = databaseClientBuilder.executeFunction(
 				stmnt -> Mono.just(result)).build();
@@ -325,7 +325,7 @@ class DefaultDatabaseClientUnitTests {
 	void shouldApplyPreparedOperation() {
 
 		MockResult result = mockSingleColumnResult(
-				MockRow.builder().identified(0, Object.class, "Walter"));
+				MockRow.builder().identified("name", Object.class, "Walter"));
 		Statement statement = mockStatementFor("SELECT * FROM person", result);
 
 		DatabaseClient databaseClient = databaseClientBuilder.build();
