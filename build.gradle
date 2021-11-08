@@ -28,7 +28,7 @@ configure(allprojects) { project ->
 	dependencyManagement {
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.13.0"
-			mavenBom "io.netty:netty-bom:4.1.69.Final"
+			mavenBom "io.netty:netty-bom:4.1.70.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.13-SNAPSHOT"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR10"
 			mavenBom "io.rsocket:rsocket-bom:1.1.1"
@@ -112,19 +112,19 @@ configure(allprojects) { project ->
 			dependency "org.quartz-scheduler:quartz:2.3.2"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core-jakarta:5.6.0.Final"
+			dependency "org.hibernate:hibernate-core-jakarta:5.6.1.Final"
 			dependency "org.hibernate:hibernate-validator:7.0.1.Final"
 			dependency "org.webjars:webjars-locator-core:0.48"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '10.0.11') {
+			dependencySet(group: 'org.apache.tomcat', version: '10.0.12') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '10.0.11') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '10.0.12') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
@@ -175,7 +175,7 @@ configure(allprojects) { project ->
 			dependency "org.hamcrest:hamcrest:2.1"
 			dependency "org.awaitility:awaitility:3.1.6"
 			dependency "org.assertj:assertj-core:3.21.0"
-			dependencySet(group: 'org.xmlunit', version: '2.8.2') {
+			dependencySet(group: 'org.xmlunit', version: '2.8.3') {
 				entry 'xmlunit-assertj'
 				entry('xmlunit-matchers') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
@@ -189,10 +189,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.12.0"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.53.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.54.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.53.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.54.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
