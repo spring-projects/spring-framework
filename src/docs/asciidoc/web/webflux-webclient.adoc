@@ -89,7 +89,7 @@ modified copy as follows:
 === MaxInMemorySize
 
 Codecs have <<web-reactive.adoc#webflux-codecs-limits,limits>> for buffering data in
-memory to avoid application memory issues. By the default those are set to 256KB.
+memory to avoid application memory issues. By default those are set to 256KB.
 If that's not enough you'll get the following error:
 
 ----
