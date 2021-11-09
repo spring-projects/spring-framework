@@ -1024,7 +1024,7 @@ by type without help. Consider the following class:
 
 	class ExampleBean(
 		private val years: Int, // Number of years to calculate the Ultimate Answer
-		private val ultimateAnswer: String// The Answer to Life, the Universe, and Everything
+		private val ultimateAnswer: String // The Answer to Life, the Universe, and Everything
 	)
 ----
 
@@ -1608,7 +1608,7 @@ listings shows how to use the `parent` attribute:
 ----
 	<!-- in the parent context -->
 	<bean id="accountService" class="com.something.SimpleAccountService">
-		<!-- insert dependencies as required as here -->
+		<!-- insert dependencies as required here -->
 	</bean>
 ----
 
@@ -1690,7 +1690,7 @@ respectively. The following example shows how to use them:
 		<property name="someMap">
 			<map>
 				<entry key="an entry" value="just some string"/>
-				<entry key ="a ref" value-ref="myDataSource"/>
+				<entry key="a ref" value-ref="myDataSource"/>
 			</map>
 		</property>
 		<!-- results in a setSomeSet(java.util.Set) call -->
@@ -1834,7 +1834,7 @@ class SomeClass {
 When the `accounts` property of the `something` bean is prepared for injection, the generics
 information about the element type of the strongly-typed `Map<String, Float>` is
 available by reflection. Thus, Spring's type conversion infrastructure recognizes the
-various value elements as being of type `Float`, and the string values (`9.99, 2.75`, and
+various value elements as being of type `Float`, and the string values (`9.99`, `2.75`, and
 `3.99`) are converted into an actual `Float` type.
 
 
@@ -2028,7 +2028,7 @@ not commonly used since the plain order of declaration is usually sufficient the
 In practice, the constructor resolution
 <<beans-factory-ctor-arguments-resolution,mechanism>> is quite efficient in matching
 arguments, so unless you really need to, we recommend using the name notation
-through-out your configuration.
+throughout your configuration.
 
 
 [[beans-compound-property-names]]
@@ -2503,13 +2503,13 @@ declared return type of the lookup method:
 	public abstract class CommandManager {
 
 		public Object process(Object commandState) {
-			MyCommand command = createCommand();
+			Command command = createCommand();
 			command.setState(commandState);
 			return command.execute();
 		}
 
 		@Lookup
-		protected abstract MyCommand createCommand();
+		protected abstract Command createCommand();
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -2604,9 +2604,9 @@ interface provides the new method definition, as the following example shows:
 .Kotlin
 ----
 	/**
-	* meant to be used to override the existing computeValue(String)
-	* implementation in MyValueCalculator
-	*/
+	 * meant to be used to override the existing computeValue(String)
+	 * implementation in MyValueCalculator
+	 */
 	class ReplacementComputeValue : MethodReplacer {
 
 		override fun reimplement(obj: Any, method: Method, args: Array<out Any>): Any {
@@ -2806,7 +2806,7 @@ prototype-scoped bean repeatedly at runtime. You cannot dependency-inject a
 prototype-scoped bean into your singleton bean, because that injection occurs only
 once, when the Spring container instantiates the singleton bean and resolves
 and injects its dependencies. If you need a new instance of a prototype bean at
-runtime more than once, see <<beans-factory-method-injection>>
+runtime more than once, see <<beans-factory-method-injection>>.
 
 
 
@@ -2984,7 +2984,7 @@ The Spring container creates a new instance of the `AppPreferences` bean by usin
 `appPreferences` bean is scoped at the `ServletContext` level and stored as a regular
 `ServletContext` attribute. This is somewhat similar to a Spring singleton bean but
 differs in two important ways: It is a singleton per `ServletContext`, not per Spring
-'ApplicationContext' (for which there may be several in any given web application),
+`ApplicationContext` (for which there may be several in any given web application),
 and it is actually exposed and therefore visible as a `ServletContext` attribute.
 
 When using annotation-driven components or Java configuration, you can use the
@@ -3039,7 +3039,7 @@ constructor or setter argument or autowired field) as `ObjectFactory<MyTargetBea
 allowing for a `getObject()` call to retrieve the current instance on demand every
 time it is needed -- without holding on to the instance or storing it separately.
 
-As an extended variant, you may declare `ObjectProvider<MyTargetBean>`, which delivers
+As an extended variant, you may declare `ObjectProvider<MyTargetBean>` which delivers
 several additional access variants, including `getIfAvailable` and `getIfUnique`.
 
 The JSR-330 variant of this is called `Provider` and is used with a `Provider<MyTargetBean>`
@@ -3100,7 +3100,7 @@ to the HTTP `Session`-scoped bean (`userPreferences`). The salient point here is
 `userManager` bean is a singleton: it is instantiated exactly once per
 container, and its dependencies (in this case only one, the `userPreferences` bean) are
 also injected only once. This means that the `userManager` bean operates only on the
-exact same `userPreferences` object (that is, the one with which it was originally injected.
+exact same `userPreferences` object (that is, the one with which it was originally injected).
 
 This is not the behavior you want when injecting a shorter-lived scoped bean into a
 longer-lived scoped bean (for example, injecting an HTTP `Session`-scoped collaborating
@@ -3350,8 +3350,9 @@ of the scope. You can also do the `Scope` registration declaratively, by using t
 	</beans>
 ----
 
-NOTE: When you place `<aop:scoped-proxy/>` in a `FactoryBean` implementation, it is the factory
-bean itself that is scoped, not the object returned from `getObject()`.
+NOTE: When you place `<aop:scoped-proxy/>` within a `<bean>` declaration for a
+`FactoryBean` implementation, it is the factory bean itself that is scoped, not the object
+returned from `getObject()`.
 
 
 
@@ -3927,7 +3928,7 @@ shows the definition of the BeanNameAware interface:
 ----
 
 The callback is invoked after population of normal bean properties but before an
-initialization callback such as `InitializingBean`, `afterPropertiesSet`, or a custom
+initialization callback such as `InitializingBean.afterPropertiesSet()` or a custom
 init-method.
 
 
@@ -3959,7 +3960,7 @@ dependency type. The following table summarizes the most important `Aware` inter
 
 | `BeanFactoryAware`
 | Declaring `BeanFactory`.
-| <<beans-factory-aware>>
+| <<beans-beanfactory>>
 
 | `BeanNameAware`
 | Name of the declaring bean.
@@ -4146,7 +4147,7 @@ or it may wrap a bean with a proxy. Some Spring AOP infrastructure classes are
 implemented as bean post-processors in order to provide proxy-wrapping logic.
 
 An `ApplicationContext` automatically detects any beans that are defined in the
-configuration metadata that implements the `BeanPostProcessor` interface. The
+configuration metadata that implement the `BeanPostProcessor` interface. The
 `ApplicationContext` registers these beans as post-processors so that they can be called
 later, upon bean creation. Bean post-processors can be deployed in the container in the
 same fashion as any other beans.
@@ -4544,22 +4545,22 @@ Java as opposed to a (potentially) verbose amount of XML, you can create your ow
 `FactoryBean`, write the complex initialization inside that class, and then plug your
 custom `FactoryBean` into the container.
 
-The `FactoryBean` interface provides three methods:
+The `FactoryBean<T>` interface provides three methods:
 
-* `Object getObject()`: Returns an instance of the object this factory creates. The
+* `T getObject()`: Returns an instance of the object this factory creates. The
   instance can possibly be shared, depending on whether this factory returns singletons
   or prototypes.
 * `boolean isSingleton()`: Returns `true` if this `FactoryBean` returns singletons or
-  `false` otherwise.
-* `Class getObjectType()`: Returns the object type returned by the `getObject()` method
+  `false` otherwise. The default implementation of this method returns `true`.
+* `Class<?> getObjectType()`: Returns the object type returned by the `getObject()` method
   or `null` if the type is not known in advance.
 
-The `FactoryBean` concept and interface is used in a number of places within the Spring
+The `FactoryBean` concept and interface are used in a number of places within the Spring
 Framework. More than 50 implementations of the `FactoryBean` interface ship with Spring
 itself.
 
 When you need to ask a container for an actual `FactoryBean` instance itself instead of
-the bean it produces, preface the bean's `id` with the ampersand symbol (`&`) when
+the bean it produces, prefix the bean's `id` with the ampersand symbol (`&`) when
 calling the `getBean()` method of the `ApplicationContext`. So, for a given `FactoryBean`
 with an `id` of `myBean`, invoking `getBean("myBean")` on the container returns the
 product of the `FactoryBean`, whereas invoking `getBean("&myBean")` returns the
@@ -4677,11 +4678,11 @@ example:
 ----
 	class SimpleMovieLister {
 
-	@Required
-	lateinit var movieFinder: MovieFinder
+		@Required
+		lateinit var movieFinder: MovieFinder
 
-	// ...
-}
+		// ...
+	}
 ----
 
 This annotation indicates that the affected bean property must be populated at
@@ -5377,7 +5378,7 @@ Letting qualifier values select against target bean names, within the type-match
 candidates, does not require a `@Qualifier` annotation at the injection point.
 If there is no other resolution indicator (such as a qualifier or a primary marker),
 for a non-unique dependency situation, Spring matches the injection point name
-(that is, the field name or parameter name) against the target bean names and choose the
+(that is, the field name or parameter name) against the target bean names and chooses the
 same-named candidate, if any.
 ====
 
@@ -5392,7 +5393,7 @@ matching an `account` qualifier against beans marked with the same qualifier lab
 
 For beans that are themselves defined as a collection, `Map`, or array type, `@Resource`
 is a fine solution, referring to the specific collection or array bean by unique name.
-That said, as of 4.3, collection, you can match `Map`, and array types through Spring's
+That said, as of 4.3, you can match collection, `Map`, and array types through Spring's
 `@Autowired` type matching algorithm as well, as long as the element type information
 is preserved in `@Bean` return type signatures or collection inheritance hierarchies.
 In this case, you can use qualifier values to select among same-typed collections,
@@ -6046,14 +6047,14 @@ example shows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-    @Configuration
-    public class AppConfig {
+	@Configuration
+	public class AppConfig {
 
-         @Bean
-         public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
-               return new PropertySourcesPlaceholderConfigurer();
-         }
-    }
+		@Bean
+		public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
+			return new PropertySourcesPlaceholderConfigurer();
+		}
+	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -6079,7 +6080,7 @@ will get properties from `application.properties` and `application.yml` files.
 
 Built-in converter support provided by Spring allows simple type conversion (to `Integer`
 or `int` for example) to be automatically handled. Multiple comma-separated values can be
-automatically converted to String array without extra effort.
+automatically converted to `String` array without extra effort.
 
 It is possible to provide a default value as following:
 
@@ -6103,8 +6104,8 @@ It is possible to provide a default value as following:
 	class MovieRecommender(@Value("\${catalog.name:defaultCatalog}") private val catalog: String)
 ----
 
-A Spring `BeanPostProcessor` uses a `ConversionService` behind the scene to handle the
-process for converting the String value in `@Value` to the target type. If you want to
+A Spring `BeanPostProcessor` uses a `ConversionService` behind the scenes to handle the
+process for converting the `String` value in `@Value` to the target type. If you want to
 provide conversion support for your own custom type, you can provide your own
 `ConversionService` bean instance as the following example shows:
 
@@ -6130,7 +6131,7 @@ provide conversion support for your own custom type, you can provide your own
 
 		@Bean
 		fun conversionService(): ConversionService {
-				return DefaultFormattingConversionService().apply {
+			return DefaultFormattingConversionService().apply {
 				addConverter(MyCustomConverter())
 			}
 		}
@@ -6319,7 +6320,7 @@ is meta-annotated with `@Component`, as the following example shows:
 		// ...
 	}
 ----
-<1> The `Component` causes `@Service` to be treated in the same way as `@Component`.
+<1> The `@Component` causes `@Service` to be treated in the same way as `@Component`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -6333,7 +6334,7 @@ is meta-annotated with `@Component`, as the following example shows:
 		// ...
 	}
 ----
-<1> The `Component` causes `@Service` to be treated in the same way as `@Component`.
+<1> The `@Component` causes `@Service` to be treated in the same way as `@Component`.
 
 You can also combine meta-annotations to create "`composed annotations`". For example,
 the `@RestController` annotation from Spring MVC is composed of `@Controller` and
@@ -6595,7 +6596,7 @@ and using "`stub`" repositories instead:
 			includeFilters = @Filter(type = FilterType.REGEX, pattern = ".*Stub.*Repository"),
 			excludeFilters = @Filter(Repository.class))
 	public class AppConfig {
-		...
+		// ...
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -6679,9 +6680,11 @@ factory method and other bean definition properties, such as a qualifier value t
 the `@Qualifier` annotation. Other method-level annotations that can be specified are
 `@Scope`, `@Lazy`, and custom qualifier annotations.
 
-TIP: In addition to its role for component initialization, you can also place the `@Lazy` annotation
-on injection points marked with `@Autowired` or `@Inject`. In this context, it
-leads to the injection of a lazy-resolution proxy.
+TIP: In addition to its role for component initialization, you can also place the `@Lazy`
+annotation on injection points marked with `@Autowired` or `@Inject`. In this context,
+it leads to the injection of a lazy-resolution proxy. However, such a proxy approach
+is rather limited. For sophisticated lazy interactions, in particular in combination
+with optional dependencies, we recommend `ObjectProvider<MyTargetBean>` instead.
 
 Autowired fields and methods are supported, as previously discussed, with additional
 support for autowiring of `@Bean` methods. The following example shows how to do so:
@@ -7161,7 +7164,7 @@ configuration, as shown in the following example:
 With Gradle 4.6 and later, the dependency should be declared in the `annotationProcessor`
 configuration, as shown in the following example:
 
-[source,groovy,indent=0subs="verbatim,quotes,attributes"]
+[source,groovy,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	dependencies {
 		annotationProcessor "org.springframework:spring-context-indexer:{spring-version}"
@@ -7179,8 +7182,8 @@ TIP: The index is enabled automatically when a `META-INF/spring.components` file
 on the classpath. If an index is partially available for some libraries (or use cases)
 but could not be built for the whole application, you can fall back to a regular classpath
 arrangement (as though no index were present at all) by setting `spring.index.ignore` to
-`true`, either as a JVM system property or in a `spring.properties` file at the root of
-the classpath.
+`true`, either as a JVM system property or via the
+<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism.
 
 
 
@@ -7635,7 +7638,7 @@ to reduce subtle bugs that can be hard to track down when operating in "`lite`" 
 ****
 
 The `@Bean` and `@Configuration` annotations are discussed in depth in the following sections.
-First, however, we cover the various ways of creating a spring container using by
+First, however, we cover the various ways of creating a spring container by using
 Java-based configuration.
 
 
@@ -7762,7 +7765,7 @@ To enable component scanning, you can annotate your `@Configuration` class as fo
 	@Configuration
 	@ComponentScan(basePackages = "com.acme") // <1>
 	public class AppConfig  {
-		...
+		// ...
 	}
 ----
 <1> This annotation enables component scanning.
@@ -7896,6 +7899,7 @@ init-param):
 
 `@Bean` is a method-level annotation and a direct analog of the XML `<bean/>` element.
 The annotation supports some of the attributes offered by `<bean/>`, such as:
+
 * <<beans-factory-lifecycle-initializingbean, init-method>>
 * <<beans-factory-lifecycle-disposablebean, destroy-method>>
 * <<beans-factory-autowire,autowiring>>
@@ -7984,7 +7988,7 @@ return type, as the following example shows:
 
 However, this limits the visibility for advance type prediction to the specified
 interface type (`TransferService`). Then, with the full type (`TransferServiceImpl`)
-known to the container only once, the affected singleton bean has been instantiated.
+known to the container only once the affected singleton bean has been instantiated.
 Non-lazy singleton beans get instantiated according to their declaration order,
 so you may see different type matching results depending on when another component
 tries to match by a non-declared type (such as `@Autowired TransferServiceImpl`,
@@ -8242,8 +8246,10 @@ Spring offers a convenient way of working with scoped dependencies through
 <<beans-factory-scopes-other-injection, scoped proxies>>. The easiest way to create
 such a proxy when using the XML configuration is the `<aop:scoped-proxy/>` element.
 Configuring your beans in Java with a `@Scope` annotation offers equivalent support
-with the `proxyMode` attribute. The default is no proxy (`ScopedProxyMode.NO`),
-but you can specify `ScopedProxyMode.TARGET_CLASS` or `ScopedProxyMode.INTERFACES`.
+with the `proxyMode` attribute. The default is `ScopedProxyMode.DEFAULT`, which
+typically indicates that no scoped proxy should be created unless a different default
+has been configured at the component-scan instruction level. You can specify
+`ScopedProxyMode.TARGET_CLASS`, `ScopedProxyMode.INTERFACES` or `ScopedProxyMode.NO`.
 
 If you port the scoped proxy example from the XML reference documentation (see
 <<beans-factory-scopes-other-injection, scoped proxies>>) to our `@Bean` using Java,
@@ -8297,7 +8303,7 @@ as the following example shows:
 	@Configuration
 	public class AppConfig {
 
-		@Bean(name = "myThing")
+		@Bean("myThing")
 		public Thing thing() {
 			return new Thing();
 		}
@@ -8390,7 +8396,7 @@ annotation, as the following example shows:
 === Using the `@Configuration` annotation
 
 `@Configuration` is a class-level annotation indicating that an object is a source of
-bean definitions. `@Configuration` classes declare beans through public `@Bean` annotated
+bean definitions. `@Configuration` classes declare beans through `@Bean`-annotated
 methods. Calls to `@Bean` methods on `@Configuration` classes can also be used to define
 inter-bean dependencies. See <<beans-java-basic-concepts>> for a general introduction.
 
@@ -9139,7 +9145,7 @@ method that returns `true` or `false`. For example, the following listing shows 
 		val attrs = metadata.getAllAnnotationAttributes(Profile::class.java.name)
 		if (attrs != null) {
 			for (value in attrs["value"]!!) {
-				if (context.environment.acceptsProfiles(Profiles .of(*value as Array<String>))) {
+				if (context.environment.acceptsProfiles(Profiles.of(*value as Array<String>))) {
 					return true
 				}
 			}
@@ -9903,7 +9909,7 @@ as a way to provide a default definition for one or more beans. If any
 profile is enabled, the default profile does not apply.
 
 You can change the name of the default profile by using `setDefaultProfiles()` on
-the `Environment` or ,declaratively, by using the `spring.profiles.default` property.
+the `Environment` or, declaratively, by using the `spring.profiles.default` property.
 
 
 
@@ -10222,8 +10228,8 @@ bean with the same name. If it does, it uses that bean as the `MessageSource`. I
 `DelegatingMessageSource` is instantiated in order to be able to accept calls to the
 methods defined above.
 
-Spring provides two `MessageSource` implementations, `ResourceBundleMessageSource` and
-`StaticMessageSource`. Both implement `HierarchicalMessageSource` in order to do nested
+Spring provides three `MessageSource` implementations, `ResourceBundleMessageSource`, `ReloadableResourceBundleMessageSource`
+and `StaticMessageSource`. All of them implement `HierarchicalMessageSource` in order to do nested
 messaging. The `StaticMessageSource` is rarely used but provides programmatic ways to
 add messages to the source. The following example shows `ResourceBundleMessageSource`:
 
@@ -10407,6 +10413,10 @@ You can also use the `MessageSourceAware` interface to acquire a reference to an
 `MessageSource` that has been defined. Any bean that is defined in an
 `ApplicationContext` that implements the `MessageSourceAware` interface is injected with
 the application context's `MessageSource` when the bean is created and configured.
+
+NOTE: Because Spring's `MessageSource` is based on Java's `ResourceBundle`, it does not merge
+bundles with the same base name, but will only use the first bundle found.
+Subsequent message bundles with the same base name are ignored.
 
 NOTE: As an alternative to `ResourceBundleMessageSource`, Spring provides a
 `ReloadableResourceBundleMessageSource` class. This variant supports the same bundle
@@ -10718,7 +10728,7 @@ following example shows how to do so:
 ----
 
 It is also possible to add additional runtime filtering by using the `condition` attribute
-of the annotation that defines a <<expressions, `SpEL` expression>> , which should match
+of the annotation that defines a <<expressions, `SpEL` expression>>, which should match
 to actually invoke the method for a particular event.
 
 The following example shows how our notifier can be rewritten to be invoked only if the
@@ -10830,10 +10840,12 @@ The following example shows how to do so:
 Be aware of the following limitations when using asynchronous events:
 
 * If an asynchronous event listener throws an `Exception`, it is not propagated to the
-  caller. See `AsyncUncaughtExceptionHandler` for more details.
+  caller. See
+  {api-spring-framework}/aop/interceptor/AsyncUncaughtExceptionHandler.html[`AsyncUncaughtExceptionHandler`]
+  for more details.
 * Asynchronous event listener methods cannot publish a subsequent event by returning a
   value. If you need to publish another event as the result of the processing, inject an
-  {api-spring-framework}/aop/interceptor/AsyncUncaughtExceptionHandler.html[`ApplicationEventPublisher`]
+  {api-spring-framework}/context/ApplicationEventPublisher.html[`ApplicationEventPublisher`]
   to publish the event manually.
 
 
@@ -11021,8 +11033,8 @@ For a simple deployment of a Spring ApplicationContext as a Java EE RAR file:
 . Package
 all application classes into a RAR file (which is a standard JAR file with a different
 file extension).
-.Add all required library JARs into the root of the RAR archive.
-.Add a
+. Add all required library JARs into the root of the RAR archive.
+. Add a
 `META-INF/ra.xml` deployment descriptor (as shown in the {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[javadoc for `SpringContextResourceAdapter`])
 and the corresponding Spring XML bean definition file(s) (typically
 `META-INF/applicationContext.xml`).
@@ -11116,7 +11128,7 @@ The following table lists features provided by the `BeanFactory` and
 | No
 | Yes
 
-| Convenient `MessageSource` access (for internalization)
+| Convenient `MessageSource` access (for internationalization)
 | No
 | Yes
 
