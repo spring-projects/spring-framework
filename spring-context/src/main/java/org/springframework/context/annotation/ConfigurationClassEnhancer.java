@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -453,8 +453,8 @@ class ConfigurationClassEnhancer {
 		 * instance directly. If a FactoryBean instance is fetched through the container via &-dereferencing,
 		 * it will not be proxied. This too is aligned with the way XML configuration works.
 		 */
-		private Object enhanceFactoryBean(final Object factoryBean, Class<?> exposedType,
-				final ConfigurableBeanFactory beanFactory, final String beanName) {
+		private Object enhanceFactoryBean(Object factoryBean, Class<?> exposedType,
+				ConfigurableBeanFactory beanFactory, String beanName) {
 
 			try {
 				Class<?> clazz = factoryBean.getClass();
@@ -489,8 +489,8 @@ class ConfigurationClassEnhancer {
 			return createCglibProxyForFactoryBean(factoryBean, beanFactory, beanName);
 		}
 
-		private Object createInterfaceProxyForFactoryBean(final Object factoryBean, Class<?> interfaceType,
-				final ConfigurableBeanFactory beanFactory, final String beanName) {
+		private Object createInterfaceProxyForFactoryBean(Object factoryBean, Class<?> interfaceType,
+				ConfigurableBeanFactory beanFactory, String beanName) {
 
 			return Proxy.newProxyInstance(
 					factoryBean.getClass().getClassLoader(), new Class<?>[] {interfaceType},
@@ -502,8 +502,8 @@ class ConfigurationClassEnhancer {
 					});
 		}
 
-		private Object createCglibProxyForFactoryBean(final Object factoryBean,
-				final ConfigurableBeanFactory beanFactory, final String beanName) {
+		private Object createCglibProxyForFactoryBean(Object factoryBean,
+				ConfigurableBeanFactory beanFactory, String beanName) {
 
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(factoryBean.getClass());
