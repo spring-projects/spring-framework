@@ -459,7 +459,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		return metadata;
 	}
 
-	private InjectionMetadata buildAutowiringMetadata(final Class<?> clazz) {
+	private InjectionMetadata buildAutowiringMetadata(Class<?> clazz) {
 		if (!AnnotationUtils.isCandidateClass(clazz, this.autowiredAnnotationTypes)) {
 			return InjectionMetadata.EMPTY;
 		}

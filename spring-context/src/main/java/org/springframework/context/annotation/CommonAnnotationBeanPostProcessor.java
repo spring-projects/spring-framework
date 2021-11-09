@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -332,7 +332,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 
-	private InjectionMetadata findResourceMetadata(String beanName, final Class<?> clazz, @Nullable PropertyValues pvs) {
+	private InjectionMetadata findResourceMetadata(String beanName, Class<?> clazz, @Nullable PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
 		// Quick check on the concurrent map first, with minimal locking.
@@ -352,7 +352,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		return metadata;
 	}
 
-	private InjectionMetadata buildResourceMetadata(final Class<?> clazz) {
+	private InjectionMetadata buildResourceMetadata(Class<?> clazz) {
 		if (!AnnotationUtils.isCandidateClass(clazz, resourceAnnotationTypes)) {
 			return InjectionMetadata.EMPTY;
 		}
@@ -464,6 +464,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			public void releaseTarget(Object target) {
 			}
 		};
+
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTargetSource(ts);
 		if (element.lookupType.isInterface()) {
