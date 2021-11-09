@@ -315,7 +315,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 
-	private InjectionMetadata findResourceMetadata(String beanName, final Class<?> clazz, @Nullable PropertyValues pvs) {
+	private InjectionMetadata findResourceMetadata(String beanName, Class<?> clazz, @Nullable PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
 		// Quick check on the concurrent map first, with minimal locking.
@@ -335,7 +335,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		return metadata;
 	}
 
-	private InjectionMetadata buildResourceMetadata(final Class<?> clazz) {
+	private InjectionMetadata buildResourceMetadata(Class<?> clazz) {
 		if (!AnnotationUtils.isCandidateClass(clazz, resourceAnnotationTypes)) {
 			return InjectionMetadata.EMPTY;
 		}
