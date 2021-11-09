@@ -232,12 +232,12 @@ class UrlPathHelperTests {
 		request.setContextPath("/SPR-12372");
 		request.setPathInfo(null);
 		request.setServletPath("/foo/bar/");
-		request.setRequestURI("/SPR-12372/foo//bar/");
+		request.setRequestURI("/SPR-12372/foo///bar/");
 
 		assertThat(helper.getLookupPathForRequest(request)).isEqualTo("/foo/bar/");
 
 		request.setServletPath("/foo/bar/");
-		request.setRequestURI("/SPR-12372/foo/bar//");
+		request.setRequestURI("////SPR-12372/foo/bar//");
 
 		assertThat(helper.getLookupPathForRequest(request)).isEqualTo("/foo/bar/");
 

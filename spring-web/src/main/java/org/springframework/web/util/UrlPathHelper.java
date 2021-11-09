@@ -405,17 +405,18 @@ public class UrlPathHelper {
 	 * </ul>
 	 */
 	private static String getSanitizedPath(final String path) {
-		if (path.length() == 0) {
+		int start = path.indexOf("//");
+		if (start == -1) {
 			return path;
 		}
-		char[] arr = path.toCharArray();
-		int slowIndex = 0;
-		for (int fastIndex = 1; fastIndex < arr.length; fastIndex++) {
-			if (arr[fastIndex] != '/' || arr[slowIndex] != '/') {
-				arr[++slowIndex] = arr[fastIndex];
+		char[] content = path.toCharArray();
+		int slowIndex = start;
+		for (int fastIndex = start + 1; fastIndex < content.length; fastIndex++) {
+			if (content[fastIndex] != '/' || content[slowIndex] != '/') {
+				content[++slowIndex] = content[fastIndex];
 			}
 		}
-		return new String(arr, 0, slowIndex + 1);
+		return new String(content, 0, slowIndex + 1);
 	}
 
 	/**
