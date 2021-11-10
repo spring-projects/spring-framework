@@ -4170,8 +4170,8 @@ the example:
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
-				.addResourceLocations("/public", "classpath:/static/")
-				.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
+					.addResourceLocations("/public", "classpath:/static/")
+					.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
 		}
 
 	}
@@ -4258,6 +4258,9 @@ https://www.webjars.org/documentation[WebJars] are also supported through the
 re-write URLs to include the version of the jar and can also match against incoming URLs
 without versions -- for example, from `/jquery/jquery.min.js` to
 `/jquery/1.2.0/jquery.min.js`.
+
+TIP: The Java configuration based on `ResourceHandlerRegistry` provides further options
+for fine-grained control, e.g. last-modified behavior and optimized resource resolution.
 
 
 

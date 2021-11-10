@@ -310,7 +310,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");
 	}
 
-	@Test  // gh-27538
+	@Test  // gh-27538, gh-27624
 	public void filterNonExistingLocations() throws Exception {
 		List<Resource> inputLocations = Arrays.asList(
 				new ClassPathResource("test/", getClass()),
@@ -320,6 +320,7 @@ public class ResourceHttpRequestHandlerTests {
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
 		handler.setServletContext(new MockServletContext());
 		handler.setLocations(inputLocations);
+		handler.setOptimizeLocations(true);
 		handler.afterPropertiesSet();
 
 		List<Resource> actual = handler.getLocations();

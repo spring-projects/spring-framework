@@ -72,8 +72,8 @@ import org.springframework.web.server.WebHandler;
  * <p>This request handler may also be configured with a
  * {@link #setResourceResolvers(List) resourcesResolver} and
  * {@link #setResourceTransformers(List) resourceTransformer} chains to support
- * arbitrary resolution and transformation of resources being served. By default a
- * {@link PathResourceResolver} simply finds resources based on the configured
+ * arbitrary resolution and transformation of resources being served. By default
+ * a {@link PathResourceResolver} simply finds resources based on the configured
  * "locations". An application can configure additional resolvers and
  * transformers such as the {@link VersionResourceResolver} which can resolve
  * and prepare URLs for resources with a version in the URL.
@@ -85,6 +85,7 @@ import org.springframework.web.server.WebHandler;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 5.0
  */
 public class ResourceWebHandler implements WebHandler, InitializingBean {
@@ -93,6 +94,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	private static final Log logger = LogFactory.getLog(ResourceWebHandler.class);
 
+
+	@Nullable
+	private ResourceLoader resourceLoader;
 
 	private final List<String> locationValues = new ArrayList<>(4);
 
@@ -119,11 +123,18 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	@Nullable
 	private Map<String, MediaType> mediaTypes;
 
-	@Nullable
-	private ResourceLoader resourceLoader;
-
 	private boolean useLastModified = true;
 
+	private boolean optimizeLocations = false;
+
+
+	/**
+	 * Provide the ResourceLoader to load {@link #setLocationValues location values} with.
+	 * @since 5.1
+	 */
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+	}
 
 	/**
 	 * Accepts a list of String-based location values to be resolved into
@@ -161,9 +172,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * <p>Note that if {@link #setLocationValues(List) locationValues} are provided,
 	 * instead of loaded Resource-based locations, this method will return
 	 * empty until after initialization via {@link #afterPropertiesSet()}.
-	 * <p><strong>Note:</strong> As of 5.3.11 the list of locations is filtered
-	 * to exclude those that don't actually exist and therefore the list returned
-	 * from this method may be a subset of all given locations.
+	 * <p><strong>Note:</strong> As of 5.3.11 the list of locations may be filtered to
+	 * exclude those that don't actually exist and therefore the list returned from this
+	 * method may be a subset of all given locations. See {@link #setOptimizeLocations}.
 	 * @see #setLocationValues
 	 * @see #setLocations
 	 */
@@ -213,6 +224,22 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	}
 
 	/**
+	 * Configure the {@link ResourceHttpMessageWriter} to use.
+	 * <p>By default a {@link ResourceHttpMessageWriter} will be configured.
+	 */
+	public void setResourceHttpMessageWriter(@Nullable ResourceHttpMessageWriter httpMessageWriter) {
+		this.resourceHttpMessageWriter = httpMessageWriter;
+	}
+
+	/**
+	 * Return the configured resource message writer.
+	 */
+	@Nullable
+	public ResourceHttpMessageWriter getResourceHttpMessageWriter() {
+		return this.resourceHttpMessageWriter;
+	}
+
+	/**
 	 * Set the {@link org.springframework.http.CacheControl} instance to build
 	 * the Cache-Control HTTP response header.
 	 */
@@ -230,19 +257,48 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	}
 
 	/**
-	 * Configure the {@link ResourceHttpMessageWriter} to use.
-	 * <p>By default a {@link ResourceHttpMessageWriter} will be configured.
+	 * Set whether we should look at the {@link Resource#lastModified()}
+	 * when serving resources and use this information to drive {@code "Last-Modified"}
+	 * HTTP response headers.
+	 * <p>This option is enabled by default and should be turned off if the metadata of
+	 * the static files should be ignored.
+	 * @since 5.3
 	 */
-	public void setResourceHttpMessageWriter(@Nullable ResourceHttpMessageWriter httpMessageWriter) {
-		this.resourceHttpMessageWriter = httpMessageWriter;
+	public void setUseLastModified(boolean useLastModified) {
+		this.useLastModified = useLastModified;
 	}
 
 	/**
-	 * Return the configured resource message writer.
+	 * Return whether the {@link Resource#lastModified()} information is used
+	 * to drive HTTP responses when serving static resources.
+	 * @since 5.3
 	 */
-	@Nullable
-	public ResourceHttpMessageWriter getResourceHttpMessageWriter() {
-		return this.resourceHttpMessageWriter;
+	public boolean isUseLastModified() {
+		return this.useLastModified;
+	}
+
+	/**
+	 * Set whether to optimize the specified locations through an existence
+	 * check on startup, filtering non-existing directories upfront so that
+	 * they do not have to be checked on every resource access.
+	 * <p>The default is {@code false}, for defensiveness against zip files
+	 * without directory entries which are unable to expose the existence of
+	 * a directory upfront. Switch this flag to {@code true} for optimized
+	 * access in case of a consistent jar layout with directory entries.
+	 * @since 5.3.13
+	 */
+	public void setOptimizeLocations(boolean optimizeLocations) {
+		this.optimizeLocations = optimizeLocations;
+	}
+
+	/**
+	 * Return whether to optimize the specified locations through an existence
+	 * check on startup, filtering non-existing directories upfront so that
+	 * they do not have to be checked on every resource access.
+	 * @since 5.3.13
+	 */
+	public boolean isOptimizeLocations() {
+		return this.optimizeLocations;
 	}
 
 	/**
@@ -269,36 +325,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		return (this.mediaTypes != null ? this.mediaTypes : Collections.emptyMap());
 	}
 
-	/**
-	 * Provide the ResourceLoader to load {@link #setLocationValues(List)
-	 * location values} with.
-	 * @since 5.1
-	 */
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
-	}
-
-	/**
-	 * Return whether the {@link Resource#lastModified()} information is used
-	 * to drive HTTP responses when serving static resources.
-	 * @since 5.3
-	 */
-	public boolean isUseLastModified() {
-		return this.useLastModified;
-	}
-
-	/**
-	 * Set whether we should look at the {@link Resource#lastModified()}
-	 * when serving resources and use this information to drive {@code "Last-Modified"}
-	 * HTTP response headers.
-	 * <p>This option is enabled by default and should be turned off if the metadata of
-	 * the static files should be ignored.
-	 * @param useLastModified whether to use the resource last-modified information.
-	 * @since 5.3
-	 */
-	public void setUseLastModified(boolean useLastModified) {
-		this.useLastModified = useLastModified;
-	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -332,7 +358,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			}
 		}
 
-		result = result.stream().filter(Resource::exists).collect(Collectors.toList());
+		if (isOptimizeLocations()) {
+			result = result.stream().filter(Resource::exists).collect(Collectors.toList());
+		}
 
 		this.locationsToUse.clear();
 		this.locationsToUse.addAll(result);
