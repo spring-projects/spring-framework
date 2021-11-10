@@ -348,11 +348,11 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		for (String pair : pairs) {
 			int idx = pair.indexOf('=');
 			if (idx == -1) {
-				result.add(URLDecoder.decode(pair, charset.name()), null);
+				result.add(URLDecoder.decode(pair, charset), null);
 			}
 			else {
-				String name = URLDecoder.decode(pair.substring(0, idx), charset.name());
-				String value = URLDecoder.decode(pair.substring(idx + 1), charset.name());
+				String name = URLDecoder.decode(pair.substring(0, idx), charset);
+				String value = URLDecoder.decode(pair.substring(idx + 1), charset);
 				result.add(name, value);
 			}
 		}
@@ -438,18 +438,13 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 					return;
 				}
 				values.forEach(value -> {
-					try {
-						if (builder.length() != 0) {
-							builder.append('&');
-						}
-						builder.append(URLEncoder.encode(name, charset.name()));
-						if (value != null) {
-							builder.append('=');
-							builder.append(URLEncoder.encode(String.valueOf(value), charset.name()));
-						}
+					if (builder.length() != 0) {
+						builder.append('&');
 					}
-					catch (UnsupportedEncodingException ex) {
-						throw new IllegalStateException(ex);
+					builder.append(URLEncoder.encode(name, charset));
+					if (value != null) {
+						builder.append('=');
+						builder.append(URLEncoder.encode(String.valueOf(value), charset));
 					}
 				});
 		});
