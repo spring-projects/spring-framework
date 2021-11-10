@@ -30,6 +30,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
@@ -48,6 +49,7 @@ import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
@@ -338,6 +340,33 @@ public class DefaultClientResponseTests {
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 		assertThat(result.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+	}
+
+	@Test
+	public void createException() {
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = factory.wrap(ByteBuffer.wrap(bytes));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
+		given(mockResponse.getHeaders()).willReturn(httpHeaders);
+		given(mockResponse.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(mockResponse.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
+		given(mockResponse.getBody()).willReturn(body);
+
+		List<HttpMessageReader<?>> messageReaders = Collections.singletonList(
+				new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
+		given(mockExchangeStrategies.messageReaders()).willReturn(messageReaders);
+
+		Mono<WebClientResponseException> resultMono = defaultClientResponse.createException();
+		WebClientResponseException exception = resultMono.block();
+		assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+		assertThat(exception.getMessage()).isEqualTo("404 Not Found");
+		assertThat(exception.getHeaders()).containsExactly(entry("Content-Type",
+				Collections.singletonList("text/plain")));
+		assertThat(exception.getResponseBodyAsByteArray()).isEqualTo(bytes);
 	}
 
 
