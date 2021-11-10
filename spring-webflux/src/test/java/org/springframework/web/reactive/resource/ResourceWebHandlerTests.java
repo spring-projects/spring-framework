@@ -74,6 +74,7 @@ public class ResourceWebHandlerTests {
 
 	private ResourceWebHandler handler;
 
+
 	@BeforeEach
 	public void setup() throws Exception {
 		List<Resource> locations = new ArrayList<>(2);
@@ -253,7 +254,7 @@ public class ResourceWebHandlerTests {
 		assertResponseBody(exchange, "h1 { color:red; }");
 	}
 
-	@Test  // gh-27538
+	@Test  // gh-27538, gh-27624
 	public void filterNonExistingLocations() throws Exception {
 		List<Resource> inputLocations = Arrays.asList(
 				new ClassPathResource("test/", getClass()),
@@ -262,6 +263,7 @@ public class ResourceWebHandlerTests {
 
 		ResourceWebHandler handler = new ResourceWebHandler();
 		handler.setLocations(inputLocations);
+		handler.setOptimizeLocations(true);
 		handler.afterPropertiesSet();
 
 		List<Resource> actual = handler.getLocations();
