@@ -32,6 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -972,12 +973,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			String host = getHost(elementNamespace, dataHandler);
 			String contentId = UUID.randomUUID() + "@" + host;
 			this.mimeContainer.addAttachment("<" + contentId + ">", dataHandler);
-			try {
-				contentId = URLEncoder.encode(contentId, "UTF-8");
-			}
-			catch (UnsupportedEncodingException ex) {
-				// ignore
-			}
+			contentId = URLEncoder.encode(contentId, StandardCharsets.UTF_8);
 			return CID + contentId;
 		}
 
