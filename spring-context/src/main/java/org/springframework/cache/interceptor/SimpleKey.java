@@ -23,7 +23,6 @@ import java.util.Arrays;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * A simple key as returned from the {@link SimpleKeyGenerator}.
