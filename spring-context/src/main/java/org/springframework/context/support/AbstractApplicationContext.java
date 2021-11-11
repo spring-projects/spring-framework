@@ -1025,7 +1025,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			this.readWriteLock.writeLock().lock();
 			try {
 				doClose();
-			} finally {
+			}
+			finally {
 				this.readWriteLock.writeLock().unlock();
 			}
 			// If we registered a JVM shutdown hook, we don't need it anymore now:
@@ -1160,7 +1161,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		try {
 			assertBeanFactoryActive();
 			return function.apply(getBeanFactory());
-		} finally {
+		} 
+		finally {
 			this.readWriteLock.readLock().unlock();
 		}
 	}
