@@ -27,6 +27,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -238,6 +240,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** ApplicationEvents published before the multicaster setup. */
 	@Nullable
 	private Set<ApplicationEvent> earlyApplicationEvents;
+
+	/**  ReentrantReadWriteLock used by this class. */
+	private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
 
 	/**
@@ -1017,7 +1022,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Override
 	public void close() {
 		synchronized (this.startupShutdownMonitor) {
-			doClose();
+			this.readWriteLock.writeLock().lock();
+			try {
+				doClose();
+			} finally {
+				this.readWriteLock.writeLock().unlock();
+			}
 			// If we registered a JVM shutdown hook, we don't need it anymore now:
 			// We've already explicitly closed the context.
 			if (this.shutdownHook != null) {
@@ -1142,6 +1152,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 	}
 
+	/**
+	 * using this context's BeanFactory with read lock
+	 */
+	protected <R> R doBeanFactoryMethodWithReadLock(Function<ConfigurableListableBeanFactory, R> function) {
+		this.readWriteLock.readLock().lock();
+		try {
+			assertBeanFactoryActive();
+			return function.apply(getBeanFactory());
+		} finally {
+			this.readWriteLock.readLock().unlock();
+		}
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of BeanFactory interface
@@ -1149,87 +1172,74 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public Object getBean(String name) throws BeansException {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBean(name);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBean(name));
 	}
 
 	@Override
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBean(name, requiredType);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBean(name, requiredType));
 	}
 
 	@Override
 	public Object getBean(String name, Object... args) throws BeansException {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBean(name, args);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBean(name, args));
 	}
 
 	@Override
 	public <T> T getBean(Class<T> requiredType) throws BeansException {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBean(requiredType);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBean(requiredType));
 	}
 
 	@Override
 	public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBean(requiredType, args);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBean(requiredType, args));
 	}
 
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType) {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBeanProvider(requiredType);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBeanProvider(requiredType));
 	}
 
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBeanProvider(requiredType);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBeanProvider(requiredType));
 	}
 
 	@Override
 	public boolean containsBean(String name) {
-		return getBeanFactory().containsBean(name);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.containsBean(name));
 	}
 
 	@Override
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
-		assertBeanFactoryActive();
-		return getBeanFactory().isSingleton(name);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.isSingleton(name));
 	}
 
 	@Override
 	public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
-		assertBeanFactoryActive();
-		return getBeanFactory().isPrototype(name);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.isPrototype(name));
 	}
 
 	@Override
 	public boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException {
-		assertBeanFactoryActive();
-		return getBeanFactory().isTypeMatch(name, typeToMatch);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.isTypeMatch(name, typeToMatch));
 	}
 
 	@Override
 	public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
-		assertBeanFactoryActive();
-		return getBeanFactory().isTypeMatch(name, typeToMatch);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.isTypeMatch(name, typeToMatch));
 	}
 
 	@Override
 	@Nullable
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
-		assertBeanFactoryActive();
-		return getBeanFactory().getType(name);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getType(name));
 	}
 
 	@Override
 	@Nullable
 	public Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
-		assertBeanFactoryActive();
-		return getBeanFactory().getType(name, allowFactoryBeanInit);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getType(name, allowFactoryBeanInit));
 	}
 
 	@Override
@@ -1259,66 +1269,56 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType, boolean allowEagerInit) {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBeanProvider(requiredType, allowEagerInit);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBeanProvider(requiredType, allowEagerInit));
 	}
 
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType, boolean allowEagerInit) {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBeanProvider(requiredType, allowEagerInit);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBeanProvider(requiredType, allowEagerInit));
 	}
 
 	@Override
 	public String[] getBeanNamesForType(ResolvableType type) {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBeanNamesForType(type);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBeanNamesForType(type));
 	}
 
 	@Override
 	public String[] getBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBeanNamesForType(type, includeNonSingletons, allowEagerInit));
 	}
 
 	@Override
 	public String[] getBeanNamesForType(@Nullable Class<?> type) {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBeanNamesForType(type);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBeanNamesForType(type));
 	}
 
 	@Override
 	public String[] getBeanNamesForType(@Nullable Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBeanNamesForType(type, includeNonSingletons, allowEagerInit));
 	}
 
 	@Override
 	public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type) throws BeansException {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBeansOfType(type);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBeansOfType(type));
 	}
 
 	@Override
 	public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
 			throws BeansException {
 
-		assertBeanFactoryActive();
-		return getBeanFactory().getBeansOfType(type, includeNonSingletons, allowEagerInit);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBeansOfType(type, includeNonSingletons, allowEagerInit));
 	}
 
 	@Override
 	public String[] getBeanNamesForAnnotation(Class<? extends Annotation> annotationType) {
-		assertBeanFactoryActive();
-		return getBeanFactory().getBeanNamesForAnnotation(annotationType);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBeanNamesForAnnotation(annotationType));
 	}
 
 	@Override
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)
 			throws BeansException {
 
-		assertBeanFactoryActive();
-		return getBeanFactory().getBeansWithAnnotation(annotationType);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.getBeansWithAnnotation(annotationType));
 	}
 
 	@Override
@@ -1326,8 +1326,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
 			throws NoSuchBeanDefinitionException {
 
-		assertBeanFactoryActive();
-		return getBeanFactory().findAnnotationOnBean(beanName, annotationType);
+		return doBeanFactoryMethodWithReadLock(bf -> bf.findAnnotationOnBean(beanName, annotationType));
 	}
 
 
