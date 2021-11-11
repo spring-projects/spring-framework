@@ -74,7 +74,7 @@ public class SimpleKey implements Serializable {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " [" + StringUtils.arrayToCommaDelimitedString(this.params) + "]";
+		return getClass().getSimpleName() + " " + Arrays.deepToString(this.params);
 	}
 
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
