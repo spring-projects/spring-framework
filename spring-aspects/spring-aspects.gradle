@@ -8,8 +8,6 @@ sourceSets.main.java.srcDirs = files()
 sourceSets.test.aspectj.srcDir "src/test/java"
 sourceSets.test.java.srcDirs = files()
 
-aspectj.version = dependencyManagement.managedVersions['org.aspectj:aspectjweaver']
-
 compileAspectj {
 	sourceCompatibility "17"
 	targetCompatibility "17"

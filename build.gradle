@@ -1,7 +1,7 @@
 plugins {
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE' apply false
 	id 'io.spring.nohttp' version '0.0.10'
-	id "io.freefair.aspectj" version '6.2.0' apply false
+	id "io.freefair.aspectj" version '6.3.0' apply false
 	id 'org.jetbrains.dokka' version '1.5.0' apply false
 	id 'org.jetbrains.kotlin.jvm' version '1.5.31' apply false
 	id "org.jetbrains.kotlin.plugin.serialization" version "1.5.31" apply false
