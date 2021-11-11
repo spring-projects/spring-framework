@@ -21,6 +21,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -674,14 +675,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		if (ObjectUtils.identityToString(wac).equals(wac.getId())) {
 			// The application context id is still set to its original default value
 			// -> assign a more useful id based on available information
-			if (this.contextId != null) {
-				wac.setId(this.contextId);
-			}
-			else {
-				// Generate default id...
-				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
-						ObjectUtils.getDisplayString(getServletContext().getContextPath()) + '/' + getServletName());
-			}
+			// Generate default id...
+			wac.setId(Objects.requireNonNullElseGet(this.contextId, () -> ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
+					ObjectUtils.getDisplayString(getServletContext().getContextPath()) + '/' + getServletName()));
 		}
 
 		wac.setServletContext(getServletContext());
