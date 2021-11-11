@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -373,12 +374,20 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
 			Set<String> types = new HashSet<>();
+			boolean basePackageIndexNotDefined = true;
 			for (TypeFilter filter : this.includeFilters) {
 				String stereotype = extractStereotype(filter);
 				if (stereotype == null) {
 					throw new IllegalArgumentException("Failed to extract stereotype from " + filter);
 				}
-				types.addAll(index.getCandidateTypes(basePackage, stereotype));
+				Set<String> candidateTypes = index.getCandidateTypes(basePackage, stereotype);
+				if (basePackageIndexNotDefined && !Collections.EMPTY_SET.equals(candidateTypes)) {
+					basePackageIndexNotDefined = false;
+				}
+				types.addAll(candidateTypes);
+			}
+			if (basePackageIndexNotDefined) {
+				return scanCandidateComponents(basePackage);
 			}
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
