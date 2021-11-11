@@ -23,7 +23,6 @@ import java.util.Arrays;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * A simple key as returned from the {@link SimpleKeyGenerator}.
@@ -73,7 +72,7 @@ public class SimpleKey implements Serializable {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " [" + StringUtils.arrayToCommaDelimitedString(this.params) + "]";
+		return getClass().getSimpleName() + " " + Arrays.deepToString(this.params);
 	}
 
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
