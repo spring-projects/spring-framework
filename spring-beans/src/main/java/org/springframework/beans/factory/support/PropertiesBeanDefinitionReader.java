@@ -457,11 +457,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				}
 				else if (property.startsWith(CONSTRUCTOR_ARG_PREFIX)) {
 					if (property.endsWith(REF_SUFFIX)) {
-						int index = Integer.parseInt(property.substring(1, property.length() - REF_SUFFIX.length()));
+						int index = Integer.parseInt(property, 1, property.length() - REF_SUFFIX.length(), 10);
 						cas.addIndexedArgumentValue(index, new RuntimeBeanReference(entry.getValue().toString()));
 					}
 					else {
-						int index = Integer.parseInt(property.substring(1));
+						int index = Integer.parseInt(property, 1, property.length(), 10);
 						cas.addIndexedArgumentValue(index, readValue(entry));
 					}
 				}

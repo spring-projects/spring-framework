@@ -707,7 +707,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 				idx = host.indexOf(':');
 			}
 			if (idx != -1) {
-				return Integer.parseInt(host.substring(idx + 1));
+				return Integer.parseInt(host, idx + 1, host.length(), 10);
 			}
 		}
 

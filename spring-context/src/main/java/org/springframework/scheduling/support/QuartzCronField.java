@@ -86,7 +86,7 @@ final class QuartzCronField extends CronField {
 					adjuster = lastDayOfMonth();
 				}
 				else { // "L-[0-9]+"
-					int offset = Integer.parseInt(value.substring(idx + 1));
+					int offset = Integer.parseInt(value, idx + 1, value.length(), 10);
 					if (offset >= 0) {
 						throw new IllegalArgumentException("Offset '" + offset + " should be < 0 '" + value + "'");
 					}
@@ -104,7 +104,7 @@ final class QuartzCronField extends CronField {
 				throw new IllegalArgumentException("Unrecognized characters after 'W' in '" + value + "'");
 			}
 			else { // "[0-9]+W"
-				int dayOfMonth = Integer.parseInt(value.substring(0, idx));
+				int dayOfMonth = Integer.parseInt(value, 0, idx, 10);
 				dayOfMonth = Type.DAY_OF_MONTH.checkValidValue(dayOfMonth);
 				TemporalAdjuster adjuster = weekdayNearestTo(dayOfMonth);
 				return new QuartzCronField(Type.DAY_OF_MONTH, adjuster, value);
@@ -152,7 +152,7 @@ final class QuartzCronField extends CronField {
 			}
 			// "[0-7]#[0-9]+"
 			DayOfWeek dayOfWeek = parseDayOfWeek(value.substring(0, idx));
-			int ordinal = Integer.parseInt(value.substring(idx + 1));
+			int ordinal = Integer.parseInt(value, idx + 1, value.length(), 10);
 			if (ordinal <= 0) {
 				throw new IllegalArgumentException("Ordinal '" + ordinal + "' in '" + value +
 						"' must be positive number ");
