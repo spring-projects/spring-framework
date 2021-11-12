@@ -364,7 +364,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 					}
 					host = value.substring(0, portSeparatorIdx);
 					try {
-						port = Integer.parseInt(value.substring(portSeparatorIdx + 1));
+						port = Integer.parseInt(value, portSeparatorIdx + 1, value.length(), 10);
 					}
 					catch (NumberFormatException ex) {
 						throw new IllegalArgumentException(
@@ -904,7 +904,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				throw new IllegalArgumentException("Invalid IPv4 address: " + rawValue);
 			}
 			host(rawValue.substring(0, portSeparatorIdx));
-			port(Integer.parseInt(rawValue.substring(portSeparatorIdx + 1)));
+			port(Integer.parseInt(rawValue, portSeparatorIdx + 1, rawValue.length(), 10));
 		}
 		else {
 			host(rawValue);
