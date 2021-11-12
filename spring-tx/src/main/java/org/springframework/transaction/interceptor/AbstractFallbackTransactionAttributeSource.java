@@ -107,7 +107,7 @@ public abstract class AbstractFallbackTransactionAttributeSource
 		}
 
 		// First, see if we have a cached value.
-		Object cacheKey = getCacheKey(method, targetClass);
+		Object cacheKey = getCacheKey(AopUtils.getMostSpecificMethod(method,targetClass), targetClass);
 		TransactionAttribute cached = this.attributeCache.get(cacheKey);
 		if (cached != null) {
 			// Value will either be canonical value indicating there is no transaction attribute,
