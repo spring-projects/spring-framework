@@ -89,7 +89,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 			return null;
 		}
 
-		Object cacheKey = getCacheKey(method, targetClass);
+		Object cacheKey = getCacheKey(AopUtils.getMostSpecificMethod(method,targetClass), targetClass);
 		Collection<CacheOperation> cached = this.attributeCache.get(cacheKey);
 
 		if (cached != null) {
