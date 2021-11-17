@@ -3218,7 +3218,7 @@ probably want it deserialized from JSON (similar to `@RequestBody`). Use the
 	}
 ----
 
-You can use `@RequestPart` in combination with `jakarta.validation.Valid` or use Spring's
+You can use `@RequestPart` in combination with `javax.validation.Valid` or use Spring's
 `@Validated` annotation, both of which cause Standard Bean Validation to be applied.
 By default, validation errors cause a `MethodArgumentNotValidException`, which is turned
 into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation errors locally
@@ -3275,7 +3275,7 @@ The following example uses a `@RequestBody` argument:
 You can use the <<mvc-config-message-converters>> option of the <<mvc-config>> to
 configure or customize message conversion.
 
-You can use `@RequestBody` in combination with `jakarta.validation.Valid` or Spring's
+You can use `@RequestBody` in combination with `javax.validation.Valid` or Spring's
 `@Validated` annotation, both of which cause Standard Bean Validation to be applied.
 By default, validation errors cause a `MethodArgumentNotValidException`, which is turned
 into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation errors locally
