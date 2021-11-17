@@ -364,7 +364,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Create a new {@code DispatcherServlet} with the given web application context. This
-	 * constructor is useful in Servlet 3.0+ environments where instance-based registration
+	 * constructor is useful in Servlet environments where instance-based registration
 	 * of servlets is possible through the {@link ServletContext#addServlet} API.
 	 * <p>Using this constructor indicates that the following properties / init-params
 	 * will be ignored:

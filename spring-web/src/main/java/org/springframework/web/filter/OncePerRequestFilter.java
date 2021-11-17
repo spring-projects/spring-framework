@@ -35,7 +35,7 @@ import org.springframework.web.util.WebUtils;
  * dispatch, on any servlet container. It provides a {@link #doFilterInternal}
  * method with HttpServletRequest and HttpServletResponse arguments.
  *
- * <p>As of Servlet 3.0, a filter may be invoked as part of a
+ * <p>A filter may be invoked as part of a
  * {@link jakarta.servlet.DispatcherType#REQUEST REQUEST} or
  * {@link jakarta.servlet.DispatcherType#ASYNC ASYNC} dispatches that occur in
  * separate threads. A filter can be configured in {@code web.xml} whether it
@@ -133,10 +133,10 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	}
 
 	/**
-	 * The dispatcher type {@code jakarta.servlet.DispatcherType.ASYNC} introduced
-	 * in Servlet 3.0 means a filter can be invoked in more than one thread over
-	 * the course of a single request. This method returns {@code true} if the
-	 * filter is currently executing within an asynchronous dispatch.
+	 * The dispatcher type {@code jakarta.servlet.DispatcherType.ASYNC} means a
+	 * filter can be invoked in more than one thread over the course of a single
+	 * request. This method returns {@code true} if the filter is currently
+	 * executing within an asynchronous dispatch.
 	 * @param request the current request
 	 * @since 3.2
 	 * @see WebAsyncManager#hasConcurrentResult()
@@ -186,15 +186,15 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	}
 
 	/**
-	 * The dispatcher type {@code jakarta.servlet.DispatcherType.ASYNC} introduced
-	 * in Servlet 3.0 means a filter can be invoked in more than one thread
-	 * over the course of a single request. Some filters only need to filter
-	 * the initial thread (e.g. request wrapping) while others may need
-	 * to be invoked at least once in each additional thread for example for
-	 * setting up thread locals or to perform final processing at the very end.
+	 * The dispatcher type {@code jakarta.servlet.DispatcherType.ASYNC} means a
+	 * filter can be invoked in more than one thread over the course of a single
+	 * request. Some filters only need to filter the initial thread (e.g. request
+	 * wrapping) while others may need to be invoked at least once in each
+	 * additional thread for example for setting up thread locals or to perform
+	 * final processing at the very end.
 	 * <p>Note that although a filter can be mapped to handle specific dispatcher
 	 * types via {@code web.xml} or in Java through the {@code ServletContext},
-	 * servlet containers may enforce different defaults with regards to
+	 * servlet containers may enforce different defaults with respect to
 	 * dispatcher types. This flag enforces the design intent of the filter.
 	 * <p>The default return value is "true", which means the filter will not be
 	 * invoked during subsequent async dispatches. If "false", the filter will

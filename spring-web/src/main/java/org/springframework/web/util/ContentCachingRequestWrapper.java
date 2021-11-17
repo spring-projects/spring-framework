@@ -46,8 +46,6 @@ import org.springframework.lang.Nullable;
  * retrieved via {@link #getContentAsByteArray()}.
  *
  * <p>Used e.g. by {@link org.springframework.web.filter.AbstractRequestLoggingFilter}.
- * Note: As of Spring Framework 5.0, this wrapper is built on the Servlet 3.1 API.
- *
  *
  * @author Juergen Hoeller
  * @author Brian Clozel

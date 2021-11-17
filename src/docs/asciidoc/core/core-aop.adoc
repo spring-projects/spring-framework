@@ -3570,7 +3570,7 @@ visibility may be annotated, including private methods. Annotating non-public me
 directly is the only way to get transaction demarcation for the execution of such methods.
 
 TIP: Since Spring Framework 4.2, `spring-aspects` provides a similar aspect that offers the
-exact same features for the standard `javax.transaction.Transactional` annotation. Check
+exact same features for the standard `jakarta.transaction.Transactional` annotation. Check
 `JtaAnnotationTransactionAspect` for more details.
 
 For AspectJ programmers who want to use the Spring configuration and transaction

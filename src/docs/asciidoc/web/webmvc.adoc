@@ -14,7 +14,7 @@ whose name, "`Spring WebFlux,`" is also based on its source module
 This section covers Spring Web MVC. The <<web-reactive.adoc#spring-web-reactive, next section>>
 covers Spring WebFlux.
 
-For baseline information and compatibility with Servlet container and Java EE version
+For baseline information and compatibility with Servlet container and Jakarta EE version
 ranges, see the Spring Framework
 https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Versions[Wiki].
 
@@ -315,9 +315,9 @@ provides many extra convenient options.
 [[mvc-container-config]]
 === Servlet Config
 
-In a Servlet 3.0+ environment, you have the option of configuring the Servlet container
-programmatically as an alternative or in combination with a `web.xml` file. The following
-example registers a `DispatcherServlet`:
+In a Servlet environment, you have the option of configuring the Servlet container
+programmatically as an alternative or in combination with a `web.xml` file.
+The following example registers a `DispatcherServlet`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1132,7 +1132,7 @@ request with a simple request parameter.
 `MultipartResolver` from the `org.springframework.web.multipart` package is a strategy
 for parsing multipart requests including file uploads. There is one implementation
 based on https://commons.apache.org/proper/commons-fileupload[Commons FileUpload] and
-another based on Servlet 3.0 multipart request parsing.
+another based on Servlet multipart request parsing.
 
 To enable multipart handling, you need to declare a `MultipartResolver` bean in your
 `DispatcherServlet` Spring configuration with a name of `multipartResolver`.
@@ -1163,9 +1163,9 @@ javadoc for details and configuration options.
 
 
 [[mvc-multipart-resolver-standard]]
-==== Servlet 3.0
+==== Servlet Multipart Parsing
 
-Servlet 3.0 multipart parsing needs to be enabled through Servlet container configuration.
+Servlet multipart parsing needs to be enabled through Servlet container configuration.
 To do so:
 
 * In Java, set a `MultipartConfigElement` on the Servlet registration.
@@ -1205,7 +1205,7 @@ The following example shows how to set a `MultipartConfigElement` on the Servlet
 	}
 ----
 
-Once the Servlet 3.0 configuration is in place, you can add a bean of type
+Once the Servlet multipart configuration is in place, you can add a bean of type
 `StandardServletMultipartResolver` with a name of `multipartResolver`.
 
 [NOTE]
@@ -2777,7 +2777,7 @@ alternatively, set `@ModelAttribute(binding=false)`, as the following example sh
 <1> Setting `@ModelAttribute(binding=false)`.
 
 You can automatically apply validation after data binding by adding the
-`javax.validation.Valid` annotation or Spring's `@Validated` annotation
+`jakarta.validation.Valid` annotation or Spring's `@Validated` annotation
 (<<core.adoc#validation-beanvalidation, Bean Validation>> and
 <<core.adoc#validation, Spring validation>>). The following example shows how to do so:
 
@@ -3116,7 +3116,7 @@ When the `@RequestParam` annotation is declared as a `Map<String, MultipartFile>
 `MultiValueMap<String, MultipartFile>`, without a parameter name specified in the annotation,
 then the map is populated with the multipart files for each given parameter name.
 
-NOTE: With Servlet 3.0 multipart parsing, you may also declare `jakarta.servlet.http.Part`
+NOTE: With Servlet multipart parsing, you may also declare `jakarta.servlet.http.Part`
 instead of Spring's `MultipartFile`, as a method argument or collection value type.
 
 You can also use multipart content as part of data binding to a
@@ -3218,7 +3218,7 @@ probably want it deserialized from JSON (similar to `@RequestBody`). Use the
 	}
 ----
 
-You can use `@RequestPart` in combination with `javax.validation.Valid` or use Spring's
+You can use `@RequestPart` in combination with `jakarta.validation.Valid` or use Spring's
 `@Validated` annotation, both of which cause Standard Bean Validation to be applied.
 By default, validation errors cause a `MethodArgumentNotValidException`, which is turned
 into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation errors locally
@@ -3275,7 +3275,7 @@ The following example uses a `@RequestBody` argument:
 You can use the <<mvc-config-message-converters>> option of the <<mvc-config>> to
 configure or customize message conversion.
 
-You can use `@RequestBody` in combination with `javax.validation.Valid` or Spring's
+You can use `@RequestBody` in combination with `jakarta.validation.Valid` or Spring's
 `@Validated` annotation, both of which cause Standard Bean Validation to be applied.
 By default, validation errors cause a `MethodArgumentNotValidException`, which is turned
 into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation errors locally
@@ -4350,7 +4350,7 @@ capital letters of the class and the method name (for example, the `getThing` me
 == Asynchronous Requests
 [.small]#<<mvc-ann-async-vs-webflux, Compared to WebFlux>>#
 
-Spring MVC has an extensive integration with Servlet 3.0 asynchronous request
+Spring MVC has an extensive integration with Servlet asynchronous request
 <<mvc-ann-async-processing,processing>>:
 
 * <<mvc-ann-async-deferredresult, `DeferredResult`>> and <<mvc-ann-async-callable, `Callable`>>
@@ -4524,10 +4524,10 @@ methods for timeout and completion callbacks.
 ==== Compared to WebFlux
 
 The Servlet API was originally built for making a single pass through the Filter-Servlet
-chain. Asynchronous request processing, added in Servlet 3.0, lets applications exit
-the Filter-Servlet chain but leave the response open for further processing. The Spring MVC
-asynchronous support is built around that mechanism. When a controller returns a `DeferredResult`,
-the Filter-Servlet chain is exited, and the Servlet container thread is released. Later, when
+chain. Asynchronous request processing lets applications exit the Filter-Servlet chain
+but leave the response open for further processing. The Spring MVC asynchronous support
+is built around that mechanism. When a controller returns a `DeferredResult`, the
+Filter-Servlet chain is exited, and the Servlet container thread is released. Later, when
 the `DeferredResult` is set, an `ASYNC` dispatch (to the same URL) is made, during which the
 controller is mapped again but, rather than invoking it, the `DeferredResult` value is used
 (as if the controller returned it) to resume processing.
