@@ -5512,7 +5512,7 @@ dependency in addition to https://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jac
 
 Other interesting Jackson modules are available:
 
-* https://github.com/zalando/jackson-datatype-money[jackson-datatype-money]: Support for `jakarta.money` types (unofficial module).
+* https://github.com/zalando/jackson-datatype-money[jackson-datatype-money]: Support for `javax.money` types (unofficial module).
 * https://github.com/FasterXML/jackson-datatype-hibernate[jackson-datatype-hibernate]: Support for Hibernate-specific types and properties (including lazy-loading aspects).
 
 The following example shows how to achieve the same configuration in XML:
