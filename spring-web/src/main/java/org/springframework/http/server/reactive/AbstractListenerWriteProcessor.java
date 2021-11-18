@@ -254,7 +254,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * the next item from the upstream, write Publisher.
 	 * <p>The default implementation is a no-op.
 	 * @deprecated originally introduced for Undertow to stop write notifications
-	 * when no data is available, but deprecated as of as of 5.0.6 since constant
+	 * when no data is available, but deprecated as of 5.0.6 since constant
 	 * switching on every requested item causes a significant slowdown.
 	 */
 	@Deprecated

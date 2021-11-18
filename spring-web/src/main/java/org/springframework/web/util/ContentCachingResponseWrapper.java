@@ -159,15 +159,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	}
 
 	/**
-	 * Return the status code as specified on the response.
-	 * @deprecated as of 5.2 in favor of {@link HttpServletResponse#getStatus()}
-	 */
-	@Deprecated
-	public int getStatusCode() {
-		return getStatus();
-	}
-
-	/**
 	 * Return the cached response content as a byte array.
 	 */
 	public byte[] getContentAsByteArray() {
