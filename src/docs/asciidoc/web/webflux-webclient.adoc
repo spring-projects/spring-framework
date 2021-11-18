@@ -12,9 +12,9 @@ decode request and response content on the server side.
 support for the following:
 
 * https://github.com/reactor/reactor-netty[Reactor Netty]
+* https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html[JDK HttpClient]
 * https://github.com/jetty-project/jetty-reactive-httpclient[Jetty Reactive HttpClient]
 * https://hc.apache.org/index.html[Apache HttpComponents]
-* https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html[JDK HttpClient]
 * Others can be plugged via `ClientHttpConnector`.
 
 
@@ -336,6 +336,40 @@ To configure a response timeout for a specific request:
 
 
 
+[[webflux-client-builder-jdk-httpclient]]
+=== JDK HttpClient
+
+The following example shows how to customize the JDK `HttpClient`:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+    HttpClient httpClient = HttpClient.newBuilder()
+        .followRedirects(Redirect.NORMAL)
+        .connectTimeout(Duration.ofSeconds(20))
+        .build();
+
+    ClientHttpConnector connector =
+            new JdkClientHttpConnector(httpClient, new DefaultDataBufferFactory());
+
+    WebClient webClient = WebClient.builder().clientConnector(connector).build();
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+    val httpClient = HttpClient.newBuilder()
+        .followRedirects(Redirect.NORMAL)
+        .connectTimeout(Duration.ofSeconds(20))
+        .build()
+
+    val connector = JdkClientHttpConnector(httpClient, DefaultDataBufferFactory())
+
+    val webClient = WebClient.builder().clientConnector(connector).build()
+----
+
+
+
 [[webflux-client-builder-jetty]]
 === Jetty
 
@@ -426,6 +460,7 @@ The following example shows how to customize Apache HttpComponents `HttpClient` 
 	HttpAsyncClientBuilder clientBuilder = HttpAsyncClients.custom();
 	clientBuilder.setDefaultRequestConfig(...);
 	CloseableHttpAsyncClient client = clientBuilder.build();
+
 	ClientHttpConnector connector = new HttpComponentsClientHttpConnector(client);
 
 	WebClient webClient = WebClient.builder().clientConnector(connector).build();
@@ -440,43 +475,6 @@ The following example shows how to customize Apache HttpComponents `HttpClient` 
 	val webClient = WebClient.builder().clientConnector(connector).build()
 ----
 
-[[webflux-client-builder-jdk-httpclient]]
-=== JDK
-The following example shows how to customize JDK `HttpClient` settings:
-
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
-----
-	@Bean
-	public WebClient webClient() {
-		HttpClient httpClient = HttpClient.newBuilder()
-			.executor(...)
-			.connectTimeout(...)
-			.build();
-		ClientHttpConnector connector =
-				new JdkClientHttpConnector(httpClient, new DefaultDataBufferFactory()); // <1>
-
-		return WebClient webClient = WebClient.builder().clientConnector(connector).build(); // <2>
-	}
-----
-<1> Use the `JdkClientHttpConnector` constructor with customized `HttpClient` instance.
-<2> Plug the connector into the `WebClient.Builder`.
-
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	@Bean
-	fun webClient() : WebClient {
-		val httpClient = HttpClient.newBuilder()
-			.executor(...)
-			.connectTimeout(...)
-			.build()
-		val connector = JdkClientHttpConnector(httpClient, DefaultDataBufferFactory()) // <1>
-
-		return WebClient webClient = WebClient.builder()
-				.clientConnector(connector).build() // <2>
-	}
-----
 
 [[webflux-client-retrieve]]
 == `retrieve()`

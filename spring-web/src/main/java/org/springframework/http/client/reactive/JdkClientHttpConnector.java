@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,37 +27,40 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 
 /**
- * {@link ClientHttpConnector} for the Java 11 HTTP client.
+ * {@link ClientHttpConnector} for Java's {@link HttpClient}.
  *
  * @author Julien Eyraud
- * @since 5.2
- * @see <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html">Java HttpClient</a>
+ * @since 6.0
+ * @see <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html">HttpClient</a>
  */
 public class JdkClientHttpConnector implements ClientHttpConnector {
 
 	private final HttpClient httpClient;
 
-	private final DataBufferFactory dataBufferFactory;
+	private final DataBufferFactory bufferFactory;
 
 
 	/**
-	 * Default constructor that creates a new instance of {@link HttpClient} and a {@link DataBufferFactory}.
+	 * Default constructor that uses {@link HttpClient#newHttpClient()}.
 	 */
 	public JdkClientHttpConnector() {
 		this(HttpClient.newHttpClient(), new DefaultDataBufferFactory());
 	}
 
 	/**
-	 * Constructor with an initialized {@link HttpClient} and a initialized {@link DataBufferFactory}.
+	 * Constructor with an initialized {@link HttpClient} and a {@link DataBufferFactory}.
 	 */
-	public JdkClientHttpConnector(final HttpClient httpClient, final DataBufferFactory dataBufferFactory) {
+	public JdkClientHttpConnector(HttpClient httpClient, DataBufferFactory bufferFactory) {
 		this.httpClient = httpClient;
-		this.dataBufferFactory = dataBufferFactory;
+		this.bufferFactory = bufferFactory;
 	}
 
+
 	@Override
-	public Mono<ClientHttpResponse> connect(final HttpMethod method, final URI uri, final Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
-		final JdkClientHttpRequest request = new JdkClientHttpRequest(this.httpClient, method, uri, this.dataBufferFactory);
+	public Mono<ClientHttpResponse> connect(
+			HttpMethod method, URI uri, Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
+
+		JdkClientHttpRequest request = new JdkClientHttpRequest(this.httpClient, method, uri, this.bufferFactory);
 		return requestCallback.apply(request).then(Mono.defer(request::getResponse));
 	}
 
