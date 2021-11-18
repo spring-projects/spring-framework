@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,26 +67,6 @@ public class ServerErrorException extends ResponseStatusException {
 		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
 		this.handlerMethod = parameter.getMethod();
 		this.parameter = parameter;
-	}
-
-	/**
-	 * Constructor for a 500 error linked to a specific {@code MethodParameter}.
-	 * @deprecated in favor of {@link #ServerErrorException(String, MethodParameter, Throwable)}
-	 */
-	@Deprecated
-	public ServerErrorException(String reason, MethodParameter parameter) {
-		this(reason, parameter, null);
-	}
-
-	/**
-	 * Constructor for a 500 error with a reason only.
-	 * @deprecated in favor of {@link #ServerErrorException(String, Throwable)}
-	 */
-	@Deprecated
-	public ServerErrorException(String reason) {
-		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, null);
-		this.handlerMethod = null;
-		this.parameter = null;
 	}
 
 

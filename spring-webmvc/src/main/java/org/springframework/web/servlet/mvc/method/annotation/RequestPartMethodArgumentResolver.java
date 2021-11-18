@@ -46,7 +46,7 @@ import org.springframework.web.multipart.support.RequestPartServletServerHttpReq
  * <ul>
  * <li>Annotated with @{@link RequestPart}
  * <li>Of type {@link MultipartFile} in conjunction with Spring's {@link MultipartResolver} abstraction
- * <li>Of type {@code jakarta.servlet.http.Part} in conjunction with Servlet 3.0 multipart requests
+ * <li>Of type {@code jakarta.servlet.http.Part} in conjunction with Servlet multipart requests
  * </ul>
  *
  * <p>When a parameter is annotated with {@code @RequestPart}, the content of the part is

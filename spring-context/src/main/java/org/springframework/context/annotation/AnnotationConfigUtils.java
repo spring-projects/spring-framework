@@ -84,14 +84,6 @@ public abstract class AnnotationConfigUtils {
 			"org.springframework.context.annotation.internalAutowiredAnnotationProcessor";
 
 	/**
-	 * The bean name of the internally managed Required annotation processor.
-	 * @deprecated as of 5.1, since no Required processor is registered by default anymore
-	 */
-	@Deprecated
-	public static final String REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME =
-			"org.springframework.context.annotation.internalRequiredAnnotationProcessor";
-
-	/**
 	 * The bean name of the internally managed common annotation processor.
 	 */
 	public static final String COMMON_ANNOTATION_PROCESSOR_BEAN_NAME =

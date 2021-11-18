@@ -441,21 +441,6 @@ class StringUtilsTests {
 	}
 
 	@Test
-	@Deprecated
-	void mergeStringArrays() {
-		String[] input1 = new String[] {"myString2"};
-		String[] input2 = new String[] {"myString1", "myString2"};
-		String[] result = StringUtils.mergeStringArrays(input1, input2);
-		assertThat(result.length).isEqualTo(2);
-		assertThat(result[0]).isEqualTo("myString2");
-		assertThat(result[1]).isEqualTo("myString1");
-
-		assertThat(StringUtils.mergeStringArrays(input1, null)).isEqualTo(input1);
-		assertThat(StringUtils.mergeStringArrays(null, input2)).isEqualTo(input2);
-		assertThat(StringUtils.mergeStringArrays(null, null)).isNull();
-	}
-
-	@Test
 	void sortStringArray() {
 		String[] input = new String[] {"myString2"};
 		input = StringUtils.addStringToArray(input, "myString1");

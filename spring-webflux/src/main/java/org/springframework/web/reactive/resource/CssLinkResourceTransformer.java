@@ -79,8 +79,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 				.flatMap(outputResource -> {
 					String filename = outputResource.getFilename();
 					if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
-							inputResource instanceof EncodedResourceResolver.EncodedResource ||
-							inputResource instanceof GzipResourceResolver.GzippedResource) {
+							inputResource instanceof EncodedResourceResolver.EncodedResource) {
 						return Mono.just(outputResource);
 					}
 

@@ -23,7 +23,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.util.ServletRequestPathUtils;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * {@link RequestToViewNameTranslator} that simply transforms the URI of
@@ -120,48 +119,6 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 */
 	public void setStripExtension(boolean stripExtension) {
 		this.stripExtension = stripExtension;
-	}
-
-	/**
-	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
-	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
-	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
-	 */
-	@Deprecated
-	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
-	}
-
-	/**
-	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
-	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
-	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
-	 */
-	@Deprecated
-	public void setUrlDecode(boolean urlDecode) {
-	}
-
-	/**
-	 * Set if ";" (semicolon) content should be stripped from the request URI.
-	 * @see org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
-	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
-	 */
-	@Deprecated
-	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
-	}
-
-	/**
-	 * Set the {@link org.springframework.web.util.UrlPathHelper} to use for
-	 * the resolution of lookup paths.
-	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
-	 * or to share common UrlPathHelper settings across multiple web components.
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
-	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
-	 */
-	@Deprecated
-	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 	}
 
 

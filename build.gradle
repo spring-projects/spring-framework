@@ -120,8 +120,8 @@ configure(allprojects) { project ->
 			dependencySet(group: 'org.apache.tomcat', version: '10.0.12') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
-					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
+					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 				}
 			}
 			dependencySet(group: 'org.apache.tomcat.embed', version: '10.0.12') {
@@ -130,9 +130,7 @@ configure(allprojects) { project ->
 			}
 			dependencySet(group: 'io.undertow', version: '2.2.12.Final') {
 				entry 'undertow-core'
-				entry('undertow-servlet-jakartaee9') {
-					exclude group: "org.jboss.spec.javax.annotation", name: "jboss-annotations-api_1.3_spec"
-				}
+				entry 'undertow-servlet-jakartaee9'
 				entry 'undertow-websockets-jsr-jakartaee9'
 			}
 

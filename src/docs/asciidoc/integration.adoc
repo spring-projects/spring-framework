@@ -534,7 +534,7 @@ shows our class that extends `SpringBeanAutowiringSupport`:
 	 * the @Autowired annotation) is the simplest JAX-WS compliant way.
 	 *
 	 * This is the class registered with the server-side JAX-WS implementation.
-	 * In the case of a Java EE server, this would simply be defined as a servlet
+	 * In the case of a Jakarta EE server, this would simply be defined as a servlet
 	 * in web.xml, with the server detecting that this is a JAX-WS endpoint and reacting
 	 * accordingly. The servlet name usually needs to match the specified WS service name.
 	 *
@@ -564,7 +564,7 @@ shows our class that extends `SpringBeanAutowiringSupport`:
 Our `AccountServiceEndpoint` needs to run in the same web application as the Spring
 context to allow for access to Spring's facilities. This is the case by default in Java
 EE environments, using the standard contract for JAX-WS servlet endpoint deployment.
-See the various Java EE web service tutorials for details.
+See the various Jakarta EE web service tutorials for details.
 
 
 [[remoting-web-services-jaxws-export-standalone]]
@@ -631,12 +631,12 @@ Spring-managed beans, similar to the standalone mode discussed in the
 <<remoting-web-services-jaxws-export-standalone, previous section>> --
 but this time in a Servlet environment.
 
-NOTE: This is not portable in a Java EE environment. It is mainly intended for non-EE
+NOTE: This is not portable in a Jakarta EE environment. It is mainly intended for non-EE
 environments, such as Tomcat, that embed the JAX-WS RI as part of the web application.
 
 The differences from the standard style of exporting servlet-based endpoints are that
 the lifecycle of the endpoint instances themselves are managed by Spring and that there
-is only one JAX-WS servlet defined in `web.xml`. With the standard Java EE style (as
+is only one JAX-WS servlet defined in `web.xml`. With the standard Jakarta EE style (as
 shown earlier), you have one servlet definition per service endpoint, with each endpoint
 typically delegating to Spring beans (through the use of `@Autowired`, as shown earlier).
 
@@ -1444,7 +1444,7 @@ the same way as Spring's integration does for the JDBC API.
 
 JMS can be roughly divided into two areas of functionality, namely the production and
 consumption of messages. The `JmsTemplate` class is used for message production and
-synchronous message reception. For asynchronous reception similar to Java EE's
+synchronous message reception. For asynchronous reception similar to Jakarta EE's
 message-driven bean style, Spring provides a number of message-listener containers that
 you can use to create Message-Driven POJOs (MDPs). Spring also provides a declarative way
 to create message listeners.
@@ -1461,8 +1461,8 @@ the user.
 
 The `org.springframework.jms.support` package provides `JMSException` translation
 functionality. The translation converts the checked `JMSException` hierarchy to a
-mirrored hierarchy of unchecked exceptions. If any provider-specific
-subclasses of the checked `javax.jms.JMSException` exist, this exception is wrapped in the
+mirrored hierarchy of unchecked exceptions. If any provider-specific subclasses
+of the checked `jakarta.jms.JMSException` exist, this exception is wrapped in the
 unchecked `UncategorizedJmsException`.
 
 The `org.springframework.jms.support.converter` package provides a `MessageConverter`
@@ -1562,7 +1562,7 @@ vendor-specific, such as SSL configuration options.
 
 When using JMS inside an EJB, the vendor provides implementations of the JMS interfaces
 so that they can participate in declarative transaction management and perform pooling
-of connections and sessions. In order to use this implementation, Java EE containers
+of connections and sessions. In order to use this implementation, Jakarta EE containers
 typically require that you declare a JMS connection factory as a `resource-ref` inside
 the EJB or servlet deployment descriptors. To ensure the use of these features with the
 `JmsTemplate` inside an EJB, the client application should ensure that it references the
@@ -1689,7 +1689,7 @@ the standard JMS `MessageConsumer.setMessageListener()` method, and leaves it up
 provider to perform listener callbacks. This variant does not allow for dynamic adaption
 to runtime demands or for participation in externally managed transactions.
 Compatibility-wise, it stays very close to the spirit of the standalone JMS
-specification, but is generally not compatible with Java EE's JMS restrictions.
+specification, but is generally not compatible with Jakarta EE's JMS restrictions.
 
 NOTE: While `SimpleMessageListenerContainer` does not allow for participation in externally
 managed transactions, it does support native JMS transactions. To enable this feature,
@@ -1717,7 +1717,7 @@ Each received message is registered with an XA transaction when configured with 
 `JtaTransactionManager`. As a result, processing may take advantage of XA transaction
 semantics. This listener container strikes a good balance between low requirements on
 the JMS provider, advanced functionality (such as participation in externally managed
-transactions), and compatibility with Java EE environments.
+transactions), and compatibility with Jakarta EE environments.
 
 You can customize the cache level of the container. Note that, when no caching is enabled,
 a new connection and a new session is created for each message reception. Combining this
@@ -1762,7 +1762,7 @@ Connection/Session pair from the specified `ConnectionFactory` to the thread.
 `JmsTemplate` automatically detects such transactional resources and operates
 on them accordingly.
 
-In a Java EE environment, the `ConnectionFactory` pools Connection and Session instances,
+In a Jakarta EE environment, the `ConnectionFactory` pools Connection and Session instances,
 so those resources are efficiently reused across transactions. In a standalone environment,
 using Spring's `SingleConnectionFactory` result in a shared JMS `Connection`, with
 each transaction having its own independent `Session`. Alternatively, consider the use
@@ -1772,7 +1772,7 @@ class.
 You can also use `JmsTemplate` with the `JtaTransactionManager` and an XA-capable JMS
 `ConnectionFactory` to perform distributed transactions. Note that this requires the
 use of a JTA transaction manager as well as a properly XA-configured ConnectionFactory.
-(Check your Java EE server's or JMS provider's documentation.)
+(Check your Jakarta EE server's or JMS provider's documentation.)
 
 Reusing code across a managed and unmanaged transactional environment can be confusing
 when using the JMS API to create a `Session` from a `Connection`. This is because the
@@ -1791,7 +1791,7 @@ transactional JMS `Session`.
 === Sending a Message
 
 The `JmsTemplate` contains many convenience methods to send a message. Send
-methods specify the destination by using a `javax.jms.Destination` object, and others
+methods specify the destination by using a `jakarta.jms.Destination` object, and others
 specify the destination by using a `String` in a JNDI lookup. The `send` method
 that takes no destination argument uses the default destination.
 
@@ -1800,11 +1800,11 @@ supplied `Session` object:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	import javax.jms.ConnectionFactory;
-	import javax.jms.JMSException;
-	import javax.jms.Message;
-	import javax.jms.Queue;
-	import javax.jms.Session;
+	import jakarta.jms.ConnectionFactory;
+	import jakarta.jms.JMSException;
+	import jakarta.jms.Message;
+	import jakarta.jms.Queue;
+	import jakarta.jms.Session;
 
 	import org.springframework.jms.core.MessageCreator;
 	import org.springframework.jms.core.JmsTemplate;
@@ -1949,17 +1949,17 @@ See <<jms-annotated-support>> for more details.
 In a fashion similar to a Message-Driven Bean (MDB) in the EJB world, the Message-Driven
 POJO (MDP) acts as a receiver for JMS messages. The one restriction (but see
 <<jms-receiving-async-message-listener-adapter>>) on an MDP is that it must implement
-the `javax.jms.MessageListener` interface. Note that, if your POJO receives messages
+the `jakarta.jms.MessageListener` interface. Note that, if your POJO receives messages
 on multiple threads, it is important to ensure that your implementation is thread-safe.
 
 The following example shows a simple implementation of an MDP:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	import javax.jms.JMSException;
-	import javax.jms.Message;
-	import javax.jms.MessageListener;
-	import javax.jms.TextMessage;
+	import jakarta.jms.JMSException;
+	import jakarta.jms.Message;
+	import jakarta.jms.MessageListener;
+	import jakarta.jms.TextMessage;
 
 	public class ExampleListener implements MessageListener {
 
@@ -2202,10 +2202,10 @@ transaction manager and use a listener container that supports externally manage
 transactions (typically, `DefaultMessageListenerContainer`).
 
 To configure a message listener container for XA transaction participation, you want
-to configure a `JtaTransactionManager` (which, by default, delegates to the Java EE
+to configure a `JtaTransactionManager` (which, by default, delegates to the Jakarta EE
 server's transaction subsystem). Note that the underlying JMS `ConnectionFactory` needs to
 be XA-capable and properly registered with your JTA transaction coordinator. (Check your
-Java EE server's configuration of JNDI resources.) This lets message reception as well
+Jakarta EE server's configuration of JNDI resources.) This lets message reception as well
 as (for example) database access be part of the same transaction (with unified commit
 semantics, at the expense of XA transaction log overhead).
 
@@ -2265,7 +2265,7 @@ Alternatively, you can set up a `JmsMessageEndpointManager` with a given
 		<property name="activationSpec">
 			<bean class="org.apache.activemq.ra.ActiveMQActivationSpec">
 				<property name="destination" value="myQueue"/>
-				<property name="destinationType" value="javax.jms.Queue"/>
+				<property name="destinationType" value="jakarta.jms.Queue"/>
 			</bean>
 		</property>
 		<property name="messageListener" ref="myMessageListener"/>
@@ -2338,7 +2338,7 @@ bean as a JMS listener endpoint. The following example shows how to use it:
 ----
 
 The idea of the preceding example is that, whenever a message is available on the
-`javax.jms.Destination` `myDestination`, the `processOrder` method is invoked
+`jakarta.jms.Destination` `myDestination`, the `processOrder` method is invoked
 accordingly (in this case, with the content of the JMS message, similar to
 what the <<jms-receiving-async-message-listener-adapter, `MessageListenerAdapter`>>
 provides).
@@ -2462,9 +2462,9 @@ a custom header:
 
 The main elements you can inject in JMS listener endpoints are as follows:
 
-* The raw `javax.jms.Message` or any of its subclasses (provided that it
+* The raw `jakarta.jms.Message` or any of its subclasses (provided that it
   matches the incoming message type).
-* The `javax.jms.Session` for optional access to the native JMS API (for example, for sending
+* The `jakarta.jms.Session` for optional access to the native JMS API (for example, for sending
   a custom reply).
 * The `org.springframework.messaging.Message` that represents the incoming JMS message.
   Note that this message holds both the custom and the standard headers (as defined
@@ -2521,7 +2521,7 @@ annotate the payload with `@Valid` and configure the necessary validator, as the
 
 The existing support in <<jms-receiving-async-message-listener-adapter, `MessageListenerAdapter`>>
 already lets your method have a non-`void` return type. When that is the case, the result of
-the invocation is encapsulated in a `javax.jms.Message`, sent either in the destination specified
+the invocation is encapsulated in a `jakarta.jms.Message`, sent either in the destination specified
 in the `JMSReplyTo` header of the original message or in the default destination configured on
 the listener. You can now set that default destination by using the `@SendTo` annotation of the
 messaging abstraction.
@@ -2772,7 +2772,7 @@ also provides a discussion of transaction choices and message redelivery scenari
 | The cache level for JMS resources: `none`, `connection`, `session`, `consumer`, or
   `auto`. By default (`auto`), the cache level is effectively `consumer`, unless
   an external transaction manager has been specified -- in which case, the effective
-  default will be `none` (assuming Java EE-style transaction management, where the given
+  default will be `none` (assuming Jakarta EE-style transaction management, where the given
   ConnectionFactory is an XA-aware pool).
 
 | `acknowledge`
@@ -2884,7 +2884,7 @@ The following table describes the available configuration options for the JCA va
 
 | `transaction-manager`
 | A reference to a Spring `JtaTransactionManager` or a
-  `javax.transaction.TransactionManager` for kicking off an XA transaction for each
+  `jakarta.transaction.TransactionManager` for kicking off an XA transaction for each
   incoming message. If not specified, native acknowledging is used (see the
   `acknowledge` attribute).
 
@@ -4427,12 +4427,12 @@ callback interface. In the following example, the `mailSender` property is of ty
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	import javax.mail.Message;
-	import javax.mail.MessagingException;
-	import javax.mail.internet.InternetAddress;
-	import javax.mail.internet.MimeMessage;
+	import jakarta.mail.Message;
+	import jakarta.mail.MessagingException;
+	import jakarta.mail.internet.InternetAddress;
+	import jakarta.mail.internet.MimeMessage;
 
-	import javax.mail.internet.MimeMessage;
+	import jakarta.mail.internet.MimeMessage;
 	import org.springframework.mail.MailException;
 	import org.springframework.mail.javamail.JavaMailSender;
 	import org.springframework.mail.javamail.MimeMessagePreparator;
@@ -4604,7 +4604,7 @@ tasks with the `TaskExecutor` and `TaskScheduler` interfaces, respectively. Spri
 features implementations of those interfaces that support thread pools or delegation to
 CommonJ within an application server environment. Ultimately, the use of these
 implementations behind the common interfaces abstracts away the differences between Java
-SE 5, Java SE 6, and Java EE environments.
+SE 5, Java SE 6, and Jakarta EE environments.
 
 Spring also features integration classes to support scheduling with the `Timer`
 (part of the JDK since 1.3) and the Quartz Scheduler ( https://www.quartz-scheduler.org/[]).
@@ -4622,7 +4622,7 @@ operation).
 Executors are the JDK name for the concept of thread pools. The "`executor`" naming is
 due to the fact that there is no guarantee that the underlying implementation is
 actually a pool. An executor may be single-threaded or even synchronous. Spring's
-abstraction hides implementation details between the Java SE and Java EE environments.
+abstraction hides implementation details between the Java SE and Jakarta EE environments.
 
 Spring's `TaskExecutor` interface is identical to the `java.util.concurrent.Executor`
 interface. In fact, originally, its primary reason for existence was to abstract away
@@ -4664,13 +4664,9 @@ The variants that Spring provides are as follows:
   configuring a `java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
   If you need to adapt to a different kind of `java.util.concurrent.Executor`, we
   recommend that you use a `ConcurrentTaskExecutor` instead.
-* `WorkManagerTaskExecutor`:
-  This implementation uses a CommonJ `WorkManager` as its backing service provider
-  and is the central convenience class for setting up CommonJ-based thread pool
-  integration on WebLogic or WebSphere within a Spring application context.
 * `DefaultManagedTaskExecutor`:
   This implementation uses a JNDI-obtained `ManagedExecutorService` in a JSR-236
-  compatible runtime environment (such as a Java EE 7+ application server),
+  compatible runtime environment (such as a Jakarta EE application server),
   replacing a CommonJ WorkManager for that purpose.
 
 
@@ -4850,7 +4846,7 @@ application server environment where threads should not be created directly by t
 application itself. For such scenarios, Spring provides a `TimerManagerTaskScheduler`
 that delegates to a CommonJ `TimerManager` on WebLogic or WebSphere as well as a more recent
 `DefaultManagedTaskScheduler` that delegates to a JSR-236 `ManagedScheduledExecutorService`
-in a Java EE 7+ environment. Both are typically configured with a JNDI lookup.
+in a Jakarta EE environment. Both are typically configured with a JNDI lookup.
 
 Whenever external thread management is not a requirement, a simpler alternative is
 a local `ScheduledExecutorService` setup within the application, which can be adapted

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,27 +148,6 @@ public class InjectAnnotationBeanPostProcessorTests {
 		TypedExtendedResourceInjectionBean bean = (TypedExtendedResourceInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBean()).isSameAs(tb);
 		assertThat(bean.getTestBean2()).isSameAs(tb2);
-		assertThat(bean.getTestBean3()).isSameAs(tb);
-		assertThat(bean.getTestBean4()).isSameAs(tb);
-		assertThat(bean.getNestedTestBean()).isSameAs(ntb);
-		assertThat(bean.getBeanFactory()).isSameAs(bf);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void testExtendedResourceInjectionWithAtRequired() {
-		bf.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
-		RootBeanDefinition bd = new RootBeanDefinition(TypedExtendedResourceInjectionBean.class);
-		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		bf.registerBeanDefinition("annotatedBean", bd);
-		TestBean tb = new TestBean();
-		bf.registerSingleton("testBean", tb);
-		NestedTestBean ntb = new NestedTestBean();
-		bf.registerSingleton("nestedTestBean", ntb);
-
-		TypedExtendedResourceInjectionBean bean = (TypedExtendedResourceInjectionBean) bf.getBean("annotatedBean");
-		assertThat(bean.getTestBean()).isSameAs(tb);
-		assertThat(bean.getTestBean2()).isSameAs(tb);
 		assertThat(bean.getTestBean3()).isSameAs(tb);
 		assertThat(bean.getTestBean4()).isSameAs(tb);
 		assertThat(bean.getNestedTestBean()).isSameAs(ntb);
@@ -666,7 +645,6 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		@Override
 		@Inject
-		@Required
 		@SuppressWarnings("deprecation")
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);

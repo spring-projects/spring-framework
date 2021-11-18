@@ -353,14 +353,6 @@ public class PersistenceAnnotationBeanPostProcessor
 		return pvs;
 	}
 
-	@Deprecated
-	@Override
-	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
-
-		return postProcessProperties(pvs, bean, beanName);
-	}
-
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
 		EntityManager emToClose = this.extendedEntityManagersToClose.remove(bean);

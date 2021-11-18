@@ -1258,7 +1258,7 @@ The following table describes the method arguments:
 The presence of this annotation is not required since it is, by default, assumed if no
 other argument is matched.
 
-You can annotate payload arguments with `@javax.validation.Valid` or Spring's `@Validated`,
+You can annotate payload arguments with `@jakarta.validation.Valid` or Spring's `@Validated`,
 to have the payload arguments be automatically validated.
 
 | `@Header`
