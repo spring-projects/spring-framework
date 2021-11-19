@@ -224,18 +224,7 @@ public abstract class StringUtils {
 			return str;
 		}
 
-		int beginIndex = 0;
-		int endIndex = str.length() - 1;
-
-		while (beginIndex <= endIndex && Character.isWhitespace(str.charAt(beginIndex))) {
-			beginIndex++;
-		}
-
-		while (endIndex > beginIndex && Character.isWhitespace(str.charAt(endIndex))) {
-			endIndex--;
-		}
-
-		return str.substring(beginIndex, endIndex + 1);
+		return str.strip();
 	}
 
 	/**
@@ -272,11 +261,7 @@ public abstract class StringUtils {
 			return str;
 		}
 
-		int beginIdx = 0;
-		while (beginIdx < str.length() && Character.isWhitespace(str.charAt(beginIdx))) {
-			beginIdx++;
-		}
-		return str.substring(beginIdx);
+		return str.stripLeading();
 	}
 
 	/**
@@ -290,11 +275,7 @@ public abstract class StringUtils {
 			return str;
 		}
 
-		int endIdx = str.length() - 1;
-		while (endIdx >= 0 && Character.isWhitespace(str.charAt(endIdx))) {
-			endIdx--;
-		}
-		return str.substring(0, endIdx + 1);
+		return str.stripTrailing();
 	}
 
 	/**
