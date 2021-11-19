@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.ref.Reference;
@@ -912,8 +913,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
 				if (isFactoryBean(beanName)) {
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
-					if (bean instanceof FactoryBean) {
-						FactoryBean<?> factory = (FactoryBean<?>) bean;
+					if (bean instanceof FactoryBean<?> factory) {
 						boolean isEagerInit = (factory instanceof SmartFactoryBean &&
 								((SmartFactoryBean<?>) factory).isEagerInit());
 						if (isEagerInit) {
@@ -930,10 +930,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		// Trigger post-initialization callback for all applicable beans...
 		for (String beanName : beanNames) {
 			Object singletonInstance = getSingleton(beanName);
-			if (singletonInstance instanceof SmartInitializingSingleton) {
+			if (singletonInstance instanceof SmartInitializingSingleton smartSingleton) {
 				StartupStep smartInitialize = this.getApplicationStartup().start("spring.beans.smart-initialize")
 						.tag("beanName", beanName);
-				SmartInitializingSingleton smartSingleton = (SmartInitializingSingleton) singletonInstance;
 				smartSingleton.afterSingletonsInstantiated();
 				smartInitialize.end();
 			}
@@ -1837,11 +1836,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Serialization support
 	//---------------------------------------------------------------------
 
+	@Serial
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
 		throw new NotSerializableException("DefaultListableBeanFactory itself is not deserializable - " +
 				"just a SerializedBeanFactoryReference is");
 	}
 
+	@Serial
 	protected Object writeReplace() throws ObjectStreamException {
 		if (this.serializationId != null) {
 			return new SerializedBeanFactoryReference(this.serializationId);
