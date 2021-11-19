@@ -64,9 +64,7 @@ public abstract class StreamUtils {
 			return EMPTY_CONTENT;
 		}
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE);
-		copy(in, out);
-		return out.toByteArray();
+		return in.readAllBytes();
 	}
 
 	/**
@@ -152,15 +150,9 @@ public abstract class StreamUtils {
 		Assert.notNull(in, "No InputStream specified");
 		Assert.notNull(out, "No OutputStream specified");
 
-		int byteCount = 0;
-		byte[] buffer = new byte[BUFFER_SIZE];
-		int bytesRead;
-		while ((bytesRead = in.read(buffer)) != -1) {
-			out.write(buffer, 0, bytesRead);
-			byteCount += bytesRead;
-		}
+		int count = (int) in.transferTo(out);
 		out.flush();
-		return byteCount;
+		return count;
 	}
 
 	/**
