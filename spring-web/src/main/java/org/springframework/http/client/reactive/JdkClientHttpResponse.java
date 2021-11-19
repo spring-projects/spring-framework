@@ -21,6 +21,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.Flow;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -36,13 +38,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * {@link ClientHttpResponse} implementation for Java's {@link HttpClient}.
+ * {@link ClientHttpResponse} for the Java {@link HttpClient}.
  *
  * @author Julien Eyraud
+ * @author Rossen Stoyanchev
  * @since 6.0
  */
 class JdkClientHttpResponse implements ClientHttpResponse {
@@ -54,12 +59,23 @@ class JdkClientHttpResponse implements ClientHttpResponse {
 
 	private final DataBufferFactory bufferFactory;
 
+	private final HttpHeaders headers;
+
 
 	public JdkClientHttpResponse(
 			HttpResponse<Flow.Publisher<List<ByteBuffer>>> response, DataBufferFactory bufferFactory) {
 
 		this.response = response;
 		this.bufferFactory = bufferFactory;
+		this.headers = adaptHeaders(response);
+	}
+
+	private static HttpHeaders adaptHeaders(HttpResponse<Flow.Publisher<List<ByteBuffer>>> response) {
+		Map<String, List<String>> rawHeaders = response.headers().map();
+		Map<String, List<String>> map = new LinkedCaseInsensitiveMap<>(rawHeaders.size(), Locale.ENGLISH);
+		MultiValueMap<String, String> multiValueMap = CollectionUtils.toMultiValueMap(map);
+		multiValueMap.putAll(rawHeaders);
+		return HttpHeaders.readOnlyHttpHeaders(multiValueMap);
 	}
 
 
@@ -75,34 +91,31 @@ class JdkClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return this.response.headers().map().entrySet().stream()
-				.collect(HttpHeaders::new,
-						(headers, entry) -> headers.addAll(entry.getKey(), entry.getValue()),
-						HttpHeaders::addAll);
+		return this.headers;
 	}
 
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		return this.response.headers().allValues(HttpHeaders.SET_COOKIE).stream()
-				.flatMap(header ->
-						HttpCookie.parse(header).stream().map(cookie ->
-								ResponseCookie.from(cookie.getName(), cookie.getValue())
-										.domain(cookie.getDomain())
-										.httpOnly(cookie.isHttpOnly())
-										.maxAge(cookie.getMaxAge())
-										.path(cookie.getPath())
-										.secure(cookie.getSecure())
-										.sameSite(parseSameSite(header))
-										.build()))
+				.flatMap(header -> {
+					Matcher matcher = SAME_SITE_PATTERN.matcher(header);
+					String sameSite = (matcher.matches() ? matcher.group(1) : null);
+					return HttpCookie.parse(header).stream().map(cookie -> toResponseCookie(cookie, sameSite));
+				})
 				.collect(LinkedMultiValueMap::new,
-						(valueMap, cookie) -> valueMap.add(cookie.getName(), cookie),
+						(cookies, cookie) -> cookies.add(cookie.getName(), cookie),
 						LinkedMultiValueMap::addAll);
 	}
 
-	@Nullable
-	private static String parseSameSite(String headerValue) {
-		Matcher matcher = SAME_SITE_PATTERN.matcher(headerValue);
-		return (matcher.matches() ? matcher.group(1) : null);
+	private ResponseCookie toResponseCookie(HttpCookie cookie, @Nullable String sameSite) {
+		return ResponseCookie.from(cookie.getName(), cookie.getValue())
+				.domain(cookie.getDomain())
+				.httpOnly(cookie.isHttpOnly())
+				.maxAge(cookie.getMaxAge())
+				.path(cookie.getPath())
+				.secure(cookie.getSecure())
+				.sameSite(sameSite)
+				.build();
 	}
 
 	@Override

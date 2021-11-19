@@ -19,11 +19,9 @@ package org.springframework.http.client.reactive;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Flow;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,50 +33,38 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link ClientHttpRequest} implementation for Java's {@link HttpClient}.
+ * {@link ClientHttpRequest} for the Java {@link HttpClient}.
  *
  * @author Julien Eyraud
+ * @author Rossen Stoyanchev
  * @since 6.0
  */
 class JdkClientHttpRequest extends AbstractClientHttpRequest {
-
-	private static final Set<String> DISALLOWED_HEADERS =
-			Set.of("connection", "content-length", "date", "expect", "from", "host", "upgrade", "via", "warning");
-
-
-	private final HttpClient httpClient;
 
 	private final HttpMethod method;
 
 	private final URI uri;
 
-	private final HttpRequest.Builder builder;
-
 	private final DataBufferFactory bufferFactory;
 
-	@Nullable
-	private Mono<ClientHttpResponse> response;
+	private final HttpRequest.Builder builder;
 
 
-	public JdkClientHttpRequest(
-			HttpClient httpClient, HttpMethod httpMethod, URI uri, DataBufferFactory bufferFactory) {
+	public JdkClientHttpRequest(HttpMethod httpMethod, URI uri, DataBufferFactory bufferFactory) {
+		Assert.notNull(httpMethod, "HttpMethod is required");
+		Assert.notNull(uri, "URI is required");
+		Assert.notNull(bufferFactory, "DataBufferFactory is required");
 
-		Assert.notNull(httpClient, "HttpClient should not be null");
-		Assert.notNull(httpMethod, "HttpMethod should not be null");
-		Assert.notNull(uri, "URI should not be null");
-		Assert.notNull(bufferFactory, "DataBufferFactory should not be null");
-
-		this.httpClient = httpClient;
 		this.method = httpMethod;
 		this.uri = uri;
-		this.builder = HttpRequest.newBuilder(uri);
 		this.bufferFactory = bufferFactory;
+		this.builder = HttpRequest.newBuilder(uri);
 	}
 
 
@@ -103,20 +89,16 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 		return (T) this.builder.build();
 	}
 
-	Mono<ClientHttpResponse> getResponse() {
-		Assert.notNull(this.response, "Response is not set");
-		return this.response;
-	}
-
 
 	@Override
 	protected void applyHeaders() {
-		for (Map.Entry<String, List<String>> header : getHeaders().entrySet()) {
-			if (DISALLOWED_HEADERS.contains(header.getKey().toLowerCase())) {
+		for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
+			if (entry.getKey().equalsIgnoreCase(HttpHeaders.CONTENT_LENGTH)) {
+				// content-length is specified when writing
 				continue;
 			}
-			for (String value : header.getValue()) {
-				this.builder.header(header.getKey(), value);
+			for (String value : entry.getValue()) {
+				this.builder.header(entry.getKey(), value);
 			}
 		}
 		if (!getHeaders().containsKey(HttpHeaders.ACCEPT)) {
@@ -126,31 +108,28 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	protected void applyCookies() {
-		this.builder.header(HttpHeaders.COOKIE,
-				getCookies().values().stream()
-						.flatMap(List::stream)
-						.map(cookie -> cookie.getName() + "=" + cookie.getValue())
-						.collect(Collectors.joining("; ")));
+		this.builder.header(HttpHeaders.COOKIE, getCookies().values().stream()
+				.flatMap(List::stream).map(HttpCookie::toString).collect(Collectors.joining(";")));
 	}
 
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return doCommit(() -> {
-			Flow.Publisher<ByteBuffer> flow =
-					JdkFlowAdapter.publisherToFlowPublisher(Flux.from(body).map(DataBuffer::asByteBuffer));
-
-			HttpRequest.BodyPublisher bodyPublisher = (getHeaders().getContentLength() >= 0 ?
-					HttpRequest.BodyPublishers.fromPublisher(flow, getHeaders().getContentLength()) :
-					HttpRequest.BodyPublishers.fromPublisher(flow));
-
-			this.response = Mono.fromCompletionStage(() -> {
-						HttpRequest request = this.builder.method(this.method.name(), bodyPublisher).build();
-						return this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofPublisher());
-					})
-					.map(response -> new JdkClientHttpResponse(response, this.bufferFactory));
-
+			this.builder.method(this.method.name(), toBodyPublisher(body));
 			return Mono.empty();
 		});
+	}
+
+	private HttpRequest.BodyPublisher toBodyPublisher(Publisher<? extends DataBuffer> body) {
+		Publisher<ByteBuffer> byteBufferBody = (body instanceof Mono ?
+				Mono.from(body).map(DataBuffer::asByteBuffer) :
+				Flux.from(body).map(DataBuffer::asByteBuffer));
+
+		Flow.Publisher<ByteBuffer> bodyFlow = JdkFlowAdapter.publisherToFlowPublisher(byteBufferBody);
+
+		return (getHeaders().getContentLength() > 0 ?
+				HttpRequest.BodyPublishers.fromPublisher(bodyFlow, getHeaders().getContentLength()) :
+				HttpRequest.BodyPublishers.fromPublisher(bodyFlow));
 	}
 
 	@Override
@@ -160,18 +139,8 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public Mono<Void> setComplete() {
-		if (isCommitted()) {
-			return Mono.empty();
-		}
-
 		return doCommit(() -> {
-			this.response = Mono.fromCompletionStage(() -> {
-						HttpRequest.BodyPublisher bodyPublisher = HttpRequest.BodyPublishers.noBody();
-						HttpRequest request = this.builder.method(this.method.name(), bodyPublisher).build();
-						return this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofPublisher());
-					})
-					.map(response -> new JdkClientHttpResponse(response, this.bufferFactory));
-
+			this.builder.method(this.method.name(), HttpRequest.BodyPublishers.noBody());
 			return Mono.empty();
 		});
 	}

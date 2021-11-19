@@ -18,6 +18,12 @@ package org.springframework.http.client.reactive;
 
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
@@ -27,9 +33,10 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 
 /**
- * {@link ClientHttpConnector} for Java's {@link HttpClient}.
+ * {@link ClientHttpConnector} for the Java {@link HttpClient}.
  *
  * @author Julien Eyraud
+ * @author Rossen Stoyanchev
  * @since 6.0
  * @see <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html">HttpClient</a>
  */
@@ -60,8 +67,17 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 	public Mono<ClientHttpResponse> connect(
 			HttpMethod method, URI uri, Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		JdkClientHttpRequest request = new JdkClientHttpRequest(this.httpClient, method, uri, this.bufferFactory);
-		return requestCallback.apply(request).then(Mono.defer(request::getResponse));
+		JdkClientHttpRequest jdkClientHttpRequest = new JdkClientHttpRequest(method, uri, this.bufferFactory);
+
+		return requestCallback.apply(jdkClientHttpRequest).then(Mono.defer(() -> {
+			HttpRequest httpRequest = jdkClientHttpRequest.getNativeRequest();
+
+			CompletableFuture<HttpResponse<Flow.Publisher<List<ByteBuffer>>>> future =
+					this.httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofPublisher());
+
+			return Mono.fromCompletionStage(future)
+					.map(response -> new JdkClientHttpResponse(response, this.bufferFactory));
+		}));
 	}
 
 }
