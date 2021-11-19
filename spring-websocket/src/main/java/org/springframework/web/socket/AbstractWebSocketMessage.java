@@ -79,10 +79,9 @@ public abstract class AbstractWebSocketMessage<T> implements WebSocketMessage<T>
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof AbstractWebSocketMessage)) {
+		if (!(other instanceof AbstractWebSocketMessage<?> otherMessage)) {
 			return false;
 		}
-		AbstractWebSocketMessage<?> otherMessage = (AbstractWebSocketMessage<?>) other;
 		return ObjectUtils.nullSafeEquals(this.payload, otherMessage.payload);
 	}
 
