@@ -415,8 +415,10 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
+			// @ComponentScan("com.sl.springlearning.extension")包路径处理：packageSearchPath = classpath*:com/sl/springlearning/extension/**/*.class
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + '/' + this.resourcePattern;
+			//获取当前包下所有的class文件
 			Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
@@ -430,6 +432,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 						if (isCandidateComponent(metadataReader)) {
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 							sbd.setSource(resource);
+							//按照scanner过滤器过滤，比如配置类本身将被过滤掉，没有@Component等组件注解的类将过滤掉
+							//包含@Component注解的组件将创建BeanDefinition
 							if (isCandidateComponent(sbd)) {
 								if (debugEnabled) {
 									logger.debug("Identified candidate component class: " + resource);

@@ -133,15 +133,17 @@ class ConfigurationClassBeanDefinitionReader {
 			this.importRegistry.removeImportingClass(configClass.getMetadata().getClassName());
 			return;
 		}
-
+		//与@Import注解相关
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
+		//将@Bean方法注册为bean
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
-
+		//将configClass中中ImportResource指定的资源注册为bean
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+		//将configClass中ImportedRegistrar注册为bean
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 
@@ -175,6 +177,7 @@ class ConfigurationClassBeanDefinitionReader {
 	private void loadBeanDefinitionsForBeanMethod(BeanMethod beanMethod) {
 		ConfigurationClass configClass = beanMethod.getConfigurationClass();
 		MethodMetadata metadata = beanMethod.getMetadata();
+		//获取方法名
 		String methodName = metadata.getMethodName();
 
 		// Do we need to mark the bean as skipped by its condition?
@@ -185,12 +188,14 @@ class ConfigurationClassBeanDefinitionReader {
 		if (configClass.skippedBeanMethods.contains(methodName)) {
 			return;
 		}
-
+		//获取@Bean注解的元数据信息
 		AnnotationAttributes bean = AnnotationConfigUtils.attributesFor(metadata, Bean.class);
 		Assert.state(bean != null, "No @Bean annotation attributes");
 
 		// Consider name and any aliases
+		//获取@Bean注解是否有name属性，如@Bean(name = "myBean")
 		List<String> names = new ArrayList<>(Arrays.asList(bean.getStringArray("name")));
+		//默认bean的名称和方法名称相同,但是如果设置了name，就取name作为beanName
 		String beanName = (!names.isEmpty() ? names.remove(0) : methodName);
 
 		// Register aliases even when overridden
@@ -208,9 +213,11 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
+		//创建一个BeanMethod的BeanDefinition
 		ConfigurationClassBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass, metadata);
 		beanDef.setSource(this.sourceExtractor.extractSource(metadata, configClass.getResource()));
-
+		//设置工厂方法
+		//后期Bean的实例化，getBean的时候，会判断BeanMethod是否存在FactoryMethod，如果存在，就使用反射调用工厂方法，返回工厂方法中的对象
 		if (metadata.isStatic()) {
 			// static @Bean method
 			beanDef.setBeanClassName(configClass.getMetadata().getClassName());
