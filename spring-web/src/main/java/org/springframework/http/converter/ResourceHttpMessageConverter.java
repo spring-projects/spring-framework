@@ -19,6 +19,7 @@ package org.springframework.http.converter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
@@ -131,22 +132,13 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 	protected void writeContent(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
-		try {
-			InputStream in = resource.getInputStream();
-			try {
-				StreamUtils.copy(in, outputMessage.getBody());
-			}
-			catch (NullPointerException ex) {
-				// ignore, see SPR-13620
-			}
-			finally {
-				try {
-					in.close();
-				}
-				catch (Throwable ex) {
-					// ignore, see SPR-12999
-				}
-			}
+		try (InputStream in = resource.getInputStream()){
+			OutputStream out = outputMessage.getBody();
+			in.transferTo(out);
+			out.flush();
+		}
+		catch (NullPointerException ex) {
+			// ignore, see SPR-13620
 		}
 		catch (FileNotFoundException ex) {
 			// ignore, see SPR-12999

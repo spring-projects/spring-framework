@@ -84,13 +84,6 @@ class StreamUtilsTests {
 	}
 
 	@Test
-	void copyStream() throws Exception {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		StreamUtils.copy(new ByteArrayInputStream(bytes), out);
-		assertThat(out.toByteArray()).isEqualTo(bytes);
-	}
-
-	@Test
 	void copyRange() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		StreamUtils.copyRange(new ByteArrayInputStream(bytes), out, 0, 100);

@@ -65,9 +65,7 @@ public abstract class StreamUtils {
 			return new byte[0];
 		}
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE);
-		copy(in, out);
-		return out.toByteArray();
+		return in.readAllBytes();
 	}
 
 	/**
@@ -139,29 +137,6 @@ public abstract class StreamUtils {
 		Writer writer = new OutputStreamWriter(out, charset);
 		writer.write(in);
 		writer.flush();
-	}
-
-	/**
-	 * Copy the contents of the given InputStream to the given OutputStream.
-	 * <p>Leaves both streams open when done.
-	 * @param in the InputStream to copy from
-	 * @param out the OutputStream to copy to
-	 * @return the number of bytes copied
-	 * @throws IOException in case of I/O errors
-	 */
-	public static int copy(InputStream in, OutputStream out) throws IOException {
-		Assert.notNull(in, "No InputStream specified");
-		Assert.notNull(out, "No OutputStream specified");
-
-		int byteCount = 0;
-		byte[] buffer = new byte[BUFFER_SIZE];
-		int bytesRead;
-		while ((bytesRead = in.read(buffer)) != -1) {
-			out.write(buffer, 0, bytesRead);
-			byteCount += bytesRead;
-		}
-		out.flush();
-		return byteCount;
 	}
 
 	/**
