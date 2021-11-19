@@ -407,7 +407,7 @@ public abstract class UriUtils {
 		int paramIndex = path.indexOf(';', begin);
 		end = (paramIndex != -1 && paramIndex < end ? paramIndex : end);
 		int extIndex = path.lastIndexOf('.', end);
-		if (extIndex != -1 && extIndex > begin) {
+		if (extIndex != -1 && extIndex >= begin) {
 			return path.substring(extIndex + 1, end);
 		}
 		return null;
