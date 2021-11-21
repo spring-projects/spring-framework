@@ -82,6 +82,46 @@ public class LiteralTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	public void testLiteralBytes01() {
+		evaluate("b'\\x61\\x62\\x63'", "abc", String.class);
+	}
+
+	@Test
+	public void testLiteralBytes02() {
+		evaluate("b'\\x61\\x62\\x63abc'", "abcabc", String.class);
+	}
+
+	@Test
+	public void testLiteralBytes03() {
+		evaluate("b\"\\x61a\\x62b\\x63c\"", "aabbcc", String.class);
+	}
+
+	@Test
+	public void testLiteralBytes04() {
+		evaluate("b\"\\x61\\x62\\x63\"", "abc", String.class);
+	}
+
+	@Test
+	public void testLiteralBytes05() {
+		evaluate("b\"\\x61\\x62\\x63abc\"", "abcabc", String.class);
+	}
+
+	@Test
+	public void testLiteralBytes06() {
+		evaluate("b\"\\x61a\\x62b\\x63c\"", "aabbcc", String.class);
+	}
+
+	@Test
+	public void testLiteralBytes07() {
+		evaluate("b\"abc\"", new String(new byte[] {97, 98, 99}), String.class);
+	}
+
+	@Test
+	public void testLiteralBytes08() {
+		evaluate("b\"\\x61\\x62\\x63\"", new String(new byte[] {97, 98, 99}), String.class);
+	}
+
+	@Test
 	public void testHexIntLiteral01() {
 		evaluate("0x7FFFF", "524287", Integer.class);
 		evaluate("0x7FFFFL", 524287L, Long.class);

@@ -255,8 +255,13 @@ public enum SpelMessage {
 
 	/** @since 4.3.17 */
 	FLAWED_PATTERN(Kind.ERROR, 1073,
-			"Failed to efficiently evaluate pattern ''{0}'': consider redesigning it");
+			"Failed to efficiently evaluate pattern ''{0}'': consider redesigning it"),
 
+	NON_TERMINATING_DOUBLE_QUOTED_BYTES(Kind.ERROR, 1074,
+			"Cannot find terminating \" for bytes"),
+
+	NON_TERMINATING_QUOTED_BYTES(Kind.ERROR, 1075,
+			"Cannot find terminating '' for bytes");
 
 	private final Kind kind;
 

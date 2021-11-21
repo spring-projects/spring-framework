@@ -40,6 +40,8 @@ enum TokenKind {
 
 	LITERAL_REAL_FLOAT,
 
+	LITERAL_BYTES,
+
 	LPAREN("("),
 
 	RPAREN(")"),

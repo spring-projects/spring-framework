@@ -73,6 +73,7 @@ import org.springframework.expression.spel.ast.StringLiteral;
 import org.springframework.expression.spel.ast.Ternary;
 import org.springframework.expression.spel.ast.TypeReference;
 import org.springframework.expression.spel.ast.VariableReference;
+import org.springframework.expression.spel.ast.BytesLiteral;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -863,6 +864,9 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		}
 		else if (t.kind == TokenKind.LITERAL_STRING) {
 			push(new StringLiteral(t.stringValue(), t.startPos, t.endPos, t.stringValue()));
+		}
+		else if (t.kind == TokenKind.LITERAL_BYTES) {
+			push(new BytesLiteral(t.stringValue(), t.startPos, t.endPos, t.stringValue()));
 		}
 		else {
 			return false;
