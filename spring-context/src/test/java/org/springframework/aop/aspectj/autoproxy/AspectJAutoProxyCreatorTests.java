@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -40,7 +38,6 @@ import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -51,7 +48,6 @@ import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -65,9 +61,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  */
 public class AspectJAutoProxyCreatorTests {
-
-	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
-
 
 	@Test
 	public void testAspectsAreApplied() {
@@ -314,12 +307,6 @@ public class AspectJAutoProxyCreatorTests {
 	 */
 	private String qName(String fileSuffix) {
 		return String.format("%s-%s", getClass().getSimpleName(), fileSuffix);
-	}
-
-	private void assertStopWatchTimeLimit(final StopWatch sw, final long maxTimeMillis) {
-		long totalTimeMillis = sw.getTotalTimeMillis();
-		assertThat(totalTimeMillis < maxTimeMillis).as("'" + sw.getLastTaskName() + "' took too long: expected less than<" + maxTimeMillis +
-				"> ms, actual<" + totalTimeMillis + "> ms.").isTrue();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,22 @@
 
 package org.springframework.r2dbc.connection.init;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.assertj.core.util.Strings;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.support.EncodedResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER;
+import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER;
+import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_COMMENT_PREFIXES;
+import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
 
 /**
  * Unit tests for {@link ScriptUtils}.
@@ -37,6 +42,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Baldwin
  * @author Nicolas Debeissat
  * @author Mark Paluch
+ * @since 5.3
+ * @see ScriptUtilsIntegrationTests
  */
 public class ScriptUtilsUnitTests {
 
@@ -49,14 +56,12 @@ public class ScriptUtilsUnitTests {
 		String rawStatement3 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 		String cleanedStatement3 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 
-		String script = Strings.join(rawStatement1, rawStatement2, rawStatement3).with(
-				";");
+		String delimiter = ";";
+		String script = Strings.join(rawStatement1, rawStatement2, rawStatement3).with(delimiter);
 
-		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, ";", statements);
+		List<String> statements = splitSqlScript(script, delimiter);
 
-		assertThat(statements).hasSize(3).containsSequence(cleanedStatement1,
-				cleanedStatement2, cleanedStatement3);
+		assertThat(statements).containsExactly(cleanedStatement1, cleanedStatement2, cleanedStatement3);
 	}
 
 	@Test
@@ -65,13 +70,12 @@ public class ScriptUtilsUnitTests {
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 		String statement3 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 
-		String script = Strings.join(statement1, statement2, statement3).with("\n");
+		String delimiter = "\n";
+		String script = Strings.join(statement1, statement2, statement3).with(delimiter);
 
-		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, "\n", statements);
+		List<String> statements = splitSqlScript(script, delimiter);
 
-		assertThat(statements).hasSize(3).containsSequence(statement1, statement2,
-				statement3);
+		assertThat(statements).containsExactly(statement1, statement2, statement3);
 	}
 
 	@Test
@@ -79,141 +83,149 @@ public class ScriptUtilsUnitTests {
 		String statement1 = "do something";
 		String statement2 = "do something else";
 
-		char delim = '\n';
-		String script = statement1 + delim + statement2 + delim;
+		String script = Strings.join(statement1, statement2).with("\n");
 
-		List<String> statements = new ArrayList<>();
+		List<String> statements = splitSqlScript(script, DEFAULT_STATEMENT_SEPARATOR);
 
-		ScriptUtils.splitSqlScript(script, ScriptUtils.DEFAULT_STATEMENT_SEPARATOR,
-				statements);
-
-		assertThat(statements).hasSize(1).contains(script.replace('\n', ' '));
+		assertThat(statements).as("stripped but not split statements").containsExactly(script.replace('\n', ' '));
 	}
 
-	@Test
+	@Test  // SPR-13218
 	public void splitScriptWithSingleQuotesNestedInsideDoubleQuotes() {
 		String statement1 = "select '1' as \"Dogbert's owner's\" from dual";
 		String statement2 = "select '2' as \"Dilbert's\" from dual";
 
-		char delim = ';';
-		String script = statement1 + delim + statement2 + delim;
+		String delimiter = ";";
+		String script = Strings.join(statement1, statement2).with(delimiter);
 
-		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, ';', statements);
+		List<String> statements = splitSqlScript(script, delimiter);
 
-		assertThat(statements).hasSize(2).containsSequence(statement1, statement2);
+		assertThat(statements).containsExactly(statement1, statement2);
 	}
 
-	@Test
-	public void readAndSplitScriptWithMultipleNewlinesAsSeparator() {
+	@Test  // SPR-11560
+	public void readAndSplitScriptWithMultipleNewlinesAsSeparator() throws Exception {
 		String script = readScript("db-test-data-multi-newline.sql");
-		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, "\n\n", statements);
+		List<String> statements = splitSqlScript(script, "\n\n");
 
-		String statement1 = "insert into users (last_name) values ('Walter')";
-		String statement2 = "insert into users (last_name) values ('Jesse')";
+		String statement1 = "insert into T_TEST (NAME) values ('Keith')";
+		String statement2 = "insert into T_TEST (NAME) values ('Dave')";
 
-		assertThat(statements.size()).as("wrong number of statements").isEqualTo(2);
-		assertThat(statements.get(0)).as("statement 1 not split correctly").isEqualTo(
-				statement1);
-		assertThat(statements.get(1)).as("statement 2 not split correctly").isEqualTo(
-				statement2);
+		assertThat(statements).containsExactly(statement1, statement2);
 	}
 
 	@Test
-	public void readAndSplitScriptContainingComments() {
+	public void readAndSplitScriptContainingComments() throws Exception {
 		String script = readScript("test-data-with-comments.sql");
-		splitScriptContainingComments(script);
+		splitScriptContainingComments(script, DEFAULT_COMMENT_PREFIXES);
 	}
 
 	@Test
-	public void readAndSplitScriptContainingCommentsWithWindowsLineEnding() {
-		String script = readScript("test-data-with-comments.sql").replaceAll("\n",
-				"\r\n");
-		splitScriptContainingComments(script);
+	public void readAndSplitScriptContainingCommentsWithWindowsLineEnding() throws Exception {
+		String script = readScript("test-data-with-comments.sql").replaceAll("\n", "\r\n");
+		splitScriptContainingComments(script, DEFAULT_COMMENT_PREFIXES);
 	}
 
-	private void splitScriptContainingComments(String script) {
-		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, ';', statements);
+	@Test
+	public void readAndSplitScriptContainingCommentsWithMultiplePrefixes() throws Exception {
+		String script = readScript("test-data-with-multi-prefix-comments.sql");
+		splitScriptContainingComments(script, "--", "#", "^");
+	}
+
+	private void splitScriptContainingComments(String script, String... commentPrefixes) {
+		List<String> statements = ScriptUtils.splitSqlScript(null, script, ";", commentPrefixes, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
+				DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Rod; Johnson'), (2, 'Adrian Collier')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 		String statement3 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
+		// Statement 4 addresses the error described in SPR-9982.
 		String statement4 = "INSERT INTO persons( person_id , name) VALUES( 1 , 'Name' )";
 
-		assertThat(statements).hasSize(4).containsSequence(statement1, statement2,
-				statement3, statement4);
+		assertThat(statements).containsExactly(statement1, statement2, statement3, statement4);
 	}
 
-	@Test
-	public void readAndSplitScriptContainingCommentsWithLeadingTabs() {
+	@Test  // SPR-10330
+	public void readAndSplitScriptContainingCommentsWithLeadingTabs() throws Exception {
 		String script = readScript("test-data-with-comments-and-leading-tabs.sql");
-		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, ';', statements);
+		List<String> statements = splitSqlScript(script, ";");
 
-		String statement1 = "insert into customer (id, name) values (1, 'Walter White')";
+		String statement1 = "insert into customer (id, name) values (1, 'Sam Brannen')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2013-06-08', 1)";
 		String statement3 = "insert into orders(id, order_date, customer_id) values (2, '2013-06-08', 1)";
 
-		assertThat(statements).hasSize(3).containsSequence(statement1, statement2,
-				statement3);
+		assertThat(statements).containsExactly(statement1, statement2, statement3);
 	}
 
-	@Test
-	public void readAndSplitScriptContainingMultiLineComments() {
+	@Test  // SPR-9531
+	public void readAndSplitScriptContainingMultiLineComments() throws Exception {
 		String script = readScript("test-data-with-multi-line-comments.sql");
-		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, ';', statements);
+		List<String> statements = splitSqlScript(script, ";");
 
-		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Walter', 'White')";
-		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Jesse' , 'Pinkman' )";
+		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller')";
+		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Sam' , 'Brannen' )";
 
-		assertThat(statements).hasSize(2).containsSequence(statement1, statement2);
+		assertThat(statements).containsExactly(statement1, statement2);
 	}
 
 	@Test
-	public void readAndSplitScriptContainingMultiLineNestedComments() {
+	public void readAndSplitScriptContainingMultiLineNestedComments() throws Exception {
 		String script = readScript("test-data-with-multi-line-nested-comments.sql");
-		List<String> statements = new ArrayList<>();
-		ScriptUtils.splitSqlScript(script, ';', statements);
+		List<String> statements = splitSqlScript(script, ";");
 
-		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Walter', 'White')";
-		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Jesse' , 'Pinkman' )";
+		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller')";
+		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Sam' , 'Brannen' )";
 
-		assertThat(statements).hasSize(2).containsSequence(statement1, statement2);
+		assertThat(statements).containsExactly(statement1, statement2);
 	}
 
-	@Test
-	public void containsDelimiters() {
-		assertThat(ScriptUtils.containsSqlScriptDelimiters("select 1\n select ';'",
-				";")).isFalse();
-		assertThat(ScriptUtils.containsSqlScriptDelimiters("select 1; select 2",
-				";")).isTrue();
+	@ParameterizedTest
+	@CsvSource(delimiter = '#', value = {
+		// semicolon
+		"'select 1\n select '';'''                                                          # ;      # false",
+		"'select 1\n select \";\"'                                                          # ;      # false",
+		"'select 1; select 2'                                                               # ;      # true",
+		// newline
+		"'select 1; select ''\n'''                                                          # '\n'   # false",
+		"'select 1; select \"\n\"'                                                          # '\n'   # false",
+		"'select 1\n select 2'                                                              # '\n'   # true",
+		// double newline
+		"'select 1\n select 2'                                                              # '\n\n' # false",
+		"'select 1\n\n select 2'                                                            # '\n\n' # true",
+		// semicolon with MySQL style escapes '\\'
+		"'insert into users(first, last)\nvalues(''a\\\\'', ''b;'')'                        # ;      # false",
+		"'insert into users(first, last)\nvalues(''Charles'', ''d\\''Artagnan''); select 1' # ;      # true",
+		// semicolon inside comments
+		"'-- a;b;c\ninsert into colors(color_num) values(42);'                              # ;      # true",
+		"'/* a;b;c */\ninsert into colors(color_num) values(42);'                           # ;      # true",
+		"'-- a;b;c\ninsert into colors(color_num) values(42)'                               # ;      # false",
+		"'/* a;b;c */\ninsert into colors(color_num) values(42)'                            # ;      # false",
+		// single quotes inside comments
+		"'-- What\\''s your favorite color?\ninsert into colors(color_num) values(42);'     # ;      # true",
+		"'-- What''s your favorite color?\ninsert into colors(color_num) values(42);'       # ;      # true",
+		"'/* What\\''s your favorite color? */\ninsert into colors(color_num) values(42);'  # ;      # true",
+		"'/* What''s your favorite color? */\ninsert into colors(color_num) values(42);'    # ;      # true",
+		// double quotes inside comments
+		"'-- double \" quotes\ninsert into colors(color_num) values(42);'                   # ;      # true",
+		"'-- double \\\" quotes\ninsert into colors(color_num) values(42);'                 # ;      # true",
+		"'/* double \" quotes */\ninsert into colors(color_num) values(42);'                # ;      # true",
+		"'/* double \\\" quotes */\ninsert into colors(color_num) values(42);'              # ;      # true"
+	})
+	public void containsStatementSeparator(String script, String delimiter, boolean expected) {
+		boolean contains = ScriptUtils.containsStatementSeparator(null, script, delimiter, DEFAULT_COMMENT_PREFIXES,
+				DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 
-		assertThat(ScriptUtils.containsSqlScriptDelimiters("select 1; select '\\n\n';",
-				"\n")).isFalse();
-		assertThat(ScriptUtils.containsSqlScriptDelimiters("select 1\n select 2",
-				"\n")).isTrue();
-
-		assertThat(ScriptUtils.containsSqlScriptDelimiters("select 1\n select 2",
-				"\n\n")).isFalse();
-		assertThat(ScriptUtils.containsSqlScriptDelimiters("select 1\n\n select 2",
-				"\n\n")).isTrue();
-
-		// MySQL style escapes '\\'
-		assertThat(ScriptUtils.containsSqlScriptDelimiters(
-				"insert into users(first_name, last_name)\nvalues('a\\\\', 'b;')",
-				";")).isFalse();
-		assertThat(ScriptUtils.containsSqlScriptDelimiters(
-				"insert into users(first_name, last_name)\nvalues('Charles', 'd\\'Artagnan'); select 1;",
-				";")).isTrue();
+		assertThat(contains).isEqualTo(expected);
 	}
 
-	private String readScript(String path) {
-		EncodedResource resource = new EncodedResource(
-				new ClassPathResource(path, getClass()));
-		return ScriptUtils.readScript(resource, DefaultDataBufferFactory.sharedInstance).block();
+	private String readScript(String path) throws Exception {
+		EncodedResource resource = new EncodedResource(new ClassPathResource(path, getClass()));
+		return ScriptUtils.readScript(resource, DefaultDataBufferFactory.sharedInstance, DEFAULT_STATEMENT_SEPARATOR).block();
+	}
+
+	private static List<String> splitSqlScript(String script, String separator) throws ScriptException {
+		return ScriptUtils.splitSqlScript(null, script, separator, DEFAULT_COMMENT_PREFIXES, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
+				DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 	}
 
 }

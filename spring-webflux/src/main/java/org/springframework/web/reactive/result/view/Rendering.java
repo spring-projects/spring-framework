@@ -149,7 +149,6 @@ public interface Rendering {
 		 * Whether to the provided redirect URL should be prepended with the
 		 * application context path (if any).
 		 * <p>By default this is set to {@code true}.
-		 *
 		 * @see RedirectView#setContextRelative(boolean)
 		 */
 		RedirectBuilder contextRelative(boolean contextRelative);
@@ -158,7 +157,6 @@ public interface Rendering {
 		 * Whether to append the query string of the current URL to the target
 		 * redirect URL or not.
 		 * <p>By default this is set to {@code false}.
-		 *
 		 * @see RedirectView#setPropagateQuery(boolean)
 		 */
 		RedirectBuilder propagateQuery(boolean propagate);

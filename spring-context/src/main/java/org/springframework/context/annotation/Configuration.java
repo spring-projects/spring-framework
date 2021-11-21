@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ import org.springframework.stereotype.Component;
  * <p>{@code @Configuration} is meta-annotated with {@link Component @Component}, therefore
  * {@code @Configuration} classes are candidates for component scanning (typically using
  * Spring XML's {@code <context:component-scan/>} element) and therefore may also take
- * advantage of {@link Autowired @Autowired}/{@link javax.inject.Inject @Inject}
+ * advantage of {@link Autowired @Autowired}/{@link jakarta.inject.Inject @Inject}
  * like any regular {@code @Component}. In particular, if a single constructor is present
  * autowiring semantics will be applied transparently for that constructor:
  *
@@ -129,7 +129,7 @@ import org.springframework.stereotype.Component;
  * &#064;Configuration
  * public class AppConfig {
  *
- *     &#064Autowired Environment env;
+ *     &#064;Autowired Environment env;
  *
  *     &#064;Bean
  *     public MyBean myBean() {
@@ -149,7 +149,7 @@ import org.springframework.stereotype.Component;
  * &#064;PropertySource("classpath:/com/acme/app.properties")
  * public class AppConfig {
  *
- *     &#064Inject Environment env;
+ *     &#064;Inject Environment env;
  *
  *     &#064;Bean
  *     public MyBean myBean() {
@@ -170,7 +170,7 @@ import org.springframework.stereotype.Component;
  * &#064;PropertySource("classpath:/com/acme/app.properties")
  * public class AppConfig {
  *
- *     &#064Value("${bean.name}") String beanName;
+ *     &#064;Value("${bean.name}") String beanName;
  *
  *     &#064;Bean
  *     public MyBean myBean() {
@@ -297,7 +297,7 @@ import org.springframework.stereotype.Component;
  * &#064;ImportResource("classpath:/com/acme/database-config.xml")
  * public class AppConfig {
  *
- *     &#064Inject DataSource dataSource; // from XML
+ *     &#064;Inject DataSource dataSource; // from XML
  *
  *     &#064;Bean
  *     public MyBean myBean() {

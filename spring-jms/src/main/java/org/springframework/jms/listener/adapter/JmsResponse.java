@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.jms.listener.adapter;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Session;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Session;
 
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.lang.Nullable;
@@ -94,8 +94,7 @@ public class JmsResponse<T> {
 		if (this.destination instanceof Destination) {
 			return (Destination) this.destination;
 		}
-		if (this.destination instanceof DestinationNameHolder) {
-			DestinationNameHolder nameHolder = (DestinationNameHolder) this.destination;
+		if (this.destination instanceof DestinationNameHolder nameHolder) {
 			return destinationResolver.resolveDestinationName(session,
 					nameHolder.destinationName, nameHolder.pubSubDomain);
 		}

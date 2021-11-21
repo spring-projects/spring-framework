@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.test.web.servlet.request;
 
-import javax.servlet.http.Part;
-
+import jakarta.servlet.http.Part;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
@@ -50,7 +49,7 @@ public class MockMultipartHttpServletRequestBuilderTests {
 		assertThat(mockRequest.getParts()).extracting(Part::getName).containsExactly("name");
 	}
 
-	@Test // gh-26261
+	@Test // gh-26261, gh-26400
 	void addFileWithoutFilename() throws Exception {
 		MockPart jsonPart = new MockPart("data", "{\"node\":\"node\"}".getBytes(UTF_8));
 		jsonPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
@@ -62,7 +61,8 @@ public class MockMultipartHttpServletRequestBuilderTests {
 						.buildRequest(new MockServletContext());
 
 		assertThat(mockRequest.getFileMap()).containsOnlyKeys("file");
-		assertThat(mockRequest.getParameterMap()).isEmpty();
+		assertThat(mockRequest.getParameterMap()).hasSize(1);
+		assertThat(mockRequest.getParameter("data")).isEqualTo("{\"node\":\"node\"}");
 		assertThat(mockRequest.getParts()).extracting(Part::getName).containsExactly("data");
 	}
 

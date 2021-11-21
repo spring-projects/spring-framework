@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,15 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	@Override
 	public boolean isReadable() {
 		try {
-			URL url = getURL();
+			return checkReadable(getURL());
+		}
+		catch (IOException ex) {
+			return false;
+		}
+	}
+
+	boolean checkReadable(URL url) {
+		try {
 			if (ResourceUtils.isFileURL(url)) {
 				// Proceed with file system resolution
 				File file = getFile();
@@ -98,8 +106,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 				// Try InputStream resolution for jar resources
 				URLConnection con = url.openConnection();
 				customizeConnection(con);
-				if (con instanceof HttpURLConnection) {
-					HttpURLConnection httpCon = (HttpURLConnection) con;
+				if (con instanceof HttpURLConnection httpCon) {
 					int code = httpCon.getResponseCode();
 					if (code != HttpURLConnection.HTTP_OK) {
 						httpCon.disconnect();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.resource;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -42,6 +41,7 @@ import org.springframework.web.util.UriUtils;
  * expected to be configured at the end in a chain of resolvers.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public class PathResourceResolver extends AbstractResourceResolver {
@@ -110,7 +110,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 */
 	protected Mono<Resource> getResource(String resourcePath, Resource location) {
 		try {
-			if (location instanceof ClassPathResource) {
+			if (!(location instanceof UrlResource)) {
 				resourcePath = UriUtils.decode(resourcePath, StandardCharsets.UTF_8);
 			}
 			Resource resource = location.createRelative(resourcePath);
@@ -119,11 +119,12 @@ public class PathResourceResolver extends AbstractResourceResolver {
 					return Mono.just(resource);
 				}
 				else if (logger.isWarnEnabled()) {
-					Resource[] allowedLocations = getAllowedLocations();
-					logger.warn("Resource path \"" + resourcePath + "\" was successfully resolved " +
-							"but resource \"" + resource.getURL() + "\" is neither under the " +
-							"current location \"" + location.getURL() + "\" nor under any of the " +
-							"allowed locations " + (allowedLocations != null ? Arrays.asList(allowedLocations) : "[]"));
+					Object allowedLocationsText = (getAllowedLocations() != null ? Arrays.asList(getAllowedLocations()) : "[]");
+					logger.warn("""
+							Resource path "%s" was successfully resolved, but resource \
+							"%s" is neither under the current location "%s" nor under any \
+							of the allowed locations %s"\
+							""".formatted(resourcePath, resource.getURL(),location.getURL(), allowedLocationsText));
 				}
 			}
 			return Mono.empty();
@@ -177,8 +178,8 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			resourcePath = resource.getURL().toExternalForm();
 			locationPath = StringUtils.cleanPath(location.getURL().toString());
 		}
-		else if (resource instanceof ClassPathResource) {
-			resourcePath = ((ClassPathResource) resource).getPath();
+		else if (resource instanceof ClassPathResource classPathResource) {
+			resourcePath = classPathResource.getPath();
 			locationPath = StringUtils.cleanPath(((ClassPathResource) location).getPath());
 		}
 		else {
@@ -197,7 +198,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		if (resourcePath.contains("%")) {
 			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
 			try {
-				String decodedPath = URLDecoder.decode(resourcePath, "UTF-8");
+				String decodedPath = URLDecoder.decode(resourcePath, StandardCharsets.UTF_8);
 				if (decodedPath.contains("../") || decodedPath.contains("..\\")) {
 					logger.warn("Resolved resource path contains encoded \"../\" or \"..\\\": " + resourcePath);
 					return true;
@@ -205,9 +206,6 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			}
 			catch (IllegalArgumentException ex) {
 				// May not be possible to decode...
-			}
-			catch (UnsupportedEncodingException ex) {
-				// Should never happen...
 			}
 		}
 		return false;

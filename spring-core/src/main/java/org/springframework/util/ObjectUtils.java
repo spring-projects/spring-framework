@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public abstract class ObjectUtils {
 	 * Determine whether the given object is empty.
 	 * <p>This method supports the following object types.
 	 * <ul>
-	 * <li>{@code Optional}: considered empty if {@link Optional#empty()}</li>
+	 * <li>{@code Optional}: considered empty if not {@link Optional#isPresent()}</li>
 	 * <li>{@code Array}: considered empty if its length is zero</li>
 	 * <li>{@link CharSequence}: considered empty if its length is zero</li>
 	 * <li>{@link Collection}: delegates to {@link Collection#isEmpty()}</li>
@@ -556,42 +556,6 @@ public abstract class ObjectUtils {
 			hash = MULTIPLIER * hash + element;
 		}
 		return hash;
-	}
-
-	/**
-	 * Return the same value as {@link Boolean#hashCode(boolean)}}.
-	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
-	 */
-	@Deprecated
-	public static int hashCode(boolean bool) {
-		return Boolean.hashCode(bool);
-	}
-
-	/**
-	 * Return the same value as {@link Double#hashCode(double)}}.
-	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
-	 */
-	@Deprecated
-	public static int hashCode(double dbl) {
-		return Double.hashCode(dbl);
-	}
-
-	/**
-	 * Return the same value as {@link Float#hashCode(float)}}.
-	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
-	 */
-	@Deprecated
-	public static int hashCode(float flt) {
-		return Float.hashCode(flt);
-	}
-
-	/**
-	 * Return the same value as {@link Long#hashCode(long)}}.
-	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
-	 */
-	@Deprecated
-	public static int hashCode(long lng) {
-		return Long.hashCode(lng);
 	}
 
 

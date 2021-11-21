@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,8 +64,7 @@ public class ArgumentTypePreparedStatementSetter implements PreparedStatementSet
 				if (arg instanceof Collection && this.argTypes[i] != Types.ARRAY) {
 					Collection<?> entries = (Collection<?>) arg;
 					for (Object entry : entries) {
-						if (entry instanceof Object[]) {
-							Object[] valueArray = ((Object[]) entry);
+						if (entry instanceof Object[] valueArray) {
 							for (Object argValue : valueArray) {
 								doSetValue(ps, parameterPosition, this.argTypes[i], argValue);
 								parameterPosition++;

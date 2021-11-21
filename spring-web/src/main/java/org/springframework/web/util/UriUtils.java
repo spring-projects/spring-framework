@@ -246,15 +246,15 @@ public abstract class UriUtils {
 	 * Encode the query parameters from the given {@code MultiValueMap} with UTF-8.
 	 * <p>This can be used with {@link UriComponentsBuilder#queryParams(MultiValueMap)}
 	 * when building a URI from an already encoded template.
-	 * <pre class="code">
-	 * MultiValueMap&lt;String, String&gt; params = new LinkedMultiValueMap<>(2);
+	 * <pre class="code">{@code
+	 * MultiValueMap<String, String> params = new LinkedMultiValueMap<>(2);
 	 * // add to params...
 	 *
 	 * ServletUriComponentsBuilder.fromCurrentRequest()
 	 *         .queryParams(UriUtils.encodeQueryParams(params))
 	 *         .build(true)
 	 *         .toUriString();
-	 * </pre>
+	 * }</pre>
 	 * @param params the parameters to encode
 	 * @return a new {@code MultiValueMap} with the encoded names and values
 	 * @since 5.2.3
@@ -407,7 +407,7 @@ public abstract class UriUtils {
 		int paramIndex = path.indexOf(';', begin);
 		end = (paramIndex != -1 && paramIndex < end ? paramIndex : end);
 		int extIndex = path.lastIndexOf('.', end);
-		if (extIndex != -1 && extIndex > begin) {
+		if (extIndex != -1 && extIndex >= begin) {
 			return path.substring(extIndex + 1, end);
 		}
 		return null;

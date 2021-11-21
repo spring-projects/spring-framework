@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
@@ -33,17 +32,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.FormEncodingType;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.util.KeyDataPair;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.http.MediaType;
@@ -371,10 +369,23 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			});
 		});
 		for (NameValuePair param : this.webRequest.getRequestParameters()) {
-			if (param instanceof KeyDataPair) {
-				KeyDataPair pair = (KeyDataPair) param;
-				MockPart part = new MockPart(pair.getName(), pair.getFile().getName(), readAllBytes(pair.getFile()));
-				part.getHeaders().setContentType(MediaType.valueOf(pair.getMimeType()));
+			if (param instanceof KeyDataPair pair) {
+				File file = pair.getFile();
+				MockPart part;
+				if (file != null) {
+					part = new MockPart(pair.getName(), file.getName(), readAllBytes(file));
+				}
+				else {
+					// Support empty file upload OR file upload via setData().
+					// For an empty file upload, getValue() returns an empty string, and
+					// getData() returns null.
+					// For a file upload via setData(), getData() returns the file data, and
+					// getValue() returns the file name (if set) or an empty string.
+					part = new MockPart(pair.getName(), pair.getValue(), pair.getData());
+				}
+				MediaType mediaType = (pair.getMimeType() != null ? MediaType.valueOf(pair.getMimeType()) :
+						MediaType.APPLICATION_OCTET_STREAM);
+				part.getHeaders().setContentType(mediaType);
 				request.addPart(part);
 			}
 			else {
@@ -384,12 +395,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 	private String urlDecode(String value) {
-		try {
-			return URLDecoder.decode(value, "UTF-8");
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw new IllegalStateException(ex);
-		}
+		return URLDecoder.decode(value, StandardCharsets.UTF_8);
 	}
 
 	private byte[] readAllBytes(File file) {

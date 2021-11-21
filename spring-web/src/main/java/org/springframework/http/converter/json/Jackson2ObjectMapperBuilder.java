@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,13 +55,11 @@ import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.apache.commons.logging.Log;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.KotlinDetector;
-import org.springframework.http.HttpLogging;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -85,9 +83,7 @@ import org.springframework.util.xml.StaxUtils;
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>:
  * support for other Java 8 types like {@link java.util.Optional}</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>:
- * support for Java 8 Date & Time API types</li>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>:
- * support for Joda-Time types</li>
+ * support for Java 8 Date &amp; Time API types</li>
  * <li><a href="https://github.com/FasterXML/jackson-module-kotlin">jackson-module-kotlin</a>:
  * support for Kotlin classes and data classes</li>
  * </ul>
@@ -104,10 +100,6 @@ import org.springframework.util.xml.StaxUtils;
  * @see Jackson2ObjectMapperFactoryBean
  */
 public class Jackson2ObjectMapperBuilder {
-
-	private static volatile boolean kotlinWarningLogged;
-
-	private final Log logger = HttpLogging.forLogName(getClass());
 
 	private final Map<Class<?>, Class<?>> mixIns = new LinkedHashMap<>();
 
@@ -798,6 +790,7 @@ public class Jackson2ObjectMapperBuilder {
 				module.addDeserializer((Class<T>) type, (JsonDeserializer<? extends T>) deserializer));
 	}
 
+	@SuppressWarnings("deprecation")  // on Jackson 2.13: configure(MapperFeature, boolean)
 	private void configureFeature(ObjectMapper objectMapper, Object feature, boolean enabled) {
 		if (feature instanceof JsonParser.Feature) {
 			objectMapper.configure((JsonParser.Feature) feature, enabled);
@@ -841,19 +834,6 @@ public class Jackson2ObjectMapperBuilder {
 			// jackson-datatype-jsr310 not available
 		}
 
-		// Joda-Time 2.x present?
-		if (ClassUtils.isPresent("org.joda.time.YearMonth", this.moduleClassLoader)) {
-			try {
-				Class<? extends Module> jodaModuleClass = (Class<? extends Module>)
-						ClassUtils.forName("com.fasterxml.jackson.datatype.joda.JodaModule", this.moduleClassLoader);
-				Module jodaModule = BeanUtils.instantiateClass(jodaModuleClass);
-				modulesToRegister.set(jodaModule.getTypeId(), jodaModule);
-			}
-			catch (ClassNotFoundException ex) {
-				// jackson-datatype-joda not available
-			}
-		}
-
 		// Kotlin present?
 		if (KotlinDetector.isKotlinPresent()) {
 			try {
@@ -863,11 +843,7 @@ public class Jackson2ObjectMapperBuilder {
 				modulesToRegister.set(kotlinModule.getTypeId(), kotlinModule);
 			}
 			catch (ClassNotFoundException ex) {
-				if (!kotlinWarningLogged) {
-					kotlinWarningLogged = true;
-					logger.warn("For Jackson Kotlin classes support please add " +
-							"\"com.fasterxml.jackson.module:jackson-module-kotlin\" to the classpath");
-				}
+				// jackson-module-kotlin not available
 			}
 		}
 	}

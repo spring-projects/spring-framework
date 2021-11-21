@@ -83,22 +83,22 @@ import org.springframework.util.StringUtils;
  * <p>A sample config in an XML-based
  * {@link org.springframework.beans.factory.BeanFactory} might look as follows:
  *
- * <pre class="code">&lt;beans>
+ * <pre class="code">&lt;beans&gt;
  *
- *   &lt;!-- Prototype bean since we have state -->
- *   &lt;bean id="myService" class="a.b.c.MyService" singleton="false"/>
+ *   &lt;!-- Prototype bean since we have state --&gt;
+ *   &lt;bean id="myService" class="a.b.c.MyService" singleton="false"/&gt;
  *
- *   &lt;!-- will lookup the above 'myService' bean by *TYPE* -->
+ *   &lt;!-- will lookup the above 'myService' bean by *TYPE* --&gt;
  *   &lt;bean id="myServiceFactory"
- *            class="org.springframework.beans.factory.config.ServiceLocatorFactoryBean">
- *     &lt;property name="serviceLocatorInterface" value="a.b.c.ServiceFactory"/>
- *   &lt;/bean>
+ *            class="org.springframework.beans.factory.config.ServiceLocatorFactoryBean"&gt;
+ *     &lt;property name="serviceLocatorInterface" value="a.b.c.ServiceFactory"/&gt;
+ *   &lt;/bean&gt;
  *
- *   &lt;bean id="clientBean" class="a.b.c.MyClientBean">
- *     &lt;property name="myServiceFactory" ref="myServiceFactory"/>
- *   &lt;/bean>
+ *   &lt;bean id="clientBean" class="a.b.c.MyClientBean"&gt;
+ *     &lt;property name="myServiceFactory" ref="myServiceFactory"/&gt;
+ *   &lt;/bean&gt;
  *
- *&lt;/beans></pre>
+ *&lt;/beans&gt;</pre>
  *
  * <p>The attendant {@code MyClientBean} class implementation might then
  * look something like this:
@@ -135,22 +135,22 @@ import org.springframework.util.StringUtils;
  * <p>A sample config in an XML-based
  * {@link org.springframework.beans.factory.BeanFactory} might look as follows:
  *
- * <pre class="code">&lt;beans>
+ * <pre class="code">&lt;beans&gt;
  *
- *   &lt;!-- Prototype beans since we have state (both extend MyService) -->
- *   &lt;bean id="specialService" class="a.b.c.SpecialService" singleton="false"/>
- *   &lt;bean id="anotherService" class="a.b.c.AnotherService" singleton="false"/>
+ *   &lt;!-- Prototype beans since we have state (both extend MyService) --&gt;
+ *   &lt;bean id="specialService" class="a.b.c.SpecialService" singleton="false"/&gt;
+ *   &lt;bean id="anotherService" class="a.b.c.AnotherService" singleton="false"/&gt;
  *
  *   &lt;bean id="myServiceFactory"
- *            class="org.springframework.beans.factory.config.ServiceLocatorFactoryBean">
- *     &lt;property name="serviceLocatorInterface" value="a.b.c.ServiceFactory"/>
- *   &lt;/bean>
+ *            class="org.springframework.beans.factory.config.ServiceLocatorFactoryBean"&gt;
+ *     &lt;property name="serviceLocatorInterface" value="a.b.c.ServiceFactory"/&gt;
+ *   &lt;/bean&gt;
  *
- *   &lt;bean id="clientBean" class="a.b.c.MyClientBean">
- *     &lt;property name="myServiceFactory" ref="myServiceFactory"/>
- *   &lt;/bean>
+ *   &lt;bean id="clientBean" class="a.b.c.MyClientBean"&gt;
+ *     &lt;property name="myServiceFactory" ref="myServiceFactory"/&gt;
+ *   &lt;/bean&gt;
  *
- *&lt;/beans></pre>
+ *&lt;/beans&gt;</pre>
  *
  * <p>The attendant {@code MyClientBean} class implementation might then
  * look something like this:

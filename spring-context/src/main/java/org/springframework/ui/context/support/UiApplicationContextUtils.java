@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,7 @@ public abstract class UiApplicationContextUtils {
 		if (context.containsLocalBean(THEME_SOURCE_BEAN_NAME)) {
 			ThemeSource themeSource = context.getBean(THEME_SOURCE_BEAN_NAME, ThemeSource.class);
 			// Make ThemeSource aware of parent ThemeSource.
-			if (context.getParent() instanceof ThemeSource && themeSource instanceof HierarchicalThemeSource) {
-				HierarchicalThemeSource hts = (HierarchicalThemeSource) themeSource;
+			if (context.getParent() instanceof ThemeSource && themeSource instanceof HierarchicalThemeSource hts) {
 				if (hts.getParentThemeSource() == null) {
 					// Only set parent context as parent ThemeSource if no parent ThemeSource
 					// registered already.

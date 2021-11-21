@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class StompEncoder  {
 
 	@SuppressWarnings("serial")
 	private final Map<String, byte[]> headerKeyUpdateCache =
-			new LinkedHashMap<String, byte[]>(HEADER_KEY_CACHE_LIMIT, 0.75f, true) {
+			new LinkedHashMap<>(HEADER_KEY_CACHE_LIMIT, 0.75f, true) {
 				@Override
 				protected boolean removeEldestEntry(Map.Entry<String, byte[]> eldest) {
 					if (size() > HEADER_KEY_CACHE_LIMIT) {
@@ -236,22 +236,24 @@ public class StompEncoder  {
 
 		private int size;
 
+		@Override
 		public void add(byte[] bytes) {
 			this.size += bytes.length;
 			super.add(bytes);
 		}
 
+		@Override
 		public void add(byte b) {
 			this.size++;
 			super.add(b);
 		}
 
+		@Override
 		public byte[] toByteArray() {
 			byte[] result = new byte[this.size];
 			int position = 0;
 			for (Object o : this) {
-				if (o instanceof byte[]) {
-					byte[] src = (byte[]) o;
+				if (o instanceof byte[] src) {
 					System.arraycopy(src, 0, result, position, src.length);
 					position += src.length;
 				}

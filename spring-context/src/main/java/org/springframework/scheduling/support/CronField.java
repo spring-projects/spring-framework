@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,6 +157,11 @@ abstract class CronField {
 		return this.type;
 	}
 
+	@SuppressWarnings("unchecked")
+	protected static <T extends Temporal & Comparable<? super T>> T cast(Temporal temporal) {
+		return (T) temporal;
+	}
+
 
 	/**
 	 * Represents the type of cron field, i.e. seconds, minutes, hours,
@@ -225,9 +230,7 @@ abstract class CronField {
 		 * Elapse the given temporal for the difference between the current
 		 * value of this field and the goal value. Typically, the returned
 		 * temporal will have the given goal as the current value for this type,
-		 * but this is not the case for {@link #DAY_OF_MONTH}. For instance,
-		 * if {@code goal} is 31, and {@code temporal} is April 16th,
-		 * this method returns May 1st, because April 31st does not exist.
+		 * but this is not the case for {@link #DAY_OF_MONTH}.
 		 * @param temporal the temporal to elapse
 		 * @param goal the goal value
 		 * @param <T> the type of temporal
@@ -236,11 +239,18 @@ abstract class CronField {
 		 */
 		public <T extends Temporal & Comparable<? super T>> T elapseUntil(T temporal, int goal) {
 			int current = get(temporal);
+			ValueRange range = temporal.range(this.field);
 			if (current < goal) {
-				return this.field.getBaseUnit().addTo(temporal, goal - current);
+				if (range.isValidIntValue(goal)) {
+					return cast(temporal.with(this.field, goal));
+				}
+				else {
+					// goal is invalid, eg. 29th Feb, so roll forward
+					long amount = range.getMaximum() - current + 1;
+					return this.field.getBaseUnit().addTo(temporal, amount);
+				}
 			}
 			else {
-				ValueRange range = temporal.range(this.field);
 				long amount = goal + range.getMaximum() - current + 1 - range.getMinimum();
 				return this.field.getBaseUnit().addTo(temporal, amount);
 			}

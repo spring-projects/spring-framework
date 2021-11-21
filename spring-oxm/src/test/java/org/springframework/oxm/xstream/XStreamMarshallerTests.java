@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.json.JsonWriter;
+import com.thoughtworks.xstream.security.AnyTypePermission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -67,18 +68,21 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Arjen Poutsma
  * @author Sam Brannen
+ * @author Juergen Hoeller
  */
 class XStreamMarshallerTests {
 
 	private static final String EXPECTED_STRING = "<flight><flightNumber>42</flightNumber></flight>";
 
-	private final XStreamMarshaller marshaller = new XStreamMarshaller();
-
 	private final Flight flight = new Flight();
+
+	private XStreamMarshaller marshaller;
 
 
 	@BeforeEach
 	void createMarshaller() {
+		marshaller = new XStreamMarshaller();
+		marshaller.setTypePermissions(AnyTypePermission.ANY);
 		marshaller.setAliases(Collections.singletonMap("flight", Flight.class.getName()));
 		flight.setFlightNumber(42L);
 	}
@@ -135,7 +139,7 @@ class XStreamMarshallerTests {
 		StringWriter writer = new StringWriter();
 		StreamResult result = new StreamResult(writer);
 		marshaller.marshal(flight, result);
-		assertThat(XmlContent.from(writer)).isSimilarTo(EXPECTED_STRING);
+		assertThat(XmlContent.from(writer)).isSimilarToIgnoringWhitespace(EXPECTED_STRING);
 	}
 
 	@Test
@@ -143,8 +147,8 @@ class XStreamMarshallerTests {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		StreamResult result = new StreamResult(os);
 		marshaller.marshal(flight, result);
-		String s = new String(os.toByteArray(), "UTF-8");
-		assertThat(XmlContent.of(s)).isSimilarTo(EXPECTED_STRING);
+		String s = os.toString("UTF-8");
+		assertThat(XmlContent.of(s)).isSimilarToIgnoringWhitespace(EXPECTED_STRING);
 	}
 
 	@Test
@@ -250,7 +254,7 @@ class XStreamMarshallerTests {
 
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
-		assertThat(XmlContent.from(writer)).isSimilarTo(EXPECTED_STRING);
+		assertThat(XmlContent.from(writer)).isSimilarToIgnoringWhitespace(EXPECTED_STRING);
 	}
 
 	@Test
@@ -263,7 +267,7 @@ class XStreamMarshallerTests {
 
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
-		assertThat(XmlContent.from(writer)).isSimilarTo(EXPECTED_STRING);
+		assertThat(XmlContent.from(writer)).isSimilarToIgnoringWhitespace(EXPECTED_STRING);
 	}
 
 	@Test
@@ -272,7 +276,7 @@ class XStreamMarshallerTests {
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight><flightNo>42</flightNo></flight>";
-		assertThat(XmlContent.from(writer)).isSimilarTo(expected);
+		assertThat(XmlContent.from(writer)).isSimilarToIgnoringWhitespace(expected);
 	}
 
 	@Test
@@ -347,7 +351,7 @@ class XStreamMarshallerTests {
 		flight.setFlightNumber(42);
 		marshaller.marshal(flight, result);
 		String expected = "<flight><number>42</number></flight>";
-		assertThat(XmlContent.from(writer)).isSimilarTo(expected);
+		assertThat(XmlContent.from(writer)).isSimilarToIgnoringWhitespace(expected);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public final class ServerSentEvent<T> {
 	}
 
 	/**
-	 * Return a builder for a {@code SseEvent}, populated with the give {@linkplain #data() data}.
+	 * Return a builder for a {@code SseEvent}, populated with the given {@linkplain #data() data}.
 	 * @param <T> the type of data that this event contains
 	 * @return the builder
 	 */

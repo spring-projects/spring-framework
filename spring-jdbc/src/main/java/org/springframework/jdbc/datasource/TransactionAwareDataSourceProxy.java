@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /**
  * Proxy for a target JDBC {@link javax.sql.DataSource}, adding awareness of
  * Spring-managed transactions. Similar to a transactional JNDI DataSource
- * as provided by a Java EE server.
+ * as provided by a Jakarta EE server.
  *
  * <p>Data access code that should remain unaware of Spring's data access support
  * can work with this proxy to seamlessly participate in Spring-managed transactions.
@@ -52,7 +52,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Connection. If not within a transaction, normal DataSource behavior applies.
  *
  * <p>This proxy allows data access code to work with the plain JDBC API and still
- * participate in Spring-managed transactions, similar to JDBC code in a Java EE/JTA
+ * participate in Spring-managed transactions, similar to JDBC code in a Jakarta EE/JTA
  * environment. However, if possible, use Spring's DataSourceUtils, JdbcTemplate or
  * JDBC operation objects to get transaction participation even without a proxy for
  * the target DataSource, avoiding the need to define such a proxy in the first place.
@@ -186,10 +186,10 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 					// Allow for differentiating between the proxy and the raw Connection.
 					StringBuilder sb = new StringBuilder("Transaction-aware proxy for target Connection ");
 					if (this.target != null) {
-						sb.append("[").append(this.target.toString()).append("]");
+						sb.append('[').append(this.target.toString()).append(']');
 					}
 					else {
-						sb.append(" from DataSource [").append(this.targetDataSource).append("]");
+						sb.append(" from DataSource [").append(this.targetDataSource).append(']');
 					}
 					return sb.toString();
 				case "close":

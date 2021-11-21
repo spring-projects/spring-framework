@@ -44,10 +44,8 @@ public abstract class TestConstructorUtils {
 	/**
 	 * Determine if the supplied executable for the given test class is an
 	 * autowirable constructor.
-	 *
 	 * <p>This method delegates to {@link #isAutowirableConstructor(Executable, Class, PropertyProvider)}
 	 * will a value of {@code null} for the fallback {@link PropertyProvider}.
-	 *
 	 * @param executable an executable for the test class
 	 * @param testClass the test class
 	 * @return {@code true} if the executable is an autowirable constructor
@@ -60,10 +58,8 @@ public abstract class TestConstructorUtils {
 	/**
 	 * Determine if the supplied constructor for the given test class is
 	 * autowirable.
-	 *
 	 * <p>This method delegates to {@link #isAutowirableConstructor(Constructor, Class, PropertyProvider)}
 	 * will a value of {@code null} for the fallback {@link PropertyProvider}.
-	 *
 	 * @param constructor a constructor for the test class
 	 * @param testClass the test class
 	 * @return {@code true} if the constructor is autowirable
@@ -76,10 +72,8 @@ public abstract class TestConstructorUtils {
 	/**
 	 * Determine if the supplied executable for the given test class is an
 	 * autowirable constructor.
-	 *
 	 * <p>This method delegates to {@link #isAutowirableConstructor(Constructor, Class, PropertyProvider)}
 	 * if the supplied executable is a constructor and otherwise returns {@code false}.
-	 *
 	 * @param executable an executable for the test class
 	 * @param testClass the test class
 	 * @param fallbackPropertyProvider fallback property provider used to look up
@@ -114,7 +108,6 @@ public abstract class TestConstructorUtils {
 	 * {@link PropertyProvider} (see
 	 * {@link TestConstructor#TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME}).</li>
 	 * </ol>
-	 *
 	 * @param constructor a constructor for the test class
 	 * @param testClass the test class
 	 * @param fallbackPropertyProvider fallback property provider used to look up

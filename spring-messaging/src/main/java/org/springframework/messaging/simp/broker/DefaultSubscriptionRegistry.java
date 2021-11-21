@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -162,7 +163,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		if (getSelectorHeaderName() == null) {
 			return null;
 		}
-		String selector = SimpMessageHeaderAccessor.getFirstNativeHeader(getSelectorHeaderName(), headers);
+		String selector = NativeMessageHeaderAccessor.getFirstNativeHeader(getSelectorHeaderName(), headers);
 		if (selector == null) {
 			return null;
 		}
@@ -509,8 +510,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			if (target instanceof Message) {
 				value = name.equals("headers") ? ((Message) target).getHeaders() : null;
 			}
-			else if (target instanceof MessageHeaders) {
-				MessageHeaders headers = (MessageHeaders) target;
+			else if (target instanceof MessageHeaders headers) {
 				SimpMessageHeaderAccessor accessor =
 						MessageHeaderAccessor.getAccessor(headers, SimpMessageHeaderAccessor.class);
 				Assert.state(accessor != null, "No SimpMessageHeaderAccessor");

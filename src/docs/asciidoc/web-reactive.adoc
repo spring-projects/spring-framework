@@ -1,7 +1,5 @@
 [[spring-web-reactive]]
 = Web on Reactive Stack
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 4
 :tabsize: 4
@@ -9,7 +7,7 @@
 
 This part of the documentation covers support for reactive-stack web applications built
 on a https://www.reactive-streams.org/[Reactive Streams] API to run on non-blocking
-servers, such as Netty, Undertow, and Servlet 3.1+ containers. Individual chapters cover
+servers, such as Netty, Undertow, and Servlet containers. Individual chapters cover
 the <<webflux.adoc#webflux, Spring WebFlux>> framework,
 the reactive <<webflux-client, `WebClient`>>, support for <<webflux-test, testing>>,
 and <<webflux-reactive-libraries, reactive libraries>>. For Servlet-stack web applications,
@@ -36,8 +34,6 @@ discussion of mock objects.
 response objects to provide support for testing WebFlux applications without an HTTP
 server. You can use the `WebTestClient` for end-to-end integration tests, too.
 
-
-
 include::rsocket.adoc[leveloffset=+1]
 
 
@@ -57,14 +53,8 @@ For annotated controllers, WebFlux transparently adapts to the reactive library 
 the application. This is done with the help of the
 {api-spring-framework}/core/ReactiveAdapterRegistry.html[`ReactiveAdapterRegistry`], which
 provides pluggable support for reactive library and other asynchronous types. The registry
-has built-in support for RxJava 2/3, RxJava 1 (via RxJava Reactive Streams bridge), and
-`CompletableFuture`, but you can register others, too.
-
-[NOTE]
-====
-As of Spring Framework 5.3, support for RxJava 1 is deprecated.
-====
-
+has built-in support for RxJava 3, Kotlin coroutines and SmallRye Mutiny, but you can
+register others, too.
 
 For functional APIs (such as <<webflux-fn>>, the `WebClient`, and others), the general rules
 for WebFlux APIs apply -- `Flux` and `Mono` as return values and a Reactive Streams

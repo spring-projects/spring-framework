@@ -102,7 +102,7 @@ public class StringHttpMessageConverterTests {
 		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
 	}
 
-	@Test // gh-24123
+	@Test  // gh-24123
 	public void writeJson() throws IOException {
 		String body = "{\"føø\":\"bår\"}";
 		this.converter.write(body, MediaType.APPLICATION_JSON, this.outputMessage);
@@ -114,7 +114,7 @@ public class StringHttpMessageConverterTests {
 		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
 	}
 
-	@Test // gh-25328
+	@Test  // gh-25328
 	public void writeJsonApi() throws IOException {
 		String body = "{\"føø\":\"bår\"}";
 		MediaType contentType = new MediaType("application", "vnd.api.v1+json");

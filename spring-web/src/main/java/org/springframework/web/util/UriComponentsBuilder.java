@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final String HOST_PATTERN = "(" + HOST_IPV6_PATTERN + "|" + HOST_IPV4_PATTERN + ")";
 
-	private static final String PORT_PATTERN = "(\\d*(?:\\{[^/]+?})?)";
+	private static final String PORT_PATTERN = "(\\{[^}]+\\}?|[^/?#]*)";
 
 	private static final String PATH_PATTERN = "([^?#]*)";
 
@@ -357,18 +357,28 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				String value = matcher.group(1).trim();
 				String host = value;
 				int portSeparatorIdx = value.lastIndexOf(':');
-				if (portSeparatorIdx > value.lastIndexOf(']')) {
+				int squareBracketIdx = value.lastIndexOf(']');
+				if (portSeparatorIdx > squareBracketIdx) {
+					if (squareBracketIdx == -1 && value.indexOf(':') != portSeparatorIdx) {
+						throw new IllegalArgumentException("Invalid IPv4 address: " + value);
+					}
 					host = value.substring(0, portSeparatorIdx);
-					port = Integer.parseInt(value.substring(portSeparatorIdx + 1));
+					try {
+						port = Integer.parseInt(value.substring(portSeparatorIdx + 1));
+					}
+					catch (NumberFormatException ex) {
+						throw new IllegalArgumentException(
+								"Failed to parse a port from \"forwarded\"-type header value: " + value);
+					}
 				}
-				return new InetSocketAddress(host, port);
+				return InetSocketAddress.createUnresolved(host, port);
 			}
 		}
 
 		String forHeader = request.getHeaders().getFirst("X-Forwarded-For");
 		if (StringUtils.hasText(forHeader)) {
 			String host = StringUtils.tokenizeToStringArray(forHeader, ",")[0];
-			return new InetSocketAddress(host, port);
+			return InetSocketAddress.createUnresolved(host, port);
 		}
 
 		return null;
@@ -412,12 +422,15 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * also escaping characters with reserved meaning.
 	 * <p>For most cases, this method is more likely to give the expected result
 	 * because in treats URI variables as opaque data to be fully encoded, while
-	 * {@link UriComponents#encode()} is useful only if intentionally expanding
-	 * URI variables that contain reserved characters.
+	 * {@link UriComponents#encode()} is useful when intentionally expanding URI
+	 * variables that contain reserved characters.
 	 * <p>For example ';' is legal in a path but has reserved meaning. This
 	 * method replaces ";" with "%3B" in URI variables but not in the URI
 	 * template. By contrast, {@link UriComponents#encode()} never replaces ";"
 	 * since it is a legal character in a path.
+	 * <p>When not expanding URI variables at all, prefer use of
+	 * {@link UriComponents#encode()} since that will also encode anything that
+	 * incidentally looks like a URI variable.
 	 * @since 5.0.8
 	 */
 	public final UriComponentsBuilder encode() {
@@ -466,8 +479,9 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			result = new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
 		}
 		else {
+			MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>(this.queryParams);
 			HierarchicalUriComponents uric = new HierarchicalUriComponents(this.scheme, this.fragment,
-					this.userInfo, this.host, this.port, this.pathBuilder.build(), this.queryParams,
+					this.userInfo, this.host, this.port, this.pathBuilder.build(), queryParams,
 					hint == EncodingHint.FULLY_ENCODED);
 			result = (hint == EncodingHint.ENCODE_TEMPLATE ? uric.encodeTemplate(this.charset) : uric);
 		}
@@ -868,8 +882,9 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 					"with the removeOnly=true. Request headers: " + headers);
 		}
 
-		if (this.scheme != null && ((this.scheme.equals("http") && "80".equals(this.port)) ||
-				(this.scheme.equals("https") && "443".equals(this.port)))) {
+		if (this.scheme != null &&
+				(((this.scheme.equals("http") || this.scheme.equals("ws")) && "80".equals(this.port)) ||
+				((this.scheme.equals("https") || this.scheme.equals("wss")) && "443".equals(this.port)))) {
 			port(null);
 		}
 
@@ -883,7 +898,11 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private void adaptForwardedHost(String rawValue) {
 		int portSeparatorIdx = rawValue.lastIndexOf(':');
-		if (portSeparatorIdx > rawValue.lastIndexOf(']')) {
+		int squareBracketIdx = rawValue.lastIndexOf(']');
+		if (portSeparatorIdx > squareBracketIdx) {
+			if (squareBracketIdx == -1 && rawValue.indexOf(':') != portSeparatorIdx) {
+				throw new IllegalArgumentException("Invalid IPv4 address: " + rawValue);
+			}
 			host(rawValue.substring(0, portSeparatorIdx));
 			port(Integer.parseInt(rawValue.substring(portSeparatorIdx + 1)));
 		}

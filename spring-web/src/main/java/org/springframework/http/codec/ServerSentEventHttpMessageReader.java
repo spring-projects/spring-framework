@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,7 +147,13 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		for (String line : lines) {
 			if (line.startsWith("data:")) {
 				data = (data != null ? data : new StringBuilder());
-				data.append(line.substring(5).trim()).append("\n");
+				if (line.charAt(5) != ' ') {
+					data.append(line, 5, line.length());
+				}
+				else {
+					data.append(line, 6, line.length());
+				}
+				data.append('\n');
 			}
 			if (shouldWrap) {
 				if (line.startsWith("id:")) {
@@ -161,7 +167,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 				}
 				else if (line.startsWith(":")) {
 					comment = (comment != null ? comment : new StringBuilder());
-					comment.append(line.substring(1).trim()).append("\n");
+					comment.append(line.substring(1).trim()).append('\n');
 				}
 			}
 		}

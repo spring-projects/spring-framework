@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.beans;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,10 +45,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Chris Beams
  * @since 18.01.2006
  */
-public class BeanWrapperGenericsTests {
+class BeanWrapperGenericsTests {
 
 	@Test
-	public void testGenericSet() {
+	void testGenericSet() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		Set<String> input = new HashSet<>();
@@ -61,7 +60,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testGenericLowerBoundedSet() {
+	void testGenericLowerBoundedSet() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, true));
@@ -74,7 +73,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testGenericSetWithConversionFailure() {
+	void testGenericSetWithConversionFailure() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		Set<TestBean> input = new HashSet<>();
@@ -85,7 +84,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testGenericList() throws MalformedURLException {
+	void testGenericList() throws Exception {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		List<String> input = new ArrayList<>();
@@ -97,7 +96,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testGenericListElement() throws MalformedURLException {
+	void testGenericListElement() throws Exception {
 		GenericBean<?> gb = new GenericBean<>();
 		gb.setResourceList(new ArrayList<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
@@ -106,29 +105,29 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testGenericMap() {
+	void testGenericMap() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		Map<String, String> input = new HashMap<>();
 		input.put("4", "5");
 		input.put("6", "7");
 		bw.setPropertyValue("shortMap", input);
-		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(5);
-		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(7);
+		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
+		assertThat(gb.getShortMap().get(Short.valueOf("6"))).isEqualTo(7);
 	}
 
 	@Test
-	public void testGenericMapElement() {
+	void testGenericMapElement() {
 		GenericBean<?> gb = new GenericBean<>();
 		gb.setShortMap(new HashMap<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("shortMap[4]", "5");
 		assertThat(bw.getPropertyValue("shortMap[4]")).isEqualTo(5);
-		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(5);
+		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
 	}
 
 	@Test
-	public void testGenericMapWithKeyType() {
+	void testGenericMapWithKeyType() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		Map<String, String> input = new HashMap<>();
@@ -140,17 +139,17 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testGenericMapElementWithKeyType() {
+	void testGenericMapElementWithKeyType() {
 		GenericBean<?> gb = new GenericBean<>();
 		gb.setLongMap(new HashMap<Long, Integer>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("longMap[4]", "5");
-		assertThat(gb.getLongMap().get(new Long("4"))).isEqualTo("5");
+		assertThat(gb.getLongMap().get(Long.valueOf("4"))).isEqualTo("5");
 		assertThat(bw.getPropertyValue("longMap[4]")).isEqualTo("5");
 	}
 
 	@Test
-	public void testGenericMapWithCollectionValue() {
+	void testGenericMapWithCollectionValue() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
@@ -162,14 +161,12 @@ public class BeanWrapperGenericsTests {
 		value2.add(Boolean.TRUE);
 		input.put("2", value2);
 		bw.setPropertyValue("collectionMap", input);
-		boolean condition1 = gb.getCollectionMap().get(1) instanceof HashSet;
-		assertThat(condition1).isTrue();
-		boolean condition = gb.getCollectionMap().get(2) instanceof ArrayList;
-		assertThat(condition).isTrue();
+		assertThat(gb.getCollectionMap().get(1) instanceof HashSet).isTrue();
+		assertThat(gb.getCollectionMap().get(2) instanceof ArrayList).isTrue();
 	}
 
 	@Test
-	public void testGenericMapElementWithCollectionValue() {
+	void testGenericMapElementWithCollectionValue() {
 		GenericBean<?> gb = new GenericBean<>();
 		gb.setCollectionMap(new HashMap<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
@@ -177,24 +174,23 @@ public class BeanWrapperGenericsTests {
 		HashSet<Integer> value1 = new HashSet<>();
 		value1.add(1);
 		bw.setPropertyValue("collectionMap[1]", value1);
-		boolean condition = gb.getCollectionMap().get(1) instanceof HashSet;
-		assertThat(condition).isTrue();
+		assertThat(gb.getCollectionMap().get(1) instanceof HashSet).isTrue();
 	}
 
 	@Test
-	public void testGenericMapFromProperties() {
+	void testGenericMapFromProperties() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		Properties input = new Properties();
 		input.setProperty("4", "5");
 		input.setProperty("6", "7");
 		bw.setPropertyValue("shortMap", input);
-		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(5);
-		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(7);
+		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
+		assertThat(gb.getShortMap().get(Short.valueOf("6"))).isEqualTo(7);
 	}
 
 	@Test
-	public void testGenericListOfLists() throws MalformedURLException {
+	void testGenericListOfLists() {
 		GenericBean<String> gb = new GenericBean<>();
 		List<List<Integer>> list = new ArrayList<>();
 		list.add(new ArrayList<>());
@@ -206,7 +202,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testGenericListOfListsWithElementConversion() throws MalformedURLException {
+	void testGenericListOfListsWithElementConversion() {
 		GenericBean<String> gb = new GenericBean<>();
 		List<List<Integer>> list = new ArrayList<>();
 		list.add(new ArrayList<>());
@@ -218,7 +214,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testGenericListOfArrays() throws MalformedURLException {
+	void testGenericListOfArrays() {
 		GenericBean<String> gb = new GenericBean<>();
 		ArrayList<String[]> list = new ArrayList<>();
 		list.add(new String[] {"str1", "str2"});
@@ -230,7 +226,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testGenericListOfArraysWithElementConversion() throws MalformedURLException {
+	void testGenericListOfArraysWithElementConversion() {
 		GenericBean<String> gb = new GenericBean<>();
 		ArrayList<String[]> list = new ArrayList<>();
 		list.add(new String[] {"str1", "str2"});
@@ -243,55 +239,55 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testGenericListOfMaps() throws MalformedURLException {
+	void testGenericListOfMaps() {
 		GenericBean<String> gb = new GenericBean<>();
 		List<Map<Integer, Long>> list = new ArrayList<>();
 		list.add(new HashMap<>());
 		gb.setListOfMaps(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
-		bw.setPropertyValue("listOfMaps[0][10]", new Long(5));
-		assertThat(bw.getPropertyValue("listOfMaps[0][10]")).isEqualTo(new Long(5));
-		assertThat(gb.getListOfMaps().get(0).get(10)).isEqualTo(new Long(5));
+		bw.setPropertyValue("listOfMaps[0][10]", 5L);
+		assertThat(bw.getPropertyValue("listOfMaps[0][10]")).isEqualTo(5L);
+		assertThat(gb.getListOfMaps().get(0).get(10)).isEqualTo(Long.valueOf(5));
 	}
 
 	@Test
-	public void testGenericListOfMapsWithElementConversion() throws MalformedURLException {
+	void testGenericListOfMapsWithElementConversion() {
 		GenericBean<String> gb = new GenericBean<>();
 		List<Map<Integer, Long>> list = new ArrayList<>();
 		list.add(new HashMap<>());
 		gb.setListOfMaps(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfMaps[0][10]", "5");
-		assertThat(bw.getPropertyValue("listOfMaps[0][10]")).isEqualTo(new Long(5));
-		assertThat(gb.getListOfMaps().get(0).get(10)).isEqualTo(new Long(5));
+		assertThat(bw.getPropertyValue("listOfMaps[0][10]")).isEqualTo(5L);
+		assertThat(gb.getListOfMaps().get(0).get(10)).isEqualTo(Long.valueOf(5));
 	}
 
 	@Test
-	public void testGenericMapOfMaps() throws MalformedURLException {
+	void testGenericMapOfMaps() {
 		GenericBean<String> gb = new GenericBean<>();
 		Map<String, Map<Integer, Long>> map = new HashMap<>();
 		map.put("mykey", new HashMap<>());
 		gb.setMapOfMaps(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
-		bw.setPropertyValue("mapOfMaps[mykey][10]", new Long(5));
-		assertThat(bw.getPropertyValue("mapOfMaps[mykey][10]")).isEqualTo(new Long(5));
-		assertThat(gb.getMapOfMaps().get("mykey").get(10)).isEqualTo(new Long(5));
+		bw.setPropertyValue("mapOfMaps[mykey][10]", 5L);
+		assertThat(bw.getPropertyValue("mapOfMaps[mykey][10]")).isEqualTo(5L);
+		assertThat(gb.getMapOfMaps().get("mykey").get(10)).isEqualTo(Long.valueOf(5));
 	}
 
 	@Test
-	public void testGenericMapOfMapsWithElementConversion() throws MalformedURLException {
+	void testGenericMapOfMapsWithElementConversion() {
 		GenericBean<String> gb = new GenericBean<>();
 		Map<String, Map<Integer, Long>> map = new HashMap<>();
 		map.put("mykey", new HashMap<>());
 		gb.setMapOfMaps(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfMaps[mykey][10]", "5");
-		assertThat(bw.getPropertyValue("mapOfMaps[mykey][10]")).isEqualTo(new Long(5));
-		assertThat(gb.getMapOfMaps().get("mykey").get(10)).isEqualTo(new Long(5));
+		assertThat(bw.getPropertyValue("mapOfMaps[mykey][10]")).isEqualTo(Long.valueOf(5));
+		assertThat(gb.getMapOfMaps().get("mykey").get(10)).isEqualTo(Long.valueOf(5));
 	}
 
 	@Test
-	public void testGenericMapOfLists() throws MalformedURLException {
+	void testGenericMapOfLists() {
 		GenericBean<String> gb = new GenericBean<>();
 		Map<Integer, List<Integer>> map = new HashMap<>();
 		map.put(1, new ArrayList<>());
@@ -303,7 +299,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testGenericMapOfListsWithElementConversion() throws MalformedURLException {
+	void testGenericMapOfListsWithElementConversion() {
 		GenericBean<String> gb = new GenericBean<>();
 		Map<Integer, List<Integer>> map = new HashMap<>();
 		map.put(1, new ArrayList<>());
@@ -315,7 +311,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testGenericTypeNestingMapOfInteger() throws Exception {
+	void testGenericTypeNestingMapOfInteger() {
 		Map<String, String> map = new HashMap<>();
 		map.put("testKey", "100");
 
@@ -324,14 +320,13 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("mapOfInteger", map);
 
 		Object obj = gb.getMapOfInteger().get("testKey");
-		boolean condition = obj instanceof Integer;
-		assertThat(condition).isTrue();
+		assertThat(obj instanceof Integer).isTrue();
 	}
 
 	@Test
-	public void testGenericTypeNestingMapOfListOfInteger() throws Exception {
+	void testGenericTypeNestingMapOfListOfInteger() {
 		Map<String, List<String>> map = new HashMap<>();
-		List<String> list = Arrays.asList(new String[] {"1", "2", "3"});
+		List<String> list = Arrays.asList("1", "2", "3");
 		map.put("testKey", list);
 
 		NestedGenericCollectionBean gb = new NestedGenericCollectionBean();
@@ -339,13 +334,12 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("mapOfListOfInteger", map);
 
 		Object obj = gb.getMapOfListOfInteger().get("testKey").get(0);
-		boolean condition = obj instanceof Integer;
-		assertThat(condition).isTrue();
+		assertThat(obj instanceof Integer).isTrue();
 		assertThat(((Integer) obj).intValue()).isEqualTo(1);
 	}
 
 	@Test
-	public void testGenericTypeNestingListOfMapOfInteger() throws Exception {
+	void testGenericTypeNestingListOfMapOfInteger() {
 		List<Map<String, String>> list = new ArrayList<>();
 		Map<String, String> map = new HashMap<>();
 		map.put("testKey", "5");
@@ -356,15 +350,14 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("listOfMapOfInteger", list);
 
 		Object obj = gb.getListOfMapOfInteger().get(0).get("testKey");
-		boolean condition = obj instanceof Integer;
-		assertThat(condition).isTrue();
+		assertThat(obj instanceof Integer).isTrue();
 		assertThat(((Integer) obj).intValue()).isEqualTo(5);
 	}
 
 	@Test
-	public void testGenericTypeNestingMapOfListOfListOfInteger() throws Exception {
+	void testGenericTypeNestingMapOfListOfListOfInteger() {
 		Map<String, List<List<String>>> map = new HashMap<>();
-		List<String> list = Arrays.asList(new String[] {"1", "2", "3"});
+		List<String> list = Arrays.asList("1", "2", "3");
 		map.put("testKey", Collections.singletonList(list));
 
 		NestedGenericCollectionBean gb = new NestedGenericCollectionBean();
@@ -372,13 +365,12 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("mapOfListOfListOfInteger", map);
 
 		Object obj = gb.getMapOfListOfListOfInteger().get("testKey").get(0).get(0);
-		boolean condition = obj instanceof Integer;
-		assertThat(condition).isTrue();
+		assertThat(obj instanceof Integer).isTrue();
 		assertThat(((Integer) obj).intValue()).isEqualTo(1);
 	}
 
 	@Test
-	public void testComplexGenericMap() {
+	void testComplexGenericMap() {
 		Map<List<String>, List<String>> inputMap = new HashMap<>();
 		List<String> inputKey = new ArrayList<>();
 		inputKey.add("1");
@@ -391,11 +383,11 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("genericMap", inputMap);
 
 		assertThat(holder.getGenericMap().keySet().iterator().next().get(0)).isEqualTo(1);
-		assertThat(holder.getGenericMap().values().iterator().next().get(0)).isEqualTo(new Long(10));
+		assertThat(holder.getGenericMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
 	}
 
 	@Test
-	public void testComplexGenericMapWithCollectionConversion() {
+	void testComplexGenericMapWithCollectionConversion() {
 		Map<Set<String>, Set<String>> inputMap = new HashMap<>();
 		Set<String> inputKey = new HashSet<>();
 		inputKey.add("1");
@@ -408,11 +400,11 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("genericMap", inputMap);
 
 		assertThat(holder.getGenericMap().keySet().iterator().next().get(0)).isEqualTo(1);
-		assertThat(holder.getGenericMap().values().iterator().next().get(0)).isEqualTo(new Long(10));
+		assertThat(holder.getGenericMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
 	}
 
 	@Test
-	public void testComplexGenericIndexedMapEntry() {
+	void testComplexGenericIndexedMapEntry() {
 		List<String> inputValue = new ArrayList<>();
 		inputValue.add("10");
 
@@ -421,11 +413,11 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("genericIndexedMap[1]", inputValue);
 
 		assertThat(holder.getGenericIndexedMap().keySet().iterator().next()).isEqualTo(1);
-		assertThat(holder.getGenericIndexedMap().values().iterator().next().get(0)).isEqualTo(new Long(10));
+		assertThat(holder.getGenericIndexedMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
 	}
 
 	@Test
-	public void testComplexGenericIndexedMapEntryWithCollectionConversion() {
+	void testComplexGenericIndexedMapEntryWithCollectionConversion() {
 		Set<String> inputValue = new HashSet<>();
 		inputValue.add("10");
 
@@ -434,11 +426,11 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("genericIndexedMap[1]", inputValue);
 
 		assertThat(holder.getGenericIndexedMap().keySet().iterator().next()).isEqualTo(1);
-		assertThat(holder.getGenericIndexedMap().values().iterator().next().get(0)).isEqualTo(new Long(10));
+		assertThat(holder.getGenericIndexedMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
 	}
 
 	@Test
-	public void testComplexDerivedIndexedMapEntry() {
+	void testComplexDerivedIndexedMapEntry() {
 		List<String> inputValue = new ArrayList<>();
 		inputValue.add("10");
 
@@ -447,11 +439,11 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("derivedIndexedMap[1]", inputValue);
 
 		assertThat(holder.getDerivedIndexedMap().keySet().iterator().next()).isEqualTo(1);
-		assertThat(holder.getDerivedIndexedMap().values().iterator().next().get(0)).isEqualTo(new Long(10));
+		assertThat(holder.getDerivedIndexedMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
 	}
 
 	@Test
-	public void testComplexDerivedIndexedMapEntryWithCollectionConversion() {
+	void testComplexDerivedIndexedMapEntryWithCollectionConversion() {
 		Set<String> inputValue = new HashSet<>();
 		inputValue.add("10");
 
@@ -460,11 +452,11 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("derivedIndexedMap[1]", inputValue);
 
 		assertThat(holder.getDerivedIndexedMap().keySet().iterator().next()).isEqualTo(1);
-		assertThat(holder.getDerivedIndexedMap().values().iterator().next().get(0)).isEqualTo(new Long(10));
+		assertThat(holder.getDerivedIndexedMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
 	}
 
 	@Test
-	public void testGenericallyTypedIntegerBean() throws Exception {
+	void testGenericallyTypedIntegerBean() {
 		GenericIntegerBean gb = new GenericIntegerBean();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("genericProperty", "10");
@@ -475,7 +467,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testGenericallyTypedSetOfIntegerBean() throws Exception {
+	void testGenericallyTypedSetOfIntegerBean() {
 		GenericSetOfIntegerBean gb = new GenericSetOfIntegerBean();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("genericProperty", "10");
@@ -486,23 +478,23 @@ public class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	public void testSettingGenericPropertyWithReadOnlyInterface() {
+	void testSettingGenericPropertyWithReadOnlyInterface() {
 		Bar bar = new Bar();
 		BeanWrapper bw = new BeanWrapperImpl(bar);
 		bw.setPropertyValue("version", "10");
-		assertThat(bar.getVersion()).isEqualTo(new Double(10.0));
+		assertThat(bar.getVersion()).isEqualTo(Double.valueOf(10.0));
 	}
 
 	@Test
-	public void testSettingLongPropertyWithGenericInterface() {
+	void testSettingLongPropertyWithGenericInterface() {
 		Promotion bean = new Promotion();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.setPropertyValue("id", "10");
-		assertThat(bean.getId()).isEqualTo(new Long(10));
+		assertThat(bean.getId()).isEqualTo(Long.valueOf(10));
 	}
 
 	@Test
-	public void testUntypedPropertyWithMapAtRuntime() {
+	void testUntypedPropertyWithMapAtRuntime() {
 		class Holder<D> {
 			private final D data;
 			public Holder(D data) {

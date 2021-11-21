@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.mock.http.client.MockClientHttpRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -42,7 +43,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 public class UnorderedRequestExpectationManagerTests {
 
-	private UnorderedRequestExpectationManager manager = new UnorderedRequestExpectationManager();
+	private final UnorderedRequestExpectationManager manager = new UnorderedRequestExpectationManager();
 
 
 	@Test
@@ -57,7 +58,7 @@ public class UnorderedRequestExpectationManagerTests {
 	}
 
 	@Test
-	public void zeroExpectedRequests() throws Exception {
+	public void zeroExpectedRequests() {
 		this.manager.verify();
 	}
 
@@ -108,19 +109,18 @@ public class UnorderedRequestExpectationManagerTests {
 		this.manager.validateRequest(createRequest(GET, "/bar"));
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 		this.manager.validateRequest(createRequest(GET, "/foo"));
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				this.manager.verify())
-			.withMessageContaining("3 request(s) executed:\n" +
-				"GET /bar\n" +
-				"GET /foo\n" +
-				"GET /foo\n");
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(this.manager::verify)
+				.withMessageContaining("3 request(s) executed:\n" +
+						"GET /bar\n" +
+						"GET /foo\n" +
+						"GET /foo\n");
 	}
 
 
-	@SuppressWarnings("deprecation")
 	private ClientHttpRequest createRequest(HttpMethod method, String url) {
 		try {
-			return new org.springframework.mock.http.client.MockAsyncClientHttpRequest(method,  new URI(url));
+			return new MockClientHttpRequest(method,  new URI(url));
 		}
 		catch (URISyntaxException ex) {
 			throw new IllegalStateException(ex);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -286,7 +286,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 			}
 		}
 		if (this.type != UrlType.RELATIVE && this.type != UrlType.ABSOLUTE && !this.value.startsWith("/")) {
-			url.append("/");
+			url.append('/');
 		}
 		url.append(replaceUriTemplateParams(this.value, this.params, this.templateParams));
 		url.append(createQueryString(this.params, this.templateParams, (url.indexOf("?") == -1)));
@@ -313,7 +313,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 * @param usedParams set of parameter names that have been applied as
 	 * template params
 	 * @param includeQueryStringDelimiter true if the query string should start
-	 * with a '?' instead of '&'
+	 * with a '?' instead of '&amp;'
 	 * @return the query string
 	 */
 	protected String createQueryString(List<Param> params, Set<String> usedParams, boolean includeQueryStringDelimiter)
@@ -324,15 +324,15 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 		for (Param param : params) {
 			if (!usedParams.contains(param.getName()) && StringUtils.hasLength(param.getName())) {
 				if (includeQueryStringDelimiter && qs.length() == 0) {
-					qs.append("?");
+					qs.append('?');
 				}
 				else {
-					qs.append("&");
+					qs.append('&');
 				}
 				try {
 					qs.append(UriUtils.encodeQueryParam(param.getName(), encoding));
 					if (param.getValue() != null) {
-						qs.append("=");
+						qs.append('=');
 						qs.append(UriUtils.encodeQueryParam(param.getValue(), encoding));
 					}
 				}

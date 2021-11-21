@@ -98,6 +98,7 @@ class QuartzCronFieldTests {
 		assertThatIllegalArgumentException().isThrownBy(() -> QuartzCronField.parseDaysOfWeek("L#1"));
 		assertThatIllegalArgumentException().isThrownBy(() -> QuartzCronField.parseDaysOfWeek("8#1"));
 		assertThatIllegalArgumentException().isThrownBy(() -> QuartzCronField.parseDaysOfWeek("2#1,2#3,2#5"));
+		assertThatIllegalArgumentException().isThrownBy(() -> QuartzCronField.parseDaysOfWeek("FRI#-1"));
 	}
 
 }

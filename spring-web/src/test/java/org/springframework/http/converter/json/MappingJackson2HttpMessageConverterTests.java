@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.entry;
 import static org.assertj.core.api.Assertions.within;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 
 /**
  * Jackson 2.x converter tests.
@@ -74,6 +72,27 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
+	public void canReadWithObjectMapperRegistrationForType() {
+		MediaType halJsonMediaType = MediaType.parseMediaType("application/hal+json");
+		MediaType halFormsJsonMediaType = MediaType.parseMediaType("application/prs.hal-forms+json");
+
+		assertThat(converter.canRead(MyBean.class, halJsonMediaType)).isTrue();
+		assertThat(converter.canRead(MyBean.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(converter.canRead(MyBean.class, halFormsJsonMediaType)).isTrue();
+		assertThat(converter.canRead(Map.class, MediaType.APPLICATION_JSON)).isTrue();
+
+		converter.registerObjectMappersForType(MyBean.class, map -> {
+			map.put(halJsonMediaType, new ObjectMapper());
+			map.put(MediaType.APPLICATION_JSON, new ObjectMapper());
+		});
+
+		assertThat(converter.canRead(MyBean.class, halJsonMediaType)).isTrue();
+		assertThat(converter.canRead(MyBean.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(converter.canRead(MyBean.class, halFormsJsonMediaType)).isFalse();
+		assertThat(converter.canRead(Map.class, MediaType.APPLICATION_JSON)).isTrue();
+	}
+
+	@Test
 	public void canWrite() {
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json"))).isTrue();
 		assertThat(converter.canWrite(Map.class, new MediaType("application", "json"))).isTrue();
@@ -86,6 +105,22 @@ public class MappingJackson2HttpMessageConverterTests {
 	public void canReadAndWriteMicroformats() {
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "vnd.test-micro-type+json"))).isTrue();
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "vnd.test-micro-type+json"))).isTrue();
+	}
+
+	@Test
+	public void getSupportedMediaTypes() {
+		MediaType[] defaultMediaTypes = {MediaType.APPLICATION_JSON, MediaType.parseMediaType("application/*+json")};
+		assertThat(converter.getSupportedMediaTypes()).containsExactly(defaultMediaTypes);
+		assertThat(converter.getSupportedMediaTypes(MyBean.class)).containsExactly(defaultMediaTypes);
+
+		MediaType halJson = MediaType.parseMediaType("application/hal+json");
+		converter.registerObjectMappersForType(MyBean.class, map -> {
+			map.put(halJson, new ObjectMapper());
+			map.put(MediaType.APPLICATION_JSON, new ObjectMapper());
+		});
+
+		assertThat(converter.getSupportedMediaTypes(MyBean.class)).containsExactly(halJson, MediaType.APPLICATION_JSON);
+		assertThat(converter.getSupportedMediaTypes(Map.class)).containsExactly(defaultMediaTypes);
 	}
 
 	@Test
@@ -151,7 +186,6 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(result.contains("\"bool\":true")).isTrue();
 		assertThat(result.contains("\"bytes\":\"AQI=\"")).isTrue();
 		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(MediaType.APPLICATION_JSON);
-		verify(outputMessage.getBody(), never()).close();
 	}
 
 	@Test

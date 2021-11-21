@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.messaging.support.MessageBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -74,28 +77,25 @@ public class BrokerMessageHandlerTests {
 
 	@Test
 	public void publishBrokerAvailableEvent() {
-
 		assertThat(this.handler.isBrokerAvailable()).isFalse();
 		assertThat(this.handler.availabilityEvents).isEqualTo(Collections.emptyList());
 
 		this.handler.publishBrokerAvailableEvent();
 
 		assertThat(this.handler.isBrokerAvailable()).isTrue();
-		assertThat(this.handler.availabilityEvents).isEqualTo(Arrays.asList(true));
+		assertThat(this.handler.availabilityEvents).isEqualTo(Collections.singletonList(true));
 	}
 
 	@Test
 	public void publishBrokerAvailableEventWhenAlreadyAvailable() {
-
 		this.handler.publishBrokerAvailableEvent();
 		this.handler.publishBrokerAvailableEvent();
 
-		assertThat(this.handler.availabilityEvents).isEqualTo(Arrays.asList(true));
+		assertThat(this.handler.availabilityEvents).isEqualTo(Collections.singletonList(true));
 	}
 
 	@Test
 	public void publishBrokerUnavailableEvent() {
-
 		this.handler.publishBrokerAvailableEvent();
 		assertThat(this.handler.isBrokerAvailable()).isTrue();
 
@@ -107,7 +107,6 @@ public class BrokerMessageHandlerTests {
 
 	@Test
 	public void publishBrokerUnavailableEventWhenAlreadyUnavailable() {
-
 		this.handler.publishBrokerAvailableEvent();
 		this.handler.publishBrokerUnavailableEvent();
 		this.handler.publishBrokerUnavailableEvent();
@@ -115,6 +114,47 @@ public class BrokerMessageHandlerTests {
 		assertThat(this.handler.availabilityEvents).isEqualTo(Arrays.asList(true, false));
 	}
 
+	@Test
+	public void checkDestination() {
+		TestBrokerMessageHandler theHandler = new TestBrokerMessageHandler("/topic");
+		theHandler.start();
+
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		accessor.setLeaveMutable(true);
+
+		accessor.setDestination("/topic/foo");
+		theHandler.handleMessage(MessageBuilder.createMessage("p", accessor.toMessageHeaders()));
+
+		accessor.setDestination("/app/foo");
+		theHandler.handleMessage(MessageBuilder.createMessage("p", accessor.toMessageHeaders()));
+
+		accessor.setDestination(null);
+		theHandler.handleMessage(MessageBuilder.createMessage("p", accessor.toMessageHeaders()));
+
+		List<Message<?>> list = theHandler.messages;
+		assertThat(list).hasSize(2);
+		assertThat(list.get(0).getHeaders().get(SimpMessageHeaderAccessor.DESTINATION_HEADER)).isEqualTo("/topic/foo");
+		assertThat(list.get(1).getHeaders().get(SimpMessageHeaderAccessor.DESTINATION_HEADER)).isNull();
+	}
+
+	@Test
+	public void checkDestinationWithoutConfiguredPrefixes() {
+		this.handler.setUserDestinationPredicate(destination -> destination.startsWith("/user/"));
+		this.handler.start();
+
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		accessor.setLeaveMutable(true);
+
+		accessor.setDestination("/user/1/foo");
+		this.handler.handleMessage(MessageBuilder.createMessage("p", accessor.toMessageHeaders()));
+
+		accessor.setDestination("/foo");
+		this.handler.handleMessage(MessageBuilder.createMessage("p", accessor.toMessageHeaders()));
+
+		List<Message<?>> list = this.handler.messages;
+		assertThat(list).hasSize(1);
+		assertThat(list.get(0).getHeaders().get(SimpMessageHeaderAccessor.DESTINATION_HEADER)).isEqualTo("/foo");
+	}
 
 	private static class TestBrokerMessageHandler extends AbstractBrokerMessageHandler
 			implements ApplicationEventPublisher {
@@ -124,14 +164,19 @@ public class BrokerMessageHandlerTests {
 		private final List<Boolean> availabilityEvents = new ArrayList<>();
 
 
-		private TestBrokerMessageHandler() {
-			super(mock(SubscribableChannel.class), mock(MessageChannel.class), mock(SubscribableChannel.class));
+		TestBrokerMessageHandler(String... destinationPrefixes) {
+			super(mock(SubscribableChannel.class), mock(MessageChannel.class),
+					mock(SubscribableChannel.class), Arrays.asList(destinationPrefixes));
+
 			setApplicationEventPublisher(this);
 		}
 
 		@Override
 		protected void handleMessageInternal(Message<?> message) {
-			this.messages.add(message);
+			String destination = (String) message.getHeaders().get(SimpMessageHeaderAccessor.DESTINATION_HEADER);
+			if (checkDestinationPrefix(destination)) {
+				this.messages.add(message);
+			}
 		}
 
 		@Override

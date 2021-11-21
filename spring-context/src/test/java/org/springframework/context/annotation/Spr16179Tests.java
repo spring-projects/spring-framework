@@ -70,6 +70,7 @@ public class Spr16179Tests {
 		Assembler<Page<String>> assembler2;
 
 		@Autowired(required = false)
+		@SuppressWarnings("rawtypes")
 		Assembler<Page> assembler3;
 
 		@Autowired(required = false)

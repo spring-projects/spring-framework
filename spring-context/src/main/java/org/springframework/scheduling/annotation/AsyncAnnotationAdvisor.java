@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.util.function.SingletonSupplier;
  * annotation. This annotation can be used at the method and type level in
  * implementation classes as well as in service interfaces.
  *
- * <p>This advisor detects the EJB 3.1 {@code javax.ejb.Asynchronous}
+ * <p>This advisor detects the EJB 3.1 {@code jakarta.ejb.Asynchronous}
  * annotation as well, treating it exactly like Spring's own {@code Async}.
  * Furthermore, a custom async annotation type may get specified through the
  * {@link #setAsyncAnnotationType "asyncAnnotationType"} property.
@@ -55,7 +55,7 @@ import org.springframework.util.function.SingletonSupplier;
 @SuppressWarnings("serial")
 public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements BeanFactoryAware {
 
-	private Advice advice;
+	private final Advice advice;
 
 	private Pointcut pointcut;
 
@@ -75,7 +75,6 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	 * handle unexpected exception thrown by asynchronous method executions
 	 * @see AnnotationAsyncExecutionInterceptor#getDefaultExecutor(BeanFactory)
 	 */
-	@SuppressWarnings("unchecked")
 	public AsyncAnnotationAdvisor(
 			@Nullable Executor executor, @Nullable AsyncUncaughtExceptionHandler exceptionHandler) {
 
@@ -99,7 +98,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 		asyncAnnotationTypes.add(Async.class);
 		try {
 			asyncAnnotationTypes.add((Class<? extends Annotation>)
-					ClassUtils.forName("javax.ejb.Asynchronous", AsyncAnnotationAdvisor.class.getClassLoader()));
+					ClassUtils.forName("jakarta.ejb.Asynchronous", AsyncAnnotationAdvisor.class.getClassLoader()));
 		}
 		catch (ClassNotFoundException ex) {
 			// If EJB 3.1 API not present, simply ignore.
@@ -112,7 +111,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	/**
 	 * Set the 'async' annotation type.
 	 * <p>The default async annotation type is the {@link Async} annotation, as well
-	 * as the EJB 3.1 {@code javax.ejb.Asynchronous} annotation (if present).
+	 * as the EJB 3.1 {@code jakarta.ejb.Asynchronous} annotation (if present).
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation type to indicate that a method is to
 	 * be executed asynchronously.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,13 +84,6 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 
 		/**
 		 * Configure the {@code HttpMessageReader} to use for multipart requests.
-		 * <p>By default, if
-		 * <a href="https://github.com/synchronoss/nio-multipart">Synchronoss NIO Multipart</a>
-		 * is present, this is set to
-		 * {@link org.springframework.http.codec.multipart.MultipartHttpMessageReader
-		 * MultipartHttpMessageReader} created with an instance of
-		 * {@link org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader
-		 * SynchronossPartHttpMessageReader}.
 		 * <p>Note that {@link #maxInMemorySize(int)} and/or
 		 * {@link #enableLoggingRequestDetails(boolean)}, if configured, will be
 		 * applied to the given reader, if applicable.

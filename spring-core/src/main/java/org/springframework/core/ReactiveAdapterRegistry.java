@@ -16,43 +16,39 @@
 
 package org.springframework.core;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Flow;
 import java.util.function.Function;
 
 import kotlinx.coroutines.CompletableDeferredKt;
 import kotlinx.coroutines.Deferred;
 import org.reactivestreams.Publisher;
+import reactor.adapter.JdkFlowAdapter;
 import reactor.blockhound.BlockHound;
 import reactor.blockhound.integration.BlockHoundIntegration;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import rx.RxReactiveStreams;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * A registry of adapters to adapt Reactive Streams {@link Publisher} to/from
  * various async/reactive types such as {@code CompletableFuture}, RxJava
- * {@code Observable}, and others.
+ * {@code Flowable}, and others.
  *
  * <p>By default, depending on classpath availability, adapters are registered
- * for Reactor, RxJava 2/3, or RxJava 1 (+ RxJava Reactive Streams bridge),
- * {@link CompletableFuture}, Java 9+ {@code Flow.Publisher}, and Kotlin
- * Coroutines' {@code Deferred} and {@code Flow}.
- *
- * <p><strong>Note:</strong> As of Spring Framework 5.3, support for RxJava 1.x
- * is deprecated in favor of RxJava 2 and 3.
+ * for Reactor, RxJava 3, {@link CompletableFuture}, {@code Flow.Publisher},
+ * and Kotlin Coroutines' {@code Deferred} and {@code Flow}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 5.0
  */
 public class ReactiveAdapterRegistry {
@@ -62,25 +58,18 @@ public class ReactiveAdapterRegistry {
 
 	private static final boolean reactorPresent;
 
-	private static final boolean rxjava1Present;
-
-	private static final boolean rxjava2Present;
-
 	private static final boolean rxjava3Present;
 
-	private static final boolean flowPublisherPresent;
-
 	private static final boolean kotlinCoroutinesPresent;
+
+	private static final boolean mutinyPresent;
 
 	static {
 		ClassLoader classLoader = ReactiveAdapterRegistry.class.getClassLoader();
 		reactorPresent = ClassUtils.isPresent("reactor.core.publisher.Flux", classLoader);
-		rxjava1Present = ClassUtils.isPresent("rx.Observable", classLoader) &&
-				ClassUtils.isPresent("rx.RxReactiveStreams", classLoader);
-		rxjava2Present = ClassUtils.isPresent("io.reactivex.Flowable", classLoader);
 		rxjava3Present = ClassUtils.isPresent("io.reactivex.rxjava3.core.Flowable", classLoader);
-		flowPublisherPresent = ClassUtils.isPresent("java.util.concurrent.Flow.Publisher", classLoader);
 		kotlinCoroutinesPresent = ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt", classLoader);
+		mutinyPresent = ClassUtils.isPresent("io.smallrye.mutiny.Multi", classLoader);
 	}
 
 	private final List<ReactiveAdapter> adapters = new ArrayList<>();
@@ -96,30 +85,19 @@ public class ReactiveAdapterRegistry {
 			new ReactorRegistrar().registerAdapters(this);
 		}
 
-		// RxJava1 (deprecated)
-		if (rxjava1Present) {
-			new RxJava1Registrar().registerAdapters(this);
-		}
-
-		// RxJava2
-		if (rxjava2Present) {
-			new RxJava2Registrar().registerAdapters(this);
-		}
-		// RxJava3
+		// RxJava
 		if (rxjava3Present) {
 			new RxJava3Registrar().registerAdapters(this);
 		}
 
-		// Java 9+ Flow.Publisher
-		if (flowPublisherPresent) {
-			new ReactorJdkFlowAdapterRegistrar().registerAdapter(this);
-		}
-		// If not present, do nothing for the time being...
-		// We can fall back on "reactive-streams-flow-bridge" (once released)
-
 		// Kotlin Coroutines
 		if (reactorPresent && kotlinCoroutinesPresent) {
 			new CoroutinesRegistrar().registerAdapters(this);
+		}
+
+		// SmallRye Mutiny
+		if (mutinyPresent) {
+			new MutinyRegistrar().registerAdapters(this);
 		}
 	}
 
@@ -215,159 +193,6 @@ public class ReactiveAdapterRegistry {
 	}
 
 
-	private static class ReactorRegistrar {
-
-		void registerAdapters(ReactiveAdapterRegistry registry) {
-			// Register Flux and Mono before Publisher...
-
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.singleOptionalValue(Mono.class, Mono::empty),
-					source -> (Mono<?>) source,
-					Mono::from
-			);
-
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.multiValue(Flux.class, Flux::empty),
-					source -> (Flux<?>) source,
-					Flux::from);
-
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.multiValue(Publisher.class, Flux::empty),
-					source -> (Publisher<?>) source,
-					source -> source);
-
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.nonDeferredAsyncValue(CompletionStage.class, EmptyCompletableFuture::new),
-					source -> Mono.fromCompletionStage((CompletionStage<?>) source),
-					source -> Mono.from(source).toFuture()
-			);
-		}
-	}
-
-
-	private static class RxJava1Registrar {
-
-		void registerAdapters(ReactiveAdapterRegistry registry) {
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.multiValue(rx.Observable.class, rx.Observable::empty),
-					source -> RxReactiveStreams.toPublisher((rx.Observable<?>) source),
-					RxReactiveStreams::toObservable
-			);
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.singleRequiredValue(rx.Single.class),
-					source -> RxReactiveStreams.toPublisher((rx.Single<?>) source),
-					RxReactiveStreams::toSingle
-			);
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.noValue(rx.Completable.class, rx.Completable::complete),
-					source -> RxReactiveStreams.toPublisher((rx.Completable) source),
-					RxReactiveStreams::toCompletable
-			);
-		}
-	}
-
-
-	private static class RxJava2Registrar {
-
-		void registerAdapters(ReactiveAdapterRegistry registry) {
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.multiValue(io.reactivex.Flowable.class, io.reactivex.Flowable::empty),
-					source -> (io.reactivex.Flowable<?>) source,
-					io.reactivex.Flowable::fromPublisher
-			);
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.multiValue(io.reactivex.Observable.class, io.reactivex.Observable::empty),
-					source -> ((io.reactivex.Observable<?>) source).toFlowable(io.reactivex.BackpressureStrategy.BUFFER),
-					io.reactivex.Observable::fromPublisher
-			);
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.singleRequiredValue(io.reactivex.Single.class),
-					source -> ((io.reactivex.Single<?>) source).toFlowable(),
-					io.reactivex.Single::fromPublisher
-			);
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.singleOptionalValue(io.reactivex.Maybe.class, io.reactivex.Maybe::empty),
-					source -> ((io.reactivex.Maybe<?>) source).toFlowable(),
-					source -> io.reactivex.Flowable.fromPublisher(source)
-							.toObservable().singleElement()
-			);
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.noValue(io.reactivex.Completable.class, io.reactivex.Completable::complete),
-					source -> ((io.reactivex.Completable) source).toFlowable(),
-					io.reactivex.Completable::fromPublisher
-			);
-		}
-	}
-
-	private static class RxJava3Registrar {
-
-		void registerAdapters(ReactiveAdapterRegistry registry) {
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.multiValue(
-							io.reactivex.rxjava3.core.Flowable.class,
-							io.reactivex.rxjava3.core.Flowable::empty),
-					source -> (io.reactivex.rxjava3.core.Flowable<?>) source,
-					io.reactivex.rxjava3.core.Flowable::fromPublisher
-			);
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.multiValue(
-							io.reactivex.rxjava3.core.Observable.class,
-							io.reactivex.rxjava3.core.Observable::empty),
-					source -> ((io.reactivex.rxjava3.core.Observable<?>) source).toFlowable(
-							io.reactivex.rxjava3.core.BackpressureStrategy.BUFFER),
-					io.reactivex.rxjava3.core.Observable::fromPublisher
-			);
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.singleRequiredValue(io.reactivex.rxjava3.core.Single.class),
-					source -> ((io.reactivex.rxjava3.core.Single<?>) source).toFlowable(),
-					io.reactivex.rxjava3.core.Single::fromPublisher
-			);
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.singleOptionalValue(
-							io.reactivex.rxjava3.core.Maybe.class,
-							io.reactivex.rxjava3.core.Maybe::empty),
-					source -> ((io.reactivex.rxjava3.core.Maybe<?>) source).toFlowable(),
-					io.reactivex.rxjava3.core.Maybe::fromPublisher
-			);
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.noValue(
-							io.reactivex.rxjava3.core.Completable.class,
-							io.reactivex.rxjava3.core.Completable::complete),
-					source -> ((io.reactivex.rxjava3.core.Completable) source).toFlowable(),
-					io.reactivex.rxjava3.core.Completable::fromPublisher
-			);
-		}
-	}
-
-	private static class ReactorJdkFlowAdapterRegistrar {
-
-		void registerAdapter(ReactiveAdapterRegistry registry) {
-			// TODO: remove reflection when build requires JDK 9+
-
-			try {
-				String publisherName = "java.util.concurrent.Flow.Publisher";
-				Class<?> publisherClass = ClassUtils.forName(publisherName, getClass().getClassLoader());
-
-				String adapterName = "reactor.adapter.JdkFlowAdapter";
-				Class<?> flowAdapterClass = ClassUtils.forName(adapterName,  getClass().getClassLoader());
-
-				Method toFluxMethod = flowAdapterClass.getMethod("flowPublisherToFlux", publisherClass);
-				Method toFlowMethod = flowAdapterClass.getMethod("publisherToFlowPublisher", Publisher.class);
-				Object emptyFlow = ReflectionUtils.invokeMethod(toFlowMethod, null, Flux.empty());
-
-				registry.registerReactiveType(
-						ReactiveTypeDescriptor.multiValue(publisherClass, () -> emptyFlow),
-						source -> (Publisher<?>) ReflectionUtils.invokeMethod(toFluxMethod, null, source),
-						publisher -> ReflectionUtils.invokeMethod(toFlowMethod, null, publisher)
-				);
-			}
-			catch (Throwable ex) {
-				// Ignore
-			}
-		}
-	}
-
-
 	/**
 	 * ReactiveAdapter variant that wraps adapted Publishers as {@link Flux} or
 	 * {@link Mono} depending on {@link ReactiveTypeDescriptor#isMultiValue()}.
@@ -391,10 +216,85 @@ public class ReactiveAdapterRegistry {
 	}
 
 
+	private static class ReactorRegistrar {
+
+		private static final Flow.Publisher<?> EMPTY_FLOW = JdkFlowAdapter.publisherToFlowPublisher(Flux.empty());
+
+		void registerAdapters(ReactiveAdapterRegistry registry) {
+			// Register Flux and Mono before Publisher...
+
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.singleOptionalValue(Mono.class, Mono::empty),
+					source -> (Mono<?>) source,
+					Mono::from);
+
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.multiValue(Flux.class, Flux::empty),
+					source -> (Flux<?>) source,
+					Flux::from);
+
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.multiValue(Publisher.class, Flux::empty),
+					source -> (Publisher<?>) source,
+					source -> source);
+
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.nonDeferredAsyncValue(CompletionStage.class, EmptyCompletableFuture::new),
+					source -> Mono.fromCompletionStage((CompletionStage<?>) source),
+					source -> Mono.from(source).toFuture());
+
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.multiValue(Flow.Publisher.class, () -> EMPTY_FLOW),
+					source -> JdkFlowAdapter.flowPublisherToFlux((Flow.Publisher<?>) source),
+					JdkFlowAdapter::publisherToFlowPublisher);
+		}
+	}
+
+
 	private static class EmptyCompletableFuture<T> extends CompletableFuture<T> {
 
 		EmptyCompletableFuture() {
 			complete(null);
+		}
+	}
+
+
+	private static class RxJava3Registrar {
+
+		void registerAdapters(ReactiveAdapterRegistry registry) {
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.multiValue(
+							io.reactivex.rxjava3.core.Flowable.class,
+							io.reactivex.rxjava3.core.Flowable::empty),
+					source -> (io.reactivex.rxjava3.core.Flowable<?>) source,
+					io.reactivex.rxjava3.core.Flowable::fromPublisher);
+
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.multiValue(
+							io.reactivex.rxjava3.core.Observable.class,
+							io.reactivex.rxjava3.core.Observable::empty),
+					source -> ((io.reactivex.rxjava3.core.Observable<?>) source).toFlowable(
+							io.reactivex.rxjava3.core.BackpressureStrategy.BUFFER),
+					io.reactivex.rxjava3.core.Observable::fromPublisher);
+
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.singleRequiredValue(io.reactivex.rxjava3.core.Single.class),
+					source -> ((io.reactivex.rxjava3.core.Single<?>) source).toFlowable(),
+					io.reactivex.rxjava3.core.Single::fromPublisher);
+
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.singleOptionalValue(
+							io.reactivex.rxjava3.core.Maybe.class,
+							io.reactivex.rxjava3.core.Maybe::empty),
+					source -> ((io.reactivex.rxjava3.core.Maybe<?>) source).toFlowable(),
+					io.reactivex.rxjava3.core.Maybe::fromPublisher);
+
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.noValue(
+							io.reactivex.rxjava3.core.Completable.class,
+							io.reactivex.rxjava3.core.Completable::complete),
+					source -> ((io.reactivex.rxjava3.core.Completable) source).toFlowable(),
+					io.reactivex.rxjava3.core.Completable::fromPublisher);
 		}
 	}
 
@@ -412,8 +312,27 @@ public class ReactiveAdapterRegistry {
 			registry.registerReactiveType(
 					ReactiveTypeDescriptor.multiValue(kotlinx.coroutines.flow.Flow.class, kotlinx.coroutines.flow.FlowKt::emptyFlow),
 					source -> kotlinx.coroutines.reactor.ReactorFlowKt.asFlux((kotlinx.coroutines.flow.Flow<?>) source),
-					kotlinx.coroutines.reactive.ReactiveFlowKt::asFlow
-			);
+					kotlinx.coroutines.reactive.ReactiveFlowKt::asFlow);
+		}
+	}
+
+
+	private static class MutinyRegistrar {
+
+		void registerAdapters(ReactiveAdapterRegistry registry) {
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.singleOptionalValue(
+							io.smallrye.mutiny.Uni.class,
+							() -> io.smallrye.mutiny.Uni.createFrom().nothing()),
+					uni -> ((io.smallrye.mutiny.Uni<?>) uni).convert().toPublisher(),
+					publisher -> io.smallrye.mutiny.Uni.createFrom().publisher(publisher));
+
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.multiValue(
+							io.smallrye.mutiny.Multi.class,
+							() -> io.smallrye.mutiny.Multi.createFrom().empty()),
+					multi -> (io.smallrye.mutiny.Multi<?>) multi,
+					publisher -> io.smallrye.mutiny.Multi.createFrom().publisher(publisher));
 		}
 	}
 
@@ -431,7 +350,6 @@ public class ReactiveAdapterRegistry {
 
 		@Override
 		public void applyTo(BlockHound.Builder builder) {
-
 			// Avoid hard references potentially anywhere in spring-core (no need for structural dependency)
 
 			builder.allowBlockingCallsInside(

@@ -76,7 +76,7 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	/**
 	 * Preserve the source behind this error: possibly an {@link Exception}
 	 * (typically {@link org.springframework.beans.PropertyAccessException})
-	 * or a Bean Validation {@link javax.validation.ConstraintViolation}.
+	 * or a Bean Validation {@link jakarta.validation.ConstraintViolation}.
 	 * <p>Note that any such source object is being stored as transient:
 	 * that is, it won't be part of a serialized error representation.
 	 * @param source the source object
@@ -92,7 +92,7 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	/**
 	 * Unwrap the source behind this error: possibly an {@link Exception}
 	 * (typically {@link org.springframework.beans.PropertyAccessException})
-	 * or a Bean Validation {@link javax.validation.ConstraintViolation}.
+	 * or a Bean Validation {@link jakarta.validation.ConstraintViolation}.
 	 * <p>The cause of the outermost exception will be introspected as well,
 	 * e.g. the underlying conversion exception or exception thrown from a setter
 	 * (instead of having to unwrap the {@code PropertyAccessException} in turn).
@@ -117,7 +117,7 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	/**
 	 * Check the source behind this error: possibly an {@link Exception}
 	 * (typically {@link org.springframework.beans.PropertyAccessException})
-	 * or a Bean Validation {@link javax.validation.ConstraintViolation}.
+	 * or a Bean Validation {@link jakarta.validation.ConstraintViolation}.
 	 * <p>The cause of the outermost exception will be introspected as well,
 	 * e.g. the underlying conversion exception or exception thrown from a setter
 	 * (instead of having to unwrap the {@code PropertyAccessException} in turn).

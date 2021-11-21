@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.util.MethodInvoker;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public abstract class ReflectionHelper {
@@ -281,25 +282,32 @@ public abstract class ReflectionHelper {
 				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
 				conversionOccurred |= (argument != arguments[i]);
 			}
+
 			MethodParameter methodParam = MethodParameter.forExecutable(executable, varargsPosition);
+
+			// If the target is varargs and there is just one more argument, then convert it here.
 			if (varargsPosition == arguments.length - 1) {
-				// If the target is varargs and there is just one more argument
-				// then convert it here
-				TypeDescriptor targetType = new TypeDescriptor(methodParam);
 				Object argument = arguments[varargsPosition];
+				TypeDescriptor targetType = new TypeDescriptor(methodParam);
 				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
-				arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);
-				// Three outcomes of that previous line:
-				// 1) the input argument was already compatible (ie. array of valid type) and nothing was done
-				// 2) the input argument was correct type but not in an array so it was made into an array
-				// 3) the input argument was the wrong type and got converted and put into an array
+				// If the argument type is equal to the varargs element type, there is no need
+				// to convert it or wrap it in an array. For example, using StringToArrayConverter
+				// to convert a String containing a comma would result in the String being split
+				// and repackaged in an array when it should be used as-is.
+				if (!sourceType.equals(targetType.getElementTypeDescriptor())) {
+					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);
+				}
+				// Three outcomes of the above if-block:
+				// 1) the input argument was correct type but not wrapped in an array, and nothing was done.
+				// 2) the input argument was already compatible (i.e., array of valid type), and nothing was done.
+				// 3) the input argument was the wrong type and got converted and wrapped in an array.
 				if (argument != arguments[varargsPosition] &&
 						!isFirstEntryInArray(argument, arguments[varargsPosition])) {
 					conversionOccurred = true; // case 3
 				}
 			}
+			// Otherwise, convert remaining arguments to the varargs element type.
 			else {
-				// Convert remaining arguments to the varargs element type
 				TypeDescriptor targetType = new TypeDescriptor(methodParam).getElementTypeDescriptor();
 				Assert.state(targetType != null, "No element type");
 				for (int i = varargsPosition; i < arguments.length; i++) {
@@ -332,8 +340,8 @@ public abstract class ReflectionHelper {
 	}
 
 	/**
-	 * Package up the arguments so that they correctly match what is expected in parameterTypes.
-	 * For example, if parameterTypes is {@code (int, String[])} because the second parameter
+	 * Package up the arguments so that they correctly match what is expected in requiredParameterTypes.
+	 * <p>For example, if requiredParameterTypes is {@code (int, String[])} because the second parameter
 	 * was declared {@code String...}, then if arguments is {@code [1,"a","b"]} then it must be
 	 * repackaged as {@code [1,new String[]{"a","b"}]} in order to match the expected types.
 	 * @param requiredParameterTypes the types of the parameters for the invocation
@@ -350,23 +358,24 @@ public abstract class ReflectionHelper {
 				requiredParameterTypes[parameterCount - 1] !=
 						(args[argumentCount - 1] != null ? args[argumentCount - 1].getClass() : null)) {
 
-			int arraySize = 0;  // zero size array if nothing to pass as the varargs parameter
-			if (argumentCount >= parameterCount) {
-				arraySize = argumentCount - (parameterCount - 1);
-			}
-
-			// Create an array for the varargs arguments
+			// Create an array for the leading arguments plus the varargs array argument.
 			Object[] newArgs = new Object[parameterCount];
+			// Copy all leading arguments to the new array, omitting the varargs array argument.
 			System.arraycopy(args, 0, newArgs, 0, newArgs.length - 1);
 
 			// Now sort out the final argument, which is the varargs one. Before entering this method,
 			// the arguments should have been converted to the box form of the required type.
-			Class<?> componentType = requiredParameterTypes[parameterCount - 1].getComponentType();
-			Object repackagedArgs = Array.newInstance(componentType, arraySize);
-			for (int i = 0; i < arraySize; i++) {
-				Array.set(repackagedArgs, i, args[parameterCount - 1 + i]);
+			int varargsArraySize = 0;  // zero size array if nothing to pass as the varargs parameter
+			if (argumentCount >= parameterCount) {
+				varargsArraySize = argumentCount - (parameterCount - 1);
 			}
-			newArgs[newArgs.length - 1] = repackagedArgs;
+			Class<?> componentType = requiredParameterTypes[parameterCount - 1].getComponentType();
+			Object varargsArray = Array.newInstance(componentType, varargsArraySize);
+			for (int i = 0; i < varargsArraySize; i++) {
+				Array.set(varargsArray, i, args[parameterCount - 1 + i]);
+			}
+			// Finally, add the varargs array to the new arguments array.
+			newArgs[newArgs.length - 1] = varargsArray;
 			return newArgs;
 		}
 		return args;

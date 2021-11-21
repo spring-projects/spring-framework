@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.springframework.web.server;
-
-import java.util.Collections;
-import java.util.Map;
 
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.NestedRuntimeException;
@@ -47,7 +44,7 @@ public class ResponseStatusException extends NestedRuntimeException {
 	 * @param status the HTTP status (required)
 	 */
 	public ResponseStatusException(HttpStatus status) {
-		this(status, null, null);
+		this(status, null);
 	}
 
 	/**
@@ -57,7 +54,10 @@ public class ResponseStatusException extends NestedRuntimeException {
 	 * @param reason the associated reason (optional)
 	 */
 	public ResponseStatusException(HttpStatus status, @Nullable String reason) {
-		this(status, reason, null);
+		super("");
+		Assert.notNull(status, "HttpStatus is required");
+		this.status = status.value();
+		this.reason = reason;
 	}
 
 	/**
@@ -114,29 +114,11 @@ public class ResponseStatusException extends NestedRuntimeException {
 	/**
 	 * Return headers associated with the exception that should be added to the
 	 * error response, e.g. "Allow", "Accept", etc.
-	 * <p>The default implementation in this class returns an empty map.
-	 * @since 5.1.11
-	 * @deprecated as of 5.1.13 in favor of {@link #getResponseHeaders()}
-	 */
-	@Deprecated
-	public Map<String, String> getHeaders() {
-		return Collections.emptyMap();
-	}
-
-	/**
-	 * Return headers associated with the exception that should be added to the
-	 * error response, e.g. "Allow", "Accept", etc.
 	 * <p>The default implementation in this class returns empty headers.
 	 * @since 5.1.13
 	 */
 	public HttpHeaders getResponseHeaders() {
-		Map<String, String> headers = getHeaders();
-		if (headers.isEmpty()) {
-			return HttpHeaders.EMPTY;
-		}
-		HttpHeaders result = new HttpHeaders();
-		getHeaders().forEach(result::add);
-		return result;
+		return HttpHeaders.EMPTY;
 	}
 
 	/**

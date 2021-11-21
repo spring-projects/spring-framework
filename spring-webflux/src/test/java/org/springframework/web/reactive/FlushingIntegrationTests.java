@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 					for (char c : "0123456789".toCharArray()) {
 						sb.append(c);
 						if (sb.length() + 1 == 1024) {
-							sink.next(sb.append("\n").toString());
+							sink.next(sb.append('\n').toString());
 							return;
 						}
 					}

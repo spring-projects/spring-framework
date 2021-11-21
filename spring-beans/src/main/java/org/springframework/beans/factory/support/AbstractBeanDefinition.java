@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,8 +236,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		setSource(original.getSource());
 		copyAttributesFrom(original);
 
-		if (original instanceof AbstractBeanDefinition) {
-			AbstractBeanDefinition originalAbd = (AbstractBeanDefinition) original;
+		if (original instanceof AbstractBeanDefinition originalAbd) {
 			if (originalAbd.hasBeanClass()) {
 				setBeanClass(originalAbd.getBeanClass());
 			}
@@ -313,8 +312,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		setSource(other.getSource());
 		copyAttributesFrom(other);
 
-		if (other instanceof AbstractBeanDefinition) {
-			AbstractBeanDefinition otherAbd = (AbstractBeanDefinition) other;
+		if (other instanceof AbstractBeanDefinition otherAbd) {
 			if (otherAbd.hasBeanClass()) {
 				setBeanClass(otherAbd.getBeanClass());
 			}
@@ -894,7 +892,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Return if there are property values values defined for this bean.
+	 * Return if there are property values defined for this bean.
 	 * @since 5.0.2
 	 */
 	@Override
@@ -1178,10 +1176,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof AbstractBeanDefinition)) {
+		if (!(other instanceof AbstractBeanDefinition that)) {
 			return false;
 		}
-		AbstractBeanDefinition that = (AbstractBeanDefinition) other;
 		return (ObjectUtils.nullSafeEquals(getBeanClassName(), that.getBeanClassName()) &&
 				ObjectUtils.nullSafeEquals(this.scope, that.scope) &&
 				this.abstractFlag == that.abstractFlag &&
@@ -1194,8 +1191,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 				this.primary == that.primary &&
 				this.nonPublicAccessAllowed == that.nonPublicAccessAllowed &&
 				this.lenientConstructorResolution == that.lenientConstructorResolution &&
-				ObjectUtils.nullSafeEquals(this.constructorArgumentValues, that.constructorArgumentValues) &&
-				ObjectUtils.nullSafeEquals(this.propertyValues, that.propertyValues) &&
+				equalsConstructorArgumentValues(that) &&
+				equalsPropertyValues(that) &&
 				ObjectUtils.nullSafeEquals(this.methodOverrides, that.methodOverrides) &&
 				ObjectUtils.nullSafeEquals(this.factoryBeanName, that.factoryBeanName) &&
 				ObjectUtils.nullSafeEquals(this.factoryMethodName, that.factoryMethodName) &&
@@ -1208,12 +1205,30 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 				super.equals(other));
 	}
 
+	private boolean equalsConstructorArgumentValues(AbstractBeanDefinition other) {
+		if (!hasConstructorArgumentValues()) {
+			return !other.hasConstructorArgumentValues();
+		}
+		return ObjectUtils.nullSafeEquals(this.constructorArgumentValues, other.constructorArgumentValues);
+	}
+
+	private boolean equalsPropertyValues(AbstractBeanDefinition other) {
+		if (!hasPropertyValues()) {
+			return !other.hasPropertyValues();
+		}
+		return ObjectUtils.nullSafeEquals(this.propertyValues, other.propertyValues);
+	}
+
 	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(getBeanClassName());
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.scope);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.constructorArgumentValues);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.propertyValues);
+		if (hasConstructorArgumentValues()) {
+			hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.constructorArgumentValues);
+		}
+		if (hasPropertyValues()) {
+			hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.propertyValues);
+		}
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.factoryBeanName);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.factoryMethodName);
 		hashCode = 29 * hashCode + super.hashCode();
@@ -1223,7 +1238,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("class [");
-		sb.append(getBeanClassName()).append("]");
+		sb.append(getBeanClassName()).append(']');
 		sb.append("; scope=").append(this.scope);
 		sb.append("; abstract=").append(this.abstractFlag);
 		sb.append("; lazyInit=").append(this.lazyInit);

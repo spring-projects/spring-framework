@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -229,6 +230,68 @@ public class DefaultPartHttpMessageReaderTests  {
 						"This is implicitly typed plain ASCII text.\r\nIt does NOT end with a linebreak.", latch)).as("Part 1")
 				.expectError(DecodingException.class)
 				.verify();
+
+		latch.await();
+	}
+
+	@ParameterizedDefaultPartHttpMessageReaderTest
+	public void quotedBoundary(String displayName, DefaultPartHttpMessageReader reader) throws InterruptedException {
+		MockServerHttpRequest request = createRequest(
+				new ClassPathResource("simple.multipart", getClass()), "\"simple-boundary\"");
+
+		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
+
+		CountDownLatch latch = new CountDownLatch(2);
+		StepVerifier.create(result)
+				.consumeNextWith(part -> testPart(part, null,
+						"This is implicitly typed plain ASCII text.\r\nIt does NOT end with a linebreak.", latch)).as("Part 1")
+				.consumeNextWith(part -> testPart(part, null,
+						"This is explicitly typed plain ASCII text.\r\nIt DOES end with a linebreak.\r\n", latch)).as("Part 2")
+				.verifyComplete();
+
+		latch.await();
+	}
+
+	@ParameterizedDefaultPartHttpMessageReaderTest
+	public void utf8Headers(String displayName, DefaultPartHttpMessageReader reader) throws InterruptedException {
+		MockServerHttpRequest request = createRequest(
+				new ClassPathResource("utf8.multipart", getClass()), "\"simple-boundary\"");
+
+		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
+
+		CountDownLatch latch = new CountDownLatch(1);
+		StepVerifier.create(result)
+				.consumeNextWith(part -> {
+					assertThat(part.headers()).containsEntry("Føø", Collections.singletonList("Bår"));
+					testPart(part, null, "This is plain ASCII text.", latch);
+				})
+				.verifyComplete();
+
+		latch.await();
+	}
+
+	// gh-27612
+	@Test
+	public void exceedHeaderLimit() throws InterruptedException {
+		Flux<DataBuffer> body = DataBufferUtils
+				.readByteChannel((new ClassPathResource("files.multipart", getClass()))::readableChannel, bufferFactory, 282);
+
+		MediaType contentType = new MediaType("multipart", "form-data", singletonMap("boundary", "----WebKitFormBoundaryG8fJ50opQOML0oGD"));
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(contentType)
+				.body(body);
+
+		DefaultPartHttpMessageReader reader = new DefaultPartHttpMessageReader();
+
+		reader.setMaxHeadersSize(230);
+
+		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
+
+		CountDownLatch latch = new CountDownLatch(2);
+		StepVerifier.create(result)
+				.consumeNextWith(part -> testPart(part, null, LOREM_IPSUM, latch))
+				.consumeNextWith(part -> testPart(part, null, MUSPI_MEROL, latch))
+				.verifyComplete();
 
 		latch.await();
 	}

@@ -56,7 +56,7 @@ import org.springframework.util.MultiValueMap;
  */
 public class ExchangeResult {
 
-	private static Log logger = LogFactory.getLog(ExchangeResult.class);
+	private static final Log logger = LogFactory.getLog(ExchangeResult.class);
 
 	private static final List<MediaType> PRINTABLE_MEDIA_TYPES = Arrays.asList(
 			MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
@@ -77,7 +77,10 @@ public class ExchangeResult {
 	private final String uriTemplate;
 
 	@Nullable
-	final Object mockServerResult;
+	private final Object mockServerResult;
+
+	/** Ensure single logging, e.g. for expectAll. */
+	private boolean diagnosticsLogged;
 
 
 	/**
@@ -121,6 +124,7 @@ public class ExchangeResult {
 		this.timeout = other.timeout;
 		this.uriTemplate = other.uriTemplate;
 		this.mockServerResult = other.mockServerResult;
+		this.diagnosticsLogged = other.diagnosticsLogged;
 	}
 
 
@@ -218,16 +222,17 @@ public class ExchangeResult {
 	}
 
 	/**
-	 * Execute the given Runnable, catch any {@link AssertionError}, decorate
-	 * with {@code AssertionError} containing diagnostic information about the
-	 * request and response, and then re-throw.
+	 * Execute the given Runnable, catch any {@link AssertionError}, log details
+	 * about the request and response at ERROR level under the class log
+	 * category, and after that re-throw the error.
 	 */
 	public void assertWithDiagnostics(Runnable assertion) {
 		try {
 			assertion.run();
 		}
 		catch (AssertionError ex) {
-			if (logger.isErrorEnabled()) {
+			if (!this.diagnosticsLogged && logger.isErrorEnabled()) {
+				this.diagnosticsLogged = true;
 				logger.error("Request details for assertion failure:\n" + this);
 			}
 			throw ex;

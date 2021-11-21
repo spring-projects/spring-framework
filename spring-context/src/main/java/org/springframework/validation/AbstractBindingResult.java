@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,8 +204,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	public FieldError getFieldError(String field) {
 		String fixedField = fixedField(field);
 		for (ObjectError objectError : this.errors) {
-			if (objectError instanceof FieldError) {
-				FieldError fieldError = (FieldError) objectError;
+			if (objectError instanceof FieldError fieldError) {
 				if (isMatchingFieldError(fixedField, fieldError)) {
 					return fieldError;
 				}
@@ -364,10 +363,9 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof BindingResult)) {
+		if (!(other instanceof BindingResult otherResult)) {
 			return false;
 		}
-		BindingResult otherResult = (BindingResult) other;
 		return (getObjectName().equals(otherResult.getObjectName()) &&
 				ObjectUtils.nullSafeEquals(getTarget(), otherResult.getTarget()) &&
 				getAllErrors().equals(otherResult.getAllErrors()));

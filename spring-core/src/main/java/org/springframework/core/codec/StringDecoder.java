@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,16 +157,20 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 				int startIndex = buffer.readPosition();
 				int length = (endIndex - startIndex + 1);
 				DataBuffer slice = buffer.retainedSlice(startIndex, length);
-				if (this.stripDelimiter) {
-					slice.writePosition(slice.writePosition() - matcher.delimiter().length);
-				}
 				result = (result != null ? result : new ArrayList<>());
 				if (chunks.isEmpty()) {
+					if (this.stripDelimiter) {
+						slice.writePosition(slice.writePosition() - matcher.delimiter().length);
+					}
 					result.add(slice);
 				}
 				else {
 					chunks.add(slice);
-					result.add(buffer.factory().join(chunks));
+					DataBuffer joined = buffer.factory().join(chunks);
+					if (this.stripDelimiter) {
+						joined.writePosition(joined.writePosition() - matcher.delimiter().length);
+					}
+					result.add(joined);
 					chunks.clear();
 				}
 				buffer.readPosition(endIndex + 1);
@@ -205,17 +209,6 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	/**
 	 * Create a {@code StringDecoder} for {@code "text/plain"}.
-	 * @param stripDelimiter this flag is ignored
-	 * @deprecated as of Spring 5.0.4, in favor of {@link #textPlainOnly()} or
-	 * {@link #textPlainOnly(List, boolean)}
-	 */
-	@Deprecated
-	public static StringDecoder textPlainOnly(boolean stripDelimiter) {
-		return textPlainOnly();
-	}
-
-	/**
-	 * Create a {@code StringDecoder} for {@code "text/plain"}.
 	 */
 	public static StringDecoder textPlainOnly() {
 		return textPlainOnly(DEFAULT_DELIMITERS, true);
@@ -229,17 +222,6 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	 */
 	public static StringDecoder textPlainOnly(List<String> delimiters, boolean stripDelimiter) {
 		return new StringDecoder(delimiters, stripDelimiter, new MimeType("text", "plain", DEFAULT_CHARSET));
-	}
-
-	/**
-	 * Create a {@code StringDecoder} that supports all MIME types.
-	 * @param stripDelimiter this flag is ignored
-	 * @deprecated as of Spring 5.0.4, in favor of {@link #allMimeTypes()} or
-	 * {@link #allMimeTypes(List, boolean)}
-	 */
-	@Deprecated
-	public static StringDecoder allMimeTypes(boolean stripDelimiter) {
-		return allMimeTypes();
 	}
 
 	/**

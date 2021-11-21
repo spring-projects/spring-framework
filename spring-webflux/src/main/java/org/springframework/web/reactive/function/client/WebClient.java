@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,13 +186,6 @@ public interface WebClient {
 		 */
 		Builder baseUrl(String baseUrl);
 
-		/**
-		 * Configure default URI variable values that will be used when expanding
-		 * URI templates using a {@link Map}.
-		 * @param defaultUriVariables the default values to use
-		 * @see #baseUrl(String)
-		 * @see #uriBuilderFactory(UriBuilderFactory)
-		 */
 		/**
 		 * Configure default URL variable values to use when expanding URI
 		 * templates with a {@link Map}. Effectively a shortcut for:
@@ -476,10 +469,10 @@ public interface WebClient {
 		/**
 		 * Provide a function to populate the Reactor {@code Context}.
 		 * @param contextModifier the function to modify the context with
+		 * @since 5.3.1
 		 * @deprecated in 5.3.2 to be removed soon after; this method cannot
 		 * provide context to downstream (nested or subsequent) requests and is
 		 * of limited value.
-		 * @since 5.3.1
 		 */
 		@Deprecated
 		S context(Function<Context, Context> contextModifier);
@@ -529,7 +522,7 @@ public interface WebClient {
 		 * Mono&lt;Object&gt; entityMono = client.get()
 		 *     .uri("/persons/1")
 		 *     .accept(MediaType.APPLICATION_JSON)
-		 *     .exchangeToMono(response -> {
+		 *     .exchangeToMono(response -&gt; {
 		 *         if (response.statusCode().equals(HttpStatus.OK)) {
 		 *             return response.bodyToMono(Person.class);
 		 *         }
@@ -561,7 +554,7 @@ public interface WebClient {
 		 * Mono&lt;Object&gt; entityMono = client.get()
 		 *     .uri("/persons")
 		 *     .accept(MediaType.APPLICATION_JSON)
-		 *     .exchangeToFlux(response -> {
+		 *     .exchangeToFlux(response -&gt; {
 		 *         if (response.statusCode().equals(HttpStatus.OK)) {
 		 *             return response.bodyToFlux(Person.class);
 		 *         }
@@ -758,7 +751,7 @@ public interface WebClient {
 		 * Provide a function to map specific error status codes to an error
 		 * signal to be propagated downstream instead of the response.
 		 * <p>By default, if there are no matching status handlers, responses
-		 * with status codes >= 400 are mapped to
+		 * with status codes &gt;= 400 are mapped to
 		 * {@link WebClientResponseException} which is created with
 		 * {@link ClientResponse#createException()}.
 		 * <p>To suppress the treatment of a status code as an error and process
@@ -773,7 +766,7 @@ public interface WebClient {
 		 *     .retrieve()
 		 *     .bodyToMono(Account.class)
 		 *     .onErrorResume(WebClientResponseException.class,
-		 *          ex -> ex.getRawStatusCode() == 404 ? Mono.empty() : Mono.error(ex));
+		 *          ex -&gt; ex.getRawStatusCode() == 404 ? Mono.empty() : Mono.error(ex));
 		 * </pre>
 		 * @param statusPredicate to match responses with
 		 * @param exceptionFunction to map the response to an error signal

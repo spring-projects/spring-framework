@@ -85,7 +85,7 @@ public class FrameworkExtensionTests {
 	 */
 	private static class TestRequestPostProcessor implements RequestPostProcessor {
 
-		private HttpHeaders headers = new HttpHeaders();
+		private final HttpHeaders headers = new HttpHeaders();
 
 
 		public TestRequestPostProcessor foo(String value) {

@@ -25,9 +25,9 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -528,7 +528,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * same active logical session. However, this is not guaranteed across
 	 * different servlet containers; the only 100% safe way is a session mutex.
 	 * @see org.springframework.web.util.HttpSessionMutexListener
-	 * @see org.springframework.web.util.WebUtils#getSessionMutex(javax.servlet.http.HttpSession)
+	 * @see org.springframework.web.util.WebUtils#getSessionMutex(jakarta.servlet.http.HttpSession)
 	 */
 	public void setSynchronizeOnSession(boolean synchronizeOnSession) {
 		this.synchronizeOnSession = synchronizeOnSession;
@@ -826,6 +826,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * and return {@code null} if the result of that call is {@code true}.
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	protected long getLastModifiedInternal(HttpServletRequest request, HandlerMethod handlerMethod) {
 		return -1;
 	}

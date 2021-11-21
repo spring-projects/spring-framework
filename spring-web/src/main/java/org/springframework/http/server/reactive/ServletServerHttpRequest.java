@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,13 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.AsyncListener;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import reactor.core.publisher.Flux;
 
@@ -73,6 +72,9 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final byte[] buffer;
 
+	private final AsyncListener asyncListener;
+
+
 	public ServletServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
 			String servletPath, DataBufferFactory bufferFactory, int bufferSize)
 			throws IOException, URISyntaxException {
@@ -93,7 +95,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		this.bufferFactory = bufferFactory;
 		this.buffer = new byte[bufferSize];
 
-		asyncContext.addListener(new RequestAsyncListener());
+		this.asyncListener = new RequestAsyncListener();
 
 		// Tomcat expects ReadListener registration on initial thread
 		ServletInputStream inputStream = request.getInputStream();
@@ -200,18 +202,34 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Nullable
 	private String getSslSessionId() {
-		return (String) this.request.getAttribute("javax.servlet.request.ssl_session_id");
+		return (String) this.request.getAttribute("jakarta.servlet.request.ssl_session_id");
 	}
 
 	@Nullable
 	private X509Certificate[] getX509Certificates() {
-		String name = "javax.servlet.request.X509Certificate";
+		String name = "jakarta.servlet.request.X509Certificate";
 		return (X509Certificate[]) this.request.getAttribute(name);
 	}
 
 	@Override
 	public Flux<DataBuffer> getBody() {
 		return Flux.from(this.bodyPublisher);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeRequest() {
+		return (T) this.request;
+	}
+
+	/**
+	 * Return an {@link RequestAsyncListener} that completes the request body
+	 * Publisher when the Servlet container notifies that request input has ended.
+	 * The listener is not actually registered but is rather exposed for
+	 * {@link ServletHttpHandlerAdapter} to ensure events are delegated.
+	 */
+	AsyncListener getAsyncListener() {
+		return this.asyncListener;
 	}
 
 	/**
@@ -243,12 +261,6 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		if (rsReadLogger.isTraceEnabled()) {
 			rsReadLogger.trace(getLogPrefix() + "Read " + read + (read != -1 ? " bytes" : ""));
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T getNativeRequest() {
-		return (T) this.request;
 	}
 
 

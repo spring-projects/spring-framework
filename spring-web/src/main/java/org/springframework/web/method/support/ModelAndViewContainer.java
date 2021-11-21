@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -333,7 +333,7 @@ public class ModelAndViewContainer {
 		StringBuilder sb = new StringBuilder("ModelAndViewContainer: ");
 		if (!isRequestHandled()) {
 			if (isViewReference()) {
-				sb.append("reference to view with name '").append(this.view).append("'");
+				sb.append("reference to view with name '").append(this.view).append('\'');
 			}
 			else {
 				sb.append("View is [").append(this.view).append(']');

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,12 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.security.Principal;
 
-import javax.servlet.ServletRequest;
-
+import jakarta.servlet.ServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
@@ -41,32 +39,25 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class PrincipalMethodArgumentResolverTests {
+class PrincipalMethodArgumentResolverTests {
 
-	private PrincipalMethodArgumentResolver resolver;
+	private PrincipalMethodArgumentResolver resolver = new PrincipalMethodArgumentResolver();
 
-	private ModelAndViewContainer mavContainer;
+	private MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "");
 
-	private MockHttpServletRequest servletRequest;
-
-	private ServletWebRequest webRequest;
+	private ServletWebRequest webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
 
 	private Method method;
 
 
 	@BeforeEach
-	public void setup() throws Exception {
-		resolver = new PrincipalMethodArgumentResolver();
-		mavContainer = new ModelAndViewContainer();
-		servletRequest = new MockHttpServletRequest("GET", "");
-		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
-
+	void setup() throws Exception {
 		method = getClass().getMethod("supportedParams", ServletRequest.class, Principal.class);
 	}
 
 
 	@Test
-	public void principal() throws Exception {
+	void principal() throws Exception {
 		Principal principal = () -> "Foo";
 		servletRequest.setUserPrincipal(principal);
 
@@ -78,7 +69,7 @@ public class PrincipalMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void principalAsNull() throws Exception {
+	void principalAsNull() throws Exception {
 		MethodParameter principalParameter = new MethodParameter(method, 1);
 		assertThat(resolver.supportsParameter(principalParameter)).as("Principal not supported").isTrue();
 
@@ -87,7 +78,7 @@ public class PrincipalMethodArgumentResolverTests {
 	}
 
 	@Test // gh-25780
-	public void annotatedPrincipal() throws Exception {
+	void annotatedPrincipal() throws Exception {
 		Principal principal = () -> "Foo";
 		servletRequest.setUserPrincipal(principal);
 		Method principalMethod = getClass().getMethod("supportedParamsWithAnnotatedPrincipal", Principal.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -341,10 +341,10 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		assertIsRegistered("Bean instance not registered", objectName);
 
-		Object result = server.invoke(objectName, "add", new Object[] {new Integer(2), new Integer(3)}, new String[] {
+		Object result = server.invoke(objectName, "add", new Object[] {2, 3}, new String[] {
 				int.class.getName(), int.class.getName()});
 
-		assertThat(new Integer(5)).as("Incorrect result return from add").isEqualTo(result);
+		assertThat(Integer.valueOf(5)).as("Incorrect result return from add").isEqualTo(result);
 		assertThat(server.getAttribute(objectName, "Name")).as("Incorrect attribute value").isEqualTo(name);
 
 		server.setAttribute(objectName, new Attribute("Name", otherName));
@@ -352,7 +352,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	void testBonaFideMBeanIsNotExportedWhenAutodetectIsTotallyTurnedOff() throws Exception {
+	void testBonaFideMBeanIsNotExportedWhenAutodetectIsTotallyTurnedOff() {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("^&_invalidObjectName_(*", builder.getBeanDefinition());

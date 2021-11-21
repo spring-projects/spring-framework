@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.core.annotation;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -36,7 +35,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
-import org.springframework.lang.UsesSunMisc;
 import org.springframework.util.ReflectionUtils;
 
 import static java.util.stream.Collectors.toList;
@@ -58,12 +56,6 @@ class AnnotationTypeMappingsTests {
 		assertThat(mappings.get(0).getAnnotationType()).isEqualTo(SimpleAnnotation.class);
 		assertThat(getAll(mappings)).flatExtracting(
 				AnnotationTypeMapping::getAnnotationType).containsExactly(SimpleAnnotation.class);
-	}
-
-	@Test
-	void forAnnotationWhenHasSpringAnnotationReturnsFilteredMappings() {
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(WithSpringLangAnnotation.class);
-		assertThat(mappings.size()).isEqualTo(1);
 	}
 
 	@Test
@@ -524,12 +516,6 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface SimpleAnnotation {
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Inherited
-	@UsesSunMisc
-	@interface WithSpringLangAnnotation {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

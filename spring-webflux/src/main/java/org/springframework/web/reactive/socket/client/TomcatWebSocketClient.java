@@ -16,9 +16,8 @@
 
 package org.springframework.web.reactive.socket.client;
 
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
-
+import jakarta.websocket.Session;
+import jakarta.websocket.WebSocketContainer;
 import org.apache.tomcat.websocket.WsWebSocketContainer;
 import reactor.core.publisher.Sinks;
 

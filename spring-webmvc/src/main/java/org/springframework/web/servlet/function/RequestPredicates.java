@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -66,6 +65,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * request matching operations, such as matching based on path, HTTP method, etc.
  *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 5.2
  */
 public abstract class RequestPredicates {
@@ -793,11 +793,11 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void changeParser(PathPatternParser parser) {
-			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+			if (this.left instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
-			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+			if (this.right instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
 		}
 
@@ -838,8 +838,8 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void changeParser(PathPatternParser parser) {
-			if (this.delegate instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) delegate).changeParser(parser);
+			if (this.delegate instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
 		}
 
@@ -905,11 +905,11 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void changeParser(PathPatternParser parser) {
-			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+			if (this.left instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
-			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+			if (this.right instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
 		}
 
@@ -924,7 +924,7 @@ public abstract class RequestPredicates {
 
 		private final ServerRequest request;
 
-		private RequestPath requestPath;
+		private final RequestPath requestPath;
 
 		private final Map<String, Object> attributes;
 

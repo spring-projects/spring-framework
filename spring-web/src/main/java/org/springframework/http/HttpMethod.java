@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,14 +57,13 @@ public enum HttpMethod {
 
 
 	/**
-	 * Determine whether this {@code HttpMethod} matches the given
-	 * method value.
-	 * @param method the method value as a String
+	 * Determine whether this {@code HttpMethod} matches the given method value.
+	 * @param method the HTTP method as a String
 	 * @return {@code true} if it matches, {@code false} otherwise
 	 * @since 4.2.4
 	 */
 	public boolean matches(String method) {
-		return (this == resolve(method));
+		return name().equals(method);
 	}
 
 }

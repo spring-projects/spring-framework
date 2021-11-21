@@ -18,8 +18,7 @@ package org.springframework.util;
 
 import java.io.UnsupportedEncodingException;
 
-import javax.xml.bind.DatatypeConverter;
-
+import jakarta.xml.bind.DatatypeConverter;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

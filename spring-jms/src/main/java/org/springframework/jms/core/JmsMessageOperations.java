@@ -18,7 +18,7 @@ package org.springframework.jms.core;
 
 import java.util.Map;
 
-import javax.jms.Destination;
+import jakarta.jms.Destination;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
@@ -31,7 +31,7 @@ import org.springframework.messaging.core.MessageSendingOperations;
 /**
  * A specialization of {@link MessageSendingOperations}, {@link MessageReceivingOperations}
  * and {@link MessageRequestReplyOperations} for JMS related operations that allow to specify
- * a destination name rather than the actual {@link javax.jms.Destination}.
+ * a destination name rather than the actual {@link jakarta.jms.Destination}.
  *
  * @author Stephane Nicoll
  * @since 4.1

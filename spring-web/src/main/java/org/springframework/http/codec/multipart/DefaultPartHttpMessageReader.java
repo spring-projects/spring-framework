@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,9 @@
 package org.springframework.http.codec.multipart;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -62,11 +61,9 @@ import org.springframework.util.Assert;
  */
 public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements HttpMessageReader<Part> {
 
-	private static final String IDENTIFIER = "spring-multipart";
-
 	private int maxInMemorySize = 256 * 1024;
 
-	private int maxHeadersSize = 8 * 1024;
+	private int maxHeadersSize = 10 * 1024;
 
 	private long maxDiskUsagePerPart = -1;
 
@@ -76,7 +73,9 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 
 	private Scheduler blockingOperationScheduler = Schedulers.boundedElastic();
 
-	private Mono<Path> fileStorageDirectory = Mono.defer(this::defaultFileStorageDirectory).cache();
+	private FileStorage fileStorage = FileStorage.tempDirectory(this::getBlockingOperationScheduler);
+
+	private Charset headersCharset = StandardCharsets.UTF_8;
 
 
 	/**
@@ -132,7 +131,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	}
 
 	/**
-	 * Sets the directory used to store parts larger than
+	 * Set the directory used to store parts larger than
 	 * {@link #setMaxInMemorySize(int) maxInMemorySize}. By default, a directory
 	 * named {@code spring-webflux-multipart} is created under the system
 	 * temporary directory.
@@ -144,14 +143,11 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 */
 	public void setFileStorageDirectory(Path fileStorageDirectory) throws IOException {
 		Assert.notNull(fileStorageDirectory, "FileStorageDirectory must not be null");
-		if (!Files.exists(fileStorageDirectory)) {
-			Files.createDirectory(fileStorageDirectory);
-		}
-		this.fileStorageDirectory = Mono.just(fileStorageDirectory);
+		this.fileStorage = FileStorage.fromPath(fileStorageDirectory);
 	}
 
 	/**
-	 * Sets the Reactor {@link Scheduler} to be used for creating files and
+	 * Set the Reactor {@link Scheduler} to be used for creating files and
 	 * directories, and writing to files. By default,
 	 * {@link Schedulers#boundedElastic()} is used, but this property allows for
 	 * changing it to an externally managed scheduler.
@@ -165,19 +161,21 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 		this.blockingOperationScheduler = blockingOperationScheduler;
 	}
 
+	private Scheduler getBlockingOperationScheduler() {
+		return this.blockingOperationScheduler;
+	}
+
 	/**
 	 * When set to {@code true}, the {@linkplain Part#content() part content}
 	 * is streamed directly from the parsed input buffer stream, and not stored
 	 * in memory nor file.
 	 * When {@code false}, parts are backed by
 	 * in-memory and/or file storage. Defaults to {@code false}.
-	 *
 	 * <p><strong>NOTE</strong> that with streaming enabled, the
 	 * {@code Flux<Part>} that is produced by this message reader must be
 	 * consumed in the original order, i.e. the order of the HTTP message.
 	 * Additionally, the {@linkplain Part#content() body contents} must either
 	 * be completely consumed or canceled before moving to the next part.
-	 *
 	 * <p>Also note that enabling this property effectively ignores
 	 * {@link #setMaxInMemorySize(int) maxInMemorySize},
 	 * {@link #setMaxDiskUsagePerPart(long) maxDiskUsagePerPart},
@@ -186,6 +184,18 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 */
 	public void setStreaming(boolean streaming) {
 		this.streaming = streaming;
+	}
+
+	/**
+	 * Set the character set used to decode headers.
+	 * Defaults to UTF-8 as per RFC 7578.
+	 * @param headersCharset the charset to use for decoding headers
+	 * @since 5.3.6
+	 * @see <a href="https://tools.ietf.org/html/rfc7578#section-5.1">RFC-7578 Section 5.1</a>
+	 */
+	public void setHeadersCharset(Charset headersCharset) {
+		Assert.notNull(headersCharset, "HeadersCharset must not be null");
+		this.headersCharset = headersCharset;
 	}
 
 	@Override
@@ -214,35 +224,27 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 						message.getHeaders().getContentType() + "\""));
 			}
 			Flux<MultipartParser.Token> tokens = MultipartParser.parse(message.getBody(), boundary,
-					this.maxHeadersSize);
+					this.maxHeadersSize, this.headersCharset);
 
 			return PartGenerator.createParts(tokens, this.maxParts, this.maxInMemorySize, this.maxDiskUsagePerPart,
-					this.streaming, this.fileStorageDirectory, this.blockingOperationScheduler);
+					this.streaming, this.fileStorage.directory(), this.blockingOperationScheduler);
 		});
 	}
 
 	@Nullable
-	private static byte[] boundary(HttpMessage message) {
+	private byte[] boundary(HttpMessage message) {
 		MediaType contentType = message.getHeaders().getContentType();
 		if (contentType != null) {
 			String boundary = contentType.getParameter("boundary");
 			if (boundary != null) {
-				return boundary.getBytes(StandardCharsets.ISO_8859_1);
+				int len = boundary.length();
+				if (len > 2 && boundary.charAt(0) == '"' && boundary.charAt(len - 1) == '"') {
+					boundary = boundary.substring(1, len - 1);
+				}
+				return boundary.getBytes(this.headersCharset);
 			}
 		}
 		return null;
-	}
-
-	@SuppressWarnings("BlockingMethodInNonBlockingContext")
-	private Mono<Path> defaultFileStorageDirectory() {
-		return Mono.fromCallable(() -> {
-			Path tempDirectory = Paths.get(System.getProperty("java.io.tmpdir"), IDENTIFIER);
-			if (!Files.exists(tempDirectory)) {
-				Files.createDirectory(tempDirectory);
-			}
-			return tempDirectory;
-		}).subscribeOn(this.blockingOperationScheduler);
-
 	}
 
 }

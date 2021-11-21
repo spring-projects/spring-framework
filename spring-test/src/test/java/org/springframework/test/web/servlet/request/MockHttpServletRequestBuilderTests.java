@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-
-import org.junit.jupiter.api.BeforeEach;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -58,28 +56,22 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-public class MockHttpServletRequestBuilderTests {
+class MockHttpServletRequestBuilderTests {
 
 	private final ServletContext servletContext = new MockServletContext();
 
-	private MockHttpServletRequestBuilder builder;
-
-
-	@BeforeEach
-	public void setUp() {
-		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo/bar");
-	}
+	private MockHttpServletRequestBuilder builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo/bar");
 
 
 	@Test
-	public void method() {
+	void method() {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertThat(request.getMethod()).isEqualTo("GET");
 	}
 
 	@Test
-	public void uri() {
+	void uri() {
 		String uri = "https://java.sun.com:8080/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)";
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, uri);
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
@@ -94,7 +86,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void requestUriWithEncoding() {
+	void requestUriWithEncoding() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo bar");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
@@ -102,7 +94,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test  // SPR-13435
-	public void requestUriWithDoubleSlashes() throws URISyntaxException {
+	void requestUriWithDoubleSlashes() throws URISyntaxException {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, new URI("/test//currentlyValid/0"));
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
@@ -110,13 +102,13 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test // gh-24556
-	public void requestUriWithoutScheme() {
+	void requestUriWithoutScheme() {
 		assertThatIllegalArgumentException().isThrownBy(() -> MockMvcRequestBuilders.get("localhost:8080/path"))
 				.withMessage("'url' should start with a path or be a complete HTTP URL: localhost:8080/path");
 	}
 
 	@Test
-	public void contextPathEmpty() {
+	void contextPathEmpty() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
@@ -126,7 +118,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void contextPathServletPathEmpty() {
+	void contextPathServletPathEmpty() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/travel/hotels/42");
 		this.builder.contextPath("/travel");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
@@ -137,7 +129,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void contextPathServletPath() {
+	void contextPathServletPath() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/travel/main/hotels/42");
 		this.builder.contextPath("/travel");
 		this.builder.servletPath("/main");
@@ -150,7 +142,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void contextPathServletPathInfoEmpty() {
+	void contextPathServletPathInfoEmpty() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/travel/hotels/42");
 		this.builder.contextPath("/travel");
 		this.builder.servletPath("/hotels/42");
@@ -162,7 +154,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void contextPathServletPathInfo() {
+	void contextPathServletPathInfo() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
 		this.builder.servletPath("/index.html");
 		this.builder.pathInfo(null);
@@ -174,7 +166,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test // SPR-16453
-	public void pathInfoIsDecoded() {
+	void pathInfoIsDecoded() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/travel/hotels 42");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
@@ -182,7 +174,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void contextPathServletPathInvalid() {
+	void contextPathServletPathInvalid() {
 		testContextPathServletPathInvalid("/Foo", "", "Request URI [/foo/bar] does not start with context path [/Foo]");
 		testContextPathServletPathInvalid("foo", "", "Context path must start with a '/'");
 		testContextPathServletPathInvalid("/foo/", "", "Context path must not end with a '/'");
@@ -204,7 +196,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void requestUriAndFragment() {
+	void requestUriAndFragment() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo#bar");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
@@ -212,28 +204,28 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void requestParameter() {
+	void requestParameter() {
 		this.builder.param("foo", "bar", "baz");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		Map<String, String[]> parameterMap = request.getParameterMap();
 
-		assertThat(parameterMap.get("foo")).isEqualTo(new String[] {"bar", "baz"});
+		assertThat(parameterMap.get("foo")).containsExactly("bar", "baz");
 	}
 
 	@Test
-	public void requestParameterFromQuery() {
+	void requestParameterFromQuery() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/?foo=bar&foo=baz");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		Map<String, String[]> parameterMap = request.getParameterMap();
 
-		assertThat(parameterMap.get("foo")).isEqualTo(new String[] {"bar", "baz"});
+		assertThat(parameterMap.get("foo")).containsExactly("bar", "baz");
 		assertThat(request.getQueryString()).isEqualTo("foo=bar&foo=baz");
 	}
 
 	@Test
-	public void requestParameterFromQueryList() {
+	void requestParameterFromQueryList() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/?foo[0]=bar&foo[1]=baz");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
@@ -244,19 +236,19 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void queryParameter() {
+	void queryParameter() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
 		this.builder.queryParam("foo", "bar");
 		this.builder.queryParam("foo", "baz");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
-		assertThat(request.getParameterMap().get("foo")).isEqualTo(new String[] {"bar", "baz"});
+		assertThat(request.getParameterMap().get("foo")).containsExactly("bar", "baz");
 		assertThat(request.getQueryString()).isEqualTo("foo=bar&foo=baz");
 	}
 
 	@Test
-	public void queryParameterMap() {
+	void queryParameterMap() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
 		MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 		List<String> values = new ArrayList<>();
@@ -267,12 +259,12 @@ public class MockHttpServletRequestBuilderTests {
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
-		assertThat(request.getParameterMap().get("foo")).isEqualTo(new String[] {"bar", "baz"});
+		assertThat(request.getParameterMap().get("foo")).containsExactly("bar", "baz");
 		assertThat(request.getQueryString()).isEqualTo("foo=bar&foo=baz");
 	}
 
 	@Test
-	public void queryParameterList() {
+	void queryParameterList() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
 		this.builder.queryParam("foo[0]", "bar");
 		this.builder.queryParam("foo[1]", "baz");
@@ -285,7 +277,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void requestParameterFromQueryWithEncoding() {
+	void requestParameterFromQueryWithEncoding() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/?foo={value}", "bar=baz");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
@@ -295,18 +287,18 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test  // SPR-11043
-	public void requestParameterFromQueryNull() {
+	void requestParameterFromQueryNull() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/?foo");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		Map<String, String[]> parameterMap = request.getParameterMap();
 
-		assertThat(parameterMap.get("foo")).isEqualTo(new String[] {null});
+		assertThat(parameterMap.get("foo")).containsExactly((String) null);
 		assertThat(request.getQueryString()).isEqualTo("foo");
 	}
 
 	@Test  // SPR-13801
-	public void requestParameterFromMultiValueMap() throws Exception {
+	void requestParameterFromMultiValueMap() throws Exception {
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("foo", "bar");
 		params.add("foo", "baz");
@@ -315,11 +307,11 @@ public class MockHttpServletRequestBuilderTests {
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
-		assertThat(request.getParameterMap().get("foo")).isEqualTo(new String[] {"bar", "baz"});
+		assertThat(request.getParameterMap().get("foo")).containsExactly("bar", "baz");
 	}
 
 	@Test
-	public void requestParameterFromRequestBodyFormData() throws Exception {
+	void requestParameterFromRequestBodyFormData() throws Exception {
 		String contentType = "application/x-www-form-urlencoded;charset=UTF-8";
 		String body = "name+1=value+1&name+2=value+A&name+2=value+B&name+3";
 
@@ -327,13 +319,13 @@ public class MockHttpServletRequestBuilderTests {
 				.contentType(contentType).content(body.getBytes(StandardCharsets.UTF_8))
 				.buildRequest(this.servletContext);
 
-		assertThat(request.getParameterMap().get("name 1")).isEqualTo(new String[] {"value 1"});
-		assertThat(request.getParameterMap().get("name 2")).isEqualTo(new String[] {"value A", "value B"});
-		assertThat(request.getParameterMap().get("name 3")).isEqualTo(new String[] {null});
+		assertThat(request.getParameterMap().get("name 1")).containsExactly("value 1");
+		assertThat(request.getParameterMap().get("name 2")).containsExactly("value A", "value B");
+		assertThat(request.getParameterMap().get("name 3")).containsExactly((String) null);
 	}
 
 	@Test
-	public void acceptHeader() {
+	void acceptHeader() {
 		this.builder.accept(MediaType.TEXT_HTML, MediaType.APPLICATION_XML);
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
@@ -346,14 +338,14 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test // gh-2079
-	public void acceptHeaderWithInvalidValues() {
+	void acceptHeaderWithInvalidValues() {
 		this.builder.accept("any", "any2");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		assertThat(request.getHeader("Accept")).isEqualTo("any, any2");
 	}
 
 	@Test
-	public void contentType() {
+	void contentType() {
 		this.builder.contentType(MediaType.TEXT_HTML);
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
@@ -366,7 +358,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void contentTypeViaString() {
+	void contentTypeViaString() {
 		this.builder.contentType("text/html");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
@@ -379,14 +371,14 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test // gh-2079
-	public void contentTypeWithInvalidValue() {
+	void contentTypeWithInvalidValue() {
 		this.builder.contentType("any");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		assertThat(request.getContentType()).isEqualTo("any");
 	}
 
 	@Test  // SPR-11308
-	public void contentTypeViaHeader() {
+	void contentTypeViaHeader() {
 		this.builder.header("Content-Type", MediaType.TEXT_HTML_VALUE);
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		String contentType = request.getContentType();
@@ -395,14 +387,14 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test // gh-2079
-	public void contentTypeViaHeaderWithInvalidValue() {
+	void contentTypeViaHeaderWithInvalidValue() {
 		this.builder.header("Content-Type", "yaml");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		assertThat(request.getContentType()).isEqualTo("yaml");
 	}
 
 	@Test  // SPR-11308
-	public void contentTypeViaMultipleHeaderValues() {
+	void contentTypeViaMultipleHeaderValues() {
 		this.builder.header("Content-Type", MediaType.TEXT_HTML_VALUE, MediaType.ALL_VALUE);
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
@@ -410,7 +402,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void body() throws IOException {
+	void body() throws IOException {
 		byte[] body = "Hello World".getBytes("UTF-8");
 		this.builder.content(body);
 
@@ -422,7 +414,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void header() {
+	void header() {
 		this.builder.header("foo", "bar", "baz");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
@@ -434,7 +426,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void headers() {
+	void headers() {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 		httpHeaders.put("foo", Arrays.asList("bar", "baz"));
@@ -450,7 +442,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void cookie() {
+	void cookie() {
 		Cookie cookie1 = new Cookie("foo", "bar");
 		Cookie cookie2 = new Cookie("baz", "qux");
 		this.builder.cookie(cookie1, cookie2);
@@ -466,13 +458,13 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void noCookies() {
+	void noCookies() {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		assertThat(request.getCookies()).isNull();
 	}
 
 	@Test
-	public void locale() {
+	void locale() {
 		Locale locale = new Locale("nl", "nl");
 		this.builder.locale(locale);
 
@@ -482,17 +474,20 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void characterEncoding() {
+	void characterEncoding() {
 		String encoding = "UTF-8";
+
 		this.builder.characterEncoding(encoding);
-
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
-
 		assertThat(request.getCharacterEncoding()).isEqualTo(encoding);
+
+		this.builder.characterEncoding(StandardCharsets.ISO_8859_1);
+		request = this.builder.buildRequest(this.servletContext);
+		assertThat(request.getCharacterEncoding()).isEqualTo(StandardCharsets.ISO_8859_1.name());
 	}
 
 	@Test
-	public void requestAttribute() {
+	void requestAttribute() {
 		this.builder.requestAttr("foo", "bar");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
@@ -500,7 +495,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void sessionAttribute() {
+	void sessionAttribute() {
 		this.builder.sessionAttr("foo", "bar");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
@@ -508,7 +503,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void sessionAttributes() {
+	void sessionAttributes() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		this.builder.sessionAttrs(map);
@@ -519,7 +514,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void session() {
+	void session() {
 		MockHttpSession session = new MockHttpSession(this.servletContext);
 		session.setAttribute("foo", "bar");
 		this.builder.session(session);
@@ -533,7 +528,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void flashAttribute() {
+	void flashAttribute() {
 		this.builder.flashAttr("foo", "bar");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
@@ -543,7 +538,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void principal() {
+	void principal() {
 		User user = new User();
 		this.builder.principal(user);
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
@@ -552,7 +547,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test  // SPR-12945
-	public void mergeInvokesDefaultRequestPostProcessorFirst() {
+	void mergeInvokesDefaultRequestPostProcessorFirst() {
 		final String ATTR = "ATTR";
 		final String EXPECTED = "override";
 
@@ -570,7 +565,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test  // SPR-13719
-	public void arbitraryMethod() {
+	void arbitraryMethod() {
 		String httpMethod = "REPort";
 		URI url = UriComponentsBuilder.fromPath("/foo/{bar}").buildAndExpand(42).toUri();
 		this.builder = new MockHttpServletRequestBuilder(httpMethod, url);

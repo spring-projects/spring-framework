@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,11 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 
 	private boolean independentInnerClass;
 
-	private Set<String> memberClassNames = new LinkedHashSet<>(4);
+	private final Set<String> memberClassNames = new LinkedHashSet<>(4);
 
-	private List<MergedAnnotation<?>> annotations = new ArrayList<>();
+	private final List<MergedAnnotation<?>> annotations = new ArrayList<>();
 
-	private List<SimpleMethodMetadata> annotatedMethods = new ArrayList<>();
+	private final List<SimpleMethodMetadata> annotatedMethods = new ArrayList<>();
 
 	@Nullable
 	private SimpleAnnotationMetadata metadata;
@@ -117,7 +117,7 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 	@Override
 	@Nullable
 	public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-		return MergedAnnotationReadingVisitor.get(this.classLoader, this::getSource,
+		return MergedAnnotationReadingVisitor.get(this.classLoader, getSource(),
 				descriptor, visible, this.annotations::add);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package org.springframework.web.bind.support;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
@@ -101,19 +104,20 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 * @param request the request with parameters to bind (can be multipart)
 	 * @see org.springframework.web.multipart.MultipartRequest
 	 * @see org.springframework.web.multipart.MultipartFile
-	 * @see javax.servlet.http.Part
+	 * @see jakarta.servlet.http.Part
 	 * @see #bind(org.springframework.beans.PropertyValues)
 	 */
 	public void bind(WebRequest request) {
 		MutablePropertyValues mpvs = new MutablePropertyValues(request.getParameterMap());
-		if (request instanceof NativeWebRequest) {
-			MultipartRequest multipartRequest = ((NativeWebRequest) request).getNativeRequest(MultipartRequest.class);
+		if (request instanceof NativeWebRequest nativeRequest) {
+			MultipartRequest multipartRequest = nativeRequest.getNativeRequest(MultipartRequest.class);
 			if (multipartRequest != null) {
 				bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
 			}
-			else if (StringUtils.startsWithIgnoreCase(request.getHeader("Content-Type"), "multipart/")) {
-				HttpServletRequest servletRequest = ((NativeWebRequest) request).getNativeRequest(HttpServletRequest.class);
-				if (servletRequest != null) {
+			else if (StringUtils.startsWithIgnoreCase(
+					request.getHeader(HttpHeaders.CONTENT_TYPE), MediaType.MULTIPART_FORM_DATA_VALUE)) {
+				HttpServletRequest servletRequest = nativeRequest.getNativeRequest(HttpServletRequest.class);
+				if (servletRequest != null && HttpMethod.POST.matches(servletRequest.getMethod())) {
 					StandardServletPartUtils.bindParts(servletRequest, mpvs, isBindEmptyMultipartFiles());
 				}
 			}

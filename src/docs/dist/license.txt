@@ -212,7 +212,7 @@ code for these subcomponents is subject to the terms and
 conditions of the following licenses.
 
 
->>> ASM 7.1 (org.ow2.asm:asm:7.1, org.ow2.asm:asm-commons:7.1):
+>>> ASM 9.1 (org.ow2.asm:asm:9.1, org.ow2.asm:asm-commons:9.1):
 
 Copyright (c) 2000-2011 INRIA, France Telecom
 All rights reserved.

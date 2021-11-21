@@ -19,9 +19,9 @@ package org.springframework.web.servlet.i18n;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.SimpleLocaleContext;
@@ -333,7 +333,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * @param request the request to resolve the locale for
 	 * @return the default locale (never {@code null})
 	 * @see #setDefaultLocale
-	 * @see javax.servlet.http.HttpServletRequest#getLocale()
+	 * @see jakarta.servlet.http.HttpServletRequest#getLocale()
 	 */
 	protected Locale determineDefaultLocale(HttpServletRequest request) {
 		Locale defaultLocale = getDefaultLocale();

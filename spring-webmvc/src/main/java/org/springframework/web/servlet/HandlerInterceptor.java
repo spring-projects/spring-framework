@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
@@ -70,13 +70,14 @@ import org.springframework.web.method.HandlerMethod;
  * @see org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor
  * @see org.springframework.web.servlet.i18n.LocaleChangeInterceptor
  * @see org.springframework.web.servlet.theme.ThemeChangeInterceptor
- * @see javax.servlet.Filter
+ * @see jakarta.servlet.Filter
  */
 public interface HandlerInterceptor {
 
 	/**
-	 * Intercept the execution of a handler. Called after HandlerMapping determined
-	 * an appropriate handler object, but before HandlerAdapter invokes the handler.
+	 * Interception point before the execution of a handler. Called after
+	 * HandlerMapping determined an appropriate handler object, but before
+	 * HandlerAdapter invokes the handler.
 	 * <p>DispatcherServlet processes a handler in an execution chain, consisting
 	 * of any number of interceptors, with the handler itself at the end.
 	 * With this method, each interceptor can decide to abort the execution chain,
@@ -100,9 +101,10 @@ public interface HandlerInterceptor {
 	}
 
 	/**
-	 * Intercept the execution of a handler. Called after HandlerAdapter actually
-	 * invoked the handler, but before the DispatcherServlet renders the view.
-	 * Can expose additional model objects to the view via the given ModelAndView.
+	 * Interception point after successful execution of a handler.
+	 * Called after HandlerAdapter actually invoked the handler, but before the
+	 * DispatcherServlet renders the view. Can expose additional model objects
+	 * to the view via the given ModelAndView.
 	 * <p>DispatcherServlet processes a handler in an execution chain, consisting
 	 * of any number of interceptors, with the handler itself at the end.
 	 * With this method, each interceptor can post-process an execution,

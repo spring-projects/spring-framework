@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ReactiveAdapter;
@@ -118,7 +117,7 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 	public ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response, Context context)
 			throws ServletException, IOException {
 
-		writeAsync(request, response, createDeferredResult());
+		writeAsync(request, response, createDeferredResult(request));
 		return null;
 	}
 
@@ -140,7 +139,7 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 
 	}
 
-	private DeferredResult<ServerResponse> createDeferredResult() {
+	private DeferredResult<ServerResponse> createDeferredResult(HttpServletRequest request) {
 		DeferredResult<ServerResponse> result;
 		if (this.timeout != null) {
 			result = new DeferredResult<>(this.timeout.toMillis());
@@ -153,7 +152,13 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 				if (ex instanceof CompletionException && ex.getCause() != null) {
 					ex = ex.getCause();
 				}
-				result.setErrorResult(ex);
+				ServerResponse errorResponse = errorResponse(ex, request);
+				if (errorResponse != null) {
+					result.setResult(errorResponse);
+				}
+				else {
+					result.setErrorResult(ex);
+				}
 			}
 			else {
 				result.setResult(value);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -209,7 +208,6 @@ public class HttpEntityMethodProcessorTests {
 
 	@Test  // SPR-13423
 	public void handleReturnValueWithETagAndETagFilter() throws Exception {
-
 		String eTagValue = "\"deadb33f8badf00d\"";
 		String content = "body";
 
@@ -242,6 +240,25 @@ public class HttpEntityMethodProcessorTests {
 		assertThat(this.servletResponse.getContentAsString()).isEqualTo(content);
 	}
 
+	@Test  // gh-24539
+	public void handleReturnValueWithMalformedAcceptHeader() throws Exception {
+		webRequest.getNativeRequest(MockHttpServletRequest.class).addHeader("Accept", "null");
+
+		List<HttpMessageConverter<?>>converters = new ArrayList<>();
+		converters.add(new ByteArrayHttpMessageConverter());
+		converters.add(new StringHttpMessageConverter());
+
+		Method method = getClass().getDeclaredMethod("handle");
+		MethodParameter returnType = new MethodParameter(method, -1);
+		ResponseEntity<String> returnValue = ResponseEntity.badRequest().body("Foo");
+
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
+		processor.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
+
+		assertThat(servletResponse.getStatus()).isEqualTo(400);
+		assertThat(servletResponse.getHeader("Content-Type")).isNull();
+		assertThat(servletResponse.getContentAsString()).isEmpty();
+	}
 
 	@SuppressWarnings("unused")
 	private void handle(HttpEntity<List<SimpleBean>> arg1, HttpEntity<SimpleBean> arg2) {

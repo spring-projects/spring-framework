@@ -19,10 +19,10 @@ package org.springframework.orm.jpa;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.spi.PersistenceProvider;
-import javax.persistence.spi.PersistenceUnitInfo;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.spi.PersistenceProvider;
+import jakarta.persistence.spi.PersistenceUnitInfo;
 
 import org.springframework.lang.Nullable;
 
@@ -64,10 +64,10 @@ public interface JpaVendorAdapter {
 	 * non-unit-dependent properties. Effectively, this PersistenceUnitInfo-based
 	 * variant only needs to be implemented if there is an actual need to react
 	 * to unit-specific characteristics such as the transaction type.
-	 * <p><b>NOTE:</b> This variant will only be invoked in case of Java EE style
+	 * <p><b>NOTE:</b> This variant will only be invoked in case of Jakarta EE style
 	 * container bootstrapping where a {@link PersistenceUnitInfo} is present
 	 * (i.e. {@link LocalContainerEntityManagerFactoryBean}. In case of simple
-	 * Java SE style bootstrapping via {@link javax.persistence.Persistence}
+	 * Java SE style bootstrapping via {@link jakarta.persistence.Persistence}
 	 * (i.e. {@link LocalEntityManagerFactoryBean}), the parameter-less
 	 * {@link #getJpaPropertyMap()} variant will be called directly.
 	 * @param pui the PersistenceUnitInfo for the current persistence unit
@@ -75,7 +75,7 @@ public interface JpaVendorAdapter {
 	 * facilities, or an empty Map if there are no properties to expose
 	 * @since 4.3.13
 	 * @see PersistenceUnitInfo#getTransactionType()
-	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(PersistenceUnitInfo, Map)
+	 * @see jakarta.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(PersistenceUnitInfo, Map)
 	 */
 	default Map<String, ?> getJpaPropertyMap(PersistenceUnitInfo pui) {
 		return getJpaPropertyMap();
@@ -89,7 +89,7 @@ public interface JpaVendorAdapter {
 	 * JPA property values specified here.
 	 * @return a Map of JPA properties, as accepted by the standard JPA bootstrap
 	 * facilities, or an empty Map if there are no properties to expose
-	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, Map)
+	 * @see jakarta.persistence.Persistence#createEntityManagerFactory(String, Map)
 	 */
 	default Map<String, ?> getJpaPropertyMap() {
 		return Collections.emptyMap();
@@ -109,7 +109,7 @@ public interface JpaVendorAdapter {
 	 * that the EntityManagerFactory proxy is supposed to implement.
 	 * <p>If the provider does not offer any EntityManagerFactory extensions,
 	 * the adapter should simply return the standard
-	 * {@link javax.persistence.EntityManagerFactory} class here.
+	 * {@link jakarta.persistence.EntityManagerFactory} class here.
 	 * @since 2.5.2
 	 */
 	default Class<? extends EntityManagerFactory> getEntityManagerFactoryInterface() {
@@ -121,7 +121,7 @@ public interface JpaVendorAdapter {
 	 * that this provider's EntityManagers will implement.
 	 * <p>If the provider does not offer any EntityManager extensions,
 	 * the adapter should simply return the standard
-	 * {@link javax.persistence.EntityManager} class here.
+	 * {@link jakarta.persistence.EntityManager} class here.
 	 */
 	default Class<? extends EntityManager> getEntityManagerInterface() {
 		return EntityManager.class;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.springframework.context.MessageSource;
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
@@ -27,7 +28,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -69,6 +69,15 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	public InvocableHandlerMethod(Object bean, Method method) {
 		super(bean, method);
+	}
+
+	/**
+	 * Variant of {@link #InvocableHandlerMethod(Object, Method)} that
+	 * also accepts a {@link MessageSource}, for use in sub-classes.
+	 * @since 5.3.10
+	 */
+	protected InvocableHandlerMethod(Object bean, Method method, @Nullable MessageSource messageSource) {
+		super(bean, method, messageSource);
 	}
 
 	/**
@@ -189,7 +198,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	@Nullable
 	protected Object doInvoke(Object... args) throws Exception {
 		Method method = getBridgedMethod();
-		ReflectionUtils.makeAccessible(method);
 		try {
 			if (KotlinDetector.isSuspendingFunction(method)) {
 				return CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);

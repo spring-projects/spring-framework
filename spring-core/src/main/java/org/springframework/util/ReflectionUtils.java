@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,12 +190,11 @@ public abstract class ReflectionUtils {
 	/**
 	 * Make the given constructor accessible, explicitly setting it accessible
 	 * if necessary. The {@code setAccessible(true)} method is only called
-	 * when actually necessary, to avoid unnecessary conflicts with a JVM
-	 * SecurityManager (if active).
+	 * when actually necessary, to avoid unnecessary conflicts.
 	 * @param ctor the constructor to make accessible
 	 * @see java.lang.reflect.Constructor#setAccessible
 	 */
-	@SuppressWarnings("deprecation")  // on JDK 9
+	@SuppressWarnings("deprecation")
 	public static void makeAccessible(Constructor<?> ctor) {
 		if ((!Modifier.isPublic(ctor.getModifiers()) ||
 				!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) && !ctor.isAccessible()) {
@@ -384,7 +383,7 @@ public abstract class ReflectionUtils {
 	 * @throws IllegalStateException if introspection fails
 	 */
 	public static Method[] getAllDeclaredMethods(Class<?> leafClass) {
-		final List<Method> methods = new ArrayList<>(32);
+		final List<Method> methods = new ArrayList<>(20);
 		doWithMethods(leafClass, methods::add);
 		return methods.toArray(EMPTY_METHOD_ARRAY);
 	}
@@ -410,7 +409,7 @@ public abstract class ReflectionUtils {
 	 * @since 5.2
 	 */
 	public static Method[] getUniqueDeclaredMethods(Class<?> leafClass, @Nullable MethodFilter mf) {
-		final List<Method> methods = new ArrayList<>(32);
+		final List<Method> methods = new ArrayList<>(20);
 		doWithMethods(leafClass, method -> {
 			boolean knownSignature = false;
 			Method methodBeingOverriddenWithCovariantReturnType = null;
@@ -441,10 +440,9 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Variant of {@link Class#getDeclaredMethods()} that uses a local cache in
-	 * order to avoid the JVM's SecurityManager check and new Method instances.
-	 * In addition, it also includes Java 8 default methods from locally
-	 * implemented interfaces, since those are effectively to be treated just
-	 * like declared methods.
+	 * order to avoid new Method instances. In addition, it also includes Java 8
+	 * default methods from locally implemented interfaces, since those are
+	 * effectively to be treated just like declared methods.
 	 * @param clazz the class to introspect
 	 * @return the cached array of methods
 	 * @throws IllegalStateException if introspection fails
@@ -561,12 +559,11 @@ public abstract class ReflectionUtils {
 	/**
 	 * Make the given method accessible, explicitly setting it accessible if
 	 * necessary. The {@code setAccessible(true)} method is only called
-	 * when actually necessary, to avoid unnecessary conflicts with a JVM
-	 * SecurityManager (if active).
+	 * when actually necessary, to avoid unnecessary conflicts.
 	 * @param method the method to make accessible
 	 * @see java.lang.reflect.Method#setAccessible
 	 */
-	@SuppressWarnings("deprecation")  // on JDK 9
+	@SuppressWarnings("deprecation")
 	public static void makeAccessible(Method method) {
 		if ((!Modifier.isPublic(method.getModifiers()) ||
 				!Modifier.isPublic(method.getDeclaringClass().getModifiers())) && !method.isAccessible()) {
@@ -625,6 +622,7 @@ public abstract class ReflectionUtils {
 	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
 	 * @param field the field to set
 	 * @param target the target object on which to set the field
+	 * (or {@code null} for a static field)
 	 * @param value the value to set (may be {@code null})
 	 */
 	public static void setField(Field field, @Nullable Object target, @Nullable Object value) {
@@ -644,6 +642,7 @@ public abstract class ReflectionUtils {
 	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
 	 * @param field the field to get
 	 * @param target the target object from which to get the field
+	 * (or {@code null} for a static field)
 	 * @return the field's current value
 	 */
 	@Nullable
@@ -718,7 +717,7 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * This variant retrieves {@link Class#getDeclaredFields()} from a local cache
-	 * in order to avoid the JVM's SecurityManager check and defensive array copying.
+	 * in order to avoid defensive array copying.
 	 * @param clazz the class to introspect
 	 * @return the cached array of fields
 	 * @throws IllegalStateException if introspection fails
@@ -772,12 +771,11 @@ public abstract class ReflectionUtils {
 	/**
 	 * Make the given field accessible, explicitly setting it accessible if
 	 * necessary. The {@code setAccessible(true)} method is only called
-	 * when actually necessary, to avoid unnecessary conflicts with a JVM
-	 * SecurityManager (if active).
+	 * when actually necessary, to avoid unnecessary conflicts.
 	 * @param field the field to make accessible
 	 * @see java.lang.reflect.Field#setAccessible
 	 */
-	@SuppressWarnings("deprecation")  // on JDK 9
+	@SuppressWarnings("deprecation")
 	public static void makeAccessible(Field field) {
 		if ((!Modifier.isPublic(field.getModifiers()) ||
 				!Modifier.isPublic(field.getDeclaringClass().getModifiers()) ||

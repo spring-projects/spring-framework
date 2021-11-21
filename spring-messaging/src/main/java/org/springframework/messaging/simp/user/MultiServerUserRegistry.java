@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -275,7 +275,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		private String name = "";
 
 		// User sessions from "this" registry only (i.e. one server)
-		private Set<TransferSimpSession> sessions;
+		private final Set<TransferSimpSession> sessions;
 
 		// Cross-server session lookup (e.g. user connected to multiple servers)
 		@Nullable
@@ -535,10 +535,9 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof SimpSubscription)) {
+			if (!(other instanceof SimpSubscription otherSubscription)) {
 				return false;
 			}
-			SimpSubscription otherSubscription = (SimpSubscription) other;
 			return (getId().equals(otherSubscription.getId()) &&
 					ObjectUtils.nullSafeEquals(getSession(), otherSubscription.getSession()));
 		}

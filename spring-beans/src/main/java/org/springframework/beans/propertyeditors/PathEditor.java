@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import java.nio.file.Paths;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
+import org.springframework.util.ResourceUtils;
 
 /**
  * Editor for {@code java.nio.file.Path}, to directly populate a Path
@@ -74,7 +74,7 @@ public class PathEditor extends PropertyEditorSupport {
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
-		boolean nioPathCandidate = !text.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX);
+		boolean nioPathCandidate = !text.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX);
 		if (nioPathCandidate && !text.startsWith("/")) {
 			try {
 				URI uri = new URI(text);
@@ -85,9 +85,13 @@ public class PathEditor extends PropertyEditorSupport {
 					return;
 				}
 			}
-			catch (URISyntaxException | FileSystemNotFoundException ex) {
-				// Not a valid URI (let's try as Spring resource location),
-				// or a URI scheme not registered for NIO (let's try URL
+			catch (URISyntaxException ex) {
+				// Not a valid URI; potentially a Windows-style path after
+				// a file prefix (let's try as Spring resource location)
+				nioPathCandidate = !text.startsWith(ResourceUtils.FILE_URL_PREFIX);
+			}
+			catch (FileSystemNotFoundException ex) {
+				// URI scheme not registered for NIO (let's try URL
 				// protocol handlers via Spring's resource mechanism).
 			}
 		}
@@ -97,7 +101,7 @@ public class PathEditor extends PropertyEditorSupport {
 		if (resource == null) {
 			setValue(null);
 		}
-		else if (!resource.exists() && nioPathCandidate) {
+		else if (nioPathCandidate && !resource.exists()) {
 			setValue(Paths.get(text).normalize());
 		}
 		else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -283,8 +283,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 
 		Advisor advisor = this.advisors.remove(index);
-		if (advisor instanceof IntroductionAdvisor) {
-			IntroductionAdvisor ia = (IntroductionAdvisor) advisor;
+		if (advisor instanceof IntroductionAdvisor ia) {
 			// We need to remove introduction interfaces.
 			for (Class<?> ifc : ia.getInterfaces()) {
 				removeInterface(ifc);
@@ -521,8 +520,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		copy.copyFrom(this);
 		copy.targetSource = EmptyTargetSource.forClass(getTargetClass(), getTargetSource().isStatic());
 		copy.advisorChainFactory = this.advisorChainFactory;
-		copy.interfaces = this.interfaces;
-		copy.advisors = this.advisors;
+		copy.interfaces = new ArrayList<>(this.interfaces);
+		copy.advisors = new ArrayList<>(this.advisors);
 		return copy;
 	}
 

@@ -18,7 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Map;
 
-import javax.servlet.ServletRequest;
+import jakarta.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.lang.Nullable;

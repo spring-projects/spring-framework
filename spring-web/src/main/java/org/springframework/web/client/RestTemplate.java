@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
@@ -120,14 +121,14 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	static {
 		ClassLoader classLoader = RestTemplate.class.getClassLoader();
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
-		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
+		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 	}
 
@@ -281,14 +282,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @param uriVars the default URI variable values
 	 * @since 4.3
 	 */
-	@SuppressWarnings("deprecation")
 	public void setDefaultUriVariables(Map<String, ?> uriVars) {
 		if (this.uriTemplateHandler instanceof DefaultUriBuilderFactory) {
 			((DefaultUriBuilderFactory) this.uriTemplateHandler).setDefaultUriVariables(uriVars);
-		}
-		else if (this.uriTemplateHandler instanceof org.springframework.web.util.AbstractUriTemplateHandler) {
-			((org.springframework.web.util.AbstractUriTemplateHandler) this.uriTemplateHandler)
-					.setDefaultUriVariables(uriVars);
 		}
 		else {
 			throw new IllegalArgumentException(
@@ -302,11 +298,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * backwards compatibility, the encoding mode is set to
 	 * {@link EncodingMode#URI_COMPONENT URI_COMPONENT}. As of 5.0.8, prefer
 	 * using {@link EncodingMode#TEMPLATE_AND_VALUES TEMPLATE_AND_VALUES}.
-	 * <p><strong>Note:</strong> in 5.0 the switch from
-	 * {@link org.springframework.web.util.DefaultUriTemplateHandler
-	 * DefaultUriTemplateHandler} (deprecated in 4.3), as the default to use, to
-	 * {@link DefaultUriBuilderFactory} brings in a different default for the
-	 * {@code parsePath} property (switching from false to true).
 	 * @param handler the URI template handler to use
 	 */
 	public void setUriTemplateHandler(UriTemplateHandler handler) {
@@ -885,7 +876,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			if (this.responseType != null) {
 				List<MediaType> allSupportedMediaTypes = getMessageConverters().stream()
 						.filter(converter -> canReadResponse(this.responseType, converter))
-						.flatMap(this::getSupportedMediaTypes)
+						.flatMap((HttpMessageConverter<?> converter) -> getSupportedMediaTypes(this.responseType, converter))
 						.distinct()
 						.sorted(MediaType.SPECIFICITY_COMPARATOR)
 						.collect(Collectors.toList());
@@ -908,8 +899,10 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			return false;
 		}
 
-		private Stream<MediaType> getSupportedMediaTypes(HttpMessageConverter<?> messageConverter) {
-			return messageConverter.getSupportedMediaTypes()
+		private Stream<MediaType> getSupportedMediaTypes(Type type, HttpMessageConverter<?> converter) {
+			Type rawType = (type instanceof ParameterizedType ? ((ParameterizedType) type).getRawType() : type);
+			Class<?> clazz = (rawType instanceof Class ? (Class<?>) rawType : null);
+			return (clazz != null ? converter.getSupportedMediaTypes(clazz) : converter.getSupportedMediaTypes())
 					.stream()
 					.map(mediaType -> {
 						if (mediaType.getCharset() != null) {

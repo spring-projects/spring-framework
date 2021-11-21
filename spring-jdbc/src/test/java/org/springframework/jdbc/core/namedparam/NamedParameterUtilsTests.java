@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -32,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Artur Geraschenko
+ * @author Yanming Zhou
  */
 public class NamedParameterUtilsTests {
 
@@ -94,6 +96,20 @@ public class NamedParameterUtilsTests {
 				.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :a :a xx :a :a"), namedParams).length).isSameAs(5);
 		assertThat(NamedParameterUtils
 				.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :b :c xx :a :b"), namedParams)[4]).isEqualTo(2);
+	}
+
+	@Test
+	public void convertSqlParameterValueToArray() {
+		SqlParameterValue sqlParameterValue = new SqlParameterValue(2, "b");
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("a", "a");
+		paramMap.put("b", sqlParameterValue);
+		paramMap.put("c", "c");
+		assertThat(NamedParameterUtils.buildValueArray("xxx :a :b :c xx :a :b", paramMap)[4]).isSameAs(sqlParameterValue);
+		MapSqlParameterSource namedParams = new MapSqlParameterSource();
+		namedParams.addValue("a", "a", 1).addValue("b", sqlParameterValue).addValue("c", "c", 3);
+		assertThat(NamedParameterUtils
+				.buildValueArray(NamedParameterUtils.parseSqlStatement("xxx :a :b :c xx :a :b"), namedParams, null)[4]).isSameAs(sqlParameterValue);
 	}
 
 	@Test

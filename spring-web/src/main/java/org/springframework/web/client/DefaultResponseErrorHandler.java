@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,11 @@
 
 package org.springframework.web.client;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -126,40 +123,26 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 	/**
-	 * Return error message with details from the response body, possibly truncated:
+	 * Return error message with details from the response body. For example:
 	 * <pre>
-	 * 404 Not Found: [{'id': 123, 'message': 'my very long... (500 bytes)]
+	 * 404 Not Found: [{'id': 123, 'message': 'my message'}]
 	 * </pre>
 	 */
 	private String getErrorMessage(
 			int rawStatusCode, String statusText, @Nullable byte[] responseBody, @Nullable Charset charset) {
 
 		String preface = rawStatusCode + " " + statusText + ": ";
+
 		if (ObjectUtils.isEmpty(responseBody)) {
 			return preface + "[no body]";
 		}
 
-		if (charset == null) {
-			charset = StandardCharsets.UTF_8;
-		}
-		int maxChars = 200;
+		charset = (charset != null ? charset : StandardCharsets.UTF_8);
 
-		if (responseBody.length < maxChars * 2) {
-			return preface + "[" + new String(responseBody, charset) + "]";
-		}
+		String bodyText = new String(responseBody, charset);
+		bodyText = LogFormatUtils.formatValue(bodyText, -1, true);
 
-		try {
-			Reader reader = new InputStreamReader(new ByteArrayInputStream(responseBody), charset);
-			CharBuffer buffer = CharBuffer.allocate(maxChars);
-			reader.read(buffer);
-			reader.close();
-			buffer.flip();
-			return preface + "[" + buffer.toString() + "... (" + responseBody.length + " bytes)]";
-		}
-		catch (IOException ex) {
-			// should never happen
-			throw new IllegalStateException(ex);
-		}
+		return preface + bodyText;
 	}
 
 	/**
@@ -169,7 +152,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * {@link HttpClientErrorException#create} for errors in the 4xx range, to
 	 * {@link HttpServerErrorException#create} for errors in the 5xx range,
 	 * or otherwise raises {@link UnknownHttpStatusCodeException}.
-	 *
 	 * @since 5.0
 	 * @see HttpClientErrorException#create
 	 * @see HttpServerErrorException#create
@@ -189,26 +171,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 			default:
 				throw new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
 		}
-	}
-
-	/**
-	 * Determine the HTTP status of the given response.
-	 * @param response the response to inspect
-	 * @return the associated HTTP status
-	 * @throws IOException in case of I/O errors
-	 * @throws UnknownHttpStatusCodeException in case of an unknown status code
-	 * that cannot be represented with the {@link HttpStatus} enum
-	 * @since 4.3.8
-	 * @deprecated as of 5.0, in favor of {@link #handleError(ClientHttpResponse, HttpStatus)}
-	 */
-	@Deprecated
-	protected HttpStatus getHttpStatusCode(ClientHttpResponse response) throws IOException {
-		HttpStatus statusCode = HttpStatus.resolve(response.getRawStatusCode());
-		if (statusCode == null) {
-			throw new UnknownHttpStatusCodeException(response.getRawStatusCode(), response.getStatusText(),
-					response.getHeaders(), getResponseBody(response), getCharset(response));
-		}
-		return statusCode;
 	}
 
 	/**

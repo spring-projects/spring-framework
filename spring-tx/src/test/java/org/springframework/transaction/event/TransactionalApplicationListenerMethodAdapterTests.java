@@ -26,6 +26,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,7 +82,7 @@ public class TransactionalApplicationListenerMethodAdapterTests {
 		assertThat(callback.postEvent).isEqualTo(event);
 		assertThat(callback.ex).isNull();
 		assertThat(adapter.getTransactionPhase()).isEqualTo(TransactionPhase.AFTER_COMMIT);
-		assertThat(adapter.getListenerId()).endsWith("SampleEvents.defaultPhase(class java.lang.String)");
+		assertThat(adapter.getListenerId()).endsWith("SampleEvents.defaultPhase(java.lang.String)");
 	}
 
 	@Test
@@ -102,7 +103,7 @@ public class TransactionalApplicationListenerMethodAdapterTests {
 		assertThat(callback.ex).isInstanceOf(RuntimeException.class);
 		assertThat(callback.ex.getMessage()).isEqualTo("event");
 		assertThat(adapter.getTransactionPhase()).isEqualTo(TransactionPhase.BEFORE_COMMIT);
-		assertThat(adapter.getListenerId()).isEqualTo(adapter.getDefaultListenerId());
+		assertThat(adapter.getListenerId()).isEqualTo(ClassUtils.getQualifiedMethodName(m) + "(java.lang.String)");
 	}
 
 	@Test

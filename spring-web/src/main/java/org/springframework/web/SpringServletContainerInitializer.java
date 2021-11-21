@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,31 +23,28 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Set;
 
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.HandlesTypes;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.HandlesTypes;
 
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Servlet 3.0 {@link ServletContainerInitializer} designed to support code-based
+ * A Spring-provided {@link ServletContainerInitializer} designed to support code-based
  * configuration of the servlet container using Spring's {@link WebApplicationInitializer}
  * SPI as opposed to (or possibly in combination with) the traditional
  * {@code web.xml}-based approach.
  *
  * <h2>Mechanism of Operation</h2>
  * This class will be loaded and instantiated and have its {@link #onStartup}
- * method invoked by any Servlet 3.0-compliant container during container startup assuming
+ * method invoked by any Servlet-compliant container during container startup assuming
  * that the {@code spring-web} module JAR is present on the classpath. This occurs through
  * the JAR Services API {@link ServiceLoader#load(Class)} method detecting the
- * {@code spring-web} module's {@code META-INF/services/javax.servlet.ServletContainerInitializer}
- * service provider configuration file. See the
- * <a href="https://download.oracle.com/javase/6/docs/technotes/guides/jar/jar.html#Service%20Provider">
- * JAR Services API documentation</a> as well as section <em>8.2.4</em> of the Servlet 3.0
- * Final Draft specification for complete details.
+ * {@code spring-web} module's {@code META-INF/services/jakarta.servlet.ServletContainerInitializer}
+ * service provider configuration file.
  *
  * <h3>In combination with {@code web.xml}</h3>
  * A web application can choose to limit the amount of classpath scanning the Servlet
@@ -61,8 +58,8 @@ import org.springframework.util.ReflectionUtils;
  *
  * <pre class="code">
  * &lt;absolute-ordering&gt;
- *   &lt;name>some_web_fragment&lt;/name&gt;
- *   &lt;name>spring_web&lt;/name&gt;
+ *   &lt;name&gt;some_web_fragment&lt;/name&gt;
+ *   &lt;name&gt;spring_web&lt;/name&gt;
  * &lt;/absolute-ordering&gt;
  * </pre>
  *
@@ -80,12 +77,12 @@ import org.springframework.util.ReflectionUtils;
  * <h2>General Notes</h2>
  * In general, this class should be viewed as <em>supporting infrastructure</em> for
  * the more important and user-facing {@code WebApplicationInitializer} SPI. Taking
- * advantage of this container initializer is also completely <em>optional</em>: while
- * it is true that this initializer will be loaded and invoked under all Servlet 3.0+
- * runtimes, it remains the user's choice whether to make any
- * {@code WebApplicationInitializer} implementations available on the classpath. If no
- * {@code WebApplicationInitializer} types are detected, this container initializer will
- * have no effect.
+ * advantage of this container initializer is also completely <em>optional</em>:
+ * while it is true that this initializer will be loaded and invoked under all
+ * Servlet runtimes, it remains the user's choice whether to make any
+ * {@code WebApplicationInitializer} implementations available on the classpath.
+ * If no {@code WebApplicationInitializer} types are detected, this container
+ * initializer will have no effect.
  *
  * <p>Note that use of this container initializer and of {@code WebApplicationInitializer}
  * is not in any way "tied" to Spring MVC other than the fact that the types are shipped
@@ -117,8 +114,8 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	 * Delegate the {@code ServletContext} to any {@link WebApplicationInitializer}
 	 * implementations present on the application classpath.
 	 * <p>Because this class declares @{@code HandlesTypes(WebApplicationInitializer.class)},
-	 * Servlet 3.0+ containers will automatically scan the classpath for implementations
-	 * of Spring's {@code WebApplicationInitializer} interface and provide the set of all
+	 * Servlet containers will automatically scan the classpath for implementations of
+	 * Spring's {@code WebApplicationInitializer} interface and provide the set of all
 	 * such types to the {@code webAppInitializerClasses} parameter of this method.
 	 * <p>If no {@code WebApplicationInitializer} implementations are found on the classpath,
 	 * this method is effectively a no-op. An INFO-level log message will be issued notifying

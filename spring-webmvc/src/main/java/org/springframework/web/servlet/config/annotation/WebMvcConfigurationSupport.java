@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -129,6 +129,8 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * ordered at 1 to map URL paths directly to view names.
  * <li>{@link BeanNameUrlHandlerMapping}
  * ordered at 2 to map URL paths to controller bean names.
+ * <li>{@link RouterFunctionMapping}
+ * ordered at 3 to map {@linkplain org.springframework.web.servlet.function.RouterFunction router functions}.
  * <li>{@link HandlerMapping}
  * ordered at {@code Integer.MAX_VALUE-1} to serve static resource requests.
  * <li>{@link HandlerMapping}
@@ -143,6 +145,8 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * for processing requests with {@link HttpRequestHandler HttpRequestHandlers}.
  * <li>{@link SimpleControllerHandlerAdapter}
  * for processing requests with interface-based {@link Controller Controllers}.
+ * <li>{@link HandlerFunctionAdapter}
+ * for processing requests with {@linkplain org.springframework.web.servlet.function.RouterFunction router functions}.
  * </ul>
  *
  * <p>Registers a {@link HandlerExceptionResolverComposite} with this chain of
@@ -214,14 +218,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	static {
 		ClassLoader classLoader = WebMvcConfigurationSupport.class.getClassLoader();
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
-		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
+		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 	}
 
@@ -275,7 +279,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Set the {@link javax.servlet.ServletContext}, e.g. for resource handling,
+	 * Set the {@link jakarta.servlet.ServletContext}, e.g. for resource handling,
 	 * looking up file extensions, etc.
 	 */
 	@Override
@@ -284,7 +288,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Return the associated {@link javax.servlet.ServletContext}.
+	 * Return the associated {@link jakarta.servlet.ServletContext}.
 	 * @since 4.2
 	 */
 	@Nullable
@@ -395,6 +399,17 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	protected void configurePathMatch(PathMatchConfigurer configurer) {
 	}
 
+	/**
+	 * Return a global {@link PathPatternParser} instance to use for parsing
+	 * patterns to match to the {@link org.springframework.http.server.RequestPath}.
+	 * The returned instance can be configured using
+	 * {@link #configurePathMatch(PathMatchConfigurer)}.
+	 * @since 5.3.4
+	 */
+	@Bean
+	public PathPatternParser mvcPatternParser() {
+		return getPathMatchConfigurer().getPatternParserOrDefault();
+	}
 
 	/**
 	 * Return a global {@link UrlPathHelper} instance which is used to resolve
@@ -514,6 +529,16 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 		BeanNameUrlHandlerMapping mapping = new BeanNameUrlHandlerMapping();
 		mapping.setOrder(2);
+
+		PathMatchConfigurer pathConfig = getPathMatchConfigurer();
+		if (pathConfig.getPatternParser() != null) {
+			mapping.setPatternParser(pathConfig.getPatternParser());
+		}
+		else {
+			mapping.setUrlPathHelper(pathConfig.getUrlPathHelperOrDefault());
+			mapping.setPathMatcher(pathConfig.getPathMatcherOrDefault());
+		}
+
 		mapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
 		mapping.setCorsConfigurations(getCorsConfigurations());
 		return mapping;
@@ -749,7 +774,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	public Validator mvcValidator() {
 		Validator validator = getValidator();
 		if (validator == null) {
-			if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
+			if (ClassUtils.isPresent("jakarta.validation.Validator", getClass().getClassLoader())) {
 				Class<?> clazz;
 				try {
 					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";

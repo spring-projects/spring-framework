@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,10 +48,7 @@ public class OpModulus extends Operator {
 		Object leftOperand = getLeftOperand().getValueInternal(state).getValue();
 		Object rightOperand = getRightOperand().getValueInternal(state).getValue();
 
-		if (leftOperand instanceof Number && rightOperand instanceof Number) {
-			Number leftNumber = (Number) leftOperand;
-			Number rightNumber = (Number) rightOperand;
-
+		if (leftOperand instanceof Number leftNumber && rightOperand instanceof Number rightNumber) {
 			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
 				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
@@ -79,7 +76,7 @@ public class OpModulus extends Operator {
 				return new TypedValue(leftNumber.intValue() % rightNumber.intValue());
 			}
 			else {
-				// Unknown Number subtypes -> best guess is double division
+				// Unknown Number subtype -> best guess is double division
 				return new TypedValue(leftNumber.doubleValue() % rightNumber.doubleValue());
 			}
 		}

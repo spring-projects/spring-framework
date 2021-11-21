@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,14 @@
 package org.springframework.http.codec.json;
 
 import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.SerializersKt;
+import kotlinx.serialization.descriptors.PolymorphicKind;
+import kotlinx.serialization.descriptors.SerialDescriptor;
 import kotlinx.serialization.json.Json;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -39,7 +43,9 @@ import org.springframework.util.MimeType;
  * Decode a byte stream into JSON and convert to Object's with
  * <a href="https://github.com/Kotlin/kotlinx.serialization">kotlinx.serialization</a>.
  *
- * <p>This decoder can be used to bind {@code @Serializable} Kotlin classes.
+ * <p>This decoder can be used to bind {@code @Serializable} Kotlin classes,
+ * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphic serialization</a>
+ * is not supported.
  * It supports {@code application/json} and {@code application/*+json} with
  * various character sets, {@code UTF-8} being the default.
  *
@@ -132,9 +138,26 @@ public class KotlinSerializationJsonDecoder extends AbstractDecoder<Object> {
 		KSerializer<Object> serializer = serializerCache.get(type);
 		if (serializer == null) {
 			serializer = SerializersKt.serializer(type);
+			if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
+				throw new UnsupportedOperationException("Open polymorphic serialization is not supported yet");
+			}
 			serializerCache.put(type, serializer);
 		}
 		return serializer;
+	}
+
+	private boolean hasPolymorphism(SerialDescriptor descriptor, Set<String> alreadyProcessed) {
+		alreadyProcessed.add(descriptor.getSerialName());
+		if (descriptor.getKind().equals(PolymorphicKind.OPEN.INSTANCE)) {
+			return true;
+		}
+		for (int i = 0 ; i < descriptor.getElementsCount() ; i++) {
+			SerialDescriptor elementDescriptor = descriptor.getElementDescriptor(i);
+			if (!alreadyProcessed.contains(elementDescriptor.getSerialName()) && hasPolymorphism(elementDescriptor, alreadyProcessed)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

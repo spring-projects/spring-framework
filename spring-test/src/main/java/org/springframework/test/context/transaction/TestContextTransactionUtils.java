@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,9 +106,7 @@ public abstract class TestContextTransactionUtils {
 		}
 
 		try {
-			if (bf instanceof ListableBeanFactory) {
-				ListableBeanFactory lbf = (ListableBeanFactory) bf;
-
+			if (bf instanceof ListableBeanFactory lbf) {
 				// Look up single bean by type
 				Map<String, DataSource> dataSources =
 						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, DataSource.class);
@@ -180,9 +178,7 @@ public abstract class TestContextTransactionUtils {
 		}
 
 		try {
-			if (bf instanceof ListableBeanFactory) {
-				ListableBeanFactory lbf = (ListableBeanFactory) bf;
-
+			if (bf instanceof ListableBeanFactory lbf) {
 				// Look up single TransactionManagementConfigurer
 				Map<String, TransactionManagementConfigurer> configurers =
 						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, TransactionManagementConfigurer.class);

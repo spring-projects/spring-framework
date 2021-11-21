@@ -43,13 +43,10 @@ task api(type: Javadoc) {
 		header = rootProject.description
 		use = true
 		overview = "src/docs/api/overview.html"
-		stylesheetFile = file("src/docs/api/stylesheet.css")
 		splitIndex = true
 		links(project.ext.javadocLinks)
-		addStringOption('Xdoclint:none', '-quiet')
-		if(JavaVersion.current().isJava9Compatible()) {
-			addBooleanOption('html5', true)
-		}
+		addBooleanOption('Xdoclint:syntax', true) // only check syntax with doclint
+		addBooleanOption('Werror', true) // fail build on Javadoc warnings
 	}
 	source moduleProjects.collect { project ->
 		project.sourceSets.main.allJava
@@ -61,54 +58,13 @@ task api(type: Javadoc) {
 /**
  * Produce KDoc for all Spring Framework modules in "build/docs/kdoc"
  */
-dokka {
-	dependsOn {
-		tasks.getByName("api")
-	}
-
-	doFirst {
-		configuration {
-			classpath = moduleProjects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
-			classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
-
-			moduleProjects.findAll {
-				it.pluginManager.hasPlugin("kotlin")
-			}.each { project ->
-				def kotlinDirs = project.sourceSets.main.kotlin.srcDirs.collect()
-				kotlinDirs -= project.sourceSets.main.java.srcDirs
-				kotlinDirs.each { dir ->
-					if (dir.exists()) {
-						sourceRoot {
-							path = dir.path
-						}
-					}
-				}
-			}
+pluginManager.withPlugin("kotlin") {
+	tasks.dokkaHtmlMultiModule.configure {
+		dependsOn {
+			tasks.getByName("api")
 		}
-	}
-
-	outputFormat = "html"
-	outputDirectory = "$buildDir/docs/kdoc"
-
-	configuration {
-		moduleName = "spring-framework"
-
-		externalDocumentationLink {
-			url = new URL("https://docs.spring.io/spring-framework/docs/$version/javadoc-api/")
-			packageListUrl = new File(buildDir, "docs/javadoc/package-list").toURI().toURL()
-		}
-		externalDocumentationLink {
-			url = new URL("https://projectreactor.io/docs/core/release/api/")
-		}
-		externalDocumentationLink {
-			url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
-		}
-		externalDocumentationLink {
-			url = new URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
-		}
-		externalDocumentationLink {
-			url = new URL("https://r2dbc.io/spec/0.8.3.RELEASE/api/")
-		}
+		moduleName.set("spring-framework")
+		outputDirectory.set(project.file("$buildDir/docs/kdoc"))
 	}
 }
 
@@ -127,6 +83,8 @@ task extractDocResources(type: Copy, dependsOn: downloadResources) {
 }
 
 asciidoctorj {
+	def docRoot = 'https://docs.spring.io'
+	def docsSpringFramework = "${docRoot}/spring-framework/docs/${project.version}"
 	version = '2.4.1'
 	fatalWarnings ".*"
 	options doctype: 'book', eruby: 'erubis'
@@ -134,7 +92,7 @@ asciidoctorj {
 			icons: 'font',
 			idprefix: '',
 			idseparator: '-',
-			docinfo: 'shared',
+			docinfo: 'shared,private-header', // https://docs.asciidoctor.org/asciidoctor/latest/docinfo/
 			revnumber: project.version,
 			sectanchors: '',
 			sectnums: '',
@@ -143,7 +101,11 @@ asciidoctorj {
 			'highlightjs-theme': 'googlecode',
 			stylesdir: 'css/',
 			stylesheet: 'stylesheet.css',
-			'spring-version': project.version
+			'spring-version': project.version,
+			'spring-framework-main-code': 'https://github.com/spring-projects/spring-framework/tree/main',
+			'doc-root': docRoot,
+			'docs-spring-framework': docsSpringFramework,
+			'api-spring-framework': "${docsSpringFramework}/javadoc-api/org/springframework"
 	])
 }
 
@@ -184,7 +146,7 @@ asciidoctorPdf {
 /**
  * Zip all docs (API and reference) into a single archive
  */
-task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'asciidoctorPdf', 'dokka']) {
+task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'asciidoctorPdf', 'dokkaHtmlMultiModule']) {
 	group = "Distribution"
 	description = "Builds -${archiveClassifier} archive containing api and reference " +
 			"for deployment at https://docs.spring.io/spring-framework/docs."
@@ -203,7 +165,7 @@ task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'asciidoctorPdf', 'dok
 	from ("$asciidoctorPdf.outputDir") {
 		into "reference/pdf"
 	}
-	from (dokka) {
+	from (dokkaHtmlMultiModule.outputDirectory) {
 		into "kdoc-api"
 	}
 }
@@ -260,11 +222,11 @@ task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
 		expand(copyright: new Date().format("yyyy"), version: project.version)
 	}
 
-	from(zipTree(docsZip.archivePath)) {
+	from(zipTree(docsZip.archiveFile)) {
 		into "${baseDir}/docs"
 	}
 
-	from(zipTree(schemaZip.archivePath)) {
+	from(zipTree(schemaZip.archiveFile)) {
 		into "${baseDir}/schema"
 	}
 

@@ -16,8 +16,7 @@
 
 package org.springframework.context.annotation;
 
-import javax.annotation.Resource;
-
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,16 @@ public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 	private String selectorHeaderName = "selector";
 
 
-	public SimpleBrokerRegistration(SubscribableChannel inChannel, MessageChannel outChannel, String[] prefixes) {
-		super(inChannel, outChannel, prefixes);
+	/**
+	 * Create a new {@code SimpleBrokerRegistration}.
+	 * @param clientInboundChannel the inbound channel
+	 * @param clientOutboundChannel the outbound channel
+	 * @param destinationPrefixes the destination prefixes
+	 */
+	public SimpleBrokerRegistration(SubscribableChannel clientInboundChannel,
+			MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
+
+		super(clientInboundChannel, clientOutboundChannel, destinationPrefixes);
 	}
 
 

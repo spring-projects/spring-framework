@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -606,7 +606,7 @@ public interface HibernateOperations {
 	 * @param firstResult the index of the first result object to be retrieved
 	 * (numbered from 0)
 	 * @param maxResults the maximum number of result objects to retrieve
-	 * (or <=0 for no limit)
+	 * (or &lt;=0 for no limit)
 	 * @return a {@link List} containing 0 or more persistent instances
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see DetachedCriteria#getExecutableCriteria(org.hibernate.Session)
@@ -643,7 +643,7 @@ public interface HibernateOperations {
 	 * @param firstResult the index of the first result object to be retrieved
 	 * (numbered from 0)
 	 * @param maxResults the maximum number of result objects to retrieve
-	 * (or <=0 for no limit)
+	 * (or &lt;=0 for no limit)
 	 * @return a {@link List} containing 0 or more persistent instances
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.criterion.Example#create(Object)
@@ -660,7 +660,7 @@ public interface HibernateOperations {
 	 * @param firstResult the index of the first result object to be retrieved
 	 * (numbered from 0)
 	 * @param maxResults the maximum number of result objects to retrieve
-	 * (or <=0 for no limit)
+	 * (or &lt;=0 for no limit)
 	 * @return a {@link List} containing 0 or more persistent instances
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.criterion.Example#create(Object)

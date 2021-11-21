@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -285,21 +285,21 @@ public enum HttpStatus {
 	I_AM_A_TEAPOT(418, Series.CLIENT_ERROR, "I'm a teapot"),
 	/**
 	 * @deprecated See
-	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&amp;url2=draft-ietf-webdav-protocol-06.txt">
 	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
 	INSUFFICIENT_SPACE_ON_RESOURCE(419, Series.CLIENT_ERROR, "Insufficient Space On Resource"),
 	/**
 	 * @deprecated See
-	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&amp;url2=draft-ietf-webdav-protocol-06.txt">
 	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
 	METHOD_FAILURE(420, Series.CLIENT_ERROR, "Method Failure"),
 	/**
 	 * @deprecated
-	 * See <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 * See <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&amp;url2=draft-ietf-webdav-protocol-06.txt">
 	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
@@ -414,6 +414,13 @@ public enum HttpStatus {
 	 * @see <a href="https://tools.ietf.org/html/rfc6585#section-6">Additional HTTP Status Codes</a>
 	 */
 	NETWORK_AUTHENTICATION_REQUIRED(511, Series.SERVER_ERROR, "Network Authentication Required");
+
+
+	private static final HttpStatus[] VALUES;
+
+	static {
+		VALUES = values();
+	}
 
 
 	private final int value;
@@ -550,7 +557,8 @@ public enum HttpStatus {
 	 */
 	@Nullable
 	public static HttpStatus resolve(int statusCode) {
-		for (HttpStatus status : values()) {
+		// Use cached VALUES instead of values() to prevent array allocation.
+		for (HttpStatus status : VALUES) {
 			if (status.value == statusCode) {
 				return status;
 			}

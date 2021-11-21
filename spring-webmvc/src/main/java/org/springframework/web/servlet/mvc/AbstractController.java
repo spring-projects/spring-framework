@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet.mvc;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -135,7 +135,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	 * different servlet containers; the only 100% safe way is a session mutex.
 	 * @see AbstractController#handleRequestInternal
 	 * @see org.springframework.web.util.HttpSessionMutexListener
-	 * @see org.springframework.web.util.WebUtils#getSessionMutex(javax.servlet.http.HttpSession)
+	 * @see org.springframework.web.util.WebUtils#getSessionMutex(jakarta.servlet.http.HttpSession)
 	 */
 	public final void setSynchronizeOnSession(boolean synchronizeOnSession) {
 		this.synchronizeOnSession = synchronizeOnSession;

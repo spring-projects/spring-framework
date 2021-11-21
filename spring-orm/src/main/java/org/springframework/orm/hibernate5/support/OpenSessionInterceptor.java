@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,27 +112,14 @@ public class OpenSessionInterceptor implements MethodInterceptor, InitializingBe
 	 * @see FlushMode#MANUAL
 	 */
 	protected Session openSession(SessionFactory sessionFactory) throws DataAccessResourceFailureException {
-		Session session = openSession();
-		if (session == null) {
-			try {
-				session = sessionFactory.openSession();
-				session.setHibernateFlushMode(FlushMode.MANUAL);
-			}
-			catch (HibernateException ex) {
-				throw new DataAccessResourceFailureException("Could not open Hibernate Session", ex);
-			}
+		try {
+			Session session = sessionFactory.openSession();
+			session.setHibernateFlushMode(FlushMode.MANUAL);
+			return session;
 		}
-		return session;
-	}
-
-	/**
-	 * Open a Session for the given SessionFactory.
-	 * @deprecated as of 5.0, in favor of {@link #openSession(SessionFactory)}
-	 */
-	@Deprecated
-	@Nullable
-	protected Session openSession() throws DataAccessResourceFailureException {
-		return null;
+		catch (HibernateException ex) {
+			throw new DataAccessResourceFailureException("Could not open Hibernate Session", ex);
+		}
 	}
 
 }

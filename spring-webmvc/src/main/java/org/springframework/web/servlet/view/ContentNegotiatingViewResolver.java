@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -332,8 +332,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	@Nullable
 	private View getBestView(List<View> candidateViews, List<MediaType> requestedMediaTypes, RequestAttributes attrs) {
 		for (View candidateView : candidateViews) {
-			if (candidateView instanceof SmartView) {
-				SmartView smartView = (SmartView) candidateView;
+			if (candidateView instanceof SmartView smartView) {
 				if (smartView.isRedirectView()) {
 					return candidateView;
 				}
@@ -344,6 +343,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 				if (StringUtils.hasText(candidateView.getContentType())) {
 					MediaType candidateContentType = MediaType.parseMediaType(candidateView.getContentType());
 					if (mediaType.isCompatibleWith(candidateContentType)) {
+						mediaType = mediaType.removeQualityValue();
 						if (logger.isDebugEnabled()) {
 							logger.debug("Selected '" + mediaType + "' given " + requestedMediaTypes);
 						}

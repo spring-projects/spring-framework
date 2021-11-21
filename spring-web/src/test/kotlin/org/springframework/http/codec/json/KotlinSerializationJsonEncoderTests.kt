@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.http.codec.json
 import kotlinx.serialization.Serializable
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
@@ -51,7 +52,8 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 				MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue()
 
 		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, KotlinSerializationJsonDecoderTests.Pojo::class.java), MediaType.APPLICATION_JSON)).isTrue()
+		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
+		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), MediaType.APPLICATION_JSON)).isTrue()
 		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
 		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
 	}
@@ -91,10 +93,11 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 		Assertions.assertThat(encoder.canEncode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
 		val sseType = ResolvableType.forClass(ServerSentEvent::class.java)
 		Assertions.assertThat(encoder.canEncode(sseType, MediaType.APPLICATION_JSON)).isFalse()
+		Assertions.assertThat(encoder.canEncode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 
 	@Serializable
-	data class Pojo(val foo: String, val bar: String)
+	data class Pojo(val foo: String, val bar: String, val pojo: Pojo? = null)
 
 }

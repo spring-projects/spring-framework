@@ -38,7 +38,7 @@ import org.springframework.web.context.ContextLoader;
  * implementation which accepts <em>component classes</em> as input &mdash; in particular
  * {@link org.springframework.context.annotation.Configuration @Configuration}-annotated
  * classes, but also plain {@link org.springframework.stereotype.Component @Component}
- * classes and JSR-330 compliant classes using {@code javax.inject} annotations.
+ * classes and JSR-330 compliant classes using {@code jakarta.inject} annotations.
  *
  * <p>Allows for registering classes one by one (specifying class names as config
  * location) as well as for classpath scanning (specifying base packages as config location).

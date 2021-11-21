@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.TextMessage;
-
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Message;
+import jakarta.jms.MessageListener;
+import jakarta.jms.TextMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,12 +68,12 @@ public class JmsNamespaceHandlerTests {
 
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	public void setup() {
 		this.context = new ToolingTestApplicationContext("jmsNamespaceHandlerTests.xml", getClass());
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	public void shutdown() {
 		this.context.close();
 	}
 
@@ -88,11 +87,11 @@ public class JmsNamespaceHandlerTests {
 		assertThat(containers.size()).as("Context should contain 3 JCA endpoint containers").isEqualTo(3);
 
 		assertThat(context.getBeansOfType(JmsListenerContainerFactory.class))
-			.as("Context should contain 3 JmsListenerContainerFactory instances").hasSize(3);
+				.as("Context should contain 3 JmsListenerContainerFactory instances").hasSize(3);
 	}
 
 	@Test
-	public void testContainerConfiguration() throws Exception {
+	public void testContainerConfiguration() {
 		Map<String, DefaultMessageListenerContainer> containers = context.getBeansOfType(DefaultMessageListenerContainer.class);
 		ConnectionFactory defaultConnectionFactory = context.getBean(DEFAULT_CONNECTION_FACTORY, ConnectionFactory.class);
 		ConnectionFactory explicitConnectionFactory = context.getBean(EXPLICIT_CONNECTION_FACTORY, ConnectionFactory.class);
@@ -114,7 +113,7 @@ public class JmsNamespaceHandlerTests {
 	}
 
 	@Test
-	public void testJcaContainerConfiguration() throws Exception {
+	public void testJcaContainerConfiguration() {
 		Map<String, JmsMessageEndpointManager> containers = context.getBeansOfType(JmsMessageEndpointManager.class);
 
 		assertThat(containers.containsKey("listener3")).as("listener3 not found").isTrue();

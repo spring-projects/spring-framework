@@ -181,7 +181,7 @@ The following example shows how to access form data:
 [source,java,role="primary"]
 .Java
 ----
-Mono<MultiValueMap<String, String> map = request.formData();
+Mono<MultiValueMap<String, String>> map = request.formData();
 ----
 [source,kotlin,role="secondary"]
 .Kotlin
@@ -194,7 +194,7 @@ The following example shows how to access multipart data as a map:
 [source,java,role="primary"]
 .Java
 ----
-Mono<MultiValueMap<String, Part> map = request.multipartData();
+Mono<MultiValueMap<String, Part>> map = request.multipartData();
 ----
 [source,kotlin,role="secondary"]
 .Kotlin
@@ -505,6 +505,8 @@ The example shown above also uses two request predicates, as the builder uses
 Router functions are evaluated in order: if the first route does not match, the
 second is evaluated, and so on.
 Therefore, it makes sense to declare more specific routes before general ones.
+This is also important when registering router functions as Spring beans, as will
+be described later.
 Note that this behavior is different from the annotation-based programming model, where the
 "most specific" controller method is picked automatically.
 
@@ -656,8 +658,8 @@ components required to process requests. The WebFlux Java configuration declares
 infrastructure components to support functional endpoints:
 
 * `RouterFunctionMapping`: Detects one or more `RouterFunction<?>` beans in the Spring
-configuration, combines them through `RouterFunction.andOther`, and routes requests to the
-resulting composed `RouterFunction`.
+configuration, <<core.adoc#beans-factory-ordered, orders them>>, combines them through
+`RouterFunction.andOther`, and routes requests to the resulting composed `RouterFunction`.
 * `HandlerFunctionAdapter`: Simple adapter that lets `DispatcherHandler` invoke
 a `HandlerFunction` that was mapped to a request.
 * `ServerResponseResultHandler`: Handles the result from the invocation of a

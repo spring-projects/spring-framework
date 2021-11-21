@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.util.ObjectUtils;
 ///CLOVER:OFF
 @SuppressWarnings("unused")
 public class Inventor {
+
 	private String name;
 	public String _name;
 	public String _name_;
@@ -202,8 +203,14 @@ public class Inventor {
 		return strings.length + i;
 	}
 
-	public Inventor(String... strings) {
+	public String aVarargsMethod3(String str1, String... strings) {
+		if (ObjectUtils.isEmpty(strings)) {
+			return str1;
+		}
+		return str1 + "-" + String.join("-", strings);
+	}
 
+	public Inventor(String... strings) {
 	}
 
 	public boolean getSomeProperty() {

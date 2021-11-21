@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,8 @@ import org.springframework.web.util.UriBuilderFactory;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sam Brannen
+ * @author Michał Rowicki
  * @since 5.0
  * @see StatusAssertions
  * @see HeaderAssertions
@@ -439,6 +441,33 @@ public interface WebTestClient {
 		Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer);
 
 		/**
+		 * Configure an {@code EntityExchangeResult} callback that is invoked
+		 * every time after a response is fully decoded to a single entity, to a
+		 * List of entities, or to a byte[]. In effect, equivalent to each and
+		 * all of the below but registered once, globally:
+		 * <pre>
+		 * client.get().uri("/accounts/1")
+		 *         .exchange()
+		 *         .expectBody(Person.class).consumeWith(exchangeResult -&gt; ... ));
+		 *
+		 * client.get().uri("/accounts")
+		 *         .exchange()
+		 *         .expectBodyList(Person.class).consumeWith(exchangeResult -&gt; ... ));
+		 *
+		 * client.get().uri("/accounts/1")
+		 *         .exchange()
+		 *         .expectBody().consumeWith(exchangeResult -&gt; ... ));
+		 * </pre>
+		 * <p>Note that the configured consumer does not apply to responses
+		 * decoded to {@code Flux<T>} which can be consumed outside the workflow
+		 * of the test client, for example via {@code reactor.test.StepVerifier}.
+		 * @param consumer the consumer to apply to entity responses
+		 * @return the builder
+		 * @since 5.3.5
+		 */
+		Builder entityExchangeResultConsumer(Consumer<EntityExchangeResult<?>> consumer);
+
+		/**
 		 * Configure the codecs for the {@code WebClient} in the
 		 * {@link #exchangeStrategies(ExchangeStrategies) underlying}
 		 * {@code ExchangeStrategies}.
@@ -755,6 +784,34 @@ public interface WebTestClient {
 	interface ResponseSpec {
 
 		/**
+		 * Apply multiple assertions to a response with the given
+		 * {@linkplain ResponseSpecConsumer consumers}, with the guarantee that
+		 * all assertions will be applied even if one or more assertions fails
+		 * with an exception.
+		 * <p>If a single {@link Error} or {@link RuntimeException} is thrown,
+		 * it will be rethrown.
+		 * <p>If multiple exceptions are thrown, this method will throw an
+		 * {@link AssertionError} whose error message is a summary of all of the
+		 * exceptions. In addition, each exception will be added as a
+		 * {@linkplain Throwable#addSuppressed(Throwable) suppressed exception} to
+		 * the {@code AssertionError}.
+		 * <p>This feature is similar to the {@code SoftAssertions} support in
+		 * AssertJ and the {@code assertAll()} support in JUnit Jupiter.
+		 *
+		 * <h4>Example</h4>
+		 * <pre class="code">
+		 * webTestClient.get().uri("/hello").exchange()
+		 *     .expectAll(
+		 *         responseSpec -&gt; responseSpec.expectStatus().isOk(),
+		 *         responseSpec -&gt; responseSpec.expectBody(String.class).isEqualTo("Hello, World!")
+		 *     );
+		 * </pre>
+		 * @param consumers the list of {@code ResponseSpec} consumers
+		 * @since 5.3.10
+		 */
+		ResponseSpec expectAll(ResponseSpecConsumer... consumers);
+
+		/**
 		 * Assertions on the response status.
 		 */
 		StatusAssertions expectStatus();
@@ -805,7 +862,6 @@ public interface WebTestClient {
 		/**
 		 * Exit the chained flow in order to consume the response body
 		 * externally, e.g. via {@link reactor.test.StepVerifier}.
-		 *
 		 * <p>Note that when {@code Void.class} is passed in, the response body
 		 * is consumed and released. If no content is expected, then consider
 		 * using {@code .expectBody().isEmpty()} instead which asserts that
@@ -818,6 +874,16 @@ public interface WebTestClient {
 		 * about a target type with generics.
 		 */
 		<T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef);
+
+		/**
+		 * {@link Consumer} of a {@link ResponseSpec}.
+		 * @since 5.3.10
+		 * @see ResponseSpec#expectAll(ResponseSpecConsumer...)
+		 */
+		@FunctionalInterface
+		interface ResponseSpecConsumer extends Consumer<ResponseSpec> {
+		}
+
 	}
 
 

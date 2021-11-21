@@ -20,8 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
-import javax.annotation.Priority;
-
+import jakarta.annotation.Priority;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanUtils;

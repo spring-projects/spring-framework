@@ -233,15 +233,14 @@ public abstract class CollectionUtils {
 	 * @param candidates the candidates to search for
 	 * @return the first present object, or {@code null} if not found
 	 */
-	@SuppressWarnings("unchecked")
 	@Nullable
 	public static <E> E findFirstMatch(Collection<?> source, Collection<E> candidates) {
 		if (isEmpty(source) || isEmpty(candidates)) {
 			return null;
 		}
-		for (Object candidate : candidates) {
+		for (E candidate : candidates) {
 			if (source.contains(candidate)) {
-				return (E) candidate;
+				return candidate;
 			}
 		}
 		return null;
@@ -447,7 +446,7 @@ public abstract class CollectionUtils {
 	 * @return the adapted {@code Iterator}
 	 */
 	public static <E> Iterator<E> toIterator(@Nullable Enumeration<E> enumeration) {
-		return (enumeration != null ? new EnumerationIterator<>(enumeration) : Collections.emptyIterator());
+		return (enumeration != null ? enumeration.asIterator() : Collections.emptyIterator());
 	}
 
 	/**
@@ -471,41 +470,10 @@ public abstract class CollectionUtils {
 			MultiValueMap<? extends K, ? extends V> targetMap) {
 
 		Assert.notNull(targetMap, "'targetMap' must not be null");
-		Map<K, List<V>> result = newLinkedHashMap(targetMap.size());
-		targetMap.forEach((key, value) -> {
-			List<? extends V> values = Collections.unmodifiableList(value);
-			result.put(key, (List<V>) values);
-		});
-		Map<K, List<V>> unmodifiableMap = Collections.unmodifiableMap(result);
-		return toMultiValueMap(unmodifiableMap);
-	}
-
-
-	/**
-	 * Iterator wrapping an Enumeration.
-	 */
-	private static class EnumerationIterator<E> implements Iterator<E> {
-
-		private final Enumeration<E> enumeration;
-
-		public EnumerationIterator(Enumeration<E> enumeration) {
-			this.enumeration = enumeration;
+		if (targetMap instanceof UnmodifiableMultiValueMap) {
+			return (MultiValueMap<K, V>) targetMap;
 		}
-
-		@Override
-		public boolean hasNext() {
-			return this.enumeration.hasMoreElements();
-		}
-
-		@Override
-		public E next() {
-			return this.enumeration.nextElement();
-		}
-
-		@Override
-		public void remove() throws UnsupportedOperationException {
-			throw new UnsupportedOperationException("Not supported");
-		}
+		return new UnmodifiableMultiValueMap<>(targetMap);
 	}
 
 

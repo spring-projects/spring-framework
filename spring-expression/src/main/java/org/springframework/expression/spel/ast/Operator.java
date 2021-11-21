@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.util.ObjectUtils;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Giovanni Dall'Oglio Risso
+ * @author Sam Brannen
  * @since 3.0
  */
 public abstract class Operator extends SpelNodeImpl {
@@ -81,10 +82,10 @@ public abstract class Operator extends SpelNodeImpl {
 		StringBuilder sb = new StringBuilder("(");
 		sb.append(getChild(0).toStringAST());
 		for (int i = 1; i < getChildCount(); i++) {
-			sb.append(" ").append(getOperatorName()).append(" ");
+			sb.append(' ').append(getOperatorName()).append(' ');
 			sb.append(getChild(i).toStringAST());
 		}
-		sb.append(")");
+		sb.append(')');
 		return sb.toString();
 	}
 
@@ -261,10 +262,7 @@ public abstract class Operator extends SpelNodeImpl {
 	 * @param right the right-hand operand value
 	 */
 	public static boolean equalityCheck(EvaluationContext context, @Nullable Object left, @Nullable Object right) {
-		if (left instanceof Number && right instanceof Number) {
-			Number leftNumber = (Number) left;
-			Number rightNumber = (Number) right;
-
+		if (left instanceof Number leftNumber && right instanceof Number rightNumber) {
 			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
 				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);

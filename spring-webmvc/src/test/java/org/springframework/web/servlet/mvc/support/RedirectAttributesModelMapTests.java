@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class RedirectAttributesModelMapTests {
+class RedirectAttributesModelMapTests {
 
 	private RedirectAttributesModelMap redirectAttributes;
 
@@ -54,13 +54,13 @@ public class RedirectAttributesModelMapTests {
 	}
 
 	@Test
-	public void addAttributePrimitiveType() {
+	void addAttributePrimitiveType() {
 		this.redirectAttributes.addAttribute("speed", 65);
 		assertThat(this.redirectAttributes.get("speed")).isEqualTo("65");
 	}
 
 	@Test
-	public void addAttributeCustomType() {
+	void addAttributeCustomType() {
 		String attrName = "person";
 		this.redirectAttributes.addAttribute(attrName, new TestBean("Fred"));
 
@@ -73,7 +73,7 @@ public class RedirectAttributesModelMapTests {
 	}
 
 	@Test
-	public void addAttributeToString() {
+	void addAttributeToString() {
 		String attrName = "person";
 		RedirectAttributesModelMap model = new RedirectAttributesModelMap();
 		model.addAttribute(attrName, new TestBean("Fred"));
@@ -82,22 +82,22 @@ public class RedirectAttributesModelMapTests {
 	}
 
 	@Test
-	public void addAttributeValue() {
+	void addAttributeValue() {
 		this.redirectAttributes.addAttribute(new TestBean("Fred"));
 
 		assertThat(this.redirectAttributes.get("testBean")).isEqualTo("Fred");
 	}
 
 	@Test
-	public void addAllAttributesList() {
-		this.redirectAttributes.addAllAttributes(Arrays.asList(new TestBean("Fred"), new Integer(5)));
+	void addAllAttributesList() {
+		this.redirectAttributes.addAllAttributes(Arrays.asList(new TestBean("Fred"), 5));
 
 		assertThat(this.redirectAttributes.get("testBean")).isEqualTo("Fred");
 		assertThat(this.redirectAttributes.get("integer")).isEqualTo("5");
 	}
 
 	@Test
-	public void addAttributesMap() {
+	void addAttributesMap() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("person", new TestBean("Fred"));
 		map.put("age", 33);
@@ -108,7 +108,7 @@ public class RedirectAttributesModelMapTests {
 	}
 
 	@Test
-	public void mergeAttributes() {
+	void mergeAttributes() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("person", new TestBean("Fred"));
 		map.put("age", 33);
@@ -121,14 +121,14 @@ public class RedirectAttributesModelMapTests {
 	}
 
 	@Test
-	public void put() {
+	void put() {
 		this.redirectAttributes.put("testBean", new TestBean("Fred"));
 
 		assertThat(this.redirectAttributes.get("testBean")).isEqualTo("Fred");
 	}
 
 	@Test
-	public void putAll() {
+	void putAll() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("person", new TestBean("Fred"));
 		map.put("age", 33);

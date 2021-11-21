@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,10 +72,7 @@ public class OpMultiply extends Operator {
 		Object leftOperand = getLeftOperand().getValueInternal(state).getValue();
 		Object rightOperand = getRightOperand().getValueInternal(state).getValue();
 
-		if (leftOperand instanceof Number && rightOperand instanceof Number) {
-			Number leftNumber = (Number) leftOperand;
-			Number rightNumber = (Number) rightOperand;
-
+		if (leftOperand instanceof Number leftNumber && rightOperand instanceof Number rightNumber) {
 			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
 				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
@@ -108,13 +105,8 @@ public class OpMultiply extends Operator {
 			}
 		}
 
-		if (leftOperand instanceof String && rightOperand instanceof Integer) {
-			int repeats = (Integer) rightOperand;
-			StringBuilder result = new StringBuilder();
-			for (int i = 0; i < repeats; i++) {
-				result.append(leftOperand);
-			}
-			return new TypedValue(result.toString());
+		if (leftOperand instanceof String text && rightOperand instanceof Integer repeats) {
+			return new TypedValue(text.repeat(repeats));
 		}
 
 		return state.operate(Operation.MULTIPLY, leftOperand, rightOperand);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,17 @@ public class MapAccessorTests {
 		assertThat(ex.getValue(sec,mapGetter)).isEqualTo("bar");
 		assertThat(SpelCompiler.compile(ex)).isTrue();
 		assertThat(ex.getValue(sec,mapGetter)).isEqualTo("bar");
+
+		// basic isWritable
+		ex = sep.parseExpression("foo");
+		assertThat(ex.isWritable(sec,testMap)).isTrue();
+
+		// basic write
+		ex = sep.parseExpression("foo2");
+		ex.setValue(sec, testMap, "bar2");
+		assertThat(ex.getValue(sec,testMap)).isEqualTo("bar2");
+		assertThat(SpelCompiler.compile(ex)).isTrue();
+		assertThat(ex.getValue(sec,testMap)).isEqualTo("bar2");
 	}
 
 	public static class MapGetter {

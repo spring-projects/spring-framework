@@ -16,14 +16,13 @@
 
 package org.springframework.jms.support.destination;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicSession;
-
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Queue;
+import jakarta.jms.QueueSession;
+import jakarta.jms.Session;
+import jakarta.jms.Topic;
+import jakarta.jms.TopicSession;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.StubQueue;

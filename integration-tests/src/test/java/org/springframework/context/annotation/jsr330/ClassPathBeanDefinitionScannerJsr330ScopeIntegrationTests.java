@@ -21,9 +21,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -314,16 +313,16 @@ class ClassPathBeanDefinitionScannerJsr330ScopeIntegrationTests {
 				if (definition instanceof AnnotatedBeanDefinition) {
 					AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
 					for (String type : annDef.getMetadata().getAnnotationTypes()) {
-						if (type.equals(javax.inject.Singleton.class.getName())) {
+						if (type.equals(jakarta.inject.Singleton.class.getName())) {
 							metadata.setScopeName(BeanDefinition.SCOPE_SINGLETON);
 							break;
 						}
-						else if (annDef.getMetadata().getMetaAnnotationTypes(type).contains(javax.inject.Scope.class.getName())) {
+						else if (annDef.getMetadata().getMetaAnnotationTypes(type).contains(jakarta.inject.Scope.class.getName())) {
 							metadata.setScopeName(type.substring(type.length() - 13, type.length() - 6).toLowerCase());
 							metadata.setScopedProxyMode(scopedProxyMode);
 							break;
 						}
-						else if (type.startsWith("javax.inject")) {
+						else if (type.startsWith("jakarta.inject")) {
 							metadata.setScopeName(BeanDefinition.SCOPE_PROTOTYPE);
 						}
 					}
@@ -391,14 +390,14 @@ class ClassPathBeanDefinitionScannerJsr330ScopeIntegrationTests {
 
 	@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
-	@javax.inject.Scope
+	@jakarta.inject.Scope
 	public @interface RequestScoped {
 	}
 
 
 	@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
-	@javax.inject.Scope
+	@jakarta.inject.Scope
 	public @interface SessionScoped {
 	}
 

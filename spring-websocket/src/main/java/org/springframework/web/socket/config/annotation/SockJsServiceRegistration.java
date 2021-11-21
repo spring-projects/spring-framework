@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public class SockJsServiceRegistration {
 	 * also be set to point to a URL served by the application.
 	 * <p>Note that it's possible to specify a relative URL in which case the URL
 	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
-	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then the
+	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then
 	 * the relative URL must start with "../../" to traverse up to the location
 	 * above the SockJS mapping. In case of a prefix-based Servlet mapping one more
 	 * traversal may be needed.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.test.web.servlet.setup;
 
-import javax.servlet.Filter;
+import java.nio.charset.Charset;
+
+import jakarta.servlet.Filter;
 
 import org.springframework.test.web.servlet.DispatcherServletCustomizer;
 import org.springframework.test.web.servlet.MockMvcBuilder;
@@ -28,6 +30,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
  * Defines common methods for building a {@code MockMvc}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.1
  * @param <B> a self reference to the builder type
  */
@@ -82,6 +85,18 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	<T extends B> T defaultRequest(RequestBuilder requestBuilder);
 
 	/**
+	 * Define the default character encoding to be applied to every response.
+	 * <p>The default implementation of this method throws an
+	 * {@link UnsupportedOperationException}. Concrete implementations are therefore
+	 * encouraged to override this method.
+	 * @param defaultResponseCharacterEncoding the default response character encoding
+	 * @since 5.3.10
+	 */
+	default <T extends B> T defaultResponseCharacterEncoding(Charset defaultResponseCharacterEncoding) {
+		throw new UnsupportedOperationException("defaultResponseCharacterEncoding is not supported by this MockMvcBuilder");
+	}
+
+	/**
 	 * Define a global expectation that should <em>always</em> be applied to
 	 * every response. For example, status code 200 (OK), content type
 	 * {@code "application/json"}, etc.
@@ -110,6 +125,7 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	 * A more advanced variant of {@link #dispatchOptions(boolean)} that allows
 	 * customizing any {@link org.springframework.web.servlet.DispatcherServlet}
 	 * property.
+	 * @since 5.3
 	 */
 	<T extends B> T addDispatcherServletCustomizer(DispatcherServletCustomizer customizer);
 

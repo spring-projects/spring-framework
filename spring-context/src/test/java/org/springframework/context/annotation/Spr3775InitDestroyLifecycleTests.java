@@ -20,9 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
@@ -49,8 +48,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <li>{@link InitializingBean} &amp; {@link DisposableBean} interfaces</li>
  * <li>Custom {@link RootBeanDefinition#getInitMethodName() init} &amp;
  * {@link RootBeanDefinition#getDestroyMethodName() destroy} methods</li>
- * <li>JSR 250's {@link javax.annotation.PostConstruct @PostConstruct} &amp;
- * {@link javax.annotation.PreDestroy @PreDestroy} annotations</li>
+ * <li>JSR 250's {@link jakarta.annotation.PostConstruct @PostConstruct} &amp;
+ * {@link jakarta.annotation.PreDestroy @PreDestroy} annotations</li>
  * </ul>
  *
  * @author Sam Brannen

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.web.servlet;
 import java.io.IOException;
 import java.util.Locale;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -34,7 +34,6 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.Controller;
-import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -68,7 +67,8 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 	}
 
 
-	public static class LocaleChecker implements Controller, LastModified {
+	@SuppressWarnings("deprecation")
+	public static class LocaleChecker implements Controller, org.springframework.web.servlet.mvc.LastModified {
 
 		@Override
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)

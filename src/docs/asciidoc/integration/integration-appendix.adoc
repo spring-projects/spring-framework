@@ -13,7 +13,7 @@ This part of the appendix lists XML schemas related to integration technologies.
 [[xsd-schemas-jee]]
 === The `jee` Schema
 
-The `jee` elements deal with issues related to Java EE (Java Enterprise Edition) configuration,
+The `jee` elements deal with issues related to Jakarta EE (Enterprise Edition) configuration,
 such as looking up a JNDI object and defining EJB references.
 
 To use the elements in the `jee` schema, you need to have the following preamble at the top

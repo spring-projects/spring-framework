@@ -1,7 +1,5 @@
 [[spring-data-tier]]
 = Data Access
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 4
 :tabsize: 4
@@ -60,7 +58,7 @@ and <<transaction-solutions-to-common-problems, solutions to common problems>>.
 [[transaction-motivation]]
 === Advantages of the Spring Framework's Transaction Support Model
 
-Traditionally, Java EE developers have had two choices for transaction management:
+Traditionally, EE application developers have had two choices for transaction management:
 global or local transactions, both of which have profound limitations. Global
 and local transaction management is reviewed in the next two sections, followed by a
 discussion of how the Spring Framework's transaction management support addresses the
@@ -135,7 +133,7 @@ applications. Many high-end applications use a single, highly scalable database 
 Oracle RAC) instead. Stand-alone transaction managers (such as
 https://www.atomikos.com/[Atomikos Transactions] and http://jotm.objectweb.org/[JOTM])
 are other options. Of course, you may need other application server capabilities, such as
-Java Message Service (JMS) and Java EE Connector Architecture (JCA).
+Java Message Service (JMS) and Jakarta EE Connector Architecture (JCA).
 
 The Spring Framework gives you the choice of when to scale your application to a fully
 loaded application server. Gone are the days when the only alternative to using EJB
@@ -158,8 +156,7 @@ transaction management and the
 transaction management. The following listing shows the definition of the
 `PlatformTransactionManager` API:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface PlatformTransactionManager extends TransactionManager {
 
@@ -168,21 +165,6 @@ transaction management. The following listing shows the definition of the
 		void commit(TransactionStatus status) throws TransactionException;
 
 		void rollback(TransactionStatus status) throws TransactionException;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface PlatformTransactionManager : TransactionManager {
-
-		@Throws(TransactionException::class)
-		fun getTransaction(definition: TransactionDefinition): TransactionStatus
-
-		@Throws(TransactionException::class)
-		fun commit(status: TransactionStatus)
-
-		@Throws(TransactionException::class)
-		fun rollback(status: TransactionStatus)
 	}
 ----
 
@@ -207,7 +189,7 @@ The `getTransaction(..)` method returns a `TransactionStatus` object, depending 
 `TransactionDefinition` parameter. The returned `TransactionStatus` might represent a
 new transaction or can represent an existing transaction, if a matching transaction
 exists in the current call stack. The implication in this latter case is that, as with
-Java EE transaction contexts, a `TransactionStatus` is associated with a thread of
+Jakarta EE transaction contexts, a `TransactionStatus` is associated with a thread of
 execution.
 
 As of Spring Framework 5.2, Spring also provides a transaction management abstraction for
@@ -215,8 +197,7 @@ reactive applications that make use of reactive types or Kotlin Coroutines. The 
 listing shows the transaction strategy defined by
 `org.springframework.transaction.ReactiveTransactionManager`:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface ReactiveTransactionManager extends TransactionManager {
 
@@ -225,21 +206,6 @@ listing shows the transaction strategy defined by
 		Mono<Void> commit(ReactiveTransaction status) throws TransactionException;
 
 		Mono<Void> rollback(ReactiveTransaction status) throws TransactionException;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface ReactiveTransactionManager : TransactionManager {
-
-		@Throws(TransactionException::class)
-		fun getReactiveTransaction(definition: TransactionDefinition): Mono<ReactiveTransaction>
-
-		@Throws(TransactionException::class)
-		fun commit(status: ReactiveTransaction): Mono<Void>
-
-		@Throws(TransactionException::class)
-		fun rollback(status: ReactiveTransaction): Mono<Void>
 	}
 ----
 
@@ -276,8 +242,7 @@ control transaction execution and query transaction status. The concepts should 
 familiar, as they are common to all transaction APIs. The following listing shows the
 `TransactionStatus` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface TransactionStatus extends TransactionExecution, SavepointManager, Flushable {
 
@@ -296,24 +261,6 @@ familiar, as they are common to all transaction APIs. The following listing show
 
 		@Override
 		boolean isCompleted();
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface TransactionStatus : TransactionExecution, SavepointManager, Flushable {
-
-		override fun isNewTransaction(): Boolean
-
-		fun hasSavepoint(): Boolean
-
-		override fun setRollbackOnly()
-
-		override fun isRollbackOnly(): Boolean
-
-		fun flush()
-
-		override fun isCompleted(): Boolean
 	}
 ----
 
@@ -348,7 +295,7 @@ The related `PlatformTransactionManager` bean definition then has a reference to
 	</bean>
 ----
 
-If you use JTA in a Java EE container, then you use a container `DataSource`, obtained
+If you use JTA in a Jakarta EE container, then you use a container `DataSource`, obtained
 through JNDI, in conjunction with Spring's `JtaTransactionManager`. The following example
 shows what the JTA and JNDI lookup version would look like:
 
@@ -402,8 +349,8 @@ The `DataSource` bean definition is similar to the local JDBC example shown prev
 and, thus, is not shown in the following example.
 
 NOTE: If the `DataSource` (used by any non-JTA transaction manager) is looked up through
-JNDI and managed by a Java EE container, it should be non-transactional, because the
-Spring Framework (rather than the Java EE container) manages the transactions.
+JNDI and managed by a Jakarta EE container, it should be non-transactional, because the
+Spring Framework (rather than the Jakarta EE container) manages the transactions.
 
 The `txManager` bean in this case is of the `HibernateTransactionManager` type. In the
 same way as the `DataSourceTransactionManager` needs a reference to the `DataSource`, the
@@ -431,7 +378,7 @@ example declares `sessionFactory` and `txManager` beans:
 	</bean>
 ----
 
-If you use Hibernate and Java EE container-managed JTA transactions, you should use the
+If you use Hibernate and Jakarta EE container-managed JTA transactions, you should use the
 same `JtaTransactionManager` as in the previous JTA example for JDBC, as the following
 example shows. Also, it is recommended to make Hibernate aware of JTA through its
 transaction coordinator and possibly also its connection release mode configuration:
@@ -498,7 +445,7 @@ relevant `TransactionManager`.
 [[tx-resource-synchronization-high]]
 ==== High-level Synchronization Approach
 
-The preferred approach is to use Spring's highest-level template based persistence
+The preferred approach is to use Spring's highest-level template-based persistence
 integration APIs or to use native ORM APIs with transaction-aware factory beans or
 proxies for managing the native resource factories. These transaction-aware solutions
 internally handle resource creation and reuse, cleanup, optional transaction
@@ -555,7 +502,7 @@ behind the scenes and you need not write any special code.
 At the very lowest level exists the `TransactionAwareDataSourceProxy` class. This is a
 proxy for a target `DataSource`, which wraps the target `DataSource` to add awareness of
 Spring-managed transactions. In this respect, it is similar to a transactional JNDI
-`DataSource`, as provided by a Java EE server.
+`DataSource`, as provided by a Jakarta EE server.
 
 You should almost never need or want to use this class, except when existing
 code must be called and passed a standard JDBC `DataSource` interface implementation. In
@@ -888,9 +835,9 @@ that test drives the configuration shown earlier:
 	public final class Boot {
 
 		public static void main(final String[] args) throws Exception {
-			ApplicationContext ctx = new ClassPathXmlApplicationContext("context.xml", Boot.class);
-			FooService fooService = (FooService) ctx.getBean("fooService");
-			fooService.insertFoo (new Foo());
+			ApplicationContext ctx = new ClassPathXmlApplicationContext("context.xml");
+			FooService fooService = ctx.getBean(FooService.class);
+			fooService.insertFoo(new Foo());
 		}
 	}
 ----
@@ -1350,8 +1297,8 @@ source code puts the declarations much closer to the affected code. There is not
 danger of undue coupling, because code that is meant to be used transactionally is
 almost always deployed that way anyway.
 
-NOTE: The standard `javax.transaction.Transactional` annotation is also supported as a
-drop-in replacement to Spring's own annotation. Please refer to JTA 1.2 documentation
+NOTE: The standard `jakarta.transaction.Transactional` annotation is also supported as
+a drop-in replacement to Spring's own annotation. Please refer to the JTA documentation
 for more details.
 
 The ease-of-use afforded by the use of the `@Transactional` annotation is best
@@ -1365,19 +1312,23 @@ Consider the following class definition:
 	@Transactional
 	public class DefaultFooService implements FooService {
 
-		Foo getFoo(String fooName) {
+		@Override
+		public Foo getFoo(String fooName) {
 			// ...
 		}
 
-		Foo getFoo(String fooName, String barName) {
+		@Override
+		public Foo getFoo(String fooName, String barName) {
 			// ...
 		}
 
-		void insertFoo(Foo foo) {
+		@Override
+		public void insertFoo(Foo foo) {
 			// ...
 		}
 
-		void updateFoo(Foo foo) {
+		@Override
+		public void updateFoo(Foo foo) {
 			// ...
 		}
 	}
@@ -1407,11 +1358,13 @@ Consider the following class definition:
 	}
 ----
 
-Used at the class level as above, the annotation indicates a default for all methods
-of the declaring class (as well as its subclasses). Alternatively, each method can
-get annotated individually. Note that a class-level annotation does not apply to
-ancestor classes up the class hierarchy; in such a scenario, methods need to be
-locally redeclared in order to participate in a subclass-level annotation.
+Used at the class level as above, the annotation indicates a default for all methods of
+the declaring class (as well as its subclasses). Alternatively, each method can be
+annotated individually. See <<transaction-declarative-annotations-method-visibility>> for
+further details on which methods Spring considers transactional. Note that a class-level
+annotation does not apply to ancestor classes up the class hierarchy; in such a scenario,
+inherited methods need to be locally redeclared in order to participate in a
+subclass-level annotation.
 
 When a POJO class such as the one above is defined as a bean in a Spring context,
 you can make the bean instance transactional through an `@EnableTransactionManagement`
@@ -1441,7 +1394,8 @@ In XML configuration, the `<tx:annotation-driven/>` tag provides similar conveni
 		<bean id="fooService" class="x.y.service.DefaultFooService"/>
 
 		<!-- enable the configuration of transactional behavior based on annotations -->
-		<tx:annotation-driven transaction-manager="txManager"/><!-- a TransactionManager is still required --> <1>
+		<!-- a TransactionManager is still required -->
+		<tx:annotation-driven transaction-manager="txManager"/> <1>
 
 		<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 			<!-- (this dependency is defined somewhere else) -->
@@ -1456,7 +1410,7 @@ In XML configuration, the `<tx:annotation-driven/>` tag provides similar conveni
 
 
 TIP: You can omit the `transaction-manager` attribute in the `<tx:annotation-driven/>`
-tag if the bean name of the `TransactionManager` that you want to wire in has the name,
+tag if the bean name of the `TransactionManager` that you want to wire in has the name
 `transactionManager`. If the `TransactionManager` bean that you want to dependency-inject
 has any other name, you have to use the `transaction-manager` attribute, as in the
 preceding example.
@@ -1471,19 +1425,23 @@ programming arrangements as the following listing shows:
 	@Transactional
 	public class DefaultFooService implements FooService {
 
-		Publisher<Foo> getFoo(String fooName) {
+		@Override
+		public Publisher<Foo> getFoo(String fooName) {
 			// ...
 		}
 
-		Mono<Foo> getFoo(String fooName, String barName) {
+		@Override
+		public Mono<Foo> getFoo(String fooName, String barName) {
 			// ...
 		}
 
-		Mono<Void> insertFoo(Foo foo) {
+		@Override
+		public Mono<Void> insertFoo(Foo foo) {
 			// ...
 		}
 
-		Mono<Void> updateFoo(Foo foo) {
+		@Override
+		public Mono<Void> updateFoo(Foo foo) {
 			// ...
 		}
 	}
@@ -1518,17 +1476,47 @@ Reactive Streams cancellation signals. See the <<tx-prog-operator-cancel>> secti
 "Using the TransactionOperator" for more details.
 
 
+[[transaction-declarative-annotations-method-visibility]]
 .Method visibility and `@Transactional`
-****
-When you use proxies, you should apply the `@Transactional` annotation only to methods
-with public visibility. If you do annotate protected, private or package-visible
-methods with the `@Transactional` annotation, no error is raised, but the annotated
-method does not exhibit the configured transactional settings. If you need to annotate
-non-public methods, consider using AspectJ (described later).
-****
+[NOTE]
+====
+When you use transactional proxies with Spring's standard configuration, you should apply
+the `@Transactional` annotation only to methods with `public` visibility. If you do
+annotate `protected`, `private`, or package-visible methods with the `@Transactional`
+annotation, no error is raised, but the annotated method does not exhibit the configured
+transactional settings. If you need to annotate non-public methods, consider the tip in
+the following paragraph for class-based proxies or consider using AspectJ compile-time or
+load-time weaving (described later).
+
+When using `@EnableTransactionManagement` in a `@Configuration` class, `protected` or
+package-visible methods can also be made transactional for class-based proxies by
+registering a custom `transactionAttributeSource` bean like in the following example.
+Note, however, that transactional methods in interface-based proxies must always be
+`public` and defined in the proxied interface.
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	/**
+	 * Register a custom AnnotationTransactionAttributeSource with the
+	 * publicMethodsOnly flag set to false to enable support for
+	 * protected and package-private @Transactional methods in
+	 * class-based proxies.
+	 *
+	 * @see ProxyTransactionManagementConfiguration#transactionAttributeSource()
+	 */
+	@Bean
+	TransactionAttributeSource transactionAttributeSource() {
+		return new AnnotationTransactionAttributeSource(false);
+	}
+----
+
+The _Spring TestContext Framework_ supports non-private `@Transactional` test methods by
+default. See <<testing.adoc#testcontext-tx,Transaction Management>> in the testing
+chapter for examples.
+====
 
 You can apply the `@Transactional` annotation to an interface definition, a method
-on an interface, a class definition, or a public method on a class. However, the
+on an interface, a class definition, or a method on a class. However, the
 mere presence of the `@Transactional` annotation is not enough to activate the
 transactional behavior. The `@Transactional` annotation is merely metadata that can
 be consumed by some runtime infrastructure that is `@Transactional`-aware and that
@@ -1550,12 +1538,13 @@ the proxy are intercepted. This means that self-invocation (in effect, a method 
 the target object calling another method of the target object) does not lead to an actual
 transaction at runtime even if the invoked method is marked with `@Transactional`. Also,
 the proxy must be fully initialized to provide the expected behavior, so you should not
-rely on this feature in your initialization code (that is, `@PostConstruct`).
+rely on this feature in your initialization code -- for example, in a `@PostConstruct`
+method.
 
-Consider using of AspectJ mode (see the `mode` attribute in the following table) if you
-expect self-invocations to be wrapped with transactions as well. In this case, there no
-proxy in the first place. Instead, the target class is woven (that is, its byte code is
-modified) to turn `@Transactional` into runtime behavior on any kind of method.
+Consider using AspectJ mode (see the `mode` attribute in the following table) if you
+expect self-invocations to be wrapped with transactions as well. In this case, there is
+no proxy in the first place. Instead, the target class is woven (that is, its byte code
+is modified) to support `@Transactional` runtime behavior on any kind of method.
 
 [[tx-annotation-driven-settings]]
 .Annotation driven transaction settings
@@ -1608,14 +1597,14 @@ NOTE: The `proxy-target-class` attribute controls what type of transactional pro
 created for classes annotated with the `@Transactional` annotation. If
 `proxy-target-class` is set to `true`, class-based proxies are created. If
 `proxy-target-class` is `false` or if the attribute is omitted, standard JDK
-interface-based proxies are created. (See <<core.adoc#aop-proxying>> for a discussion of the
-different proxy types.)
+interface-based proxies are created. (See <<core.adoc#aop-proxying, Proxying Mechanisms>>
+for a discussion of the different proxy types.)
 
-NOTE: `@EnableTransactionManagement` and `<tx:annotation-driven/>` looks for
+NOTE: `@EnableTransactionManagement` and `<tx:annotation-driven/>` look for
 `@Transactional` only on beans in the same application context in which they are defined.
 This means that, if you put annotation-driven configuration in a `WebApplicationContext`
 for a `DispatcherServlet`, it checks for `@Transactional` beans only in your controllers
-and not your services. See <<web.adoc#mvc-servlet, MVC>> for more information.
+and not in your services. See <<web.adoc#mvc-servlet, MVC>> for more information.
 
 The most derived location takes precedence when evaluating the transactional settings
 for a method. In the case of the following example, the `DefaultFooService` class is
@@ -1663,8 +1652,8 @@ precedence over the transactional settings defined at the class level.
 ===== `@Transactional` Settings
 
 The `@Transactional` annotation is metadata that specifies that an interface, class,
-or method must have transactional semantics (for example, "`start a brand new read-only
-transaction when this method is invoked, suspending any existing transaction`").
+or method must have transactional semantics (for example, "start a brand new read-only
+transaction when this method is invoked, suspending any existing transaction").
 The default `@Transactional` settings are as follows:
 
 * The propagation setting is `PROPAGATION_REQUIRED.`
@@ -1889,7 +1878,7 @@ rollback rules, timeouts, and other features.
 ==== Transaction Propagation
 
 This section describes some semantics of transaction propagation in Spring. Note
-that this section is not an introduction to transaction propagation proper. Rather, it
+that this section is not a proper introduction to transaction propagation. Rather, it
 details some of the semantics regarding transaction propagation in Spring.
 
 In Spring-managed transactions, be aware of the difference between physical and
@@ -2132,7 +2121,7 @@ declarative approach:
 
 		<aop:config>
 			<aop:pointcut id="entryPointMethod" expression="execution(* x.y..*Service.*(..))"/>
-			<!-- runs after the profiling advice (c.f. the order attribute) -->
+			<!-- runs after the profiling advice (cf. the order attribute) -->
 
 			<aop:advisor advice-ref="txAdvice" pointcut-ref="entryPointMethod" order="2"/>
 			<!-- order value is higher than the profiling aspect -->
@@ -2175,7 +2164,7 @@ container by means of an AspectJ aspect. To do so, first annotate your classes
 (and optionally your classes' methods) with the `@Transactional` annotation,
 and then link (weave) your application with the
 `org.springframework.transaction.aspectj.AnnotationTransactionAspect` defined in the
-`spring-aspects.jar` file. You must also configure The aspect with a transaction
+`spring-aspects.jar` file. You must also configure the aspect with a transaction
 manager. You can use the Spring Framework's IoC container to take care of
 dependency-injecting the aspect. The simplest way to configure the transaction
 management aspect is to use the `<tx:annotation-driven/>` element and specify the `mode`
@@ -2596,8 +2585,7 @@ following example shows how to do so:
 	TransactionStatus status = txManager.getTransaction(def);
 	try {
 		// put your business logic here
-	}
-	catch (MyException ex) {
+	} catch (MyException ex) {
 		txManager.rollback(status);
 		throw ex;
 	}
@@ -2762,7 +2750,7 @@ supporting transaction suspension. See the
 {api-spring-framework}/transaction/jta/JtaTransactionManager.html[`JtaTransactionManager`]
 javadoc for details.
 
-Spring's `JtaTransactionManager` is the standard choice to run on Java EE application
+Spring's `JtaTransactionManager` is the standard choice to run on Jakarta EE application
 servers and is known to work on all common servers. Advanced functionality, such as
 transaction suspension, works on many servers as well (including GlassFish, JBoss and
 Geronimo) without any special configuration required. However, for fully supported
@@ -3120,7 +3108,7 @@ class and the related support classes. See <<jdbc-core>>, <<jdbc-advanced-jdbc>>
 
 * `datasource`: The `org.springframework.jdbc.datasource` package contains a utility class for easy
 `DataSource` access and various simple `DataSource` implementations that you can use for
-testing and running unmodified JDBC code outside of a Java EE container. A subpackage
+testing and running unmodified JDBC code outside of a Jakarta EE container. A subpackage
 named `org.springfamework.jdbc.datasource.embedded` provides support for creating
 embedded databases by using Java database engines, such as HSQL, H2, and Derby. See
 <<jdbc-connections>> and <<jdbc-embedded-database-support>>.
@@ -3306,7 +3294,7 @@ For example, it may be better to write the preceding code snippet as follows:
 	};
 
 	public List<Actor> findAllActors() {
-		return this.jdbcTemplate.query( "select first_name, last_name from t_actor", actorRowMapper);
+		return this.jdbcTemplate.query("select first_name, last_name from t_actor", actorRowMapper);
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -3616,7 +3604,7 @@ variable and the corresponding value that is plugged into the `namedParameters`
 variable (of type `MapSqlParameterSource`).
 
 Alternatively, you can pass along named parameters and their corresponding values to a
-`NamedParameterJdbcTemplate` instance by using the `Map`-based style.The remaining
+`NamedParameterJdbcTemplate` instance by using the `Map`-based style. The remaining
 methods exposed by the `NamedParameterJdbcOperations` and implemented by the
 `NamedParameterJdbcTemplate` class follow a similar pattern and are not covered here.
 
@@ -3754,7 +3742,7 @@ See also <<jdbc-JdbcTemplate-idioms>> for guidelines on using the
 ==== Using `SQLExceptionTranslator`
 
 `SQLExceptionTranslator` is an interface to be implemented by classes that can translate
-between `SQLExceptions` and Spring's own `org.springframework.dao.DataAccessException`,
+between ``SQLException``s and Spring's own `org.springframework.dao.DataAccessException`,
 which is agnostic in regard to data access strategy. Implementations can be generic (for
 example, using SQLState codes for JDBC) or proprietary (for example, using Oracle error
 codes) for greater precision.
@@ -3810,9 +3798,9 @@ You can extend `SQLErrorCodeSQLExceptionTranslator`, as the following example sh
 
 		override fun customTranslate(task: String, sql: String?, sqlEx: SQLException): DataAccessException? {
 			if (sqlEx.errorCode == -12345) {
-					return DeadlockLoserDataAccessException(task, sqlEx)
-				}
-				return null;
+				return DeadlockLoserDataAccessException(task, sqlEx)
+			}
+			return null
 		}
 	}
 ----
@@ -4045,7 +4033,7 @@ The following example updates a column for a certain primary key:
 
 In the preceding example,
 an SQL statement has placeholders for row parameters. You can pass the parameter values
-in as varargs or ,alternatively, as an array of objects. Thus, you should explicitly wrap primitives
+in as varargs or, alternatively, as an array of objects. Thus, you should explicitly wrap primitives
 in the primitive wrapper classes, or you should use auto-boxing.
 
 
@@ -4261,7 +4249,7 @@ The `DriverManagerDataSource` class is an implementation of the standard `DataSo
 interface that configures a plain JDBC driver through bean properties and returns a new
 `Connection` every time.
 
-This implementation is useful for test and stand-alone environments outside of a Java EE
+This implementation is useful for test and stand-alone environments outside of a Jakarta EE
 container, either as a `DataSource` bean in a Spring IoC container or in conjunction
 with a simple JNDI environment. Pool-assuming `Connection.close()` calls
 close the connection, so any `DataSource`-aware persistence code should work. However,
@@ -4275,7 +4263,7 @@ environment, that it is almost always preferable to use such a connection pool o
 
 `TransactionAwareDataSourceProxy` is a proxy for a target `DataSource`. The proxy wraps that
 target `DataSource` to add awareness of Spring-managed transactions. In this respect, it
-is similar to a transactional JNDI `DataSource`, as provided by a Java EE server.
+is similar to a transactional JNDI `DataSource`, as provided by a Jakarta EE server.
 
 NOTE: It is rarely desirable to use this class, except when already existing code must be
 called and passed a standard JDBC `DataSource` interface implementation. In this case,
@@ -4297,7 +4285,7 @@ specified data source to the currently executing thread, potentially allowing fo
 thread connection per data source.
 
 Application code is required to retrieve the JDBC connection through
-`DataSourceUtils.getConnection(DataSource)` instead of Java EE's standard
+`DataSourceUtils.getConnection(DataSource)` instead of Jakarta EE's standard
 `DataSource.getConnection`. It throws unchecked `org.springframework.dao` exceptions
 instead of checked `SQLExceptions`. All framework classes (such as `JdbcTemplate`) use this
 strategy implicitly. If not used with this transaction manager, the lookup strategy
@@ -4514,13 +4502,14 @@ While this usually works well, there is a potential for issues (for example, wit
 `null` values). Spring, by default, calls `ParameterMetaData.getParameterType` in such a
 case, which can be expensive with your JDBC driver. You should use a recent driver
 version and consider setting the `spring.jdbc.getParameterType.ignore` property to `true`
-(as a JVM system property or in a `spring.properties` file in the root of your classpath)
-if you encounter a performance issue (as reported on Oracle 12c, JBoss and PostgreSQL).
+(as a JVM system property or via the
+<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism) if you encounter
+a performance issue (as reported on Oracle 12c, JBoss, and PostgreSQL).
 
 Alternatively, you might consider specifying the corresponding JDBC types explicitly,
-either through a 'BatchPreparedStatementSetter' (as shown earlier), through an explicit type
-array given to a 'List<Object[]>' based call, through 'registerSqlType' calls on a
-custom 'MapSqlParameterSource' instance, or through a 'BeanPropertySqlParameterSource'
+either through a `BatchPreparedStatementSetter` (as shown earlier), through an explicit type
+array given to a `List<Object[]>` based call, through `registerSqlType` calls on a
+custom `MapSqlParameterSource` instance, or through a `BeanPropertySqlParameterSource`
 that derives the SQL type from the Java-declared property type even for a null value.
 ====
 
@@ -4587,7 +4576,7 @@ The following example shows a batch update that uses a batch size of 100:
 	}
 ----
 
-The batch update methods for this call returns an array of `int` arrays that contains an
+The batch update method for this call returns an array of `int` arrays that contains an
 array entry for each batch with an array of the number of affected rows for each update.
 The top-level array's length indicates the number of batches run, and the second level
 array's length indicates the number of updates in that batch. The number of updates in
@@ -5183,11 +5172,9 @@ as the following example shows:
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcCall funcGetActorName;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 			jdbcTemplate.setResultsMapCaseInsensitive(true);
 			this.funcGetActorName = new SimpleJdbcCall(jdbcTemplate)
@@ -5453,7 +5440,7 @@ example shows such a method:
 The `SqlUpdate` class encapsulates an SQL update. As with a query, an update object is
 reusable, and, as with all `RdbmsOperation` classes, an update can have parameters and is
 defined in SQL. This class provides a number of `update(..)` methods analogous to the
-`execute(..)` methods of query objects. The `SQLUpdate` class is concrete. It can be
+`execute(..)` methods of query objects. The `SqlUpdate` class is concrete. It can be
 subclassed -- for example, to add a custom update method.
 However, you do not have to subclass the `SqlUpdate`
 class, since it can easily be parameterized by setting SQL and declaring parameters.
@@ -5506,10 +5493,10 @@ The following example creates a custom update method named `execute`:
 		}
 
 		/**
-		* @param id for the Customer to be updated
-		* @param rating the new value for credit rating
-		* @return number of rows updated
-		*/
+		 * @param id for the Customer to be updated
+		 * @param rating the new value for credit rating
+		 * @return number of rows updated
+		 */
 		fun execute(id: Int, rating: Int): Int {
 			return update(rating, id)
 		}
@@ -5520,10 +5507,8 @@ The following example creates a custom update method named `execute`:
 [[jdbc-StoredProcedure]]
 ==== Using `StoredProcedure`
 
-The `StoredProcedure` class is a superclass for object abstractions of RDBMS stored
-procedures. This class is `abstract`, and its various `execute(..)` methods have
-`protected` access, preventing use other than through a subclass that offers tighter
-typing.
+The `StoredProcedure` class is an `abstract` superclass for object abstractions of RDBMS
+stored procedures.
 
 The inherited `sql` property is the name of the stored procedure in the RDBMS.
 
@@ -6042,8 +6027,8 @@ limit is 1000.
 
 In addition to the primitive values in the value list, you can create a `java.util.List`
 of object arrays. This list can support multiple expressions being defined for the `in`
-clause, such as `select * from T_ACTOR where (id, last_name) in \((1, 'Johnson'), (2,
-'Harrop'\))`. This, of course, requires that your database supports this syntax.
+clause, such as `+++select * from T_ACTOR where (id, last_name) in ((1, 'Johnson'), (2,
+'Harrop'))+++`. This, of course, requires that your database supports this syntax.
 
 
 [[jdbc-complex-types]]
@@ -7105,7 +7090,7 @@ databases, you may want multiple `DatabaseClient` instances, which requires mult
 instances.
 
 [[r2dbc-auto-generated-keys]]
-== Retrieving Auto-generated Keys
+=== Retrieving Auto-generated Keys
 
 `INSERT` statements may generate keys when inserting rows into a table
 that defines an auto-increment or identity column. To get full control over
@@ -7399,7 +7384,9 @@ examples (one for Java configuration and one for XML configuration) show how to 
 ----
 	@Repository
 	class ProductDaoImpl : ProductDao {
+
 		// class body here...
+
 	}
 ----
 
@@ -7439,7 +7426,7 @@ cover the other ORM technologies and show brief examples.
 
 NOTE: As of Spring Framework 5.3, Spring requires Hibernate ORM 5.2+ for Spring's
 `HibernateJpaVendorAdapter` as well as for a native Hibernate `SessionFactory` setup.
-Is is strongly recommended to go with Hibernate ORM 5.4 for a newly started application.
+It is strongly recommended to go with Hibernate ORM 5.4 for a newly started application.
 For use with `HibernateJpaVendorAdapter`, Hibernate Search needs to be upgraded to 5.11.6.
 
 
@@ -7822,7 +7809,7 @@ resource definitions in the container or locally within the application is mainl
 matter of the transaction strategy that you use. Compared to a Spring-defined local
 `SessionFactory`, a manually registered JNDI `SessionFactory` does not provide any
 benefits. Deploying a `SessionFactory` through Hibernate's JCA connector provides the
-added value of participating in the Java EE server's management infrastructure, but does
+added value of participating in the Jakarta EE server's management infrastructure, but does
 not add actual value beyond that.
 
 Spring's transaction support is not bound to a container. When configured with any strategy
@@ -7832,11 +7819,7 @@ local transaction support is a lightweight and powerful alternative to JTA. When
 local EJB stateless session beans to drive transactions, you depend both on an EJB
 container and on JTA, even if you access only a single database and use only stateless
 session beans to provide declarative transactions through container-managed
-transactions. Direct use of JTA programmatically also requires a Java EE environment.
-JTA does not involve only container dependencies in terms of JTA itself and of
-JNDI `DataSource` instances. For non-Spring, JTA-driven Hibernate transactions, you have
-to use the Hibernate JCA connector or extra Hibernate transaction code with the
-`TransactionManagerLookup` configured for proper JVM-level caching.
+transactions. Direct use of JTA programmatically also requires a Jakarta EE environment.
 
 Spring-driven transactions can work as well with a locally defined Hibernate
 `SessionFactory` as they do with a local JDBC `DataSource`, provided they access a
@@ -7844,12 +7827,7 @@ single database. Thus, you need only use Spring's JTA transaction strategy when 
 have distributed transaction requirements. A JCA connector requires container-specific
 deployment steps, and (obviously) JCA support in the first place. This configuration
 requires more work than deploying a simple web application with local resource
-definitions and Spring-driven transactions. Also, you often need the Enterprise Edition
-of your container if you use, for example, WebLogic Express, which does not
-provide JCA. A Spring application with local resources and transactions that span one
-single database works in any Java EE web container (without JTA, JCA, or EJB), such as
-Tomcat, Resin, or even plain Jetty. Additionally, you can easily reuse such a middle
-tier in desktop applications or test suites.
+definitions and Spring-driven transactions.
 
 All things considered, if you do not use EJBs, stick with local `SessionFactory` setup
 and Spring's `HibernateTransactionManager` or `JtaTransactionManager`. You get all of
@@ -7970,18 +7948,18 @@ persistence unit name. The following XML example configures such a bean:
 This form of JPA deployment is the simplest and the most limited. You cannot refer to an
 existing JDBC `DataSource` bean definition, and no support for global transactions
 exists. Furthermore, weaving (byte-code transformation) of persistent classes is
-provider-specific, often requiring a specific JVM agent to specified on startup. This
+provider-specific, often requiring a specific JVM agent to be specified on startup. This
 option is sufficient only for stand-alone applications and test environments, for which
 the JPA specification is designed.
 
 [[orm-jpa-setup-jndi]]
 ===== Obtaining an EntityManagerFactory from JNDI
 
-You can use this option when deploying to a Java EE server. Check your server's documentation
+You can use this option when deploying to a Jakarta EE server. Check your server's documentation
 on how to deploy a custom JPA provider into your server, allowing for a different
 provider than the server's default.
 
-Obtaining an `EntityManagerFactory` from JNDI (for example in a Java EE environment),
+Obtaining an `EntityManagerFactory` from JNDI (for example in a Jakarta EE environment),
 is a matter of changing the XML configuration, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -7991,13 +7969,13 @@ is a matter of changing the XML configuration, as the following example shows:
 	</beans>
 ----
 
-This action assumes standard Java EE bootstrapping. The Java EE server auto-detects
+This action assumes standard Jakarta EE bootstrapping. The Jakarta EE server auto-detects
 persistence units (in effect, `META-INF/persistence.xml` files in application jars) and
-`persistence-unit-ref` entries in the Java EE deployment descriptor (for example,
+`persistence-unit-ref` entries in the Jakarta EE deployment descriptor (for example,
 `web.xml`) and defines environment naming context locations for those persistence units.
 
 In such a scenario, the entire persistence unit deployment, including the weaving
-(byte-code transformation) of persistent classes, is up to the Java EE server. The JDBC
+(byte-code transformation) of persistent classes, is up to the Jakarta EE server. The JDBC
 `DataSource` is defined through a JNDI location in the `META-INF/persistence.xml` file.
 `EntityManager` transactions are integrated with the server's JTA subsystem. Spring merely
 uses the obtained `EntityManagerFactory`, passing it on to application objects through
@@ -8069,12 +8047,12 @@ so on. However, it also imposes requirements on the runtime environment, such as
 availability of a weaving-capable class loader if the persistence provider demands
 byte-code transformation.
 
-This option may conflict with the built-in JPA capabilities of a Java EE server. In a
-full Java EE environment, consider obtaining your `EntityManagerFactory` from JNDI.
+This option may conflict with the built-in JPA capabilities of a Jakarta EE server. In a
+full Jakarta EE environment, consider obtaining your `EntityManagerFactory` from JNDI.
 Alternatively, specify a custom `persistenceXmlLocation` on your
 `LocalContainerEntityManagerFactoryBean` definition (for example,
 META-INF/my-persistence.xml) and include only a descriptor with that name in your
-application jar files. Because the Java EE server looks only for default
+application jar files. Because the Jakarta EE server looks only for default
 `META-INF/persistence.xml` files, it ignores such custom persistence units and, hence,
 avoids conflicts with a Spring-driven JPA setup upfront. (This applies to Resin 3.1, for
 example.)
@@ -8105,7 +8083,7 @@ more insight regarding the `LoadTimeWeaver` implementations and their setup, eit
 generic or customized to various platforms (such as Tomcat, JBoss and WebSphere).
 
 As described in <<core.adoc#aop-aj-ltw-spring, Spring configuration>>, you can configure
-a context-wide `LoadTimeWeaver` by using the `@EnableLoadTimeWeaving` annotation of the
+a context-wide `LoadTimeWeaver` by using the `@EnableLoadTimeWeaving` annotation or the
 `context:load-time-weaver` XML element. Such a global weaver is automatically picked up
 by all JPA `LocalContainerEntityManagerFactoryBean` instances. The following example
 shows the preferred way of setting up a load-time weaver, delivering auto-detection
@@ -8356,7 +8334,7 @@ protected, or private) does not matter.
 
 What about class-level annotations?
 
-On the Java EE platform, they are used for dependency declaration and not for resource
+On the Jakarta EE platform, they are used for dependency declaration and not for resource
 injection.
 ****
 
@@ -8429,13 +8407,13 @@ more details of its operations and how they are used within Spring's JPA support
 ==== Setting up JPA with JTA Transaction Management
 
 As an alternative to `JpaTransactionManager`, Spring also allows for multi-resource
-transaction coordination through JTA, either in a Java EE environment or with a
+transaction coordination through JTA, either in a Jakarta EE environment or with a
 stand-alone transaction coordinator, such as Atomikos. Aside from choosing Spring's
 `JtaTransactionManager` instead of `JpaTransactionManager`, you need to take few further
 steps:
 
 * The underlying JDBC connection pools need to be XA-capable and be integrated with
-your transaction coordinator. This is usually straightforward in a Java EE environment,
+your transaction coordinator. This is usually straightforward in a Jakarta EE environment,
 exposing a different kind of `DataSource` through JNDI. See your application server
 documentation for details. Analogously, a standalone transaction coordinator usually
 comes with special XA-integrated `DataSource` variants. Again, check its documentation.
@@ -8567,8 +8545,7 @@ the two Spring interfaces used for this purpose.
 Spring abstracts all marshalling operations behind the
 `org.springframework.oxm.Marshaller` interface, the main method of which follows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Marshaller {
 
@@ -8578,22 +8555,6 @@ Spring abstracts all marshalling operations behind the
 		void marshal(Object graph, Result result) throws XmlMappingException, IOException;
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Marshaller {
-
-		/**
-		* Marshal the object graph with the given root into the provided Result.
-		*/
-		@Throws(XmlMappingException::class, IOException::class)
-		fun marshal(
-				graph: Any,
-				result: Result
-		)
-	}
-----
-
 
 The `Marshaller` interface has one main method, which marshals the given object to a
 given `javax.xml.transform.Result`. The result is a tagging interface that basically
@@ -8627,8 +8588,7 @@ to determine how your O-X technology manages this.
 Similar to the `Marshaller`, we have the `org.springframework.oxm.Unmarshaller`
 interface, which the following listing shows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Unmarshaller {
 
@@ -8636,18 +8596,6 @@ interface, which the following listing shows:
 		 * Unmarshal the given provided Source into an object graph.
 		 */
 		Object unmarshal(Source source) throws XmlMappingException, IOException;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Unmarshaller {
-
-		/**
-		* Unmarshal the given provided Source into an object graph.
-		*/
-		@Throws(XmlMappingException::class, IOException::class)
-		fun unmarshal(source: Source): Any
 	}
 ----
 

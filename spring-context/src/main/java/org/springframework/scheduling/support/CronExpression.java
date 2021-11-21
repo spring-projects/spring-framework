@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,9 @@ public final class CronExpression {
 			CronField daysOfWeek,
 			String expression) {
 
+		// reverse order, to make big changes first
 		// to make sure we end up at 0 nanos, we add an extra field
-		this.fields = new CronField[]{CronField.zeroNanos(), seconds, minutes, hours, daysOfMonth, months, daysOfWeek};
+		this.fields = new CronField[]{daysOfWeek, months, daysOfMonth, hours, minutes, seconds, CronField.zeroNanos()};
 		this.expression = expression;
 	}
 
@@ -170,7 +171,6 @@ public final class CronExpression {
 	 * <li>{@code "@daily"} (or {@code "@midnight"}) to run once a day, i.e. {@code "0 0 0 * * *"},</li>
 	 * <li>{@code "@hourly"} to run once an hour, i.e. {@code "0 0 * * * *"}.</li>
 	 * </ul>
-	 *
 	 * @param expression the expression string to parse
 	 * @return the parsed {@code CronExpression} object
 	 * @throws IllegalArgumentException in the expression does not conform to
@@ -199,6 +199,25 @@ public final class CronExpression {
 		catch (IllegalArgumentException ex) {
 			String msg = ex.getMessage() + " in cron expression \"" + expression + "\"";
 			throw new IllegalArgumentException(msg, ex);
+		}
+	}
+
+	/**
+	 * Determine whether the given string represents a valid cron expression.
+	 * @param expression the expression to evaluate
+	 * @return {@code true} if the given expression is a valid cron expression
+	 * @since 5.3.8
+	 */
+	public static boolean isValidExpression(@Nullable String expression) {
+		if (expression == null) {
+			return false;
+		}
+		try {
+			parse(expression);
+			return true;
+		}
+		catch (IllegalArgumentException ex) {
+			return false;
 		}
 	}
 
@@ -261,8 +280,7 @@ public final class CronExpression {
 		if (this == o) {
 			return true;
 		}
-		if (o instanceof CronExpression) {
-			CronExpression other = (CronExpression) o;
+		if (o instanceof CronExpression other) {
 			return Arrays.equals(this.fields, other.fields);
 		}
 		else {

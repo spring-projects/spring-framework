@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package org.springframework.aop.framework;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetClassAware;
@@ -29,6 +31,7 @@ import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.core.DecoratingProxy;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -130,34 +133,23 @@ public abstract class AopProxyUtils {
 				specifiedInterfaces = advised.getProxiedInterfaces();
 			}
 		}
-		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);
-		boolean addAdvised = !advised.isOpaque() && !advised.isInterfaceProxied(Advised.class);
-		boolean addDecoratingProxy = (decoratingProxy && !advised.isInterfaceProxied(DecoratingProxy.class));
-		int nonUserIfcCount = 0;
-		if (addSpringProxy) {
-			nonUserIfcCount++;
+		List<Class<?>> proxiedInterfaces = new ArrayList<>(specifiedInterfaces.length + 3);
+		for (Class<?> ifc : specifiedInterfaces) {
+			// Only non-sealed interfaces are actually eligible for JDK proxying (on JDK 17)
+			if (!ifc.isSealed()) {
+				proxiedInterfaces.add(ifc);
+			}
 		}
-		if (addAdvised) {
-			nonUserIfcCount++;
+		if (!advised.isInterfaceProxied(SpringProxy.class)) {
+			proxiedInterfaces.add(SpringProxy.class);
 		}
-		if (addDecoratingProxy) {
-			nonUserIfcCount++;
+		if (!advised.isOpaque() && !advised.isInterfaceProxied(Advised.class)) {
+			proxiedInterfaces.add(Advised.class);
 		}
-		Class<?>[] proxiedInterfaces = new Class<?>[specifiedInterfaces.length + nonUserIfcCount];
-		System.arraycopy(specifiedInterfaces, 0, proxiedInterfaces, 0, specifiedInterfaces.length);
-		int index = specifiedInterfaces.length;
-		if (addSpringProxy) {
-			proxiedInterfaces[index] = SpringProxy.class;
-			index++;
+		if (decoratingProxy && !advised.isInterfaceProxied(DecoratingProxy.class)) {
+			proxiedInterfaces.add(DecoratingProxy.class);
 		}
-		if (addAdvised) {
-			proxiedInterfaces[index] = Advised.class;
-			index++;
-		}
-		if (addDecoratingProxy) {
-			proxiedInterfaces[index] = DecoratingProxy.class;
-		}
-		return proxiedInterfaces;
+		return ClassUtils.toClassArray(proxiedInterfaces);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.ChannelOperationsId;
 import reactor.netty.http.server.HttpServerResponse;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -125,11 +126,30 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 	@Override
 	protected void touchDataBuffer(DataBuffer buffer) {
 		if (logger.isDebugEnabled()) {
+			if (ReactorServerHttpRequest.reactorNettyRequestChannelOperationsIdPresent) {
+				if (ChannelOperationsIdHelper.touch(buffer, this.response)) {
+					return;
+				}
+			}
 			this.response.withConnection(connection -> {
 				ChannelId id = connection.channel().id();
 				DataBufferUtils.touch(buffer, "Channel id: " + id.asShortText());
 			});
 		}
 	}
+
+
+	private static class ChannelOperationsIdHelper {
+
+		public static boolean touch(DataBuffer dataBuffer, HttpServerResponse response) {
+			if (response instanceof reactor.netty.ChannelOperationsId) {
+				String id = ((ChannelOperationsId) response).asLongText();
+				DataBufferUtils.touch(dataBuffer, "Channel id: " + id);
+				return true;
+			}
+			return false;
+		}
+	}
+
 
 }

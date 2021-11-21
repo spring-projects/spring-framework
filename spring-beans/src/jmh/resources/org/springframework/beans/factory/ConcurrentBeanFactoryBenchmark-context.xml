@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
-<beans>
-
-  <bean id="bean1" class="org.springframework.beans.factory.ConcurrentBeanFactoryTests$ConcurrentBean"
+  <bean id="bean1" class="org.springframework.beans.factory.ConcurrentBeanFactoryBenchmark$ConcurrentBean"
 			scope="prototype">
     <property name="date" value="2004/08/08"/>
   </bean>
 
-  <bean id="bean2" class="org.springframework.beans.factory.ConcurrentBeanFactoryTests$ConcurrentBean"
+  <bean id="bean2" class="org.springframework.beans.factory.ConcurrentBeanFactoryBenchmark$ConcurrentBean"
 			scope="prototype">
     <property name="date" value="2000/02/02"/>
   </bean>

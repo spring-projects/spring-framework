@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  */
 public class TableMetaDataContext {
@@ -279,7 +280,7 @@ public class TableMetaDataContext {
 		insertStatement.append("INSERT INTO ");
 		if (getSchemaName() != null) {
 			insertStatement.append(getSchemaName());
-			insertStatement.append(".");
+			insertStatement.append('.');
 		}
 		insertStatement.append(getTableName());
 		insertStatement.append(" (");
@@ -302,13 +303,17 @@ public class TableMetaDataContext {
 				}
 			}
 			else {
-				throw new InvalidDataAccessApiUsageException("Unable to locate columns for table '" +
-						getTableName() + "' so an insert statement can't be generated");
+				String message = "Unable to locate columns for table '" + getTableName()
+						+ "' so an insert statement can't be generated.";
+				if (isAccessTableColumnMetaData()) {
+					message += " Consider specifying explicit column names -- for example, via SimpleJdbcInsert#usingColumns().";
+				}
+				throw new InvalidDataAccessApiUsageException(message);
 			}
 		}
 		String params = String.join(", ", Collections.nCopies(columnCount, "?"));
 		insertStatement.append(params);
-		insertStatement.append(")");
+		insertStatement.append(')');
 		return insertStatement.toString();
 	}
 
@@ -358,18 +363,6 @@ public class TableMetaDataContext {
 	 */
 	public boolean isGetGeneratedKeysSimulated() {
 		return obtainMetaDataProvider().isGetGeneratedKeysSimulated();
-	}
-
-	/**
-	 * Does this database support a simple query to retrieve generated keys
-	 * when the JDBC 3.0 feature is not supported:
-	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
-	 * @deprecated as of 4.3.15, in favor of {@link #getSimpleQueryForGetGeneratedKey}
-	 */
-	@Deprecated
-	@Nullable
-	public String getSimulationQueryForGetGeneratedKey(String tableName, String keyColumnName) {
-		return getSimpleQueryForGetGeneratedKey(tableName, keyColumnName);
 	}
 
 	/**

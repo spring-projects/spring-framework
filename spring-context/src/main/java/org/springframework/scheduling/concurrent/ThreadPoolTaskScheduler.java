@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,8 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @since 3.0
  * @see #setPoolSize
  * @see #setRemoveOnCancelPolicy
+ * @see #setContinueExistingPeriodicTasksAfterShutdownPolicy
+ * @see #setExecuteExistingDelayedTasksAfterShutdownPolicy
  * @see #setThreadFactory
  * @see #setErrorHandler
  */
@@ -63,6 +65,10 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	private volatile int poolSize = 1;
 
 	private volatile boolean removeOnCancelPolicy;
+
+	private volatile boolean continueExistingPeriodicTasksAfterShutdownPolicy;
+
+	private volatile boolean executeExistingDelayedTasksAfterShutdownPolicy = true;
 
 	@Nullable
 	private volatile ErrorHandler errorHandler;
@@ -84,26 +90,54 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	 */
 	public void setPoolSize(int poolSize) {
 		Assert.isTrue(poolSize > 0, "'poolSize' must be 1 or higher");
-		this.poolSize = poolSize;
 		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
 			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setCorePoolSize(poolSize);
 		}
+		this.poolSize = poolSize;
 	}
 
 	/**
 	 * Set the remove-on-cancel mode on {@link ScheduledThreadPoolExecutor}.
 	 * <p>Default is {@code false}. If set to {@code true}, the target executor will be
-	 * switched into remove-on-cancel mode (if possible, with a soft fallback otherwise).
+	 * switched into remove-on-cancel mode (if possible).
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
+	 * @see ScheduledThreadPoolExecutor#setRemoveOnCancelPolicy
 	 */
-	public void setRemoveOnCancelPolicy(boolean removeOnCancelPolicy) {
-		this.removeOnCancelPolicy = removeOnCancelPolicy;
+	public void setRemoveOnCancelPolicy(boolean flag) {
 		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
-			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(removeOnCancelPolicy);
+			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(flag);
 		}
-		else if (removeOnCancelPolicy && this.scheduledExecutor != null) {
-			logger.debug("Could not apply remove-on-cancel policy - not a ScheduledThreadPoolExecutor");
+		this.removeOnCancelPolicy = flag;
+	}
+
+	/**
+	 * Set whether to continue existing periodic tasks even when this executor has been shutdown.
+	 * <p>Default is {@code false}. If set to {@code true}, the target executor will be
+	 * switched into continuing periodic tasks (if possible).
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
+	 * @since 5.3.9
+	 * @see ScheduledThreadPoolExecutor#setContinueExistingPeriodicTasksAfterShutdownPolicy
+	 */
+	public void setContinueExistingPeriodicTasksAfterShutdownPolicy(boolean flag) {
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
+			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setContinueExistingPeriodicTasksAfterShutdownPolicy(flag);
 		}
+		this.continueExistingPeriodicTasksAfterShutdownPolicy = flag;
+	}
+
+	/**
+	 * Set whether to execute existing delayed tasks even when this executor has been shutdown.
+	 * <p>Default is {@code true}. If set to {@code false}, the target executor will be
+	 * switched into dropping remaining tasks (if possible).
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
+	 * @since 5.3.9
+	 * @see ScheduledThreadPoolExecutor#setExecuteExistingDelayedTasksAfterShutdownPolicy
+	 */
+	public void setExecuteExistingDelayedTasksAfterShutdownPolicy(boolean flag) {
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
+			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setExecuteExistingDelayedTasksAfterShutdownPolicy(flag);
+		}
+		this.executeExistingDelayedTasksAfterShutdownPolicy = flag;
 	}
 
 	/**
@@ -135,12 +169,15 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 		this.scheduledExecutor = createExecutor(this.poolSize, threadFactory, rejectedExecutionHandler);
 
-		if (this.removeOnCancelPolicy) {
-			if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
-				((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(true);
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor scheduledPoolExecutor) {
+			if (this.removeOnCancelPolicy) {
+				scheduledPoolExecutor.setRemoveOnCancelPolicy(true);
 			}
-			else {
-				logger.debug("Could not apply remove-on-cancel policy - not a ScheduledThreadPoolExecutor");
+			if (this.continueExistingPeriodicTasksAfterShutdownPolicy) {
+				scheduledPoolExecutor.setContinueExistingPeriodicTasksAfterShutdownPolicy(true);
+			}
+			if (!this.executeExistingDelayedTasksAfterShutdownPolicy) {
+				scheduledPoolExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
 			}
 		}
 
@@ -202,18 +239,6 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	}
 
 	/**
-	 * Return the current setting for the remove-on-cancel mode.
-	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor}.
-	 */
-	public boolean isRemoveOnCancelPolicy() {
-		if (this.scheduledExecutor == null) {
-			// Not initialized yet: return our setting for the time being.
-			return this.removeOnCancelPolicy;
-		}
-		return getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy();
-	}
-
-	/**
 	 * Return the number of currently active threads.
 	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor}.
 	 * @see #getScheduledThreadPoolExecutor()
@@ -225,6 +250,21 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			return 0;
 		}
 		return getScheduledThreadPoolExecutor().getActiveCount();
+	}
+
+	/**
+	 * Return the current setting for the remove-on-cancel mode.
+	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor}.
+	 * @deprecated as of 5.3.9, in favor of direct
+	 * {@link #getScheduledThreadPoolExecutor()} access
+	 */
+	@Deprecated
+	public boolean isRemoveOnCancelPolicy() {
+		if (this.scheduledExecutor == null) {
+			// Not initialized yet: return our setting for the time being.
+			return this.removeOnCancelPolicy;
+		}
+		return getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy();
 	}
 
 

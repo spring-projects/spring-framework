@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,31 +125,6 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	@Nullable
 	public Integer getRawStatusCode() {
-		return this.statusCode;
-	}
-
-	/**
-	 * Set the HTTP status code of the response.
-	 * @param statusCode the HTTP status as an integer value
-	 * @since 5.0.1
-	 * @deprecated as of 5.2.4 in favor of {@link ServerHttpResponse#setRawStatusCode(Integer)}.
-	 */
-	@Deprecated
-	public void setStatusCodeValue(@Nullable Integer statusCode) {
-		if (this.state.get() != State.COMMITTED) {
-			this.statusCode = statusCode;
-		}
-	}
-
-	/**
-	 * Return the HTTP status code of the response.
-	 * @return the HTTP status as an integer value
-	 * @since 5.0.1
-	 * @deprecated as of 5.2.4 in favor of {@link ServerHttpResponse#getRawStatusCode()}.
-	 */
-	@Nullable
-	@Deprecated
-	public Integer getStatusCodeValue() {
 		return this.statusCode;
 	}
 

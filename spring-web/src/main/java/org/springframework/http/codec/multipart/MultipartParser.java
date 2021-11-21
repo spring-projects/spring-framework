@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.http.codec.multipart;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,6 +29,7 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.util.context.Context;
 
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -69,11 +70,14 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 
 	private final AtomicBoolean requestOutstanding = new AtomicBoolean();
 
+	private final Charset headersCharset;
 
-	private MultipartParser(FluxSink<Token> sink, byte[] boundary, int maxHeadersSize) {
+
+	private MultipartParser(FluxSink<Token> sink, byte[] boundary, int maxHeadersSize, Charset headersCharset) {
 		this.sink = sink;
 		this.boundary = boundary;
 		this.maxHeadersSize = maxHeadersSize;
+		this.headersCharset = headersCharset;
 		this.state = new AtomicReference<>(new PreambleState());
 	}
 
@@ -82,15 +86,22 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	 * @param buffers the input buffers
 	 * @param boundary the multipart boundary, as found in the {@code Content-Type} header
 	 * @param maxHeadersSize the maximum buffered header size
+	 * @param headersCharset the charset to use for decoding headers
 	 * @return a stream of parsed tokens
 	 */
-	public static Flux<Token> parse(Flux<DataBuffer> buffers, byte[] boundary, int maxHeadersSize) {
+	public static Flux<Token> parse(Flux<DataBuffer> buffers, byte[] boundary, int maxHeadersSize,
+			Charset headersCharset) {
 		return Flux.create(sink -> {
-			MultipartParser parser = new MultipartParser(sink, boundary, maxHeadersSize);
+			MultipartParser parser = new MultipartParser(sink, boundary, maxHeadersSize, headersCharset);
 			sink.onCancel(parser::onSinkCancel);
 			sink.onRequest(n -> parser.requestBuffer());
 			buffers.subscribe(parser);
 		});
+	}
+
+	@Override
+	public Context currentContext() {
+		return this.sink.currentContext();
 	}
 
 	@Override
@@ -180,7 +191,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 
 
 	/**
-	 * Represents the output of {@link #parse(Flux, byte[], int)}.
+	 * Represents the output of {@link #parse(Flux, byte[], int, Charset)}.
 	 */
 	public abstract static class Token {
 
@@ -331,33 +342,23 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 
 		/**
 		 * First checks whether the multipart boundary leading to this state
-		 * was the final boundary, or whether {@link #maxHeadersSize} is
-		 * exceeded. Then looks for the header-body boundary
-		 * ({@code CR LF CR LF}) in the given buffer. If found, convert
-		 * all buffers collected so far into a {@link HttpHeaders} object
+		 * was the final boundary. Then looks for the header-body boundary
+		 * ({@code CR LF CR LF}) in the given buffer. If found, checks whether
+		 * the size of all header buffers does not exceed {@link #maxHeadersSize},
+		 * converts all buffers collected so far into a {@link HttpHeaders} object
 		 * and changes to {@link BodyState}, passing the remainder of the
-		 * buffer. If the boundary is not found, the buffer is collected.
+		 * buffer. If the boundary is not found, the buffer is collected if
+		 * its size does not exceed {@link #maxHeadersSize}.
 		 */
 		@Override
 		public void onNext(DataBuffer buf) {
-			long prevCount = this.byteCount.get();
-			long count = this.byteCount.addAndGet(buf.readableByteCount());
-			if (prevCount < 2 && count >= 2) {
-				if (isLastBoundary(buf)) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Last boundary found in " + buf);
-					}
-
-					if (changeState(this, DisposedState.INSTANCE, buf)) {
-						emitComplete();
-					}
-					return;
+			if (isLastBoundary(buf)) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Last boundary found in " + buf);
 				}
-			}
-			else if (count > MultipartParser.this.maxHeadersSize) {
+
 				if (changeState(this, DisposedState.INSTANCE, buf)) {
-					emitError(new DataBufferLimitException("Part headers exceeded the memory usage limit of " +
-							MultipartParser.this.maxHeadersSize + " bytes"));
+					emitComplete();
 				}
 				return;
 			}
@@ -366,18 +367,23 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 				if (logger.isTraceEnabled()) {
 					logger.trace("End of headers found @" + endIdx + " in " + buf);
 				}
-				DataBuffer headerBuf = MultipartUtils.sliceTo(buf, endIdx);
-				this.buffers.add(headerBuf);
-				DataBuffer bodyBuf = MultipartUtils.sliceFrom(buf, endIdx);
-				DataBufferUtils.release(buf);
+				long count = this.byteCount.addAndGet(endIdx);
+				if (belowMaxHeaderSize(count)) {
+					DataBuffer headerBuf = MultipartUtils.sliceTo(buf, endIdx);
+					this.buffers.add(headerBuf);
+					DataBuffer bodyBuf = MultipartUtils.sliceFrom(buf, endIdx);
+					DataBufferUtils.release(buf);
 
-				emitHeaders(parseHeaders());
-				// TODO: no need to check result of changeState, no further statements
-				changeState(this, new BodyState(), bodyBuf);
+					emitHeaders(parseHeaders());
+					changeState(this, new BodyState(), bodyBuf);
+				}
 			}
 			else {
-				this.buffers.add(buf);
-				requestBuffer();
+				long count = this.byteCount.addAndGet(buf.readableByteCount());
+				if (belowMaxHeaderSize(count)) {
+					this.buffers.add(buf);
+					requestBuffer();
+				}
 			}
 		}
 
@@ -398,6 +404,21 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 		}
 
 		/**
+		 * Checks whether the given {@code count} is below or equal to {@link #maxHeadersSize}
+		 * and emits a {@link DataBufferLimitException} if not.
+		 */
+		private boolean belowMaxHeaderSize(long count) {
+			if (count <= MultipartParser.this.maxHeadersSize) {
+				return true;
+			}
+			else {
+				emitError(new DataBufferLimitException("Part headers exceeded the memory usage limit of " +
+						MultipartParser.this.maxHeadersSize + " bytes"));
+				return false;
+			}
+		}
+
+		/**
 		 * Parses the list of buffers into a {@link HttpHeaders} instance.
 		 * Converts the joined buffers into a string using ISO=8859-1, and parses
 		 * that string into key and values.
@@ -408,7 +429,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 			}
 			DataBuffer joined = this.buffers.get(0).factory().join(this.buffers);
 			this.buffers.clear();
-			String string = joined.toString(StandardCharsets.ISO_8859_1);
+			String string = joined.toString(MultipartParser.this.headersCharset);
 			DataBufferUtils.release(joined);
 			String[] lines = string.split(HEADER_ENTRY_SEPARATOR);
 			HttpHeaders result = new HttpHeaders();

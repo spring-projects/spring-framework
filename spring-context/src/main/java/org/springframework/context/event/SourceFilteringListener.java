@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.lang.Nullable;
  * @author Stephane Nicoll
  * @since 2.0.5
  */
-public class SourceFilteringListener implements GenericApplicationListener, SmartApplicationListener {
+public class SourceFilteringListener implements GenericApplicationListener {
 
 	private final Object source;
 
@@ -80,11 +80,6 @@ public class SourceFilteringListener implements GenericApplicationListener, Smar
 	}
 
 	@Override
-	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
-		return supportsEventType(ResolvableType.forType(eventType));
-	}
-
-	@Override
 	public boolean supportsSourceType(@Nullable Class<?> sourceType) {
 		return (sourceType != null && sourceType.isInstance(this.source));
 	}
@@ -92,6 +87,11 @@ public class SourceFilteringListener implements GenericApplicationListener, Smar
 	@Override
 	public int getOrder() {
 		return (this.delegate != null ? this.delegate.getOrder() : Ordered.LOWEST_PRECEDENCE);
+	}
+
+	@Override
+	public String getListenerId() {
+		return (this.delegate != null ? this.delegate.getListenerId() : "");
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,11 +43,8 @@ public abstract class ExchangeFilterFunctions {
 
 	/**
 	 * Name of the request attribute with {@link Credentials} for {@link #basicAuthentication()}.
-	 * @deprecated as of Spring 5.1 in favor of using
-	 * {@link HttpHeaders#setBasicAuth(String, String)} while building the request.
 	 */
-	@Deprecated
-	public static final String BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE =
+	private static final String BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE =
 			ExchangeFilterFunctions.class.getName() + ".basicAuthenticationCredentials";
 
 
@@ -116,8 +113,7 @@ public abstract class ExchangeFilterFunctions {
 	public static ExchangeFilterFunction basicAuthentication() {
 		return (request, next) -> {
 			Object attr = request.attributes().get(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE);
-			if (attr instanceof Credentials) {
-				Credentials cred = (Credentials) attr;
+			if (attr instanceof Credentials cred) {
 				return next.exchange(ClientRequest.from(request)
 						.headers(headers -> headers.setBasicAuth(cred.username, cred.password))
 						.build());
@@ -174,10 +170,9 @@ public abstract class ExchangeFilterFunctions {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof Credentials)) {
+			if (!(other instanceof Credentials otherCred)) {
 				return false;
 			}
-			Credentials otherCred = (Credentials) other;
 			return (this.username.equals(otherCred.username) && this.password.equals(otherCred.password));
 		}
 

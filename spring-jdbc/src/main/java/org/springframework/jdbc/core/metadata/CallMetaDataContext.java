@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -646,13 +646,13 @@ public class CallMetaDataContext {
 		}
 
 		if (StringUtils.hasLength(catalogNameToUse)) {
-			callString.append(catalogNameToUse).append(".");
+			callString.append(catalogNameToUse).append('.');
 		}
 		if (StringUtils.hasLength(schemaNameToUse)) {
-			callString.append(schemaNameToUse).append(".");
+			callString.append(schemaNameToUse).append('.');
 		}
 		callString.append(this.metaDataProvider.procedureNameToUse(getProcedureName()));
-		callString.append("(");
+		callString.append('(');
 
 		for (SqlParameter parameter : this.callParameters) {
 			if (!parameter.isResultsParameter()) {

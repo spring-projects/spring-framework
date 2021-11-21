@@ -23,27 +23,27 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSContext;
-import javax.jms.JMSException;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicSession;
-import javax.jms.TransactionInProgressException;
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.JMSContext;
+import jakarta.jms.JMSException;
+import jakarta.jms.QueueConnection;
+import jakarta.jms.QueueConnectionFactory;
+import jakarta.jms.QueueSession;
+import jakarta.jms.Session;
+import jakarta.jms.TopicConnection;
+import jakarta.jms.TopicConnectionFactory;
+import jakarta.jms.TopicSession;
+import jakarta.jms.TransactionInProgressException;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Proxy for a target JMS {@link javax.jms.ConnectionFactory}, adding awareness of
+ * Proxy for a target JMS {@link jakarta.jms.ConnectionFactory}, adding awareness of
  * Spring-managed transactions. Similar to a transactional JNDI ConnectionFactory
- * as provided by a Java EE application server.
+ * as provided by a Jakarta EE application server.
  *
  * <p>Messaging code which should remain unaware of Spring's JMS support can work with
  * this proxy to seamlessly participate in Spring-managed transactions. Note that the
@@ -164,7 +164,7 @@ public class TransactionAwareConnectionFactoryProxy
 	public QueueConnection createQueueConnection() throws JMSException {
 		ConnectionFactory target = getTargetConnectionFactory();
 		if (!(target instanceof QueueConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
+			throw new jakarta.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
 		}
 		QueueConnection targetConnection = ((QueueConnectionFactory) target).createQueueConnection();
 		return (QueueConnection) getTransactionAwareConnectionProxy(targetConnection);
@@ -174,7 +174,7 @@ public class TransactionAwareConnectionFactoryProxy
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
 		ConnectionFactory target = getTargetConnectionFactory();
 		if (!(target instanceof QueueConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
+			throw new jakarta.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
 		}
 		QueueConnection targetConnection = ((QueueConnectionFactory) target).createQueueConnection(username, password);
 		return (QueueConnection) getTransactionAwareConnectionProxy(targetConnection);
@@ -184,7 +184,7 @@ public class TransactionAwareConnectionFactoryProxy
 	public TopicConnection createTopicConnection() throws JMSException {
 		ConnectionFactory target = getTargetConnectionFactory();
 		if (!(target instanceof TopicConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
+			throw new jakarta.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
 		}
 		TopicConnection targetConnection = ((TopicConnectionFactory) target).createTopicConnection();
 		return (TopicConnection) getTransactionAwareConnectionProxy(targetConnection);
@@ -194,7 +194,7 @@ public class TransactionAwareConnectionFactoryProxy
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		ConnectionFactory target = getTargetConnectionFactory();
 		if (!(target instanceof TopicConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
+			throw new jakarta.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
 		}
 		TopicConnection targetConnection = ((TopicConnectionFactory) target).createTopicConnection(username, password);
 		return (TopicConnection) getTransactionAwareConnectionProxy(targetConnection);

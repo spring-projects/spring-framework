@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,10 @@
 
 package org.springframework.test.context;
 
-import org.junit.platform.runner.JUnitPlatform;
 import org.junit.platform.suite.api.ExcludeTags;
 import org.junit.platform.suite.api.IncludeClassNamePatterns;
 import org.junit.platform.suite.api.SelectPackages;
-import org.junit.platform.suite.api.UseTechnicalNames;
-import org.junit.runner.RunWith;
+import org.junit.platform.suite.api.Suite;
 
 /**
  * JUnit Platform based test suite for tests that involve the Spring TestContext
@@ -42,10 +40,9 @@ import org.junit.runner.RunWith;
  * @author Sam Brannen
  * @since 5.2
  */
-@RunWith(JUnitPlatform.class)
+@Suite
 @SelectPackages("org.springframework.test.context")
 @IncludeClassNamePatterns(".*Tests?$")
 @ExcludeTags("failing-test-case")
-@UseTechnicalNames
-public class SpringTestContextFrameworkTestSuite {
+class SpringTestContextFrameworkTestSuite {
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,6 @@ import kotlin.reflect.KParameter;
 import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
@@ -75,8 +73,6 @@ import org.springframework.util.StringUtils;
  */
 public abstract class BeanUtils {
 
-	private static final Log logger = LogFactory.getLog(BeanUtils.class);
-
 	private static final ParameterNameDiscoverer parameterNameDiscoverer =
 			new DefaultParameterNameDiscoverer();
 
@@ -91,7 +87,10 @@ public abstract class BeanUtils {
 		values.put(byte.class, (byte) 0);
 		values.put(short.class, (short) 0);
 		values.put(int.class, 0);
-		values.put(long.class, (long) 0);
+		values.put(long.class, 0L);
+		values.put(float.class, 0F);
+		values.put(double.class, 0D);
+		values.put(char.class, '\0');
 		DEFAULT_TYPE_VALUES = Collections.unmodifiableMap(values);
 	}
 
@@ -101,9 +100,9 @@ public abstract class BeanUtils {
 	 * @param clazz class to instantiate
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
+	 * @see Class#newInstance()
 	 * @deprecated as of Spring 5.0, following the deprecation of
 	 * {@link Class#newInstance()} in JDK 9
-	 * @see Class#newInstance()
 	 */
 	@Deprecated
 	public static <T> T instantiate(Class<T> clazz) throws BeanInstantiationException {
@@ -143,19 +142,20 @@ public abstract class BeanUtils {
 		if (clazz.isInterface()) {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
+		Constructor<T> ctor;
 		try {
-			return instantiateClass(clazz.getDeclaredConstructor());
+			ctor = clazz.getDeclaredConstructor();
 		}
 		catch (NoSuchMethodException ex) {
-			Constructor<T> ctor = findPrimaryConstructor(clazz);
-			if (ctor != null) {
-				return instantiateClass(ctor);
+			ctor = findPrimaryConstructor(clazz);
+			if (ctor == null) {
+				throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 			}
-			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 		}
 		catch (LinkageError err) {
 			throw new BeanInstantiationException(clazz, "Unresolvable class definition", err);
 		}
+		return instantiateClass(ctor);
 	}
 
 	/**
@@ -227,32 +227,45 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Return a resolvable constructor for the provided class, either a primary constructor
-	 * or single public constructor or simply a default constructor. Callers have to be
-	 * prepared to resolve arguments for the returned constructor's parameters, if any.
+	 * Return a resolvable constructor for the provided class, either a primary or single
+	 * public constructor with arguments, or a single non-public constructor with arguments,
+	 * or simply a default constructor. Callers have to be prepared to resolve arguments
+	 * for the returned constructor's parameters, if any.
 	 * @param clazz the class to check
+	 * @throws IllegalStateException in case of no unique constructor found at all
 	 * @since 5.3
 	 * @see #findPrimaryConstructor
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Constructor<T> getResolvableConstructor(Class<T> clazz) {
 		Constructor<T> ctor = findPrimaryConstructor(clazz);
-		if (ctor == null) {
-			Constructor<?>[] ctors = clazz.getConstructors();
+		if (ctor != null) {
+			return ctor;
+		}
+
+		Constructor<?>[] ctors = clazz.getConstructors();
+		if (ctors.length == 1) {
+			// A single public constructor
+			return (Constructor<T>) ctors[0];
+		}
+		else if (ctors.length == 0){
+			ctors = clazz.getDeclaredConstructors();
 			if (ctors.length == 1) {
-				ctor = (Constructor<T>) ctors[0];
-			}
-			else {
-				try {
-					ctor = clazz.getDeclaredConstructor();
-				}
-				catch (NoSuchMethodException ex) {
-					throw new IllegalStateException("No primary or single public constructor found for " +
-							clazz + " - and no default constructor found either");
-				}
+				// A single non-public constructor, e.g. from a non-public record type
+				return (Constructor<T>) ctors[0];
 			}
 		}
-		return ctor;
+
+		// Several constructors -> let's try to take the default constructor
+		try {
+			return clazz.getDeclaredConstructor();
+		}
+		catch (NoSuchMethodException ex) {
+			// Giving up...
+		}
+
+		// No unique constructor at all
+		throw new IllegalStateException("No primary or single unique constructor found for " + clazz);
 	}
 
 	/**
@@ -268,10 +281,7 @@ public abstract class BeanUtils {
 	public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(clazz)) {
-			Constructor<T> kotlinPrimaryConstructor = KotlinDelegate.findPrimaryConstructor(clazz);
-			if (kotlinPrimaryConstructor != null) {
-				return kotlinPrimaryConstructor;
-			}
+			return KotlinDelegate.findPrimaryConstructor(clazz);
 		}
 		return null;
 	}
@@ -531,7 +541,7 @@ public abstract class BeanUtils {
 
 	/**
 	 * Find a JavaBeans PropertyEditor following the 'Editor' suffix convention
-	 * (e.g. "mypackage.MyDomainClass" -> "mypackage.MyDomainClassEditor").
+	 * (e.g. "mypackage.MyDomainClass" &rarr; "mypackage.MyDomainClassEditor").
 	 * <p>Compatible to the standard JavaBeans convention as implemented by
 	 * {@link java.beans.PropertyEditorManager} but isolated from the latter's
 	 * registered default editors for primitive types.
@@ -554,9 +564,6 @@ public abstract class BeanUtils {
 			}
 			catch (Throwable ex) {
 				// e.g. AccessControlException on Google App Engine
-				if (logger.isDebugEnabled()) {
-					logger.debug("Could not access system ClassLoader: " + ex);
-				}
 				return null;
 			}
 		}
@@ -567,10 +574,6 @@ public abstract class BeanUtils {
 			Class<?> editorClass = cl.loadClass(editorName);
 			if (editorClass != null) {
 				if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
-					if (logger.isInfoEnabled()) {
-						logger.info("Editor class [" + editorName +
-								"] does not implement [java.beans.PropertyEditor] interface");
-					}
 					unknownEditorTypes.add(targetType);
 					return null;
 				}
@@ -581,10 +584,6 @@ public abstract class BeanUtils {
 		}
 		catch (ClassNotFoundException ex) {
 			// Ignore - fall back to unknown editor type registration below
-		}
-		if (logger.isTraceEnabled()) {
-			logger.trace("No property editor [" + editorName + "] found for type " +
-					targetTypeName + " according to 'Editor' suffix convention");
 		}
 		unknownEditorTypes.add(targetType);
 		return null;
@@ -779,7 +778,14 @@ public abstract class BeanUtils {
 					if (readMethod != null) {
 						ResolvableType sourceResolvableType = ResolvableType.forMethodReturnType(readMethod);
 						ResolvableType targetResolvableType = ResolvableType.forMethodParameter(writeMethod, 0);
-						if (targetResolvableType.isAssignableFrom(sourceResolvableType)) {
+
+						// Ignore generic types in assignable check if either ResolvableType has unresolvable generics.
+						boolean isAssignable =
+								(sourceResolvableType.hasUnresolvableGenerics() || targetResolvableType.hasUnresolvableGenerics() ?
+										ClassUtils.isAssignable(writeMethod.getParameterTypes()[0], readMethod.getReturnType()) :
+										targetResolvableType.isAssignableFrom(sourceResolvableType));
+
+						if (isAssignable) {
 							try {
 								if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
 									readMethod.setAccessible(true);

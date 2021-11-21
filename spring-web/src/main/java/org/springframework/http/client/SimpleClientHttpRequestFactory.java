@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,8 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * {@link ClientHttpRequestFactory} implementation that uses standard JDK facilities.
@@ -37,8 +35,7 @@ import org.springframework.util.Assert;
  * @see java.net.HttpURLConnection
  * @see HttpComponentsClientHttpRequestFactory
  */
-@SuppressWarnings("deprecation")
-public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
+public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory {
 
 	private static final int DEFAULT_CHUNK_SIZE = 4096;
 
@@ -55,9 +52,6 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 	private int readTimeout = -1;
 
 	private boolean outputStreaming = true;
-
-	@Nullable
-	private AsyncListenableTaskExecutor taskExecutor;
 
 
 	/**
@@ -130,15 +124,6 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 		this.outputStreaming = outputStreaming;
 	}
 
-	/**
-	 * Set the task executor for this request factory. Setting this property is required
-	 * for {@linkplain #createAsyncRequest(URI, HttpMethod) creating asynchronous requests}.
-	 * @param taskExecutor the task executor
-	 */
-	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
-		this.taskExecutor = taskExecutor;
-	}
-
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
@@ -150,27 +135,6 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 		}
 		else {
 			return new SimpleStreamingClientHttpRequest(connection, this.chunkSize, this.outputStreaming);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>Setting the {@link #setTaskExecutor taskExecutor} property is required before calling this method.
-	 */
-	@Override
-	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		Assert.state(this.taskExecutor != null, "Asynchronous execution requires TaskExecutor to be set");
-
-		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
-		prepareConnection(connection, httpMethod.name());
-
-		if (this.bufferRequestBody) {
-			return new SimpleBufferingAsyncClientHttpRequest(
-					connection, this.outputStreaming, this.taskExecutor);
-		}
-		else {
-			return new SimpleStreamingAsyncClientHttpRequest(
-					connection, this.chunkSize, this.outputStreaming, this.taskExecutor);
 		}
 	}
 

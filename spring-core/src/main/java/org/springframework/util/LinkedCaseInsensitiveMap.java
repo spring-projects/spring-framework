@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	 * @see #convertKey(String)
 	 */
 	public LinkedCaseInsensitiveMap(int expectedSize, @Nullable Locale locale) {
-		this.targetMap = new LinkedHashMap<String, V>(
+		this.targetMap = new LinkedHashMap<>(
 				(int) (expectedSize / CollectionUtils.DEFAULT_LOAD_FACTOR), CollectionUtils.DEFAULT_LOAD_FACTOR) {
 			@Override
 			public boolean containsKey(Object key) {
@@ -211,7 +211,13 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	public V putIfAbsent(String key, @Nullable V value) {
 		String oldKey = this.caseInsensitiveKeys.putIfAbsent(convertKey(key), key);
 		if (oldKey != null) {
-			return this.targetMap.get(oldKey);
+			V oldKeyValue = this.targetMap.get(oldKey);
+			if (oldKeyValue != null) {
+				return oldKeyValue;
+			}
+			else {
+				key = oldKey;
+			}
 		}
 		return this.targetMap.putIfAbsent(key, value);
 	}
@@ -221,7 +227,13 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	public V computeIfAbsent(String key, Function<? super String, ? extends V> mappingFunction) {
 		String oldKey = this.caseInsensitiveKeys.putIfAbsent(convertKey(key), key);
 		if (oldKey != null) {
-			return this.targetMap.get(oldKey);
+			V oldKeyValue = this.targetMap.get(oldKey);
+			if (oldKeyValue != null) {
+				return oldKeyValue;
+			}
+			else {
+				key = oldKey;
+			}
 		}
 		return this.targetMap.computeIfAbsent(key, mappingFunction);
 	}

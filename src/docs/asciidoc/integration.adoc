@@ -1,7 +1,5 @@
 [[spring-integration]]
 = Integration
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :doc-spring-amqp: {doc-root}/spring-amqp/docs/current/reference
 :doc-spring-gemfire: {doc-root}/spring-gemfire/docs/current/reference
 :toc: left
@@ -9,8 +7,8 @@
 :tabsize: 4
 :docinfo1:
 
-This part of the reference documentation covers the Spring Framework's integration with
-a number technologies.
+This part of the reference documentation covers Spring Framework's integration with
+a number of technologies.
 
 
 [[rest-client-access]]
@@ -65,7 +63,7 @@ overloaded methods:
 
 | `patchForObject`
 | Updates a resource by using PATCH and returns the representation from the response.
-Note that the JDK `HttpURLConnection` does not support the `PATCH`, but Apache
+Note that the JDK `HttpURLConnection` does not support `PATCH`, but Apache
 HttpComponents and others do.
 
 | `delete`
@@ -163,7 +161,7 @@ You can use the `exchange()` methods to specify request headers, as the followin
 	URI uri = UriComponentsBuilder.fromUriString(uriTemplate).build(42);
 
 	RequestEntity<Void> requestEntity = RequestEntity.get(uri)
-			.header(("MyRequestHeader", "MyValue")
+			.header("MyRequestHeader", "MyValue")
 			.build();
 
 	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
@@ -346,13 +344,6 @@ to `multipart/form-data` by the `FormHttpMessageConverter`. If the `MultiValueMa
 If necessary the `Content-Type` may also be set explicitly.
 
 
-[[rest-async-resttemplate]]
-=== Using `AsyncRestTemplate` (Deprecated)
-
-The `AsyncRestTemplate` is deprecated. For all use cases where you might consider using
-`AsyncRestTemplate`, use the <<web-reactive.adoc#webflux-client, WebClient>> instead.
-
-
 
 [[remoting]]
 == Remoting and Web Services
@@ -392,7 +383,7 @@ model and corresponding services:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	public class Account implements Serializable{
+	public class Account implements Serializable {
 
 		private String name;
 
@@ -447,7 +438,7 @@ section of the Spring AMQP reference.
 [[remoting-autodection-remote-interfaces]]
 [NOTE]
 ====
-Auto-detection is not implemented for remote interfaces
+Auto-detection is not implemented for remote interfaces.
 
 The main reason why auto-detection of implemented interfaces does not occur for remote
 interfaces is to avoid opening too many doors to remote callers. The target object might
@@ -516,7 +507,7 @@ Spring provides full support for the standard Java web services APIs:
 * Accessing web services using JAX-WS
 
 In addition to stock support for JAX-WS in Spring Core, the Spring portfolio also
-features http://www.springframework.org/spring-ws[Spring Web Services], which is a solution for
+features https://projects.spring.io/spring-ws[Spring Web Services], which is a solution for
 contract-first, document-driven web services -- highly recommended for building modern,
 future-proof web services.
 
@@ -543,7 +534,7 @@ shows our class that extends `SpringBeanAutowiringSupport`:
 	 * the @Autowired annotation) is the simplest JAX-WS compliant way.
 	 *
 	 * This is the class registered with the server-side JAX-WS implementation.
-	 * In the case of a Java EE server, this would simply be defined as a servlet
+	 * In the case of a Jakarta EE server, this would simply be defined as a servlet
 	 * in web.xml, with the server detecting that this is a JAX-WS endpoint and reacting
 	 * accordingly. The servlet name usually needs to match the specified WS service name.
 	 *
@@ -573,7 +564,7 @@ shows our class that extends `SpringBeanAutowiringSupport`:
 Our `AccountServiceEndpoint` needs to run in the same web application as the Spring
 context to allow for access to Spring's facilities. This is the case by default in Java
 EE environments, using the standard contract for JAX-WS servlet endpoint deployment.
-See the various Java EE web service tutorials for details.
+See the various Jakarta EE web service tutorials for details.
 
 
 [[remoting-web-services-jaxws-export-standalone]]
@@ -640,12 +631,12 @@ Spring-managed beans, similar to the standalone mode discussed in the
 <<remoting-web-services-jaxws-export-standalone, previous section>> --
 but this time in a Servlet environment.
 
-NOTE: This is not portable in a Java EE environment. It is mainly intended for non-EE
+NOTE: This is not portable in a Jakarta EE environment. It is mainly intended for non-EE
 environments, such as Tomcat, that embed the JAX-WS RI as part of the web application.
 
 The differences from the standard style of exporting servlet-based endpoints are that
 the lifecycle of the endpoint instances themselves are managed by Spring and that there
-is only one JAX-WS servlet defined in `web.xml`. With the standard Java EE style (as
+is only one JAX-WS servlet defined in `web.xml`. With the standard Jakarta EE style (as
 shown earlier), you have one servlet definition per service endpoint, with each endpoint
 typically delegating to Spring beans (through the use of `@Autowired`, as shown earlier).
 
@@ -713,7 +704,7 @@ as the following example shows:
 ----
 
 NOTE: The above is slightly simplified in that JAX-WS requires endpoint interfaces
-and implementation classes to be annotated with `@WebService`, `@SOAPBinding` etc
+and implementation classes to be annotated with `@WebService`, `@SOAPBinding`, etc.
 annotations. This means that you cannot (easily) use plain Java interfaces and
 implementation classes as JAX-WS endpoint artifacts; you need to annotate them
 accordingly first. Check the JAX-WS documentation for details on those requirements.
@@ -1453,7 +1444,7 @@ the same way as Spring's integration does for the JDBC API.
 
 JMS can be roughly divided into two areas of functionality, namely the production and
 consumption of messages. The `JmsTemplate` class is used for message production and
-synchronous message reception. For asynchronous reception similar to Java EE's
+synchronous message reception. For asynchronous reception similar to Jakarta EE's
 message-driven bean style, Spring provides a number of message-listener containers that
 you can use to create Message-Driven POJOs (MDPs). Spring also provides a declarative way
 to create message listeners.
@@ -1470,8 +1461,8 @@ the user.
 
 The `org.springframework.jms.support` package provides `JMSException` translation
 functionality. The translation converts the checked `JMSException` hierarchy to a
-mirrored hierarchy of unchecked exceptions. If any provider-specific
-subclasses of the checked `javax.jms.JMSException` exist, this exception is wrapped in the
+mirrored hierarchy of unchecked exceptions. If any provider-specific subclasses
+of the checked `jakarta.jms.JMSException` exist, this exception is wrapped in the
 unchecked `UncategorizedJmsException`.
 
 The `org.springframework.jms.support.converter` package provides a `MessageConverter`
@@ -1571,7 +1562,7 @@ vendor-specific, such as SSL configuration options.
 
 When using JMS inside an EJB, the vendor provides implementations of the JMS interfaces
 so that they can participate in declarative transaction management and perform pooling
-of connections and sessions. In order to use this implementation, Java EE containers
+of connections and sessions. In order to use this implementation, Jakarta EE containers
 typically require that you declare a JMS connection factory as a `resource-ref` inside
 the EJB or servlet deployment descriptors. To ensure the use of these features with the
 `JmsTemplate` inside an EJB, the client application should ensure that it references the
@@ -1612,7 +1603,7 @@ cache size is set to `1`. You can use the `sessionCacheSize` property to increas
 cached sessions. Note that the number of actual cached sessions is more than that
 number, as sessions are cached based on their acknowledgment mode, so there can be up to
 four cached session instances (one for each
-acknowledgment mode) when `sessionCacheSize` is set to one . `MessageProducer` and `MessageConsumer` instances are cached within their
+acknowledgment mode) when `sessionCacheSize` is set to one. `MessageProducer` and `MessageConsumer` instances are cached within their
 owning session and also take into account the unique properties of the producers and
 consumers when caching. MessageProducers are cached based on their destination.
 MessageConsumers are cached based on a key composed of the destination, selector,
@@ -1623,7 +1614,7 @@ noLocal delivery flag, and the durable subscription name (if creating durable co
 ==== Destination Management
 
 Destinations, as `ConnectionFactory` instances, are JMS administered objects that you can store
-and retrieved in JNDI. When configuring a Spring application context, you can use the
+and retrieve in JNDI. When configuring a Spring application context, you can use the
 JNDI `JndiObjectFactoryBean` factory class or `<jee:jndi-lookup>` to perform dependency
 injection on your object's references to JMS destinations. However, this strategy
 is often cumbersome if there are a large number of destinations in the application or if there
@@ -1698,7 +1689,7 @@ the standard JMS `MessageConsumer.setMessageListener()` method, and leaves it up
 provider to perform listener callbacks. This variant does not allow for dynamic adaption
 to runtime demands or for participation in externally managed transactions.
 Compatibility-wise, it stays very close to the spirit of the standalone JMS
-specification, but is generally not compatible with Java EE's JMS restrictions.
+specification, but is generally not compatible with Jakarta EE's JMS restrictions.
 
 NOTE: While `SimpleMessageListenerContainer` does not allow for participation in externally
 managed transactions, it does support native JMS transactions. To enable this feature,
@@ -1726,7 +1717,7 @@ Each received message is registered with an XA transaction when configured with 
 `JtaTransactionManager`. As a result, processing may take advantage of XA transaction
 semantics. This listener container strikes a good balance between low requirements on
 the JMS provider, advanced functionality (such as participation in externally managed
-transactions), and compatibility with Java EE environments.
+transactions), and compatibility with Jakarta EE environments.
 
 You can customize the cache level of the container. Note that, when no caching is enabled,
 a new connection and a new session is created for each message reception. Combining this
@@ -1736,7 +1727,7 @@ use a proper cache level in such a case.
 This container also has recoverable capabilities when the broker goes down. By default,
 a simple `BackOff` implementation retries every five seconds. You can specify
 a custom `BackOff` implementation for more fine-grained recovery options. See
-api-spring-framework/util/backoff/ExponentialBackOff.html[`ExponentialBackOff`] for an example.
+{api-spring-framework}/util/backoff/ExponentialBackOff.html[`ExponentialBackOff`] for an example.
 
 NOTE: Like its sibling (<<jms-mdp-simple, `SimpleMessageListenerContainer`>>),
 `DefaultMessageListenerContainer` supports native JMS transactions and allows for
@@ -1749,7 +1740,7 @@ Any such arrangements are significantly more efficient than the alternative:
 wrapping your entire processing with an XA transaction (through configuring your
 `DefaultMessageListenerContainer` with an `JtaTransactionManager`) to cover the
 reception of the JMS message as well as the execution of the business logic in your
-message listener (including database operations etc).
+message listener (including database operations, etc.).
 
 IMPORTANT: The default `AUTO_ACKNOWLEDGE` mode does not provide proper reliability guarantees.
 Messages can get lost when listener execution fails (since the provider automatically
@@ -1771,7 +1762,7 @@ Connection/Session pair from the specified `ConnectionFactory` to the thread.
 `JmsTemplate` automatically detects such transactional resources and operates
 on them accordingly.
 
-In a Java EE environment, the `ConnectionFactory` pools Connection and Session instances,
+In a Jakarta EE environment, the `ConnectionFactory` pools Connection and Session instances,
 so those resources are efficiently reused across transactions. In a standalone environment,
 using Spring's `SingleConnectionFactory` result in a shared JMS `Connection`, with
 each transaction having its own independent `Session`. Alternatively, consider the use
@@ -1781,7 +1772,7 @@ class.
 You can also use `JmsTemplate` with the `JtaTransactionManager` and an XA-capable JMS
 `ConnectionFactory` to perform distributed transactions. Note that this requires the
 use of a JTA transaction manager as well as a properly XA-configured ConnectionFactory.
-(Check your Java EE server's or JMS provider's documentation.)
+(Check your Jakarta EE server's or JMS provider's documentation.)
 
 Reusing code across a managed and unmanaged transactional environment can be confusing
 when using the JMS API to create a `Session` from a `Connection`. This is because the
@@ -1800,7 +1791,7 @@ transactional JMS `Session`.
 === Sending a Message
 
 The `JmsTemplate` contains many convenience methods to send a message. Send
-methods specify the destination by using a `javax.jms.Destination` object, and others
+methods specify the destination by using a `jakarta.jms.Destination` object, and others
 specify the destination by using a `String` in a JNDI lookup. The `send` method
 that takes no destination argument uses the default destination.
 
@@ -1809,11 +1800,11 @@ supplied `Session` object:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	import javax.jms.ConnectionFactory;
-	import javax.jms.JMSException;
-	import javax.jms.Message;
-	import javax.jms.Queue;
-	import javax.jms.Session;
+	import jakarta.jms.ConnectionFactory;
+	import jakarta.jms.JMSException;
+	import jakarta.jms.Message;
+	import jakarta.jms.Queue;
+	import jakarta.jms.Session;
 
 	import org.springframework.jms.core.MessageCreator;
 	import org.springframework.jms.core.JmsTemplate;
@@ -1866,7 +1857,7 @@ content. The overloaded methods `convertAndSend()` and `receiveAndConvert()` met
 `JmsTemplate` delegate the conversion process to an instance of the `MessageConverter`
 interface. This interface defines a simple contract to convert between Java objects and
 JMS messages. The default implementation (`SimpleMessageConverter`) supports conversion
-between `String` and `TextMessage`, `byte[]` and `BytesMesssage`, and `java.util.Map`
+between `String` and `TextMessage`, `byte[]` and `BytesMessage`, and `java.util.Map`
 and `MapMessage`. By using the converter, you and your application code can focus on the
 business object that is being sent or received through JMS and not be concerned with the
 details of how it is represented as a JMS message.
@@ -1958,17 +1949,17 @@ See <<jms-annotated-support>> for more details.
 In a fashion similar to a Message-Driven Bean (MDB) in the EJB world, the Message-Driven
 POJO (MDP) acts as a receiver for JMS messages. The one restriction (but see
 <<jms-receiving-async-message-listener-adapter>>) on an MDP is that it must implement
-the `javax.jms.MessageListener` interface. Note that, if your POJO receives messages
+the `jakarta.jms.MessageListener` interface. Note that, if your POJO receives messages
 on multiple threads, it is important to ensure that your implementation is thread-safe.
 
 The following example shows a simple implementation of an MDP:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	import javax.jms.JMSException;
-	import javax.jms.Message;
-	import javax.jms.MessageListener;
-	import javax.jms.TextMessage;
+	import jakarta.jms.JMSException;
+	import jakarta.jms.Message;
+	import jakarta.jms.MessageListener;
+	import jakarta.jms.TextMessage;
 
 	public class ExampleListener implements MessageListener {
 
@@ -2211,10 +2202,10 @@ transaction manager and use a listener container that supports externally manage
 transactions (typically, `DefaultMessageListenerContainer`).
 
 To configure a message listener container for XA transaction participation, you want
-to configure a `JtaTransactionManager` (which, by default, delegates to the Java EE
+to configure a `JtaTransactionManager` (which, by default, delegates to the Jakarta EE
 server's transaction subsystem). Note that the underlying JMS `ConnectionFactory` needs to
 be XA-capable and properly registered with your JTA transaction coordinator. (Check your
-Java EE server's configuration of JNDI resources.) This lets message reception as well
+Jakarta EE server's configuration of JNDI resources.) This lets message reception as well
 as (for example) database access be part of the same transaction (with unified commit
 semantics, at the expense of XA transaction log overhead).
 
@@ -2274,7 +2265,7 @@ Alternatively, you can set up a `JmsMessageEndpointManager` with a given
 		<property name="activationSpec">
 			<bean class="org.apache.activemq.ra.ActiveMQActivationSpec">
 				<property name="destination" value="myQueue"/>
-				<property name="destinationType" value="javax.jms.Queue"/>
+				<property name="destinationType" value="jakarta.jms.Queue"/>
 			</bean>
 		</property>
 		<property name="messageListener" ref="myMessageListener"/>
@@ -2347,7 +2338,7 @@ bean as a JMS listener endpoint. The following example shows how to use it:
 ----
 
 The idea of the preceding example is that, whenever a message is available on the
-`javax.jms.Destination` `myDestination`, the `processOrder` method is invoked
+`jakarta.jms.Destination` `myDestination`, the `processOrder` method is invoked
 accordingly (in this case, with the content of the JMS message, similar to
 what the <<jms-receiving-async-message-listener-adapter, `MessageListenerAdapter`>>
 provides).
@@ -2471,9 +2462,9 @@ a custom header:
 
 The main elements you can inject in JMS listener endpoints are as follows:
 
-* The raw `javax.jms.Message` or any of its subclasses (provided that it
+* The raw `jakarta.jms.Message` or any of its subclasses (provided that it
   matches the incoming message type).
-* The `javax.jms.Session` for optional access to the native JMS API (for example, for sending
+* The `jakarta.jms.Session` for optional access to the native JMS API (for example, for sending
   a custom reply).
 * The `org.springframework.messaging.Message` that represents the incoming JMS message.
   Note that this message holds both the custom and the standard headers (as defined
@@ -2530,7 +2521,7 @@ annotate the payload with `@Valid` and configure the necessary validator, as the
 
 The existing support in <<jms-receiving-async-message-listener-adapter, `MessageListenerAdapter`>>
 already lets your method have a non-`void` return type. When that is the case, the result of
-the invocation is encapsulated in a `javax.jms.Message`, sent either in the destination specified
+the invocation is encapsulated in a `jakarta.jms.Message`, sent either in the destination specified
 in the `JMSReplyTo` header of the original message or in the default destination configured on
 the listener. You can now set that default destination by using the `@SendTo` annotation of the
 messaging abstraction.
@@ -2781,7 +2772,7 @@ also provides a discussion of transaction choices and message redelivery scenari
 | The cache level for JMS resources: `none`, `connection`, `session`, `consumer`, or
   `auto`. By default (`auto`), the cache level is effectively `consumer`, unless
   an external transaction manager has been specified -- in which case, the effective
-  default will be `none` (assuming Java EE-style transaction management, where the given
+  default will be `none` (assuming Jakarta EE-style transaction management, where the given
   ConnectionFactory is an XA-aware pool).
 
 | `acknowledge`
@@ -2893,7 +2884,7 @@ The following table describes the available configuration options for the JCA va
 
 | `transaction-manager`
 | A reference to a Spring `JtaTransactionManager` or a
-  `javax.transaction.TransactionManager` for kicking off an XA transaction for each
+  `jakarta.transaction.TransactionManager` for kicking off an XA transaction for each
   incoming message. If not specified, native acknowledging is used (see the
   `acknowledge` attribute).
 
@@ -4394,7 +4385,7 @@ email when someone places an order:
 					+ order.getCustomer().getLastName()
 					+ ", thank you for placing order. Your order number is "
 					+ order.getOrderNumber());
-			try{
+			try {
 				this.mailSender.send(msg);
 			}
 			catch (MailException ex) {
@@ -4436,12 +4427,12 @@ callback interface. In the following example, the `mailSender` property is of ty
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	import javax.mail.Message;
-	import javax.mail.MessagingException;
-	import javax.mail.internet.InternetAddress;
-	import javax.mail.internet.MimeMessage;
+	import jakarta.mail.Message;
+	import jakarta.mail.MessagingException;
+	import jakarta.mail.internet.InternetAddress;
+	import jakarta.mail.internet.MimeMessage;
 
-	import javax.mail.internet.MimeMessage;
+	import jakarta.mail.internet.MimeMessage;
 	import org.springframework.mail.MailException;
 	import org.springframework.mail.javamail.JavaMailSender;
 	import org.springframework.mail.javamail.MimeMessagePreparator;
@@ -4613,7 +4604,7 @@ tasks with the `TaskExecutor` and `TaskScheduler` interfaces, respectively. Spri
 features implementations of those interfaces that support thread pools or delegation to
 CommonJ within an application server environment. Ultimately, the use of these
 implementations behind the common interfaces abstracts away the differences between Java
-SE 5, Java SE 6, and Java EE environments.
+SE 5, Java SE 6, and Jakarta EE environments.
 
 Spring also features integration classes to support scheduling with the `Timer`
 (part of the JDK since 1.3) and the Quartz Scheduler ( https://www.quartz-scheduler.org/[]).
@@ -4631,7 +4622,7 @@ operation).
 Executors are the JDK name for the concept of thread pools. The "`executor`" naming is
 due to the fact that there is no guarantee that the underlying implementation is
 actually a pool. An executor may be single-threaded or even synchronous. Spring's
-abstraction hides implementation details between the Java SE and Java EE environments.
+abstraction hides implementation details between the Java SE and Jakarta EE environments.
 
 Spring's `TaskExecutor` interface is identical to the `java.util.concurrent.Executor`
 interface. In fact, originally, its primary reason for existence was to abstract away
@@ -4673,13 +4664,9 @@ The variants that Spring provides are as follows:
   configuring a `java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
   If you need to adapt to a different kind of `java.util.concurrent.Executor`, we
   recommend that you use a `ConcurrentTaskExecutor` instead.
-* `WorkManagerTaskExecutor`:
-  This implementation uses a CommonJ `WorkManager` as its backing service provider
-  and is the central convenience class for setting up CommonJ-based thread pool
-  integration on WebLogic or WebSphere within a Spring application context.
 * `DefaultManagedTaskExecutor`:
   This implementation uses a JNDI-obtained `ManagedExecutorService` in a JSR-236
-  compatible runtime environment (such as a Java EE 7+ application server),
+  compatible runtime environment (such as a Jakarta EE application server),
   replacing a CommonJ WorkManager for that purpose.
 
 
@@ -4859,7 +4846,7 @@ application server environment where threads should not be created directly by t
 application itself. For such scenarios, Spring provides a `TimerManagerTaskScheduler`
 that delegates to a CommonJ `TimerManager` on WebLogic or WebSphere as well as a more recent
 `DefaultManagedTaskScheduler` that delegates to a JSR-236 `ManagedScheduledExecutorService`
-in a Java EE 7+ environment. Both are typically configured with a JNDI lookup.
+in a Jakarta EE environment. Both are typically configured with a JNDI lookup.
 
 Whenever external thread management is not a requirement, a simpler alternative is
 a local `ScheduledExecutorService` setup within the application, which can be adapted
@@ -4925,37 +4912,54 @@ switching to `aspectj` mode in combination with compile-time or load-time weavin
 ==== The `@Scheduled` annotation
 
 You can add the `@Scheduled` annotation to a method, along with trigger metadata. For
-example, the following method is invoked every five seconds with a fixed delay,
-meaning that the period is measured from the completion time of each preceding
-invocation:
+example, the following method is invoked every five seconds (5000 milliseconds) with a
+fixed delay, meaning that the period is measured from the completion time of each
+preceding invocation.
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	@Scheduled(fixedDelay=5000)
+	@Scheduled(fixedDelay = 5000)
 	public void doSomething() {
 		// something that should run periodically
 	}
 ----
 
-If you need a fixed-rate execution, you can change the property name specified within
-the annotation. The following method is invoked every five seconds (measured between the
-successive start times of each invocation):
+[NOTE]
+====
+By default, milliseconds will be used as the time unit for fixed delay, fixed rate, and
+initial delay values. If you would like to use a different time unit such as seconds or
+minutes, you can configure this via the `timeUnit` attribute in `@Scheduled`.
+
+For example, the previous example can also be written as follows.
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	@Scheduled(fixedRate=5000)
+	@Scheduled(fixedDelay = 5, timeUnit = TimeUnit.SECONDS)
+	public void doSomething() {
+		// something that should run periodically
+	}
+----
+====
+
+If you need a fixed-rate execution, you can use the `fixedRate` attribute within the
+annotation. The following method is invoked every five seconds (measured between the
+successive start times of each invocation).
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(fixedRate = 5, timeUnit = TimeUnit.SECONDS)
 	public void doSomething() {
 		// something that should run periodically
 	}
 ----
 
 For fixed-delay and fixed-rate tasks, you can specify an initial delay by indicating the
-number of milliseconds to wait before the first execution of the method, as the following
-`fixedRate` example shows:
+amount of time to wait before the first execution of the method, as the following
+`fixedRate` example shows.
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	@Scheduled(initialDelay=1000, fixedRate=5000)
+	@Scheduled(initialDelay = 1000, fixedRate = 5000)
 	public void doSomething() {
 		// something that should run periodically
 	}
@@ -4977,7 +4981,7 @@ The following example runs only on weekdays:
 TIP: You can also use the `zone` attribute to specify the time zone in which the cron
 expression is resolved.
 
-Notice that the methods to be scheduled must have void returns and must not expect any
+Notice that the methods to be scheduled must have void returns and must not accept any
 arguments. If the method needs to interact with other objects from the application
 context, those would typically have been provided through dependency injection.
 
@@ -5572,8 +5576,8 @@ an existing Spring application. Similar to the <<data-access.adoc#transaction, t
 support, the caching abstraction allows consistent use of various caching solutions with
 minimal impact on the code.
 
-As from Spring 4.1, the cache abstraction has been significantly extended with the
-support of <<cache-jsr-107,JSR-107 annotations>> and more customization options.
+In Spring Framework 4.1, the cache abstraction was significantly extended with support
+for <<cache-jsr-107,JSR-107 annotations>> and more customization options.
 
 
 
@@ -5612,7 +5616,7 @@ invoke the method again. The caching logic is applied transparently without any
 interference to the invoker.
 
 IMPORTANT: This approach works only for methods that are guaranteed to return the same
-output (result) for a given input (or arguments) no matter how many times it is invoked.
+output (result) for a given input (or arguments) no matter how many times they are invoked.
 
 The caching abstraction provides other cache-related operations, such as the ability
 to update the content of the cache or to remove one or all entries. These are useful if
@@ -5625,21 +5629,22 @@ provide the actual data store. This abstraction is materialized by the
 `org.springframework.cache.Cache` and `org.springframework.cache.CacheManager` interfaces.
 
 Spring provides <<cache-store-configuration, a few implementations>> of that abstraction:
-JDK `java.util.concurrent.ConcurrentMap` based caches, https://www.ehcache.org/[Ehcache 2.x],
-Gemfire cache, https://github.com/ben-manes/caffeine/wiki[Caffeine], and JSR-107
-compliant caches (such as Ehcache 3.x). See <<cache-plug>> for more information on
-plugging in other cache stores and providers.
+JDK `java.util.concurrent.ConcurrentMap` based caches, Gemfire cache,
+https://github.com/ben-manes/caffeine/wiki[Caffeine], and JSR-107 compliant caches (such
+as Ehcache 3.x). See <<cache-plug>> for more information on plugging in other cache
+stores and providers.
 
 IMPORTANT: The caching abstraction has no special handling for multi-threaded and
-multi-process environments, as such features are handled by the cache implementation. .
+multi-process environments, as such features are handled by the cache implementation.
 
 If you have a multi-process environment (that is, an application deployed on several nodes),
 you need to configure your cache provider accordingly. Depending on your use cases, a copy
 of the same data on several nodes can be enough. However, if you change the data during
 the course of the application, you may need to enable other propagation mechanisms.
 
-Caching a particular item is a direct equivalent of the typical get-if-not-found-then-
-proceed-and-put-eventually code blocks found with programmatic cache interaction.
+Caching a particular item is a direct equivalent of the typical
+get-if-not-found-then-proceed-and-put-eventually code blocks
+found with programmatic cache interaction.
 No locks are applied, and several threads may try to load the same item concurrently.
 The same applies to eviction. If several threads are trying to update or evict data
 concurrently, you may use stale data. Certain cache providers offer advanced features
@@ -5647,7 +5652,7 @@ in that area. See the documentation of your cache provider for more details.
 
 To use the cache abstraction, you need to take care of two aspects:
 
-* Caching declaration: Identify the methods that need to be cached and their policy.
+* Caching declaration: Identify the methods that need to be cached and their policies.
 * Cache configuration: The backing cache where the data is stored and from which it is read.
 
 
@@ -5690,7 +5695,7 @@ method -- if at least one cache is hit, the associated value is returned.
 NOTE: All the other caches that do not contain the value are also updated, even though
 the cached method was not actually invoked.
 
-The following example uses `@Cacheable` on the `findBook` method:
+The following example uses `@Cacheable` on the `findBook` method with multiple caches:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -5837,7 +5842,7 @@ regardless of the content of the annotation.
 
 Similarly to `key` and `keyGenerator`, the `cacheManager` and `cacheResolver`
 parameters are mutually exclusive, and an operation specifying both
-results in an exception. as a custom `CacheManager` is ignored by the
+results in an exception, as a custom `CacheManager` is ignored by the
 `CacheResolver` implementation. This is probably not what you expect.
 ====
 
@@ -5898,9 +5903,11 @@ want to cache paperback books, as the following example does:
 <1> Using the `unless` attribute to block hardbacks.
 
 
-The cache abstraction supports `java.util.Optional`, using its content as the cached value
-only if it is present. `#result` always refers to the business entity and never a
-supported wrapper, so the previous example can be rewritten as follows:
+The cache abstraction supports `java.util.Optional` return types. If an `Optional` value
+is _present_, it will be stored in the associated cache. If an `Optional` value is not
+present, `null` will be stored in the associated cache. `#result` always refers to the
+business entity and never a supported wrapper, so the previous example can be rewritten
+as follows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -5908,8 +5915,8 @@ supported wrapper, so the previous example can be rewritten as follows:
 	public Optional<Book> findBook(String name)
 ----
 
-Note that `result` still refers to `Book` and not `Optional`. As it might be `null`, we
-should use the safe navigation operator.
+Note that `#result` still refers to `Book` and not `Optional<Book>`. Since it might be
+`null`, we use SpEL's <<core.adoc#expressions-operator-safe-navigation, safe navigation operator>>.
 
 [[cache-spel-context]]
 ===== Available Caching SpEL Evaluation Context
@@ -6295,7 +6302,7 @@ up its declaration at runtime and understands its meaning. Note that, as mention
 === JCache (JSR-107) Annotations
 
 Since version 4.1, Spring's caching abstraction fully supports the JCache standard
-annotations: `@CacheResult`, `@CachePut`, `@CacheRemove`, and `@CacheRemoveAll`
+(JSR-107) annotations: `@CacheResult`, `@CachePut`, `@CacheRemove`, and `@CacheRemoveAll`
 as well as the `@CacheDefaults`, `@CacheKey`, and `@CacheValue` companions.
 You can use these annotations even without migrating your cache store to JSR-107.
 The internal implementation uses Spring's caching abstraction and provides default
@@ -6309,8 +6316,8 @@ you can switch to these standard annotations without changing your cache storage
 ==== Feature Summary
 
 For those who are familiar with Spring's caching annotations, the following table
-describes the main differences between the Spring annotations and the JSR-107
-counterpart:
+describes the main differences between the Spring annotations and their JSR-107
+counterparts:
 
 .Spring vs. JSR-107 caching annotations
 [cols="1,1,3"]
@@ -6402,16 +6409,15 @@ invoking the method again:
 
 ==== Enabling JSR-107 Support
 
-You need do nothing specific to enable the JSR-107 support alongside Spring's
-declarative annotation support. Both `@EnableCaching` and the
-`cache:annotation-driven` element automatically enable the JCache support
-if both the JSR-107 API and the `spring-context-support` module are present
-in the classpath.
+You do not need to do anything specific to enable the JSR-107 support alongside Spring's
+declarative annotation support. Both `@EnableCaching` and the `cache:annotation-driven`
+XML element automatically enable the JCache support if both the JSR-107 API and the
+`spring-context-support` module are present in the classpath.
 
-NOTE: Depending on your use case, the choice is basically yours. You can even
-mix and match services by using the JSR-107 API on some and using Spring's own
-annotations on others. However, if these services impact the same caches,
-you should use a consistent and identical key generation implementation.
+NOTE: Depending on your use case, the choice is basically yours. You can even mix and
+match services by using the JSR-107 API on some and using Spring's own annotations on
+others. However, if these services impact the same caches, you should use a consistent
+and identical key generation implementation.
 
 
 
@@ -6509,28 +6515,11 @@ and is very fast, but it does not provide any management, persistence capabiliti
 or eviction contracts.
 
 
-[[cache-store-configuration-ehcache]]
+[[cache-store-configuration-eviction]]
 ==== Ehcache-based Cache
 
-NOTE: Ehcache 3.x is fully JSR-107 compliant and no dedicated support is required for it.
-
-The Ehcache 2.x implementation is located in the `org.springframework.cache.ehcache`
-package. Again, to use it, you need to declare the appropriate `CacheManager`.
-The following example shows how to do so:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="cacheManager"
-			class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
-
-	<!-- EhCache library setup -->
-	<bean id="ehcache"
-			class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>
-----
-
-This setup bootstraps the ehcache library inside the Spring IoC (through the `ehcache`
-bean), which is then wired into the dedicated `CacheManager` implementation. Note that
-the entire Ehcache-specific configuration is read from `ehcache.xml`.
+Ehcache 3.x is fully JSR-107 compliant and no dedicated support is required for it. See
+<<cache-store-configuration-jsr107>> for details.
 
 
 [[cache-store-configuration-caffeine]]
@@ -6635,15 +6624,13 @@ invoked every time.
 === Plugging-in Different Back-end Caches
 
 Clearly, there are plenty of caching products out there that you can use as a backing
-store. To plug them in, you need to provide a `CacheManager` and a `Cache` implementation,
-since, unfortunately, there is no available standard that we can use instead.
-This may sound harder than it is, since, in practice, the classes tend to be simple
-https://en.wikipedia.org/wiki/Adapter_pattern[adapters] that map the caching abstraction
-framework on top of the storage API, as the `ehcache` classes do. Most `CacheManager`
-classes can use the classes in the `org.springframework.cache.support` package
-(such as `AbstractCacheManager` which takes care of the boiler-plate code,
-leaving only the actual mapping to be completed). We hope that, in time, the libraries
-that provide integration with Spring can fill in this small configuration gap.
+store. For those that do not support JSR-107 you need to provide a `CacheManager` and a
+`Cache` implementation. This may sound harder than it is, since, in practice, the classes
+tend to be simple https://en.wikipedia.org/wiki/Adapter_pattern[adapters] that map the
+caching abstraction framework on top of the storage API, as the _Caffeine_ classes do.
+Most `CacheManager` classes can use the classes in the
+`org.springframework.cache.support` package (such as `AbstractCacheManager` which takes
+care of the boiler-plate code, leaving only the actual mapping to be completed).
 
 
 
