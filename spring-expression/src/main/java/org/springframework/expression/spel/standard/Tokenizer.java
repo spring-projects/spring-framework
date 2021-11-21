@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
+import org.springframework.util.Assert;
 
 /**
  * Lex some input data into a stream of tokens that can then be parsed.
@@ -88,6 +89,13 @@ class Tokenizer {
 		while (this.pos < this.max) {
 			char ch = this.charsToProcess[this.pos];
 			if (isAlphabetic(ch)) {
+				if (ch == 'b' || ch == 'B') {
+					Assert.isTrue(this.pos + 1 < this.max, "Is not bytes literal");
+					if (this.charsToProcess[this.pos + 1] == '\'' || this.charsToProcess[this.pos + 1] == '"') {
+						lexQuotedBytesLiteral();
+						continue;
+					}
+				}
 				lexIdentifier();
 			}
 			else {
@@ -319,6 +327,61 @@ class Tokenizer {
 		}
 		this.pos++;
 		this.tokens.add(new Token(TokenKind.LITERAL_STRING, subarray(start, this.pos), start, this.pos));
+	}
+
+	// Bytes_LITERAL: 'b\'\x12\x34\x56\''!;
+	private void lexQuotedBytesLiteral() {
+		List<Character> bytesList = new ArrayList<>();
+		int start = ++this.pos;
+		// prefix is quoto or doubleQuoto
+		char prefix = this.charsToProcess[start];
+		boolean terminated = false;
+		while (!terminated) {
+			this.pos++;
+			char ch = this.charsToProcess[this.pos];
+			if (ch == prefix) {
+				if (this.charsToProcess[this.pos + 1] == prefix) {
+					this.pos++;  // skip over that too, and continue
+				}
+				else {
+					terminated = true;
+				}
+			}
+			else if (ch == '\\') {
+				char c = this.charsToProcess[++this.pos];
+				switch (c) {
+					case 'x', 'X':
+						int v = 0;
+						for (int i = 0; i < 2; i++) {
+							this.pos++;
+							int x = 0;
+							if (this.charsToProcess[this.pos] >= '0' && this.charsToProcess[this.pos] <= '9') {
+								x = this.charsToProcess[this.pos] - '0';
+							}
+							else if (this.charsToProcess[this.pos] >= 'a' && this.charsToProcess[this.pos] <= 'f') {
+								x = this.charsToProcess[this.pos] - 'a' + 10;
+							}
+							else if (this.charsToProcess[this.pos] >= 'A' && this.charsToProcess[this.pos] <= 'F') {
+								x = this.charsToProcess[this.pos] - 'A' + 10;
+							}
+							v = v << 4 | x;
+						}
+						bytesList.add((char) v);
+				}
+			}
+			else {
+				bytesList.add(ch);
+			}
+			if (isExhausted()) {
+				raiseParseException(start, SpelMessage.NON_TERMINATING_QUOTED_BYTES);
+			}
+		}
+		char[] result = new char[bytesList.size()];
+		for (int i = 0; i < bytesList.size(); i++) {
+			result[i] = bytesList.get(i);
+		}
+		this.pos++;
+		this.tokens.add(new Token(TokenKind.LITERAL_BYTES, result, 0, result.length - 1));
 	}
 
 	// REAL_LITERAL :

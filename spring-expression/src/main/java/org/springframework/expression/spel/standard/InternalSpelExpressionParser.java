@@ -33,6 +33,7 @@ import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.Assign;
 import org.springframework.expression.spel.ast.BeanReference;
 import org.springframework.expression.spel.ast.BooleanLiteral;
+import org.springframework.expression.spel.ast.BytesLiteral;
 import org.springframework.expression.spel.ast.CompoundExpression;
 import org.springframework.expression.spel.ast.ConstructorReference;
 import org.springframework.expression.spel.ast.Elvis;
@@ -863,6 +864,9 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		}
 		else if (t.kind == TokenKind.LITERAL_STRING) {
 			push(new StringLiteral(t.stringValue(), t.startPos, t.endPos, t.stringValue()));
+		}
+		else if (t.kind == TokenKind.LITERAL_BYTES) {
+			push(new BytesLiteral(t.stringValue(), t.startPos, t.endPos, t.stringValue()));
 		}
 		else {
 			return false;
