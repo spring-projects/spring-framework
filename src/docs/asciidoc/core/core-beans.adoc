@@ -7953,6 +7953,26 @@ following text image shows:
 transferService -> com.acme.TransferServiceImpl
 ----
 
+You can also use default methods to define beans. This allows composition of bean
+configurations by implementing interfaces with bean definitions on default methods.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public interface BaseConfig {
+
+		@Bean
+		default TransferServiceImpl transferService() {
+			return new TransferServiceImpl();
+		}
+	}
+
+	@Configuration
+	public class AppConfig implements BaseConfig {
+
+	}
+----
+
 You can also declare your `@Bean` method with an interface (or base class)
 return type, as the following example shows:
 
