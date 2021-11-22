@@ -6788,20 +6788,20 @@ You can take control over result mapping by supplying a `Function<Row, T>` that 
 called for each `Row` so it can can return arbitrary values (singular values,
 collections and maps, and objects).
 
-The following example extracts the `id` column and emits its value:
+The following example extracts the `name` column and emits its value:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	Flux<String> names = client.sql("SELECT name FROM person")
-	        .map(row -> row.get("id", String.class))
+	        .map(row -> row.get("name", String.class))
 	        .all();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val names = client.sql("SELECT name FROM person")
-	        .map{ row: Row -> row.get("id", String.class) }
+	        .map{ row: Row -> row.get("name", String.class) }
 	        .flow()
 ----
 
