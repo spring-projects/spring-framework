@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,28 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-import javax.sql.DataSource;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.core.IsSame.sameInstance;
-import static org.junit.Assert.assertThat;
+import javax.sql.DataSource;
+
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+
 
 /**
  * Tests for {@link AbstractRoutingDataSource}.
+ *
  * @author Kazuki Shimizu
  */
-public class AbstractRoutingDataSourceTests {
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
+class AbstractRoutingDataSourceTests {
 
 	@Test
-	public void setTargetDataSources() {
+	void setTargetDataSources() {
 		final ThreadLocal<String> lookupKey = new ThreadLocal<>();
 		AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
 			@Override
@@ -59,31 +58,26 @@ public class AbstractRoutingDataSourceTests {
 		routingDataSource.setTargetDataSources(targetDataSources);
 
 		routingDataSource.afterPropertiesSet();
-
 		lookupKey.set("ds1");
-		assertThat(routingDataSource.determineTargetDataSource(), sameInstance(ds1));
-
+		assertThat(routingDataSource.determineTargetDataSource()).isSameAs(ds1);
 		lookupKey.set("ds2");
-		assertThat(routingDataSource.determineTargetDataSource(), sameInstance(ds2));
+		assertThat(routingDataSource.determineTargetDataSource()).isSameAs(ds2);
 	}
 
 	@Test
-	public void targetDataSourcesIsNull() {
+	void targetDataSourcesIsNull() {
 		AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
 			@Override
 			protected Object determineCurrentLookupKey() {
 				return null;
 			}
 		};
-
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("Property 'targetDataSources' is required");
-
-		routingDataSource.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(routingDataSource::afterPropertiesSet)
+				.withMessage("Property 'targetDataSources' is required");
 	}
 
 	@Test
-	public void dataSourceIsUnSupportedType() {
+	void dataSourceIsUnSupportedType() {
 		AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
 			@Override
 			protected Object determineCurrentLookupKey() {
@@ -93,17 +87,13 @@ public class AbstractRoutingDataSourceTests {
 		Map<Object, Object> targetDataSources = new HashMap<>();
 		targetDataSources.put("ds1", 1);
 		routingDataSource.setTargetDataSources(targetDataSources);
-
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("Illegal data source value - only [javax.sql.DataSource] and String supported: 1");
-
-		routingDataSource.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(routingDataSource::afterPropertiesSet)
+				.withMessage("Illegal data source value - only [javax.sql.DataSource] and String supported: 1");
 	}
 
 
-
 	@Test
-	public void setDefaultTargetDataSource() {
+	void setDefaultTargetDataSource() {
 		final ThreadLocal<String> lookupKey = new ThreadLocal<>();
 		AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
 			@Override
@@ -112,18 +102,15 @@ public class AbstractRoutingDataSourceTests {
 			}
 		};
 		DataSource ds = new StubDataSource();
-
 		routingDataSource.setTargetDataSources(new HashMap<>());
 		routingDataSource.setDefaultTargetDataSource(ds);
-
 		routingDataSource.afterPropertiesSet();
-
 		lookupKey.set("foo");
-		assertThat(routingDataSource.determineTargetDataSource(), sameInstance(ds));
+		assertThat(routingDataSource.determineTargetDataSource()).isSameAs(ds);
 	}
 
 	@Test
-	public void setDefaultTargetDataSourceFallbackIsFalse() {
+	void setDefaultTargetDataSourceFallbackIsFalse() {
 		final ThreadLocal<String> lookupKey = new ThreadLocal<>();
 		AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
 			@Override
@@ -132,22 +119,17 @@ public class AbstractRoutingDataSourceTests {
 			}
 		};
 		DataSource ds = new StubDataSource();
-
 		routingDataSource.setTargetDataSources(new HashMap<>());
 		routingDataSource.setDefaultTargetDataSource(ds);
 		routingDataSource.setLenientFallback(false);
-
 		routingDataSource.afterPropertiesSet();
-
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("Cannot determine target DataSource for lookup key [foo]");
-
 		lookupKey.set("foo");
-		routingDataSource.determineTargetDataSource();
+		assertThatIllegalStateException().isThrownBy(routingDataSource::determineTargetDataSource)
+				.withMessage("Cannot determine target DataSource for lookup key [foo]");
 	}
 
 	@Test
-	public void setDefaultTargetDataSourceLookupKeyIsNullWhenFallbackIsFalse() {
+	void setDefaultTargetDataSourceLookupKeyIsNullWhenFallbackIsFalse() {
 		final ThreadLocal<String> lookupKey = new ThreadLocal<>();
 		AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
 			@Override
@@ -156,15 +138,12 @@ public class AbstractRoutingDataSourceTests {
 			}
 		};
 		DataSource ds = new StubDataSource();
-
 		routingDataSource.setTargetDataSources(new HashMap<>());
 		routingDataSource.setDefaultTargetDataSource(ds);
 		routingDataSource.setLenientFallback(false);
-
 		routingDataSource.afterPropertiesSet();
-
 		lookupKey.set(null);
-		assertThat(routingDataSource.determineTargetDataSource(), sameInstance(ds));
+		assertThat(routingDataSource.determineTargetDataSource()).isSameAs(ds);
 	}
 
 	@Test
@@ -175,11 +154,8 @@ public class AbstractRoutingDataSourceTests {
 				return null;
 			}
 		};
-
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("DataSource router not initialized");
-
-		routingDataSource.determineTargetDataSource();
+		assertThatIllegalArgumentException().isThrownBy(routingDataSource::determineTargetDataSource)
+				.withMessage("DataSource router not initialized");
 	}
 
 }
