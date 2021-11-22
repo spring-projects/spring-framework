@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Mark Paluch
  * @author Jens Schauder
+ * @author Anton Naydenov
  */
 public class NamedParameterUtilsUnitTests {
 
@@ -272,6 +273,18 @@ public class NamedParameterUtilsUnitTests {
 
 		assertThat(psql2.getTotalParameterCount()).isEqualTo(1);
 		assertThat(psql2.getParameterNames()).containsExactly("xxx");
+	}
+
+	@Test public void parseSqlStatementWithSquareBracket() {
+		// given
+		String sql = "SELECT ARRAY[:ext]";
+
+		// when
+		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
+
+		//then
+		assertThat(psql.getNamedParameterCount()).isEqualTo(1);
+		assertThat(psql.getParameterNames()).containsExactly("ext");
 	}
 
 	@Test
