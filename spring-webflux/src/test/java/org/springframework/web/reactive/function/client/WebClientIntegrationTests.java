@@ -99,9 +99,9 @@ class WebClientIntegrationTests {
 	static Stream<ClientHttpConnector> arguments() {
 		return Stream.of(
 				new ReactorClientHttpConnector(),
+				new JdkClientHttpConnector(),
 				new JettyClientHttpConnector(),
-				new HttpComponentsClientHttpConnector(),
-				new JdkClientHttpConnector()
+				new HttpComponentsClientHttpConnector()
 		);
 	}
 

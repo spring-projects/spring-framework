@@ -75,21 +75,21 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	static Object[][] arguments() {
 		return new Object[][] {
 			{new JettyHttpServer(), new ReactorClientHttpConnector()},
+			{new JettyHttpServer(), new JdkClientHttpConnector()},
 			{new JettyHttpServer(), new JettyClientHttpConnector()},
 			{new JettyHttpServer(), new HttpComponentsClientHttpConnector()},
-			{new JettyHttpServer(), new JdkClientHttpConnector()},
 			{new ReactorHttpServer(), new ReactorClientHttpConnector()},
+			{new ReactorHttpServer(), new JdkClientHttpConnector()},
 			{new ReactorHttpServer(), new JettyClientHttpConnector()},
 			{new ReactorHttpServer(), new HttpComponentsClientHttpConnector()},
-			{new ReactorHttpServer(), new JdkClientHttpConnector()},
 			{new TomcatHttpServer(), new ReactorClientHttpConnector()},
+			{new TomcatHttpServer(), new JdkClientHttpConnector()},
 			{new TomcatHttpServer(), new JettyClientHttpConnector()},
 			{new TomcatHttpServer(), new HttpComponentsClientHttpConnector()},
-			{new TomcatHttpServer(), new JdkClientHttpConnector()},
 			{new UndertowHttpServer(), new ReactorClientHttpConnector()},
+			{new UndertowHttpServer(), new JdkClientHttpConnector()},
 			{new UndertowHttpServer(), new JettyClientHttpConnector()},
 			{new UndertowHttpServer(), new HttpComponentsClientHttpConnector()},
-			{new UndertowHttpServer(), new JdkClientHttpConnector()},
 		};
 	}
 

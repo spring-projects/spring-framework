@@ -23,6 +23,7 @@ import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
 import java.util.function.Function;
 
@@ -31,6 +32,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * {@link ClientHttpConnector} for the Java {@link HttpClient}.
@@ -44,21 +47,47 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 
 	private final HttpClient httpClient;
 
-	private final DataBufferFactory bufferFactory;
+	private DataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
 
 
 	/**
 	 * Default constructor that uses {@link HttpClient#newHttpClient()}.
 	 */
 	public JdkClientHttpConnector() {
-		this(HttpClient.newHttpClient(), new DefaultDataBufferFactory());
+		this(HttpClient.newHttpClient());
 	}
 
 	/**
 	 * Constructor with an initialized {@link HttpClient} and a {@link DataBufferFactory}.
 	 */
-	public JdkClientHttpConnector(HttpClient httpClient, DataBufferFactory bufferFactory) {
+	public JdkClientHttpConnector(HttpClient httpClient) {
 		this.httpClient = httpClient;
+	}
+
+	/**
+	 * Constructor with a {@link JdkHttpClientResourceFactory} that provides
+	 * shared resources.
+	 * @param clientBuilder a pre-initialized builder for the client that will
+	 * be further initialized with the shared resources to use
+	 * @param resourceFactory the {@link JdkHttpClientResourceFactory} to use
+	 */
+	public JdkClientHttpConnector(
+			HttpClient.Builder clientBuilder, @Nullable JdkHttpClientResourceFactory resourceFactory) {
+
+		if (resourceFactory != null) {
+			Executor executor = resourceFactory.getExecutor();
+			clientBuilder.executor(executor);
+		}
+		this.httpClient = clientBuilder.build();
+	}
+
+
+	/**
+	 * Set the buffer factory to use.
+	 * <p>By default, this is {@link DefaultDataBufferFactory#sharedInstance}.
+	 */
+	public void setBufferFactory(DataBufferFactory bufferFactory) {
+		Assert.notNull(bufferFactory, "DataBufferFactory is required");
 		this.bufferFactory = bufferFactory;
 	}
 
