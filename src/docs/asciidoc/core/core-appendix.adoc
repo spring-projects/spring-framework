@@ -749,7 +749,7 @@ essentially the same as the following XML snippet:
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="dateFormat" class="java.text.SimpleDateFormat">
-		<constructor-arg value="yyyy-HH-dd HH:mm"/>
+		<constructor-arg value="yyyy-MM-dd HH:mm"/>
 		<property name="lenient" value="true"/>
 	</bean>
 ----
