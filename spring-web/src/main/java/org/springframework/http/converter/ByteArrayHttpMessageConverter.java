@@ -16,7 +16,6 @@
 
 package org.springframework.http.converter;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.springframework.http.HttpInputMessage;

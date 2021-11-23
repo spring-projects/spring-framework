@@ -140,6 +140,29 @@ public abstract class StreamUtils {
 	}
 
 	/**
+	 * Copy the contents of the given InputStream to the given OutputStream.
+	 * <p>Leaves both streams open when done.
+	 * @param in the InputStream to copy from
+	 * @param out the OutputStream to copy to
+	 * @return the number of bytes copied
+	 * @throws IOException in case of I/O errors
+	 */
+	public static int copy(InputStream in, OutputStream out) throws IOException {
+		Assert.notNull(in, "No InputStream specified");
+		Assert.notNull(out, "No OutputStream specified");
+
+		int byteCount = 0;
+		byte[] buffer = new byte[BUFFER_SIZE];
+		int bytesRead;
+		while ((bytesRead = in.read(buffer)) != -1) {
+			out.write(buffer, 0, bytesRead);
+			byteCount += bytesRead;
+		}
+		out.flush();
+		return byteCount;
+	}
+
+	/**
 	 * Copy a range of content of the given InputStream to the given OutputStream.
 	 * <p>If the specified range exceeds the length of the InputStream, this copies
 	 * up to the end of the stream and returns the actual number of copied bytes.
