@@ -696,8 +696,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	protected void marshalXmlStreamWriter(Object graph, XMLStreamWriter streamWriter) throws XmlMappingException {
 		try {
 			StaxWriter writer;
-			if (this.streamDriver instanceof StaxDriver) {
-				writer = ((StaxDriver) this.streamDriver).createStaxWriter(streamWriter);
+			if (this.streamDriver instanceof StaxDriver staxDriver) {
+				writer = staxDriver.createStaxWriter(streamWriter);
 			}
 			else {
 				writer = new StaxWriter(new QNameMap(), streamWriter, this.nameCoder);
