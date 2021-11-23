@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,13 +73,13 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 
 	private int keepAliveSeconds = 60;
 
-	private int queueCapacity = Integer.MAX_VALUE;
-
 	private boolean allowCoreThreadTimeOut = false;
 
-	private boolean exposeUnconfigurableExecutor = false;
-
 	private boolean prestartAllCoreThreads = false;
+
+	private int queueCapacity = Integer.MAX_VALUE;
+
+	private boolean exposeUnconfigurableExecutor = false;
 
 	@Nullable
 	private ExecutorService exposedExecutor;
@@ -121,6 +121,16 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 	}
 
 	/**
+	 * Specify whether to start all core threads, causing them to idly wait for work.
+	 * <p>Default is "false".
+	 * @since 5.3.14
+	 * @see java.util.concurrent.ThreadPoolExecutor#prestartAllCoreThreads
+	 */
+	public void setPrestartAllCoreThreads(boolean prestartAllCoreThreads) {
+		this.prestartAllCoreThreads = prestartAllCoreThreads;
+	}
+
+	/**
 	 * Set the capacity for the ThreadPoolExecutor's BlockingQueue.
 	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p>Any positive value will lead to a LinkedBlockingQueue instance;
@@ -130,17 +140,6 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 	 */
 	public void setQueueCapacity(int queueCapacity) {
 		this.queueCapacity = queueCapacity;
-	}
-
-	/**
-	 * Specify whether this FactoryBean should prestart all threads
-	 * for the created executor.
-	 * <p>Default is "false".
-	 * Switch this flag to "true" to prestart the threads allocated for the current executor
-	 * @see java.util.concurrent.ThreadPoolExecutor#prestartAllCoreThreads
-	 */
-	public void setPrestartAllCoreThreads(boolean prestartAllCoreThreads) {
-		this.prestartAllCoreThreads = prestartAllCoreThreads;
 	}
 
 	/**
@@ -166,7 +165,6 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 		if (this.allowCoreThreadTimeOut) {
 			executor.allowCoreThreadTimeOut(true);
 		}
-
 		if (this.prestartAllCoreThreads) {
 			executor.prestartAllCoreThreads();
 		}

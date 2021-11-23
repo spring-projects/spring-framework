@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.GenericApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -37,6 +37,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 /**
+ * Tests for {@link ThreadPoolExecutorFactoryBean}.
+ *
  * @author Juergen Hoeller
  */
 class ThreadPoolExecutorFactoryBeanTests {
@@ -53,19 +55,25 @@ class ThreadPoolExecutorFactoryBeanTests {
 	}
 
 	@Test
-	public void executorWithPreStartedThreads() throws Exception {
-		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(ExecutorConfigWithPreStartedThreads.class);
-		ThreadPoolExecutor executor = context.getBean("childExecutor", ThreadPoolExecutor.class);
-
-		verify(executor).prestartAllCoreThreads();
+	void executorWithDefaultSettingsDoesNotPrestartAllCoreThreads() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBean("taskExecutor", ThreadPoolExecutorFactoryBean.class, TestThreadPoolExecutorFactoryBean::new);
+		context.refresh();
+		ThreadPoolExecutor threadPoolExecutor = context.getBean(ThreadPoolExecutor.class);
+		verify(threadPoolExecutor, never()).prestartAllCoreThreads();
 	}
 
 	@Test
-	public void executorWithNoPreStartedThreads() throws Exception {
-		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(ExecutorConfigWithNoPreStartedThreads.class);
-		ThreadPoolExecutor executor = context.getBean("childExecutor", ThreadPoolExecutor.class);
-
-		verify(executor, never()).prestartAllCoreThreads();
+	void executorWithPrestartAllCoreThreads() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBean("taskExecutor", ThreadPoolExecutorFactoryBean.class, () -> {
+			TestThreadPoolExecutorFactoryBean factoryBean = new TestThreadPoolExecutorFactoryBean();
+			factoryBean.setPrestartAllCoreThreads(true);
+			return factoryBean;
+		});
+		context.refresh();
+		ThreadPoolExecutor threadPoolExecutor = context.getBean(ThreadPoolExecutor.class);
+		verify(threadPoolExecutor).prestartAllCoreThreads();
 	}
 
 	@Configuration
@@ -78,37 +86,8 @@ class ThreadPoolExecutorFactoryBeanTests {
 
 	}
 
-	@Configuration
-	public static class ExecutorConfigWithPreStartedThreads {
+	private static class TestThreadPoolExecutorFactoryBean extends ThreadPoolExecutorFactoryBean {
 
-		@Bean
-		public ThreadPoolExecutorFactoryBean executorChildFactory() {
-			ThreadPoolExecutorFactoryBeanMockingChild threadPoolExecutorFactoryBeanMockingChild = new ThreadPoolExecutorFactoryBeanMockingChild();
-			threadPoolExecutorFactoryBeanMockingChild.setPrestartAllCoreThreads(true);
-			return threadPoolExecutorFactoryBeanMockingChild;
-		}
-
-		@Bean
-		public ExecutorService childExecutor() {
-			return executorChildFactory().getObject();
-		}
-	}
-
-	@Configuration
-	public static class ExecutorConfigWithNoPreStartedThreads {
-
-		@Bean
-		public ThreadPoolExecutorFactoryBean executorChildFactory() {
-			return new ThreadPoolExecutorFactoryBeanMockingChild();
-		}
-
-		@Bean
-		public ExecutorService childExecutor() {
-			return executorChildFactory().getObject();
-		}
-	}
-
-	private static class ThreadPoolExecutorFactoryBeanMockingChild extends ThreadPoolExecutorFactoryBean {
 		@Override
 		protected ThreadPoolExecutor createExecutor(
 				int corePoolSize, int maxPoolSize, int keepAliveSeconds, BlockingQueue<Runnable> queue,
@@ -117,6 +96,5 @@ class ThreadPoolExecutorFactoryBeanTests {
 			return mock(ThreadPoolExecutor.class);
 		}
 	}
-
 
 }
