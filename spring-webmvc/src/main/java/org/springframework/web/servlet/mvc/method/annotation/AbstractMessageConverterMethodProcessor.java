@@ -235,8 +235,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 						"No converter found for return value of type: " + valueType);
 			}
 			List<MediaType> mediaTypesToUse = new ArrayList<>();
-			for (MediaType requestedType : acceptableTypes) {
-				for (MediaType producibleType : producibleTypes) {
+			for (MediaType producibleType : producibleTypes) {
+				for (MediaType requestedType : acceptableTypes) {
 					if (requestedType.isCompatibleWith(producibleType)) {
 						mediaTypesToUse.add(getMostSpecificMediaType(requestedType, producibleType));
 					}
