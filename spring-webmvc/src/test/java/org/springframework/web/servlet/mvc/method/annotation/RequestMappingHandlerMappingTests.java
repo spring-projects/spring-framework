@@ -79,6 +79,17 @@ public class RequestMappingHandlerMappingTests {
 		return Stream.of(Arguments.of(mapping1, wac1), Arguments.of(mapping2, wac2));
 	}
 
+	@Test
+	void getRequestMappingInfoBuilderConfiguration() {
+		RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
+		handlerMapping.setApplicationContext(new StaticWebApplicationContext());
+
+		RequestMappingInfo.BuilderConfiguration beforeAfterPropertiesSet = handlerMapping.getRequestMappingInfoBuilderConfiguration();
+		assertThat(beforeAfterPropertiesSet).isNotNull();
+		handlerMapping.afterPropertiesSet();
+		RequestMappingInfo.BuilderConfiguration afterPropertiesSet = handlerMapping.getRequestMappingInfoBuilderConfiguration();
+		assertThat(afterPropertiesSet).isNotNull().isNotSameAs(beforeAfterPropertiesSet);
+	}
 
 	@Test
 	@SuppressWarnings("deprecation")

@@ -246,6 +246,17 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return this.config.getFileExtensions();
 	}
 
+	/**
+	 * Get the configuration to build {@link RequestMappingInfo}
+	 * instances. This is useful for programmatic registration of
+	 * additional mappings following the same configuration as {@link
+	 * #createRequestMappingInfo(RequestMapping, RequestCondition)}.
+	 *
+	 * @return builder configuration to be supplied into {@link RequestMappingInfo.Builder#options}.
+	 */
+	public RequestMappingInfo.BuilderConfiguration getRequestMappingInfoBuilderConfiguration() {
+		return this.config;
+	}
 
 	/**
 	 * {@inheritDoc}
