@@ -51,7 +51,7 @@ import org.springframework.util.StringUtils;
  *
  * <pre class="code">com.xyz.FooServiceImpl -&gt; fooServiceImpl</pre>
  * <pre class="code">com.xyz.URLFooServiceImpl -&gt; URLFooServiceImpl</pre>
- * 
+ *
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.5
