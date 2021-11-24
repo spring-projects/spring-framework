@@ -160,6 +160,23 @@ public class StompDecoderTests {
 	}
 
 	@Test
+	public void decodeFrameWithHeaderWithBackslashValue() {
+		String accept = "accept-version:1.1\n";
+		String keyAndValueWithBackslash = "key:\\value\n";
+
+		Message<byte[]> frame = decode("CONNECT\n" + accept + keyAndValueWithBackslash + "\n\0");
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
+
+		assertThat(headers.getCommand()).isEqualTo(StompCommand.CONNECT);
+
+		assertThat(headers.toNativeHeaderMap().size()).isEqualTo(2);
+		assertThat(headers.getFirstNativeHeader("accept-version")).isEqualTo("1.1");
+		assertThat(headers.getFirstNativeHeader("key")).isEqualTo("\\value");
+
+		assertThat(frame.getPayload().length).isEqualTo(0);
+	}
+
+	@Test
 	public void decodeFrameBodyNotAllowed() {
 		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->
 				decode("CONNECT\naccept-version:1.2\n\nThe body of the message\0"));
