@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>If the annotation's value doesn't indicate a bean name, an appropriate
  * name will be built based on the short name of the class (with the first
- * letter lower-cased). If two first letters of class name are uppercase, bean name will be unchanged. For example:
+ * letter lower-cased), unless the two first letters are uppercase. For example:
  *
  * <pre class="code">com.xyz.FooServiceImpl -&gt; fooServiceImpl</pre>
  * <pre class="code">com.xyz.URLFooServiceImpl -&gt; URLFooServiceImpl</pre>
