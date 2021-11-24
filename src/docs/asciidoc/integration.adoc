@@ -6226,11 +6226,9 @@ if you need to annotate non-public methods, as it changes the bytecode itself.
 TIP: Spring recommends that you only annotate concrete classes (and methods of concrete
 classes) with the `@Cache{asterisk}` annotation, as opposed to annotating interfaces.
 You certainly can place the `@Cache{asterisk}` annotation on an interface (or an interface
-method), but this works only as you would expect it to if you use interface-based proxies.
-The fact that Java annotations are not inherited from interfaces means that, if you use
-class-based proxies (`proxy-target-class="true"`) or the weaving-based aspect
-(`mode="aspectj"`), the caching settings are not recognized by the proxying and weaving
-infrastructure, and the object is not wrapped in a caching proxy.
+method), but this works only as you would expect it to if you use the proxy mode (`mode="proxy"`).
+If you use the weaving-based aspect (`mode="aspectj"`), the caching settings are not
+recognized by weaving infrastructure.
 
 NOTE: In proxy mode (the default), only external method calls coming in through the
 proxy are intercepted. This means that self-invocation (in effect, a method within the
