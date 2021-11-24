@@ -143,7 +143,7 @@ public class StompDecoder {
 				StompCommand stompCommand = StompCommand.valueOf(command);
 				headerAccessor = StompHeaderAccessor.create(stompCommand);
 				initHeaders(headerAccessor);
-				readHeaders(byteBuffer, headerAccessor);
+				readHeaders(stompCommand, byteBuffer, headerAccessor);
 				payload = readPayload(byteBuffer, headerAccessor);
 			}
 			if (payload != null) {
@@ -215,7 +215,9 @@ public class StompDecoder {
 		return StreamUtils.copyToString(command, StandardCharsets.UTF_8);
 	}
 
-	private void readHeaders(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
+	private void readHeaders(StompCommand stompCommand, ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
+		boolean shouldUnescape = (stompCommand != StompCommand.CONNECT && stompCommand != StompCommand.STOMP
+				&& stompCommand != StompCommand.CONNECTED);
 		while (true) {
 			ByteArrayOutputStream headerStream = new ByteArrayOutputStream(256);
 			boolean headerComplete = false;
@@ -236,8 +238,8 @@ public class StompDecoder {
 					}
 				}
 				else {
-					String headerName = unescape(header.substring(0, colonIndex));
-					String headerValue = unescape(header.substring(colonIndex + 1));
+					String headerName = shouldUnescape ? unescape(header.substring(0, colonIndex)) : header.substring(0, colonIndex);
+					String headerValue = shouldUnescape ? unescape(header.substring(colonIndex + 1)) : header.substring(colonIndex + 1);
 					try {
 						headerAccessor.addNativeHeader(headerName, headerValue);
 					}
