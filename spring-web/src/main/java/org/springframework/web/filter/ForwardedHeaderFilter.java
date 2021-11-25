@@ -170,21 +170,18 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		public ForwardedHeaderRemovingRequest(HttpServletRequest request) {
 			super(request);
-
 			this.headerNames = headerNames(request);
 		}
 
 		private static Set<String> headerNames(HttpServletRequest request) {
-			final var headerNames = Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(Locale.ENGLISH));
-			final var names = request.getHeaderNames();
-
+			Set<String> headerNames = Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(Locale.ENGLISH));
+			Enumeration<String> names = request.getHeaderNames();
 			while (names.hasMoreElements()) {
-				final var name = names.nextElement();
-				headerNames.add(name);
+				String name = names.nextElement();
+				if (!FORWARDED_HEADER_NAMES.contains(name)) {
+					headerNames.add(name);
+				}
 			}
-
-			headerNames.removeAll(FORWARDED_HEADER_NAMES);
-
 			return Collections.unmodifiableSet(headerNames);
 		}
 
@@ -196,7 +193,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			if (FORWARDED_HEADER_NAMES.contains(name)) {
 				return null;
 			}
-
 			return super.getHeader(name);
 		}
 
@@ -205,7 +201,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			if (FORWARDED_HEADER_NAMES.contains(name)) {
 				return Collections.emptyEnumeration();
 			}
-
 			return super.getHeaders(name);
 		}
 
