@@ -21,10 +21,10 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -437,12 +437,12 @@ public abstract class RequestPredicates {
 
 		public HttpMethodPredicate(HttpMethod httpMethod) {
 			Assert.notNull(httpMethod, "HttpMethod must not be null");
-			this.httpMethods = EnumSet.of(httpMethod);
+			this.httpMethods = Collections.singleton(httpMethod);
 		}
 
 		public HttpMethodPredicate(HttpMethod... httpMethods) {
 			Assert.notEmpty(httpMethods, "HttpMethods must not be empty");
-			this.httpMethods = EnumSet.copyOf(Arrays.asList(httpMethods));
+			this.httpMethods = new LinkedHashSet<>(Arrays.asList(httpMethods));
 		}
 
 		@Override
@@ -453,16 +453,15 @@ public abstract class RequestPredicates {
 			return match;
 		}
 
-		@Nullable
 		private static HttpMethod method(ServerRequest request) {
 			if (CorsUtils.isPreFlightRequest(request.exchange().getRequest())) {
 				String accessControlRequestMethod =
 						request.headers().firstHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
-				return HttpMethod.resolve(accessControlRequestMethod);
+				if (accessControlRequestMethod != null) {
+					return HttpMethod.valueOf(accessControlRequestMethod);
+				}
 			}
-			else {
-				return request.method();
-			}
+			return request.method();
 		}
 
 		@Override
@@ -968,6 +967,7 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		@Deprecated
 		public String methodName() {
 			return this.request.methodName();
 		}

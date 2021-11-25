@@ -32,6 +32,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.LinkedMultiValueMap;
@@ -680,6 +681,12 @@ class UriComponentsBuilderTests {
 	void fromHttpRequestWithEmptyScheme() {
 		HttpRequest request = new HttpRequest() {
 			@Override
+			public HttpMethod getMethod() {
+				return HttpMethod.GET;
+			}
+
+			@Override
+			@Deprecated
 			public String getMethodValue() {
 				return "GET";
 			}

@@ -378,6 +378,7 @@ class DefaultWebClient implements WebClient {
 					return httpMethod;
 				}
 				@Override
+				@Deprecated
 				public String getMethodValue() {
 					return httpMethod.name();
 				}
@@ -667,7 +668,7 @@ class DefaultWebClient implements WebClient {
 		}
 
 		private <T> Mono<T> insertCheckpoint(Mono<T> result, int statusCode, HttpRequest request) {
-			String httpMethod = request.getMethodValue();
+			HttpMethod httpMethod = request.getMethod();
 			URI uri = request.getURI();
 			String description = statusCode + " from " + httpMethod + " " + uri + " [DefaultWebClient]";
 			return result.checkpoint(description);

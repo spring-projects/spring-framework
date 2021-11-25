@@ -18,8 +18,8 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
@@ -102,7 +102,7 @@ public class ResponseEntityExceptionHandlerTests {
 		Exception ex = new HttpRequestMethodNotSupportedException("GET", supported);
 
 		ResponseEntity<Object> responseEntity = testException(ex);
-		assertThat(responseEntity.getHeaders().getAllow()).isEqualTo(EnumSet.of(HttpMethod.POST, HttpMethod.DELETE));
+		assertThat(responseEntity.getHeaders().getAllow()).isEqualTo(Set.of(HttpMethod.POST, HttpMethod.DELETE));
 	}
 
 	@Test

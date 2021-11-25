@@ -48,6 +48,7 @@ import jakarta.servlet.http.Part;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
@@ -107,8 +108,13 @@ class DefaultServerRequest implements ServerRequest {
 				ServletRequestPathUtils.parseAndCache(servletRequest));
 	}
 
+	@Override
+	public HttpMethod method() {
+		return HttpMethod.valueOf(servletRequest().getMethod());
+	}
 
 	@Override
+	@Deprecated
 	public String methodName() {
 		return servletRequest().getMethod();
 	}

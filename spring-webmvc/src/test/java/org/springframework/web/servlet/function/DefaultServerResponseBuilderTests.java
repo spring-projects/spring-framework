@@ -22,8 +22,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -156,7 +156,7 @@ public class DefaultServerResponseBuilderTests {
 	@Test
 	public void allow() {
 		ServerResponse response = ServerResponse.ok().allow(HttpMethod.GET).build();
-		assertThat(response.headers().getAllow()).isEqualTo(EnumSet.of(HttpMethod.GET));
+		assertThat(response.headers().getAllow()).isEqualTo(Set.of(HttpMethod.GET));
 	}
 
 	@Test

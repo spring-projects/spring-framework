@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -90,7 +89,7 @@ import org.springframework.web.server.WebHandler;
  */
 public class ResourceWebHandler implements WebHandler, InitializingBean {
 
-	private static final Set<HttpMethod> SUPPORTED_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
+	private static final Set<HttpMethod> SUPPORTED_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
 
 	private static final Log logger = LogFactory.getLog(ResourceWebHandler.class);
 
@@ -407,7 +406,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 				}))
 				.flatMap(resource -> {
 					try {
-						if (HttpMethod.OPTIONS.matches(exchange.getRequest().getMethodValue())) {
+						if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
 							exchange.getResponse().getHeaders().add("Allow", "GET,HEAD,OPTIONS");
 							return Mono.empty();
 						}
@@ -416,7 +415,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						HttpMethod httpMethod = exchange.getRequest().getMethod();
 						if (!SUPPORTED_METHODS.contains(httpMethod)) {
 							return Mono.error(new MethodNotAllowedException(
-									exchange.getRequest().getMethodValue(), SUPPORTED_METHODS));
+									exchange.getRequest().getMethod(), SUPPORTED_METHODS));
 						}
 
 						// Header phase

@@ -36,6 +36,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpLogging;
+import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -138,8 +139,13 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		return uri;
 	}
 
+	@Override
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.request.method().name());
+	}
 
 	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.request.method().name();
 	}

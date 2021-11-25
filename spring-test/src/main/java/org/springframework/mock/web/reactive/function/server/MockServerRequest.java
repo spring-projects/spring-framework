@@ -132,6 +132,7 @@ public final class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
+	@Deprecated
 	public String methodName() {
 		return this.method.name();
 	}

@@ -31,6 +31,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.lang.Nullable;
@@ -64,8 +65,13 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 		this.httpContext = context;
 	}
 
+	@Override
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.httpRequest.getMethod());
+	}
 
 	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.httpRequest.getMethod();
 	}

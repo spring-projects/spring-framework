@@ -16,10 +16,8 @@
 
 package org.springframework.web;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import jakarta.servlet.ServletException;
@@ -117,14 +115,12 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 		if (this.supportedMethods == null) {
 			return null;
 		}
-		List<HttpMethod> supportedMethods = new ArrayList<>(this.supportedMethods.length);
+		Set<HttpMethod> supportedMethods = new LinkedHashSet<>(this.supportedMethods.length);
 		for (String value : this.supportedMethods) {
-			HttpMethod resolved = HttpMethod.resolve(value);
-			if (resolved != null) {
-				supportedMethods.add(resolved);
-			}
+			HttpMethod method = HttpMethod.valueOf(value);
+			supportedMethods.add(method);
 		}
-		return EnumSet.copyOf(supportedMethods);
+		return supportedMethods;
 	}
 
 }

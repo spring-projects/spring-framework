@@ -258,7 +258,7 @@ public class CorsConfiguration {
 					this.resolvedMethods = null;
 					break;
 				}
-				this.resolvedMethods.add(HttpMethod.resolve(method));
+				this.resolvedMethods.add(HttpMethod.valueOf(method));
 			}
 		}
 		else {
@@ -302,7 +302,7 @@ public class CorsConfiguration {
 				this.resolvedMethods = null;
 			}
 			else if (this.resolvedMethods != null) {
-				this.resolvedMethods.add(HttpMethod.resolve(method));
+				this.resolvedMethods.add(HttpMethod.valueOf(method));
 			}
 		}
 	}
@@ -447,7 +447,7 @@ public class CorsConfiguration {
 		if (this.allowedMethods == null) {
 			this.allowedMethods = DEFAULT_PERMIT_METHODS;
 			this.resolvedMethods = DEFAULT_PERMIT_METHODS
-					.stream().map(HttpMethod::resolve).collect(Collectors.toList());
+					.stream().map(HttpMethod::valueOf).collect(Collectors.toList());
 		}
 		if (this.allowedHeaders == null) {
 			this.allowedHeaders = DEFAULT_PERMIT_ALL;

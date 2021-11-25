@@ -40,7 +40,6 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 import static org.springframework.http.MediaType.ALL_VALUE;
 
@@ -74,9 +73,7 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public HttpMethod getMethod() {
-		HttpMethod method = HttpMethod.resolve(this.httpRequest.getMethod());
-		Assert.state(method != null, "Method must not be null");
-		return method;
+		return HttpMethod.valueOf(this.httpRequest.getMethod());
 	}
 
 	@Override

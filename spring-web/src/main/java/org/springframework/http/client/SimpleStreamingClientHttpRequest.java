@@ -55,8 +55,13 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 		this.outputStreaming = outputStreaming;
 	}
 
+	@Override
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.connection.getRequestMethod());
+	}
 
 	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.connection.getRequestMethod();
 	}

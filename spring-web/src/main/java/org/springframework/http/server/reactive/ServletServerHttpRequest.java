@@ -41,6 +41,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -158,8 +159,13 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return (headers != null ? headers : headerValues);
 	}
 
+	@Override
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.request.getMethod());
+	}
 
 	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.request.getMethod();
 	}

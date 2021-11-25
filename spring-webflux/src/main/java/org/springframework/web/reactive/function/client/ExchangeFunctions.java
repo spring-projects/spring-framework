@@ -150,6 +150,7 @@ public abstract class ExchangeFunctions {
 				}
 
 				@Override
+				@Deprecated
 				public String getMethodValue() {
 					return request.method().name();
 				}

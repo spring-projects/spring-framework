@@ -92,12 +92,12 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	@Nullable
 	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.servletRequest.getMethod());
+		return HttpMethod.valueOf(this.servletRequest.getMethod());
 	}
 
 	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.servletRequest.getMethod();
 	}

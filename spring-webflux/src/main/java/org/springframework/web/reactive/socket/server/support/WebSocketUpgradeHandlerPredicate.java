@@ -18,6 +18,7 @@ package org.springframework.web.reactive.socket.server.support;
 
 import java.util.function.BiPredicate;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -35,9 +36,9 @@ public class WebSocketUpgradeHandlerPredicate implements BiPredicate<Object, Ser
 	@Override
 	public boolean test(Object handler, ServerWebExchange exchange) {
 		if (handler instanceof WebSocketHandler) {
-			String method = exchange.getRequest().getMethodValue();
+			HttpMethod method = exchange.getRequest().getMethod();
 			String header = exchange.getRequest().getHeaders().getUpgrade();
-			return (method.equals("GET") && header != null && header.equalsIgnoreCase("websocket"));
+			return (HttpMethod.GET.equals(method) && header != null && header.equalsIgnoreCase("websocket"));
 		}
 		return true;
 	}
