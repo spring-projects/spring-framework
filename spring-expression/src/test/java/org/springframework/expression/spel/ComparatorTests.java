@@ -21,8 +21,13 @@ import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.TypeComparator;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeComparator;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Andy Clement
  * @author Giovanni Dall'Oglio Risso
  */
-class DefaultComparatorUnitTests {
+public class ComparatorTests {
 
 	@Test
 	void testPrimitives() throws EvaluationException {
@@ -119,5 +124,31 @@ class DefaultComparatorUnitTests {
 		assertThat(comparator.canCompare("abc",3)).isFalse();
 		assertThat(comparator.canCompare(String.class,3)).isFalse();
 	}
+
+	@Test
+	public void customComparatorWorksWithEquality() {
+		final StandardEvaluationContext ctx = new StandardEvaluationContext();
+		ctx.setTypeComparator(customComparator);
+
+		ExpressionParser parser = new SpelExpressionParser();
+		Expression expr = parser.parseExpression("'1' == 1");
+
+		assertThat(expr.getValue(ctx, Boolean.class)).isTrue();
+
+	}
+
+	// A silly comparator declaring everything to be equal
+	private TypeComparator customComparator = new TypeComparator() {
+		@Override
+		public boolean canCompare(@Nullable Object firstObject, @Nullable Object secondObject) {
+			return true;
+		}
+
+		@Override
+		public int compare(@Nullable Object firstObject, @Nullable Object secondObject) throws EvaluationException {
+			return 0;
+		}
+
+	};
 
 }

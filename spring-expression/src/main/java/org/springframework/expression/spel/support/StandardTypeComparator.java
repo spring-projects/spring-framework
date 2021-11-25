@@ -46,7 +46,7 @@ public class StandardTypeComparator implements TypeComparator {
 			return true;
 		}
 		if (left instanceof Comparable && right instanceof Comparable) {
-            Class<?> ancestor = ClassUtils.determineCommonAncestor(left.getClass(), right.getClass());
+			Class<?> ancestor = ClassUtils.determineCommonAncestor(left.getClass(), right.getClass());
 			return ancestor != null && Comparable.class.isAssignableFrom(ancestor);
 		}
 		return false;
