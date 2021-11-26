@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -75,11 +74,11 @@ public abstract class DataAccessUtils {
 		if (results == null) {
 			return null;
 		}
-		List<T> resultList = results.toList();
+		List<T> resultList = results.limit(2).toList();
 		if (resultList.size() > 1) {
 			throw new IncorrectResultSizeDataAccessException(1, resultList.size());
 		}
-		return resultList.stream().findFirst().orElse(null);
+		return CollectionUtils.isEmpty(resultList) ? null : resultList.get(0);
 	}
 
 	/**
@@ -96,12 +95,11 @@ public abstract class DataAccessUtils {
 		if (results == null) {
 			return null;
 		}
-		Iterable<T> iterable = () -> results;
-		List<T> resultList = StreamSupport.stream(iterable.spliterator(), false).toList();
-		if (resultList.size() > 1) {
-			throw new IncorrectResultSizeDataAccessException(1, resultList.size());
+		T result = results.hasNext() ? results.next() : null;
+		if (results.hasNext()) {
+			throw new IncorrectResultSizeDataAccessException(1, 2);
 		}
-		return resultList.stream().findFirst().orElse(null);
+		return result;
 	}
 
 	/**
@@ -136,11 +134,11 @@ public abstract class DataAccessUtils {
 		if (results == null) {
 			return Optional.empty();
 		}
-		List<T> resultList = results.toList();
+		List<T> resultList = results.limit(2).toList();
 		if (resultList.size() > 1) {
 			throw new IncorrectResultSizeDataAccessException(1, resultList.size());
 		}
-		return resultList.stream().findFirst();
+		return CollectionUtils.isEmpty(resultList) ? Optional.empty() : Optional.of(resultList.get(0));
 	}
 
 	/**
@@ -156,12 +154,11 @@ public abstract class DataAccessUtils {
 		if (results == null) {
 			return Optional.empty();
 		}
-		Iterable<T> iterable = () -> results;
-		List<T> resultList = StreamSupport.stream(iterable.spliterator(), false).toList();
-		if (resultList.size() > 1) {
-			throw new IncorrectResultSizeDataAccessException(1, resultList.size());
+		T result = results.hasNext() ? results.next() : null;
+		if (results.hasNext()) {
+			throw new IncorrectResultSizeDataAccessException(1, 2);
 		}
-		return resultList.stream().findFirst();
+		return Optional.ofNullable(result);
 	}
 
 	/**
