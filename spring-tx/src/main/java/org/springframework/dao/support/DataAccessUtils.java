@@ -288,7 +288,7 @@ public abstract class DataAccessUtils {
 			else {
 				throw new TypeMismatchDataAccessException(
 						"Result object is of type [" + result.getClass().getName() +
-								"] and could not be converted to required type [" + requiredType.getName() + "]");
+						"] and could not be converted to required type [" + requiredType.getName() + "]");
 			}
 		}
 		return (T) result;
@@ -350,4 +350,5 @@ public abstract class DataAccessUtils {
 		DataAccessException dae = pet.translateExceptionIfPossible(rawException);
 		return (dae != null ? dae : rawException);
 	}
+
 }

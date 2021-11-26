@@ -18,7 +18,9 @@ package org.springframework.dao.support;
 
 import java.util.*;
 import java.util.function.Consumer;
+
 import org.junit.jupiter.api.Test;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -47,20 +49,20 @@ public class DataAccessUtilsTests {
 		assertThat(DataAccessUtils.optionalResult(col.iterator())).isEmpty();
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.requiredUniqueResult(col))
-				.satisfies(sizeRequirements(1, 0));
+				DataAccessUtils.requiredUniqueResult(col))
+			.satisfies(sizeRequirements(1, 0));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.objectResult(col, String.class))
-				.satisfies(sizeRequirements(1, 0));
+				DataAccessUtils.objectResult(col, String.class))
+			.satisfies(sizeRequirements(1, 0));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.intResult(col))
-				.satisfies(sizeRequirements(1, 0));
+				DataAccessUtils.intResult(col))
+			.satisfies(sizeRequirements(1, 0));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.longResult(col))
-				.satisfies(sizeRequirements(1, 0));
+				DataAccessUtils.longResult(col))
+			.satisfies(sizeRequirements(1, 0));
 	}
 
 	@Test
@@ -70,48 +72,48 @@ public class DataAccessUtilsTests {
 		col.add("test2");
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.uniqueResult(col))
-				.satisfies(sizeRequirements(1, 2));
+				DataAccessUtils.uniqueResult(col))
+			.satisfies(sizeRequirements(1, 2));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.requiredUniqueResult(col))
-				.satisfies(sizeRequirements(1, 2));
+				DataAccessUtils.requiredUniqueResult(col))
+			.satisfies(sizeRequirements(1, 2));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.objectResult(col, String.class))
-				.satisfies(sizeRequirements(1, 2));
+				DataAccessUtils.objectResult(col, String.class))
+			.satisfies(sizeRequirements(1, 2));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.intResult(col))
-				.satisfies(sizeRequirements(1, 2));
+				DataAccessUtils.intResult(col))
+			.satisfies(sizeRequirements(1, 2));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.longResult(col))
-				.satisfies(sizeRequirements(1, 2));
+				DataAccessUtils.longResult(col))
+			.satisfies(sizeRequirements(1, 2));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.singleResult(col))
-				.satisfies(sizeRequirements(1, 2));
+				DataAccessUtils.singleResult(col))
+			.satisfies(sizeRequirements(1, 2));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.singleResult(col.stream()))
-				.satisfies(sizeRequirements(1, 2));
+				DataAccessUtils.singleResult(col.stream()))
+			.satisfies(sizeRequirements(1, 2));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.singleResult(col.iterator()))
-				.satisfies(sizeRequirements(1, 2));
+				DataAccessUtils.singleResult(col.iterator()))
+			.satisfies(sizeRequirements(1, 2));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.optionalResult(col))
-				.satisfies(sizeRequirements(1, 2));
+				DataAccessUtils.optionalResult(col))
+			.satisfies(sizeRequirements(1, 2));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.optionalResult(col.stream()))
-				.satisfies(sizeRequirements(1, 2));
+				DataAccessUtils.optionalResult(col.stream()))
+			.satisfies(sizeRequirements(1, 2));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-						DataAccessUtils.optionalResult(col.iterator()))
-				.satisfies(sizeRequirements(1, 2));
+				DataAccessUtils.optionalResult(col.iterator()))
+			.satisfies(sizeRequirements(1, 2));
 	}
 
 	@Test
@@ -153,8 +155,8 @@ public class DataAccessUtilsTests {
 		Collection<Integer> col = Arrays.asList(Integer.valueOf(555), Integer.valueOf(555));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class)
-				.isThrownBy(() -> DataAccessUtils.uniqueResult(col))
-				.satisfies(sizeRequirements(1, 2));
+			.isThrownBy(() -> DataAccessUtils.uniqueResult(col))
+			.satisfies(sizeRequirements(1, 2));
 	}
 
 	@Test
@@ -196,8 +198,6 @@ public class DataAccessUtilsTests {
 
 		assertThatExceptionOfType(TypeMismatchDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.longResult(col));
-
-
 	}
 
 	@Test
