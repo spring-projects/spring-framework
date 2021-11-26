@@ -17,6 +17,11 @@
 package org.springframework.dao.support;
 
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -54,6 +59,109 @@ public abstract class DataAccessUtils {
 			throw new IncorrectResultSizeDataAccessException(1, results.size());
 		}
 		return results.iterator().next();
+	}
+
+	/**
+	 * Return a single result object from the given Stream.
+	 * <p>Returns {@code null} if 0 result objects found;
+	 * throws an exception if more than 1 element found.
+	 * @param results the result Stream (can be {@code null})
+	 * @return the single result object, or {@code null} if none
+	 * @throws IncorrectResultSizeDataAccessException if more than one
+	 * element has been found in the given Stream
+	 */
+	@Nullable
+	public static <T> T singleResult(@Nullable Stream<T> results) throws IncorrectResultSizeDataAccessException {
+		if (results == null) {
+			return null;
+		}
+		List<T> resultList = results.toList();
+		if (resultList.size() > 1) {
+			throw new IncorrectResultSizeDataAccessException(1, resultList.size());
+		}
+		return resultList.stream().findFirst().orElse(null);
+	}
+
+	/**
+	 * Return a single result object from the given Iterator.
+	 * <p>Returns {@code null} if 0 result objects found;
+	 * throws an exception if more than 1 element found.
+	 * @param results the result Iterator (can be {@code null})
+	 * @return the single result object, or {@code null} if none
+	 * @throws IncorrectResultSizeDataAccessException if more than one
+	 * element has been found in the given Iterator
+	 */
+	@Nullable
+	public static <T> T singleResult(@Nullable Iterator<T> results) throws IncorrectResultSizeDataAccessException {
+		if (results == null) {
+			return null;
+		}
+		Iterable<T> iterable = () -> results;
+		List<T> resultList = StreamSupport.stream(iterable.spliterator(), false).toList();
+		if (resultList.size() > 1) {
+			throw new IncorrectResultSizeDataAccessException(1, resultList.size());
+		}
+		return resultList.stream().findFirst().orElse(null);
+	}
+
+	/**
+	 * Return a single result object from the given Collection.
+	 * <p>Returns {@code Optional.empty()} if 0 result objects found;
+	 * throws an exception if more than 1 element found.
+	 * @param results the result Collection (can be {@code null})
+	 * @return the single optional result object, or {@code Optional.empty()} if none
+	 * @throws IncorrectResultSizeDataAccessException if more than one
+	 * element has been found in the given Collection
+	 */
+	public static <T> Optional<T> optionalResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
+		if (CollectionUtils.isEmpty(results)) {
+			return Optional.empty();
+		}
+		if (results.size() > 1) {
+			throw new IncorrectResultSizeDataAccessException(1, results.size());
+		}
+		return results.stream().findFirst();
+	}
+
+	/**
+	 * Return a single result object from the given Stream.
+	 * <p>Returns {@code Optional.empty()} if 0 result objects found;
+	 * throws an exception if more than 1 element found.
+	 * @param results the result Stream (can be {@code null})
+	 * @return the single optional result object, or {@code Optional.empty()} if none
+	 * @throws IncorrectResultSizeDataAccessException if more than one
+	 * element has been found in the given Stream
+	 */
+	public static <T> Optional<T> optionalResult(@Nullable Stream<T> results) throws IncorrectResultSizeDataAccessException {
+		if (results == null) {
+			return Optional.empty();
+		}
+		List<T> resultList = results.toList();
+		if (resultList.size() > 1) {
+			throw new IncorrectResultSizeDataAccessException(1, resultList.size());
+		}
+		return resultList.stream().findFirst();
+	}
+
+	/**
+	 * Return a single result object from the given Iterator.
+	 * <p>Returns {@code Optional.empty()} if 0 result objects found;
+	 * throws an exception if more than 1 element found.
+	 * @param results the result Iterator (can be {@code null})
+	 * @return the single optional result object, or {@code Optional.empty()} if none
+	 * @throws IncorrectResultSizeDataAccessException if more than one
+	 * element has been found in the given Iterator
+	 */
+	public static <T> Optional<T> optionalResult(@Nullable Iterator<T> results) throws IncorrectResultSizeDataAccessException {
+		if (results == null) {
+			return Optional.empty();
+		}
+		Iterable<T> iterable = () -> results;
+		List<T> resultList = StreamSupport.stream(iterable.spliterator(), false).toList();
+		if (resultList.size() > 1) {
+			throw new IncorrectResultSizeDataAccessException(1, resultList.size());
+		}
+		return resultList.stream().findFirst();
 	}
 
 	/**
@@ -180,7 +288,7 @@ public abstract class DataAccessUtils {
 			else {
 				throw new TypeMismatchDataAccessException(
 						"Result object is of type [" + result.getClass().getName() +
-						"] and could not be converted to required type [" + requiredType.getName() + "]");
+								"] and could not be converted to required type [" + requiredType.getName() + "]");
 			}
 		}
 		return (T) result;
@@ -242,5 +350,4 @@ public abstract class DataAccessUtils {
 		DataAccessException dae = pet.translateExceptionIfPossible(rawException);
 		return (dae != null ? dae : rawException);
 	}
-
 }
