@@ -74,11 +74,13 @@ public abstract class DataAccessUtils {
 		if (results == null) {
 			return null;
 		}
-		List<T> resultList = results.limit(2).toList();
-		if (resultList.size() > 1) {
-			throw new IncorrectResultSizeDataAccessException(1, resultList.size());
+		try (results) {
+			List<T> resultList = results.limit(2).toList();
+			if (resultList.size() > 1) {
+				throw new IncorrectResultSizeDataAccessException(1, resultList.size());
+			}
+			return CollectionUtils.isEmpty(resultList) ? null : resultList.get(0);
 		}
-		return CollectionUtils.isEmpty(resultList) ? null : resultList.get(0);
 	}
 
 	/**
@@ -134,11 +136,13 @@ public abstract class DataAccessUtils {
 		if (results == null) {
 			return Optional.empty();
 		}
-		List<T> resultList = results.limit(2).toList();
-		if (resultList.size() > 1) {
-			throw new IncorrectResultSizeDataAccessException(1, resultList.size());
+		try (results) {
+			List<T> resultList = results.limit(2).toList();
+			if (resultList.size() > 1) {
+				throw new IncorrectResultSizeDataAccessException(1, resultList.size());
+			}
+			return CollectionUtils.isEmpty(resultList) ? Optional.empty() : Optional.of(resultList.get(0));
 		}
-		return CollectionUtils.isEmpty(resultList) ? Optional.empty() : Optional.of(resultList.get(0));
 	}
 
 	/**
