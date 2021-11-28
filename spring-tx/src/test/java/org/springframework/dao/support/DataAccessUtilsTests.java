@@ -104,11 +104,11 @@ public class DataAccessUtilsTests {
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.singleResult(col.stream()))
-			.satisfies(sizeRequirements(1, 2));
+			.satisfies(sizeRequirements(1));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.singleResult(col.iterator()))
-			.satisfies(sizeRequirements(1, 2));
+			.satisfies(sizeRequirements(1));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.optionalResult(col))
@@ -116,11 +116,11 @@ public class DataAccessUtilsTests {
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.optionalResult(col.stream()))
-			.satisfies(sizeRequirements(1, 2));
+			.satisfies(sizeRequirements(1));
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.optionalResult(col.iterator()))
-			.satisfies(sizeRequirements(1, 2));
+			.satisfies(sizeRequirements(1));
 	}
 
 	@Test
@@ -252,6 +252,13 @@ public class DataAccessUtilsTests {
 		return ex -> {
 			assertThat(ex.getExpectedSize()).as("expected size").isEqualTo(expectedSize);
 			assertThat(ex.getActualSize()).as("actual size").isEqualTo(actualSize);
+		};
+	}
+
+	private <E extends IncorrectResultSizeDataAccessException> Consumer<E> sizeRequirements(
+			int expectedSize) {
+		return ex -> {
+			assertThat(ex.getExpectedSize()).as("expected size").isEqualTo(expectedSize);
 		};
 	}
 
