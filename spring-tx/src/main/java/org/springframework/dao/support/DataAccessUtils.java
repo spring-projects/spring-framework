@@ -99,7 +99,7 @@ public abstract class DataAccessUtils {
 		}
 		T result = results.hasNext() ? results.next() : null;
 		if (results.hasNext()) {
-			throw new IncorrectResultSizeDataAccessException(1, 2);
+			throw new IncorrectResultSizeDataAccessException(1);
 		}
 		return result;
 	}
