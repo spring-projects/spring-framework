@@ -77,7 +77,7 @@ public abstract class DataAccessUtils {
 		try (results) {
 			List<T> resultList = results.limit(2).toList();
 			if (resultList.size() > 1) {
-				throw new IncorrectResultSizeDataAccessException(1, resultList.size());
+				throw new IncorrectResultSizeDataAccessException(1);
 			}
 			return CollectionUtils.isEmpty(resultList) ? null : resultList.get(0);
 		}
