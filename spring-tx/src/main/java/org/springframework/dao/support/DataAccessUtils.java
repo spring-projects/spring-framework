@@ -127,15 +127,7 @@ public abstract class DataAccessUtils {
 	 * element has been found in the given Stream
 	 */
 	public static <T> Optional<T> optionalResult(@Nullable Stream<T> results) throws IncorrectResultSizeDataAccessException {
-		if (results == null) {
-			return Optional.empty();
-		}
-		try (results) {
-			List<T> resultList = results.limit(2).toList();
-			if (resultList.size() > 1) {
-				throw new IncorrectResultSizeDataAccessException(1, resultList.size());
-			}
-			return CollectionUtils.isEmpty(resultList) ? Optional.empty() : Optional.of(resultList.get(0));
+		return Optional.ofNullable(singleResult(results));
 		}
 	}
 
