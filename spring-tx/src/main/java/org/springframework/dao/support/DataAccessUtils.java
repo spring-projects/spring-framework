@@ -114,13 +114,7 @@ public abstract class DataAccessUtils {
 	 * element has been found in the given Collection
 	 */
 	public static <T> Optional<T> optionalResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
-		if (CollectionUtils.isEmpty(results)) {
-			return Optional.empty();
-		}
-		if (results.size() > 1) {
-			throw new IncorrectResultSizeDataAccessException(1, results.size());
-		}
-		return results.stream().findFirst();
+		return Optional.ofNullable(singleResult(results));
 	}
 
 	/**
