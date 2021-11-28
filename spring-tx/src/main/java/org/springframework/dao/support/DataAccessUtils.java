@@ -128,7 +128,6 @@ public abstract class DataAccessUtils {
 	 */
 	public static <T> Optional<T> optionalResult(@Nullable Stream<T> results) throws IncorrectResultSizeDataAccessException {
 		return Optional.ofNullable(singleResult(results));
-		}
 	}
 
 	/**
