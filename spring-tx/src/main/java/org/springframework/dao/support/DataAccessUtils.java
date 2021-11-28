@@ -141,14 +141,7 @@ public abstract class DataAccessUtils {
 	 * element has been found in the given Iterator
 	 */
 	public static <T> Optional<T> optionalResult(@Nullable Iterator<T> results) throws IncorrectResultSizeDataAccessException {
-		if (results == null) {
-			return Optional.empty();
-		}
-		T result = results.hasNext() ? results.next() : null;
-		if (results.hasNext()) {
-			throw new IncorrectResultSizeDataAccessException(1, 2);
-		}
-		return Optional.ofNullable(result);
+		return Optional.ofNullable(singleResult(results));
 	}
 
 	/**
