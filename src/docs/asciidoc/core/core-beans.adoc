@@ -2969,6 +2969,8 @@ When using annotation-driven components or Java configuration, you can use the
 ----
 
 
+
+
 [[beans-factory-scopes-application]]
 ==== Application Scope
 
@@ -3009,6 +3011,17 @@ following example shows how to do so:
 		// ...
 	}
 ----
+
+
+
+
+[[beans-factory-scopes-websocket]]
+==== WebSocket Scope
+
+WebSocket scope is associated with the lifecycle of a WebSocket session and applies to
+STOMP over WebSocket applications, see
+<<web.adoc#websocket-stomp-websocket-scope,WebSocket scope>> for more details.
+
 
 
 
