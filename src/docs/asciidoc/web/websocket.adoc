@@ -1439,8 +1439,11 @@ See <<websocket-stomp-destination-separator>>.
 
 If configured with a task scheduler, the simple broker supports
 https://stomp.github.io/stomp-specification-1.2.html#Heart-beating[STOMP heartbeats].
-For that, you can declare your own scheduler or use the one that is automatically
-declared and used internally. The following example shows how to declare your own scheduler:
+To configure a scheduler, you can declare your own `TaskScheduler` bean and set it through
+the `MessageBrokerRegistry`. Alternatively, you can use the one that is automatically
+declared in the built-in WebSocket configuration, however, you'll' need `@Lazy` to avoid
+a cycle between the built-in WebSocket configuration and your
+`WebSocketMessageBrokerConfigurer`. For example:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -1451,13 +1454,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	private TaskScheduler messageBrokerTaskScheduler;
 
 	@Autowired
-	public void setMessageBrokerTaskScheduler(TaskScheduler taskScheduler) {
+	public void setMessageBrokerTaskScheduler(@Lazy TaskScheduler taskScheduler) {
 		this.messageBrokerTaskScheduler = taskScheduler;
 	}
 
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
-
 		registry.enableSimpleBroker("/queue/", "/topic/")
 				.setHeartbeatValue(new long[] {10000, 20000})
 				.setTaskScheduler(this.messageBrokerTaskScheduler);
