@@ -146,7 +146,7 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	@Nullable
 	@Deprecated
 	public static HttpMethod resolve(@Nullable String method) {
-		return (method != null ? mappings.get(method) : null);
+		return (method != null ? valueOf(method) : null);
 	}
 
 
