@@ -24,7 +24,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Represents an HTTP request methods. Intended for use
+ * Represents an HTTP request method. Intended for use
  * with {@link org.springframework.http.client.ClientHttpRequest}
  * and {@link org.springframework.web.client.RestTemplate}.
  *
