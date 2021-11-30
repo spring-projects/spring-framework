@@ -59,9 +59,6 @@ dependencies {
 	testImplementation("org.hibernate:hibernate-core-jakarta")
 	testImplementation("org.hibernate:hibernate-validator")
 	testImplementation("jakarta.validation:jakarta.validation-api")
-	testImplementation("org.junit.platform:junit-platform-runner") {
-		exclude group: "junit", module: "junit"
-	}
 	testImplementation("org.junit.platform:junit-platform-testkit")
 	testImplementation("com.fasterxml.jackson.core:jackson-databind")
 	testImplementation("com.thoughtworks.xstream:xstream")
