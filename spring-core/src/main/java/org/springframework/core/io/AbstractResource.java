@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,13 +72,6 @@ public abstract class AbstractResource implements Resource {
 		catch (Throwable ex) {
 			debug(() -> "Could not retrieve InputStream for existence check of " + getDescription(), ex);
 			return false;
-		}
-	}
-
-	private void debug(Supplier<String> message, Throwable ex) {
-		Log logger = LogFactory.getLog(getClass());
-		if (logger.isDebugEnabled()) {
-			logger.debug(message.get(), ex);
 		}
 	}
 
@@ -255,6 +248,13 @@ public abstract class AbstractResource implements Resource {
 	@Override
 	public String toString() {
 		return getDescription();
+	}
+
+	private void debug(Supplier<String> message, Throwable ex) {
+		Log logger = LogFactory.getLog(getClass());
+		if (logger.isDebugEnabled()) {
+			logger.debug(message.get(), ex);
+		}
 	}
 
 }
