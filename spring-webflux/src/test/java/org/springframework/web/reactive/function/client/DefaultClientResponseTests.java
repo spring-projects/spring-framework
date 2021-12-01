@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.ByteArrayDecoder;
@@ -351,6 +352,35 @@ public class DefaultClientResponseTests {
 		assertThat(exception.getHeaders()).containsExactly(entry("Content-Type",
 				Collections.singletonList("text/plain")));
 		assertThat(exception.getResponseBodyAsByteArray()).isEqualTo(bytes);
+	}
+
+	@Test
+	public void createError() {
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
+		given(mockResponse.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(mockResponse.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
+		given(mockResponse.getBody()).willReturn(body);
+
+		List<HttpMessageReader<?>> messageReaders = Collections.singletonList(
+				new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
+		given(mockExchangeStrategies.messageReaders()).willReturn(messageReaders);
+
+		Mono<String> resultMono = defaultClientResponse.createError();
+		StepVerifier.create(resultMono)
+				.consumeErrorWith(t -> {
+					assertThat(t).isInstanceOf(WebClientResponseException.class);
+					WebClientResponseException exception = (WebClientResponseException) t;
+					assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+					assertThat(exception.getMessage()).isEqualTo("404 Not Found");
+					assertThat(exception.getHeaders()).containsExactly(entry("Content-Type",
+							Collections.singletonList("text/plain")));
+					assertThat(exception.getResponseBodyAsByteArray()).isEqualTo(bytes);
+
+				})
+				.verify();
 	}
 
 

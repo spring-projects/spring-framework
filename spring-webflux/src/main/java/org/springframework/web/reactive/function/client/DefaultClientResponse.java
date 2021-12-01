@@ -224,6 +224,11 @@ class DefaultClientResponse implements ClientResponse {
 	}
 
 	@Override
+	public <T> Mono<T> createError() {
+		return createException().flatMap(Mono::error);
+	}
+
+	@Override
 	public String logPrefix() {
 		return this.logPrefix;
 	}

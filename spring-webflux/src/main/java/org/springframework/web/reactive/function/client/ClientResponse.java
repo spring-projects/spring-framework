@@ -182,6 +182,18 @@ public interface ClientResponse {
 	Mono<WebClientResponseException> createException();
 
 	/**
+	 * Create a {@code Mono} that terminates with a
+	 * {@link WebClientResponseException}, containing the response status,
+	 * headers, body, and the originating request.
+	 * @param <T> the reified type
+	 * @return a {@code Mono} that fails with a
+	 * {@link WebClientResponseException}.
+	 * @see #createException()
+	 * @since 6.0
+	 */
+	<T> Mono<T> createError();
+
+	/**
 	 * Return a log message prefix to use to correlate messages for this exchange.
 	 * <p>The prefix is based on {@linkplain ClientRequest#logPrefix()}, which
 	 * itself is based on the value of the {@link ClientRequest#LOG_ID_ATTRIBUTE
