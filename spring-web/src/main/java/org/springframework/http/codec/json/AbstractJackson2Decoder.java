@@ -202,7 +202,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		}
 	}
 
-	private ObjectReader getObjectReader(
+	protected ObjectReader getObjectReader(
 			ObjectMapper mapper, ResolvableType elementType, @Nullable Map<String, Object> hints) {
 
 		Assert.notNull(elementType, "'elementType' must not be null");
@@ -218,12 +218,12 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	}
 
 	@Nullable
-	private Class<?> getContextClass(@Nullable ResolvableType elementType) {
+	protected Class<?> getContextClass(@Nullable ResolvableType elementType) {
 		MethodParameter param = (elementType != null ? getParameter(elementType)  : null);
 		return (param != null ? param.getContainingClass() : null);
 	}
 
-	private void logValue(@Nullable Object value, @Nullable Map<String, Object> hints) {
+	protected void logValue(@Nullable Object value, @Nullable Map<String, Object> hints) {
 		if (!Hints.isLoggingSuppressed(hints)) {
 			LogFormatUtils.traceDebug(logger, traceOn -> {
 				String formatted = LogFormatUtils.formatValue(value, !traceOn);
@@ -232,7 +232,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		}
 	}
 
-	private CodecException processException(IOException ex) {
+	protected CodecException processException(IOException ex) {
 		if (ex instanceof InvalidDefinitionException) {
 			JavaType type = ((InvalidDefinitionException) ex).getType();
 			return new CodecException("Type definition error: " + type, ex);
