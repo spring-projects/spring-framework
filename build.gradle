@@ -153,6 +153,7 @@ configure(allprojects) { project ->
 			dependency "org.mozilla:rhino:1.7.11"
 
 			dependency("org.dom4j:dom4j:2.1.3") {
+				exclude group: 'javax.xml.bind', name: "jaxb-api"
 				exclude group: "jaxen", name: "jaxen"
 				exclude group: "net.java.dev.msv", name: "xsdlib"
 				exclude group: "pull-parser", name: "pull-parser"
