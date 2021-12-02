@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package org.springframework.cache
  * Extension for [Cache.get] providing a `get<Foo>()` variant.
  *
  * @author Mikhael Sokolov
- * @since 5.2
+ * @since 6.0
  */
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> Cache.get(key: Any): T? = get(key, T::class.java)
@@ -30,7 +30,7 @@ inline fun <reified T : Any> Cache.get(key: Any): T? = get(key, T::class.java)
  * Extension for [Cache.get] providing a `foo[key]` variant.
  *
  * @author Mikhael Sokolov
- * @since 5.2
+ * @since 6.0
  */
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 operator fun Cache.get(key: Any): Cache.ValueWrapper? = get(key)
@@ -39,6 +39,6 @@ operator fun Cache.get(key: Any): Cache.ValueWrapper? = get(key)
  * Extension for [Cache.put] providing a `foo[key]` variant.
  *
  * @author Mikhael Sokolov
- * @since 5.2
+ * @since 6.0
  */
 operator fun Cache.set(key: Any, value: Any?) = put(key, value)
