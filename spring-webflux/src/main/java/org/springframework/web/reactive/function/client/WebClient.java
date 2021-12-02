@@ -530,7 +530,7 @@ public interface WebClient {
 		 *             return response.bodyToMono(ErrorContainer.class);
 		 *         }
 		 *         else {
-		 *             return Mono.error(response.createException());
+		 *             return response.createException();
 		 *         }
 		 *     });
 		 * </pre>
@@ -562,7 +562,7 @@ public interface WebClient {
 		 *             return response.bodyToMono(ErrorContainer.class).flux();
 		 *         }
 		 *         else {
-		 *             return Flux.error(response.createException());
+		 *             return response.createException().flux();
 		 *         }
 		 *     });
 		 * </pre>
