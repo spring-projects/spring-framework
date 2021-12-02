@@ -64,7 +64,7 @@ public class PayloadApplicationEvent<T> extends ApplicationEvent implements Reso
 
 	@Override
 	public ResolvableType getResolvableType() {
-		if(this.payloadType == null){
+		if (this.payloadType == null) {
 			this.payloadType = ResolvableType.forInstance(getPayload());
 		}
 		return ResolvableType.forClassWithGenerics(getClass(), this.payloadType);
