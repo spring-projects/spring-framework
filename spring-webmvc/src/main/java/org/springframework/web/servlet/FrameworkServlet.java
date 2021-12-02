@@ -46,6 +46,7 @@ import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
@@ -940,7 +941,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		if (this.dispatchOptionsRequest || CorsUtils.isPreFlightRequest(request)) {
 			processRequest(request, response);
-			if (response.containsHeader("Allow")) {
+			if (response.containsHeader(HttpHeaders.ALLOW)) {
 				// Proper OPTIONS response coming from a handler - we're done.
 				return;
 			}
@@ -950,7 +951,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		super.doOptions(request, new HttpServletResponseWrapper(response) {
 			@Override
 			public void setHeader(String name, String value) {
-				if ("Allow".equals(name)) {
+				if (HttpHeaders.ALLOW.equals(name)) {
 					value = (StringUtils.hasLength(value) ? value + ", " : "") + HttpMethod.PATCH.name();
 				}
 				super.setHeader(name, value);
