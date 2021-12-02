@@ -39,17 +39,7 @@ public class PayloadApplicationEvent<T> extends ApplicationEvent implements Reso
 
 	private final T payload;
 
-	@Nullable
-	private ResolvableType payloadType;
-
-	/**
-	 * Create a new PayloadApplicationEvent.
-	 * @param source the object on which the event initially occurred (never {@code null})
-	 * @param payload the payload object (never {@code null})
-	 */
-	public PayloadApplicationEvent(Object source, T payload) {
-		this(source, payload, null);
-	}
+	private final ResolvableType payloadType;
 
 	/**
 	 * Create a new PayloadApplicationEvent.
@@ -61,15 +51,21 @@ public class PayloadApplicationEvent<T> extends ApplicationEvent implements Reso
 		super(source);
 		Assert.notNull(payload, "Payload must not be null");
 		this.payload = payload;
-		this.payloadType = payloadType;
+		this.payloadType = (payloadType != null) ? payloadType : ResolvableType.forInstance(payload);
+	}
+
+	/**
+	 * Create a new PayloadApplicationEvent, using the instance to infer its type.
+	 * @param source the object on which the event initially occurred (never {@code null})
+	 * @param payload the payload object (never {@code null})
+	 */
+	public PayloadApplicationEvent(Object source, T payload) {
+		this(source, payload, null);
 	}
 
 
 	@Override
 	public ResolvableType getResolvableType() {
-		if (this.payloadType == null) {
-			this.payloadType = ResolvableType.forInstance(getPayload());
-		}
 		return ResolvableType.forClassWithGenerics(getClass(), this.payloadType);
 	}
 
