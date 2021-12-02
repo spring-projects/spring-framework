@@ -530,7 +530,7 @@ public interface WebClient {
 		 *             return response.bodyToMono(ErrorContainer.class);
 		 *         }
 		 *         else {
-		 *             return response.createError();
+		 *             return response.createException();
 		 *         }
 		 *     });
 		 * </pre>
