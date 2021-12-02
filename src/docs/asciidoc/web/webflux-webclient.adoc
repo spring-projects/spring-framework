@@ -595,7 +595,7 @@ depending on the response status:
 				}
 				else {
 					// Turn to error
-					return response.createException().flatMap(Mono::error);
+					return response.createException();
 				}
 			});
 ----
