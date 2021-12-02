@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Future;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -47,6 +47,7 @@ import org.springframework.util.Assert;
 public abstract class FooServiceImpl implements FooService {
 
 	// Just to test ASM5's bytecode parsing of INVOKESPECIAL/STATIC on interfaces
+	@SuppressWarnings("unused")
 	private static final Comparator<MessageBean> COMPARATOR_BY_MESSAGE = Comparator.comparing(MessageBean::getMessage);
 
 

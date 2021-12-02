@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.reactive.config.ViewResolverRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.result.method.annotation.AbstractRequestMappingIntegrationTests;
 import org.springframework.web.server.ServerWebExchange;
@@ -66,15 +66,16 @@ class LocaleContextResolverIntegrationTests extends AbstractRequestMappingIntegr
 	void fixedLocale(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		Mono<ClientResponse> result = webClient
+		Mono<ResponseEntity<Void>> result = webClient
 				.get()
 				.uri("http://localhost:" + this.port + "/")
-				.exchange();
+				.retrieve()
+				.toBodilessEntity();
 
 		StepVerifier.create(result)
-				.consumeNextWith(response -> {
-					assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
-					assertThat(response.headers().asHttpHeaders().getContentLanguage()).isEqualTo(Locale.GERMANY);
+				.consumeNextWith(entity -> {
+					assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+					assertThat(entity.getHeaders().getContentLanguage()).isEqualTo(Locale.GERMANY);
 				})
 				.verifyComplete();
 	}

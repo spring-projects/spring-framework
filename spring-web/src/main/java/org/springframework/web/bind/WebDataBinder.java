@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,6 +194,7 @@ public class WebDataBinder extends DataBinder {
 	protected void doBind(MutablePropertyValues mpvs) {
 		checkFieldDefaults(mpvs);
 		checkFieldMarkers(mpvs);
+		adaptEmptyArrayIndices(mpvs);
 		super.doBind(mpvs);
 	}
 
@@ -245,6 +246,27 @@ public class WebDataBinder extends DataBinder {
 					}
 					mpvs.removePropertyValue(pv);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Check for property values with names that end on {@code "[]"}. This is
+	 * used by some clients for array syntax without an explicit index value.
+	 * If such values are found, drop the brackets to adapt to the expected way
+	 * of expressing the same for data binding purposes.
+	 * @param mpvs the property values to be bound (can be modified)
+	 * @since 5.3
+	 */
+	protected void adaptEmptyArrayIndices(MutablePropertyValues mpvs) {
+		for (PropertyValue pv : mpvs.getPropertyValues()) {
+			String name = pv.getName();
+			if (name.endsWith("[]")) {
+				String field = name.substring(0, name.length() - 2);
+				if (getPropertyAccessor().isWritableProperty(field) && !mpvs.contains(field)) {
+					mpvs.add(field, pv.getValue());
+				}
+				mpvs.removePropertyValue(pv);
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.util;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
@@ -77,22 +78,66 @@ public interface UriBuilder {
 	UriBuilder port(@Nullable String port);
 
 	/**
-	 * Append the given path to the existing path of this builder.
-	 * The given path may contain URI template variables.
+	 * Append to the path of this builder.
+	 * <p>The given value is appended as-is to previous {@link #path(String) path}
+	 * values without inserting any additional slashes. For example:
+	 * <pre class="code">
+	 *
+	 * builder.path("/first-").path("value/").path("/{id}").build("123")
+	 *
+	 * // Results is "/first-value/123"
+	 * </pre>
+	 * <p>By contrast {@link #pathSegment(String...) pathSegment} does insert
+	 * slashes between individual path segments. For example:
+	 * <pre class="code">
+	 *
+	 * builder.pathSegment("first-value", "second-value").path("/")
+	 *
+	 * // Results is "/first-value/second-value/"
+	 * </pre>
+	 * <p>The resulting full path is normalized to eliminate duplicate slashes.
+	 * <p><strong>Note:</strong> When inserting a URI variable value that
+	 * contains slashes in a {@link #path(String) path}, whether those are
+	 * encoded depends on the configured encoding mode. For more details, see
+	 * {@link UriComponentsBuilder#encode()}, or otherwise if building URIs
+	 * indirectly via {@code WebClient} or {@code RestTemplate}, see its
+	 * {@link DefaultUriBuilderFactory#setEncodingMode encodingMode}.
+	 * Also see the <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#web-uri-encoding">
+	 * URI Encoding</a> section of the reference docs.
 	 * @param path the URI path
 	 */
 	UriBuilder path(String path);
 
 	/**
-	 * Set the path of this builder overriding the existing path values.
+	 * Override the current path.
 	 * @param path the URI path, or {@code null} for an empty path
 	 */
 	UriBuilder replacePath(@Nullable String path);
 
 	/**
-	 * Append path segments to the existing path. Each path segment may contain
-	 * URI template variables and should not contain any slashes.
-	 * Use {@code path("/")} subsequently to ensure a trailing slash.
+	 * Append to the path using path segments. For example:
+	 * <pre class="code">
+	 *
+	 * builder.pathSegment("first-value", "second-value", "{id}").build("123")
+	 *
+	 * // Results is "/first-value/second-value/123"
+	 * </pre>
+	 * <p>If slashes are present in a path segment, they are encoded:
+	 * <pre class="code">
+	 *
+	 * builder.pathSegment("ba/z", "{id}").build("a/b")
+	 *
+	 * // Results is "/ba%2Fz/a%2Fb"
+	 * </pre>
+	 * To insert a trailing slash, use the {@link #path} builder method:
+	 * <pre class="code">
+	 *
+	 * builder.pathSegment("first-value", "second-value").path("/")
+	 *
+	 * // Results is "/first-value/second-value/"
+	 * </pre>
+	 * <p>Empty path segments are ignored and therefore duplicate slashes do not
+	 * appear in the resulting full path.
 	 * @param pathSegments the URI path segments
 	 */
 	UriBuilder pathSegment(String... pathSegments) throws IllegalArgumentException;
@@ -149,6 +194,16 @@ public interface UriBuilder {
 	 * @see #queryParam(String, Object...)
 	 */
 	UriBuilder queryParam(String name, @Nullable Collection<?> values);
+
+	/**
+	 * Delegates to either {@link #queryParam(String, Object...)} or
+	 * {@link #queryParam(String, Collection)} if the given {@link Optional} has
+	 * a value, or else if it is empty, no query parameter is added at all.
+	 * @param name the query parameter name
+	 * @param value an Optional, either empty or holding the query parameter value.
+	 * @since 5.3
+	 */
+	UriBuilder queryParamIfPresent(String name, Optional<?> value);
 
 	/**
 	 * Add multiple query parameters and values.

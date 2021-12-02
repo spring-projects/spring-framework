@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
 package org.springframework.web.servlet.support;
 
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.assertj.core.api.ObjectAssert;
 import org.junit.jupiter.api.Test;
 
@@ -292,7 +292,7 @@ public class FlashMapManagerTests {
 
 	@Test // SPR-12569
 	public void flashAttributesWithQueryParamsWithSpace() throws Exception {
-		String encodedValue = URLEncoder.encode("1 2", "UTF-8");
+		String encodedValue = URLEncoder.encode("1 2", StandardCharsets.UTF_8);
 
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("key", "value");

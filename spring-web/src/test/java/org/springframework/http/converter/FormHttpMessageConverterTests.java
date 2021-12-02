@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,19 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileUpload;
-import org.apache.commons.fileupload.RequestContext;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.FileItemFactory;
+import org.apache.tomcat.util.http.fileupload.FileUpload;
+import org.apache.tomcat.util.http.fileupload.RequestContext;
+import org.apache.tomcat.util.http.fileupload.UploadContext;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -46,13 +49,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.http.MediaType.MULTIPART_MIXED;
 import static org.springframework.http.MediaType.TEXT_XML;
-import static org.springframework.http.converter.FormHttpMessageConverter.MULTIPART_ALL;
 
 /**
  * Unit tests for {@link FormHttpMessageConverter} and
@@ -177,12 +177,15 @@ public class FormHttpMessageConverterTests {
 		HttpEntity<Source> entity = new HttpEntity<>(xml, entityHeaders);
 		parts.add("xml", entity);
 
+		Map<String, String> parameters = new LinkedHashMap<>(2);
+		parameters.put("charset", StandardCharsets.UTF_8.name());
+		parameters.put("foo", "bar");
+
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.write(parts, new MediaType("multipart", "form-data", StandardCharsets.UTF_8), outputMessage);
+		this.converter.write(parts, new MediaType("multipart", "form-data", parameters), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
-		// SPR-17030
-		assertThat(contentType.getParameters()).containsKeys("charset", "boundary");
+		assertThat(contentType.getParameters()).containsKeys("charset", "boundary", "foo"); // gh-21568, gh-25839
 
 		// see if Commons FileUpload can read what we wrote
 		FileItemFactory fileItemFactory = new DiskFileItemFactory();
@@ -222,10 +225,9 @@ public class FormHttpMessageConverterTests {
 		item = items.get(5);
 		assertThat(item.getFieldName()).isEqualTo("xml");
 		assertThat(item.getContentType()).isEqualTo("text/xml");
-		verify(outputMessage.getBody(), never()).close();
 	}
 
-	@Test // SPR-13309
+	@Test  // SPR-13309
 	public void writeMultipartOrder() throws Exception {
 		MyBean myBean = new MyBean();
 		myBean.setString("foo");
@@ -269,6 +271,29 @@ public class FormHttpMessageConverterTests {
 				.endsWith("><string>foo</string></MyBean>");
 	}
 
+	@Test
+	public void writeMultipartCharset() throws Exception {
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
+		parts.add("logo", logo);
+
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.write(parts, MULTIPART_FORM_DATA, outputMessage);
+
+		MediaType contentType = outputMessage.getHeaders().getContentType();
+		Map<String, String> parameters = contentType.getParameters();
+		assertThat(parameters).containsOnlyKeys("boundary");
+
+		this.converter.setCharset(StandardCharsets.ISO_8859_1);
+
+		outputMessage = new MockHttpOutputMessage();
+		this.converter.write(parts, MULTIPART_FORM_DATA, outputMessage);
+
+		parameters = outputMessage.getHeaders().getContentType().getParameters();
+		assertThat(parameters).containsOnlyKeys("boundary", "charset");
+		assertThat(parameters).containsEntry("charset", "ISO-8859-1");
+	}
+
 	private void assertCanRead(MediaType mediaType) {
 		assertCanRead(MultiValueMap.class, mediaType);
 	}
@@ -278,7 +303,7 @@ public class FormHttpMessageConverterTests {
 	}
 
 	private void asssertCannotReadMultipart() {
-		assertCannotRead(MULTIPART_ALL);
+		assertCannotRead(new MediaType("multipart", "*"));
 		assertCannotRead(MULTIPART_FORM_DATA);
 		assertCannotRead(MULTIPART_MIXED);
 		assertCannotRead(MULTIPART_RELATED);
@@ -303,15 +328,16 @@ public class FormHttpMessageConverterTests {
 	}
 
 
-	private static class MockHttpOutputMessageRequestContext implements RequestContext {
+	private static class MockHttpOutputMessageRequestContext implements UploadContext {
 
 		private final MockHttpOutputMessage outputMessage;
 
+		private final byte[] body;
 
 		private MockHttpOutputMessageRequestContext(MockHttpOutputMessage outputMessage) {
 			this.outputMessage = outputMessage;
+			this.body = this.outputMessage.getBodyAsBytes();
 		}
-
 
 		@Override
 		public String getCharacterEncoding() {
@@ -326,16 +352,16 @@ public class FormHttpMessageConverterTests {
 		}
 
 		@Override
-		@Deprecated
-		public int getContentLength() {
-			return this.outputMessage.getBodyAsBytes().length;
+		public InputStream getInputStream() throws IOException {
+			return new ByteArrayInputStream(body);
 		}
 
 		@Override
-		public InputStream getInputStream() throws IOException {
-			return new ByteArrayInputStream(this.outputMessage.getBodyAsBytes());
+		public long contentLength() {
+			return body.length;
 		}
 	}
+
 
 	public static class MyBean {
 

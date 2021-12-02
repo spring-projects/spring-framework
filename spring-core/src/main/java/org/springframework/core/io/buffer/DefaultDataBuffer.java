@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.core.io.buffer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -191,8 +190,8 @@ public class DefaultDataBuffer implements DataBuffer {
 		if (newCapacity > oldCapacity) {
 			ByteBuffer oldBuffer = this.byteBuffer;
 			ByteBuffer newBuffer = allocate(newCapacity, oldBuffer.isDirect());
-			((Buffer) oldBuffer).position(0).limit(oldBuffer.capacity());
-			((Buffer) newBuffer).position(0).limit(oldBuffer.capacity());
+			oldBuffer.position(0).limit(oldBuffer.capacity());
+			newBuffer.position(0).limit(oldBuffer.capacity());
 			newBuffer.put(oldBuffer);
 			newBuffer.clear();
 			setNativeBuffer(newBuffer);
@@ -205,8 +204,8 @@ public class DefaultDataBuffer implements DataBuffer {
 					writePosition = newCapacity;
 					writePosition(writePosition);
 				}
-				((Buffer) oldBuffer).position(readPosition).limit(writePosition);
-				((Buffer) newBuffer).position(readPosition).limit(writePosition);
+				oldBuffer.position(readPosition).limit(writePosition);
+				newBuffer.position(readPosition).limit(writePosition);
 				newBuffer.put(oldBuffer);
 				newBuffer.clear();
 			}
@@ -265,7 +264,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 		ByteBuffer tmp = this.byteBuffer.duplicate();
 		int limit = this.readPosition + length;
-		((Buffer) tmp).clear().position(this.readPosition).limit(limit);
+		tmp.clear().position(this.readPosition).limit(limit);
 		tmp.get(destination, offset, length);
 
 		this.readPosition += length;
@@ -295,7 +294,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 		ByteBuffer tmp = this.byteBuffer.duplicate();
 		int limit = this.writePosition + length;
-		((Buffer) tmp).clear().position(this.writePosition).limit(limit);
+		tmp.clear().position(this.writePosition).limit(limit);
 		tmp.put(source, offset, length);
 
 		this.writePosition += length;
@@ -324,7 +323,7 @@ public class DefaultDataBuffer implements DataBuffer {
 		int length = source.remaining();
 		ByteBuffer tmp = this.byteBuffer.duplicate();
 		int limit = this.writePosition + source.remaining();
-		((Buffer) tmp).clear().position(this.writePosition).limit(limit);
+		tmp.clear().position(this.writePosition).limit(limit);
 		tmp.put(source);
 		this.writePosition += length;
 	}
@@ -333,18 +332,14 @@ public class DefaultDataBuffer implements DataBuffer {
 	public DefaultDataBuffer slice(int index, int length) {
 		checkIndex(index, length);
 		int oldPosition = this.byteBuffer.position();
-		// Explicit access via Buffer base type for compatibility
-		// with covariant return type on JDK 9's ByteBuffer...
-		Buffer buffer = this.byteBuffer;
 		try {
-			buffer.position(index);
+			this.byteBuffer.position(index);
 			ByteBuffer slice = this.byteBuffer.slice();
-			// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
-			((Buffer) slice).limit(length);
+			slice.limit(length);
 			return new SlicedDefaultDataBuffer(slice, this.dataBufferFactory, length);
 		}
 		finally {
-			buffer.position(oldPosition);
+			this.byteBuffer.position(oldPosition);
 		}
 	}
 
@@ -358,11 +353,8 @@ public class DefaultDataBuffer implements DataBuffer {
 		checkIndex(index, length);
 
 		ByteBuffer duplicate = this.byteBuffer.duplicate();
-		// Explicit access via Buffer base type for compatibility
-		// with covariant return type on JDK 9's ByteBuffer...
-		Buffer buffer = duplicate;
-		buffer.position(index);
-		buffer.limit(index + length);
+		duplicate.position(index);
+		duplicate.limit(index + length);
 		return duplicate.slice();
 	}
 
@@ -439,10 +431,9 @@ public class DefaultDataBuffer implements DataBuffer {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof DefaultDataBuffer)) {
+		if (!(other instanceof DefaultDataBuffer otherBuffer)) {
 			return false;
 		}
-		DefaultDataBuffer otherBuffer = (DefaultDataBuffer) other;
 		return (this.readPosition == otherBuffer.readPosition &&
 				this.writePosition == otherBuffer.writePosition &&
 				this.byteBuffer.equals(otherBuffer.byteBuffer));
@@ -462,9 +453,9 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	private void checkIndex(int index, int length) {
 		assertIndex(index >= 0, "index %d must be >= 0", index);
-		assertIndex(length >= 0, "length %d must be >= 0", index);
+		assertIndex(length >= 0, "length %d must be >= 0", length);
 		assertIndex(index <= this.capacity, "index %d must be <= %d", index, this.capacity);
-		assertIndex(length <= this.capacity, "length %d must be <= %d", index, this.capacity);
+		assertIndex(length <= this.capacity, "length %d must be <= %d", length, this.capacity);
 	}
 
 	private void assertIndex(boolean expression, String format, Object... args) {

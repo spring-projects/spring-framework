@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@ package org.springframework.web.servlet.handler;
 
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.Ordered;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -142,7 +142,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			if (result != null) {
 				// Print debug message when warn logger is not enabled.
 				if (logger.isDebugEnabled() && (this.warnLogger == null || !this.warnLogger.isWarnEnabled())) {
-					logger.debug("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
+					logger.debug(buildLogMessage(ex, request) + (result.isEmpty() ? "" : " to " + result));
 				}
 				// Explicitly configured warn logger in logException method.
 				logException(ex, request);
@@ -180,8 +180,16 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 				}
 			}
 		}
-		// Else only apply if there are no explicit handler mappings.
-		return (this.mappedHandlers == null && this.mappedHandlerClasses == null);
+		return !hasHandlerMappings();
+	}
+
+	/**
+	 * Whether there are any handler mappings registered via
+	 * {@link #setMappedHandlers(Set)} or {@link #setMappedHandlerClasses(Class[])}.
+	 * @since 5.3
+	 */
+	protected boolean hasHandlerMappings() {
+		return (this.mappedHandlers != null || this.mappedHandlerClasses != null);
 	}
 
 	/**
@@ -207,7 +215,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @return the log message to use
 	 */
 	protected String buildLogMessage(Exception ex, HttpServletRequest request) {
-		return "Resolved [" + ex + "]";
+		return "Resolved [" + LogFormatUtils.formatValue(ex, -1, true) + "]";
 	}
 
 	/**

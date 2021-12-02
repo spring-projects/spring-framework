@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.GenericPropertiesContextLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,11 +50,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sam Brannen
  * @since 2.5
- * @see GenericPropertiesContextLoader
+ * @see org.springframework.test.context.support.GenericPropertiesContextLoader
  * @see SpringJUnit4ClassRunnerAppCtxTests
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(loader = GenericPropertiesContextLoader.class)
+@SuppressWarnings("deprecation")
+@ContextConfiguration(loader = org.springframework.test.context.support.GenericPropertiesContextLoader.class)
 public class PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests {
 
 	@Autowired

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
@@ -34,8 +34,6 @@ import org.springframework.web.multipart.MultipartFile;
  * Default implementation of the
  * {@link org.springframework.web.multipart.MultipartHttpServletRequest}
  * interface. Provides management of pre-generated parameter values.
- *
- * <p>Used by {@link org.springframework.web.multipart.commons.CommonsMultipartResolver}.
  *
  * @author Trevor D. Cook
  * @author Juergen Hoeller

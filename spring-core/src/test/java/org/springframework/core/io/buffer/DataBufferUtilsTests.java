@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -35,18 +36,20 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
+import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import reactor.util.context.Context;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
-import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -815,7 +818,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 
 		StepVerifier.create(result)
 				.consumeNextWith(buf -> {
-					assertThat(DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)).isEqualTo("foobarbaz");
+					assertThat(buf.toString(StandardCharsets.UTF_8)).isEqualTo("foobarbaz");
 					release(buf);
 				})
 				.verifyComplete();
@@ -833,6 +836,22 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 
 		StepVerifier.create(result)
 				.verifyError(DataBufferLimitException.class);
+	}
+
+	@Test // gh-26060
+	void joinWithLimitDoesNotOverRelease() {
+		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
+		byte[] bytes = "foo-bar-baz".getBytes(StandardCharsets.UTF_8);
+
+		NettyDataBuffer buffer = bufferFactory.allocateBuffer(bytes.length);
+		buffer.getNativeBuffer().retain(); // should be at 2 now
+		buffer.write(bytes);
+
+		Mono<DataBuffer> result = DataBufferUtils.join(Flux.just(buffer), 8);
+
+		StepVerifier.create(result).verifyError(DataBufferLimitException.class);
+		assertThat(buffer.getNativeBuffer().refCnt()).isEqualTo(1);
+		buffer.release();
 	}
 
 	@ParameterizedDataBufferAllocatingTest
@@ -887,22 +906,89 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	void matcher2(String displayName, DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
-		DataBuffer foo = stringBuffer("fooobar");
+		DataBuffer foo = stringBuffer("foooobar");
 
 		byte[] delims = "oo".getBytes(StandardCharsets.UTF_8);
 		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
-		int result = matcher.match(foo);
-		assertThat(result).isEqualTo(2);
-		foo.readPosition(2);
-		result = matcher.match(foo);
-		assertThat(result).isEqualTo(3);
-		foo.readPosition(3);
-		result = matcher.match(foo);
-		assertThat(result).isEqualTo(-1);
+		int endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(2);
+		foo.readPosition(endIndex + 1);
+		endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(4);
+		foo.readPosition(endIndex + 1);
+		endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(-1);
 
 		release(foo);
 	}
 
+	@ParameterizedDataBufferAllocatingTest
+	void matcher3(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer foo = stringBuffer("foooobar");
+
+		byte[] delims = "oo".getBytes(StandardCharsets.UTF_8);
+		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		int endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(2);
+		foo.readPosition(endIndex + 1);
+		endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(4);
+		foo.readPosition(endIndex + 1);
+		endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(-1);
+
+		release(foo);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void propagateContextByteChannel(String displayName, DataBufferFactory bufferFactory) throws IOException {
+		Path path = Paths.get(this.resource.getURI());
+		try (SeekableByteChannel out = Files.newByteChannel(this.tempFile, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+			Flux<DataBuffer> result = DataBufferUtils.read(path, bufferFactory, 1024, StandardOpenOption.READ)
+					.transformDeferredContextual((f, ctx) -> {
+						assertThat(ctx.getOrDefault("key", "EMPTY")).isEqualTo("TEST");
+						return f;
+					})
+					.transform(f -> DataBufferUtils.write(f, out))
+					.transformDeferredContextual((f, ctx) -> {
+						assertThat(ctx.getOrDefault("key", "EMPTY")).isEqualTo("TEST");
+						return f;
+					})
+					.contextWrite(Context.of("key", "TEST"));
+
+			StepVerifier.create(result)
+					.consumeNextWith(DataBufferUtils::release)
+					.verifyComplete();
+
+
+		}
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void propagateContextAsynchronousFileChannel(String displayName, DataBufferFactory bufferFactory) throws IOException {
+		Path path = Paths.get(this.resource.getURI());
+		try (AsynchronousFileChannel out = AsynchronousFileChannel.open(this.tempFile, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+			Flux<DataBuffer> result = DataBufferUtils.read(path, bufferFactory, 1024, StandardOpenOption.READ)
+					.transformDeferredContextual((f, ctx) -> {
+						assertThat(ctx.getOrDefault("key", "EMPTY")).isEqualTo("TEST");
+						return f;
+					})
+					.transform(f -> DataBufferUtils.write(f, out))
+					.transformDeferredContextual((f, ctx) -> {
+						assertThat(ctx.getOrDefault("key", "EMPTY")).isEqualTo("TEST");
+						return f;
+					})
+					.contextWrite(Context.of("key", "TEST"));
+
+			StepVerifier.create(result)
+					.consumeNextWith(DataBufferUtils::release)
+					.verifyComplete();
+
+
+		}
+	}
 
 	private static class ZeroDemandSubscriber extends BaseSubscriber<DataBuffer> {
 

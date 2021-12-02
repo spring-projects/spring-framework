@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,12 +112,12 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 		StringBuilder sb = new StringBuilder(getClass().getSimpleName());
 		sb.append(" [payload=");
 		if (this.payload instanceof byte[]) {
-			sb.append("byte[").append(((byte[]) this.payload).length).append("]");
+			sb.append("byte[").append(((byte[]) this.payload).length).append(']');
 		}
 		else {
 			sb.append(this.payload);
 		}
-		sb.append(", headers=").append(this.headers).append("]");
+		sb.append(", headers=").append(this.headers).append(']');
 		return sb.toString();
 	}
 

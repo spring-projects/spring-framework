@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * WebSocketConnectionManager} instead to auto-start a WebSocket connection.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class JettyWebSocketClient extends AbstractWebSocketClient implements Lifecycle {
@@ -144,18 +145,18 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 		final ClientUpgradeRequest request = new ClientUpgradeRequest();
 		request.setSubProtocols(protocols);
 
-		for (WebSocketExtension e : extensions) {
-			request.addExtensions(new WebSocketToJettyExtensionConfigAdapter(e));
+		for (WebSocketExtension extension : extensions) {
+			request.addExtensions(new WebSocketToJettyExtensionConfigAdapter(extension));
 		}
 
-		headers.forEach(request::setHeader);
+		request.setHeaders(headers);
 
 		Principal user = getUser();
-		final JettyWebSocketSession wsSession = new JettyWebSocketSession(attributes, user);
-		final JettyWebSocketHandlerAdapter listener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
+		JettyWebSocketSession wsSession = new JettyWebSocketSession(attributes, user);
 
 		Callable<WebSocketSession> connectTask = () -> {
-			Future<Session> future = this.client.connect(listener, uri, request);
+			JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
+			Future<Session> future = this.client.connect(adapter, uri, request);
 			future.get(this.client.getConnectTimeout() + 2000, TimeUnit.MILLISECONDS);
 			return wsSession;
 		};

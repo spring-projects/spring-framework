@@ -88,4 +88,19 @@ public class RollbackRuleTests {
 				new RollbackRuleAttribute((String) null));
 	}
 
+	@Test
+	public void foundEnclosedExceptionWithEnclosingException() {
+		RollbackRuleAttribute rr = new RollbackRuleAttribute(EnclosingException.class);
+		assertThat(rr.getDepth(new EnclosingException.EnclosedException())).isEqualTo(0);
+	}
+
+	@SuppressWarnings("serial")
+	static class EnclosingException extends RuntimeException {
+
+		@SuppressWarnings("serial")
+		static class EnclosedException extends RuntimeException {
+
+		}
+	}
+
 }

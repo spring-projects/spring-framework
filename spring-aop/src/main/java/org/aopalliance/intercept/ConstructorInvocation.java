@@ -18,6 +18,8 @@ package org.aopalliance.intercept;
 
 import java.lang.reflect.Constructor;
 
+import javax.annotation.Nonnull;
+
 /**
  * Description of an invocation to a constructor, given to an
  * interceptor upon constructor-call.
@@ -36,6 +38,7 @@ public interface ConstructorInvocation extends Invocation {
 	 * {@link Joinpoint#getStaticPart()} method (same result).
 	 * @return the constructor being called
 	 */
+	@Nonnull
 	Constructor<?> getConstructor();
 
 }

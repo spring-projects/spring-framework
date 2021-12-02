@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.jms;
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.TextMessage;
 
 /**
  * Stub JMS Message implementation intended for testing purposes only.
@@ -325,6 +325,7 @@ public class StubTextMessage implements TextMessage {
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public boolean isBodyAssignableTo(Class c) throws JMSException {
 		return false;
 	}

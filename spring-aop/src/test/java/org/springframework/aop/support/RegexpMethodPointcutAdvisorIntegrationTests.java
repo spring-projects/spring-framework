@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public class RegexpMethodPointcutAdvisorIntegrationTests {
 		assertThat(nop.getCount()).isEqualTo(2);
 
 		// Serialize and continue...
-		p = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		p = SerializationTestUtils.serializeAndDeserialize(p);
 		assertThat(p.getAge()).isEqualTo(newAge);
 		// Remembers count, but we need to get a new reference to nop...
 		nop = (SerializableNopInterceptor) ((Advised) p).getAdvisors()[0].getAdvice();

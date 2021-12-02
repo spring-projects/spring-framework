@@ -40,39 +40,14 @@
 	</util:properties>
 
 	<!-- Local EJB Tests -->
-	<jee:local-slsb id="simpleLocalEjb" jndi-name="ejb/MyLocalBean"
-			business-interface="org.springframework.beans.testfixture.beans.ITestBean"/>
-
-	<jee:local-slsb id="complexLocalEjb"
-			jndi-name="ejb/MyLocalBean"
-			business-interface="org.springframework.beans.testfixture.beans.ITestBean"
-			cache-home="true"
-			lookup-home-on-startup="true"
-			resource-ref="true">
-		<jee:environment>foo=bar</jee:environment>
-	</jee:local-slsb>
+	<jee:local-slsb id="simpleLocalEjb" jndi-name="ejb/MyLocalBean"/>
 
 	<!-- Remote EJB Tests -->
-	<jee:remote-slsb id="simpleRemoteEjb" jndi-name="ejb/MyRemoteBean"
-			business-interface="org.springframework.beans.testfixture.beans.ITestBean"/>
-
-	<jee:remote-slsb id="complexRemoteEjb"
-			jndi-name="ejb/MyRemoteBean"
-			business-interface="org.springframework.beans.testfixture.beans.ITestBean"
-			cache-home="true"
-			lookup-home-on-startup="true"
-			resource-ref="true"
-			home-interface="org.springframework.beans.testfixture.beans.ITestBean"
-			refresh-home-on-connect-failure="true"
-      cache-session-bean="true">
-		<jee:environment>foo=bar</jee:environment>
-	</jee:remote-slsb>
+	<jee:remote-slsb id="simpleRemoteEjb" jndi-name="ejb/MyRemoteBean"/>
 
 	<!-- Lazy beans Tests-->
-	<jee:jndi-lookup id="lazyDataSource" jndi-name="jdbc/MyDataSource" lazy-init="true" />
-	<jee:local-slsb id="lazyLocalBean" jndi-name="ejb/MyLocalBean"
-		business-interface="org.springframework.beans.testfixture.beans.ITestBean" lazy-init="true" />
-	<jee:remote-slsb id="lazyRemoteBean" jndi-name="ejb/MyRemoteBean"
-		business-interface="org.springframework.beans.testfixture.beans.ITestBean" lazy-init="true" />
+	<jee:jndi-lookup id="lazyDataSource" jndi-name="jdbc/MyDataSource" lazy-init="true"/>
+	<jee:local-slsb id="lazyLocalBean" jndi-name="ejb/MyLocalBean" lazy-init="true"/>
+	<jee:remote-slsb id="lazyRemoteBean" jndi-name="ejb/MyRemoteBean" lazy-init="true"/>
 
 </beans>

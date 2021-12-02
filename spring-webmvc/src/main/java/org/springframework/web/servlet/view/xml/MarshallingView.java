@@ -19,10 +19,11 @@ package org.springframework.web.servlet.view.xml;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBElement;
 import javax.xml.transform.stream.StreamResult;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.xml.bind.JAXBElement;
 
 import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;

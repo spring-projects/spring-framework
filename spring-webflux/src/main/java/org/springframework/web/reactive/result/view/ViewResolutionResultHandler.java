@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -320,7 +320,20 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 			}
 		}
 		List<MediaType> mediaTypes = getMediaTypes(views);
-		MediaType bestMediaType = selectMediaType(exchange, () -> mediaTypes);
+		MediaType bestMediaType;
+		try {
+			bestMediaType = selectMediaType(exchange, () -> mediaTypes);
+		}
+		catch (NotAcceptableStatusException ex) {
+			HttpStatus statusCode = exchange.getResponse().getStatusCode();
+			if (statusCode != null && statusCode.isError()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Ignoring error response content (if any). " + ex.getReason());
+				}
+				return Mono.empty();
+			}
+			throw ex;
+		}
 		if (bestMediaType != null) {
 			for (View view : views) {
 				for (MediaType mediaType : view.getSupportedMediaTypes()) {

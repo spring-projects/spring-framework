@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import test.aop.PerTargetAspect;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.ExceptionAspect;
+import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.ExceptionThrowingAspect;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -42,7 +42,7 @@ class AspectMetadataTests {
 
 	@Test
 	void singletonAspect() {
-		AspectMetadata am = new AspectMetadata(ExceptionAspect.class, "someBean");
+		AspectMetadata am = new AspectMetadata(ExceptionThrowingAspect.class, "someBean");
 		assertThat(am.isPerThisOrPerTarget()).isFalse();
 		assertThat(am.getPerClausePointcut()).isSameAs(Pointcut.TRUE);
 		assertThat(am.getAjType().getPerClause().getKind()).isEqualTo(PerClauseKind.SINGLETON);

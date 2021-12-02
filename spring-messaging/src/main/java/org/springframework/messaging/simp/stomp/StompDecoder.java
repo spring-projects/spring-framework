@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -33,6 +32,7 @@ import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StreamUtils;
 
 /**
  * Decodes one or more STOMP frames contained in a {@link ByteBuffer}.
@@ -133,11 +133,7 @@ public class StompDecoder {
 	private Message<byte[]> decodeMessage(ByteBuffer byteBuffer, @Nullable MultiValueMap<String, String> headers) {
 		Message<byte[]> decodedMessage = null;
 		skipEol(byteBuffer);
-
-		// Explicit mark/reset access via Buffer base type for compatibility
-		// with covariant return type on JDK 9's ByteBuffer...
-		Buffer buffer = byteBuffer;
-		buffer.mark();
+		byteBuffer.mark();
 
 		String command = readCommand(byteBuffer);
 		if (command.length() > 0) {
@@ -175,7 +171,7 @@ public class StompDecoder {
 						headers.putAll(map);
 					}
 				}
-				buffer.reset();
+				byteBuffer.reset();
 			}
 		}
 		else {
@@ -216,7 +212,7 @@ public class StompDecoder {
 		while (byteBuffer.remaining() > 0 && !tryConsumeEndOfLine(byteBuffer)) {
 			command.write(byteBuffer.get());
 		}
-		return new String(command.toByteArray(), StandardCharsets.UTF_8);
+		return StreamUtils.copyToString(command, StandardCharsets.UTF_8);
 	}
 
 	private void readHeaders(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
@@ -231,7 +227,7 @@ public class StompDecoder {
 				headerStream.write(byteBuffer.get());
 			}
 			if (headerStream.size() > 0 && headerComplete) {
-				String header = new String(headerStream.toByteArray(), StandardCharsets.UTF_8);
+				String header = StreamUtils.copyToString(headerStream, StandardCharsets.UTF_8);
 				int colonIndex = header.indexOf(':');
 				if (colonIndex <= 0) {
 					if (byteBuffer.remaining() > 0) {
@@ -268,7 +264,7 @@ public class StompDecoder {
 		int index = inString.indexOf('\\');
 
 		while (index >= 0) {
-			sb.append(inString.substring(pos, index));
+			sb.append(inString, pos, index);
 			if (index + 1 >= inString.length()) {
 				throw new StompConversionException("Illegal escape sequence at index " + index + ": " + inString);
 			}
@@ -356,8 +352,7 @@ public class StompDecoder {
 					throw new StompConversionException("'\\r' must be followed by '\\n'");
 				}
 			}
-			// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
-			((Buffer) byteBuffer).position(byteBuffer.position() - 1);
+			byteBuffer.position(byteBuffer.position() - 1);
 		}
 		return false;
 	}

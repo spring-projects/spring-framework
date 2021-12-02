@@ -21,14 +21,14 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.tagext.BodyContent;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.tagext.BodyContent;
 
 import org.springframework.lang.Nullable;
 
 /**
- * Mock implementation of the {@link javax.servlet.jsp.tagext.BodyContent} class.
+ * Mock implementation of the {@link jakarta.servlet.jsp.tagext.BodyContent} class.
  * Only necessary for testing applications when testing custom JSP tags.
  *
  * @author Juergen Hoeller

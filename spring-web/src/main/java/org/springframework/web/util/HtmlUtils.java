@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public abstract class HtmlUtils {
 
 	/**
 	 * Turn special characters into HTML character references.
-	 * <p>Handles complete character set defined in HTML 4.01 recommendation.
+	 * <p>Handles the complete character set defined in the HTML 4.01 recommendation.
 	 * <p>Escapes all special characters to their corresponding
 	 * entity reference (e.g. {@code &lt;}).
 	 * <p>Reference:
@@ -65,7 +65,7 @@ public abstract class HtmlUtils {
 
 	/**
 	 * Turn special characters into HTML character references.
-	 * <p>Handles complete character set defined in HTML 4.01 recommendation.
+	 * <p>Handles the complete character set defined in the HTML 4.01 recommendation.
 	 * <p>Escapes all special characters to their corresponding
 	 * entity reference (e.g. {@code &lt;}) at least as required by the
 	 * specified encoding. In other words, if a special character does
@@ -98,9 +98,9 @@ public abstract class HtmlUtils {
 
 	/**
 	 * Turn special characters into HTML character references.
-	 * <p>Handles complete character set defined in HTML 4.01 recommendation.
+	 * <p>Handles the complete character set defined in the HTML 4.01 recommendation.
 	 * <p>Escapes all special characters to their corresponding numeric
-	 * reference in decimal format (&#<i>Decimal</i>;).
+	 * reference in decimal format (&amp;#<i>Decimal</i>;).
 	 * <p>Reference:
 	 * <a href="https://www.w3.org/TR/html4/sgml/entities.html">
 	 * https://www.w3.org/TR/html4/sgml/entities.html
@@ -114,9 +114,9 @@ public abstract class HtmlUtils {
 
 	/**
 	 * Turn special characters into HTML character references.
-	 * <p>Handles complete character set defined in HTML 4.01 recommendation.
+	 * <p>Handles the complete character set defined in the HTML 4.01 recommendation.
 	 * <p>Escapes all special characters to their corresponding numeric
-	 * reference in decimal format (&#<i>Decimal</i>;) at least as required by the
+	 * reference in decimal format (&amp;#<i>Decimal</i>;) at least as required by the
 	 * specified encoding. In other words, if a special character does
 	 * not have to be escaped for the given encoding, it may not be.
 	 * <p>Reference:
@@ -148,9 +148,9 @@ public abstract class HtmlUtils {
 
 	/**
 	 * Turn special characters into HTML character references.
-	 * <p>Handles complete character set defined in HTML 4.01 recommendation.
+	 * <p>Handles the complete character set defined in the HTML 4.01 recommendation.
 	 * <p>Escapes all special characters to their corresponding numeric
-	 * reference in hex format (&#x<i>Hex</i>;).
+	 * reference in hex format (&amp;#x<i>Hex</i>;).
 	 * <p>Reference:
 	 * <a href="https://www.w3.org/TR/html4/sgml/entities.html">
 	 * https://www.w3.org/TR/html4/sgml/entities.html
@@ -164,9 +164,9 @@ public abstract class HtmlUtils {
 
 	/**
 	 * Turn special characters into HTML character references.
-	 * <p>Handles complete character set defined in HTML 4.01 recommendation.
+	 * <p>Handles the complete character set defined in the HTML 4.01 recommendation.
 	 * <p>Escapes all special characters to their corresponding numeric
-	 * reference in hex format (&#x<i>Hex</i>;) at least as required by the
+	 * reference in hex format (&amp;#x<i>Hex</i>;) at least as required by the
 	 * specified encoding. In other words, if a special character does
 	 * not have to be escaped for the given encoding, it may not be.
 	 * <p>Reference:

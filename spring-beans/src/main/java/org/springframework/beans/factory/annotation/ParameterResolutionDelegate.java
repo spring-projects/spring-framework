@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,6 +140,8 @@ public final class ParameterResolutionDelegate {
 	 * Due to a bug in {@code javac} on JDK versions prior to JDK 9, looking up
 	 * annotations directly on a {@link Parameter} will fail for inner class
 	 * constructors.
+	 * <p>Note: Since Spring 6 may still encounter user code compiled with
+	 * {@code javac 8}, this workaround is kept in place for the time being.
 	 * <h4>Bug in javac in JDK &lt; 9</h4>
 	 * <p>The parameter annotations array in the compiled byte code excludes an entry
 	 * for the implicit <em>enclosing instance</em> parameter for an inner class

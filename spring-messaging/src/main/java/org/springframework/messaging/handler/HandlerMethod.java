@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -87,6 +88,7 @@ public class HandlerMethod {
 		this.beanType = ClassUtils.getUserClass(bean);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+		ReflectionUtils.makeAccessible(this.bridgedMethod);
 		this.parameters = initMethodParameters();
 	}
 
@@ -102,6 +104,7 @@ public class HandlerMethod {
 		this.beanType = ClassUtils.getUserClass(bean);
 		this.method = bean.getClass().getMethod(methodName, parameterTypes);
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(this.method);
+		ReflectionUtils.makeAccessible(this.bridgedMethod);
 		this.parameters = initMethodParameters();
 	}
 
@@ -123,6 +126,7 @@ public class HandlerMethod {
 		this.beanType = ClassUtils.getUserClass(beanType);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+		ReflectionUtils.makeAccessible(this.bridgedMethod);
 		this.parameters = initMethodParameters();
 	}
 
@@ -304,10 +308,9 @@ public class HandlerMethod {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof HandlerMethod)) {
+		if (!(other instanceof HandlerMethod otherMethod)) {
 			return false;
 		}
-		HandlerMethod otherMethod = (HandlerMethod) other;
 		return (this.bean.equals(otherMethod.bean) && this.method.equals(otherMethod.method));
 	}
 

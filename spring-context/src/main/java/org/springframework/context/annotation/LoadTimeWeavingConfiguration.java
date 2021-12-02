@@ -41,7 +41,7 @@ import org.springframework.util.Assert;
  * @see LoadTimeWeavingConfigurer
  * @see ConfigurableApplicationContext#LOAD_TIME_WEAVER_BEAN_NAME
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoaderAware {
 

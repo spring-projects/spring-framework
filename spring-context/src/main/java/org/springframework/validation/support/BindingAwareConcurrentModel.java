@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.validation.support;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.validation.BindingResult;
 
@@ -36,17 +37,19 @@ import org.springframework.validation.BindingResult;
  * @author Rossen Stoyanchev
  * @since 5.0
  * @see BindingResult
+ * @see BindingAwareModelMap
  */
 @SuppressWarnings("serial")
 public class BindingAwareConcurrentModel extends ConcurrentModel {
 
 	@Override
-	public Object put(String key, Object value) {
+	@Nullable
+	public Object put(String key, @Nullable Object value) {
 		removeBindingResultIfNecessary(key, value);
 		return super.put(key, value);
 	}
 
-	private void removeBindingResultIfNecessary(String key, Object value) {
+	private void removeBindingResultIfNecessary(String key, @Nullable Object value) {
 		if (!key.startsWith(BindingResult.MODEL_KEY_PREFIX)) {
 			String resultKey = BindingResult.MODEL_KEY_PREFIX + key;
 			BindingResult result = (BindingResult) get(resultKey);

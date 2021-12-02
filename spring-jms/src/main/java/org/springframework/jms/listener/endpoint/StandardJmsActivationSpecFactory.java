@@ -18,12 +18,12 @@ package org.springframework.jms.listener.endpoint;
 
 import java.util.Map;
 
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.resource.spi.ActivationSpec;
-import javax.resource.spi.ResourceAdapter;
+import jakarta.jms.JMSException;
+import jakarta.jms.Queue;
+import jakarta.jms.Session;
+import jakarta.jms.Topic;
+import jakarta.resource.spi.ActivationSpec;
+import jakarta.resource.spi.ResourceAdapter;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -193,11 +193,11 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * having been requested.
 	 * @param bw the BeanWrapper wrapping the ActivationSpec object
 	 * @param ackMode the configured acknowledge mode
-	 * (according to the constants in {@link javax.jms.Session}
-	 * @see javax.jms.Session#AUTO_ACKNOWLEDGE
-	 * @see javax.jms.Session#DUPS_OK_ACKNOWLEDGE
-	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
-	 * @see javax.jms.Session#SESSION_TRANSACTED
+	 * (according to the constants in {@link jakarta.jms.Session}
+	 * @see jakarta.jms.Session#AUTO_ACKNOWLEDGE
+	 * @see jakarta.jms.Session#DUPS_OK_ACKNOWLEDGE
+	 * @see jakarta.jms.Session#CLIENT_ACKNOWLEDGE
+	 * @see jakarta.jms.Session#SESSION_TRANSACTED
 	 */
 	protected void applyAcknowledgeMode(BeanWrapper bw, int ackMode) {
 		if (ackMode == Session.SESSION_TRANSACTED) {

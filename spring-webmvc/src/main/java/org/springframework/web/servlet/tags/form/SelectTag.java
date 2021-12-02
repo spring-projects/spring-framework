@@ -19,7 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
@@ -243,7 +243,7 @@ import org.springframework.web.servlet.support.BindStatus;
 public class SelectTag extends AbstractHtmlInputElementTag {
 
 	/**
-	 * The {@link javax.servlet.jsp.PageContext} attribute under
+	 * The {@link jakarta.servlet.jsp.PageContext} attribute under
 	 * which the bound value is exposed to inner {@link OptionTag OptionTags}.
 	 */
 	public static final String LIST_VALUE_PAGE_ATTRIBUTE =

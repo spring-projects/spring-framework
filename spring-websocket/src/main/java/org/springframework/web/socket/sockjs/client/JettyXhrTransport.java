@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
-import org.eclipse.jetty.client.util.StringContentProvider;
+import org.eclipse.jetty.client.util.StringRequestContent;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpMethod;
 
@@ -35,6 +35,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.socket.CloseStatus;
@@ -141,7 +142,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 		Request httpRequest = this.httpClient.newRequest(url).method(method);
 		addHttpHeaders(httpRequest, headers);
 		if (body != null) {
-			httpRequest.content(new StringContentProvider(body));
+			httpRequest.body(new StringRequestContent(body));
 		}
 		ContentResponse response;
 		try {
@@ -159,10 +160,12 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 
 	private static void addHttpHeaders(Request request, HttpHeaders headers) {
-		headers.forEach((key, values) -> {
-			for (String value : values) {
-				request.header(key, value);
-			}
+		request.headers(fields -> {
+			headers.forEach((key, values) -> {
+				for (String value : values) {
+					fields.add(key, value);
+				}
+			});
 		});
 	}
 
@@ -247,14 +250,13 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 		}
 
 		private void handleFrame() {
-			byte[] bytes = this.outputStream.toByteArray();
+			String content = StreamUtils.copyToString(this.outputStream, SockJsFrame.CHARSET);
 			this.outputStream.reset();
-			String content = new String(bytes, SockJsFrame.CHARSET);
 			if (logger.isTraceEnabled()) {
 				logger.trace("XHR content received: " + content);
 			}
 			if (!PRELUDE.equals(content)) {
-				this.sockJsSession.handleFrame(new String(bytes, SockJsFrame.CHARSET));
+				this.sockJsSession.handleFrame(content);
 			}
 		}
 

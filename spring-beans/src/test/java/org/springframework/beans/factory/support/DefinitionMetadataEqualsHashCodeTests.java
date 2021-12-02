@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,7 +126,7 @@ public class DefinitionMetadataEqualsHashCodeTests {
 		assertThat(equal.hashCode()).as("Hash code for equal instances should match").isEqualTo(master.hashCode());
 
 		assertThat(notEqual).as("Should not be equal").isNotEqualTo(master);
-		assertThat(notEqual.hashCode()).as("Hash code for non-equal instances should not match").isNotEqualTo((long) master.hashCode());
+		assertThat(notEqual.hashCode()).as("Hash code for non-equal instances should not match").isNotEqualTo(master.hashCode());
 
 		assertThat(subclass).as("Subclass should be equal").isEqualTo(master);
 		assertThat(subclass.hashCode()).as("Hash code for subclass should match").isEqualTo(master.hashCode());

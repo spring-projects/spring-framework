@@ -13,9 +13,7 @@
 		<property name="headerCopyrightPattern" value="20\d\d-20\d\d"/>
 		<property name="packageInfoHeaderType" value="none"/>
 	</module>
-	<module name="com.puppycrawl.tools.checkstyle.checks.NewlineAtEndOfFileCheck">
-		<property name="lineSeparator" value="lf"/>
-	</module>
+	<module name="com.puppycrawl.tools.checkstyle.checks.NewlineAtEndOfFileCheck"/>
 
 	<!-- TreeWalker Checks -->
 	<module name="com.puppycrawl.tools.checkstyle.TreeWalker">
@@ -144,9 +142,7 @@
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck">
 			<property name="allowMissingParamTags" value="true"/>
-			<property name="allowMissingThrowsTags" value="true"/>
 			<property name="allowMissingReturnTag" value="true"/>
-			<property name="allowMissingJavadoc" value="true"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocVariableCheck">
 			<property name="scope" value="public"/>
@@ -160,11 +156,11 @@
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.AtclauseOrderCheck">
 			<property name="target" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF"/>
-    		<property name="tagOrder" value="@author, @since, @param, @see, @version, @serial, @deprecated"/>
+			<property name="tagOrder" value="@author, @since, @param, @see, @version, @serial, @deprecated"/>
 		</module>
- 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.AtclauseOrderCheck">
+		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.AtclauseOrderCheck">
 			<property name="target" value="METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
-    		<property name="tagOrder" value="@param, @return, @throws, @since, @deprecated, @see"/>
+			<property name="tagOrder" value="@param, @return, @throws, @since, @see, @deprecated"/>
 		</module>
 
 		<!-- Miscellaneous -->

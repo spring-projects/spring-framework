@@ -19,8 +19,7 @@ package org.springframework.messaging.converter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
+import jakarta.xml.bind.annotation.XmlRootElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.xmlunit.diff.DifferenceEvaluator;

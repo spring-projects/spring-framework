@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.core.MethodParameter;
  * @see MissingMatrixVariableException
  */
 @SuppressWarnings("serial")
-public class MissingPathVariableException extends ServletRequestBindingException {
+public class MissingPathVariableException extends MissingRequestValueException {
 
 	private final String variableName;
 
@@ -43,7 +43,20 @@ public class MissingPathVariableException extends ServletRequestBindingException
 	 * @param parameter the method parameter
 	 */
 	public MissingPathVariableException(String variableName, MethodParameter parameter) {
-		super("");
+		this(variableName, parameter, false);
+	}
+
+	/**
+	 * Constructor for use when a value was present but converted to {@code null}.
+	 * @param variableName the name of the missing path variable
+	 * @param parameter the method parameter
+	 * @param missingAfterConversion whether the value became null after conversion
+	 * @since 5.3.6
+	 */
+	public MissingPathVariableException(
+			String variableName, MethodParameter parameter, boolean missingAfterConversion) {
+
+		super("", missingAfterConversion);
 		this.variableName = variableName;
 		this.parameter = parameter;
 	}
@@ -51,8 +64,9 @@ public class MissingPathVariableException extends ServletRequestBindingException
 
 	@Override
 	public String getMessage() {
-		return "Missing URI template variable '" + this.variableName +
-				"' for method parameter of type " + this.parameter.getNestedParameterType().getSimpleName();
+		return "Required URI template variable '" + this.variableName + "' for method parameter type " +
+				this.parameter.getNestedParameterType().getSimpleName() + " is " +
+				(isMissingAfterConversion() ? "present but converted to null" : "not present");
 	}
 
 	/**

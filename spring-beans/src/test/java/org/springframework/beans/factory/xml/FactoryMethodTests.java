@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -288,7 +288,7 @@ public class FactoryMethodTests {
 		assertThat(fm2.getTestBean()).isSameAs(fm2.getTestBean());
 		assertThat(fm2).isNotSameAs(fm1);
 
-		FactoryMethods fm3 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", tbArg2, new Integer(1), "myName");
+		FactoryMethods fm3 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", tbArg2, 1, "myName");
 		assertThat(fm3.getNum()).isEqualTo(1);
 		assertThat(fm3.getName()).isEqualTo("myName");
 		assertThat(fm3.getTestBean().getName()).isEqualTo("arg2");

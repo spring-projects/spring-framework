@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package org.springframework.orm.jpa;
 
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceException;
-import javax.persistence.SharedCacheMode;
-import javax.persistence.ValidationMode;
-import javax.persistence.spi.PersistenceProvider;
-import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
+
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.SharedCacheMode;
+import jakarta.persistence.ValidationMode;
+import jakarta.persistence.spi.PersistenceProvider;
+import jakarta.persistence.spi.PersistenceUnitInfo;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ResourceLoaderAware;
@@ -40,7 +41,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that creates a JPA
- * {@link javax.persistence.EntityManagerFactory} according to JPA's standard
+ * {@link jakarta.persistence.EntityManagerFactory} according to JPA's standard
  * <i>container</i> bootstrap contract. This is the most powerful way to set
  * up a shared JPA EntityManagerFactory in a Spring application context;
  * the EntityManagerFactory can then be passed to JPA-based DAOs via
@@ -58,20 +59,16 @@ import org.springframework.util.ClassUtils;
  * instead of being tied to a special VM agent specified on JVM startup.
  *
  * <p>Internally, this FactoryBean parses the {@code persistence.xml} file
- * itself and creates a corresponding {@link javax.persistence.spi.PersistenceUnitInfo}
+ * itself and creates a corresponding {@link jakarta.persistence.spi.PersistenceUnitInfo}
  * object (with further configuration merged in, such as JDBC DataSources and the
  * Spring LoadTimeWeaver), to be passed to the chosen JPA
- * {@link javax.persistence.spi.PersistenceProvider}. This corresponds to a
+ * {@link jakarta.persistence.spi.PersistenceProvider}. This corresponds to a
  * local JPA container with full support for the standard JPA container contract.
  *
  * <p>The exposed EntityManagerFactory object will implement all the interfaces of
  * the underlying native EntityManagerFactory returned by the PersistenceProvider,
  * plus the {@link EntityManagerFactoryInfo} interface which exposes additional
  * metadata as assembled by this FactoryBean.
- *
- * <p><b>NOTE: Spring's JPA support requires JPA 2.1 or higher, as of Spring 5.0.</b>
- * JPA 1.0/2.0 based applications are still supported; however, a JPA 2.1 compliant
- * persistence provider is needed at runtime.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -84,7 +81,7 @@ import org.springframework.util.ClassUtils;
  * @see EntityManagerFactoryInfo
  * @see LocalEntityManagerFactoryBean
  * @see org.springframework.orm.jpa.support.SharedEntityManagerBean
- * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
+ * @see jakarta.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
  */
 @SuppressWarnings("serial")
 public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean
@@ -220,7 +217,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * overriding a value in {@code persistence.xml} if set.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
 	 * @since 4.0
-	 * @see javax.persistence.spi.PersistenceUnitInfo#getSharedCacheMode()
+	 * @see jakarta.persistence.spi.PersistenceUnitInfo#getSharedCacheMode()
 	 * @see #setPersistenceUnitManager
 	 */
 	public void setSharedCacheMode(SharedCacheMode sharedCacheMode) {
@@ -232,7 +229,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * overriding a value in {@code persistence.xml} if set.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
 	 * @since 4.0
-	 * @see javax.persistence.spi.PersistenceUnitInfo#getValidationMode()
+	 * @see jakarta.persistence.spi.PersistenceUnitInfo#getValidationMode()
 	 * @see #setPersistenceUnitManager
 	 */
 	public void setValidationMode(ValidationMode validationMode) {
@@ -250,7 +247,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * Note that this variant typically works for JTA transaction management as well;
 	 * if it does not, consider using the explicit {@link #setJtaDataSource} instead.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
-	 * @see javax.persistence.spi.PersistenceUnitInfo#getNonJtaDataSource()
+	 * @see jakarta.persistence.spi.PersistenceUnitInfo#getNonJtaDataSource()
 	 * @see #setPersistenceUnitManager
 	 */
 	public void setDataSource(DataSource dataSource) {
@@ -267,7 +264,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * on the PersistenceUnitInfo passed to the PersistenceProvider, as well as
 	 * overriding data source configuration in {@code persistence.xml} (if any).
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
-	 * @see javax.persistence.spi.PersistenceUnitInfo#getJtaDataSource()
+	 * @see jakarta.persistence.spi.PersistenceUnitInfo#getJtaDataSource()
 	 * @see #setPersistenceUnitManager
 	 */
 	public void setJtaDataSource(DataSource jtaDataSource) {
@@ -394,7 +391,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * <p>The default implementation is empty.
 	 * @param emf the newly created EntityManagerFactory we are working with
 	 * @param pui the PersistenceUnitInfo used to configure the EntityManagerFactory
-	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
+	 * @see jakarta.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
 	 */
 	protected void postProcessEntityManagerFactory(EntityManagerFactory emf, PersistenceUnitInfo pui) {
 	}

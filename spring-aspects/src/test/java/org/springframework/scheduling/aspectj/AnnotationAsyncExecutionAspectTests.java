@@ -38,7 +38,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * Unit tests for {@link AnnotationAsyncExecutionAspect}.
@@ -46,7 +46,7 @@ import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
  * @author Ramnivas Laddad
  * @author Stephane Nicoll
  */
-@EnabledForTestGroups(PERFORMANCE)
+@EnabledForTestGroups(LONG_RUNNING)
 public class AnnotationAsyncExecutionAspectTests {
 
 	private static final long WAIT_TIME = 1000; //milliseconds

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.aopalliance.aop.Advice;
  * <p>Introductions are often <b>mixins</b>, enabling the building of composite
  * objects that can achieve many of the goals of multiple inheritance in Java.
  *
- * <p>Compared to {qlink IntroductionInfo}, this interface allows an advice to
+ * <p>Compared to {@link IntroductionInfo}, this interface allows an advice to
  * implement a range of interfaces that is not necessarily known in advance.
  * Thus an {@link IntroductionAdvisor} can be used to specify which interfaces
  * will be exposed in an advised object.

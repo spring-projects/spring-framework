@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class JsonPathResultMatchers {
 	 * @see #value(Matcher, Class)
 	 * @see #value(Object)
 	 */
-	public <T> ResultMatcher value(Matcher<T> matcher) {
+	public <T> ResultMatcher value(Matcher<? super T> matcher) {
 		return result -> this.jsonPathHelper.assertValue(getContent(result), matcher);
 	}
 
@@ -97,7 +97,7 @@ public class JsonPathResultMatchers {
 	 * @see #value(Matcher)
 	 * @see #value(Object)
 	 */
-	public <T> ResultMatcher value(Matcher<T> matcher, Class<T> targetType) {
+	public <T> ResultMatcher value(Matcher<? super T> matcher, Class<T> targetType) {
 		return result -> this.jsonPathHelper.assertValue(getContent(result), matcher, targetType);
 	}
 
@@ -107,7 +107,7 @@ public class JsonPathResultMatchers {
 	 * @see #value(Matcher)
 	 * @see #value(Matcher, Class)
 	 */
-	public ResultMatcher value(Object expectedValue) {
+	public ResultMatcher value(@Nullable Object expectedValue) {
 		return result -> this.jsonPathHelper.assertValue(getContent(result), expectedValue);
 	}
 

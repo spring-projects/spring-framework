@@ -248,7 +248,7 @@ public interface ServerWebExchange {
 		 * Configure a consumer to modify the current request using a builder.
 		 * <p>Effectively this:
 		 * <pre>
-		 * exchange.mutate().request(builder-> builder.method(HttpMethod.PUT));
+		 * exchange.mutate().request(builder -&gt; builder.method(HttpMethod.PUT));
 		 *
 		 * // vs...
 		 *

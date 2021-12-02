@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,28 +32,31 @@ import org.springframework.web.method.annotation.RequestParamMethodArgumentResol
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for
- * {@link org.springframework.web.method.support.CompositeUriComponentsContributor}.
+ * Unit tests for {@link CompositeUriComponentsContributor}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-public class CompositeUriComponentsContributorTests {
-
+class CompositeUriComponentsContributorTests {
 
 	@Test
-	public void supportsParameter() {
-
+	void supportsParameter() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 		resolvers.add(new RequestParamMethodArgumentResolver(false));
 		resolvers.add(new RequestHeaderMethodArgumentResolver(null));
 		resolvers.add(new RequestParamMethodArgumentResolver(true));
 
-		Method method = ClassUtils.getMethod(this.getClass(), "handleRequest", String.class, String.class, String.class);
-
 		CompositeUriComponentsContributor contributor = new CompositeUriComponentsContributor(resolvers);
+		Method method = ClassUtils.getMethod(this.getClass(), "handleRequest", String.class, String.class, String.class);
 		assertThat(contributor.supportsParameter(new MethodParameter(method, 0))).isTrue();
 		assertThat(contributor.supportsParameter(new MethodParameter(method, 1))).isTrue();
 		assertThat(contributor.supportsParameter(new MethodParameter(method, 2))).isFalse();
+	}
+
+	@Test
+	void hasContributors() {
+		assertThat(new CompositeUriComponentsContributor().hasContributors()).isFalse();
+		assertThat(new CompositeUriComponentsContributor(new RequestParamMethodArgumentResolver(true)).hasContributors()).isTrue();
 	}
 
 

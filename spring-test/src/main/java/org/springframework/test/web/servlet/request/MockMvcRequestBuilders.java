@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.test.web.servlet.request;
 
 import java.net.URI;
 
-import javax.servlet.DispatcherType;
+import jakarta.servlet.DispatcherType;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -220,28 +220,6 @@ public abstract class MockMvcRequestBuilders {
 	 * @since 5.0
 	 */
 	public static MockMultipartHttpServletRequestBuilder multipart(URI uri) {
-		return new MockMultipartHttpServletRequestBuilder(uri);
-	}
-
-	/**
-	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
-	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param uriVars zero or more URI variables
-	 * @deprecated in favor of {@link #multipart(String, Object...)}
-	 */
-	@Deprecated
-	public static MockMultipartHttpServletRequestBuilder fileUpload(String urlTemplate, Object... uriVars) {
-		return new MockMultipartHttpServletRequestBuilder(urlTemplate, uriVars);
-	}
-
-	/**
-	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
-	 * @param uri the URL
-	 * @since 4.0.3
-	 * @deprecated in favor of {@link #multipart(URI)}
-	 */
-	@Deprecated
-	public static MockMultipartHttpServletRequestBuilder fileUpload(URI uri) {
 		return new MockMultipartHttpServletRequestBuilder(uri);
 	}
 

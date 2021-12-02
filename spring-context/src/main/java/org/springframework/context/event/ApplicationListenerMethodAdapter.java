@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.concurrent.CompletionStage;
 
 import org.apache.commons.logging.Log;
@@ -37,6 +38,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.Ordered;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
@@ -89,12 +91,21 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	private final int order;
 
 	@Nullable
+	private volatile String listenerId;
+
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	@Nullable
 	private EventExpressionEvaluator evaluator;
 
 
+	/**
+	 * Construct a new ApplicationListenerMethodAdapter.
+	 * @param beanName the name of the bean to invoke the listener method on
+	 * @param targetClass the target class that the method is declared on
+	 * @param method the listener method to invoke
+	 */
 	public ApplicationListenerMethodAdapter(String beanName, Class<?> targetClass, Method method) {
 		this.beanName = beanName;
 		this.method = BridgeMethodResolver.findBridgedMethod(method);
@@ -106,6 +117,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		this.declaredEventTypes = resolveDeclaredEventTypes(method, ann);
 		this.condition = (ann != null ? ann.condition() : null);
 		this.order = resolveOrder(this.targetMethod);
+		String id = (ann != null ? ann.id() : "");
+		this.listenerId = (!id.isEmpty() ? id : null);
 	}
 
 	private static List<ResolvableType> resolveDeclaredEventTypes(Method method, @Nullable EventListener ann) {
@@ -135,14 +148,14 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	private static int resolveOrder(Method method) {
 		Order ann = AnnotatedElementUtils.findMergedAnnotation(method, Order.class);
-		return (ann != null ? ann.value() : 0);
+		return (ann != null ? ann.value() : Ordered.LOWEST_PRECEDENCE);
 	}
 
 
 	/**
 	 * Initialize this instance.
 	 */
-	void init(ApplicationContext applicationContext, EventExpressionEvaluator evaluator) {
+	void init(ApplicationContext applicationContext, @Nullable EventExpressionEvaluator evaluator) {
 		this.applicationContext = applicationContext;
 		this.evaluator = evaluator;
 	}
@@ -177,6 +190,32 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	@Override
 	public int getOrder() {
 		return this.order;
+	}
+
+	@Override
+	public String getListenerId() {
+		String id = this.listenerId;
+		if (id == null) {
+			id = getDefaultListenerId();
+			this.listenerId = id;
+		}
+		return id;
+	}
+
+	/**
+	 * Determine the default id for the target listener, to be applied in case of
+	 * no {@link EventListener#id() annotation-specified id value}.
+	 * <p>The default implementation builds a method name with parameter types.
+	 * @since 5.3.5
+	 * @see #getListenerId()
+	 */
+	protected String getDefaultListenerId() {
+		Method method = getTargetMethod();
+		StringJoiner sj = new StringJoiner(",", "(", ")");
+		for (Class<?> paramType : method.getParameterTypes()) {
+			sj.add(paramType.getName());
+		}
+		return ClassUtils.getQualifiedMethodName(method) + sj.toString();
 	}
 
 
@@ -254,8 +293,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 				publishEvent(event);
 			}
 		}
-		else if (result instanceof Collection<?>) {
-			Collection<?> events = (Collection<?>) result;
+		else if (result instanceof Collection<?> events) {
 			for (Object event : events) {
 				publishEvent(event);
 			}
@@ -333,6 +371,14 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 	/**
+	 * Return the target listener method.
+	 * @since 5.3
+	 */
+	protected Method getTargetMethod() {
+		return this.targetMethod;
+	}
+
+	/**
 	 * Return the condition to use.
 	 * <p>Matches the {@code condition} attribute of the {@link EventListener}
 	 * annotation or any matching attribute on a composed annotation that
@@ -349,7 +395,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 * @param message error message to append the HandlerMethod details to
 	 */
 	protected String getDetailedErrorMessage(Object bean, String message) {
-		StringBuilder sb = new StringBuilder(message).append("\n");
+		StringBuilder sb = new StringBuilder(message).append('\n');
 		sb.append("HandlerMethod details: \n");
 		sb.append("Bean [").append(bean.getClass().getName()).append("]\n");
 		sb.append("Method [").append(this.method.toGenericString()).append("]\n");
@@ -379,7 +425,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(bean, message));
 		sb.append("Resolved arguments: \n");
 		for (int i = 0; i < resolvedArgs.length; i++) {
-			sb.append("[").append(i).append("] ");
+			sb.append('[').append(i).append("] ");
 			if (resolvedArgs[i] == null) {
 				sb.append("[null] \n");
 			}

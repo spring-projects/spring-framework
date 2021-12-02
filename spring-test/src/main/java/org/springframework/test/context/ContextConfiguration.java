@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import org.springframework.core.annotation.AliasFor;
  * {@link org.springframework.stereotype.Component @Component},
  * {@link org.springframework.stereotype.Service @Service},
  * {@link org.springframework.stereotype.Repository @Repository}, etc.)</li>
- * <li>A JSR-330 compliant class that is annotated with {@code javax.inject} annotations</li>
+ * <li>A JSR-330 compliant class that is annotated with {@code jakarta.inject} annotations</li>
  * <li>Any class that contains {@link org.springframework.context.annotation.Bean @Bean}-methods</li>
  * <li>Any other class that is intended to be registered as a Spring component (i.e., a Spring bean
  * in the {@code ApplicationContext}), potentially taking advantage of automatic autowiring of a
@@ -74,6 +74,10 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em>.
+ *
+ * <p>As of Spring Framework 5.3, this annotation will be inherited from an
+ * enclosing test class by default. See
+ * {@link NestedTestConfiguration @NestedTestConfiguration} for details.
  *
  * @author Sam Brannen
  * @since 2.5

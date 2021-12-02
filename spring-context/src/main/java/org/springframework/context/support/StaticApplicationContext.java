@@ -137,7 +137,7 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	/**
 	 * Associate the given message with the given code.
 	 * @param code lookup code
-	 * @param locale locale message should be found within
+	 * @param locale the locale message should be found within
 	 * @param defaultMessage message associated with this lookup code
 	 * @see #getStaticMessageSource
 	 */

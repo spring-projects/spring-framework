@@ -19,8 +19,8 @@ package org.springframework.web.servlet.tags;
 import java.beans.PropertyEditor;
 import java.io.IOException;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.TagSupport;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.TagSupport;
 
 import org.springframework.lang.Nullable;
 import org.springframework.web.util.TagUtils;
@@ -114,7 +114,7 @@ public class TransformTag extends HtmlEscapingAwareTag {
 	 * Set PageContext attribute name under which to expose
 	 * a variable that contains the result of the transformation.
 	 * @see #setScope
-	 * @see javax.servlet.jsp.PageContext#setAttribute
+	 * @see jakarta.servlet.jsp.PageContext#setAttribute
 	 */
 	public void setVar(String var) {
 		this.var = var;
@@ -125,7 +125,7 @@ public class TransformTag extends HtmlEscapingAwareTag {
 	 * Default is SCOPE_PAGE ("page").
 	 * @see #setVar
 	 * @see org.springframework.web.util.TagUtils#SCOPE_PAGE
-	 * @see javax.servlet.jsp.PageContext#setAttribute
+	 * @see jakarta.servlet.jsp.PageContext#setAttribute
 	 */
 	public void setScope(String scope) {
 		this.scope = scope;

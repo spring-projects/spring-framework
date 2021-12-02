@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,14 @@ package org.springframework.jms.listener;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
-import javax.jms.Session;
-
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.ExceptionListener;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.MessageListener;
+import jakarta.jms.Session;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
@@ -75,8 +74,7 @@ public class SimpleMessageListenerContainerTests {
 	@Test
 	public void testSessionTransactedModeReallyDoesDefaultToFalse() {
 		assertThat(this.container.isPubSubNoLocal()).as("The [pubSubLocal] property of SimpleMessageListenerContainer " +
-				"must default to false. Change this test (and the " +
-				"attendant Javadoc) if you have changed the default.").isFalse();
+				"must default to false. Change this test (and the attendant javadoc) if you have changed the default.").isFalse();
 	}
 
 	@Test
@@ -121,6 +119,7 @@ public class SimpleMessageListenerContainerTests {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.getBeanFactory().registerSingleton("messageListenerContainer", this.container);
 		context.refresh();
+		context.close();
 
 		verify(connection).setExceptionListener(this.container);
 	}
@@ -151,6 +150,7 @@ public class SimpleMessageListenerContainerTests {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.getBeanFactory().registerSingleton("messageListenerContainer", this.container);
 		context.refresh();
+		context.close();
 
 		verify(connection).setExceptionListener(this.container);
 		verify(connection).start();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -464,15 +464,25 @@ public class ResolvableType implements Serializable {
 	 */
 	public ResolvableType getSuperType() {
 		Class<?> resolved = resolve();
-		if (resolved == null || resolved.getGenericSuperclass() == null) {
+		if (resolved == null) {
 			return NONE;
 		}
-		ResolvableType superType = this.superType;
-		if (superType == null) {
-			superType = forType(resolved.getGenericSuperclass(), this);
-			this.superType = superType;
+		try {
+			Type superclass = resolved.getGenericSuperclass();
+			if (superclass == null) {
+				return NONE;
+			}
+			ResolvableType superType = this.superType;
+			if (superType == null) {
+				superType = forType(superclass, this);
+				this.superType = superType;
+			}
+			return superType;
 		}
-		return superType;
+		catch (TypeNotPresentException ex) {
+			// Ignore non-present types in generic signature
+			return NONE;
+		}
 	}
 
 	/**
@@ -544,12 +554,17 @@ public class ResolvableType implements Serializable {
 		}
 		Class<?> resolved = resolve();
 		if (resolved != null) {
-			for (Type genericInterface : resolved.getGenericInterfaces()) {
-				if (genericInterface instanceof Class) {
-					if (forClass((Class<?>) genericInterface).hasGenerics()) {
-						return true;
+			try {
+				for (Type genericInterface : resolved.getGenericInterfaces()) {
+					if (genericInterface instanceof Class) {
+						if (forClass((Class<?>) genericInterface).hasGenerics()) {
+							return true;
+						}
 					}
 				}
+			}
+			catch (TypeNotPresentException ex) {
+				// Ignore non-present types in generic signature
 			}
 			return getSuperType().hasUnresolvableGenerics();
 		}
@@ -579,8 +594,7 @@ public class ResolvableType implements Serializable {
 	 * without specific bounds (i.e., equal to {@code ? extends Object}).
 	 */
 	private boolean isWildcardWithoutBounds() {
-		if (this.type instanceof WildcardType) {
-			WildcardType wt = (WildcardType) this.type;
+		if (this.type instanceof WildcardType wt) {
 			if (wt.getLowerBounds().length == 0) {
 				Type[] upperBounds = wt.getUpperBounds();
 				if (upperBounds.length == 0 || (upperBounds.length == 1 && Object.class == upperBounds[0])) {
@@ -855,8 +869,7 @@ public class ResolvableType implements Serializable {
 		if (this.type instanceof TypeVariable) {
 			return resolveType().resolveVariable(variable);
 		}
-		if (this.type instanceof ParameterizedType) {
-			ParameterizedType parameterizedType = (ParameterizedType) this.type;
+		if (this.type instanceof ParameterizedType parameterizedType) {
 			Class<?> resolved = resolve();
 			if (resolved == null) {
 				return null;
@@ -891,11 +904,10 @@ public class ResolvableType implements Serializable {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ResolvableType)) {
+		if (!(other instanceof ResolvableType otherType)) {
 			return false;
 		}
 
-		ResolvableType otherType = (ResolvableType) other;
 		if (!ObjectUtils.nullSafeEquals(this.type, otherType.type)) {
 			return false;
 		}
@@ -1558,10 +1570,9 @@ public class ResolvableType implements Serializable {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof ParameterizedType)) {
+			if (!(other instanceof ParameterizedType otherType)) {
 				return false;
 			}
-			ParameterizedType otherType = (ParameterizedType) other;
 			return (otherType.getOwnerType() == null && this.rawType.equals(otherType.getRawType()) &&
 					Arrays.equals(this.typeArguments, otherType.getActualTypeArguments()));
 		}

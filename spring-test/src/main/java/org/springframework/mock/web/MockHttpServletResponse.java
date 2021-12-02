@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -51,7 +51,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Mock implementation of the {@link javax.servlet.http.HttpServletResponse} interface.
+ * Mock implementation of the {@link jakarta.servlet.http.HttpServletResponse} interface.
  *
  * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
  *
@@ -80,10 +80,16 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private boolean writerAccessAllowed = true;
 
-	@Nullable
-	private String characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
+	private String defaultCharacterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
-	private boolean charset = false;
+	private String characterEncoding = this.defaultCharacterEncoding;
+
+	/**
+	 * {@code true} if the character encoding has been explicitly set through
+	 * {@link HttpServletResponse} methods or through a {@code charset} parameter
+	 * on the {@code Content-Type}.
+	 */
+	private boolean characterEncodingSet = false;
 
 	private final ByteArrayOutputStream content = new ByteArrayOutputStream(1024);
 
@@ -116,6 +122,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Nullable
 	private String errorMessage;
+
+
+	//---------------------------------------------------------------------
+	// Properties for MockRequestDispatcher
+	//---------------------------------------------------------------------
 
 	@Nullable
 	private String forwardedUrl;
@@ -158,32 +169,61 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	/**
-	 * Return whether the character encoding has been set.
-	 * <p>If {@code false}, {@link #getCharacterEncoding()} will return a default encoding value.
+	 * Set the <em>default</em> character encoding for the response.
+	 * <p>If this method is not invoked, {@code ISO-8859-1} will be used as the
+	 * default character encoding.
+	 * <p>If the {@linkplain #getCharacterEncoding() character encoding} for the
+	 * response has not already been explicitly set via {@link #setCharacterEncoding(String)}
+	 * or {@link #setContentType(String)}, the character encoding for the response
+	 * will be set to the supplied default character encoding.
+	 * @param characterEncoding the default character encoding
+	 * @since 5.3.10
+	 * @see #setCharacterEncoding(String)
+	 * @see #setContentType(String)
+	 */
+	public void setDefaultCharacterEncoding(String characterEncoding) {
+		Assert.notNull(characterEncoding, "'characterEncoding' must not be null");
+		this.defaultCharacterEncoding = characterEncoding;
+		if (!this.characterEncodingSet) {
+			this.characterEncoding = characterEncoding;
+		}
+	}
+
+	/**
+	 * Determine whether the character encoding has been explicitly set through
+	 * {@link HttpServletResponse} methods or through a {@code charset} parameter
+	 * on the {@code Content-Type}.
+	 * <p>If {@code false}, {@link #getCharacterEncoding()} will return the
+	 * {@linkplain #setDefaultCharacterEncoding(String) default character encoding}.
 	 */
 	public boolean isCharset() {
-		return this.charset;
+		return this.characterEncodingSet;
 	}
 
 	@Override
 	public void setCharacterEncoding(String characterEncoding) {
-		this.characterEncoding = characterEncoding;
-		this.charset = true;
-		updateContentTypeHeader();
+		setExplicitCharacterEncoding(characterEncoding);
+		updateContentTypePropertyAndHeader();
 	}
 
-	private void updateContentTypeHeader() {
+	private void setExplicitCharacterEncoding(String characterEncoding) {
+		Assert.notNull(characterEncoding, "'characterEncoding' must not be null");
+		this.characterEncoding = characterEncoding;
+		this.characterEncodingSet = true;
+	}
+
+	private void updateContentTypePropertyAndHeader() {
 		if (this.contentType != null) {
 			String value = this.contentType;
-			if (this.charset && !this.contentType.toLowerCase().contains(CHARSET_PREFIX)) {
-				value = value + ';' + CHARSET_PREFIX + this.characterEncoding;
+			if (this.characterEncodingSet && !value.toLowerCase().contains(CHARSET_PREFIX)) {
+				value += ';' + CHARSET_PREFIX + getCharacterEncoding();
+				this.contentType = value;
 			}
 			doAddHeaderValue(HttpHeaders.CONTENT_TYPE, value, true);
 		}
 	}
 
 	@Override
-	@Nullable
 	public String getCharacterEncoding() {
 		return this.characterEncoding;
 	}
@@ -198,9 +238,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	public PrintWriter getWriter() throws UnsupportedEncodingException {
 		Assert.state(this.writerAccessAllowed, "Writer access not allowed");
 		if (this.writer == null) {
-			Writer targetWriter = (this.characterEncoding != null ?
-					new OutputStreamWriter(this.content, this.characterEncoding) :
-					new OutputStreamWriter(this.content));
+			Writer targetWriter = new OutputStreamWriter(this.content, getCharacterEncoding());
 			this.writer = new ResponsePrintWriter(targetWriter);
 		}
 		return this.writer;
@@ -214,14 +252,17 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * Get the content of the response body as a {@code String}, using the charset
 	 * specified for the response by the application, either through
 	 * {@link HttpServletResponse} methods or through a charset parameter on the
-	 * {@code Content-Type}.
+	 * {@code Content-Type}. If no charset has been explicitly defined, the
+	 * {@linkplain #setDefaultCharacterEncoding(String) default character encoding}
+	 * will be used.
 	 * @return the content as a {@code String}
 	 * @throws UnsupportedEncodingException if the character encoding is not supported
 	 * @see #getContentAsString(Charset)
+	 * @see #setCharacterEncoding(String)
+	 * @see #setContentType(String)
 	 */
 	public String getContentAsString() throws UnsupportedEncodingException {
-		return (this.characterEncoding != null ?
-				this.content.toString(this.characterEncoding) : this.content.toString());
+		return this.content.toString(getCharacterEncoding());
 	}
 
 	/**
@@ -234,11 +275,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @throws UnsupportedEncodingException if the character encoding is not supported
 	 * @since 5.2
 	 * @see #getContentAsString()
+	 * @see #setCharacterEncoding(String)
+	 * @see #setContentType(String)
 	 */
 	public String getContentAsString(Charset fallbackCharset) throws UnsupportedEncodingException {
-		return (isCharset() && this.characterEncoding != null ?
-				this.content.toString(this.characterEncoding) :
-				this.content.toString(fallbackCharset.name()));
+		if (this.characterEncodingSet) {
+			return this.content.toString(getCharacterEncoding());
+		}
+
+		return this.content.toString(fallbackCharset);
 	}
 
 	@Override
@@ -268,19 +313,17 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			try {
 				MediaType mediaType = MediaType.parseMediaType(contentType);
 				if (mediaType.getCharset() != null) {
-					this.characterEncoding = mediaType.getCharset().name();
-					this.charset = true;
+					setExplicitCharacterEncoding(mediaType.getCharset().name());
 				}
 			}
 			catch (Exception ex) {
 				// Try to get charset value anyway
 				int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
 				if (charsetIndex != -1) {
-					this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
-					this.charset = true;
+					setExplicitCharacterEncoding(contentType.substring(charsetIndex + CHARSET_PREFIX.length()));
 				}
 			}
-			updateContentTypeHeader();
+			updateContentTypePropertyAndHeader();
 		}
 	}
 
@@ -330,7 +373,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	@Override
 	public void reset() {
 		resetBuffer();
-		this.characterEncoding = null;
+		this.characterEncoding = this.defaultCharacterEncoding;
+		this.characterEncodingSet = false;
 		this.contentLength = 0;
 		this.contentType = null;
 		this.locale = Locale.getDefault();
@@ -341,7 +385,13 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	public void setLocale(Locale locale) {
+	public void setLocale(@Nullable Locale locale) {
+		// Although the Javadoc for jakarta.servlet.ServletResponse.setLocale(Locale) does not
+		// state how a null value for the supplied Locale should be handled, both Tomcat and
+		// Jetty simply ignore a null value. So we do the same here.
+		if (locale == null) {
+			return;
+		}
 		this.locale = locale;
 		doAddHeaderValue(HttpHeaders.CONTENT_LANGUAGE, locale.toLanguageTag(), true);
 	}
@@ -373,10 +423,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			buf.append("; Domain=").append(cookie.getDomain());
 		}
 		int maxAge = cookie.getMaxAge();
+		ZonedDateTime expires = (cookie instanceof MockCookie ? ((MockCookie) cookie).getExpires() : null);
 		if (maxAge >= 0) {
 			buf.append("; Max-Age=").append(maxAge);
 			buf.append("; Expires=");
-			ZonedDateTime expires = (cookie instanceof MockCookie ? ((MockCookie) cookie).getExpires() : null);
 			if (expires != null) {
 				buf.append(expires.format(DateTimeFormatter.RFC_1123_DATE_TIME));
 			}
@@ -386,6 +436,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 				buf.append(headers.getFirst(HttpHeaders.EXPIRES));
 			}
 		}
+		else if (expires != null) {
+			buf.append("; Expires=");
+			buf.append(expires.format(DateTimeFormatter.RFC_1123_DATE_TIME));
+		}
 
 		if (cookie.getSecure()) {
 			buf.append("; Secure");
@@ -393,8 +447,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		if (cookie.isHttpOnly()) {
 			buf.append("; HttpOnly");
 		}
-		if (cookie instanceof MockCookie) {
-			MockCookie mockCookie = (MockCookie) cookie;
+		if (cookie instanceof MockCookie mockCookie) {
 			if (StringUtils.hasText(mockCookie.getSameSite())) {
 				buf.append("; SameSite=").append(mockCookie.getSameSite());
 			}
@@ -419,12 +472,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public boolean containsHeader(String name) {
-		return (this.headers.get(name) != null);
+		return this.headers.containsKey(name);
 	}
 
 	/**
 	 * Return the names of all specified headers as a Set of Strings.
-	 * <p>As of Servlet 3.0, this method is also defined HttpServletResponse.
+	 * <p>As of Servlet 3.0, this method is also defined in {@link HttpServletResponse}.
 	 * @return the {@code Set} of header name {@code Strings}, or an empty {@code Set} if none
 	 */
 	@Override
@@ -435,7 +488,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	/**
 	 * Return the primary value for the given header as a String, if any.
 	 * Will return the first value in case of multiple values.
-	 * <p>As of Servlet 3.0, this method is also defined in HttpServletResponse.
+	 * <p>As of Servlet 3.0, this method is also defined in {@link HttpServletResponse}.
 	 * As of Spring 3.1, it returns a stringified value for Servlet 3.0 compatibility.
 	 * Consider using {@link #getHeaderValue(String)} for raw Object access.
 	 * @param name the name of the header
@@ -450,7 +503,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Return all values for the given header as a List of Strings.
-	 * <p>As of Servlet 3.0, this method is also defined in HttpServletResponse.
+	 * <p>As of Servlet 3.0, this method is also defined in {@link HttpServletResponse}.
 	 * As of Spring 3.1, it returns a List of stringified values for Servlet 3.0 compatibility.
 	 * Consider using {@link #getHeaderValues(String)} for raw Object access.
 	 * @param name the name of the header
@@ -592,12 +645,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	public void setHeader(String name, String value) {
+	public void setHeader(String name, @Nullable String value) {
 		setHeaderValue(name, value);
 	}
 
 	@Override
-	public void addHeader(String name, String value) {
+	public void addHeader(String name, @Nullable String value) {
 		addHeaderValue(name, value);
 	}
 
@@ -611,7 +664,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		addHeaderValue(name, value);
 	}
 
-	private void setHeaderValue(String name, Object value) {
+	private void setHeaderValue(String name, @Nullable Object value) {
+		if (value == null) {
+			return;
+		}
 		boolean replaceHeader = true;
 		if (setSpecialHeader(name, value, replaceHeader)) {
 			return;
@@ -619,7 +675,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		doAddHeaderValue(name, value, replaceHeader);
 	}
 
-	private void addHeaderValue(String name, Object value) {
+	private void addHeaderValue(String name, @Nullable Object value) {
+		if (value == null) {
+			return;
+		}
 		boolean replaceHeader = false;
 		if (setSpecialHeader(name, value, replaceHeader)) {
 			return;
@@ -638,10 +697,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			return true;
 		}
 		else if (HttpHeaders.CONTENT_LANGUAGE.equalsIgnoreCase(name)) {
+			String contentLanguages = value.toString();
 			HttpHeaders headers = new HttpHeaders();
-			headers.add(HttpHeaders.CONTENT_LANGUAGE, value.toString());
+			headers.add(HttpHeaders.CONTENT_LANGUAGE, contentLanguages);
 			Locale language = headers.getContentLanguage();
 			setLocale(language != null ? language : Locale.getDefault());
+			// Since setLocale() sets the Content-Language header to the given
+			// single Locale, we have to explicitly set the Content-Language header
+			// to the user-provided value.
+			doAddHeaderValue(HttpHeaders.CONTENT_LANGUAGE, contentLanguages, true);
 			return true;
 		}
 		else if (HttpHeaders.SET_COOKIE.equalsIgnoreCase(name)) {
@@ -660,12 +724,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	private void doAddHeaderValue(String name, Object value, boolean replace) {
-		HeaderValueHolder header = this.headers.get(name);
 		Assert.notNull(value, "Header value must not be null");
-		if (header == null) {
-			header = new HeaderValueHolder();
-			this.headers.put(name, header);
-		}
+		HeaderValueHolder header = this.headers.computeIfAbsent(name, key -> new HeaderValueHolder());
 		if (replace) {
 			header.setValue(value);
 		}

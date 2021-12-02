@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -75,8 +75,10 @@ import org.springframework.util.StringUtils;
  * by default, Spring's {@link Autowired @Autowired} and {@link Value @Value}
  * annotations.
  *
- * <p>Also supports JSR-330's {@link javax.inject.Inject @Inject} annotation,
+ * <p>Also supports the common {@link jakarta.inject.Inject @Inject} annotation,
  * if available, as a direct alternative to Spring's own {@code @Autowired}.
+ * Additionally, it retains support for the {@code javax.inject.Inject} variant
+ * dating back to the original JSR-330 specification (as known from Java EE 6-8).
  *
  * <h3>Autowired Constructors</h3>
  * <p>Only one constructor of any given bean class may declare this annotation with
@@ -128,8 +130,8 @@ import org.springframework.util.StringUtils;
  * @see Autowired
  * @see Value
  */
-public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-		implements MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
+public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
+		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -154,20 +156,30 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	/**
 	 * Create a new {@code AutowiredAnnotationBeanPostProcessor} for Spring's
 	 * standard {@link Autowired @Autowired} and {@link Value @Value} annotations.
-	 * <p>Also supports JSR-330's {@link javax.inject.Inject @Inject} annotation,
-	 * if available.
+	 * <p>Also supports the common {@link jakarta.inject.Inject @Inject} annotation,
+	 * if available, as well as the original {@code javax.inject.Inject} variant.
 	 */
 	@SuppressWarnings("unchecked")
 	public AutowiredAnnotationBeanPostProcessor() {
 		this.autowiredAnnotationTypes.add(Autowired.class);
 		this.autowiredAnnotationTypes.add(Value.class);
+
+		try {
+			this.autowiredAnnotationTypes.add((Class<? extends Annotation>)
+					ClassUtils.forName("jakarta.inject.Inject", AutowiredAnnotationBeanPostProcessor.class.getClassLoader()));
+			logger.trace("'jakarta.inject.Inject' annotation found and supported for autowiring");
+		}
+		catch (ClassNotFoundException ex) {
+			// jakarta.inject API not available - simply skip.
+		}
+
 		try {
 			this.autowiredAnnotationTypes.add((Class<? extends Annotation>)
 					ClassUtils.forName("javax.inject.Inject", AutowiredAnnotationBeanPostProcessor.class.getClassLoader()));
-			logger.trace("JSR-330 'javax.inject.Inject' annotation found and supported for autowiring");
+			logger.trace("'javax.inject.Inject' annotation found and supported for autowiring");
 		}
 		catch (ClassNotFoundException ex) {
-			// JSR-330 API not available - simply skip.
+			// javax.inject API not available - simply skip.
 		}
 	}
 
@@ -177,7 +189,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * setter methods, and arbitrary config methods.
 	 * <p>The default autowired annotation types are the Spring-provided
 	 * {@link Autowired @Autowired} and {@link Value @Value} annotations as well
-	 * as JSR-330's {@link javax.inject.Inject @Inject} annotation, if available.
+	 * as the common {@code @Inject} annotation, if available.
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation type to indicate that a member is supposed
 	 * to be autowired.
@@ -193,7 +205,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * setter methods, and arbitrary config methods.
 	 * <p>The default autowired annotation types are the Spring-provided
 	 * {@link Autowired @Autowired} and {@link Value @Value} annotations as well
-	 * as JSR-330's {@link javax.inject.Inject @Inject} annotation, if available.
+	 * as the common {@code @Inject} annotation, if available.
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation types to indicate that a member is supposed
 	 * to be autowired.
@@ -407,14 +419,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		return pvs;
 	}
 
-	@Deprecated
-	@Override
-	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
-
-		return postProcessProperties(pvs, bean, beanName);
-	}
-
 	/**
 	 * 'Native' processing method for direct calls with an arbitrary target instance,
 	 * resolving all of its fields and methods which are annotated with one of the
@@ -459,7 +463,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		return metadata;
 	}
 
-	private InjectionMetadata buildAutowiringMetadata(final Class<?> clazz) {
+	private InjectionMetadata buildAutowiringMetadata(Class<?> clazz) {
 		if (!AnnotationUtils.isCandidateClass(clazz, this.autowiredAnnotationTypes)) {
 			return InjectionMetadata.EMPTY;
 		}
@@ -537,9 +541,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * @param ann the Autowired annotation
 	 * @return whether the annotation indicates that a dependency is required
 	 */
-	@SuppressWarnings({"deprecation", "cast"})
 	protected boolean determineRequiredStatus(MergedAnnotation<?> ann) {
-		// The following (AnnotationAttributes) cast is required on JDK 9+.
+		// Cast to (AnnotationAttributes) is required. Otherwise, the :spring-beans:compileGroovy
+		// task fails in the Gradle build.
 		return determineRequiredStatus((AnnotationAttributes)
 				ann.asMap(mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType())));
 	}
@@ -613,7 +617,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		private final boolean required;
 
-		private volatile boolean cached = false;
+		private volatile boolean cached;
 
 		@Nullable
 		private volatile Object cachedFieldValue;
@@ -628,45 +632,57 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			Field field = (Field) this.member;
 			Object value;
 			if (this.cached) {
-				value = resolvedCachedArgument(beanName, this.cachedFieldValue);
+				try {
+					value = resolvedCachedArgument(beanName, this.cachedFieldValue);
+				}
+				catch (NoSuchBeanDefinitionException ex) {
+					// Unexpected removal of target bean for cached argument -> re-resolve
+					value = resolveFieldValue(field, bean, beanName);
+				}
 			}
 			else {
-				DependencyDescriptor desc = new DependencyDescriptor(field, this.required);
-				desc.setContainingClass(bean.getClass());
-				Set<String> autowiredBeanNames = new LinkedHashSet<>(1);
-				Assert.state(beanFactory != null, "No BeanFactory available");
-				TypeConverter typeConverter = beanFactory.getTypeConverter();
-				try {
-					value = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter);
-				}
-				catch (BeansException ex) {
-					throw new UnsatisfiedDependencyException(null, beanName, new InjectionPoint(field), ex);
-				}
-				synchronized (this) {
-					if (!this.cached) {
-						if (value != null || this.required) {
-							this.cachedFieldValue = desc;
-							registerDependentBeans(beanName, autowiredBeanNames);
-							if (autowiredBeanNames.size() == 1) {
-								String autowiredBeanName = autowiredBeanNames.iterator().next();
-								if (beanFactory.containsBean(autowiredBeanName) &&
-										beanFactory.isTypeMatch(autowiredBeanName, field.getType())) {
-									this.cachedFieldValue = new ShortcutDependencyDescriptor(
-											desc, autowiredBeanName, field.getType());
-								}
-							}
-						}
-						else {
-							this.cachedFieldValue = null;
-						}
-						this.cached = true;
-					}
-				}
+				value = resolveFieldValue(field, bean, beanName);
 			}
 			if (value != null) {
 				ReflectionUtils.makeAccessible(field);
 				field.set(bean, value);
 			}
+		}
+
+		@Nullable
+		private Object resolveFieldValue(Field field, Object bean, @Nullable String beanName) {
+			DependencyDescriptor desc = new DependencyDescriptor(field, this.required);
+			desc.setContainingClass(bean.getClass());
+			Set<String> autowiredBeanNames = new LinkedHashSet<>(1);
+			Assert.state(beanFactory != null, "No BeanFactory available");
+			TypeConverter typeConverter = beanFactory.getTypeConverter();
+			Object value;
+			try {
+				value = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter);
+			}
+			catch (BeansException ex) {
+				throw new UnsatisfiedDependencyException(null, beanName, new InjectionPoint(field), ex);
+			}
+			synchronized (this) {
+				if (!this.cached) {
+					Object cachedFieldValue = null;
+					if (value != null || this.required) {
+						cachedFieldValue = desc;
+						registerDependentBeans(beanName, autowiredBeanNames);
+						if (autowiredBeanNames.size() == 1) {
+							String autowiredBeanName = autowiredBeanNames.iterator().next();
+							if (beanFactory.containsBean(autowiredBeanName) &&
+									beanFactory.isTypeMatch(autowiredBeanName, field.getType())) {
+								cachedFieldValue = new ShortcutDependencyDescriptor(
+										desc, autowiredBeanName, field.getType());
+							}
+						}
+					}
+					this.cachedFieldValue = cachedFieldValue;
+					this.cached = true;
+				}
+			}
+			return value;
 		}
 	}
 
@@ -678,7 +694,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		private final boolean required;
 
-		private volatile boolean cached = false;
+		private volatile boolean cached;
 
 		@Nullable
 		private volatile Object[] cachedMethodArguments;
@@ -696,58 +712,16 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			Method method = (Method) this.member;
 			Object[] arguments;
 			if (this.cached) {
-				// Shortcut for avoiding synchronization...
-				arguments = resolveCachedArguments(beanName);
+				try {
+					arguments = resolveCachedArguments(beanName);
+				}
+				catch (NoSuchBeanDefinitionException ex) {
+					// Unexpected removal of target bean for cached argument -> re-resolve
+					arguments = resolveMethodArguments(method, bean, beanName);
+				}
 			}
 			else {
-				int argumentCount = method.getParameterCount();
-				arguments = new Object[argumentCount];
-				DependencyDescriptor[] descriptors = new DependencyDescriptor[argumentCount];
-				Set<String> autowiredBeans = new LinkedHashSet<>(argumentCount);
-				Assert.state(beanFactory != null, "No BeanFactory available");
-				TypeConverter typeConverter = beanFactory.getTypeConverter();
-				for (int i = 0; i < arguments.length; i++) {
-					MethodParameter methodParam = new MethodParameter(method, i);
-					DependencyDescriptor currDesc = new DependencyDescriptor(methodParam, this.required);
-					currDesc.setContainingClass(bean.getClass());
-					descriptors[i] = currDesc;
-					try {
-						Object arg = beanFactory.resolveDependency(currDesc, beanName, autowiredBeans, typeConverter);
-						if (arg == null && !this.required) {
-							arguments = null;
-							break;
-						}
-						arguments[i] = arg;
-					}
-					catch (BeansException ex) {
-						throw new UnsatisfiedDependencyException(null, beanName, new InjectionPoint(methodParam), ex);
-					}
-				}
-				synchronized (this) {
-					if (!this.cached) {
-						if (arguments != null) {
-							DependencyDescriptor[] cachedMethodArguments = Arrays.copyOf(descriptors, arguments.length);
-							registerDependentBeans(beanName, autowiredBeans);
-							if (autowiredBeans.size() == argumentCount) {
-								Iterator<String> it = autowiredBeans.iterator();
-								Class<?>[] paramTypes = method.getParameterTypes();
-								for (int i = 0; i < paramTypes.length; i++) {
-									String autowiredBeanName = it.next();
-									if (beanFactory.containsBean(autowiredBeanName) &&
-											beanFactory.isTypeMatch(autowiredBeanName, paramTypes[i])) {
-										cachedMethodArguments[i] = new ShortcutDependencyDescriptor(
-												descriptors[i], autowiredBeanName, paramTypes[i]);
-									}
-								}
-							}
-							this.cachedMethodArguments = cachedMethodArguments;
-						}
-						else {
-							this.cachedMethodArguments = null;
-						}
-						this.cached = true;
-					}
-				}
+				arguments = resolveMethodArguments(method, bean, beanName);
 			}
 			if (arguments != null) {
 				try {
@@ -769,6 +743,59 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			Object[] arguments = new Object[cachedMethodArguments.length];
 			for (int i = 0; i < arguments.length; i++) {
 				arguments[i] = resolvedCachedArgument(beanName, cachedMethodArguments[i]);
+			}
+			return arguments;
+		}
+
+		@Nullable
+		private Object[] resolveMethodArguments(Method method, Object bean, @Nullable String beanName) {
+			int argumentCount = method.getParameterCount();
+			Object[] arguments = new Object[argumentCount];
+			DependencyDescriptor[] descriptors = new DependencyDescriptor[argumentCount];
+			Set<String> autowiredBeans = new LinkedHashSet<>(argumentCount);
+			Assert.state(beanFactory != null, "No BeanFactory available");
+			TypeConverter typeConverter = beanFactory.getTypeConverter();
+			for (int i = 0; i < arguments.length; i++) {
+				MethodParameter methodParam = new MethodParameter(method, i);
+				DependencyDescriptor currDesc = new DependencyDescriptor(methodParam, this.required);
+				currDesc.setContainingClass(bean.getClass());
+				descriptors[i] = currDesc;
+				try {
+					Object arg = beanFactory.resolveDependency(currDesc, beanName, autowiredBeans, typeConverter);
+					if (arg == null && !this.required) {
+						arguments = null;
+						break;
+					}
+					arguments[i] = arg;
+				}
+				catch (BeansException ex) {
+					throw new UnsatisfiedDependencyException(null, beanName, new InjectionPoint(methodParam), ex);
+				}
+			}
+			synchronized (this) {
+				if (!this.cached) {
+					if (arguments != null) {
+						DependencyDescriptor[] cachedMethodArguments = Arrays.copyOf(descriptors, arguments.length);
+						registerDependentBeans(beanName, autowiredBeans);
+						if (autowiredBeans.size() == argumentCount) {
+							Iterator<String> it = autowiredBeans.iterator();
+							Class<?>[] paramTypes = method.getParameterTypes();
+							for (int i = 0; i < paramTypes.length; i++) {
+								String autowiredBeanName = it.next();
+								if (beanFactory.containsBean(autowiredBeanName) &&
+										beanFactory.isTypeMatch(autowiredBeanName, paramTypes[i])) {
+									cachedMethodArguments[i] = new ShortcutDependencyDescriptor(
+											descriptors[i], autowiredBeanName, paramTypes[i]);
+								}
+							}
+						}
+						this.cachedMethodArguments = cachedMethodArguments;
+					}
+					else {
+						this.cachedMethodArguments = null;
+					}
+					this.cached = true;
+				}
 			}
 			return arguments;
 		}

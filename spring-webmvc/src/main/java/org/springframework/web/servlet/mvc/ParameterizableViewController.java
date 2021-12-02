@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet.mvc;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -67,8 +67,7 @@ public class ParameterizableViewController extends AbstractController {
 	 */
 	@Nullable
 	public String getViewName() {
-		if (this.view instanceof String) {
-			String viewName = (String) this.view;
+		if (this.view instanceof String viewName) {
 			if (getStatusCode() != null && getStatusCode().is3xxRedirection()) {
 				return viewName.startsWith("redirect:") ? viewName : "redirect:" + viewName;
 			}

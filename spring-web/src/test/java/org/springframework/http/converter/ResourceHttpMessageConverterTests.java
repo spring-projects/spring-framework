@@ -67,7 +67,7 @@ public class ResourceHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
 		inputMessage.getHeaders().setContentType(MediaType.IMAGE_JPEG);
 		inputMessage.getHeaders().setContentDisposition(
-				ContentDisposition.builder("attachment").filename("yourlogo.jpg").build());
+				ContentDisposition.attachment().filename("yourlogo.jpg").build());
 		Resource actualResource = converter.read(Resource.class, inputMessage);
 		assertThat(FileCopyUtils.copyToByteArray(actualResource.getInputStream())).isEqualTo(body);
 		assertThat(actualResource.getFilename()).isEqualTo("yourlogo.jpg");
@@ -79,7 +79,7 @@ public class ResourceHttpMessageConverterTests {
 			MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
 			inputMessage.getHeaders().setContentType(MediaType.IMAGE_JPEG);
 			inputMessage.getHeaders().setContentDisposition(
-					ContentDisposition.builder("attachment").filename("yourlogo.jpg").build());
+					ContentDisposition.attachment().filename("yourlogo.jpg").build());
 			inputMessage.getHeaders().setContentLength(123);
 			Resource actualResource = converter.read(InputStreamResource.class, inputMessage);
 			assertThat(actualResource).isInstanceOf(InputStreamResource.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@ package org.springframework.context.annotation;
 
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
@@ -33,7 +32,6 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.INestedTestBean;
@@ -122,8 +120,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	@Test
 	public void testSerialization() throws Exception {
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
-		CommonAnnotationBeanPostProcessor bpp2 = (CommonAnnotationBeanPostProcessor)
-				SerializationTestUtils.serializeAndDeserialize(bpp);
+		CommonAnnotationBeanPostProcessor bpp2 = SerializationTestUtils.serializeAndDeserialize(bpp);
 
 		AnnotatedInitDestroyBean bean = new AnnotatedInitDestroyBean();
 		bpp2.postProcessBeforeDestruction(bean, "annotatedBean");
@@ -135,8 +132,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		InitDestroyAnnotationBeanPostProcessor bpp = new InitDestroyAnnotationBeanPostProcessor();
 		bpp.setInitAnnotationType(PostConstruct.class);
 		bpp.setDestroyAnnotationType(PreDestroy.class);
-		InitDestroyAnnotationBeanPostProcessor bpp2 = (InitDestroyAnnotationBeanPostProcessor)
-				SerializationTestUtils.serializeAndDeserialize(bpp);
+		InitDestroyAnnotationBeanPostProcessor bpp2 = SerializationTestUtils.serializeAndDeserialize(bpp);
 
 		AnnotatedInitDestroyBean bean = new AnnotatedInitDestroyBean();
 		bpp2.postProcessBeforeDestruction(bean, "annotatedBean");
@@ -225,7 +221,8 @@ public class CommonAnnotationBeanPostProcessorTests {
 			}
 		});
 
-		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		@SuppressWarnings("deprecation")
+		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer ppc = new org.springframework.beans.factory.config.PropertyPlaceholderConfigurer();
 		Properties props = new Properties();
 		props.setProperty("tb", "testBean4");
 		ppc.setProperties(props);
@@ -322,7 +319,8 @@ public class CommonAnnotationBeanPostProcessorTests {
 		bf.addBeanPostProcessor(bpp);
 		bf.registerResolvableDependency(BeanFactory.class, bf);
 
-		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		@SuppressWarnings("deprecation")
+		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer ppc = new org.springframework.beans.factory.config.PropertyPlaceholderConfigurer();
 		Properties props = new Properties();
 		props.setProperty("tb", "testBean3");
 		ppc.setProperties(props);
@@ -374,7 +372,8 @@ public class CommonAnnotationBeanPostProcessorTests {
 		bf.addBeanPostProcessor(bpp);
 		bf.registerResolvableDependency(BeanFactory.class, bf);
 
-		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		@SuppressWarnings("deprecation")
+		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer ppc = new org.springframework.beans.factory.config.PropertyPlaceholderConfigurer();
 		Properties props = new Properties();
 		props.setProperty("tb", "testBean3");
 		ppc.setProperties(props);

@@ -18,10 +18,10 @@ package org.springframework.jms.listener.adapter;
 
 import java.lang.reflect.InvocationTargetException;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.Session;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageListener;
+import jakarta.jms.Session;
 
 import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.jms.listener.SubscriptionNameProvider;
@@ -51,7 +51,7 @@ import org.springframework.util.ObjectUtils;
  * message content type such as {@code String} or byte array), it will get
  * wrapped in a JMS {@code Message} and sent to the response destination
  * (either the JMS "reply-to" destination or a
- * {@link #setDefaultResponseDestination(javax.jms.Destination) specified default
+ * {@link #setDefaultResponseDestination(jakarta.jms.Destination) specified default
  * destination}).
  *
  * <p><b>Note:</b> The sending of response messages is only available when
@@ -86,7 +86,7 @@ import org.springframework.util.ObjectUtils;
  *
  * This next example illustrates a {@code Message} delegate
  * that just consumes the {@code String} contents of
- * {@link javax.jms.TextMessage TextMessages}. Notice also how the
+ * {@link jakarta.jms.TextMessage TextMessages}. Notice also how the
  * name of the {@code Message} handling method is different from the
  * {@link #ORIGINAL_DEFAULT_LISTENER_METHOD original} (this will have to
  * be configured in the attendant bean definition). Again, no {@code Message}
@@ -98,9 +98,9 @@ import org.springframework.util.ObjectUtils;
  *
  * This final example illustrates a {@code Message} delegate
  * that just consumes the {@code String} contents of
- * {@link javax.jms.TextMessage TextMessages}. Notice how the return type
+ * {@link jakarta.jms.TextMessage TextMessages}. Notice how the return type
  * of this method is {@code String}: This will result in the configured
- * {@link MessageListenerAdapter} sending a {@link javax.jms.TextMessage} in response.
+ * {@link MessageListenerAdapter} sending a {@link jakarta.jms.TextMessage} in response.
  *
  * <pre class="code">public interface ResponsiveTextMessageContentDelegate {
  *    String handleMessage(String text);

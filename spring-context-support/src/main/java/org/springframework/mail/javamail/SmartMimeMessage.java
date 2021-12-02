@@ -16,9 +16,9 @@
 
 package org.springframework.mail.javamail;
 
-import javax.activation.FileTypeMap;
-import javax.mail.Session;
-import javax.mail.internet.MimeMessage;
+import jakarta.activation.FileTypeMap;
+import jakarta.mail.Session;
+import jakarta.mail.internet.MimeMessage;
 
 import org.springframework.lang.Nullable;
 
@@ -34,8 +34,8 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 1.2
  * @see JavaMailSenderImpl#createMimeMessage()
- * @see MimeMessageHelper#getDefaultEncoding(javax.mail.internet.MimeMessage)
- * @see MimeMessageHelper#getDefaultFileTypeMap(javax.mail.internet.MimeMessage)
+ * @see MimeMessageHelper#getDefaultEncoding(jakarta.mail.internet.MimeMessage)
+ * @see MimeMessageHelper#getDefaultFileTypeMap(jakarta.mail.internet.MimeMessage)
  */
 class SmartMimeMessage extends MimeMessage {
 

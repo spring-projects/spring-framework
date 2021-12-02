@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,12 @@
 
 package org.springframework.core.env;
 
-import java.security.AccessControlException;
-import java.security.Permission;
 import java.util.Arrays;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.SpringProperties;
-import org.springframework.core.testfixture.env.EnvironmentTestUtils;
 import org.springframework.core.testfixture.env.MockPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -381,72 +378,22 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	void getSystemProperties_withAndWithoutSecurityManager() {
+	void getSystemProperties() {
 		System.setProperty(ALLOWED_PROPERTY_NAME, ALLOWED_PROPERTY_VALUE);
 		System.setProperty(DISALLOWED_PROPERTY_NAME, DISALLOWED_PROPERTY_VALUE);
 		System.getProperties().put(STRING_PROPERTY_NAME, NON_STRING_PROPERTY_VALUE);
 		System.getProperties().put(NON_STRING_PROPERTY_NAME, STRING_PROPERTY_VALUE);
 
-		{
+		try {
 			Map<?, ?> systemProperties = environment.getSystemProperties();
 			assertThat(systemProperties).isNotNull();
 			assertThat(System.getProperties()).isSameAs(systemProperties);
 			assertThat(systemProperties.get(ALLOWED_PROPERTY_NAME)).isEqualTo(ALLOWED_PROPERTY_VALUE);
 			assertThat(systemProperties.get(DISALLOWED_PROPERTY_NAME)).isEqualTo(DISALLOWED_PROPERTY_VALUE);
-
-			// non-string keys and values work fine... until the security manager is introduced below
 			assertThat(systemProperties.get(STRING_PROPERTY_NAME)).isEqualTo(NON_STRING_PROPERTY_VALUE);
 			assertThat(systemProperties.get(NON_STRING_PROPERTY_NAME)).isEqualTo(STRING_PROPERTY_VALUE);
 		}
-
-		SecurityManager oldSecurityManager = System.getSecurityManager();
-		SecurityManager securityManager = new SecurityManager() {
-			@Override
-			public void checkPropertiesAccess() {
-				// see https://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getProperties()
-				throw new AccessControlException("Accessing the system properties is disallowed");
-			}
-			@Override
-			public void checkPropertyAccess(String key) {
-				// see https://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getProperty(java.lang.String)
-				if (DISALLOWED_PROPERTY_NAME.equals(key)) {
-					throw new AccessControlException(
-							String.format("Accessing the system property [%s] is disallowed", DISALLOWED_PROPERTY_NAME));
-				}
-			}
-			@Override
-			public void checkPermission(Permission perm) {
-				// allow everything else
-			}
-		};
-
-		try {
-			System.setSecurityManager(securityManager);
-
-			{
-				Map<?, ?> systemProperties = environment.getSystemProperties();
-				assertThat(systemProperties).isNotNull();
-				assertThat(systemProperties).isInstanceOf(ReadOnlySystemAttributesMap.class);
-				assertThat((String)systemProperties.get(ALLOWED_PROPERTY_NAME)).isEqualTo(ALLOWED_PROPERTY_VALUE);
-				assertThat(systemProperties.get(DISALLOWED_PROPERTY_NAME)).isNull();
-
-				// nothing we can do here in terms of warning the user that there was
-				// actually a (non-string) value available. By this point, we only
-				// have access to calling System.getProperty(), which itself returns null
-				// if the value is non-string.  So we're stuck with returning a potentially
-				// misleading null.
-				assertThat(systemProperties.get(STRING_PROPERTY_NAME)).isNull();
-
-				// in the case of a non-string *key*, however, we can do better.  Alert
-				// the user that under these very special conditions (non-object key +
-				// SecurityManager that disallows access to system properties), they
-				// cannot do what they're attempting.
-				assertThatIllegalArgumentException().as("searching with non-string key against ReadOnlySystemAttributesMap").isThrownBy(() ->
-				systemProperties.get(NON_STRING_PROPERTY_NAME));
-			}
-		}
 		finally {
-			System.setSecurityManager(oldSecurityManager);
 			System.clearProperty(ALLOWED_PROPERTY_NAME);
 			System.clearProperty(DISALLOWED_PROPERTY_NAME);
 			System.getProperties().remove(STRING_PROPERTY_NAME);
@@ -455,48 +402,10 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	void getSystemEnvironment_withAndWithoutSecurityManager() {
-		EnvironmentTestUtils.getModifiableSystemEnvironment().put(ALLOWED_PROPERTY_NAME, ALLOWED_PROPERTY_VALUE);
-		EnvironmentTestUtils.getModifiableSystemEnvironment().put(DISALLOWED_PROPERTY_NAME, DISALLOWED_PROPERTY_VALUE);
-
-		{
-			Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
-			assertThat(systemEnvironment).isNotNull();
-			assertThat(System.getenv()).isSameAs(systemEnvironment);
-		}
-
-		SecurityManager oldSecurityManager = System.getSecurityManager();
-		SecurityManager securityManager = new SecurityManager() {
-			@Override
-			public void checkPermission(Permission perm) {
-				//see https://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getenv()
-				if ("getenv.*".equals(perm.getName())) {
-					throw new AccessControlException("Accessing the system environment is disallowed");
-				}
-				//see https://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getenv(java.lang.String)
-				if (("getenv."+DISALLOWED_PROPERTY_NAME).equals(perm.getName())) {
-					throw new AccessControlException(
-						String.format("Accessing the system environment variable [%s] is disallowed", DISALLOWED_PROPERTY_NAME));
-				}
-			}
-		};
-
-		try {
-			System.setSecurityManager(securityManager);
-			{
-				Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
-				assertThat(systemEnvironment).isNotNull();
-				assertThat(systemEnvironment).isInstanceOf(ReadOnlySystemAttributesMap.class);
-				assertThat(systemEnvironment.get(ALLOWED_PROPERTY_NAME)).isEqualTo(ALLOWED_PROPERTY_VALUE);
-				assertThat(systemEnvironment.get(DISALLOWED_PROPERTY_NAME)).isNull();
-			}
-		}
-		finally {
-			System.setSecurityManager(oldSecurityManager);
-		}
-
-		EnvironmentTestUtils.getModifiableSystemEnvironment().remove(ALLOWED_PROPERTY_NAME);
-		EnvironmentTestUtils.getModifiableSystemEnvironment().remove(DISALLOWED_PROPERTY_NAME);
+	void getSystemEnvironment() {
+		Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
+		assertThat(systemEnvironment).isNotNull();
+		assertThat(System.getenv()).isSameAs(systemEnvironment);
 	}
 
 }

@@ -16,8 +16,7 @@
 
 package org.springframework.jms.core.support;
 
-import javax.jms.ConnectionFactory;
-
+import jakarta.jms.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -54,7 +53,7 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	 * Set the JMS connection factory to be used by the gateway.
 	 * Will automatically create a JmsTemplate for the given ConnectionFactory.
 	 * @see #createJmsTemplate
-	 * @see #setConnectionFactory(javax.jms.ConnectionFactory)
+	 * @see #setConnectionFactory(jakarta.jms.ConnectionFactory)
 	 */
 	public final void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.jmsTemplate = createJmsTemplate(connectionFactory);
@@ -83,7 +82,7 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 
 	/**
 	 * Set the JmsTemplate for the gateway.
-	 * @see #setConnectionFactory(javax.jms.ConnectionFactory)
+	 * @see #setConnectionFactory(jakarta.jms.ConnectionFactory)
 	 */
 	public final void setJmsTemplate(@Nullable JmsTemplate jmsTemplate) {
 		this.jmsTemplate = jmsTemplate;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package org.springframework.transaction.support;
 
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
-
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.UserTransaction;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.testfixture.jndi.SimpleNamingContextBuilder;
@@ -48,8 +47,7 @@ public class JtaTransactionManagerSerializationTests {
 		SimpleNamingContextBuilder jndiEnv = SimpleNamingContextBuilder
 				.emptyActivatedContextBuilder();
 		jndiEnv.bind(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut2);
-		JtaTransactionManager serializedJtatm = (JtaTransactionManager) SerializationTestUtils
-				.serializeAndDeserialize(jtam);
+		JtaTransactionManager serializedJtatm = SerializationTestUtils.serializeAndDeserialize(jtam);
 
 		// should do client-side lookup
 		assertThat(serializedJtatm.logger).as("Logger must survive serialization").isNotNull();

@@ -16,7 +16,7 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.lang.Nullable;

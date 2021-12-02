@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,20 +43,21 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpUpgradeHandler;
-import javax.servlet.http.Part;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletMapping;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpUpgradeHandler;
+import jakarta.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -71,7 +72,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
+ * Mock implementation of the {@link jakarta.servlet.http.HttpServletRequest} interface.
  *
  * <p>The default, preferred {@link Locale} for the <em>server</em> mocked by this request
  * is {@link Locale#ENGLISH}. This value can be changed via {@link #addPreferredLocale}
@@ -273,6 +274,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private boolean requestedSessionIdFromURL = false;
 
 	private final MultiValueMap<String, Part> parts = new LinkedMultiValueMap<>();
+
+	private HttpServletMapping httpServletMapping = new MockHttpServletMapping("", "", "", null);
 
 
 	// ---------------------------------------------------------------------
@@ -668,11 +671,14 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getServerName() {
-		String host = getHeader(HttpHeaders.HOST);
+		String rawHostHeader = getHeader(HttpHeaders.HOST);
+		String host = rawHostHeader;
 		if (host != null) {
 			host = host.trim();
 			if (host.startsWith("[")) {
-				host = host.substring(1, host.indexOf(']'));
+				int indexOfClosingBracket = host.indexOf(']');
+				Assert.state(indexOfClosingBracket > -1, () -> "Invalid Host header: " + rawHostHeader);
+				host = host.substring(0, indexOfClosingBracket + 1);
 			}
 			else if (host.contains(":")) {
 				host = host.substring(0, host.indexOf(':'));
@@ -690,18 +696,21 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public int getServerPort() {
-		String host = getHeader(HttpHeaders.HOST);
+		String rawHostHeader = getHeader(HttpHeaders.HOST);
+		String host = rawHostHeader;
 		if (host != null) {
 			host = host.trim();
 			int idx;
 			if (host.startsWith("[")) {
-				idx = host.indexOf(':', host.indexOf(']'));
+				int indexOfClosingBracket = host.indexOf(']');
+				Assert.state(indexOfClosingBracket > -1, () -> "Invalid Host header: " + rawHostHeader);
+				idx = host.indexOf(':', indexOfClosingBracket);
 			}
 			else {
 				idx = host.indexOf(':');
 			}
 			if (idx != -1) {
-				return Integer.parseInt(host.substring(idx + 1));
+				return Integer.parseInt(host, idx + 1, host.length(), 10);
 			}
 		}
 
@@ -814,7 +823,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * <p>In contrast to the Servlet specification, this mock implementation
 	 * does <strong>not</strong> take into consideration any locales
 	 * specified via the {@code Accept-Language} header.
-	 * @see javax.servlet.ServletRequest#getLocale()
+	 * @see jakarta.servlet.ServletRequest#getLocale()
 	 * @see #addPreferredLocale(Locale)
 	 * @see #setPreferredLocales(List)
 	 */
@@ -832,7 +841,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * <p>In contrast to the Servlet specification, this mock implementation
 	 * does <strong>not</strong> take into consideration any locales
 	 * specified via the {@code Accept-Language} header.
-	 * @see javax.servlet.ServletRequest#getLocales()
+	 * @see jakarta.servlet.ServletRequest#getLocales()
 	 * @see #addPreferredLocale(Locale)
 	 * @see #setPreferredLocales(List)
 	 */
@@ -855,7 +864,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	/**
 	 * Return {@code true} if the {@link #setSecure secure} flag has been set
 	 * to {@code true} or if the {@link #getScheme scheme} is {@code https}.
-	 * @see javax.servlet.ServletRequest#isSecure()
+	 * @see jakarta.servlet.ServletRequest#isSecure()
 	 */
 	@Override
 	public boolean isSecure() {
@@ -1382,6 +1391,15 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			result.addAll(list);
 		}
 		return result;
+	}
+
+	public void setHttpServletMapping(HttpServletMapping httpServletMapping) {
+		this.httpServletMapping = httpServletMapping;
+	}
+
+	@Override
+	public HttpServletMapping getHttpServletMapping() {
+		return this.httpServletMapping;
 	}
 
 	@Override

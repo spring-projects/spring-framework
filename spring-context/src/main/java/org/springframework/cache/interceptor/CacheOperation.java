@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,13 +216,13 @@ public abstract class CacheOperation implements BasicOperation {
 		 */
 		protected StringBuilder getOperationDescription() {
 			StringBuilder result = new StringBuilder(getClass().getSimpleName());
-			result.append("[").append(this.name);
+			result.append('[').append(this.name);
 			result.append("] caches=").append(this.cacheNames);
 			result.append(" | key='").append(this.key);
 			result.append("' | keyGenerator='").append(this.keyGenerator);
 			result.append("' | cacheManager='").append(this.cacheManager);
 			result.append("' | cacheResolver='").append(this.cacheResolver);
-			result.append("' | condition='").append(this.condition).append("'");
+			result.append("' | condition='").append(this.condition).append('\'');
 			return result;
 		}
 

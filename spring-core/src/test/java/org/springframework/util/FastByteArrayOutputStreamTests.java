@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,7 +194,7 @@ class FastByteArrayOutputStreamTests {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
 		DigestUtils.appendMd5DigestAsHex(inputStream, builder);
-		builder.append("\"");
+		builder.append('"');
 		String actual = builder.toString();
 		assertThat(actual).isEqualTo("\"0b10a8db164e0754105b7a99be72e3fe5\"");
 	}
@@ -208,7 +208,7 @@ class FastByteArrayOutputStreamTests {
 		}
 		InputStream inputStream = this.os.getInputStream();
 		DigestUtils.appendMd5DigestAsHex(inputStream, builder);
-		builder.append("\"");
+		builder.append('"');
 		String actual = builder.toString();
 		assertThat(actual).isEqualTo("\"06225ca1e4533354c516e74512065331d\"");
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,7 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 	}
 
 	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.httpMethod.name();
 	}
@@ -126,7 +127,7 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.httpMethod);
-		sb.append(" ").append(this.uri);
+		sb.append(' ').append(this.uri);
 		if (!getHeaders().isEmpty()) {
 			sb.append(", headers: ").append(getHeaders());
 		}

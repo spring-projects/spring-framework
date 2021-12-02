@@ -20,13 +20,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspWriter;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspWriter;
 
 import org.springframework.lang.Nullable;
 
 /**
- * Mock implementation of the {@link javax.servlet.jsp.JspWriter} class.
+ * Mock implementation of the {@link jakarta.servlet.jsp.JspWriter} class.
  * Only necessary for testing applications when testing custom JSP tags.
  *
  * @author Juergen Hoeller

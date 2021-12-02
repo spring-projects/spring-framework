@@ -21,13 +21,11 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -90,7 +88,7 @@ public class DefaultEntityResponseBuilderTests {
 		String body = "foo";
 		EntityResponse<String> result =
 				EntityResponse.fromObject(body).allow(HttpMethod.GET).build();
-		Set<HttpMethod> expected = EnumSet.of(HttpMethod.GET);
+		Set<HttpMethod> expected = Set.of(HttpMethod.GET);
 		assertThat(result.headers().getAllow()).isEqualTo(expected);
 	}
 

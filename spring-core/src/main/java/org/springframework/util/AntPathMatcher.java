@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.util;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,6 +68,7 @@ import org.springframework.lang.Nullable;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Vladislav Kisel
  * @since 16.07.2003
  */
 public class AntPathMatcher implements PathMatcher {
@@ -77,9 +78,9 @@ public class AntPathMatcher implements PathMatcher {
 
 	private static final int CACHE_TURNOFF_THRESHOLD = 65536;
 
-	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?}");
+	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?\\}");
 
-	private static final char[] WILDCARD_CHARS = { '*', '?', '{' };
+	private static final char[] WILDCARD_CHARS = {'*', '?', '{'};
 
 
 	private String pathSeparator;
@@ -474,14 +475,14 @@ public class AntPathMatcher implements PathMatcher {
 
 	/**
 	 * Given a pattern and a full path, determine the pattern-mapped part. <p>For example: <ul>
-	 * <li>'{@code /docs/cvs/commit.html}' and '{@code /docs/cvs/commit.html} -> ''</li>
-	 * <li>'{@code /docs/*}' and '{@code /docs/cvs/commit} -> '{@code cvs/commit}'</li>
-	 * <li>'{@code /docs/cvs/*.html}' and '{@code /docs/cvs/commit.html} -> '{@code commit.html}'</li>
-	 * <li>'{@code /docs/**}' and '{@code /docs/cvs/commit} -> '{@code cvs/commit}'</li>
-	 * <li>'{@code /docs/**\/*.html}' and '{@code /docs/cvs/commit.html} -> '{@code cvs/commit.html}'</li>
-	 * <li>'{@code /*.html}' and '{@code /docs/cvs/commit.html} -> '{@code docs/cvs/commit.html}'</li>
-	 * <li>'{@code *.html}' and '{@code /docs/cvs/commit.html} -> '{@code /docs/cvs/commit.html}'</li>
-	 * <li>'{@code *}' and '{@code /docs/cvs/commit.html} -> '{@code /docs/cvs/commit.html}'</li> </ul>
+	 * <li>'{@code /docs/cvs/commit.html}' and '{@code /docs/cvs/commit.html} &rarr; ''</li>
+	 * <li>'{@code /docs/*}' and '{@code /docs/cvs/commit} &rarr; '{@code cvs/commit}'</li>
+	 * <li>'{@code /docs/cvs/*.html}' and '{@code /docs/cvs/commit.html} &rarr; '{@code commit.html}'</li>
+	 * <li>'{@code /docs/**}' and '{@code /docs/cvs/commit} &rarr; '{@code cvs/commit}'</li>
+	 * <li>'{@code /docs/**\/*.html}' and '{@code /docs/cvs/commit.html} &rarr; '{@code cvs/commit.html}'</li>
+	 * <li>'{@code /*.html}' and '{@code /docs/cvs/commit.html} &rarr; '{@code docs/cvs/commit.html}'</li>
+	 * <li>'{@code *.html}' and '{@code /docs/cvs/commit.html} &rarr; '{@code /docs/cvs/commit.html}'</li>
+	 * <li>'{@code *}' and '{@code /docs/cvs/commit.html} &rarr; '{@code /docs/cvs/commit.html}'</li> </ul>
 	 * <p>Assumes that {@link #match} returns {@code true} for '{@code pattern}' and '{@code path}', but
 	 * does <strong>not</strong> enforce this.
 	 */
@@ -641,19 +642,28 @@ public class AntPathMatcher implements PathMatcher {
 	 */
 	protected static class AntPathStringMatcher {
 
-		private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?}|[^/{}]|\\\\[{}])+?)}");
+		private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
 
-		private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
+		private static final String DEFAULT_VARIABLE_PATTERN = "((?s).*)";
 
+		private final String rawPattern;
+
+		private final boolean caseSensitive;
+
+		private final boolean exactMatch;
+
+		@Nullable
 		private final Pattern pattern;
 
-		private final List<String> variableNames = new LinkedList<>();
+		private final List<String> variableNames = new ArrayList<>();
 
 		public AntPathStringMatcher(String pattern) {
 			this(pattern, true);
 		}
 
 		public AntPathStringMatcher(String pattern, boolean caseSensitive) {
+			this.rawPattern = pattern;
+			this.caseSensitive = caseSensitive;
 			StringBuilder patternBuilder = new StringBuilder();
 			Matcher matcher = GLOB_PATTERN.matcher(pattern);
 			int end = 0;
@@ -683,9 +693,17 @@ public class AntPathMatcher implements PathMatcher {
 				}
 				end = matcher.end();
 			}
-			patternBuilder.append(quote(pattern, end, pattern.length()));
-			this.pattern = (caseSensitive ? Pattern.compile(patternBuilder.toString()) :
-					Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE));
+			// No glob pattern was found, this is an exact String match
+			if (end == 0) {
+				this.exactMatch = true;
+				this.pattern = null;
+			}
+			else {
+				this.exactMatch = false;
+				patternBuilder.append(quote(pattern, end, pattern.length()));
+				this.pattern = (this.caseSensitive ? Pattern.compile(patternBuilder.toString()) :
+						Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE));
+			}
 		}
 
 		private String quote(String s, int start, int end) {
@@ -700,28 +718,35 @@ public class AntPathMatcher implements PathMatcher {
 		 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise.
 		 */
 		public boolean matchStrings(String str, @Nullable Map<String, String> uriTemplateVariables) {
-			Matcher matcher = this.pattern.matcher(str);
-			if (matcher.matches()) {
-				if (uriTemplateVariables != null) {
-					// SPR-8455
-					if (this.variableNames.size() != matcher.groupCount()) {
-						throw new IllegalArgumentException("The number of capturing groups in the pattern segment " +
-								this.pattern + " does not match the number of URI template variables it defines, " +
-								"which can occur if capturing groups are used in a URI template regex. " +
-								"Use non-capturing groups instead.");
+			if (this.exactMatch) {
+				return this.caseSensitive ? this.rawPattern.equals(str) : this.rawPattern.equalsIgnoreCase(str);
+			}
+			else if (this.pattern != null) {
+				Matcher matcher = this.pattern.matcher(str);
+				if (matcher.matches()) {
+					if (uriTemplateVariables != null) {
+						if (this.variableNames.size() != matcher.groupCount()) {
+							throw new IllegalArgumentException("The number of capturing groups in the pattern segment " +
+									this.pattern + " does not match the number of URI template variables it defines, " +
+									"which can occur if capturing groups are used in a URI template regex. " +
+									"Use non-capturing groups instead.");
+						}
+						for (int i = 1; i <= matcher.groupCount(); i++) {
+							String name = this.variableNames.get(i - 1);
+							if (name.startsWith("*")) {
+								throw new IllegalArgumentException("Capturing patterns (" + name + ") are not " +
+										"supported by the AntPathMatcher. Use the PathPatternParser instead.");
+							}
+							String value = matcher.group(i);
+							uriTemplateVariables.put(name, value);
+						}
 					}
-					for (int i = 1; i <= matcher.groupCount(); i++) {
-						String name = this.variableNames.get(i - 1);
-						String value = matcher.group(i);
-						uriTemplateVariables.put(name, value);
-					}
+					return true;
 				}
-				return true;
 			}
-			else {
-				return false;
-			}
+			return false;
 		}
+
 	}
 
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.client.reactive;
 
 import java.time.Duration;
@@ -61,7 +62,7 @@ public class ReactorResourceFactoryTests {
 	@Test
 	void globalResourcesWithConsumer() throws Exception {
 
-		AtomicBoolean invoked = new AtomicBoolean(false);
+		AtomicBoolean invoked = new AtomicBoolean();
 
 		this.resourceFactory.addGlobalResourcesConsumer(httpResources -> invoked.set(true));
 		this.resourceFactory.afterPropertiesSet();

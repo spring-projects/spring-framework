@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ public class MapMethodProcessor implements HandlerMethodArgumentResolver, Handle
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return Map.class.isAssignableFrom(parameter.getParameterType()) &&
-				parameter.getParameterAnnotations().length == 0;
+		return (Map.class.isAssignableFrom(parameter.getParameterType()) &&
+				parameter.getParameterAnnotations().length == 0);
 	}
 
 	@Override
@@ -70,8 +70,8 @@ public class MapMethodProcessor implements HandlerMethodArgumentResolver, Handle
 		}
 		else if (returnValue != null) {
 			// should not happen
-			throw new UnsupportedOperationException("Unexpected return type: " +
-					returnType.getParameterType().getName() + " in method: " + returnType.getMethod());
+			throw new UnsupportedOperationException("Unexpected return type [" +
+					returnType.getParameterType().getName() + "] in method: " + returnType.getMethod());
 		}
 	}
 

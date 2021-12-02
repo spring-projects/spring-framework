@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import java.util.Set;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.MimeType;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -92,9 +94,33 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * @param resolver used to determine requested content type
 	 */
 	public ProducesRequestCondition(String[] produces, String[] headers, RequestedContentTypeResolver resolver) {
-		this.expressions = new ArrayList<>(parseExpressions(produces, headers));
-		Collections.sort(this.expressions);
+		this.expressions = parseExpressions(produces, headers);
+		if (this.expressions.size() > 1) {
+			Collections.sort(this.expressions);
+		}
 		this.contentTypeResolver = resolver != null ? resolver : DEFAULT_CONTENT_TYPE_RESOLVER;
+	}
+
+	private List<ProduceMediaTypeExpression> parseExpressions(String[] produces, String[] headers) {
+		Set<ProduceMediaTypeExpression> result = null;
+		if (!ObjectUtils.isEmpty(headers)) {
+			for (String header : headers) {
+				HeadersRequestCondition.HeaderExpression expr = new HeadersRequestCondition.HeaderExpression(header);
+				if ("Accept".equalsIgnoreCase(expr.name)) {
+					for (MediaType mediaType : MediaType.parseMediaTypes(expr.value)) {
+						result = (result != null ? result : new LinkedHashSet<>());
+						result.add(new ProduceMediaTypeExpression(mediaType, expr.isNegated));
+					}
+				}
+			}
+		}
+		if (!ObjectUtils.isEmpty(produces)) {
+			for (String produce : produces) {
+				result = (result != null ? result : new LinkedHashSet<>());
+				result.add(new ProduceMediaTypeExpression(produce));
+			}
+		}
+		return (result != null ? new ArrayList<>(result) : Collections.emptyList());
 	}
 
 	/**
@@ -106,26 +132,6 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		this.contentTypeResolver = other.contentTypeResolver;
 	}
 
-
-	private Set<ProduceMediaTypeExpression> parseExpressions(String[] produces, String[] headers) {
-		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>();
-		if (headers != null) {
-			for (String header : headers) {
-				HeadersRequestCondition.HeaderExpression expr = new HeadersRequestCondition.HeaderExpression(header);
-				if ("Accept".equalsIgnoreCase(expr.name)) {
-					for (MediaType mediaType : MediaType.parseMediaTypes(expr.value)) {
-						result.add(new ProduceMediaTypeExpression(mediaType, expr.isNegated));
-					}
-				}
-			}
-		}
-		if (produces != null) {
-			for (String produce : produces) {
-				result.add(new ProduceMediaTypeExpression(produce));
-			}
-		}
-		return result;
-	}
 
 	/**
 	 * Return the contained "produces" expressions.
@@ -227,13 +233,14 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * Compares this and another "produces" condition as follows:
 	 * <ol>
 	 * <li>Sort 'Accept' header media types by quality value via
-	 * {@link MediaType#sortByQualityValue(List)} and iterate the list.
+	 * {@link org.springframework.util.MimeTypeUtils#sortBySpecificity(List)}
+	 * and iterate the list.
 	 * <li>Get the first index of matching media types in each "produces"
 	 * condition first matching with {@link MediaType#equals(Object)} and
 	 * then with {@link MediaType#includes(MediaType)}.
 	 * <li>If a lower index is found, the condition at that index wins.
 	 * <li>If both indexes are equal, the media types at the index are
-	 * compared further with {@link MediaType#SPECIFICITY_COMPARATOR}.
+	 * compared further with {@link MediaType#isMoreSpecific(MimeType)}.
 	 * </ol>
 	 * <p>It is assumed that both instances have been obtained via
 	 * {@link #getMatchingCondition(ServerWebExchange)} and each instance

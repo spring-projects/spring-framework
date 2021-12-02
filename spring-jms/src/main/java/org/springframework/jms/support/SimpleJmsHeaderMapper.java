@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.AbstractHeaderMapper;
@@ -61,7 +61,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 
 
 	@Override
-	public void fromHeaders(MessageHeaders headers, javax.jms.Message jmsMessage) {
+	public void fromHeaders(MessageHeaders headers, jakarta.jms.Message jmsMessage) {
 		try {
 			Object jmsCorrelationId = headers.get(JmsHeaders.CORRELATION_ID);
 			if (jmsCorrelationId instanceof Number) {
@@ -93,8 +93,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 					logger.debug("Failed to set JMSType - skipping", ex);
 				}
 			}
-			Set<Map.Entry<String, Object>> entries = headers.entrySet();
-			for (Map.Entry<String, Object> entry : entries) {
+			for (Map.Entry<String, Object> entry : headers.entrySet()) {
 				String headerName = entry.getKey();
 				if (StringUtils.hasText(headerName) && !headerName.startsWith(JmsHeaders.PREFIX)) {
 					Object value = entry.getValue();
@@ -126,7 +125,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 	}
 
 	@Override
-	public MessageHeaders toHeaders(javax.jms.Message jmsMessage) {
+	public MessageHeaders toHeaders(jakarta.jms.Message jmsMessage) {
 		Map<String, Object> headers = new HashMap<>();
 		try {
 			try {

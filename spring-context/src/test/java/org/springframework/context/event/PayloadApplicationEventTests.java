@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,12 +37,44 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PayloadApplicationEventTests {
 
 	@Test
-	@SuppressWarnings({ "rawtypes", "resource" })
 	public void testEventClassWithInterface() {
 		ApplicationContext ac = new AnnotationConfigApplicationContext(AuditableListener.class);
-		AuditablePayloadEvent event = new AuditablePayloadEvent<>(this, "xyz");
+
+		AuditablePayloadEvent<String> event = new AuditablePayloadEvent<>(this, "xyz");
 		ac.publishEvent(event);
 		assertThat(ac.getBean(AuditableListener.class).events.contains(event)).isTrue();
+	}
+
+	@Test
+	public void testProgrammaticEventListener() {
+		List<Auditable> events = new ArrayList<>();
+		ApplicationListener<AuditablePayloadEvent<String>> listener = events::add;
+		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (event -> event.getPayload().intValue());
+
+		ConfigurableApplicationContext ac = new GenericApplicationContext();
+		ac.addApplicationListener(listener);
+		ac.addApplicationListener(mismatch);
+		ac.refresh();
+
+		AuditablePayloadEvent<String> event = new AuditablePayloadEvent<>(this, "xyz");
+		ac.publishEvent(event);
+		assertThat(events.contains(event)).isTrue();
+	}
+
+	@Test
+	public void testProgrammaticPayloadListener() {
+		List<String> events = new ArrayList<>();
+		ApplicationListener<PayloadApplicationEvent<String>> listener = ApplicationListener.forPayload(events::add);
+		ApplicationListener<PayloadApplicationEvent<Integer>> mismatch = ApplicationListener.forPayload(payload -> payload.intValue());
+
+		ConfigurableApplicationContext ac = new GenericApplicationContext();
+		ac.addApplicationListener(listener);
+		ac.addApplicationListener(mismatch);
+		ac.refresh();
+
+		AuditablePayloadEvent<String> event = new AuditablePayloadEvent<>(this, "xyz");
+		ac.publishEvent(event);
+		assertThat(events.contains(event.getPayload())).isTrue();
 	}
 
 

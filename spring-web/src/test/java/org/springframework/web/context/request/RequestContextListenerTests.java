@@ -16,8 +16,7 @@
 
 package org.springframework.web.context.request;
 
-import javax.servlet.ServletRequestEvent;
-
+import jakarta.servlet.ServletRequestEvent;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.MockRunnable;

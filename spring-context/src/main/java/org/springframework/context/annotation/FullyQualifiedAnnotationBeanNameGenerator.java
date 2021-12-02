@@ -43,6 +43,15 @@ import org.springframework.util.Assert;
  */
 public class FullyQualifiedAnnotationBeanNameGenerator extends AnnotationBeanNameGenerator {
 
+	/**
+	 * A convenient constant for a default {@code FullyQualifiedAnnotationBeanNameGenerator}
+	 * instance, as used for configuration-level import purposes.
+	 * @since 5.2.11
+	 */
+	public static final FullyQualifiedAnnotationBeanNameGenerator INSTANCE =
+			new FullyQualifiedAnnotationBeanNameGenerator();
+
+
 	@Override
 	protected String buildDefaultBeanName(BeanDefinition definition) {
 		String beanClassName = definition.getBeanClassName();

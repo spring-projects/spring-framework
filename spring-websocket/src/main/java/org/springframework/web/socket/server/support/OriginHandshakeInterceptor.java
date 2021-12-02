@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package org.springframework.web.socket.server.support;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +31,8 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.util.WebUtils;
@@ -45,7 +48,7 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Set<String> allowedOrigins = new LinkedHashSet<>();
+	private final CorsConfiguration corsConfiguration = new CorsConfiguration();
 
 
 	/**
@@ -64,27 +67,61 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 
 
 	/**
-	 * Configure allowed {@code Origin} header values. This check is mostly
-	 * designed for browsers. There is nothing preventing other types of client
-	 * to modify the {@code Origin} header value.
-	 * <p>Each provided allowed origin must have a scheme, and optionally a port
-	 * (e.g. "https://example.org", "https://example.org:9090"). An allowed origin
-	 * string may also be "*" in which case all origins are allowed.
+	 * Set the origins for which cross-origin requests are allowed from a browser.
+	 * Please, refer to {@link CorsConfiguration#setAllowedOrigins(List)} for
+	 * format details and considerations, and keep in mind that the CORS spec
+	 * does not allow use of {@code "*"} with {@code allowCredentials=true}.
+	 * For more flexible origin patterns use {@link #setAllowedOriginPatterns}
+	 * instead.
+	 *
+	 * <p>By default, no origins are allowed. When
+	 * {@link #setAllowedOriginPatterns(Collection) allowedOriginPatterns} is also
+	 * set, then that takes precedence over this property.
+	 *
+	 * <p>Note when SockJS is enabled and origins are restricted, transport types
+	 * that do not allow to check request origin (Iframe based transports) are
+	 * disabled. As a consequence, IE 6 to 9 are not supported when origins are
+	 * restricted.
+	 * @see #setAllowedOriginPatterns(Collection)
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 */
 	public void setAllowedOrigins(Collection<String> allowedOrigins) {
 		Assert.notNull(allowedOrigins, "Allowed origins Collection must not be null");
-		this.allowedOrigins.clear();
-		this.allowedOrigins.addAll(allowedOrigins);
+		this.corsConfiguration.setAllowedOrigins(new ArrayList<>(allowedOrigins));
 	}
 
 	/**
-	 * Return the allowed {@code Origin} header values.
+	 * Return the {@link #setAllowedOriginPatterns(Collection) configured} allowed origins.
 	 * @since 4.1.5
-	 * @see #setAllowedOrigins
 	 */
 	public Collection<String> getAllowedOrigins() {
-		return Collections.unmodifiableSet(this.allowedOrigins);
+		List<String> allowedOrigins = this.corsConfiguration.getAllowedOrigins();
+		return (CollectionUtils.isEmpty(allowedOrigins) ? Collections.emptySet() :
+				Collections.unmodifiableSet(new LinkedHashSet<>(allowedOrigins)));
+	}
+
+	/**
+	 * Alternative to {@link #setAllowedOrigins(Collection)} that supports more
+	 * flexible patterns for specifying the origins for which cross-origin
+	 * requests are allowed from a browser. Please, refer to
+	 * {@link CorsConfiguration#setAllowedOriginPatterns(List)} for format
+	 * details and other considerations.
+	 * <p>By default this is not set.
+	 * @since 5.3.2
+	 */
+	public void setAllowedOriginPatterns(Collection<String> allowedOriginPatterns) {
+		Assert.notNull(allowedOriginPatterns, "Allowed origin patterns Collection must not be null");
+		this.corsConfiguration.setAllowedOriginPatterns(new ArrayList<>(allowedOriginPatterns));
+	}
+
+	/**
+	 * Return the {@link #setAllowedOriginPatterns(Collection) configured} allowed origin patterns.
+	 * @since 5.3.2
+	 */
+	public Collection<String> getAllowedOriginPatterns() {
+		List<String> allowedOriginPatterns = this.corsConfiguration.getAllowedOriginPatterns();
+		return (CollectionUtils.isEmpty(allowedOriginPatterns) ? Collections.emptySet() :
+				Collections.unmodifiableSet(new LinkedHashSet<>(allowedOriginPatterns)));
 	}
 
 
@@ -92,7 +129,8 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
 
-		if (!WebUtils.isSameOrigin(request) && !WebUtils.isValidOrigin(request, this.allowedOrigins)) {
+		if (!WebUtils.isSameOrigin(request) &&
+				this.corsConfiguration.checkOrigin(request.getHeaders().getOrigin()) == null) {
 			response.setStatusCode(HttpStatus.FORBIDDEN);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Handshake request rejected, Origin header value " +

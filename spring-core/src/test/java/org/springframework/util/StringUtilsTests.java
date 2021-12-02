@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Sam Brannen
  */
 class StringUtilsTests {
 
@@ -56,6 +58,8 @@ class StringUtilsTests {
 		assertThat(StringUtils.containsWhitespace("a")).isFalse();
 		assertThat(StringUtils.containsWhitespace("abc")).isFalse();
 		assertThat(StringUtils.containsWhitespace(" ")).isTrue();
+		assertThat(StringUtils.containsWhitespace("\t")).isTrue();
+		assertThat(StringUtils.containsWhitespace("\n")).isTrue();
 		assertThat(StringUtils.containsWhitespace(" a")).isTrue();
 		assertThat(StringUtils.containsWhitespace("abc ")).isTrue();
 		assertThat(StringUtils.containsWhitespace("a b")).isTrue();
@@ -68,6 +72,8 @@ class StringUtilsTests {
 		assertThat(StringUtils.trimWhitespace("")).isEqualTo("");
 		assertThat(StringUtils.trimWhitespace(" ")).isEqualTo("");
 		assertThat(StringUtils.trimWhitespace("\t")).isEqualTo("");
+		assertThat(StringUtils.trimWhitespace("\n")).isEqualTo("");
+		assertThat(StringUtils.trimWhitespace(" \t\n")).isEqualTo("");
 		assertThat(StringUtils.trimWhitespace(" a")).isEqualTo("a");
 		assertThat(StringUtils.trimWhitespace("a ")).isEqualTo("a");
 		assertThat(StringUtils.trimWhitespace(" a ")).isEqualTo("a");
@@ -77,9 +83,12 @@ class StringUtilsTests {
 
 	@Test
 	void trimAllWhitespace() {
+		assertThat(StringUtils.trimAllWhitespace(null)).isEqualTo(null);
 		assertThat(StringUtils.trimAllWhitespace("")).isEqualTo("");
 		assertThat(StringUtils.trimAllWhitespace(" ")).isEqualTo("");
 		assertThat(StringUtils.trimAllWhitespace("\t")).isEqualTo("");
+		assertThat(StringUtils.trimAllWhitespace("\n")).isEqualTo("");
+		assertThat(StringUtils.trimAllWhitespace(" \t\n")).isEqualTo("");
 		assertThat(StringUtils.trimAllWhitespace(" a")).isEqualTo("a");
 		assertThat(StringUtils.trimAllWhitespace("a ")).isEqualTo("a");
 		assertThat(StringUtils.trimAllWhitespace(" a ")).isEqualTo("a");
@@ -93,6 +102,8 @@ class StringUtilsTests {
 		assertThat(StringUtils.trimLeadingWhitespace("")).isEqualTo("");
 		assertThat(StringUtils.trimLeadingWhitespace(" ")).isEqualTo("");
 		assertThat(StringUtils.trimLeadingWhitespace("\t")).isEqualTo("");
+		assertThat(StringUtils.trimLeadingWhitespace("\n")).isEqualTo("");
+		assertThat(StringUtils.trimLeadingWhitespace(" \t\n")).isEqualTo("");
 		assertThat(StringUtils.trimLeadingWhitespace(" a")).isEqualTo("a");
 		assertThat(StringUtils.trimLeadingWhitespace("a ")).isEqualTo("a ");
 		assertThat(StringUtils.trimLeadingWhitespace(" a ")).isEqualTo("a ");
@@ -106,6 +117,8 @@ class StringUtilsTests {
 		assertThat(StringUtils.trimTrailingWhitespace("")).isEqualTo("");
 		assertThat(StringUtils.trimTrailingWhitespace(" ")).isEqualTo("");
 		assertThat(StringUtils.trimTrailingWhitespace("\t")).isEqualTo("");
+		assertThat(StringUtils.trimTrailingWhitespace("\n")).isEqualTo("");
+		assertThat(StringUtils.trimTrailingWhitespace(" \t\n")).isEqualTo("");
 		assertThat(StringUtils.trimTrailingWhitespace("a ")).isEqualTo("a");
 		assertThat(StringUtils.trimTrailingWhitespace(" a")).isEqualTo(" a");
 		assertThat(StringUtils.trimTrailingWhitespace(" a ")).isEqualTo(" a");
@@ -261,28 +274,28 @@ class StringUtilsTests {
 		String inString = "Able was I ere I saw Elba";
 
 		String res = StringUtils.deleteAny(inString, "I");
-		assertThat(res.equals("Able was  ere  saw Elba")).as("Result has no Is [" + res + "]").isTrue();
+		assertThat(res).as("Result has no 'I'").isEqualTo("Able was  ere  saw Elba");
 
 		res = StringUtils.deleteAny(inString, "AeEba!");
-		assertThat(res.equals("l ws I r I sw l")).as("Result has no Is [" + res + "]").isTrue();
+		assertThat(res).as("Result has no 'AeEba!'").isEqualTo("l ws I r I sw l");
 
-		String mismatch = StringUtils.deleteAny(inString, "#@$#$^");
-		assertThat(mismatch.equals(inString)).as("Result is unchanged").isTrue();
-
-		String whitespace = "This is\n\n\n    \t   a messagy string with whitespace\n";
-		assertThat(whitespace.contains("\n")).as("Has CR").isTrue();
-		assertThat(whitespace.contains("\t")).as("Has tab").isTrue();
-		assertThat(whitespace.contains(" ")).as("Has  sp").isTrue();
-		String cleaned = StringUtils.deleteAny(whitespace, "\n\t ");
-		boolean condition2 = !cleaned.contains("\n");
-		assertThat(condition2).as("Has no CR").isTrue();
-		boolean condition1 = !cleaned.contains("\t");
-		assertThat(condition1).as("Has no tab").isTrue();
-		boolean condition = !cleaned.contains(" ");
-		assertThat(condition).as("Has no sp").isTrue();
-		assertThat(cleaned.length() > 10).as("Still has chars").isTrue();
+		res = StringUtils.deleteAny(inString, "#@$#$^");
+		assertThat(res).as("Result is unchanged").isEqualTo(inString);
 	}
 
+	@Test
+	void deleteAnyWhitespace() {
+		String whitespace = "This is\n\n\n    \t   a messagy string with whitespace\n";
+		assertThat(whitespace).as("Has CR").contains("\n");
+		assertThat(whitespace).as("Has tab").contains("\t");
+		assertThat(whitespace).as("Has space").contains(" ");
+
+		String cleaned = StringUtils.deleteAny(whitespace, "\n\t ");
+		assertThat(cleaned).as("Has no CR").doesNotContain("\n");
+		assertThat(cleaned).as("Has no tab").doesNotContain("\t");
+		assertThat(cleaned).as("Has no space").doesNotContain(" ");
+		assertThat(cleaned.length()).as("Still has chars").isGreaterThan(10);
+	}
 
 	@Test
 	void quote() {
@@ -295,7 +308,7 @@ class StringUtilsTests {
 	void quoteIfString() {
 		assertThat(StringUtils.quoteIfString("myString")).isEqualTo("'myString'");
 		assertThat(StringUtils.quoteIfString("")).isEqualTo("''");
-		assertThat(StringUtils.quoteIfString(5)).isEqualTo(Integer.valueOf(5));
+		assertThat(StringUtils.quoteIfString(5)).isEqualTo(5);
 		assertThat(StringUtils.quoteIfString(null)).isNull();
 	}
 
@@ -388,7 +401,10 @@ class StringUtilsTests {
 		assertThat(StringUtils.cleanPath("file:../")).isEqualTo("file:../");
 		assertThat(StringUtils.cleanPath("file:./../")).isEqualTo("file:../");
 		assertThat(StringUtils.cleanPath("file:.././")).isEqualTo("file:../");
+		assertThat(StringUtils.cleanPath("file:/mypath/spring.factories")).isEqualTo("file:/mypath/spring.factories");
 		assertThat(StringUtils.cleanPath("file:///c:/some/../path/the%20file.txt")).isEqualTo("file:///c:/path/the%20file.txt");
+		assertThat(StringUtils.cleanPath("jar:file:///c:\\some\\..\\path\\.\\the%20file.txt")).isEqualTo("jar:file:///c:/path/the%20file.txt");
+		assertThat(StringUtils.cleanPath("jar:file:///c:/some/../path/./the%20file.txt")).isEqualTo("jar:file:///c:/path/the%20file.txt");
 	}
 
 	@Test
@@ -422,21 +438,6 @@ class StringUtilsTests {
 		assertThat(StringUtils.concatenateStringArrays(input1, null)).isEqualTo(input1);
 		assertThat(StringUtils.concatenateStringArrays(null, input2)).isEqualTo(input2);
 		assertThat(StringUtils.concatenateStringArrays(null, null)).isNull();
-	}
-
-	@Test
-	@Deprecated
-	void mergeStringArrays() {
-		String[] input1 = new String[] {"myString2"};
-		String[] input2 = new String[] {"myString1", "myString2"};
-		String[] result = StringUtils.mergeStringArrays(input1, input2);
-		assertThat(result.length).isEqualTo(2);
-		assertThat(result[0]).isEqualTo("myString2");
-		assertThat(result[1]).isEqualTo("myString1");
-
-		assertThat(StringUtils.mergeStringArrays(input1, null)).isEqualTo(input1);
-		assertThat(StringUtils.mergeStringArrays(null, input2)).isEqualTo(input2);
-		assertThat(StringUtils.mergeStringArrays(null, null)).isNull();
 	}
 
 	@Test
@@ -486,7 +487,7 @@ class StringUtilsTests {
 	void tokenizeToStringArrayWithNotIgnoreEmptyTokens() {
 		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",", true, false);
 		assertThat(sa.length).isEqualTo(4);
-		assertThat(sa[0].equals("a") && sa[1].equals("b") && sa[2].equals("") && sa[3].equals("c")).as("components are correct").isTrue();
+		assertThat(sa[0].equals("a") && sa[1].equals("b") && sa[2].isEmpty() && sa[3].equals("c")).as("components are correct").isTrue();
 	}
 
 	@Test
@@ -527,7 +528,7 @@ class StringUtilsTests {
 	}
 
 	@Test
-	void delimitedListToStringArrayWithEmptyString() {
+	void delimitedListToStringArrayWithEmptyDelimiter() {
 		String[] sa = StringUtils.delimitedListToStringArray("a,b", "");
 		assertThat(sa.length).isEqualTo(3);
 		assertThat(sa[0]).isEqualTo("a");
@@ -589,7 +590,7 @@ class StringUtilsTests {
 		// Could read these from files
 		String[] sa = StringUtils.commaDelimitedListToStringArray("a,,b");
 		assertThat(sa.length).as("a,,b produces array length 3").isEqualTo(3);
-		assertThat(sa[0].equals("a") && sa[1].equals("") && sa[2].equals("b")).as("components are correct").isTrue();
+		assertThat(sa[0].equals("a") && sa[1].isEmpty() && sa[2].equals("b")).as("components are correct").isTrue();
 
 		sa = new String[] {"", "", "a", ""};
 		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
@@ -599,7 +600,7 @@ class StringUtilsTests {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < components.length; i++) {
 			if (i != 0) {
-				sb.append(",");
+				sb.append(',');
 			}
 			sb.append(components[i]);
 		}
@@ -760,6 +761,11 @@ class StringUtilsTests {
 		assertThat(StringUtils.split(null, ",")).isNull();
 		assertThat(StringUtils.split("Hello, world", null)).isNull();
 		assertThat(StringUtils.split(null, null)).isNull();
+	}
+
+	@Test
+	void collectionToDelimitedStringWithNullValuesShouldNotFail() {
+		assertThat(StringUtils.collectionToCommaDelimitedString(Collections.singletonList(null))).isEqualTo("null");
 	}
 
 }

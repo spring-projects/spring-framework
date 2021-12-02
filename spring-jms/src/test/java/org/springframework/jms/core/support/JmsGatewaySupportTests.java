@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jms.core.support;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.jms.ConnectionFactory;
-
+import jakarta.jms.ConnectionFactory;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.core.JmsTemplate;
@@ -31,10 +31,10 @@ import static org.mockito.Mockito.mock;
  * @author Mark Pollack
  * @since 24.9.2004
  */
-public class JmsGatewaySupportTests {
+class JmsGatewaySupportTests {
 
 	@Test
-	public void testJmsGatewaySupportWithConnectionFactory() throws Exception {
+	void testJmsGatewaySupportWithConnectionFactory() throws Exception {
 		ConnectionFactory mockConnectionFactory = mock(ConnectionFactory.class);
 		final List<String> test = new ArrayList<>(1);
 		JmsGatewaySupport gateway = new JmsGatewaySupport() {
@@ -51,7 +51,7 @@ public class JmsGatewaySupportTests {
 	}
 
 	@Test
-	public void testJmsGatewaySupportWithJmsTemplate() throws Exception {
+	void testJmsGatewaySupportWithJmsTemplate() throws Exception {
 		JmsTemplate template = new JmsTemplate();
 		final List<String> test = new ArrayList<>(1);
 		JmsGatewaySupport gateway = new JmsGatewaySupport() {

@@ -21,12 +21,12 @@ package org.springframework.jms;
  *
  * @author Mark Pollack
  * @since 1.1
- * @see javax.jms.InvalidClientIDException
+ * @see jakarta.jms.InvalidClientIDException
  */
 @SuppressWarnings("serial")
 public class InvalidClientIDException extends JmsException {
 
-	public InvalidClientIDException(javax.jms.InvalidClientIDException cause) {
+	public InvalidClientIDException(jakarta.jms.InvalidClientIDException cause) {
 		super(cause);
 	}
 

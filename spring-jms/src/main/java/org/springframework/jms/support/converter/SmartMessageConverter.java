@@ -16,9 +16,9 @@
 
 package org.springframework.jms.support.converter;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
 
 import org.springframework.lang.Nullable;
 
@@ -43,7 +43,7 @@ public interface SmartMessageConverter extends MessageConverter {
 	 * @param conversionHint an extra object passed to the {@link MessageConverter},
 	 * e.g. the associated {@code MethodParameter} (may be {@code null}}
 	 * @return the JMS Message
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
 	 * @throws MessageConversionException in case of conversion failure
 	 * @see #toMessage(Object, Session)
 	 */

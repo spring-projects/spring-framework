@@ -77,6 +77,8 @@ final class AnnotationTypeMapping {
 
 	private final Map<Method, List<Method>> aliasedBy;
 
+	private final boolean synthesizable;
+
 	private final Set<Method> claimedAliases = new HashSet<>();
 
 
@@ -101,6 +103,7 @@ final class AnnotationTypeMapping {
 		processAliases();
 		addConventionMappings();
 		addConventionAnnotationValues();
+		this.synthesizable = computeSynthesizableFlag();
 	}
 
 
@@ -307,6 +310,47 @@ final class AnnotationTypeMapping {
 		return !isValueAttribute && existingDistance > mapping.distance;
 	}
 
+	@SuppressWarnings("unchecked")
+	private boolean computeSynthesizableFlag() {
+		// Uses @AliasFor for local aliases?
+		for (int index : this.aliasMappings) {
+			if (index != -1) {
+				return true;
+			}
+		}
+
+		// Uses @AliasFor for attribute overrides in meta-annotations?
+		if (!this.aliasedBy.isEmpty()) {
+			return true;
+		}
+
+		// Uses convention-based attribute overrides in meta-annotations?
+		for (int index : this.conventionMappings) {
+			if (index != -1) {
+				return true;
+			}
+		}
+
+		// Has nested annotations or arrays of annotations that are synthesizable?
+		if (getAttributes().hasNestedAnnotation()) {
+			AttributeMethods attributeMethods = getAttributes();
+			for (int i = 0; i < attributeMethods.size(); i++) {
+				Method method = attributeMethods.get(i);
+				Class<?> type = method.getReturnType();
+				if (type.isAnnotation() || (type.isArray() && type.getComponentType().isAnnotation())) {
+					Class<? extends Annotation> annotationType =
+							(Class<? extends Annotation>) (type.isAnnotation() ? type : type.getComponentType());
+					AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(annotationType).get(0);
+					if (mapping.isSynthesizable()) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
 	/**
 	 * Method called after all mappings have been set. At this point no further
 	 * lookups from child mappings will occur.
@@ -476,6 +520,17 @@ final class AnnotationTypeMapping {
 	 */
 	MirrorSets getMirrorSets() {
 		return this.mirrorSets;
+	}
+
+	/**
+	 * Determine if the mapped annotation is <em>synthesizable</em>.
+	 * <p>Consult the documentation for {@link MergedAnnotation#synthesize()}
+	 * for an explanation of what is considered synthesizable.
+	 * @return {@code true} if the mapped annotation is synthesizable
+	 * @since 5.2.6
+	 */
+	boolean isSynthesizable() {
+		return this.synthesizable;
 	}
 
 

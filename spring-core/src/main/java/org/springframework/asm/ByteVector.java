@@ -352,6 +352,9 @@ public class ByteVector {
    * @param size number of additional bytes that this byte vector should be able to receive.
    */
   private void enlarge(final int size) {
+    if (length > data.length) {
+      throw new AssertionError("Internal error");
+    }
     int doubleCapacity = 2 * data.length;
     int minimalCapacity = length + size;
     byte[] newData = new byte[doubleCapacity > minimalCapacity ? doubleCapacity : minimalCapacity];

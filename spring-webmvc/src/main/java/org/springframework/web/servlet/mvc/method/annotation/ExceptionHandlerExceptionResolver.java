@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.SpringProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -47,7 +48,6 @@ import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.method.annotation.MapMethodProcessor;
-import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
@@ -71,10 +71,19 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 3.1
  */
 public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExceptionResolver
 		implements ApplicationContextAware, InitializingBean {
+
+	/**
+	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
+	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
+	 * <p>The default is "false".
+	 */
+	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
+
 
 	@Nullable
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
@@ -108,11 +117,13 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.messageConverters = new ArrayList<>();
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());
-		try {
-			this.messageConverters.add(new SourceHttpMessageConverter<>());
-		}
-		catch (Error err) {
-			// Ignore when no TransformerFactory implementation is available
+		if(!shouldIgnoreXml) {
+			try {
+				this.messageConverters.add(new SourceHttpMessageConverter<>());
+			}
+			catch (Error err) {
+				// Ignore when no TransformerFactory implementation is available
+			}
 		}
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 	}
@@ -235,7 +246,6 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * {@code HttpMessageConverter}.
 	 */
 	public void setResponseBodyAdvice(@Nullable List<ResponseBodyAdvice<?>> responseBodyAdvice) {
-		this.responseBodyAdvice.clear();
 		if (responseBodyAdvice != null) {
 			this.responseBodyAdvice.addAll(responseBodyAdvice);
 		}
@@ -332,6 +342,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			resolvers.addAll(getCustomArgumentResolvers());
 		}
 
+		// Catch-all
+		resolvers.add(new PrincipalMethodArgumentResolver());
+
 		return resolvers;
 	}
 
@@ -350,7 +363,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice));
 
 		// Annotation-based return value types
-		handlers.add(new ModelAttributeMethodProcessor(false));
+		handlers.add(new ServletModelAttributeMethodProcessor(false));
 		handlers.add(new RequestResponseBodyMethodProcessor(
 				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice));
 
@@ -364,11 +377,15 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		}
 
 		// Catch-all
-		handlers.add(new ModelAttributeMethodProcessor(true));
+		handlers.add(new ServletModelAttributeMethodProcessor(true));
 
 		return handlers;
 	}
 
+	@Override
+	protected boolean hasGlobalExceptionHandlers() {
+		return !this.exceptionHandlerAdviceCache.isEmpty();
+	}
 
 	/**
 	 * Find an {@code @ExceptionHandler} method and invoke it to handle the raised exception.
@@ -393,24 +410,27 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
+		ArrayList<Throwable> exceptions = new ArrayList<>();
 		try {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using @ExceptionHandler " + exceptionHandlerMethod);
 			}
-			Throwable cause = exception.getCause();
-			if (cause != null) {
-				// Expose cause as provided argument as well
-				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, cause, handlerMethod);
+			// Expose causes as provided arguments as well
+			Throwable exToExpose = exception;
+			while (exToExpose != null) {
+				exceptions.add(exToExpose);
+				Throwable cause = exToExpose.getCause();
+				exToExpose = (cause != exToExpose ? cause : null);
 			}
-			else {
-				// Otherwise, just the given exception as-is
-				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, handlerMethod);
-			}
+			Object[] arguments = new Object[exceptions.size() + 1];
+			exceptions.toArray(arguments);  // efficient arraycopy call in ArrayList
+			arguments[arguments.length - 1] = handlerMethod;
+			exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, arguments);
 		}
 		catch (Throwable invocationEx) {
-			// Any other than the original exception (or its cause) is unintended here,
+			// Any other than the original exception (or a cause) is unintended here,
 			// probably an accident (e.g. failed assertion or the like).
-			if (invocationEx != exception && invocationEx != exception.getCause() && logger.isWarnEnabled()) {
+			if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
 				logger.warn("Failure in @ExceptionHandler " + exceptionHandlerMethod, invocationEx);
 			}
 			// Continue with default processing of the original exception...
@@ -463,7 +483,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			}
 			Method method = resolver.resolveMethod(exception);
 			if (method != null) {
-				return new ServletInvocableHandlerMethod(handlerMethod.getBean(), method);
+				return new ServletInvocableHandlerMethod(handlerMethod.getBean(), method, this.applicationContext);
 			}
 			// For advice applicability check below (involving base packages, assignable types
 			// and annotation presence), use target class instead of interface-based proxy.
@@ -478,7 +498,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 				ExceptionHandlerMethodResolver resolver = entry.getValue();
 				Method method = resolver.resolveMethod(exception);
 				if (method != null) {
-					return new ServletInvocableHandlerMethod(advice.resolveBean(), method);
+					return new ServletInvocableHandlerMethod(advice.resolveBean(), method, this.applicationContext);
 				}
 			}
 		}

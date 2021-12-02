@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.io.support.ResourcePropertiesPersister;
 import org.springframework.lang.Nullable;
-import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
 
@@ -74,7 +74,10 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @since 26.11.2003
  * @see DefaultListableBeanFactory
+ * @deprecated as of 5.3, in favor of Spring's common bean definition formats
+ * and/or custom reader implementations
  */
+@Deprecated
 public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
@@ -145,7 +148,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	@Nullable
 	private String defaultParentBean;
 
-	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
+	private PropertiesPersister propertiesPersister = ResourcePropertiesPersister.INSTANCE;
 
 
 	/**
@@ -184,12 +187,12 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 	/**
 	 * Set the PropertiesPersister to use for parsing properties files.
-	 * The default is DefaultPropertiesPersister.
-	 * @see org.springframework.util.DefaultPropertiesPersister
+	 * The default is ResourcePropertiesPersister.
+	 * @see ResourcePropertiesPersister#INSTANCE
 	 */
 	public void setPropertiesPersister(@Nullable PropertiesPersister propertiesPersister) {
 		this.propertiesPersister =
-				(propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
+				(propertiesPersister != null ? propertiesPersister : ResourcePropertiesPersister.INSTANCE);
 	}
 
 	/**
@@ -360,15 +363,14 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		int beanCount = 0;
 
 		for (Object key : map.keySet()) {
-			if (!(key instanceof String)) {
+			if (!(key instanceof String keyString)) {
 				throw new IllegalArgumentException("Illegal key [" + key + "]: only Strings allowed");
 			}
-			String keyString = (String) key;
 			if (keyString.startsWith(prefix)) {
 				// Key is of form: prefix<name>.property
 				String nameAndProperty = keyString.substring(prefix.length());
 				// Find dot before property name, ignoring dots in property keys.
-				int sepIdx = -1;
+				int sepIdx ;
 				int propKeyIdx = nameAndProperty.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX);
 				if (propKeyIdx != -1) {
 					sepIdx = nameAndProperty.lastIndexOf(SEPARATOR, propKeyIdx);
@@ -446,8 +448,8 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				else if (SINGLETON_KEY.equals(property)) {
 					// Spring 1.2 style
 					String val = StringUtils.trimWhitespace((String) entry.getValue());
-					scope = ("".equals(val) || TRUE_VALUE.equals(val) ? BeanDefinition.SCOPE_SINGLETON :
-							BeanDefinition.SCOPE_PROTOTYPE);
+					scope = (!StringUtils.hasLength(val) || TRUE_VALUE.equals(val) ?
+							BeanDefinition.SCOPE_SINGLETON : BeanDefinition.SCOPE_PROTOTYPE);
 				}
 				else if (LAZY_INIT_KEY.equals(property)) {
 					String val = StringUtils.trimWhitespace((String) entry.getValue());
@@ -455,11 +457,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				}
 				else if (property.startsWith(CONSTRUCTOR_ARG_PREFIX)) {
 					if (property.endsWith(REF_SUFFIX)) {
-						int index = Integer.parseInt(property.substring(1, property.length() - REF_SUFFIX.length()));
+						int index = Integer.parseInt(property, 1, property.length() - REF_SUFFIX.length(), 10);
 						cas.addIndexedArgumentValue(index, new RuntimeBeanReference(entry.getValue().toString()));
 					}
 					else {
-						int index = Integer.parseInt(property.substring(1));
+						int index = Integer.parseInt(property, 1, property.length(), 10);
 						cas.addIndexedArgumentValue(index, readValue(entry));
 					}
 				}
@@ -516,8 +518,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 */
 	private Object readValue(Map.Entry<?, ?> entry) {
 		Object val = entry.getValue();
-		if (val instanceof String) {
-			String strVal = (String) val;
+		if (val instanceof String strVal) {
 			// If it starts with a reference prefix...
 			if (strVal.startsWith(REF_PREFIX)) {
 				// Expand the reference.

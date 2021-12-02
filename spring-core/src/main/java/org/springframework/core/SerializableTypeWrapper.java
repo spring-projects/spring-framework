@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,9 +109,9 @@ final class SerializableTypeWrapper {
 			// No serializable type wrapping necessary (e.g. for java.lang.Class)
 			return providedType;
 		}
-		if (GraalDetector.inImageCode() || !Serializable.class.isAssignableFrom(Class.class)) {
+		if (NativeDetector.inNativeImage() || !Serializable.class.isAssignableFrom(Class.class)) {
 			// Let's skip any wrapping attempts if types are generally not serializable in
-			// the current runtime environment (even java.lang.Class itself, e.g. on Graal)
+			// the current runtime environment (even java.lang.Class itself, e.g. on GraalVM native images)
 			return providedType;
 		}
 
@@ -185,26 +185,25 @@ final class SerializableTypeWrapper {
 
 		@Override
 		@Nullable
-		public Object invoke(Object proxy, Method method, @Nullable Object[] args) throws Throwable {
-			if (method.getName().equals("equals") && args != null) {
-				Object other = args[0];
-				// Unwrap proxies for speed
-				if (other instanceof Type) {
-					other = unwrap((Type) other);
-				}
-				return ObjectUtils.nullSafeEquals(this.provider.getType(), other);
-			}
-			else if (method.getName().equals("hashCode")) {
-				return ObjectUtils.nullSafeHashCode(this.provider.getType());
-			}
-			else if (method.getName().equals("getTypeProvider")) {
-				return this.provider;
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			switch (method.getName()) {
+				case "equals":
+					Object other = args[0];
+					// Unwrap proxies for speed
+					if (other instanceof Type) {
+						other = unwrap((Type) other);
+					}
+					return ObjectUtils.nullSafeEquals(this.provider.getType(), other);
+				case "hashCode":
+					return ObjectUtils.nullSafeHashCode(this.provider.getType());
+				case "getTypeProvider":
+					return this.provider;
 			}
 
-			if (Type.class == method.getReturnType() && args == null) {
+			if (Type.class == method.getReturnType() && ObjectUtils.isEmpty(args)) {
 				return forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, -1));
 			}
-			else if (Type[].class == method.getReturnType() && args == null) {
+			else if (Type[].class == method.getReturnType() && ObjectUtils.isEmpty(args)) {
 				Type[] result = new Type[((Type[]) method.invoke(this.provider.getType())).length];
 				for (int i = 0; i < result.length; i++) {
 					result[i] = forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, i));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.springframework.web.reactive.handler;
 
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
+import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -49,7 +51,11 @@ import org.springframework.web.util.pattern.PathPatternParser;
 public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 		implements HandlerMapping, Ordered, BeanNameAware {
 
-	private static final WebHandler REQUEST_HANDLED_HANDLER = exchange -> Mono.empty();
+	private static final WebHandler NO_OP_HANDLER = exchange -> Mono.empty();
+
+	/** Dedicated "hidden" logger for request mappings. */
+	protected final Log mappingsLogger =
+			LogDelegateFactory.getHiddenLog(HandlerMapping.class.getName() + ".Mappings");
 
 
 	private final PathPatternParser patternParser;
@@ -184,11 +190,15 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 			}
 			ServerHttpRequest request = exchange.getRequest();
 			if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
-				CorsConfiguration config = (this.corsConfigurationSource != null ? this.corsConfigurationSource.getCorsConfiguration(exchange) : null);
+				CorsConfiguration config = (this.corsConfigurationSource != null ?
+						this.corsConfigurationSource.getCorsConfiguration(exchange) : null);
 				CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
 				config = (config != null ? config.combine(handlerConfig) : handlerConfig);
+				if (config != null) {
+					config.validateAllowCredentials();
+				}
 				if (!this.corsProcessor.process(config, exchange) || CorsUtils.isPreFlightRequest(request)) {
-					return REQUEST_HANDLED_HANDLER;
+					return NO_OP_HANDLER;
 				}
 			}
 			return handler;

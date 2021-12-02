@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,13 +67,12 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  * @see org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy
  * @see org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy
  * @see org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy
- * @see org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy
  */
 public abstract class AbstractHandshakeHandler implements HandshakeHandler, Lifecycle {
 
-	private static final boolean jettyWsPresent;
-
 	private static final boolean tomcatWsPresent;
+
+	private static final boolean jettyWsPresent;
 
 	private static final boolean undertowWsPresent;
 
@@ -85,10 +84,10 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 
 	static {
 		ClassLoader classLoader = AbstractHandshakeHandler.class.getClassLoader();
-		jettyWsPresent = ClassUtils.isPresent(
-				"org.eclipse.jetty.websocket.server.WebSocketServerFactory", classLoader);
 		tomcatWsPresent = ClassUtils.isPresent(
 				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
+		jettyWsPresent = ClassUtils.isPresent(
+				"org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer", classLoader);
 		undertowWsPresent = ClassUtils.isPresent(
 				"io.undertow.websockets.jsr.ServerWebSocketContainer", classLoader);
 		glassfishWsPresent = ClassUtils.isPresent(
@@ -97,7 +96,6 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 				"weblogic.websocket.tyrus.TyrusServletWriter", classLoader);
 		websphereWsPresent = ClassUtils.isPresent(
 				"com.ibm.websphere.wsoc.WsWsocServerContainer", classLoader);
-
 	}
 
 
@@ -107,7 +105,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 
 	private final List<String> supportedProtocols = new ArrayList<>();
 
-	private volatile boolean running = false;
+	private volatile boolean running;
 
 
 	/**

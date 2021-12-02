@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,7 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 		StringBuilder sb = new StringBuilder(getClass().getName());
 		sb.append(": advice ");
 		if (this.adviceBeanName != null) {
-			sb.append("bean '").append(this.adviceBeanName).append("'");
+			sb.append("bean '").append(this.adviceBeanName).append('\'');
 		}
 		else {
 			sb.append(this.advice);

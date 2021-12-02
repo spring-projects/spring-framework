@@ -23,9 +23,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.core.Conventions;
 import org.springframework.http.HttpHeaders;
@@ -150,8 +150,7 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 	}
 
 
-	private static final class DefaultRenderingResponse extends DefaultServerResponseBuilder.AbstractServerResponse
-			implements RenderingResponse {
+	private static final class DefaultRenderingResponse extends AbstractServerResponse implements RenderingResponse {
 
 		private final String name;
 

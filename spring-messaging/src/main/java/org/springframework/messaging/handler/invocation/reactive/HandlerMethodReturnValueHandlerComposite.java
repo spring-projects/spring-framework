@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.springframework.messaging.Message;
 public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodReturnValueHandler {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
 
 	private final List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<>();
 
@@ -96,8 +95,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	@SuppressWarnings("ForLoopReplaceableByForEach")
 	@Nullable
 	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
-		for (int i = 0; i < this.returnValueHandlers.size(); i++) {
-			HandlerMethodReturnValueHandler handler = this.returnValueHandlers.get(i);
+		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
 			if (handler.supportsReturnType(returnType)) {
 				return handler;
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Internal helper class that serves as value holder for request headers.
+ * Internal helper class that serves as a value holder for request headers.
  *
  * @author Juergen Hoeller
  * @author Rick Evans
@@ -39,30 +37,30 @@ class HeaderValueHolder {
 	private final List<Object> values = new LinkedList<>();
 
 
-	public void setValue(@Nullable Object value) {
+	void setValue(@Nullable Object value) {
 		this.values.clear();
 		if (value != null) {
 			this.values.add(value);
 		}
 	}
 
-	public void addValue(Object value) {
+	void addValue(Object value) {
 		this.values.add(value);
 	}
 
-	public void addValues(Collection<?> values) {
+	void addValues(Collection<?> values) {
 		this.values.addAll(values);
 	}
 
-	public void addValueArray(Object values) {
+	void addValueArray(Object values) {
 		CollectionUtils.mergeArrayIntoCollection(values, this.values);
 	}
 
-	public List<Object> getValues() {
+	List<Object> getValues() {
 		return Collections.unmodifiableList(this.values);
 	}
 
-	public List<String> getStringValues() {
+	List<String> getStringValues() {
 		List<String> stringList = new ArrayList<>(this.values.size());
 		for (Object value : this.values) {
 			stringList.add(value.toString());
@@ -71,39 +69,18 @@ class HeaderValueHolder {
 	}
 
 	@Nullable
-	public Object getValue() {
+	Object getValue() {
 		return (!this.values.isEmpty() ? this.values.get(0) : null);
 	}
 
 	@Nullable
-	public String getStringValue() {
+	String getStringValue() {
 		return (!this.values.isEmpty() ? String.valueOf(this.values.get(0)) : null);
 	}
 
 	@Override
 	public String toString() {
 		return this.values.toString();
-	}
-
-
-	/**
-	 * Find a HeaderValueHolder by name, ignoring casing.
-	 * @param headers the Map of header names to HeaderValueHolders
-	 * @param name the name of the desired header
-	 * @return the corresponding HeaderValueHolder, or {@code null} if none found
-	 * @deprecated as of 5.1.10 in favor of using
-	 * {@link org.springframework.util.LinkedCaseInsensitiveMap}.
-	 */
-	@Nullable
-	@Deprecated
-	public static HeaderValueHolder getByName(Map<String, HeaderValueHolder> headers, String name) {
-		Assert.notNull(name, "Header name must not be null");
-		for (Map.Entry<String, HeaderValueHolder> entry : headers.entrySet()) {
-			if (entry.getKey().equalsIgnoreCase(name)) {
-				return entry.getValue();
-			}
-		}
-		return null;
 	}
 
 }

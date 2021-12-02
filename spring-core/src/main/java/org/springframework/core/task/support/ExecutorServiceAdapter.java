@@ -30,12 +30,12 @@ import org.springframework.util.Assert;
  * <p>This is primarily for adapting to client components that communicate via the
  * {@code java.util.concurrent.ExecutorService} API. It can also be used as
  * common ground between a local Spring {@code TaskExecutor} backend and a
- * JNDI-located {@code ManagedExecutorService} in a Java EE 7 environment.
+ * JNDI-located {@code ManagedExecutorService} in a Jakarta EE environment.
  *
  * <p><b>NOTE:</b> This ExecutorService adapter does <em>not</em> support the
  * lifecycle methods in the {@code java.util.concurrent.ExecutorService} API
  * ("shutdown()" etc), similar to a server-wide {@code ManagedExecutorService}
- * in a Java EE 7 environment. The lifecycle is always up to the backend pool,
+ * in a Jakarta EE environment. The lifecycle is always up to the backend pool,
  * with this adapter acting as an access-only proxy for that target pool.
  *
  * @author Juergen Hoeller

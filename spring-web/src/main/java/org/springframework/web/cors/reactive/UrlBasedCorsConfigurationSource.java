@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,21 +27,19 @@ import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
- * Provide a per reactive request {@link CorsConfiguration} instance based on a
- * collection of {@link CorsConfiguration} mapped on path patterns.
- *
- * <p>Exact path mapping URIs (such as {@code "/admin"}) are supported
- * as well as Ant-style path patterns (such as {@code "/admin/**"}).
+ * {@code CorsConfigurationSource} that uses URL patterns to select the
+ * {@code CorsConfiguration} for a request.
  *
  * @author Sebastien Deleuze
  * @author Brian Clozel
  * @since 5.0
+ * @see PathPattern
  */
 public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource {
 
-	private final Map<PathPattern, CorsConfiguration> corsConfigurations;
-
 	private final PathPatternParser patternParser;
+
+	private final Map<PathPattern, CorsConfiguration> corsConfigurations = new LinkedHashMap<>();
 
 
 	/**
@@ -50,7 +48,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * @since 5.0.6
 	 */
 	public UrlBasedCorsConfigurationSource() {
-		this(new PathPatternParser());
+		this(PathPatternParser.defaultInstance);
 	}
 
 	/**
@@ -58,7 +56,6 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * {@code PathPatternParser}.
 	 */
 	public UrlBasedCorsConfigurationSource(PathPatternParser patternParser) {
-		this.corsConfigurations = new LinkedHashMap<>();
 		this.patternParser = patternParser;
 	}
 
@@ -66,10 +63,10 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	/**
 	 * Set CORS configuration based on URL patterns.
 	 */
-	public void setCorsConfigurations(@Nullable Map<String, CorsConfiguration> corsConfigurations) {
+	public void setCorsConfigurations(@Nullable Map<String, CorsConfiguration> configMap) {
 		this.corsConfigurations.clear();
-		if (corsConfigurations != null) {
-			corsConfigurations.forEach(this::registerCorsConfiguration);
+		if (configMap != null) {
+			configMap.forEach(this::registerCorsConfiguration);
 		}
 	}
 
@@ -83,12 +80,13 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	@Override
 	@Nullable
 	public CorsConfiguration getCorsConfiguration(ServerWebExchange exchange) {
-		PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
-		return this.corsConfigurations.entrySet().stream()
-				.filter(entry -> entry.getKey().matches(lookupPath))
-				.map(Map.Entry::getValue)
-				.findFirst()
-				.orElse(null);
+		PathContainer path = exchange.getRequest().getPath().pathWithinApplication();
+		for (Map.Entry<PathPattern, CorsConfiguration> entry : this.corsConfigurations.entrySet()) {
+			if (entry.getKey().matches(path)) {
+				return entry.getValue();
+			}
+		}
+		return null;
 	}
 
 }

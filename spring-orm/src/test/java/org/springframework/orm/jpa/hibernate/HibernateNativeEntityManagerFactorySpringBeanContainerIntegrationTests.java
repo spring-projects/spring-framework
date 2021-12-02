@@ -16,8 +16,7 @@
 
 package org.springframework.orm.jpa.hibernate;
 
-import javax.persistence.AttributeConverter;
-
+import jakarta.persistence.AttributeConverter;
 import org.hibernate.SessionFactory;
 import org.hibernate.resource.beans.container.spi.BeanContainer;
 import org.hibernate.resource.beans.container.spi.ContainedBean;

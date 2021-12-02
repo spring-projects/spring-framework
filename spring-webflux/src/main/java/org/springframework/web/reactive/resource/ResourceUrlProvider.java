@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
@@ -47,17 +50,23 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * {@code ResourceHttpRequestHandler}s to make its decisions.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
-public class ResourceUrlProvider implements ApplicationListener<ContextRefreshedEvent> {
+public class ResourceUrlProvider implements ApplicationListener<ContextRefreshedEvent>, ApplicationContextAware {
 
 	private static final Log logger = LogFactory.getLog(ResourceUrlProvider.class);
 
-
-	private final PathPatternParser patternParser = new PathPatternParser();
-
 	private final Map<PathPattern, ResourceWebHandler> handlerMap = new LinkedHashMap<>();
 
+	@Nullable
+	private ApplicationContext applicationContext;
+
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
 
 	/**
 	 * Return a read-only view of the resource handler mappings either manually
@@ -78,15 +87,15 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		this.handlerMap.clear();
 		handlerMap.forEach((rawPattern, resourceWebHandler) -> {
 			rawPattern = prependLeadingSlash(rawPattern);
-			PathPattern pattern = this.patternParser.parse(rawPattern);
+			PathPattern pattern = PathPatternParser.defaultInstance.parse(rawPattern);
 			this.handlerMap.put(pattern, resourceWebHandler);
 		});
 	}
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-		if (this.handlerMap.isEmpty()) {
-			detectResourceHandlers(event.getApplicationContext());
+		if (this.applicationContext == event.getApplicationContext() && this.handlerMap.isEmpty()) {
+			detectResourceHandlers(this.applicationContext);
 		}
 	}
 
@@ -97,8 +106,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 		mappings.forEach(mapping ->
 			mapping.getHandlerMap().forEach((pattern, handler) -> {
-				if (handler instanceof ResourceWebHandler) {
-					ResourceWebHandler resourceHandler = (ResourceWebHandler) handler;
+				if (handler instanceof ResourceWebHandler resourceHandler) {
 					this.handlerMap.put(pattern, resourceHandler);
 				}
 			}));

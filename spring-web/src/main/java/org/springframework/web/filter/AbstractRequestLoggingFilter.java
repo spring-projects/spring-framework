@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 import java.util.function.Predicate;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -322,7 +322,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	protected String createMessage(HttpServletRequest request, String prefix, String suffix) {
 		StringBuilder msg = new StringBuilder();
 		msg.append(prefix);
-		msg.append(request.getMethod()).append(" ");
+		msg.append(request.getMethod()).append(' ');
 		msg.append(request.getRequestURI());
 
 		if (isIncludeQueryString()) {

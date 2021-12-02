@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Sam Brannen
  * @since 4.0.4
  */
+@SuppressWarnings("deprecation")
 class GenericPropertiesContextLoaderTests {
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];

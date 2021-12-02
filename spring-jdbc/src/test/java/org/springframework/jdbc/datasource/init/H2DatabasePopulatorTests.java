@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,18 @@
 
 package org.springframework.jdbc.datasource.init;
 
+import java.sql.Connection;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import org.junit.jupiter.api.Test;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.datasource.embedded.AutoCommitDisabledH2EmbeddedDatabaseConfigurer;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,6 +59,53 @@ class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
 		DatabasePopulatorUtils.execute(databasePopulator, db);
 		String sql = "select REVERSE(first_name) from users where last_name='Brannen'";
 		assertThat(jdbcTemplate.queryForObject(sql, String.class)).isEqualTo("maS");
+	}
+
+	/**
+	 * https://github.com/spring-projects/spring-framework/issues/27008
+	 *
+	 * @since 5.3.11
+	 */
+	@Test
+	void automaticallyCommitsIfAutoCommitIsDisabled() throws Exception {
+		EmbeddedDatabase database = null;
+		try {
+			EmbeddedDatabaseFactory databaseFactory = new EmbeddedDatabaseFactory();
+			databaseFactory.setDatabaseConfigurer(new AutoCommitDisabledH2EmbeddedDatabaseConfigurer());
+			database = databaseFactory.getDatabase();
+
+			assertAutoCommitDisabledPreconditions(database);
+
+			// Set up schema
+			databasePopulator.setScripts(usersSchema());
+			DatabasePopulatorUtils.execute(databasePopulator, database);
+			assertThat(selectFirstNames(database)).isEmpty();
+
+			// Insert data
+			databasePopulator.setScripts(resource("users-data.sql"));
+			DatabasePopulatorUtils.execute(databasePopulator, database);
+			assertThat(selectFirstNames(database)).containsExactly("Sam");
+		}
+		finally {
+			if (database != null) {
+				database.shutdown();
+			}
+		}
+	}
+
+	/**
+	 * DatabasePopulatorUtils.execute() will obtain a new Connection, so we're
+	 * really just testing the configuration of the database here.
+	 */
+	private void assertAutoCommitDisabledPreconditions(DataSource dataSource) throws Exception {
+		Connection connection = DataSourceUtils.getConnection(dataSource);
+		assertThat(connection.getAutoCommit()).as("auto-commit").isFalse();
+		assertThat(DataSourceUtils.isConnectionTransactional(connection, dataSource)).as("transactional").isFalse();
+		connection.close();
+	}
+
+	private List<String> selectFirstNames(DataSource dataSource) {
+		return new JdbcTemplate(dataSource).queryForList("select first_name from users", String.class);
 	}
 
 }
