@@ -197,7 +197,7 @@ public class ContentRequestMatchers {
 	 * <li>{@link Resource} - content from a file
 	 * <li>{@code byte[]} - other raw content
 	 * </ul>
-	 * <p><strong>Note:</strong> This method uses the Apache Commons File Upload
+	 * <p><strong>Note:</strong> This method uses the Apache Commons FileUpload
 	 * library to parse the multipart data and it must be on the test classpath.
 	 * @param expectedMap the expected multipart values
 	 * @since 5.3

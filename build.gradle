@@ -64,8 +64,8 @@ configure(allprojects) { project ->
 				entry 'groovy-xml'
 			}
 
-			dependency "io.reactivex.rxjava3:rxjava:3.1.2"
-			dependency "io.smallrye.reactive:mutiny:1.1.1"
+			dependency "io.reactivex.rxjava3:rxjava:3.1.3"
+			dependency "io.smallrye.reactive:mutiny:1.2.0"
 			dependency "io.projectreactor.tools:blockhound:1.0.6.RELEASE"
 
 			dependency "com.fasterxml:aalto-xml:1.3.0"
@@ -117,18 +117,18 @@ configure(allprojects) { project ->
 			dependency "org.webjars:webjars-locator-core:0.48"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '10.0.12') {
+			dependencySet(group: 'org.apache.tomcat', version: '10.0.13') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '10.0.12') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '10.0.13') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.2.12.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.13.Final') {
 				entry 'undertow-core'
 				entry 'undertow-servlet-jakartaee9'
 				entry 'undertow-websockets-jsr-jakartaee9'
@@ -148,7 +148,7 @@ configure(allprojects) { project ->
 			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.1.1'
 			dependency "org.eclipse.jetty:jetty-reactive-httpclient:3.0.4"
 
-			dependency "org.jruby:jruby:9.3.1.0"
+			dependency "org.jruby:jruby:9.3.2.0"
 			dependency "org.python:jython-standalone:2.7.1"
 			dependency "org.mozilla:rhino:1.7.11"
 
@@ -188,10 +188,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.12.0"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.54.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.55.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.54.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.55.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
@@ -302,7 +302,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "9.0"
+		toolVersion = "9.2"
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
