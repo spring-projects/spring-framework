@@ -103,14 +103,6 @@ public class HandlerMappingIntrospector
 	}
 
 
-	/**
-	 * Return the configured or detected {@code HandlerMapping}s.
-	 */
-	public List<HandlerMapping> getHandlerMappings() {
-		return (this.handlerMappings != null ? this.handlerMappings : Collections.emptyList());
-	}
-
-
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
@@ -123,6 +115,13 @@ public class HandlerMappingIntrospector
 			this.handlerMappings = initHandlerMappings(this.applicationContext);
 			this.pathPatternHandlerMappings = initPathPatternMatchableHandlerMappings(this.handlerMappings);
 		}
+	}
+
+	/**
+	 * Return the configured or detected {@code HandlerMapping}s.
+	 */
+	public List<HandlerMapping> getHandlerMappings() {
+		return (this.handlerMappings != null ? this.handlerMappings : Collections.emptyList());
 	}
 
 

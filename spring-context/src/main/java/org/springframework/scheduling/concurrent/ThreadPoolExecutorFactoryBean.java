@@ -26,9 +26,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 
 /**
@@ -65,7 +63,7 @@ import org.springframework.lang.Nullable;
  */
 @SuppressWarnings("serial")
 public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
-		implements FactoryBean<ExecutorService>, InitializingBean, DisposableBean {
+		implements FactoryBean<ExecutorService> {
 
 	private int corePoolSize = 1;
 

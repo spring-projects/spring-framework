@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,7 +193,7 @@ public class ContentRequestMatchers {
 	 * <li>{@link Resource} - content from a file
 	 * <li>{@code byte[]} - other raw content
 	 * </ul>
-	 * <p><strong>Note:</strong> This method uses the Apache Commons File Upload
+	 * <p><strong>Note:</strong> This method uses the Apache Commons FileUpload
 	 * library to parse the multipart data and it must be on the test classpath.
 	 * @param expectedMap the expected multipart values
 	 * @since 5.3

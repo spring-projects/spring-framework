@@ -98,12 +98,10 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 		boolean hasAlreadyFilteredAttribute = request.getAttribute(alreadyFilteredAttributeName) != null;
 
 		if (skipDispatch(httpRequest) || shouldNotFilter(httpRequest)) {
-
 			// Proceed without invoking this filter...
 			filterChain.doFilter(request, response);
 		}
 		else if (hasAlreadyFilteredAttribute) {
-
 			if (DispatcherType.ERROR.equals(request.getDispatcherType())) {
 				doFilterNestedErrorDispatch(httpRequest, httpResponse, filterChain);
 				return;
@@ -197,7 +195,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * setting up thread locals or to perform final processing at the very end.
 	 * <p>Note that although a filter can be mapped to handle specific dispatcher
 	 * types via {@code web.xml} or in Java through the {@code ServletContext},
-	 * servlet containers may enforce different defaults with regards to
+	 * servlet containers may enforce different defaults with respect to
 	 * dispatcher types. This flag enforces the design intent of the filter.
 	 * <p>The default return value is "true", which means the filter will not be
 	 * invoked during subsequent async dispatches. If "false", the filter will
