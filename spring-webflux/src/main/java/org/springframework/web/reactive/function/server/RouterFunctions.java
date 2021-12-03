@@ -32,10 +32,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
@@ -1231,9 +1233,6 @@ public abstract class RouterFunctions {
 
 	private static class RouterFunctionWebHandler implements WebHandler {
 
-		private static final HandlerFunction<ServerResponse> NOT_FOUND_HANDLER =
-				request -> ServerResponse.notFound().build();
-
 		private final HandlerStrategies strategies;
 
 		private final RouterFunction<?> routerFunction;
@@ -1249,7 +1248,7 @@ public abstract class RouterFunctions {
 				ServerRequest request = new DefaultServerRequest(exchange, this.strategies.messageReaders());
 				addAttributes(exchange, request);
 				return this.routerFunction.route(request)
-						.defaultIfEmpty(notFound())
+						.switchIfEmpty(createNotFoundError())
 						.flatMap(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
 						.flatMap(response -> wrapException(() -> response.writeTo(exchange,
 								new HandlerStrategiesResponseContext(this.strategies))));
@@ -1261,9 +1260,9 @@ public abstract class RouterFunctions {
 			attributes.put(REQUEST_ATTRIBUTE, request);
 		}
 
-		@SuppressWarnings("unchecked")
-		private static <T extends ServerResponse> HandlerFunction<T> notFound() {
-			return (HandlerFunction<T>) NOT_FOUND_HANDLER;
+		private <R> Mono<R> createNotFoundError() {
+			return Mono.defer(() -> Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+					"No matching router function")));
 		}
 
 		private static <T> Mono<T> wrapException(Supplier<Mono<T>> supplier) {
