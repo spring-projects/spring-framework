@@ -473,9 +473,9 @@ class DateTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("yearMonthAnnotatedPattern", "12/2007");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertTrue(binder.getBindingResult().getFieldValue("yearMonthAnnotatedPattern").toString().equals("12/2007"));
-		assertEquals(YearMonth.parse("2007-12"), binder.getBindingResult().getRawFieldValue("yearMonthAnnotatedPattern"));
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("yearMonthAnnotatedPattern")).isEqualTo("12/2007");
+		assertThat(binder.getBindingResult().getRawFieldValue("yearMonthAnnotatedPattern")).isEqualTo(YearMonth.parse("2007-12"));
 	}
 
 	@Test
@@ -485,6 +485,16 @@ class DateTimeFormattingTests {
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
 		assertThat(binder.getBindingResult().getFieldValue("monthDay").toString().equals("--12-03")).isTrue();
+	}
+
+	@Test
+	public void testBindMonthDayAnnotatedPattern() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("monthDayAnnotatedPattern", "1/3");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("monthDayAnnotatedPattern")).isEqualTo("1/3");
+		assertThat(binder.getBindingResult().getRawFieldValue("monthDayAnnotatedPattern")).isEqualTo(MonthDay.parse("--01-03"));
 	}
 
 	@Nested
@@ -568,16 +578,6 @@ class DateTimeFormattingTests {
 		}
 	}
 
-	@Test
-	public void testBindMonthDayAnnotatedPattern() {
-		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("monthDayAnnotatedPattern", "1/3");
-		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertTrue(binder.getBindingResult().getFieldValue("monthDayAnnotatedPattern").toString().equals("1/3"));
-		assertEquals(MonthDay.parse("--01-03"), binder.getBindingResult().getRawFieldValue("monthDayAnnotatedPattern"));
-	}
-
 
 	public static class DateTimeBean {
 
@@ -635,10 +635,10 @@ class DateTimeFormattingTests {
 		@DateTimeFormat(pattern="MM/uuuu")
 		private YearMonth yearMonthAnnotatedPattern;
 
+		private MonthDay monthDay;
+
 		@DateTimeFormat(pattern="M/d")
 		private MonthDay monthDayAnnotatedPattern;
-
-		private MonthDay monthDay;
 
 		private final List<DateTimeBean> children = new ArrayList<>();
 

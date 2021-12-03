@@ -19,9 +19,9 @@ package org.springframework.format.datetime.standard;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.MonthDay;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
-import java.time.MonthDay;
 import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -67,7 +67,6 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValu
 		fieldTypes.add(MonthDay.class);
 		FIELD_TYPES = Collections.unmodifiableSet(fieldTypes);
 	}
-
 
 	@Override
 	public final Set<Class<?>> getFieldTypes() {
