@@ -16,6 +16,7 @@
 
 package org.springframework.format.datetime.standard;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -57,6 +58,7 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValu
 	static {
 		// Create the set of field types that may be annotated with @DateTimeFormat.
 		Set<Class<?>> fieldTypes = new HashSet<>(8);
+		fieldTypes.add(Instant.class);
 		fieldTypes.add(LocalDate.class);
 		fieldTypes.add(LocalTime.class);
 		fieldTypes.add(LocalDateTime.class);

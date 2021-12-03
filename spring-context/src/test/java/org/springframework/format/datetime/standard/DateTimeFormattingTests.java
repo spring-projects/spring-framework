@@ -398,6 +398,15 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
+	void testBindInstantAnnotated() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("styleInstant", "2017-02-21T13:00");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("styleInstant")).isEqualTo("2017-02-21T13:00");
+	}
+
+	@Test
 	@SuppressWarnings("deprecation")
 	void testBindInstantFromJavaUtilDate() {
 		TimeZone defaultZone = TimeZone.getDefault();
@@ -622,6 +631,9 @@ class DateTimeFormattingTests {
 
 		private Instant instant;
 
+		@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+		private Instant styleInstant;
+
 		private Period period;
 
 		private Duration duration;
@@ -760,6 +772,14 @@ class DateTimeFormattingTests {
 
 		public void setInstant(Instant instant) {
 			this.instant = instant;
+		}
+
+		public Instant getStyleInstant() {
+			return this.styleInstant;
+		}
+
+		public void setStyleInstant(Instant styleInstant) {
+			this.styleInstant = styleInstant;
 		}
 
 		public Period getPeriod() {

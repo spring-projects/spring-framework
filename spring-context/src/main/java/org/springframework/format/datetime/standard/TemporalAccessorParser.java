@@ -17,6 +17,7 @@
 package org.springframework.format.datetime.standard;
 
 import java.text.ParseException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -115,7 +116,10 @@ public final class TemporalAccessorParser implements Parser<TemporalAccessor> {
 
 	private TemporalAccessor doParse(String text, Locale locale, DateTimeFormatter formatter) throws DateTimeParseException {
 		DateTimeFormatter formatterToUse = DateTimeContextHolder.getFormatter(formatter, locale);
-		if (LocalDate.class == this.temporalAccessorType) {
+		if (Instant.class == this.temporalAccessorType) {
+			return formatterToUse.parse(text, Instant::from);
+		}
+		else if (LocalDate.class == this.temporalAccessorType) {
 			return LocalDate.parse(text, formatterToUse);
 		}
 		else if (LocalTime.class == this.temporalAccessorType) {
