@@ -546,20 +546,16 @@ depending on the response status:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	Mono<Object> entityMono = client.get()
+	Mono<Person> entityMono = client.get()
 			.uri("/persons/1")
 			.accept(MediaType.APPLICATION_JSON)
 			.exchangeToMono(response -> {
 				if (response.statusCode().equals(HttpStatus.OK)) {
 					return response.bodyToMono(Person.class);
 				}
-				else if (response.statusCode().is4xxClientError()) {
-					// Suppress error status code
-					return response.bodyToMono(ErrorContainer.class);
-				}
 				else {
 					// Turn to error
-					return response.createException();
+					return response.createException().flatMap(Mono::error);
 				}
 			});
 ----
@@ -572,9 +568,6 @@ val entity = client.get()
   .awaitExchange {
 		if (response.statusCode() == HttpStatus.OK) {
 			 return response.awaitBody<Person>()
-		}
-		else if (response.statusCode().is4xxClientError) {
-			 return response.awaitBody<ErrorContainer>()
 		}
 		else {
 			 throw response.createExceptionAndAwait()
