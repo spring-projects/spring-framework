@@ -1248,7 +1248,7 @@ public abstract class RouterFunctions {
 				ServerRequest request = new DefaultServerRequest(exchange, this.strategies.messageReaders());
 				addAttributes(exchange, request);
 				return this.routerFunction.route(request)
-						.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+						.switchIfEmpty(createNotFoundError())
 						.flatMap(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
 						.flatMap(response -> wrapException(() -> response.writeTo(exchange,
 								new HandlerStrategiesResponseContext(this.strategies))));
@@ -1258,6 +1258,11 @@ public abstract class RouterFunctions {
 		private void addAttributes(ServerWebExchange exchange, ServerRequest request) {
 			Map<String, Object> attributes = exchange.getAttributes();
 			attributes.put(REQUEST_ATTRIBUTE, request);
+		}
+
+		private <R> Mono<R> createNotFoundError() {
+			return Mono.defer(() -> Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+					"No matching router function")));
 		}
 
 		private static <T> Mono<T> wrapException(Supplier<Mono<T>> supplier) {
