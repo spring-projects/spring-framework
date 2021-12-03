@@ -16,14 +16,17 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -189,6 +192,27 @@ public class RouterFunctionsTests {
 		MockServerHttpResponse httpResponse = new MockServerHttpResponse();
 		result.handle(httpRequest, httpResponse).block();
 		assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
+
+	@Test
+	public void toHttpHandlerRouteNotFoundReturnsResponseStatusException() {
+		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.accepted().build();
+		RouterFunction<ServerResponse> routerFunction =
+				RouterFunctions.route(RequestPredicates.GET("/path"), handlerFunction);
+
+		HandlerStrategies handlerStrategies = HandlerStrategies.empty().exceptionHandler((exchange, ex) -> {
+			exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
+			DataBuffer buffer = exchange.getResponse().bufferFactory().wrap("Custom response".getBytes(StandardCharsets.UTF_8));
+			return exchange.getResponse().writeWith(Flux.just(buffer));
+		}).build();
+		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction, handlerStrategies);
+		assertThat(result).isNotNull();
+
+		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("https://localhost").build();
+		MockServerHttpResponse httpResponse = new MockServerHttpResponse();
+		result.handle(httpRequest, httpResponse).block();
+		assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+		assertThat(httpResponse.getBodyAsString().block()).isEqualTo("Custom response");
 	}
 
 	@Test
