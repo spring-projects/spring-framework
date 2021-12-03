@@ -123,6 +123,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	}
 
 
+	@SuppressWarnings("deprecation")  // for old doUpgrade variant in Tomcat 9.0.55
 	@Override
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
 			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory){
