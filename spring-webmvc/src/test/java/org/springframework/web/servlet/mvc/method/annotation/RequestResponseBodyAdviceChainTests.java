@@ -89,13 +89,14 @@ public class RequestResponseBodyAdviceChainTests {
 		RequestResponseBodyAdviceChain chain = new RequestResponseBodyAdviceChain(advice);
 
 		HttpInputMessage wrapped = new ServletServerHttpRequest(new MockHttpServletRequest());
-		given(requestAdvice.supports(this.paramType, String.class, this.converterType)).willReturn(true);
+		given(requestAdvice.beforeBodySupport(this.paramType, String.class, this.converterType)).willReturn(true);
 		given(requestAdvice.beforeBodyRead(eq(this.request), eq(this.paramType), eq(String.class),
 				eq(this.converterType))).willReturn(wrapped);
 
 		assertThat(chain.beforeBodyRead(this.request, this.paramType, String.class, this.converterType)).isSameAs(wrapped);
 
 		String modified = "body++";
+		given(requestAdvice.afterBodySupport(this.paramType, String.class, this.converterType)).willReturn(true);
 		given(requestAdvice.afterBodyRead(eq(this.body), eq(this.request), eq(this.paramType),
 				eq(String.class), eq(this.converterType))).willReturn(modified);
 
