@@ -49,8 +49,16 @@ import org.springframework.util.Assert;
 public class JsonViewRequestBodyAdvice extends RequestBodyAdviceAdapter {
 
 	@Override
-	public boolean supports(MethodParameter methodParameter, Type targetType,
-			Class<? extends HttpMessageConverter<?>> converterType) {
+	public boolean beforeBodySupport(MethodParameter methodParameter, Type targetType,
+					Class<? extends HttpMessageConverter<?>> converterType) {
+
+		return (AbstractJackson2HttpMessageConverter.class.isAssignableFrom(converterType) &&
+				methodParameter.getParameterAnnotation(JsonView.class) != null);
+	}
+
+	@Override
+	public boolean afterBodySupport(MethodParameter methodParameter, Type targetType,
+					Class<? extends HttpMessageConverter<?>> converterType) {
 
 		return (AbstractJackson2HttpMessageConverter.class.isAssignableFrom(converterType) &&
 				methodParameter.getParameterAnnotation(JsonView.class) != null);

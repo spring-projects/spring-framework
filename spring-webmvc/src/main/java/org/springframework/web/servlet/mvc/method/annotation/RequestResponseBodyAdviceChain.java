@@ -74,12 +74,17 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 
 
 	@Override
-	public boolean supports(MethodParameter param, Type type, Class<? extends HttpMessageConverter<?>> converterType) {
+	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
 		throw new UnsupportedOperationException("Not implemented");
 	}
 
 	@Override
-	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+	public boolean beforeBodySupport(MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+		throw new UnsupportedOperationException("Not implemented");
+	}
+
+	@Override
+	public boolean afterBodySupport(MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
 		throw new UnsupportedOperationException("Not implemented");
 	}
 
@@ -88,7 +93,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) throws IOException {
 
 		for (RequestBodyAdvice advice : getMatchingAdvice(parameter, RequestBodyAdvice.class)) {
-			if (advice.supports(parameter, targetType, converterType)) {
+			if (advice.beforeBodySupport(parameter, targetType, converterType)) {
 				request = advice.beforeBodyRead(request, parameter, targetType, converterType);
 			}
 		}
@@ -100,7 +105,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
 
 		for (RequestBodyAdvice advice : getMatchingAdvice(parameter, RequestBodyAdvice.class)) {
-			if (advice.supports(parameter, targetType, converterType)) {
+			if (advice.afterBodySupport(parameter, targetType, converterType)) {
 				body = advice.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
 			}
 		}
@@ -122,7 +127,8 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
 
 		for (RequestBodyAdvice advice : getMatchingAdvice(parameter, RequestBodyAdvice.class)) {
-			if (advice.supports(parameter, targetType, converterType)) {
+			if (advice.beforeBodySupport(parameter, targetType, converterType)
+					&& advice.afterBodySupport(parameter, targetType, converterType)) {
 				body = advice.handleEmptyBody(body, inputMessage, parameter, targetType, converterType);
 			}
 		}

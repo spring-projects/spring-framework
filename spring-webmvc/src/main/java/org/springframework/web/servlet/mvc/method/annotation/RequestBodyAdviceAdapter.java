@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
  * {@link org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice
  * RequestBodyAdvice} with default method implementations.
  *
- * <p>Subclasses are required to implement {@link #supports} to return true
+ * <p>Subclasses are required to implement {@link #beforeBodySupport} and {@link #afterBodySupport} to return true
  * depending on when the advice applies.
  *
  * @author Rossen Stoyanchev

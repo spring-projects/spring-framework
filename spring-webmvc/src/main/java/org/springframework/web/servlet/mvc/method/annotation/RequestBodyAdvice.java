@@ -41,14 +41,28 @@ public interface RequestBodyAdvice {
 
 	/**
 	 * Invoked first to determine if this interceptor applies.
+	 *
 	 * @param methodParameter the method parameter
-	 * @param targetType the target type, not necessarily the same as the method
-	 * parameter type, e.g. for {@code HttpEntity<String>}.
-	 * @param converterType the selected converter type
+	 * @param targetType      the target type, not necessarily the same as the method
+	 *                        parameter type, e.g. for {@code HttpEntity<String>}.
+	 * @param converterType   the selected converter type
 	 * @return whether this interceptor should be invoked or not
 	 */
-	boolean supports(MethodParameter methodParameter, Type targetType,
-			Class<? extends HttpMessageConverter<?>> converterType);
+	boolean beforeBodySupport(MethodParameter methodParameter, Type targetType,
+							  Class<? extends HttpMessageConverter<?>> converterType);
+
+	/**
+	 * Invoked third to determine if this interceptor applies.
+	 *
+	 * @param methodParameter the method parameter
+	 *
+	 * @param targetType      the target type, not necessarily the same as the method
+	 *                        parameter type, e.g. for {@code HttpEntity<String>}.
+	 * @param converterType   the selected converter type
+	 * @return whether this interceptor should be invoked or not
+	 */
+	boolean afterBodySupport(MethodParameter methodParameter, Type targetType,
+							 Class<? extends HttpMessageConverter<?>> converterType);
 
 	/**
 	 * Invoked second before the request body is read and converted.
@@ -63,7 +77,7 @@ public interface RequestBodyAdvice {
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) throws IOException;
 
 	/**
-	 * Invoked third (and last) after the request body is converted to an Object.
+	 * Invoked fourth (and last) after the request body is converted to an Object.
 	 * @param body set to the converter Object before the first advice is called
 	 * @param inputMessage the request
 	 * @param parameter the target method parameter
