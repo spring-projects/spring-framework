@@ -57,7 +57,7 @@ public class JsonViewRequestBodyAdvice extends RequestBodyAdviceAdapter {
 	}
 
 	@Override
-	public boolean afterBodySupport(MethodParameter methodParameter, Type targetType,
+	public boolean afterBodySupport(HttpInputMessage inputMessage, MethodParameter methodParameter, Type targetType,
 					Class<? extends HttpMessageConverter<?>> converterType) {
 
 		return (AbstractJackson2HttpMessageConverter.class.isAssignableFrom(converterType) &&

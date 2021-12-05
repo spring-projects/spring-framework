@@ -52,13 +52,14 @@ public interface RequestBodyAdvice {
 
 	/**
 	 * Invoked third to determine if this interceptor applies.
+	 * @param inputMessage the request
 	 * @param methodParameter the method parameter
 	 * @param targetType      the target type, not necessarily the same as the method
 	 *                        parameter type, e.g. for {@code HttpEntity<String>}.
 	 * @param converterType   the selected converter type
 	 * @return whether this interceptor should be invoked or not
 	 */
-	boolean afterBodySupport(MethodParameter methodParameter, Type targetType,
+	boolean afterBodySupport(HttpInputMessage inputMessage, MethodParameter methodParameter, Type targetType,
 			Class<? extends HttpMessageConverter<?>> converterType);
 
 	/**

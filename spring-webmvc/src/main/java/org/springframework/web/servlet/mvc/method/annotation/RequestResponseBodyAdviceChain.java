@@ -84,7 +84,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 	}
 
 	@Override
-	public boolean afterBodySupport(MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+	public boolean afterBodySupport(HttpInputMessage inputMessage, MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
 		throw new UnsupportedOperationException("Not implemented");
 	}
 
@@ -105,7 +105,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
 
 		for (RequestBodyAdvice advice : getMatchingAdvice(parameter, RequestBodyAdvice.class)) {
-			if (advice.afterBodySupport(parameter, targetType, converterType)) {
+			if (advice.afterBodySupport(inputMessage, parameter, targetType, converterType)) {
 				body = advice.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
 			}
 		}
@@ -128,7 +128,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 
 		for (RequestBodyAdvice advice : getMatchingAdvice(parameter, RequestBodyAdvice.class)) {
 			if (advice.beforeBodySupport(parameter, targetType, converterType)
-					&& advice.afterBodySupport(parameter, targetType, converterType)) {
+					&& advice.afterBodySupport(inputMessage, parameter, targetType, converterType)) {
 				body = advice.handleEmptyBody(body, inputMessage, parameter, targetType, converterType);
 			}
 		}

@@ -391,7 +391,7 @@ public class RequestMappingHandlerAdapterTests {
 		}
 
 		@Override
-		public boolean afterBodySupport(MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+		public boolean afterBodySupport(HttpInputMessage inputMessage, MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
 
 			return StringHttpMessageConverter.class.equals(converterType);
 		}
