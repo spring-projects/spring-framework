@@ -54,7 +54,7 @@ public class TransactionAttributeEditor extends PropertyEditorSupport {
 			RuleBasedTransactionAttribute attr = new RuleBasedTransactionAttribute();
 			for (String token : tokens) {
 				// Trim leading and trailing whitespace.
-				String trimmedToken = StringUtils.trimWhitespace(token.trim());
+				String trimmedToken = token.strip();
 				// Check whether token contains illegal whitespace within text.
 				if (StringUtils.containsWhitespace(trimmedToken)) {
 					throw new IllegalArgumentException(

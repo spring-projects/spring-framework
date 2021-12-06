@@ -218,7 +218,9 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to check
 	 * @return the trimmed {@code String}
 	 * @see java.lang.Character#isWhitespace
+	 * @deprecated in favor of {@link String#strip()}
 	 */
+	@Deprecated
 	public static String trimWhitespace(String str) {
 		if (!hasLength(str)) {
 			return str;
@@ -255,7 +257,9 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to check
 	 * @return the trimmed {@code String}
 	 * @see java.lang.Character#isWhitespace
+	 * @deprecated in favor of {@link String#stripLeading()}
 	 */
+	@Deprecated
 	public static String trimLeadingWhitespace(String str) {
 		if (!hasLength(str)) {
 			return str;
@@ -269,7 +273,9 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to check
 	 * @return the trimmed {@code String}
 	 * @see java.lang.Character#isWhitespace
+	 * @deprecated in favor of {@link String#stripTrailing()}
 	 */
+	@Deprecated
 	public static String trimTrailingWhitespace(String str) {
 		if (!hasLength(str)) {
 			return str;
@@ -843,7 +849,7 @@ public abstract class StringUtils {
 			// code sans the separator between the country code and the variant.
 			int endIndexOfCountryCode = localeString.indexOf(country, language.length()) + country.length();
 			// Strip off any leading '_' and whitespace, what's left is the variant.
-			variant = trimLeadingWhitespace(localeString.substring(endIndexOfCountryCode));
+			variant = localeString.substring(endIndexOfCountryCode).stripLeading();
 			if (variant.startsWith("_")) {
 				variant = trimLeadingCharacter(variant, '_');
 			}

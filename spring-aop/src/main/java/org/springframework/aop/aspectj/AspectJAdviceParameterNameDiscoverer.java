@@ -486,7 +486,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		}
 		String[] tokens = StringUtils.tokenizeToStringArray(argsSpec, ",");
 		for (int i = 0; i < tokens.length; i++) {
-			tokens[i] = StringUtils.trimWhitespace(tokens[i]);
+			tokens[i] = tokens[i].strip();
 			String varName = maybeExtractVariableName(tokens[i]);
 			if (varName != null) {
 				varNames.add(varName);

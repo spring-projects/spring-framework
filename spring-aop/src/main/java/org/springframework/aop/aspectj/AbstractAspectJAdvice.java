@@ -261,7 +261,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	public void setArgumentNamesFromStringArray(String... args) {
 		this.argumentNames = new String[args.length];
 		for (int i = 0; i < args.length; i++) {
-			this.argumentNames[i] = StringUtils.trimWhitespace(args[i]);
+			this.argumentNames[i] = args[i].strip();
 			if (!isVariableName(this.argumentNames[i])) {
 				throw new IllegalArgumentException(
 						"'argumentNames' property of AbstractAspectJAdvice contains an argument name '" +
