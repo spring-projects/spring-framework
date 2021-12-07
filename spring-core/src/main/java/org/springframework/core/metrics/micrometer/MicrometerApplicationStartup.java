@@ -48,7 +48,7 @@ public class MicrometerApplicationStartup implements ApplicationStartup {
 		return new MicrometerStartupStep(name, this.registry);
 	}
 
-	public void endRootRecording() {
+	public void stopRootSample() {
 		this.rootSample.get().stop(Timer.builder("application-context"));
 	}
 
