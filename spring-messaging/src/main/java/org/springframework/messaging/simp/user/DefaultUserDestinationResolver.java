@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.util.Assert;
-import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 
 /**
@@ -120,29 +119,6 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 */
 	public boolean isRemoveLeadingSlash() {
 		return this.removeLeadingSlash;
-	}
-
-	/**
-	 * Provide the {@code PathMatcher} in use for working with destinations
-	 * which in turn helps to determine whether the leading slash should be
-	 * kept in actual destinations after removing the
-	 * {@link #setUserDestinationPrefix userDestinationPrefix}.
-	 * <p>By default actual destinations have a leading slash, e.g.
-	 * {@code /queue/position-updates} which makes sense with brokers that
-	 * support destinations with slash as separator. When a {@code PathMatcher}
-	 * is provided that supports an alternative separator, then resulting
-	 * destinations won't have a leading slash, e.g. {@code
-	 * jms.queue.position-updates}.
-	 * @param pathMatcher the PathMatcher used to work with destinations
-	 * @since 4.3
-	 * @deprecated as of 4.3.14 this property is no longer used and is replaced
-	 * by {@link #setRemoveLeadingSlash(boolean)} that indicates more explicitly
-	 * whether to keep the leading slash which may or may not be the case
-	 * regardless of how the {@code PathMatcher} is configured.
-	 */
-	@Deprecated
-	public void setPathMatcher(@Nullable PathMatcher pathMatcher) {
-		// Do nothing
 	}
 
 

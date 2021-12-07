@@ -43,6 +43,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.json.JsonWriter;
+import com.thoughtworks.xstream.io.xml.QNameMap;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 import com.thoughtworks.xstream.security.AnyTypePermission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -174,6 +176,23 @@ class XStreamMarshallerTests {
 		Result result = StaxUtils.createStaxResult(streamWriter);
 		marshaller.marshal(flight, result);
 		assertThat(XmlContent.from(writer)).isSimilarTo(EXPECTED_STRING);
+	}
+
+	@Test
+	void marshalStaxResultXMLStreamWriterDefaultNamespace() throws Exception {
+		QNameMap map = new QNameMap();
+		map.setDefaultNamespace("https://example.com");
+		map.setDefaultPrefix("spr");
+		StaxDriver driver = new StaxDriver(map);
+		marshaller.setStreamDriver(driver);
+
+		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+		StringWriter writer = new StringWriter();
+		XMLStreamWriter streamWriter = outputFactory.createXMLStreamWriter(writer);
+		Result result = StaxUtils.createStaxResult(streamWriter);
+		marshaller.marshal(flight, result);
+		assertThat(XmlContent.from(writer)).isSimilarTo(
+				"<spr:flight xmlns:spr=\"https://example.com\"><spr:flightNumber>42</spr:flightNumber></spr:flight>");
 	}
 
 	@Test

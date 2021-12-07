@@ -24,6 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -68,7 +69,7 @@ public class HttpRequestHandlerServlet extends HttpServlet {
 		catch (HttpRequestMethodNotSupportedException ex) {
 			String[] supportedMethods = ex.getSupportedMethods();
 			if (supportedMethods != null) {
-				response.setHeader("Allow", StringUtils.arrayToDelimitedString(supportedMethods, ", "));
+				response.setHeader(HttpHeaders.ALLOW, StringUtils.arrayToDelimitedString(supportedMethods, ", "));
 			}
 			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, ex.getMessage());
 		}

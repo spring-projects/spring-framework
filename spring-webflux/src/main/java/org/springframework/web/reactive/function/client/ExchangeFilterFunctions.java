@@ -43,11 +43,8 @@ public abstract class ExchangeFilterFunctions {
 
 	/**
 	 * Name of the request attribute with {@link Credentials} for {@link #basicAuthentication()}.
-	 * @deprecated as of Spring 5.1 in favor of using
-	 * {@link HttpHeaders#setBasicAuth(String, String)} while building the request.
 	 */
-	@Deprecated
-	public static final String BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE =
+	private static final String BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE =
 			ExchangeFilterFunctions.class.getName() + ".basicAuthenticationCredentials";
 
 

@@ -470,13 +470,10 @@ public abstract class CollectionUtils {
 			MultiValueMap<? extends K, ? extends V> targetMap) {
 
 		Assert.notNull(targetMap, "'targetMap' must not be null");
-		Map<K, List<V>> result = newLinkedHashMap(targetMap.size());
-		targetMap.forEach((key, value) -> {
-			List<? extends V> values = Collections.unmodifiableList(value);
-			result.put(key, (List<V>) values);
-		});
-		Map<K, List<V>> unmodifiableMap = Collections.unmodifiableMap(result);
-		return toMultiValueMap(unmodifiableMap);
+		if (targetMap instanceof UnmodifiableMultiValueMap) {
+			return (MultiValueMap<K, V>) targetMap;
+		}
+		return new UnmodifiableMultiValueMap<>(targetMap);
 	}
 
 

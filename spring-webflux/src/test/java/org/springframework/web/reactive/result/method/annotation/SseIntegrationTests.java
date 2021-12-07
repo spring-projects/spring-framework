@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
+import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.ServerSentEvent;
@@ -74,17 +75,21 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	static Object[][] arguments() {
 		return new Object[][] {
 			{new JettyHttpServer(), new ReactorClientHttpConnector()},
+			{new JettyHttpServer(), new JdkClientHttpConnector()},
 			{new JettyHttpServer(), new JettyClientHttpConnector()},
 			{new JettyHttpServer(), new HttpComponentsClientHttpConnector()},
 			{new ReactorHttpServer(), new ReactorClientHttpConnector()},
+			{new ReactorHttpServer(), new JdkClientHttpConnector()},
 			{new ReactorHttpServer(), new JettyClientHttpConnector()},
 			{new ReactorHttpServer(), new HttpComponentsClientHttpConnector()},
 			{new TomcatHttpServer(), new ReactorClientHttpConnector()},
+			{new TomcatHttpServer(), new JdkClientHttpConnector()},
 			{new TomcatHttpServer(), new JettyClientHttpConnector()},
 			{new TomcatHttpServer(), new HttpComponentsClientHttpConnector()},
 			{new UndertowHttpServer(), new ReactorClientHttpConnector()},
+			{new UndertowHttpServer(), new JdkClientHttpConnector()},
 			{new UndertowHttpServer(), new JettyClientHttpConnector()},
-			{new UndertowHttpServer(), new HttpComponentsClientHttpConnector()}
+			{new UndertowHttpServer(), new HttpComponentsClientHttpConnector()},
 		};
 	}
 

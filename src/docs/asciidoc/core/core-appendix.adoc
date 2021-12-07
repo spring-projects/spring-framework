@@ -125,7 +125,7 @@ The following example enumeration shows how easy injecting an enum value is:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	package javax.persistence;
+	package jakarta.persistence;
 
 	public enum PersistenceContextType {
 
@@ -136,7 +136,7 @@ The following example enumeration shows how easy injecting an enum value is:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	package javax.persistence
+	package jakarta.persistence
 
 	enum class PersistenceContextType {
 
@@ -749,7 +749,7 @@ essentially the same as the following XML snippet:
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="dateFormat" class="java.text.SimpleDateFormat">
-		<constructor-arg value="yyyy-HH-dd HH:mm"/>
+		<constructor-arg value="yyyy-MM-dd HH:mm"/>
 		<property name="lenient" value="true"/>
 	</bean>
 ----

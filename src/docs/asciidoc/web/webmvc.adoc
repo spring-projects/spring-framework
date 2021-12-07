@@ -14,7 +14,7 @@ whose name, "`Spring WebFlux,`" is also based on its source module
 This section covers Spring Web MVC. The <<web-reactive.adoc#spring-web-reactive, next section>>
 covers Spring WebFlux.
 
-For baseline information and compatibility with Servlet container and Java EE version
+For baseline information and compatibility with Servlet container and Jakarta EE version
 ranges, see the Spring Framework
 https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Versions[Wiki].
 
@@ -315,9 +315,9 @@ provides many extra convenient options.
 [[mvc-container-config]]
 === Servlet Config
 
-In a Servlet 3.0+ environment, you have the option of configuring the Servlet container
-programmatically as an alternative or in combination with a `web.xml` file. The following
-example registers a `DispatcherServlet`:
+In a Servlet environment, you have the option of configuring the Servlet container
+programmatically as an alternative or in combination with a `web.xml` file.
+The following example registers a `DispatcherServlet`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -736,8 +736,8 @@ or to render a JSON response, as the following example shows:
 		@RequestMapping(path = "/error")
 		public Map<String, Object> handle(HttpServletRequest request) {
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("status", request.getAttribute("javax.servlet.error.status_code"));
-			map.put("reason", request.getAttribute("javax.servlet.error.message"));
+			map.put("status", request.getAttribute("jakarta.servlet.error.status_code"));
+			map.put("reason", request.getAttribute("jakarta.servlet.error.message"));
 			return map;
 		}
 	}
@@ -751,8 +751,8 @@ or to render a JSON response, as the following example shows:
 		@RequestMapping(path = ["/error"])
 		fun handle(request: HttpServletRequest): Map<String, Any> {
 			val map = HashMap<String, Any>()
-			map["status"] = request.getAttribute("javax.servlet.error.status_code")
-			map["reason"] = request.getAttribute("javax.servlet.error.message")
+			map["status"] = request.getAttribute("jakarta.servlet.error.status_code")
+			map["reason"] = request.getAttribute("jakarta.servlet.error.message")
 			return map
 		}
 	}
@@ -1132,7 +1132,7 @@ request with a simple request parameter.
 `MultipartResolver` from the `org.springframework.web.multipart` package is a strategy
 for parsing multipart requests including file uploads. There is one implementation
 based on https://commons.apache.org/proper/commons-fileupload[Commons FileUpload] and
-another based on Servlet 3.0 multipart request parsing.
+another based on Servlet multipart request parsing.
 
 To enable multipart handling, you need to declare a `MultipartResolver` bean in your
 `DispatcherServlet` Spring configuration with a name of `multipartResolver`.
@@ -1163,9 +1163,9 @@ javadoc for details and configuration options.
 
 
 [[mvc-multipart-resolver-standard]]
-==== Servlet 3.0
+==== Servlet Multipart Parsing
 
-Servlet 3.0 multipart parsing needs to be enabled through Servlet container configuration.
+Servlet multipart parsing needs to be enabled through Servlet container configuration.
 To do so:
 
 * In Java, set a `MultipartConfigElement` on the Servlet registration.
@@ -1205,7 +1205,7 @@ The following example shows how to set a `MultipartConfigElement` on the Servlet
 	}
 ----
 
-Once the Servlet 3.0 configuration is in place, you can add a bean of type
+Once the Servlet multipart configuration is in place, you can add a bean of type
 `StandardServletMultipartResolver` with a name of `multipartResolver`.
 
 [NOTE]
@@ -1932,7 +1932,7 @@ instead.
 
 `@GetMapping` (and `@RequestMapping(method=HttpMethod.GET)`) support HTTP HEAD
 transparently for request mapping. Controller methods do not need to change.
-A response wrapper, applied in `javax.servlet.http.HttpServlet`, ensures a `Content-Length`
+A response wrapper, applied in `jakarta.servlet.http.HttpServlet`, ensures a `Content-Length`
 header is set to the number of bytes written (without actually writing to the response).
 
 `@GetMapping` (and `@RequestMapping(method=HttpMethod.GET)`) are implicitly mapped to
@@ -2053,17 +2053,17 @@ and others) and is equivalent to `required=false`.
 | Generic access to request parameters and request and session attributes, without direct
   use of the Servlet API.
 
-| `javax.servlet.ServletRequest`, `javax.servlet.ServletResponse`
+| `jakarta.servlet.ServletRequest`, `jakarta.servlet.ServletResponse`
 | Choose any specific request or response type -- for example, `ServletRequest`, `HttpServletRequest`,
   or Spring's `MultipartRequest`, `MultipartHttpServletRequest`.
 
-| `javax.servlet.http.HttpSession`
+| `jakarta.servlet.http.HttpSession`
 | Enforces the presence of a session. As a consequence, such an argument is never `null`.
   Note that session access is not thread-safe. Consider setting the
   `RequestMappingHandlerAdapter` instance's `synchronizeOnSession` flag to `true` if multiple
   requests are allowed to concurrently access a session.
 
-| `javax.servlet.http.PushBuilder`
+| `jakarta.servlet.http.PushBuilder`
 | Servlet 4.0 push builder API for programmatic HTTP/2 resource pushes.
   Note that, per the Servlet specification, the injected `PushBuilder` instance can be null if the client
   does not support that HTTP/2 feature.
@@ -2777,7 +2777,7 @@ alternatively, set `@ModelAttribute(binding=false)`, as the following example sh
 <1> Setting `@ModelAttribute(binding=false)`.
 
 You can automatically apply validation after data binding by adding the
-`javax.validation.Valid` annotation or Spring's `@Validated` annotation
+`jakarta.validation.Valid` annotation or Spring's `@Validated` annotation
 (<<core.adoc#validation-beanvalidation, Bean Validation>> and
 <<core.adoc#validation, Spring validation>>). The following example shows how to do so:
 
@@ -2927,7 +2927,7 @@ as the following example shows:
 
 For use cases that require adding or removing session attributes, consider injecting
 `org.springframework.web.context.request.WebRequest` or
-`javax.servlet.http.HttpSession` into the controller method.
+`jakarta.servlet.http.HttpSession` into the controller method.
 
 For temporary storage of model attributes in the session as part of a controller
 workflow, consider using `@SessionAttributes` as described in
@@ -3116,7 +3116,7 @@ When the `@RequestParam` annotation is declared as a `Map<String, MultipartFile>
 `MultiValueMap<String, MultipartFile>`, without a parameter name specified in the annotation,
 then the map is populated with the multipart files for each given parameter name.
 
-NOTE: With Servlet 3.0 multipart parsing, you may also declare `javax.servlet.http.Part`
+NOTE: With Servlet multipart parsing, you may also declare `jakarta.servlet.http.Part`
 instead of Spring's `MultipartFile`, as a method argument or collection value type.
 
 You can also use multipart content as part of data binding to a
@@ -3218,7 +3218,7 @@ probably want it deserialized from JSON (similar to `@RequestBody`). Use the
 	}
 ----
 
-You can use `@RequestPart` in combination with `javax.validation.Valid` or use Spring's
+You can use `@RequestPart` in combination with `jakarta.validation.Valid` or use Spring's
 `@Validated` annotation, both of which cause Standard Bean Validation to be applied.
 By default, validation errors cause a `MethodArgumentNotValidException`, which is turned
 into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation errors locally
@@ -3275,7 +3275,7 @@ The following example uses a `@RequestBody` argument:
 You can use the <<mvc-config-message-converters>> option of the <<mvc-config>> to
 configure or customize message conversion.
 
-You can use `@RequestBody` in combination with `javax.validation.Valid` or Spring's
+You can use `@RequestBody` in combination with `jakarta.validation.Valid` or Spring's
 `@Validated` annotation, both of which cause Standard Bean Validation to be applied.
 By default, validation errors cause a `MethodArgumentNotValidException`, which is turned
 into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation errors locally
@@ -3891,11 +3891,11 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 | Generic access to request parameters and request and session attributes without direct
   use of the Servlet API.
 
-| `javax.servlet.ServletRequest`, `javax.servlet.ServletResponse`
+| `jakarta.servlet.ServletRequest`, `jakarta.servlet.ServletResponse`
 | Choose any specific request or response type (for example, `ServletRequest` or
   `HttpServletRequest` or Spring's `MultipartRequest` or `MultipartHttpServletRequest`).
 
-| `javax.servlet.http.HttpSession`
+| `jakarta.servlet.http.HttpSession`
 | Enforces the presence of a session. As a consequence, such an argument is never `null`. +
   Note that session access is not thread-safe. Consider setting the
   `RequestMappingHandlerAdapter` instance's `synchronizeOnSession` flag to `true` if multiple
@@ -4350,7 +4350,7 @@ capital letters of the class and the method name (for example, the `getThing` me
 == Asynchronous Requests
 [.small]#<<mvc-ann-async-vs-webflux, Compared to WebFlux>>#
 
-Spring MVC has an extensive integration with Servlet 3.0 asynchronous request
+Spring MVC has an extensive integration with Servlet asynchronous request
 <<mvc-ann-async-processing,processing>>:
 
 * <<mvc-ann-async-deferredresult, `DeferredResult`>> and <<mvc-ann-async-callable, `Callable`>>
@@ -4524,10 +4524,10 @@ methods for timeout and completion callbacks.
 ==== Compared to WebFlux
 
 The Servlet API was originally built for making a single pass through the Filter-Servlet
-chain. Asynchronous request processing, added in Servlet 3.0, lets applications exit
-the Filter-Servlet chain but leave the response open for further processing. The Spring MVC
-asynchronous support is built around that mechanism. When a controller returns a `DeferredResult`,
-the Filter-Servlet chain is exited, and the Servlet container thread is released. Later, when
+chain. Asynchronous request processing lets applications exit the Filter-Servlet chain
+but leave the response open for further processing. The Spring MVC asynchronous support
+is built around that mechanism. When a controller returns a `DeferredResult`, the
+Filter-Servlet chain is exited, and the Servlet container thread is released. Later, when
 the `DeferredResult` is set, an `ASYNC` dispatch (to the same URL) is made, during which the
 controller is mapped again but, rather than invoking it, the `DeferredResult` value is used
 (as if the controller returned it) to resume processing.
@@ -4768,7 +4768,7 @@ The MVC configuration also exposes several options for asynchronous requests.
 
 Filter and Servlet declarations have an `asyncSupported` flag that needs to be set to `true`
 to enable asynchronous request processing. In addition, Filter mappings should be
-declared to handle the `ASYNC` `javax.servlet.DispatchType`.
+declared to handle the `ASYNC` `jakarta.servlet.DispatchType`.
 
 In Java configuration, when you use `AbstractAnnotationConfigDispatcherServletInitializer`
 to initialize the Servlet container, this is done automatically.
@@ -5738,8 +5738,8 @@ The following listing shows how to do so with Java configuration:
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
-				.addResourceLocations("/public", "classpath:/static/")
-				.setCacheControl(CacheControl.maxAge(Duration.ofDays(365)));
+					.addResourceLocations("/public", "classpath:/static/")
+					.setCacheControl(CacheControl.maxAge(Duration.ofDays(365)));
 		}
 	}
 ----
@@ -5845,6 +5845,9 @@ https://www.webjars.org/documentation[WebJars] are also supported through the
 re-write URLs to include the version of the jar and can also match against incoming URLs
 without versions -- for example, from `/jquery/jquery.min.js` to
 `/jquery/1.2.0/jquery.min.js`.
+
+TIP: The Java configuration based on `ResourceHandlerRegistry` provides further options
+for fine-grained control, e.g. last-modified behavior and optimized resource resolution.
 
 
 
@@ -6094,5 +6097,5 @@ For more details, see the
 https://github.com/spring-projects/spring-framework/wiki/HTTP-2-support[HTTP/2 wiki page].
 
 The Servlet API does expose one construct related to HTTP/2. You can use the
-`javax.servlet.http.PushBuilder` to proactively push resources to clients, and it
+`jakarta.servlet.http.PushBuilder` to proactively push resources to clients, and it
 is supported as a <<mvc-ann-arguments, method argument>> to `@RequestMapping` methods.

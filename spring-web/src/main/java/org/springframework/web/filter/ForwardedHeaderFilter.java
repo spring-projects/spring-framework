@@ -20,9 +20,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -37,7 +35,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
@@ -169,23 +166,23 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	 */
 	private static class ForwardedHeaderRemovingRequest extends HttpServletRequestWrapper {
 
-		private final Map<String, List<String>> headers;
+		private final Set<String> headerNames;
 
 		public ForwardedHeaderRemovingRequest(HttpServletRequest request) {
 			super(request);
-			this.headers = initHeaders(request);
+			this.headerNames = headerNames(request);
 		}
 
-		private static Map<String, List<String>> initHeaders(HttpServletRequest request) {
-			Map<String, List<String>> headers = new LinkedCaseInsensitiveMap<>(Locale.ENGLISH);
+		private static Set<String> headerNames(HttpServletRequest request) {
+			Set<String> headerNames = Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(Locale.ENGLISH));
 			Enumeration<String> names = request.getHeaderNames();
 			while (names.hasMoreElements()) {
 				String name = names.nextElement();
 				if (!FORWARDED_HEADER_NAMES.contains(name)) {
-					headers.put(name, Collections.list(request.getHeaders(name)));
+					headerNames.add(name);
 				}
 			}
-			return headers;
+			return Collections.unmodifiableSet(headerNames);
 		}
 
 		// Override header accessors to not expose forwarded headers
@@ -193,19 +190,23 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		@Override
 		@Nullable
 		public String getHeader(String name) {
-			List<String> value = this.headers.get(name);
-			return (CollectionUtils.isEmpty(value) ? null : value.get(0));
+			if (FORWARDED_HEADER_NAMES.contains(name)) {
+				return null;
+			}
+			return super.getHeader(name);
 		}
 
 		@Override
 		public Enumeration<String> getHeaders(String name) {
-			List<String> value = this.headers.get(name);
-			return (Collections.enumeration(value != null ? value : Collections.emptySet()));
+			if (FORWARDED_HEADER_NAMES.contains(name)) {
+				return Collections.emptyEnumeration();
+			}
+			return super.getHeaders(name);
 		}
 
 		@Override
 		public Enumeration<String> getHeaderNames() {
-			return Collections.enumeration(this.headers.keySet());
+			return Collections.enumeration(this.headerNames);
 		}
 	}
 

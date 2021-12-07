@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,18 +66,6 @@ public class ChannelRegistration {
 	 */
 	public ChannelRegistration interceptors(ChannelInterceptor... interceptors) {
 		this.interceptors.addAll(Arrays.asList(interceptors));
-		return this;
-	}
-
-	/**
-	 * Configure interceptors for the message channel.
-	 * @deprecated as of 4.3.12, in favor of {@link #interceptors(ChannelInterceptor...)}
-	 */
-	@Deprecated
-	public ChannelRegistration setInterceptors(@Nullable ChannelInterceptor... interceptors) {
-		if (interceptors != null) {
-			this.interceptors.addAll(Arrays.asList(interceptors));
-		}
 		return this;
 	}
 

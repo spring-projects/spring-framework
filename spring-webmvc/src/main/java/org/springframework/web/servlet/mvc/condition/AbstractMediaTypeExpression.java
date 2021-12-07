@@ -65,7 +65,17 @@ abstract class AbstractMediaTypeExpression implements MediaTypeExpression, Compa
 
 	@Override
 	public int compareTo(AbstractMediaTypeExpression other) {
-		return MediaType.SPECIFICITY_COMPARATOR.compare(this.getMediaType(), other.getMediaType());
+		MediaType mediaType1 = this.getMediaType();
+		MediaType mediaType2 = other.getMediaType();
+		if (mediaType1.isMoreSpecific(mediaType2)) {
+			return -1;
+		}
+		else if (mediaType1.isLessSpecific(mediaType2)) {
+			return 1;
+		}
+		else {
+			return 0;
+		}
 	}
 
 	@Override

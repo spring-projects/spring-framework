@@ -733,6 +733,10 @@ public class AntPathMatcher implements PathMatcher {
 						}
 						for (int i = 1; i <= matcher.groupCount(); i++) {
 							String name = this.variableNames.get(i - 1);
+							if (name.startsWith("*")) {
+								throw new IllegalArgumentException("Capturing patterns (" + name + ") are not " +
+										"supported by the AntPathMatcher. Use the PathPatternParser instead.");
+							}
 							String value = matcher.group(i);
 							uriTemplateVariables.put(name, value);
 						}

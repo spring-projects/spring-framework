@@ -107,7 +107,7 @@ public final class CandidateComponentsIndexLoader {
 				result.add(properties);
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Loaded " + result.size() + "] index(es)");
+				logger.debug("Loaded " + result.size() + " index(es)");
 			}
 			int totalCount = result.stream().mapToInt(Properties::size).sum();
 			return (totalCount > 0 ? new CandidateComponentsIndex(result) : null);

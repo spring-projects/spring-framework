@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +32,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -141,7 +141,7 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 		}
 
 		List<MediaType> result = new ArrayList<>(compatibleMediaTypes);
-		MediaType.sortBySpecificityAndQuality(result);
+		MimeTypeUtils.sortBySpecificity(result);
 
 		MediaType selected = null;
 		for (MediaType mediaType : result) {
@@ -183,8 +183,12 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 
 	private MediaType selectMoreSpecificMediaType(MediaType acceptable, MediaType producible) {
 		producible = producible.copyQualityValue(acceptable);
-		Comparator<MediaType> comparator = MediaType.SPECIFICITY_COMPARATOR;
-		return (comparator.compare(acceptable, producible) <= 0 ? acceptable : producible);
+		if (acceptable.isLessSpecific(producible)) {
+			return producible;
+		}
+		else {
+			return acceptable;
+		}
 	}
 
 }

@@ -127,7 +127,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 			return matchPreFlight(exchange.getRequest());
 		}
 		if (getMethods().isEmpty()) {
-			if (RequestMethod.OPTIONS.name().equals(exchange.getRequest().getMethodValue())) {
+			if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
 				return null; // We handle OPTIONS transparently, so don't match if no explicit declarations
 			}
 			return this;

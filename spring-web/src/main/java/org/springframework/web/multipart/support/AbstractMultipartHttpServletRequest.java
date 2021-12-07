@@ -64,7 +64,7 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 
 	@Override
 	public HttpMethod getRequestMethod() {
-		return HttpMethod.resolve(getRequest().getMethod());
+		return HttpMethod.valueOf(getRequest().getMethod());
 	}
 
 	@Override

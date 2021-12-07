@@ -72,8 +72,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		String filename = resource.getFilename();
 		if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
-				resource instanceof EncodedResourceResolver.EncodedResource ||
-				resource instanceof GzipResourceResolver.GzippedResource) {
+				resource instanceof EncodedResourceResolver.EncodedResource) {
 			return resource;
 		}
 

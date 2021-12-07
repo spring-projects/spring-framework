@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,20 +119,6 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	 */
 	public ProtobufHttpMessageConverter() {
 		this(null, null);
-	}
-
-	/**
-	 * Construct a new {@code ProtobufHttpMessageConverter} with an
-	 * initializer that allows the registration of message extensions.
-	 * @param registryInitializer an initializer for message extensions
-	 * @deprecated as of Spring Framework 5.1, use {@link #ProtobufHttpMessageConverter(ExtensionRegistry)} instead
-	 */
-	@Deprecated
-	public ProtobufHttpMessageConverter(@Nullable ExtensionRegistryInitializer registryInitializer) {
-		this(null, null);
-		if (registryInitializer != null) {
-			registryInitializer.initializeExtensionRegistry(this.extensionRegistry);
-		}
 	}
 
 	/**

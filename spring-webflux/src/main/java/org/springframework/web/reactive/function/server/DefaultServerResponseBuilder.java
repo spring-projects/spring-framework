@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -297,7 +296,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	 */
 	abstract static class AbstractServerResponse implements ServerResponse {
 
-		private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
+		private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
 
 		final int statusCode;
 
@@ -361,9 +360,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private static <K,V> void copy(MultiValueMap<K,V> src, MultiValueMap<K,V> dst) {
 			if (!src.isEmpty()) {
-				src.entrySet().stream()
-						.filter(entry -> !dst.containsKey(entry.getKey()))
-						.forEach(entry -> dst.put(entry.getKey(), entry.getValue()));
+				dst.putAll(src);
 			}
 		}
 	}

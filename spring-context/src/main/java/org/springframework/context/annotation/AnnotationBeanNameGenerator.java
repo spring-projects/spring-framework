@@ -47,9 +47,10 @@ import org.springframework.util.StringUtils;
  *
  * <p>If the annotation's value doesn't indicate a bean name, an appropriate
  * name will be built based on the short name of the class (with the first
- * letter lower-cased). For example:
+ * letter lower-cased), unless the two first letters are uppercase. For example:
  *
  * <pre class="code">com.xyz.FooServiceImpl -&gt; fooServiceImpl</pre>
+ * <pre class="code">com.xyz.URLFooServiceImpl -&gt; URLFooServiceImpl</pre>
  *
  * @author Juergen Hoeller
  * @author Mark Fisher

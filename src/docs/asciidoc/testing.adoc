@@ -32,8 +32,8 @@ manual.)
 == Unit Testing
 
 Dependency injection should make your code less dependent on the container than it would
-be with traditional Java EE development. The POJOs that make up your application should
-be testable in JUnit or TestNG tests, with objects instantiated by using the `new`
+be with traditional J2EE / Java EE development. The POJOs that make up your application
+should be testable in JUnit or TestNG tests, with objects instantiated by using the `new`
 operator, without Spring or any other container. You can use <<mock-objects, mock objects>>
 (in conjunction with other valuable testing techniques) to test your code in isolation.
 If you follow the architecture recommendations for Spring, the resulting clean layering
@@ -78,7 +78,7 @@ out-of-container tests for code that depends on environment-specific properties.
 The `org.springframework.mock.jndi` package contains a partial implementation of the JNDI
 SPI, which you can use to set up a simple JNDI environment for test suites or stand-alone
 applications. If, for example, JDBC `DataSource` instances get bound to the same JNDI
-names in test code as they do in a Java EE container, you can reuse both application code
+names in test code as they do in a Jakarta EE container, you can reuse both application code
 and configuration in testing scenarios without modification.
 
 WARNING: The mock JNDI support in the `org.springframework.mock.jndi` package is
@@ -1476,12 +1476,12 @@ and can be used anywhere in the Spring Framework.
 * `@Autowired`
 * `@Qualifier`
 * `@Value`
-* `@Resource` (javax.annotation) if JSR-250 is present
-* `@ManagedBean` (javax.annotation) if JSR-250 is present
-* `@Inject` (javax.inject) if JSR-330 is present
-* `@Named` (javax.inject) if JSR-330 is present
-* `@PersistenceContext` (javax.persistence) if JPA is present
-* `@PersistenceUnit` (javax.persistence) if JPA is present
+* `@Resource` (jakarta.annotation) if JSR-250 is present
+* `@ManagedBean` (jakarta.annotation) if JSR-250 is present
+* `@Inject` (jakarta.inject) if JSR-330 is present
+* `@Named` (jakarta.inject) if JSR-330 is present
+* `@PersistenceContext` (jakarta.persistence) if JPA is present
+* `@PersistenceUnit` (jakarta.persistence) if JPA is present
 * `@Required`
 * `@Transactional` (org.springframework.transaction.annotation)
   _with <<testcontext-tx-attribute-support, limited attribute support>>_
@@ -3088,7 +3088,7 @@ The term "`component class`" can refer to any of the following:
 
 * A class annotated with `@Configuration`.
 * A component (that is, a class annotated with `@Component`, `@Service`, `@Repository`, or other stereotype annotations).
-* A JSR-330 compliant class that is annotated with `javax.inject` annotations.
+* A JSR-330 compliant class that is annotated with `jakarta.inject` annotations.
 * Any class that contains `@Bean`-methods.
 * Any other class that is intended to be registered as a Spring component (i.e., a Spring
   bean in the `ApplicationContext`), potentially taking advantage of automatic autowiring
@@ -7424,10 +7424,10 @@ If using MockMvc through the <<webtestclient>>, there is nothing special to do t
 asynchronous requests work as the `WebTestClient` automatically does what is described
 in this section.
 
-Servlet 3.0 asynchronous requests,
-<<web.adoc#mvc-ann-async,supported in Spring MVC>>, work by exiting the Servlet container
-thread and allowing the application to compute the response asynchronously, after which
-an async dispatch is made to complete processing on a Servlet container thread.
+Servlet asynchronous requests, <<web.adoc#mvc-ann-async,supported in Spring MVC>>,
+work by exiting the Servlet container thread and allowing the application to compute
+the response asynchronously, after which an async dispatch is made to complete
+processing on a Servlet container thread.
 
 In Spring MVC Test, async requests can be tested by asserting the produced async value
 first, then manually performing the async dispatch, and finally verifying the response.

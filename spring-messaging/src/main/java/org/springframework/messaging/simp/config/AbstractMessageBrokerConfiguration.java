@@ -504,27 +504,13 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	@SuppressWarnings("deprecation")
 	public SimpUserRegistry userRegistry(
 			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel) {
 
-		SimpUserRegistry userRegistry = createLocalUserRegistry();
 		MessageBrokerRegistry brokerRegistry = getBrokerRegistry(clientInboundChannel, clientOutboundChannel);
-		if (userRegistry == null) {
-			userRegistry = createLocalUserRegistry(brokerRegistry.getUserRegistryOrder());
-		}
+		SimpUserRegistry userRegistry = createLocalUserRegistry(brokerRegistry.getUserRegistryOrder());
 		boolean broadcast = brokerRegistry.getUserRegistryBroadcast() != null;
 		return (broadcast ? new MultiServerUserRegistry(userRegistry) : userRegistry);
-	}
-
-	/**
-	 * Create the user registry that provides access to local users.
-	 * @deprecated as of 5.1 in favor of {@link #createLocalUserRegistry(Integer)}
-	 */
-	@Deprecated
-	@Nullable
-	protected SimpUserRegistry createLocalUserRegistry() {
-		return null;
 	}
 
 	/**

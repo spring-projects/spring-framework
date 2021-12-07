@@ -21,7 +21,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -141,7 +140,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
 		assertError(mono, MethodNotAllowedException.class,
-				ex -> assertThat(ex.getSupportedMethods()).isEqualTo(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD)));
+				ex -> assertThat(ex.getSupportedMethods()).isEqualTo(Set.of(HttpMethod.GET, HttpMethod.HEAD)));
 	}
 
 	@Test  // SPR-9603
@@ -194,11 +193,11 @@ public class RequestMappingInfoHandlerMappingTests {
 		List<HttpMethod> allMethodExceptTrace = new ArrayList<>(Arrays.asList(HttpMethod.values()));
 		allMethodExceptTrace.remove(HttpMethod.TRACE);
 
-		testHttpOptions("/foo", EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS), null);
-		testHttpOptions("/person/1", EnumSet.of(HttpMethod.PUT, HttpMethod.OPTIONS), null);
-		testHttpOptions("/persons", EnumSet.copyOf(allMethodExceptTrace), null);
-		testHttpOptions("/something", EnumSet.of(HttpMethod.PUT, HttpMethod.POST), null);
-		testHttpOptions("/qux", EnumSet.of(HttpMethod.PATCH,HttpMethod.GET,HttpMethod.HEAD,HttpMethod.OPTIONS),
+		testHttpOptions("/foo", Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS), null);
+		testHttpOptions("/person/1", Set.of(HttpMethod.PUT, HttpMethod.OPTIONS), null);
+		testHttpOptions("/persons", Set.copyOf(allMethodExceptTrace), null);
+		testHttpOptions("/something", Set.of(HttpMethod.PUT, HttpMethod.POST), null);
+		testHttpOptions("/qux", Set.of(HttpMethod.PATCH,HttpMethod.GET,HttpMethod.HEAD,HttpMethod.OPTIONS),
 				new MediaType("foo", "bar"));
 	}
 

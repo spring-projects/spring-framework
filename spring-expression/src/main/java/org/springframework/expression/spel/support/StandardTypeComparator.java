@@ -23,6 +23,7 @@ import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
 
 /**
@@ -44,8 +45,9 @@ public class StandardTypeComparator implements TypeComparator {
 		if (left instanceof Number && right instanceof Number) {
 			return true;
 		}
-		if (left instanceof Comparable) {
-			return true;
+		if (left instanceof Comparable && right instanceof Comparable) {
+			Class<?> ancestor = ClassUtils.determineCommonAncestor(left.getClass(), right.getClass());
+			return ancestor != null && Comparable.class.isAssignableFrom(ancestor);
 		}
 		return false;
 	}

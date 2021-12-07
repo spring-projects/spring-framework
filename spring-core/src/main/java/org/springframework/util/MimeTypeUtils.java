@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
@@ -51,8 +52,10 @@ public abstract class MimeTypeUtils {
 					'V', 'W', 'X', 'Y', 'Z'};
 
 	/**
-	 * Comparator used by {@link #sortBySpecificity(List)}.
+	 * Comparator formally used by {@link #sortBySpecificity(List)}.
+	 * @deprecated As of 6.0, with no direct replacement
 	 */
+	@Deprecated
 	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new MimeType.SpecificityComparator<>();
 
 	/**
@@ -334,36 +337,51 @@ public abstract class MimeTypeUtils {
 	}
 
 	/**
-	 * Sorts the given list of {@code MimeType} objects by specificity.
-	 * <p>Given two mime types:
-	 * <ol>
-	 * <li>if either mime type has a {@linkplain MimeType#isWildcardType() wildcard type},
-	 * then the mime type without the wildcard is ordered before the other.</li>
-	 * <li>if the two mime types have different {@linkplain MimeType#getType() types},
-	 * then they are considered equal and remain their current order.</li>
-	 * <li>if either mime type has a {@linkplain MimeType#isWildcardSubtype() wildcard subtype}
-	 * , then the mime type without the wildcard is sorted before the other.</li>
-	 * <li>if the two mime types have different {@linkplain MimeType#getSubtype() subtypes},
-	 * then they are considered equal and remain their current order.</li>
-	 * <li>if the two mime types have a different amount of
-	 * {@linkplain MimeType#getParameter(String) parameters}, then the mime type with the most
-	 * parameters is ordered before the other.</li>
-	 * </ol>
-	 * <p>For example: <blockquote>audio/basic &lt; audio/* &lt; *&#047;*</blockquote>
-	 * <blockquote>audio/basic;level=1 &lt; audio/basic</blockquote>
-	 * <blockquote>audio/basic == text/html</blockquote> <blockquote>audio/basic ==
-	 * audio/wave</blockquote>
+	 * Sorts the given list of {@code MimeType} objects by
+	 * {@linkplain MimeType#isMoreSpecific(MimeType) specificity}.
+	 *
+	 * <p>Because of the computational cost, this method throws an exception
+	 * when the given list contains too many elements.
 	 * @param mimeTypes the list of mime types to be sorted
+	 * @throws IllegalArgumentException if {@code mimeTypes} contains more
+	 * than 50 elements
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.3.2">HTTP 1.1: Semantics
 	 * and Content, section 5.3.2</a>
+	 * @see MimeType#isMoreSpecific(MimeType)
 	 */
-	public static void sortBySpecificity(List<MimeType> mimeTypes) {
+	public static <T extends MimeType> void sortBySpecificity(List<T> mimeTypes) {
 		Assert.notNull(mimeTypes, "'mimeTypes' must not be null");
-		if (mimeTypes.size() > 1) {
-			mimeTypes.sort(SPECIFICITY_COMPARATOR);
+		Assert.isTrue(mimeTypes.size() <= 50, "Too many elements");
+
+		bubbleSort(mimeTypes, MimeType::isLessSpecific);
+	}
+
+	static <T> void bubbleSort(List<T> list, BiPredicate<? super T, ? super T> swap) {
+		int len = list.size();
+		for (int i = 0; i < len; i++) {
+			for (int j = 1; j < len - i ; j++) {
+				T prev = list.get(j - 1);
+				T cur = list.get(j);
+				if (swap.test(prev, cur)) {
+					list.set(j, prev);
+					list.set(j - 1, cur);
+				}
+			}
 		}
 	}
 
+
+	/**
+	 * Generate a random MIME boundary as bytes, often used in multipart mime types.
+	 */
+	public static byte[] generateMultipartBoundary() {
+		Random randomToUse = initRandom();
+		byte[] boundary = new byte[randomToUse.nextInt(11) + 30];
+		for (int i = 0; i < boundary.length; i++) {
+			boundary[i] = BOUNDARY_CHARS[randomToUse.nextInt(BOUNDARY_CHARS.length)];
+		}
+		return boundary;
+	}
 
 	/**
 	 * Lazily initialize the {@link SecureRandom} for {@link #generateMultipartBoundary()}.
@@ -382,17 +400,6 @@ public abstract class MimeTypeUtils {
 		return randomToUse;
 	}
 
-	/**
-	 * Generate a random MIME boundary as bytes, often used in multipart mime types.
-	 */
-	public static byte[] generateMultipartBoundary() {
-		Random randomToUse = initRandom();
-		byte[] boundary = new byte[randomToUse.nextInt(11) + 30];
-		for (int i = 0; i < boundary.length; i++) {
-			boundary[i] = BOUNDARY_CHARS[randomToUse.nextInt(BOUNDARY_CHARS.length)];
-		}
-		return boundary;
-	}
 
 	/**
 	 * Generate a random MIME boundary as String, often used in multipart mime types.

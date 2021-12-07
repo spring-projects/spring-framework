@@ -18,8 +18,6 @@ package org.springframework.http;
 
 import java.net.URI;
 
-import org.springframework.lang.Nullable;
-
 /**
  * Represents an HTTP request message, consisting of
  * {@linkplain #getMethod() method} and {@linkplain #getURI() uri}.
@@ -31,22 +29,20 @@ public interface HttpRequest extends HttpMessage {
 
 	/**
 	 * Return the HTTP method of the request.
-	 * @return the HTTP method as an HttpMethod enum value, or {@code null}
-	 * if not resolvable (e.g. in case of a non-standard HTTP method)
-	 * @see #getMethodValue()
-	 * @see HttpMethod#resolve(String)
+	 * @return the HTTP method as an HttpMethod value
+	 * @see HttpMethod#valueOf(String)
 	 */
-	@Nullable
-	default HttpMethod getMethod() {
-		return HttpMethod.resolve(getMethodValue());
-	}
+	HttpMethod getMethod();
 
 	/**
 	 * Return the HTTP method of the request as a String value.
 	 * @return the HTTP method as a plain String
 	 * @since 5.0
 	 * @see #getMethod()
+	 * @deprecated in favor of {@link #getMethod()} and
+	 * {@link HttpMethod#name()}
 	 */
+	@Deprecated
 	String getMethodValue();
 
 	/**

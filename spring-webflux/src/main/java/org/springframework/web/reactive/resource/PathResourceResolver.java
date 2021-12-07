@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.resource;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -199,14 +198,14 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		if (resourcePath.contains("%")) {
 			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
 			try {
-				String decodedPath = URLDecoder.decode(resourcePath, "UTF-8");
+				String decodedPath = URLDecoder.decode(resourcePath, StandardCharsets.UTF_8);
 				if (decodedPath.contains("../") || decodedPath.contains("..\\")) {
 					logger.warn("Resolved resource path contains encoded \"../\" or \"..\\\": " + resourcePath);
 					return true;
 				}
 			}
-			catch (IllegalArgumentException | UnsupportedEncodingException ex) {
-				// Should never happen...
+			catch (IllegalArgumentException ex) {
+				// May not be possible to decode...
 			}
 		}
 		return false;

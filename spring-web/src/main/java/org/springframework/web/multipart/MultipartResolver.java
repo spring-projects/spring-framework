@@ -27,7 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * <p>Spring provides the following concrete implementation:
  * <ul>
  * <li>{@link org.springframework.web.multipart.support.StandardServletMultipartResolver}
- * for the Servlet 3.0+ Part API
+ * for the Servlet Part API
  * </ul>
  *
  * <p>There is no default resolver implementation used for Spring

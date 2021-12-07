@@ -24,7 +24,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Abstract base regular expression pointcut bean. JavaBean properties are:
@@ -81,7 +80,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		Assert.notEmpty(patterns, "'patterns' must not be empty");
 		this.patterns = new String[patterns.length];
 		for (int i = 0; i < patterns.length; i++) {
-			this.patterns[i] = StringUtils.trimWhitespace(patterns[i]);
+			this.patterns[i] = patterns[i].strip();
 		}
 		initPatternRepresentation(this.patterns);
 	}
@@ -111,7 +110,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		Assert.notEmpty(excludedPatterns, "'excludedPatterns' must not be empty");
 		this.excludedPatterns = new String[excludedPatterns.length];
 		for (int i = 0; i < excludedPatterns.length; i++) {
-			this.excludedPatterns[i] = StringUtils.trimWhitespace(excludedPatterns[i]);
+			this.excludedPatterns[i] = excludedPatterns[i].strip();
 		}
 		initExcludedPatternRepresentation(this.excludedPatterns);
 	}

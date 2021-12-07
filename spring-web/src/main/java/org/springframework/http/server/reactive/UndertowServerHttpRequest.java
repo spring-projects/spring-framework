@@ -35,6 +35,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -77,6 +78,12 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.exchange.getRequestMethod().toString());
+	}
+
+	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.exchange.getRequestMethod().toString();
 	}

@@ -28,7 +28,7 @@ import org.springframework.web.multipart.MultipartResolver;
 
 /**
  * Standard implementation of the {@link MultipartResolver} interface,
- * based on the Servlet 3.0 {@link jakarta.servlet.http.Part} API.
+ * based on the Servlet {@link jakarta.servlet.http.Part} API.
  * To be added as "multipartResolver" bean to a Spring DispatcherServlet context,
  * without any extra configuration at the bean level (see below).
  *
@@ -38,14 +38,14 @@ import org.springframework.web.multipart.MultipartResolver;
  * {@linkplain #setStrictServletCompliance strict Servlet compliance}, narrowing the
  * applicability of Spring's {@link MultipartHttpServletRequest} to form data only.
  *
- * <p><b>Note:</b> In order to use Servlet 3.0 based multipart parsing,
+ * <p><b>Note:</b> In order to use Servlet container based multipart parsing,
  * you need to mark the affected servlet with a "multipart-config" section in
  * {@code web.xml}, or with a {@link jakarta.servlet.MultipartConfigElement}
  * in programmatic servlet registration, or (in case of a custom servlet class)
  * possibly with a {@link jakarta.servlet.annotation.MultipartConfig} annotation
- * on your servlet class. Configuration settings such as maximum sizes or
- * storage locations need to be applied at that servlet registration level;
- * Servlet 3.0 does not allow for them to be set at the MultipartResolver level.
+ * on your servlet class. Configuration settings such as maximum sizes or storage
+ * locations need to be applied at that servlet registration level; a Servlet
+ * container does not allow for them to be set at the MultipartResolver level.
  *
  * <pre class="code">
  * public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {

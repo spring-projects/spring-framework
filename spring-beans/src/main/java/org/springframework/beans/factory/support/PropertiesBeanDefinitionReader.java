@@ -428,40 +428,40 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		int beginIndex = prefixWithSep.length();
 
 		for (Map.Entry<?, ?> entry : map.entrySet()) {
-			String key = StringUtils.trimWhitespace((String) entry.getKey());
+			String key = ((String) entry.getKey()).strip();
 			if (key.startsWith(prefixWithSep)) {
 				String property = key.substring(beginIndex);
 				if (CLASS_KEY.equals(property)) {
-					className = StringUtils.trimWhitespace((String) entry.getValue());
+					className = ((String) entry.getValue()).strip();
 				}
 				else if (PARENT_KEY.equals(property)) {
-					parent = StringUtils.trimWhitespace((String) entry.getValue());
+					parent = ((String) entry.getValue()).strip();
 				}
 				else if (ABSTRACT_KEY.equals(property)) {
-					String val = StringUtils.trimWhitespace((String) entry.getValue());
+					String val = ((String) entry.getValue()).strip();
 					isAbstract = TRUE_VALUE.equals(val);
 				}
 				else if (SCOPE_KEY.equals(property)) {
 					// Spring 2.0 style
-					scope = StringUtils.trimWhitespace((String) entry.getValue());
+					scope = ((String) entry.getValue()).strip();
 				}
 				else if (SINGLETON_KEY.equals(property)) {
 					// Spring 1.2 style
-					String val = StringUtils.trimWhitespace((String) entry.getValue());
+					String val = ((String) entry.getValue()).strip();
 					scope = (!StringUtils.hasLength(val) || TRUE_VALUE.equals(val) ?
 							BeanDefinition.SCOPE_SINGLETON : BeanDefinition.SCOPE_PROTOTYPE);
 				}
 				else if (LAZY_INIT_KEY.equals(property)) {
-					String val = StringUtils.trimWhitespace((String) entry.getValue());
+					String val = ((String) entry.getValue()).strip();
 					lazyInit = TRUE_VALUE.equals(val);
 				}
 				else if (property.startsWith(CONSTRUCTOR_ARG_PREFIX)) {
 					if (property.endsWith(REF_SUFFIX)) {
-						int index = Integer.parseInt(property.substring(1, property.length() - REF_SUFFIX.length()));
+						int index = Integer.parseInt(property, 1, property.length() - REF_SUFFIX.length(), 10);
 						cas.addIndexedArgumentValue(index, new RuntimeBeanReference(entry.getValue().toString()));
 					}
 					else {
-						int index = Integer.parseInt(property.substring(1));
+						int index = Integer.parseInt(property, 1, property.length(), 10);
 						cas.addIndexedArgumentValue(index, readValue(entry));
 					}
 				}
@@ -469,7 +469,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 					// This isn't a real property, but a reference to another prototype
 					// Extract property name: property is of form dog(ref)
 					property = property.substring(0, property.length() - REF_SUFFIX.length());
-					String ref = StringUtils.trimWhitespace((String) entry.getValue());
+					String ref = ((String) entry.getValue()).strip();
 
 					// It doesn't matter if the referenced bean hasn't yet been registered:
 					// this will ensure that the reference is resolved at runtime.

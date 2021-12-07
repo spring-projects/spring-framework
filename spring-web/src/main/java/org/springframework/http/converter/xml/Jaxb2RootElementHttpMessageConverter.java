@@ -18,6 +18,9 @@ package org.springframework.http.converter.xml;
 
 import java.io.StringReader;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
@@ -149,21 +152,23 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	protected Source processSource(Source source) {
 		if (source instanceof StreamSource streamSource) {
 			InputSource inputSource = new InputSource(streamSource.getInputStream());
 			try {
-				XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
-				xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+				SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+				saxParserFactory.setNamespaceAware(true);
+				saxParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
 				String featureName = "http://xml.org/sax/features/external-general-entities";
-				xmlReader.setFeature(featureName, isProcessExternalEntities());
+				saxParserFactory.setFeature(featureName, isProcessExternalEntities());
+				SAXParser saxParser = saxParserFactory.newSAXParser();
+				XMLReader xmlReader = saxParser.getXMLReader();
 				if (!isProcessExternalEntities()) {
 					xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
 				}
 				return new SAXSource(xmlReader, inputSource);
 			}
-			catch (SAXException ex) {
+			catch (SAXException | ParserConfigurationException ex) {
 				logger.warn("Processing of external entities could not be disabled", ex);
 				return source;
 			}

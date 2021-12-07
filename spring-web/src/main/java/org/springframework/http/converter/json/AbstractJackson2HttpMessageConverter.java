@@ -91,14 +91,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 
-	/**
-	 * The default charset used by the converter.
-	 */
-	@Nullable
-	@Deprecated
-	public static final Charset DEFAULT_CHARSET = null;
-
-
 	protected ObjectMapper defaultObjectMapper;
 
 	@Nullable

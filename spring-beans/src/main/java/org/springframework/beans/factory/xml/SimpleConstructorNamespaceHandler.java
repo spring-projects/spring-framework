@@ -79,8 +79,8 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 	@Override
 	public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 		if (node instanceof Attr attr) {
-			String argName = StringUtils.trimWhitespace(parserContext.getDelegate().getLocalName(attr));
-			String argValue = StringUtils.trimWhitespace(attr.getValue());
+			String argName = parserContext.getDelegate().getLocalName(attr).strip();
+			String argValue = attr.getValue().strip();
 
 			ConstructorArgumentValues cvs = definition.getBeanDefinition().getConstructorArgumentValues();
 			boolean ref = false;

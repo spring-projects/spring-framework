@@ -39,6 +39,7 @@ import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
@@ -108,8 +109,14 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public HttpMethod method() {
+		return request().getMethod();
+	}
+
+	@Override
+	@Deprecated
 	public String methodName() {
-		return request().getMethodValue();
+		return request().getMethod().name();
 	}
 
 	@Override

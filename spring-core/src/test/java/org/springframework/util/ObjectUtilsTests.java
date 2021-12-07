@@ -234,44 +234,6 @@ class ObjectUtilsTests {
 	}
 
 	@Test
-	@Deprecated
-	void hashCodeWithBooleanFalse() {
-		int expected = Boolean.FALSE.hashCode();
-		assertThat(ObjectUtils.hashCode(false)).isEqualTo(expected);
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithBooleanTrue() {
-		int expected = Boolean.TRUE.hashCode();
-		assertThat(ObjectUtils.hashCode(true)).isEqualTo(expected);
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithDouble() {
-		double dbl = 9830.43;
-		int expected = Double.valueOf(dbl).hashCode();
-		assertThat(ObjectUtils.hashCode(dbl)).isEqualTo(expected);
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithFloat() {
-		float flt = 34.8f;
-		int expected = (Float.valueOf(flt)).hashCode();
-		assertThat(ObjectUtils.hashCode(flt)).isEqualTo(expected);
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithLong() {
-		long lng = 883L;
-		int expected = (Long.valueOf(lng)).hashCode();
-		assertThat(ObjectUtils.hashCode(lng)).isEqualTo(expected);
-	}
-
-	@Test
 	void identityToString() {
 		Object obj = new Object();
 		String expected = obj.getClass().getName() + "@" + ObjectUtils.getIdentityHexString(obj);

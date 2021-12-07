@@ -6,7 +6,7 @@ The original web framework included in the Spring Framework, Spring Web MVC, was
 purpose-built for the Servlet API and Servlet containers. The reactive-stack web framework,
 Spring WebFlux, was added later in version 5.0. It is fully non-blocking, supports
 https://www.reactive-streams.org/[Reactive Streams] back pressure, and runs on such servers as
-Netty, Undertow, and Servlet 3.1+ containers.
+Netty, Undertow, and Servlet containers.
 
 Both web frameworks mirror the names of their source modules
 ({spring-framework-main-code}/spring-webmvc[spring-webmvc] and
@@ -23,16 +23,16 @@ in some cases, both -- for example, Spring MVC controllers with the reactive `We
 Why was Spring WebFlux created?
 
 Part of the answer is the need for a non-blocking web stack to handle concurrency with a
-small number of threads and scale with fewer hardware resources. Servlet 3.1 did provide
-an API for non-blocking I/O. However, using it leads away from the rest of the Servlet API,
-where contracts are synchronous (`Filter`, `Servlet`) or blocking (`getParameter`,
-`getPart`). This was the motivation for a new common API to serve as a foundation across
-any non-blocking runtime. That is important because of servers (such as Netty) that are
-well-established in the async, non-blocking space.
+small number of threads and scale with fewer hardware resources. Servlet non-blocking I/O
+leads away from the rest of the Servlet API, where contracts are synchronous
+(`Filter`, `Servlet`) or blocking (`getParameter`, `getPart`). This was the motivation
+for a new common API to serve as a foundation across any non-blocking runtime. That is
+important because of servers (such as Netty) that are well-established in the async,
+non-blocking space.
 
 The other part of the answer is functional programming. Much as the addition of annotations
-in Java 5 created opportunities (such as annotated REST controllers or unit tests), the addition
-of lambda expressions in Java 8 created opportunities for functional APIs in Java.
+in Java 5 created opportunities (such as annotated REST controllers or unit tests), the
+addition of lambda expressions in Java 8 created opportunities for functional APIs in Java.
 This is a boon for non-blocking applications and continuation-style APIs (as popularized
 by `CompletableFuture` and http://reactivex.io/[ReactiveX]) that allow declarative
 composition of asynchronous logic. At the programming-model level, Java 8 enabled Spring
@@ -149,7 +149,7 @@ You have maximum choice of libraries, since, historically, most are blocking.
 
 * If you are already shopping for a non-blocking web stack, Spring WebFlux offers the same
 execution model benefits as others in this space and also provides a choice of servers
-(Netty, Tomcat, Jetty, Undertow, and Servlet 3.1+ containers), a choice of programming models
+(Netty, Tomcat, Jetty, Undertow, and Servlet containers), a choice of programming models
 (annotated controllers and functional web endpoints), and a choice of reactive libraries
 (Reactor, RxJava, or other).
 
@@ -187,7 +187,7 @@ unsure what benefits to look for, start by learning about how non-blocking I/O w
 [[webflux-server-choice]]
 === Servers
 
-Spring WebFlux is supported on Tomcat, Jetty, Servlet 3.1+ containers, as well as on
+Spring WebFlux is supported on Tomcat, Jetty, Servlet containers, as well as on
 non-Servlet runtimes such as Netty and Undertow. All servers are adapted to a low-level,
 <<webflux-httphandler, common API>> so that higher-level
 <<webflux-programming-models, programming models>> can be supported across servers.
@@ -205,7 +205,7 @@ used in the asynchronous, non-blocking space and lets a client and a server shar
 Tomcat and Jetty can be used with both Spring MVC and WebFlux. Keep in mind, however, that
 the way they are used is very different. Spring MVC relies on Servlet blocking I/O and
 lets applications use the Servlet API directly if they need to. Spring WebFlux
-relies on Servlet 3.1 non-blocking I/O and uses the Servlet API behind a low-level
+relies on Servlet non-blocking I/O and uses the Servlet API behind a low-level
 adapter. It is not exposed for direct use.
 
 For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API.
@@ -305,7 +305,7 @@ applications:
 * For server request processing there are two levels of support.
 ** <<webflux-httphandler, HttpHandler>>: Basic contract for HTTP request handling with
 non-blocking I/O and Reactive Streams back pressure, along with adapters for Reactor Netty,
-Undertow, Tomcat, Jetty, and any Servlet 3.1+ container.
+Undertow, Tomcat, Jetty, and any Servlet container.
 ** <<webflux-web-handler-api>>: Slightly higher level, general-purpose web API for
 request handling, on top of which concrete programming models such as annotated
 controllers and functional endpoints are built.
@@ -344,16 +344,16 @@ The following table describes the supported server APIs:
 | spring-web: Undertow to Reactive Streams bridge
 
 | Tomcat
-| Servlet 3.1 non-blocking I/O; Tomcat API to read and write ByteBuffers vs byte[]
-| spring-web: Servlet 3.1 non-blocking I/O to Reactive Streams bridge
+| Servlet non-blocking I/O; Tomcat API to read and write ByteBuffers vs byte[]
+| spring-web: Servlet non-blocking I/O to Reactive Streams bridge
 
 | Jetty
-| Servlet 3.1 non-blocking I/O; Jetty API to write ByteBuffers vs byte[]
-| spring-web: Servlet 3.1 non-blocking I/O to Reactive Streams bridge
+| Servlet non-blocking I/O; Jetty API to write ByteBuffers vs byte[]
+| spring-web: Servlet non-blocking I/O to Reactive Streams bridge
 
-| Servlet 3.1 container
-| Servlet 3.1 non-blocking I/O
-| spring-web: Servlet 3.1 non-blocking I/O to Reactive Streams bridge
+| Servlet container
+| Servlet non-blocking I/O
+| spring-web: Servlet non-blocking I/O to Reactive Streams bridge
 |===
 
 The following table describes server dependencies (also see
@@ -484,9 +484,9 @@ The code snippets below show using the `HttpHandler` adapters with each server A
 	server.start()
 ----
 
-*Servlet 3.1+ Container*
+*Servlet Container*
 
-To deploy as a WAR to any Servlet 3.1+ container, you can extend and include
+To deploy as a WAR to any Servlet container, you can extend and include
 {api-spring-framework}/web/server/adapter/AbstractReactiveWebInitializer.html[`AbstractReactiveWebInitializer`]
 in the WAR. That class wraps an `HttpHandler` with `ServletHttpHandlerAdapter` and registers
 that as a `Servlet`.
@@ -2400,7 +2400,7 @@ immediately next to the `@ModelAttribute`, as the following example shows:
 <1> Adding a `BindingResult`.
 
 You can automatically apply validation after data binding by adding the
-`javax.validation.Valid` annotation or Spring's `@Validated` annotation (see also
+`jakarta.validation.Valid` annotation or Spring's `@Validated` annotation (see also
 <<core.adoc#validation-beanvalidation, Bean Validation>> and
 <<core.adoc#validation, Spring validation>>). The following example uses the `@Valid` annotation:
 
@@ -2747,7 +2747,7 @@ you can declare a concrete target `Object`, instead of `Part`, as the following 
 ----
 <1> Using `@RequestPart` to get the metadata.
 
-You can use `@RequestPart` in combination with `javax.validation.Valid` or Spring's
+You can use `@RequestPart` in combination with `jakarta.validation.Valid` or Spring's
 `@Validated` annotation, which causes Standard Bean Validation to be applied. Validation
 errors lead to a `WebExchangeBindException` that results in a 400 (BAD_REQUEST) response.
 The exception contains a `BindingResult` with the error details and can also be handled
@@ -2869,7 +2869,7 @@ and fully non-blocking reading and (client-to-server) streaming.
 You can use the <<webflux-config-message-codecs>> option of the <<webflux-config>> to
 configure or customize message readers.
 
-You can use `@RequestBody` in combination with `javax.validation.Valid` or Spring's
+You can use `@RequestBody` in combination with `jakarta.validation.Valid` or Spring's
 `@Validated` annotation, which causes Standard Bean Validation to be applied. Validation
 errors cause a `WebExchangeBindException`, which results in a 400 (BAD_REQUEST) response.
 The exception contains a `BindingResult` with error details and can be handled in the
@@ -4170,8 +4170,8 @@ the example:
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
-				.addResourceLocations("/public", "classpath:/static/")
-				.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
+					.addResourceLocations("/public", "classpath:/static/")
+					.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
 		}
 
 	}
@@ -4258,6 +4258,9 @@ https://www.webjars.org/documentation[WebJars] are also supported through the
 re-write URLs to include the version of the jar and can also match against incoming URLs
 without versions -- for example, from `/jquery/jquery.min.js` to
 `/jquery/1.2.0/jquery.min.js`.
+
+TIP: The Java configuration based on `ResourceHandlerRegistry` provides further options
+for fine-grained control, e.g. last-modified behavior and optimized resource resolution.
 
 
 

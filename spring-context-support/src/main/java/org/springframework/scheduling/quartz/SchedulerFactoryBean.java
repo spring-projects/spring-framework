@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -570,7 +570,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 		CollectionUtils.mergePropertiesIntoMap(this.quartzProperties, mergedProps);
 		if (this.dataSource != null) {
-			mergedProps.setProperty(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
+			mergedProps.putIfAbsent(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
 		}
 
 		// Determine scheduler name across local settings and Quartz properties...

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ class HtmlCharacterEntityDecoder {
 
 			boolean isPotentialReference = (this.nextPotentialReferencePosition != -1 &&
 					this.nextSemicolonPosition != -1 &&
-					this.nextPotentialReferencePosition - this.nextSemicolonPosition < MAX_REFERENCE_SIZE);
+					this.nextSemicolonPosition - this.nextPotentialReferencePosition < MAX_REFERENCE_SIZE);
 
 			if (isPotentialReference) {
 				break;

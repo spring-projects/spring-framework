@@ -36,8 +36,9 @@ import org.springframework.lang.Nullable;
 public abstract class LogFormatUtils {
 
 	/**
-	 * Variant of {@link #formatValue(Object, int, boolean)} and a convenience
-	 * method that truncates at 100 characters when {@code limitLength} is set.
+	 * Convenience variant of {@link #formatValue(Object, int, boolean)} that
+	 * limits the length of a log message to 100 characters and also replaces
+	 * newline characters if {@code limitLength} is set to "true".
 	 * @param value the value to format
 	 * @param limitLength whether to truncate the value at a length of 100
 	 * @return the formatted value
