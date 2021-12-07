@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.core.metrics.observability;
+package org.springframework.core.metrics.micrometer;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -33,21 +32,18 @@ import org.springframework.util.StringUtils;
  *
  * @author Marcin Grzejszczak
  */
-class ObservabilityStartupStep implements StartupStep {
+class MicrometerStartupStep implements StartupStep {
 
 	private final Timer.Sample sample;
 
-	private final MeterRegistry meterRegistry;
-
 	private final String name;
 
-	private final Map<String, String> tags = new HashMap<>();
+	private final Map<String, String> highCardinalityTags = new HashMap<>();
 
-	public ObservabilityStartupStep(String name, MeterRegistry meterRegistry) {
-		this.meterRegistry = meterRegistry;
-		this.sample = Timer.start(meterRegistry, new ObservabilityHandlerContext(this.tags));
+	public MicrometerStartupStep(String name, MeterRegistry meterRegistry) {
+		this.sample = Timer.start(meterRegistry, new StartupStepHandlerContext(this.highCardinalityTags));
 		this.name = name;
-		this.tags.put("event", name);
+		this.highCardinalityTags.put("event", name);
 	}
 
 	private String nameFromEvent(String name) {
@@ -98,15 +94,15 @@ class ObservabilityStartupStep implements StartupStep {
 	public StartupStep tag(String key, String value) {
 		// This comes from Boot - what do we do about this?
 		if (key.equals("beanName") || key.equals("postProcessor")) {
-			this.tags.put("event", EventNameUtil.toLowerHyphen(name(value)));
+			this.highCardinalityTags.put("event", NameUtil.toLowerHyphen(name(value)));
 		}
-		this.tags.put(key, value);
+		this.highCardinalityTags.put(key, value);
 		return this;
 	}
 
 	@Override
 	public StartupStep tag(String key, Supplier<String> value) {
-		this.tags.put(key, value.get());
+		this.highCardinalityTags.put(key, value.get());
 		return this;
 	}
 
@@ -120,27 +116,11 @@ class ObservabilityStartupStep implements StartupStep {
 		this.sample.stop(Timer.builder(nameFromEvent(this.name)));
 	}
 
-	static class ObservabilityHandlerContext extends Timer.HandlerContext {
-
-		private final Map<String, String> tags;
-
-		ObservabilityHandlerContext(Map<String, String> tags) {
-			this.tags = tags;
-		}
-
-		@Override
-		public io.micrometer.core.instrument.Tags getHighCardinalityTags() {
-			return io.micrometer.core.instrument.Tags.of(this.tags.entrySet().stream()
-					.map(e -> io.micrometer.core.instrument.Tag.of(e.getKey(), e.getValue()))
-					.collect(Collectors.toList()));
-		}
-	}
-
-	static final class EventNameUtil {
+	static final class NameUtil {
 
 		static final int MAX_NAME_LENGTH = 50;
 
-		private EventNameUtil() {
+		private NameUtil() {
 
 		}
 
@@ -176,7 +156,7 @@ class ObservabilityStartupStep implements StartupStep {
 					result.append(c);
 				}
 			}
-			return EventNameUtil.shorten(result.toString());
+			return NameUtil.shorten(result.toString());
 		}
 
 	}

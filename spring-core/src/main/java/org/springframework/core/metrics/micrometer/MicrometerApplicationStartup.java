@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.metrics.observability;
+package org.springframework.core.metrics.micrometer;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,13 +30,13 @@ import org.springframework.core.metrics.StartupStep;
  * @author Marcin Grzejszczak
  * @since 6.0
  */
-public class ObservabilityApplicationStartup implements ApplicationStartup {
+public class MicrometerApplicationStartup implements ApplicationStartup {
 
 	private final MeterRegistry registry;
 
 	private final AtomicReference<Timer.Sample> rootSample = new AtomicReference<>();
 
-	public ObservabilityApplicationStartup(MeterRegistry registry) {
+	public MicrometerApplicationStartup(MeterRegistry registry) {
 		this.registry = registry;
 	}
 
@@ -45,7 +45,7 @@ public class ObservabilityApplicationStartup implements ApplicationStartup {
 		if (this.rootSample.get() == null) {
 			this.rootSample.set(Timer.start(this.registry));
 		}
-		return new ObservabilityStartupStep(name, this.registry);
+		return new MicrometerStartupStep(name, this.registry);
 	}
 
 	public void endRootRecording() {
