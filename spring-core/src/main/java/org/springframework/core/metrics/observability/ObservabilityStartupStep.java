@@ -100,13 +100,13 @@ class ObservabilityStartupStep implements StartupStep {
 		if (key.equals("beanName") || key.equals("postProcessor")) {
 			this.tags.put("event", EventNameUtil.toLowerHyphen(name(value)));
 		}
-		tags.put(key, value);
+		this.tags.put(key, value);
 		return this;
 	}
 
 	@Override
 	public StartupStep tag(String key, Supplier<String> value) {
-		tags.put(key, value.get());
+		this.tags.put(key, value.get());
 		return this;
 	}
 
@@ -117,7 +117,7 @@ class ObservabilityStartupStep implements StartupStep {
 
 	@Override
 	public void end() {
-		this.sample.stop(Timer.builder(nameFromEvent(name)));
+		this.sample.stop(Timer.builder(nameFromEvent(this.name)));
 	}
 
 	static class ObservabilityHandlerContext extends Timer.HandlerContext {

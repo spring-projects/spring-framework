@@ -35,7 +35,7 @@ public class ObservabilityApplicationStartup implements ApplicationStartup {
 	private final MeterRegistry registry;
 
 	private final AtomicReference<Timer.Sample> rootSample = new AtomicReference<>();
-	
+
 	public ObservabilityApplicationStartup(MeterRegistry registry) {
 		this.registry = registry;
 	}
