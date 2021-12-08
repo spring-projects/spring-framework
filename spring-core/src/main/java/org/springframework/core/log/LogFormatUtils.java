@@ -17,6 +17,7 @@
 package org.springframework.core.log;
 
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 
@@ -35,10 +36,15 @@ import org.springframework.lang.Nullable;
  */
 public abstract class LogFormatUtils {
 
+	private static final Pattern NEWLINE_PATTERN = Pattern.compile("[\n\r]");
+
+	private static final Pattern CONTROL_CHARACTER_PATTERN = Pattern.compile("\\p{Cc}");
+
+
 	/**
 	 * Convenience variant of {@link #formatValue(Object, int, boolean)} that
 	 * limits the length of a log message to 100 characters and also replaces
-	 * newline characters if {@code limitLength} is set to "true".
+	 * newline and control characters if {@code limitLength} is set to "true".
 	 * @param value the value to format
 	 * @param limitLength whether to truncate the value at a length of 100
 	 * @return the formatted value
@@ -53,10 +59,13 @@ public abstract class LogFormatUtils {
 	 * compacting it into a single line when {@code replaceNewLines} is set.
 	 * @param value the value to be formatted
 	 * @param maxLength the max length, after which to truncate, or -1 for unlimited
-	 * @param replaceNewlines whether to replace newline characters with placeholders
+	 * @param replaceNewlinesAndControlCharacters whether to replace newline and
+	 * control characters with placeholders
 	 * @return the formatted value
 	 */
-	public static String formatValue(@Nullable Object value, int maxLength, boolean replaceNewlines) {
+	public static String formatValue(
+			@Nullable Object value, int maxLength, boolean replaceNewlinesAndControlCharacters) {
+
 		if (value == null) {
 			return "";
 		}
@@ -70,8 +79,9 @@ public abstract class LogFormatUtils {
 		if (maxLength != -1) {
 			result = (result.length() > maxLength ? result.substring(0, maxLength) + " (truncated)..." : result);
 		}
-		if (replaceNewlines) {
-			result = result.replace("\n", "<LF>").replace("\r", "<CR>");
+		if (replaceNewlinesAndControlCharacters) {
+			result = NEWLINE_PATTERN.matcher(result).replaceAll("<EOL>");
+			result = CONTROL_CHARACTER_PATTERN.matcher(result).replaceAll("?");
 		}
 		if (value instanceof CharSequence) {
 			result = "\"" + result + "\"";
