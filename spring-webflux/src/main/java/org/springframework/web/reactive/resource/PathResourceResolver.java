@@ -29,6 +29,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -119,11 +120,12 @@ public class PathResourceResolver extends AbstractResourceResolver {
 					return Mono.just(resource);
 				}
 				else if (logger.isWarnEnabled()) {
-					Resource[] allowedLocations = getAllowedLocations();
-					logger.warn("Resource path \"" + resourcePath + "\" was successfully resolved " +
-							"but resource \"" + resource.getURL() + "\" is neither under the " +
-							"current location \"" + location.getURL() + "\" nor under any of the " +
-							"allowed locations " + (allowedLocations != null ? Arrays.asList(allowedLocations) : "[]"));
+					Resource[] allowed = getAllowedLocations();
+					logger.warn(LogFormatUtils.formatValue(
+							"Resource path \"" + resourcePath + "\" was successfully resolved " +
+									"but resource \"" + resource.getURL() + "\" is neither under the " +
+									"current location \"" + location.getURL() + "\" nor under any of the " +
+									"allowed locations " + (allowed != null ? Arrays.asList(allowed) : "[]"), -1, true));
 				}
 			}
 			return Mono.empty();
@@ -199,7 +201,8 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			try {
 				String decodedPath = URLDecoder.decode(resourcePath, "UTF-8");
 				if (decodedPath.contains("../") || decodedPath.contains("..\\")) {
-					logger.warn("Resolved resource path contains encoded \"../\" or \"..\\\": " + resourcePath);
+					logger.warn(LogFormatUtils.formatValue(
+							"Resolved resource path contains encoded \"../\" or \"..\\\": " + resourcePath, -1, true));
 					return true;
 				}
 			}
