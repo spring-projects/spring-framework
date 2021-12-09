@@ -82,13 +82,13 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Return {@code true} if the supplied Map is {@code null} or empty.
+	 * Return {@code true} if the supplied Map is not {@code null} or empty.
 	 * Otherwise, return {@code false}.
 	 * @param map the Map to check
-	 * @return whether the given Map is empty
+	 * @return whether the given Map is not empty
 	 */
-	public static boolean isEmpty(@Nullable Map<?, ?> map) {
-		return (map == null || map.isEmpty());
+	public static boolean isNotEmpty(@Nullable Map<?, ?> map) {
+		return !isEmpty(map);
 	}
 	
 	/**
