@@ -10695,7 +10695,7 @@ architectures that build upon the well-known Spring programming model.
 [[context-functionality-events-annotation]]
 ==== Annotation-based Event Listeners
 
-You can register an event listener on any `public` method of a managed bean by using the
+You can register an event listener on any method of a managed bean by using the
 `@EventListener` annotation. The `BlockedListNotifier` can be rewritten as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
