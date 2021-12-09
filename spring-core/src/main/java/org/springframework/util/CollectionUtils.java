@@ -60,7 +60,7 @@ public abstract class CollectionUtils {
 	public static boolean isEmpty(@Nullable Collection<?> collection) {
 		return (collection == null || collection.isEmpty());
 	}
-	
+
 	/**
 	 * Return {@code true} if the supplied Collection is not {@code null} or empty.
 	 * Otherwise, return {@code false}.
@@ -90,7 +90,7 @@ public abstract class CollectionUtils {
 	public static boolean isNotEmpty(@Nullable Map<?, ?> map) {
 		return !isEmpty(map);
 	}
-	
+
 	/**
 	 * Instantiate a new {@link HashMap} with an initial capacity
 	 * that can accommodate the specified number of elements without
