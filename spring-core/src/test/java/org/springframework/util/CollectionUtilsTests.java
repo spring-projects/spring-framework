@@ -39,6 +39,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CollectionUtilsTests {
 
 	@Test
+	void isNotEmpty() {
+		assertThat(CollectionUtils.isNotEmpty((Set<Object>) null)).isFalse();
+		assertThat(CollectionUtils.isNotEmpty((Map<String, String>) null)).isFalse();
+		assertThat(CollectionUtils.isNotEmpty(new HashMap<String, String>())).isFalse();
+		assertThat(CollectionUtils.isNotEmpty(new HashSet<>())).isFalse();
+
+		List<Object> list = new ArrayList<>();
+		list.add(new Object());
+		assertThat(CollectionUtils.isNotEmpty(list)).isTrue();
+
+		Map<String, String> map = new HashMap<>();
+		map.put("foo", "bar");
+		assertThat(CollectionUtils.isNotEmpty(map)).isTrue();
+	}
+	
+	@Test
 	void isEmpty() {
 		assertThat(CollectionUtils.isEmpty((Set<Object>) null)).isTrue();
 		assertThat(CollectionUtils.isEmpty((Map<String, String>) null)).isTrue();
