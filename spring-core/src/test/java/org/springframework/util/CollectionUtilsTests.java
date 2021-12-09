@@ -53,7 +53,7 @@ class CollectionUtilsTests {
 		map.put("foo", "bar");
 		assertThat(CollectionUtils.isNotEmpty(map)).isTrue();
 	}
-	
+
 	@Test
 	void isEmpty() {
 		assertThat(CollectionUtils.isEmpty((Set<Object>) null)).isTrue();
