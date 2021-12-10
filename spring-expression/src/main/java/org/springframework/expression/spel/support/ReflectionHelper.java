@@ -290,17 +290,18 @@ public abstract class ReflectionHelper {
 				Object argument = arguments[varargsPosition];
 				TypeDescriptor targetType = new TypeDescriptor(methodParam);
 				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
-				// If the argument type is equal to the varargs element type, there is no need
-				// to convert it or wrap it in an array. For example, using StringToArrayConverter
-				// to convert a String containing a comma would result in the String being split
-				// and repackaged in an array when it should be used as-is.
-				if (!sourceType.equals(targetType.getElementTypeDescriptor())) {
+				// If the argument is null or the argument type is equal to the varargs element type,
+				// there is no need to convert it or wrap it in an array. For example, using
+				// StringToArrayConverter to convert a String containing a comma would result in the
+				// String being split and repackaged in an array when it should be used as-is.
+				if (argument != null && !sourceType.equals(targetType.getElementTypeDescriptor())) {
 					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);
 				}
-				// Three outcomes of the above if-block:
-				// 1) the input argument was correct type but not wrapped in an array, and nothing was done.
-				// 2) the input argument was already compatible (i.e., array of valid type), and nothing was done.
-				// 3) the input argument was the wrong type and got converted and wrapped in an array.
+				// Possible outcomes of the above if-block:
+				// 1) the input argument was null, and nothing was done.
+				// 2) the input argument was correct type but not wrapped in an array, and nothing was done.
+				// 3) the input argument was already compatible (i.e., array of valid type), and nothing was done.
+				// 4) the input argument was the wrong type and got converted and wrapped in an array.
 				if (argument != arguments[varargsPosition] &&
 						!isFirstEntryInArray(argument, arguments[varargsPosition])) {
 					conversionOccurred = true; // case 3
