@@ -302,10 +302,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		evaluate("optionalVarargsMethod(2,3)", "[Optional[2], Optional[3]]", String.class);
 		evaluate("optionalVarargsMethod('a',3.0d)", "[Optional[a], Optional[3.0]]", String.class);
 		evaluate("optionalVarargsMethod(new String[]{'a','b','c'})", "[Optional[a], Optional[b], Optional[c]]", String.class);
-		// The following should actually evaluate to [Optional.empty] instead of [null],
-		// but ReflectionHelper.convertArguments() currently does not provide explicit
-		// Optional support for a single argument passed to a varargs array.
-		evaluate("optionalVarargsMethod(null)", "[null]", String.class);
+		evaluate("optionalVarargsMethod(null)", "[Optional.empty]", String.class);
 		evaluate("optionalVarargsMethod(null,'a')", "[Optional.empty, Optional[a]]", String.class);
 		evaluate("optionalVarargsMethod('a',null,'b')", "[Optional[a], Optional.empty, Optional[b]]", String.class);
 	}
