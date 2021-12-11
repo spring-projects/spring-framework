@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ package org.springframework.web.server;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.http.HttpHeaders;
@@ -54,19 +53,9 @@ public class MethodNotAllowedException extends ResponseStatusException {
 			supportedMethods = Collections.emptySet();
 		}
 		this.method = method;
-		this.httpMethods = Collections.unmodifiableSet(new HashSet<>(supportedMethods));
+		this.httpMethods = Collections.unmodifiableSet(new LinkedHashSet<>(supportedMethods));
 	}
 
-
-	/**
-	 * Return a Map with an "Allow" header.
-	 * @since 5.1.11
-	 */
-	@SuppressWarnings("deprecation")
-	@Override
-	public Map<String, String> getHeaders() {
-		return getResponseHeaders().toSingleValueMap();
-	}
 
 	/**
 	 * Return HttpHeaders with an "Allow" header.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket;
 
 import java.nio.charset.Charset;
@@ -26,9 +27,9 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Representation of a WebSocket message.
- * <p>See static factory methods in {@link WebSocketSession} for creating messages
- * with the {@link org.springframework.core.io.buffer.DataBufferFactory
- * DataBufferFactory} for the session.
+ *
+ * <p>See static factory methods in {@link WebSocketSession} for creating messages with
+ * the {@link org.springframework.core.io.buffer.DataBufferFactory} for the session.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -39,6 +40,9 @@ public class WebSocketMessage {
 
 	private final DataBuffer payload;
 
+	@Nullable
+	private final Object nativeMessage;
+
 
 	/**
 	 * Constructor for a WebSocketMessage.
@@ -47,12 +51,24 @@ public class WebSocketMessage {
 	 * then invoke this constructor.
 	 */
 	public WebSocketMessage(Type type, DataBuffer payload) {
+		this(type, payload, null);
+	}
+
+	/**
+	 * Constructor for an inbound message with access to the underlying message.
+	 * @param type the type of WebSocket message
+	 * @param payload the message content
+	 * @param nativeMessage the message from the API of the underlying WebSocket
+	 * library, if applicable.
+	 * @since 5.3
+	 */
+	public WebSocketMessage(Type type, DataBuffer payload, @Nullable Object nativeMessage) {
 		Assert.notNull(type, "'type' must not be null");
 		Assert.notNull(payload, "'payload' must not be null");
 		this.type = type;
 		this.payload = payload;
+		this.nativeMessage = nativeMessage;
 	}
-
 
 	/**
 	 * Return the message type (text, binary, etc).
@@ -66,6 +82,21 @@ public class WebSocketMessage {
 	 */
 	public DataBuffer getPayload() {
 		return this.payload;
+	}
+
+	/**
+	 * Return the message from the API of the underlying WebSocket library. This
+	 * is applicable for inbound messages only and when the underlying message
+	 * has additional fields other than the content. Currently this is the case
+	 * for Reactor Netty only.
+	 * @param <T> the type to cast the underlying message to
+	 * @return the underlying message, or {@code null}
+	 * @since 5.3
+	 */
+	@Nullable
+	@SuppressWarnings("unchecked")
+	public <T> T getNativeMessage() {
+		return (T) this.nativeMessage;
 	}
 
 	/**
@@ -84,9 +115,7 @@ public class WebSocketMessage {
 	 * @since 5.0.5
 	 */
 	public String getPayloadAsText(Charset charset) {
-		byte[] bytes = new byte[this.payload.readableByteCount()];
-		this.payload.read(bytes);
-		return new String(bytes, charset);
+		return this.payload.toString(charset);
 	}
 
 	/**
@@ -122,10 +151,9 @@ public class WebSocketMessage {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof WebSocketMessage)) {
+		if (!(other instanceof WebSocketMessage otherMessage)) {
 			return false;
 		}
-		WebSocketMessage otherMessage = (WebSocketMessage) other;
 		return (this.type.equals(otherMessage.type) &&
 				ObjectUtils.nullSafeEquals(this.payload, otherMessage.payload));
 	}
@@ -139,6 +167,7 @@ public class WebSocketMessage {
 	public String toString() {
 		return "WebSocket " + this.type.name() + " message (" + this.payload.readableByteCount() + " bytes)";
 	}
+
 
 	/**
 	 * WebSocket message types.
@@ -159,7 +188,7 @@ public class WebSocketMessage {
 		/**
 		 * WebSocket pong.
 		 */
-		PONG;
+		PONG
 	}
 
 }

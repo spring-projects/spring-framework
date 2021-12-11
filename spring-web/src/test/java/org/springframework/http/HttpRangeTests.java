@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public class HttpRangeTests {
 		// 1. At limit..
 		StringBuilder atLimit = new StringBuilder("bytes=0-0");
 		for (int i=0; i < 99; i++) {
-			atLimit.append(",").append(i).append("-").append(i + 1);
+			atLimit.append(',').append(i).append('-').append(i + 1);
 		}
 		List<HttpRange> ranges = HttpRange.parseRanges(atLimit.toString());
 		assertThat(ranges.size()).isEqualTo(100);
@@ -119,7 +119,7 @@ public class HttpRangeTests {
 		// 2. Above limit..
 		StringBuilder aboveLimit = new StringBuilder("bytes=0-0");
 		for (int i=0; i < 100; i++) {
-			aboveLimit.append(",").append(i).append("-").append(i + 1);
+			aboveLimit.append(',').append(i).append('-').append(i + 1);
 		}
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				HttpRange.parseRanges(aboveLimit.toString()));

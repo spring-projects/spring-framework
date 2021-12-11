@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,17 +51,8 @@ abstract class ConfigurationMethod {
 		return new Location(this.configurationClass.getResource(), this.metadata);
 	}
 
-	String getFullyQualifiedMethodName() {
-		return this.metadata.getDeclaringClassName() + "#" + this.metadata.getMethodName();
+	void validate(ProblemReporter problemReporter) {
 	}
-
-	static String getShortMethodName(String fullyQualifiedMethodName) {
-		return fullyQualifiedMethodName.substring(fullyQualifiedMethodName.indexOf('#') + 1);
-	}
-
-	public void validate(ProblemReporter problemReporter) {
-	}
-
 
 	@Override
 	public String toString() {

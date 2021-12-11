@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.nio.charset.StandardCharsets;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * the character encoding.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  *
  * @see JsonPathAssertionTests
  * @see XmlContentAssertionTests
@@ -44,15 +45,11 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  */
 public class ContentAssertionTests {
 
-	private MockMvc mockMvc;
+	private final MockMvc mockMvc = standaloneSetup(new SimpleController()).alwaysExpect(status().isOk()).build();
 
-	@BeforeEach
-	public void setup() {
-		this.mockMvc = standaloneSetup(new SimpleController()).alwaysExpect(status().isOk()).build();
-	}
 
 	@Test
-	public void testContentType() throws Exception {
+	void contentType() throws Exception {
 		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
 			.andExpect(content().contentType(MediaType.valueOf("text/plain;charset=ISO-8859-1")))
 			.andExpect(content().contentType("text/plain;charset=ISO-8859-1"))
@@ -67,8 +64,7 @@ public class ContentAssertionTests {
 	}
 
 	@Test
-	public void testContentAsString() throws Exception {
-
+	void contentAsString() throws Exception {
 		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
 			.andExpect(content().string("Hello world!"));
 
@@ -81,8 +77,7 @@ public class ContentAssertionTests {
 	}
 
 	@Test
-	public void testContentAsBytes() throws Exception {
-
+	void contentAsBytes() throws Exception {
 		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
 			.andExpect(content().bytes("Hello world!".getBytes("ISO-8859-1")));
 
@@ -91,36 +86,41 @@ public class ContentAssertionTests {
 	}
 
 	@Test
-	public void testContentStringMatcher() throws Exception {
+	void contentStringMatcher() throws Exception {
 		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
 			.andExpect(content().string(containsString("world")));
 	}
 
 	@Test
-	public void testCharacterEncoding() throws Exception {
-
+	void characterEncoding() throws Exception {
 		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
 			.andExpect(content().encoding("ISO-8859-1"))
+			.andExpect(content().string(containsString("world")));
+
+		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
+			.andExpect(content().encoding(StandardCharsets.ISO_8859_1))
 			.andExpect(content().string(containsString("world")));
 
 		this.mockMvc.perform(get("/handleUtf8"))
 			.andExpect(content().encoding("UTF-8"))
 			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes("UTF-8")));
+
+		this.mockMvc.perform(get("/handleUtf8"))
+			.andExpect(content().encoding(StandardCharsets.UTF_8))
+			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes("UTF-8")));
 	}
 
 
-	@Controller
+	@RestController
 	private static class SimpleController {
 
-		@RequestMapping(value="/handle", produces="text/plain")
-		@ResponseBody
-		public String handle() {
+		@GetMapping(path="/handle", produces="text/plain")
+		String handle() {
 			return "Hello world!";
 		}
 
-		@RequestMapping(value="/handleUtf8", produces="text/plain;charset=UTF-8")
-		@ResponseBody
-		public String handleWithCharset() {
+		@GetMapping(path="/handleUtf8", produces="text/plain;charset=UTF-8")
+		String handleWithCharset() {
 			return "\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01";	// "Hello world! (Japanese)
 		}
 	}

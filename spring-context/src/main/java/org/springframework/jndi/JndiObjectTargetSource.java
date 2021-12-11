@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
  * &lt;/bean&gt;
  *
  * &lt;bean id="queueConnectionFactory" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
- *   &lt;property name="proxyInterfaces" value="javax.jms.QueueConnectionFactory"/&gt;
+ *   &lt;property name="proxyInterfaces" value="jakarta.jms.QueueConnectionFactory"/&gt;
  *   &lt;property name="targetSource" ref="queueConnectionFactoryTarget"/&gt;
  * &lt;/bean&gt;</pre>
  *

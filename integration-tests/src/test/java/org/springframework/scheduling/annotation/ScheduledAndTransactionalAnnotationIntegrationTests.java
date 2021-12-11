@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.transaction.testfixture.CallCountingTransactionManage
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * Integration tests cornering bug SPR-8651, which revealed that @Scheduled methods may
@@ -52,7 +52,7 @@ import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
  * @since 3.1
  */
 @SuppressWarnings("resource")
-@EnabledForTestGroups(PERFORMANCE)
+@EnabledForTestGroups(LONG_RUNNING)
 class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 	@Test
@@ -61,7 +61,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 		ctx.register(Config.class, JdkProxyTxConfig.class, RepoConfigA.class);
 		assertThatExceptionOfType(BeanCreationException.class)
 			.isThrownBy(ctx::refresh)
-			.satisfies(ex -> assertThat(ex.getRootCause()).isInstanceOf(IllegalStateException.class));
+			.withCauseInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
@@ -182,7 +182,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 	@Aspect
 	public static class MyAspect {
 
-		private final AtomicInteger count = new AtomicInteger(0);
+		private final AtomicInteger count = new AtomicInteger();
 
 		@org.aspectj.lang.annotation.Before("execution(* scheduled())")
 		public void checkTransaction() {
@@ -200,7 +200,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 	@Repository
 	static class MyRepositoryImpl implements MyRepository {
 
-		private final AtomicInteger count = new AtomicInteger(0);
+		private final AtomicInteger count = new AtomicInteger();
 
 		@Transactional
 		@Scheduled(fixedDelay = 5)
@@ -226,7 +226,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 	@Repository
 	static class MyRepositoryWithScheduledMethodImpl implements MyRepositoryWithScheduledMethod {
 
-		private final AtomicInteger count = new AtomicInteger(0);
+		private final AtomicInteger count = new AtomicInteger();
 
 		@Autowired(required = false)
 		private MyAspect myAspect;

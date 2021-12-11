@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import javax.annotation.Resource;
-import javax.inject.Provider;
-
+import jakarta.annotation.Resource;
+import jakarta.inject.Provider;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -42,7 +41,6 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.ListFactoryBean;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -247,7 +245,9 @@ public class ConfigurationClassProcessingTests {
 	public void configurationWithPostProcessor() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithPostProcessor.class);
-		RootBeanDefinition placeholderConfigurer = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
+		@SuppressWarnings("deprecation")
+		RootBeanDefinition placeholderConfigurer = new RootBeanDefinition(
+				org.springframework.beans.factory.config.PropertyPlaceholderConfigurer.class);
 		placeholderConfigurer.getPropertyValues().add("properties", "myProp=myValue");
 		ctx.registerBeanDefinition("placeholderConfigurer", placeholderConfigurer);
 		ctx.refresh();
@@ -280,12 +280,49 @@ public class ConfigurationClassProcessingTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithApplicationListener.class);
 		ctx.refresh();
+
 		ConfigWithApplicationListener config = ctx.getBean(ConfigWithApplicationListener.class);
 		assertThat(config.closed).isFalse();
 		ctx.close();
 		assertThat(config.closed).isTrue();
 	}
 
+	@Test
+	public void configurationWithOverloadedBeanMismatch() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(OverloadedBeanMismatch.class));
+		ctx.refresh();
+
+		TestBean tb = ctx.getBean(TestBean.class);
+		assertThat(tb.getLawyer()).isEqualTo(ctx.getBean(NestedTestBean.class));
+	}
+
+	@Test
+	public void configurationWithOverloadedBeanMismatchWithAsm() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(OverloadedBeanMismatch.class.getName()));
+		ctx.refresh();
+
+		TestBean tb = ctx.getBean(TestBean.class);
+		assertThat(tb.getLawyer()).isEqualTo(ctx.getBean(NestedTestBean.class));
+	}
+
+	@Test  // gh-26019
+	public void autowiringWithDynamicPrototypeBeanClass() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				ConfigWithDynamicPrototype.class, PrototypeDependency.class);
+
+		PrototypeInterface p1 = ctx.getBean(PrototypeInterface.class, 1);
+		assertThat(p1).isInstanceOf(PrototypeOne.class);
+		assertThat(((PrototypeOne) p1).prototypeDependency).isNotNull();
+
+		PrototypeInterface p2 = ctx.getBean(PrototypeInterface.class, 2);
+		assertThat(p2).isInstanceOf(PrototypeTwo.class);
+
+		PrototypeInterface p3 = ctx.getBean(PrototypeInterface.class, 1);
+		assertThat(p3).isInstanceOf(PrototypeOne.class);
+		assertThat(((PrototypeOne) p3).prototypeDependency).isNotNull();
+	}
 
 
 	/**
@@ -499,6 +536,7 @@ public class ConfigurationClassProcessingTests {
 
 				String nameSuffix = "-processed-" + myProp;
 
+				@SuppressWarnings("unused")
 				public void setNameSuffix(String nameSuffix) {
 					this.nameSuffix = nameSuffix;
 				}
@@ -514,10 +552,6 @@ public class ConfigurationClassProcessingTests {
 				@Override
 				public Object postProcessAfterInitialization(Object bean, String beanName) {
 					return bean;
-				}
-
-				public int getOrder() {
-					return 0;
 				}
 			};
 		}
@@ -592,6 +626,61 @@ public class ConfigurationClassProcessingTests {
 		@Bean
 		public ApplicationListener<ContextClosedEvent> listener() {
 			return (event -> this.closed = true);
+		}
+	}
+
+
+	@Configuration
+	public static class OverloadedBeanMismatch {
+
+		@Bean(name = "other")
+		public NestedTestBean foo() {
+			return new NestedTestBean();
+		}
+
+		@Bean(name = "foo")
+		public TestBean foo(@Qualifier("other") NestedTestBean other) {
+			TestBean tb = new TestBean();
+			tb.setLawyer(other);
+			return tb;
+		}
+	}
+
+
+	static class PrototypeDependency {
+	}
+
+	interface PrototypeInterface {
+	}
+
+	static class PrototypeOne extends AbstractPrototype {
+
+		@Autowired
+		PrototypeDependency prototypeDependency;
+
+	}
+
+	static class PrototypeTwo extends AbstractPrototype {
+
+		// no autowired dependency here, in contrast to above
+	}
+
+	static class AbstractPrototype implements PrototypeInterface {
+	}
+
+	@Configuration
+	static class ConfigWithDynamicPrototype {
+
+		@Bean
+		@Scope(value = "prototype")
+		public PrototypeInterface getDemoBean( int i) {
+			switch ( i) {
+				case 1: return new PrototypeOne();
+				case 2:
+				default:
+					return new PrototypeTwo();
+
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet.handler;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
@@ -43,9 +43,11 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 		if (handler == null) {
 			return super.shouldApplyTo(request, null);
 		}
-		else if (handler instanceof HandlerMethod) {
-			HandlerMethod handlerMethod = (HandlerMethod) handler;
+		else if (handler instanceof HandlerMethod handlerMethod) {
 			handler = handlerMethod.getBean();
+			return super.shouldApplyTo(request, handler);
+		}
+		else if (hasGlobalExceptionHandlers() && hasHandlerMappings()) {
 			return super.shouldApplyTo(request, handler);
 		}
 		else {
@@ -53,12 +55,23 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 		}
 	}
 
+	/**
+	 * Whether this resolver has global exception handlers, e.g. not declared in
+	 * the same class as the {@code HandlerMethod} that raised the exception and
+	 * therefore can apply to any handler.
+	 * @since 5.3
+	 */
+	protected boolean hasGlobalExceptionHandlers() {
+		return false;
+	}
+
 	@Override
 	@Nullable
 	protected final ModelAndView doResolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
-		return doResolveHandlerMethodException(request, response, (HandlerMethod) handler, ex);
+		HandlerMethod handlerMethod = (handler instanceof HandlerMethod ? (HandlerMethod) handler : null);
+		return doResolveHandlerMethodException(request, response, handlerMethod, ex);
 	}
 
 	/**

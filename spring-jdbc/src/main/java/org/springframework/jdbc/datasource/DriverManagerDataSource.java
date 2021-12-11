@@ -34,7 +34,7 @@ import org.springframework.util.ClassUtils;
  * connection pool, implementing the same standard interface, but creating new
  * Connections on every call.
  *
- * <p>Useful for test or standalone environments outside of a Java EE container, either
+ * <p>Useful for test or standalone environments outside of a Jakarta EE container, either
  * as a DataSource bean in a corresponding ApplicationContext or in conjunction with
  * a simple JNDI environment. Pool-assuming {@code Connection.close()} calls will
  * simply close the Connection, so any DataSource-aware persistence code should work.
@@ -44,7 +44,7 @@ import org.springframework.util.ClassUtils;
  * loading issues with the JDBC DriverManager that be resolved through direct Driver
  * usage (which is exactly what SimpleDriverDataSource does).</b>
  *
- * <p>In a Java EE container, it is recommended to use a JNDI DataSource provided by
+ * <p>In a Jakarta EE container, it is recommended to use a JNDI DataSource provided by
  * the container. Such a DataSource can be exposed as a DataSource bean in a Spring
  * ApplicationContext via {@link org.springframework.jndi.JndiObjectFactoryBean},
  * for seamless switching to and from a local DataSource bean like this class.

@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -83,8 +83,9 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 	private Mono<ClientHttpResponse> doConnect(
 			HttpMethod httpMethod, URI uri, Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		MonoProcessor<Void> requestWriteCompletion = MonoProcessor.create();
-		MonoProcessor<Void> handlerCompletion = MonoProcessor.create();
+		// unsafe(): we're intercepting, already serialized Publisher signals
+		Sinks.Empty<Void> requestWriteSink = Sinks.unsafe().empty();
+		Sinks.Empty<Void> handlerSink = Sinks.unsafe().empty();
 		ClientHttpResponse[] savedResponse = new ClientHttpResponse[1];
 
 		MockClientHttpRequest mockClientRequest = new MockClientHttpRequest(httpMethod, uri);
@@ -94,7 +95,10 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 			log("Invoking HttpHandler for ", httpMethod, uri);
 			ServerHttpRequest mockServerRequest = adaptRequest(mockClientRequest, requestBody);
 			ServerHttpResponse responseToUse = prepareResponse(mockServerResponse, mockServerRequest);
-			this.handler.handle(mockServerRequest, responseToUse).subscribe(handlerCompletion);
+			this.handler.handle(mockServerRequest, responseToUse).subscribe(
+					aVoid -> {},
+					handlerSink::tryEmitError,  // Ignore result: signals cannot compete
+					handlerSink::tryEmitEmpty);
 			return Mono.empty();
 		});
 
@@ -105,9 +109,12 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 				}));
 
 		log("Writing client request for ", httpMethod, uri);
-		requestCallback.apply(mockClientRequest).subscribe(requestWriteCompletion);
+		requestCallback.apply(mockClientRequest).subscribe(
+				aVoid -> {},
+				requestWriteSink::tryEmitError,  // Ignore result: signals cannot compete
+				requestWriteSink::tryEmitEmpty);
 
-		return Mono.when(requestWriteCompletion, handlerCompletion)
+		return Mono.when(requestWriteSink.asMono(), handlerSink.asMono())
 				.onErrorMap(ex -> {
 					ClientHttpResponse response = savedResponse[0];
 					return response != null ? new FailureAfterResponseCompletedException(response, ex) : ex;

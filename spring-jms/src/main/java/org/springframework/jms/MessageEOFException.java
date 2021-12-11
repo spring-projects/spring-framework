@@ -21,12 +21,12 @@ package org.springframework.jms;
  *
  * @author Mark Pollack
  * @since 1.1
- * @see javax.jms.MessageEOFException
+ * @see jakarta.jms.MessageEOFException
  */
 @SuppressWarnings("serial")
 public class MessageEOFException extends JmsException {
 
-	public MessageEOFException(javax.jms.MessageEOFException cause) {
+	public MessageEOFException(jakarta.jms.MessageEOFException cause) {
 		super(cause);
 	}
 

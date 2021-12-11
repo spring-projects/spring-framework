@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,10 +108,35 @@ public class LookupAnnotationTests {
 		assertThat(beanFactory.getBean(BeanConsumer.class).abstractBean).isSameAs(bean);
 	}
 
+	@Test  // gh-25806
+	public void testWithNullBean() {
+		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class, () -> null);
+		tbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		beanFactory.registerBeanDefinition("testBean", tbd);
+
+		AbstractBean bean = beanFactory.getBean("beanConsumer", BeanConsumer.class).abstractBean;
+		assertThat(bean).isNotNull();
+		Object expected = bean.get();
+		assertThat(expected).isNull();
+		assertThat(beanFactory.getBean(BeanConsumer.class).abstractBean).isSameAs(bean);
+	}
+
+	@Test
+	public void testWithGenericBean() {
+		beanFactory.registerBeanDefinition("numberBean", new RootBeanDefinition(NumberBean.class));
+		beanFactory.registerBeanDefinition("doubleStore", new RootBeanDefinition(DoubleStore.class));
+		beanFactory.registerBeanDefinition("floatStore", new RootBeanDefinition(FloatStore.class));
+
+		NumberBean bean = (NumberBean) beanFactory.getBean("numberBean");
+		assertThat(bean).isNotNull();
+		assertThat(beanFactory.getBean(DoubleStore.class)).isSameAs(bean.getDoubleStore());
+		assertThat(beanFactory.getBean(FloatStore.class)).isSameAs(bean.getFloatStore());
+	}
+
 
 	public static abstract class AbstractBean {
 
-		@Lookup
+		@Lookup("testBean")
 		public abstract TestBean get();
 
 		@Lookup
@@ -132,6 +157,28 @@ public class LookupAnnotationTests {
 
 		@Autowired
 		AbstractBean abstractBean;
+	}
+
+
+	public static class NumberStore<T extends Number> {
+	}
+
+
+	public static class DoubleStore extends NumberStore<Double> {
+	}
+
+
+	public static class FloatStore extends NumberStore<Float> {
+	}
+
+
+	public static abstract class NumberBean {
+
+		@Lookup
+		public abstract NumberStore<Double> getDoubleStore();
+
+		@Lookup
+		public abstract NumberStore<Float> getFloatStore();
 	}
 
 }

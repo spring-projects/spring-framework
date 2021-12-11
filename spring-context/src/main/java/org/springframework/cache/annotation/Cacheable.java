@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,11 @@ import org.springframework.core.annotation.AliasFor;
  * replace the default one (see {@link #keyGenerator}).
  *
  * <p>If no value is found in the cache for the computed key, the target method
- * will be invoked and the returned value stored in the associated cache. Note
- * that Java8's {@code Optional} return types are automatically handled and its
- * content is stored in the cache if present.
+ * will be invoked and the returned value will be stored in the associated cache.
+ * Note that {@link java.util.Optional} return types are unwrapped automatically.
+ * If an {@code Optional} value is {@linkplain java.util.Optional#isPresent()
+ * present}, it will be stored in the associated cache. If an {@code Optional}
+ * value is not present, {@code null} will be stored in the associated cache.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.

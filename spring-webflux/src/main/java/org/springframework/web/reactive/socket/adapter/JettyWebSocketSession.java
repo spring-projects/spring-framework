@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.SuspendToken;
 import org.eclipse.jetty.websocket.api.WriteCallback;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.lang.Nullable;
@@ -50,15 +50,22 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 
 
 	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
-		this(session, info, factory, null);
+		this(session, info, factory, (Sinks.Empty<Void>) null);
 	}
 
 	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
-			@Nullable MonoProcessor<Void> completionMono) {
+			@Nullable Sinks.Empty<Void> completionSink) {
 
-		super(session, ObjectUtils.getIdentityHexString(session), info, factory, completionMono);
+		super(session, ObjectUtils.getIdentityHexString(session), info, factory, completionSink);
 		// TODO: suspend causes failures if invoked at this stage
 		// suspendReceiving();
+	}
+
+	@Deprecated
+	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
+			@Nullable reactor.core.publisher.MonoProcessor<Void> completionMono) {
+
+		super(session, ObjectUtils.getIdentityHexString(session), info, factory, completionMono);
 	}
 
 
@@ -104,6 +111,11 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 			throw new IllegalArgumentException("Unexpected message type: " + message.getType());
 		}
 		return true;
+	}
+
+	@Override
+	public boolean isOpen() {
+		return getDelegate().isOpen();
 	}
 
 	@Override

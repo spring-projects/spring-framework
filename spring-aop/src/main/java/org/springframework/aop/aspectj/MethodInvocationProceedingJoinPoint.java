@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,11 +84,13 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	}
 
 	@Override
+	@Nullable
 	public Object proceed() throws Throwable {
 		return this.methodInvocation.invocableClone().proceed();
 	}
 
 	@Override
+	@Nullable
 	public Object proceed(Object[] arguments) throws Throwable {
 		Assert.notNull(arguments, "Argument array passed to proceed cannot be null");
 		if (arguments.length != this.methodInvocation.getArguments().length) {
@@ -219,10 +221,12 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		@Override
 		@Nullable
 		public String[] getParameterNames() {
-			if (this.parameterNames == null) {
-				this.parameterNames = parameterNameDiscoverer.getParameterNames(getMethod());
+			String[] parameterNames = this.parameterNames;
+			if (parameterNames == null) {
+				parameterNames = parameterNameDiscoverer.getParameterNames(getMethod());
+				this.parameterNames = parameterNames;
 			}
-			return this.parameterNames;
+			return parameterNames;
 		}
 
 		@Override
@@ -251,19 +255,19 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 			StringBuilder sb = new StringBuilder();
 			if (includeModifier) {
 				sb.append(Modifier.toString(getModifiers()));
-				sb.append(" ");
+				sb.append(' ');
 			}
 			if (includeReturnTypeAndArgs) {
 				appendType(sb, getReturnType(), useLongReturnAndArgumentTypeName);
-				sb.append(" ");
+				sb.append(' ');
 			}
 			appendType(sb, getDeclaringType(), useLongTypeName);
-			sb.append(".");
+			sb.append('.');
 			sb.append(getMethod().getName());
-			sb.append("(");
+			sb.append('(');
 			Class<?>[] parametersTypes = getParameterTypes();
 			appendTypes(sb, parametersTypes, includeReturnTypeAndArgs, useLongReturnAndArgumentTypeName);
-			sb.append(")");
+			sb.append(')');
 			return sb.toString();
 		}
 
@@ -274,7 +278,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 				for (int size = types.length, i = 0; i < size; i++) {
 					appendType(sb, types[i], useLongReturnAndArgumentTypeName);
 					if (i < size - 1) {
-						sb.append(",");
+						sb.append(',');
 					}
 				}
 			}

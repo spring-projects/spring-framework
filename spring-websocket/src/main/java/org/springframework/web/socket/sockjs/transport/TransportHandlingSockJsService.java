@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
 import org.springframework.context.Lifecycle;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -233,7 +235,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		TransportType transportType = TransportType.fromValue(transport);
 		if (transportType == null) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Unknown transport type for " + request.getURI());
+				logger.warn(LogFormatUtils.formatValue("Unknown transport type for " + request.getURI(), -1, true));
 			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
@@ -242,7 +244,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		TransportHandler transportHandler = this.handlers.get(transportType);
 		if (transportHandler == null) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("No TransportHandler for " + request.getURI());
+				logger.warn(LogFormatUtils.formatValue("No TransportHandler for " + request.getURI(), -1, true));
 			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
@@ -270,6 +272,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 
 			SockJsSession session = this.sessions.get(sessionId);
+			boolean isNewSession = false;
 			if (session == null) {
 				if (transportHandler instanceof SockJsSessionFactory) {
 					Map<String, Object> attributes = new HashMap<>();
@@ -278,6 +281,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 					}
 					SockJsSessionFactory sessionFactory = (SockJsSessionFactory) transportHandler;
 					session = createSockJsSession(sessionId, sessionFactory, handler, attributes);
+					isNewSession = true;
 				}
 				else {
 					response.setStatusCode(HttpStatus.NOT_FOUND);
@@ -311,6 +315,14 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 
 			transportHandler.handleRequest(request, response, handler, session);
+
+			if (isNewSession && (response instanceof ServletServerHttpResponse)) {
+				int status = ((ServletServerHttpResponse) response).getServletResponse().getStatus();
+				if (HttpStatus.valueOf(status).is4xxClientError()) {
+					this.sessions.remove(sessionId);
+				}
+			}
+
 			chain.applyAfterHandshake(request, response, null);
 		}
 		catch (SockJsException ex) {
@@ -333,7 +345,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			return false;
 		}
 
-		if (!this.allowedOrigins.contains("*")) {
+		if (!getAllowedOrigins().isEmpty() && !getAllowedOrigins().contains("*") ||
+				!getAllowedOriginPatterns().isEmpty()) {
 			TransportType transportType = TransportType.fromValue(transport);
 			if (transportType == null || !transportType.supportsOrigin()) {
 				if (logger.isWarnEnabled()) {

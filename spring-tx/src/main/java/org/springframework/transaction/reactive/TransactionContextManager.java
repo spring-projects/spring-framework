@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,19 +50,17 @@ public abstract class TransactionContextManager {
 	 * or no context found in a holder
 	 */
 	public static Mono<TransactionContext> currentContext() throws NoTransactionException {
-		return Mono.subscriberContext().handle((ctx, sink) -> {
+		return Mono.deferContextual(ctx -> {
 			if (ctx.hasKey(TransactionContext.class)) {
-				sink.next(ctx.get(TransactionContext.class));
-				return;
+				return Mono.just(ctx.get(TransactionContext.class));
 			}
 			if (ctx.hasKey(TransactionContextHolder.class)) {
 				TransactionContextHolder holder = ctx.get(TransactionContextHolder.class);
 				if (holder.hasContext()) {
-					sink.next(holder.currentContext());
-					return;
+					return Mono.just(holder.currentContext());
 				}
 			}
-			sink.error(new NoTransactionInContextException());
+			return Mono.error(new NoTransactionInContextException());
 		});
 	}
 
@@ -70,8 +68,8 @@ public abstract class TransactionContextManager {
 	 * Create a {@link TransactionContext} and register it in the subscriber {@link Context}.
 	 * @return functional context registration.
 	 * @throws IllegalStateException if a transaction context is already associated.
-	 * @see Mono#subscriberContext(Function)
-	 * @see Flux#subscriberContext(Function)
+	 * @see Mono#contextWrite(Function)
+	 * @see Flux#contextWrite(Function)
 	 */
 	public static Function<Context, Context> createTransactionContext() {
 		return context -> context.put(TransactionContext.class, new TransactionContext());

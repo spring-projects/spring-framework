@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,33 @@ package org.springframework.test.context;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import org.springframework.test.context.BootstrapUtilsTests.OuterClass.NestedWithInheritedBootstrapper;
+import org.springframework.test.context.BootstrapUtilsTests.OuterClass.NestedWithInheritedBootstrapper.DoubleNestedWithInheritedButOverriddenBootstrapper;
+import org.springframework.test.context.BootstrapUtilsTests.OuterClass.NestedWithInheritedBootstrapper.DoubleNestedWithOverriddenBootstrapper;
+import org.springframework.test.context.BootstrapUtilsTests.OuterClass.NestedWithInheritedBootstrapper.DoubleNestedWithOverriddenBootstrapper.TripleNestedWithInheritedBootstrapper;
+import org.springframework.test.context.BootstrapUtilsTests.OuterClass.NestedWithInheritedBootstrapper.DoubleNestedWithOverriddenBootstrapper.TripleNestedWithInheritedBootstrapperButLocalOverride;
+import org.springframework.test.context.BootstrapUtilsTests.WebAppConfigClass.NestedWithInheritedWebConfig;
+import org.springframework.test.context.BootstrapUtilsTests.WebAppConfigClass.NestedWithInheritedWebConfig.DoubleNestedWithImplicitlyInheritedWebConfig;
+import org.springframework.test.context.BootstrapUtilsTests.WebAppConfigClass.NestedWithInheritedWebConfig.DoubleNestedWithOverriddenWebConfig;
+import org.springframework.test.context.BootstrapUtilsTests.WebAppConfigClass.NestedWithInheritedWebConfig.DoubleNestedWithOverriddenWebConfig.TripleNestedWithInheritedOverriddenWebConfig;
+import org.springframework.test.context.BootstrapUtilsTests.WebAppConfigClass.NestedWithInheritedWebConfig.DoubleNestedWithOverriddenWebConfig.TripleNestedWithInheritedOverriddenWebConfigAndTestInterface;
 import org.springframework.test.context.support.DefaultTestContextBootstrapper;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.context.web.WebTestContextBootstrapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.context.BootstrapUtils.resolveTestContextBootstrapper;
+import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.INHERIT;
+import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.OVERRIDE;
 
 /**
  * Unit tests for {@link BootstrapUtils}.
@@ -66,11 +82,6 @@ class BootstrapUtilsTests {
 	}
 
 	@Test
-	void resolveTestContextBootstrapperForWebAppConfigurationAnnotatedClass() {
-		assertBootstrapper(WebAppConfigurationAnnotatedClass.class, WebTestContextBootstrapper.class);
-	}
-
-	@Test
 	void resolveTestContextBootstrapperWithDirectBootstrapWithAnnotation() {
 		assertBootstrapper(DirectBootstrapWithAnnotationClass.class, FooBootstrapper.class);
 	}
@@ -88,6 +99,37 @@ class BootstrapUtilsTests {
 	@Test
 	void resolveTestContextBootstrapperWithDuplicatingMetaBootstrapWithAnnotations() {
 		assertBootstrapper(DuplicateMetaAnnotatedBootstrapWithAnnotationClass.class, FooBootstrapper.class);
+	}
+
+	/**
+	 * @since 5.3
+	 */
+	@ParameterizedTest(name = "{0}")
+	@MethodSource
+	void resolveTestContextBootstrapperInEnclosingClassHierarchy(String name, Class<?> testClass, Class<?> expectedBootstrapper) {
+		assertBootstrapper(testClass, expectedBootstrapper);
+	}
+
+	static Stream<Arguments> resolveTestContextBootstrapperInEnclosingClassHierarchy() {
+		return Stream.of(//
+			args(OuterClass.class, FooBootstrapper.class),//
+			args(NestedWithInheritedBootstrapper.class, FooBootstrapper.class),//
+			args(DoubleNestedWithInheritedButOverriddenBootstrapper.class, EnigmaBootstrapper.class),//
+			args(DoubleNestedWithOverriddenBootstrapper.class, BarBootstrapper.class),//
+			args(TripleNestedWithInheritedBootstrapper.class, BarBootstrapper.class),//
+			args(TripleNestedWithInheritedBootstrapperButLocalOverride.class, EnigmaBootstrapper.class),//
+			// @WebAppConfiguration and default bootstrapper
+			args(WebAppConfigClass.class, WebTestContextBootstrapper.class),//
+			args(NestedWithInheritedWebConfig.class, WebTestContextBootstrapper.class),//
+			args(DoubleNestedWithImplicitlyInheritedWebConfig.class, WebTestContextBootstrapper.class),//
+			args(DoubleNestedWithOverriddenWebConfig.class, DefaultTestContextBootstrapper.class),//
+			args(TripleNestedWithInheritedOverriddenWebConfig.class, WebTestContextBootstrapper.class),//
+			args(TripleNestedWithInheritedOverriddenWebConfigAndTestInterface.class, DefaultTestContextBootstrapper.class)//
+		);
+	}
+
+	private static Arguments args(Class<?> testClass, Class<? extends TestContextBootstrapper> expectedBootstrapper) {
+		return arguments(testClass.getSimpleName(), testClass, expectedBootstrapper);
 	}
 
 	/**
@@ -153,7 +195,62 @@ class BootstrapUtilsTests {
 	@BootstrapWith(EnigmaBootstrapper.class)
 	static class LocalDeclarationAndMetaAnnotatedBootstrapWithAnnotationClass {}
 
-	@WebAppConfiguration
-	static class WebAppConfigurationAnnotatedClass {}
+	@org.springframework.test.context.web.WebAppConfiguration
+	static class WebAppConfigClass {
+
+		@NestedTestConfiguration(INHERIT)
+		class NestedWithInheritedWebConfig {
+
+			class DoubleNestedWithImplicitlyInheritedWebConfig {
+			}
+
+			@NestedTestConfiguration(OVERRIDE)
+			class DoubleNestedWithOverriddenWebConfig {
+
+				@NestedTestConfiguration(INHERIT)
+				@org.springframework.test.context.web.WebAppConfiguration
+				class TripleNestedWithInheritedOverriddenWebConfig {
+				}
+
+				@NestedTestConfiguration(INHERIT)
+				class TripleNestedWithInheritedOverriddenWebConfigAndTestInterface {
+				}
+			}
+		}
+
+		// Intentionally not annotated with @WebAppConfiguration to ensure that
+		// TripleNestedWithInheritedOverriddenWebConfigAndTestInterface is not
+		// considered to be annotated with @WebAppConfiguration even though the
+		// enclosing class for TestInterface is annotated with @WebAppConfiguration.
+		interface TestInterface {
+		}
+	}
+
+	@BootWithFoo
+	static class OuterClass {
+
+		@NestedTestConfiguration(INHERIT)
+		class NestedWithInheritedBootstrapper {
+
+			@NestedTestConfiguration(INHERIT)
+			@BootstrapWith(EnigmaBootstrapper.class)
+			class DoubleNestedWithInheritedButOverriddenBootstrapper {
+			}
+
+			@NestedTestConfiguration(OVERRIDE)
+			@BootWithBar
+			class DoubleNestedWithOverriddenBootstrapper {
+
+				@NestedTestConfiguration(INHERIT)
+				class TripleNestedWithInheritedBootstrapper {
+				}
+
+				@NestedTestConfiguration(INHERIT)
+				@BootstrapWith(EnigmaBootstrapper.class)
+				class TripleNestedWithInheritedBootstrapperButLocalOverride {
+				}
+			}
+		}
+	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,27 +50,27 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 
 
 	/**
-	 * Sort the rest by AspectJ precedence. If two pieces of advice have
-	 * come from the same aspect they will have the same order.
-	 * Advice from the same aspect is then further ordered according to the
+	 * Sort the supplied {@link Advisor} instances according to AspectJ precedence.
+	 * <p>If two pieces of advice come from the same aspect, they will have the same
+	 * order. Advice from the same aspect is then further ordered according to the
 	 * following rules:
 	 * <ul>
-	 * <li>if either of the pair is after advice, then the advice declared
-	 * last gets highest precedence (runs last)</li>
-	 * <li>otherwise the advice declared first gets highest precedence (runs first)</li>
+	 * <li>If either of the pair is <em>after</em> advice, then the advice declared
+	 * last gets highest precedence (i.e., runs last).</li>
+	 * <li>Otherwise the advice declared first gets highest precedence (i.e., runs
+	 * first).</li>
 	 * </ul>
 	 * <p><b>Important:</b> Advisors are sorted in precedence order, from highest
 	 * precedence to lowest. "On the way in" to a join point, the highest precedence
-	 * advisor should run first. "On the way out" of a join point, the highest precedence
-	 * advisor should run last.
+	 * advisor should run first. "On the way out" of a join point, the highest
+	 * precedence advisor should run last.
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	protected List<Advisor> sortAdvisors(List<Advisor> advisors) {
 		List<PartiallyComparableAdvisorHolder> partiallyComparableAdvisors = new ArrayList<>(advisors.size());
-		for (Advisor element : advisors) {
+		for (Advisor advisor : advisors) {
 			partiallyComparableAdvisors.add(
-					new PartiallyComparableAdvisorHolder(element, DEFAULT_PRECEDENCE_COMPARATOR));
+					new PartiallyComparableAdvisorHolder(advisor, DEFAULT_PRECEDENCE_COMPARATOR));
 		}
 		List<PartiallyComparableAdvisorHolder> sorted = PartialOrder.sort(partiallyComparableAdvisors);
 		if (sorted != null) {
@@ -86,8 +86,8 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 	}
 
 	/**
-	 * Adds an {@link ExposeInvocationInterceptor} to the beginning of the advice chain.
-	 * These additional advices are needed when using AspectJ expression pointcuts
+	 * Add an {@link ExposeInvocationInterceptor} to the beginning of the advice chain.
+	 * <p>This additional advice is needed when using AspectJ pointcut expressions
 	 * and when using AspectJ-style advice.
 	 */
 	@Override
@@ -110,7 +110,7 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 
 
 	/**
-	 * Implements AspectJ PartialComparable interface for defining partial orderings.
+	 * Implements AspectJ's {@link PartialComparable} interface for defining partial orderings.
 	 */
 	private static class PartiallyComparableAdvisorHolder implements PartialComparable {
 
@@ -140,17 +140,19 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder();
 			Advice advice = this.advisor.getAdvice();
-			sb.append(ClassUtils.getShortName(advice.getClass()));
-			sb.append(": ");
+			StringBuilder sb = new StringBuilder(ClassUtils.getShortName(advice.getClass()));
+			boolean appended = false;
 			if (this.advisor instanceof Ordered) {
-				sb.append("order ").append(((Ordered) this.advisor).getOrder()).append(", ");
+				sb.append(": order = ").append(((Ordered) this.advisor).getOrder());
+				appended = true;
 			}
 			if (advice instanceof AbstractAspectJAdvice) {
+				sb.append(!appended ? ": " : ", ");
 				AbstractAspectJAdvice ajAdvice = (AbstractAspectJAdvice) advice;
+				sb.append("aspect name = ");
 				sb.append(ajAdvice.getAspectName());
-				sb.append(", declaration order ");
+				sb.append(", declaration order = ");
 				sb.append(ajAdvice.getDeclarationOrder());
 			}
 			return sb.toString();

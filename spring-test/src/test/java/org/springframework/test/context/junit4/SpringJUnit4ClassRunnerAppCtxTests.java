@@ -16,10 +16,9 @@
 
 package org.springframework.test.context.junit4;
 
-import javax.annotation.Resource;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import jakarta.annotation.Resource;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

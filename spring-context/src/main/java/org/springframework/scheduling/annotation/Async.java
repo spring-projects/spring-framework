@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
  * {@code Future} that can be used to track the result of the asynchronous method
  * execution. However, since the target method needs to implement the same signature,
  * it will have to return a temporary {@code Future} handle that just passes a value
- * through: e.g. Spring's {@link AsyncResult}, EJB 3.1's {@link javax.ejb.AsyncResult},
+ * through: e.g. Spring's {@link AsyncResult}, EJB 3.1's {@link jakarta.ejb.AsyncResult},
  * or {@link java.util.concurrent.CompletableFuture#completedFuture(Object)}.
  *
  * @author Juergen Hoeller

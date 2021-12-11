@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class EnableLoadTimeWeavingTests {
 	@Test
 	public void control() {
 		GenericXmlApplicationContext ctx =
-			new GenericXmlApplicationContext(getClass(), "EnableLoadTimeWeavingTests-context.xml");
+				new GenericXmlApplicationContext(getClass(), "EnableLoadTimeWeavingTests-context.xml");
 		ctx.getBean("loadTimeWeaver", LoadTimeWeaver.class);
 	}
 
@@ -73,9 +73,11 @@ public class EnableLoadTimeWeavingTests {
 		verify(loadTimeWeaver).addTransformer(isA(ClassFileTransformer.class));
 	}
 
+
 	@Configuration
 	@EnableLoadTimeWeaving(aspectjWeaving=AspectJWeaving.DISABLED)
 	static class EnableLTWConfig_withAjWeavingDisabled implements LoadTimeWeavingConfigurer {
+
 		@Override
 		public LoadTimeWeaver getLoadTimeWeaver() {
 			return mock(LoadTimeWeaver.class);
@@ -85,6 +87,7 @@ public class EnableLoadTimeWeavingTests {
 	@Configuration
 	@EnableLoadTimeWeaving(aspectjWeaving=AspectJWeaving.AUTODETECT)
 	static class EnableLTWConfig_withAjWeavingAutodetect implements LoadTimeWeavingConfigurer {
+
 		@Override
 		public LoadTimeWeaver getLoadTimeWeaver() {
 			return mock(LoadTimeWeaver.class);
@@ -94,9 +97,11 @@ public class EnableLoadTimeWeavingTests {
 	@Configuration
 	@EnableLoadTimeWeaving(aspectjWeaving=AspectJWeaving.ENABLED)
 	static class EnableLTWConfig_withAjWeavingEnabled implements LoadTimeWeavingConfigurer {
+
 		@Override
 		public LoadTimeWeaver getLoadTimeWeaver() {
 			return mock(LoadTimeWeaver.class);
 		}
 	}
+
 }

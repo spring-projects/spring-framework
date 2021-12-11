@@ -18,8 +18,7 @@ package org.springframework.web.context.request.async;
 
 import java.util.function.Consumer;
 
-import javax.servlet.AsyncEvent;
-
+import jakarta.servlet.AsyncEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

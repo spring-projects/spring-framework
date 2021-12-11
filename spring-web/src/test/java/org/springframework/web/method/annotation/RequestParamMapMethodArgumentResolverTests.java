@@ -19,8 +19,7 @@ package org.springframework.web.method.annotation;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.servlet.http.Part;
-
+import jakarta.servlet.http.Part;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;

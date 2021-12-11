@@ -1,12 +1,5 @@
+:noheader:
 = Spring Framework Documentation
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
-
-****
-_What's New_, _Upgrade Notes_, _Supported Versions_, and other topics,
-independent of release cadence, are maintained externally on the project's
-https://github.com/spring-projects/spring-framework/wiki[*Github Wiki*].
-****
 
 [horizontal]
 <<overview.adoc#overview, Overview>> :: history, design philosophy, feedback,
@@ -16,23 +9,34 @@ Validation, Data Binding, Type Conversion, SpEL, AOP.
 <<testing.adoc#testing, Testing>> :: Mock Objects, TestContext Framework,
 Spring MVC Test, WebTestClient.
 <<data-access.adoc#spring-data-tier, Data Access>> :: Transactions, DAO Support,
-JDBC, O/R Mapping, XML Marshalling.
+JDBC, R2DBC, O/R Mapping, XML Marshalling.
 <<web.adoc#spring-web, Web Servlet>> :: Spring MVC, WebSocket, SockJS,
 STOMP Messaging.
 <<web-reactive.adoc#spring-webflux, Web Reactive>> :: Spring WebFlux, WebClient,
-WebSocket.
+WebSocket, RSocket.
 <<integration.adoc#spring-integration, Integration>> :: Remoting, JMS, JCA, JMX,
 Email, Tasks, Scheduling, Caching.
 <<languages.adoc#languages, Languages>> :: Kotlin, Groovy, Dynamic Languages.
+<<appendix.adoc#appendix, Appendix>> :: Spring properties.
+https://github.com/spring-projects/spring-framework/wiki[*Wiki*] :: What's New, Upgrade Notes, Supported Versions,
+and other cross-version information.
+
+ifdef::backend-html5[]
+NOTE: This documentation is also available as {docs-spring-framework}/reference/pdf/index.pdf[PDF].
+endif::[]
+
+ifdef::backend-pdf[]
+NOTE: This documentation is also available as {docs-spring-framework}/reference/html/index.html[HTML].
+endif::[]
 
 Rod Johnson, Juergen Hoeller, Keith Donald, Colin Sampaleanu, Rob Harrop, Thomas Risberg,
 Alef Arendsen, Darren Davison, Dmitriy Kopylenko, Mark Pollack, Thierry Templier, Erwin
 Vervaet, Portia Tung, Ben Hale, Adrian Colyer, John Lewis, Costin Leau, Mark Fisher, Sam
 Brannen, Ramnivas Laddad, Arjen Poutsma, Chris Beams, Tareq Abedrabbo, Andy Clement, Dave
 Syer, Oliver Gierke, Rossen Stoyanchev, Phillip Webb, Rob Winch, Brian Clozel, Stephane
-Nicoll, Sebastien Deleuze, Jay Bryant
+Nicoll, Sebastien Deleuze, Jay Bryant, Mark Paluch
 
-Copyright © 2002 - 2019 Pivotal, Inc. All Rights Reserved.
+Copyright © 2002 - 2021 Pivotal, Inc. All Rights Reserved.
 
 Copies of this document may be made for your own use and for distribution to others,
 provided that you do not charge any fee for such copies and further provided that each

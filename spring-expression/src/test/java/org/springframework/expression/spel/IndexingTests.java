@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -40,11 +41,11 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("rawtypes")
-public class IndexingTests {
+class IndexingTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void indexIntoGenericPropertyContainingMap() {
+	void indexIntoGenericPropertyContainingMap() {
 		Map<String, String> property = new HashMap<>();
 		property.put("foo", "bar");
 		this.property = property;
@@ -62,7 +63,7 @@ public class IndexingTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void indexIntoGenericPropertyContainingMapObject() {
+	void indexIntoGenericPropertyContainingMapObject() {
 		Map<String, Map<String, String>> property = new HashMap<>();
 		Map<String, String> map = new HashMap<>();
 		map.put("foo", "bar");
@@ -111,7 +112,7 @@ public class IndexingTests {
 	}
 
 	@Test
-	public void setGenericPropertyContainingMap() {
+	void setGenericPropertyContainingMap() {
 		Map<String, String> property = new HashMap<>();
 		property.put("foo", "bar");
 		this.property = property;
@@ -126,7 +127,7 @@ public class IndexingTests {
 	}
 
 	@Test
-	public void setPropertyContainingMap() {
+	void setPropertyContainingMap() {
 		Map<Integer, Integer> property = new HashMap<>();
 		property.put(9, 3);
 		this.parameterizedMap = property;
@@ -143,7 +144,7 @@ public class IndexingTests {
 	public Map<Integer, Integer> parameterizedMap;
 
 	@Test
-	public void setPropertyContainingMapAutoGrow() {
+	void setPropertyContainingMapAutoGrow() {
 		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, false));
 		Expression expression = parser.parseExpression("parameterizedMap");
 		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("java.util.Map<java.lang.Integer, java.lang.Integer>");
@@ -155,7 +156,7 @@ public class IndexingTests {
 	}
 
 	@Test
-	public void indexIntoGenericPropertyContainingList() {
+	void indexIntoGenericPropertyContainingList() {
 		List<String> property = new ArrayList<>();
 		property.add("bar");
 		this.property = property;
@@ -168,7 +169,7 @@ public class IndexingTests {
 	}
 
 	@Test
-	public void setGenericPropertyContainingList() {
+	void setGenericPropertyContainingList() {
 		List<Integer> property = new ArrayList<>();
 		property.add(3);
 		this.property = property;
@@ -183,7 +184,7 @@ public class IndexingTests {
 	}
 
 	@Test
-	public void setGenericPropertyContainingListAutogrow() {
+	void setGenericPropertyContainingListAutogrow() {
 		List<Integer> property = new ArrayList<>();
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
@@ -199,8 +200,28 @@ public class IndexingTests {
 		}
 	}
 
+	public List<BigDecimal> decimals;
+
 	@Test
-	public void indexIntoPropertyContainingList() {
+	void autoGrowListOfElementsWithoutDefaultConstructor() {
+		this.decimals = new ArrayList<>();
+		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+		parser.parseExpression("decimals[0]").setValue(this, "123.4");
+		assertThat(decimals).containsExactly(BigDecimal.valueOf(123.4));
+	}
+
+	@Test
+	void indexIntoPropertyContainingListContainingNullElement() {
+		this.decimals = new ArrayList<>();
+		this.decimals.add(null);
+		this.decimals.add(BigDecimal.ONE);
+		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+		parser.parseExpression("decimals[0]").setValue(this, "9876.5");
+		assertThat(decimals).containsExactly(BigDecimal.valueOf(9876.5), BigDecimal.ONE);
+	}
+
+	@Test
+	void indexIntoPropertyContainingList() {
 		List<Integer> property = new ArrayList<>();
 		property.add(3);
 		this.parameterizedList = property;
@@ -215,7 +236,7 @@ public class IndexingTests {
 	public List<Integer> parameterizedList;
 
 	@Test
-	public void indexIntoPropertyContainingListOfList() {
+	void indexIntoPropertyContainingListOfList() {
 		List<List<Integer>> property = new ArrayList<>();
 		property.add(Arrays.asList(3));
 		this.parameterizedListOfList = property;
@@ -230,7 +251,7 @@ public class IndexingTests {
 	public List<List<Integer>> parameterizedListOfList;
 
 	@Test
-	public void setPropertyContainingList() {
+	void setPropertyContainingList() {
 		List<Integer> property = new ArrayList<>();
 		property.add(3);
 		this.parameterizedList = property;
@@ -245,7 +266,7 @@ public class IndexingTests {
 	}
 
 	@Test
-	public void indexIntoGenericPropertyContainingNullList() {
+	void indexIntoGenericPropertyContainingNullList() {
 		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
 		SpelExpressionParser parser = new SpelExpressionParser(configuration);
 		Expression expression = parser.parseExpression("property");
@@ -261,7 +282,7 @@ public class IndexingTests {
 	}
 
 	@Test
-	public void indexIntoGenericPropertyContainingGrowingList() {
+	void indexIntoGenericPropertyContainingGrowingList() {
 		List<String> property = new ArrayList<>();
 		this.property = property;
 		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
@@ -279,7 +300,7 @@ public class IndexingTests {
 	}
 
 	@Test
-	public void indexIntoGenericPropertyContainingGrowingList2() {
+	void indexIntoGenericPropertyContainingGrowingList2() {
 		List<String> property2 = new ArrayList<>();
 		this.property2 = property2;
 		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
@@ -299,7 +320,7 @@ public class IndexingTests {
 	public List property2;
 
 	@Test
-	public void indexIntoGenericPropertyContainingArray() {
+	void indexIntoGenericPropertyContainingArray() {
 		String[] property = new String[] { "bar" };
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -311,7 +332,7 @@ public class IndexingTests {
 	}
 
 	@Test
-	public void emptyList() {
+	void emptyList() {
 		listOfScalarNotGeneric = new ArrayList();
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listOfScalarNotGeneric");
@@ -321,7 +342,7 @@ public class IndexingTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void resolveCollectionElementType() {
+	void resolveCollectionElementType() {
 		listNotGeneric = new ArrayList(2);
 		listNotGeneric.add(5);
 		listNotGeneric.add(6);
@@ -332,7 +353,7 @@ public class IndexingTests {
 	}
 
 	@Test
-	public void resolveCollectionElementTypeNull() {
+	void resolveCollectionElementTypeNull() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listNotGeneric");
 		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.List<?>");
@@ -349,7 +370,7 @@ public class IndexingTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void resolveMapKeyValueTypes() {
+	void resolveMapKeyValueTypes() {
 		mapNotGeneric = new HashMap();
 		mapNotGeneric.put("baseAmount", 3.11);
 		mapNotGeneric.put("bonusAmount", 7.17);
@@ -363,12 +384,12 @@ public class IndexingTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testListOfScalar() {
+	void testListOfScalar() {
 		listOfScalarNotGeneric = new ArrayList(1);
 		listOfScalarNotGeneric.add("5");
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listOfScalarNotGeneric[0]");
-		assertThat(expression.getValue(this, Integer.class)).isEqualTo(new Integer(5));
+		assertThat(expression.getValue(this, Integer.class)).isEqualTo(Integer.valueOf(5));
 	}
 
 	public List listOfScalarNotGeneric;
@@ -376,7 +397,7 @@ public class IndexingTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testListsOfMap() {
+	void testListsOfMap() {
 		listOfMapsNotGeneric = new ArrayList();
 		Map map = new HashMap();
 		map.put("fruit", "apple");

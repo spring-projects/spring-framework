@@ -265,7 +265,6 @@ public interface ServerResponse {
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
 		 * by the {@code Allow} header.
-		 *
 		 * @param allowedMethods the allowed methods
 		 * @return this builder
 		 * @see HttpHeaders#setAllow(Set)
@@ -345,8 +344,8 @@ public interface ServerResponse {
 
 		/**
 		 * Build the response entity with no body.
-		 * The response will be committed when the given {@code voidPublisher} completes.
-		 * @param voidPublisher publisher publisher to indicate when the response should be committed
+		 * <p>The response will be committed when the given {@code voidPublisher} completes.
+		 * @param voidPublisher the publisher to indicate when the response should be committed
 		 */
 		Mono<ServerResponse> build(Publisher<Void> voidPublisher);
 

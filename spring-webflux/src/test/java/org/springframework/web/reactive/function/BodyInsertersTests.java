@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -45,7 +45,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
@@ -125,7 +124,7 @@ public class BodyInsertersTests {
 		StepVerifier.create(result).expectComplete().verify();
 		StepVerifier.create(response.getBody())
 				.consumeNextWith(buf -> {
-					String actual = DataBufferTestUtils.dumpString(buf, UTF_8);
+					String actual = buf.toString(UTF_8);
 					assertThat(actual).isEqualTo("foo");
 				})
 				.expectComplete()
@@ -185,7 +184,7 @@ public class BodyInsertersTests {
 		StepVerifier.create(result).expectComplete().verify();
 		StepVerifier.create(response.getBody())
 				.consumeNextWith(buf -> {
-					String actual = DataBufferTestUtils.dumpString(buf, UTF_8);
+					String actual = buf.toString(UTF_8);
 					assertThat(actual).isEqualTo("foo");
 				})
 				.expectComplete()
@@ -216,7 +215,7 @@ public class BodyInsertersTests {
 		StepVerifier.create(result).expectComplete().verify();
 		StepVerifier.create(response.getBody())
 				.consumeNextWith(buf -> {
-					String actual = DataBufferTestUtils.dumpString(buf, UTF_8);
+					String actual = buf.toString(UTF_8);
 					assertThat(actual).isEqualTo("foo");
 				})
 				.expectComplete()
@@ -422,9 +421,8 @@ public class BodyInsertersTests {
 
 	@Test
 	public void ofDataBuffers() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		BodyInserter<Flux<DataBuffer>, ReactiveHttpOutputMessage> inserter = BodyInserters.fromDataBuffers(body);

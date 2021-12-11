@@ -40,7 +40,7 @@ class GroovyDynamicElementReader extends GroovyObjectSupport {
 
 	private final GroovyBeanDefinitionWrapper beanDefinition
 
-	protected final boolean decorating;
+	protected final Boolean decorating;
 
 	private boolean callAfterInvocation = true
 

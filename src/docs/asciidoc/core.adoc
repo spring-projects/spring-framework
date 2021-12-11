@@ -1,7 +1,5 @@
 [[spring-core]]
 = Core Technologies
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 4
 :tabsize: 4
@@ -36,5 +34,7 @@ include::core/core-aop-api.adoc[leveloffset=+1]
 include::core/core-null-safety.adoc[leveloffset=+1]
 
 include::core/core-databuffer-codec.adoc[leveloffset=+1]
+
+include::core/core-spring-jcl.adoc[leveloffset=+1]
 
 include::core/core-appendix.adoc[leveloffset=+1]

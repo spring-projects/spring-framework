@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -78,8 +77,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		Assert.notNull(other, "ServerResponse must not be null");
 		this.headers.addAll(other.headers());
 		this.cookies.addAll(other.cookies());
-		if (other instanceof AbstractServerResponse) {
-			AbstractServerResponse abstractOther = (AbstractServerResponse) other;
+		if (other instanceof AbstractServerResponse abstractOther) {
 			this.statusCode = abstractOther.statusCode;
 			this.hints.putAll(abstractOther.hints);
 		}
@@ -298,7 +296,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	 */
 	abstract static class AbstractServerResponse implements ServerResponse {
 
-		private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
+		private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
 
 		final int statusCode;
 
@@ -362,9 +360,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private static <K,V> void copy(MultiValueMap<K,V> src, MultiValueMap<K,V> dst) {
 			if (!src.isEmpty()) {
-				src.entrySet().stream()
-						.filter(entry -> !dst.containsKey(entry.getKey()))
-						.forEach(entry -> dst.put(entry.getKey(), entry.getValue()));
+				dst.putAll(src);
 			}
 		}
 	}

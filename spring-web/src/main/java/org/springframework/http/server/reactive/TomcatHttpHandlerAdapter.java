@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.apache.catalina.connector.CoyoteInputStream;
 import org.apache.catalina.connector.CoyoteOutputStream;
 import org.apache.catalina.connector.RequestFacade;
@@ -43,6 +43,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -51,6 +52,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Violeta Georgieva
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 5.0
  * @see org.springframework.web.server.adapter.AbstractReactiveWebInitializer
  */
@@ -104,22 +106,20 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			this.bufferSize = bufferSize;
 		}
 
-		private static HttpHeaders createTomcatHttpHeaders(HttpServletRequest request) {
+		private static MultiValueMap<String, String> createTomcatHttpHeaders(HttpServletRequest request) {
 			RequestFacade requestFacade = getRequestFacade(request);
 			org.apache.catalina.connector.Request connectorRequest = (org.apache.catalina.connector.Request)
 					ReflectionUtils.getField(COYOTE_REQUEST_FIELD, requestFacade);
 			Assert.state(connectorRequest != null, "No Tomcat connector request");
 			Request tomcatRequest = connectorRequest.getCoyoteRequest();
-			TomcatHeadersAdapter headers = new TomcatHeadersAdapter(tomcatRequest.getMimeHeaders());
-			return new HttpHeaders(headers);
+			return new TomcatHeadersAdapter(tomcatRequest.getMimeHeaders());
 		}
 
 		private static RequestFacade getRequestFacade(HttpServletRequest request) {
-			if (request instanceof RequestFacade) {
-				return (RequestFacade) request;
+			if (request instanceof RequestFacade facade) {
+				return facade;
 			}
-			else if (request instanceof HttpServletRequestWrapper) {
-				HttpServletRequestWrapper wrapper = (HttpServletRequestWrapper) request;
+			else if (request instanceof HttpServletRequestWrapper wrapper) {
 				HttpServletRequest wrappedRequest = (HttpServletRequest) wrapper.getRequest();
 				return getRequestFacade(wrappedRequest);
 			}
@@ -131,13 +131,17 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected DataBuffer readFromInputStream() throws IOException {
+			ServletInputStream inputStream = ((ServletRequest) getNativeRequest()).getInputStream();
+			if (!(inputStream instanceof CoyoteInputStream coyoteInputStream)) {
+				// It's possible InputStream can be wrapped, preventing use of CoyoteInputStream
+				return super.readFromInputStream();
+			}
 			boolean release = true;
 			int capacity = this.bufferSize;
 			DataBuffer dataBuffer = this.factory.allocateBuffer(capacity);
 			try {
 				ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, capacity);
-				ServletRequest request = getNativeRequest();
-				int read = ((CoyoteInputStream) request.getInputStream()).read(byteBuffer);
+				int read = coyoteInputStream.read(byteBuffer);
 				logBytesRead(read);
 				if (read > 0) {
 					dataBuffer.writePosition(read);
@@ -188,11 +192,10 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		}
 
 		private static ResponseFacade getResponseFacade(HttpServletResponse response) {
-			if (response instanceof ResponseFacade) {
-				return (ResponseFacade) response;
+			if (response instanceof ResponseFacade facade) {
+				return facade;
 			}
-			else if (response instanceof HttpServletResponseWrapper) {
-				HttpServletResponseWrapper wrapper = (HttpServletResponseWrapper) response;
+			else if (response instanceof HttpServletResponseWrapper wrapper) {
 				HttpServletResponse wrappedResponse = (HttpServletResponse) wrapper.getResponse();
 				return getResponseFacade(wrappedResponse);
 			}

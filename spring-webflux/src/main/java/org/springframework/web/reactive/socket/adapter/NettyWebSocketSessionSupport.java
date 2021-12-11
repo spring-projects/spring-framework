@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,10 +74,13 @@ public abstract class NettyWebSocketSessionSupport<T> extends AbstractWebSocketS
 
 	protected WebSocketMessage toMessage(WebSocketFrame frame) {
 		DataBuffer payload = bufferFactory().wrap(frame.content());
-		return new WebSocketMessage(messageTypes.get(frame.getClass()), payload);
+		return new WebSocketMessage(messageTypes.get(frame.getClass()), payload, frame);
 	}
 
 	protected WebSocketFrame toFrame(WebSocketMessage message) {
+		if (message.getNativeMessage() != null) {
+			return message.getNativeMessage();
+		}
 		ByteBuf byteBuf = NettyDataBufferFactory.toByteBuf(message.getPayload());
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
 			return new TextWebSocketFrame(byteBuf);

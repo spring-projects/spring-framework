@@ -268,6 +268,7 @@ public class InterceptingClientHttpRequestFactoryTests {
 		}
 
 		@Override
+		@Deprecated
 		public String getMethodValue() {
 			return method.name();
 		}

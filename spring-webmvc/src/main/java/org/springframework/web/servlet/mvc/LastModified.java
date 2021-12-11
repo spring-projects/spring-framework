@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.mvc;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Supports last-modified HTTP requests to facilitate content caching.
@@ -34,12 +34,18 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see javax.servlet.http.HttpServlet#getLastModified
+ * @see jakarta.servlet.http.HttpServlet#getLastModified
  * @see Controller
  * @see SimpleControllerHandlerAdapter
  * @see org.springframework.web.HttpRequestHandler
  * @see HttpRequestHandlerAdapter
+ * @deprecated as of 5.3.9 in favor of using the {@code checkNotModified} methods
+ * in {@link org.springframework.web.context.request.WebRequest}, or from an
+ * annotated controller method, returning a
+ * {@link org.springframework.http.ResponseEntity} with an "ETag" and/or
+ * "Last-Modified" headers set.
  */
+@Deprecated
 public interface LastModified {
 
 	/**
@@ -52,7 +58,7 @@ public interface LastModified {
 	 * @return the time the underlying resource was last modified, or -1
 	 * meaning that the content must always be regenerated
 	 * @see org.springframework.web.servlet.HandlerAdapter#getLastModified
-	 * @see javax.servlet.http.HttpServlet#getLastModified
+	 * @see jakarta.servlet.http.HttpServlet#getLastModified
 	 */
 	long getLastModified(HttpServletRequest request);
 

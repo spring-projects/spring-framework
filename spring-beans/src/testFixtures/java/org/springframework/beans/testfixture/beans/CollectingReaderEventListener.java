@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,13 +35,13 @@ import org.springframework.beans.factory.parsing.ReaderEventListener;
  */
 public class CollectingReaderEventListener implements ReaderEventListener {
 
-	private final List<DefaultsDefinition> defaults = new LinkedList<>();
+	private final List<DefaultsDefinition> defaults = new ArrayList<>();
 
 	private final Map<String, ComponentDefinition> componentDefinitions = new LinkedHashMap<>(8);
 
 	private final Map<String, List<AliasDefinition>> aliasMap = new LinkedHashMap<>(8);
 
-	private final List<ImportDefinition> imports = new LinkedList<>();
+	private final List<ImportDefinition> imports = new ArrayList<>();
 
 
 	@Override
@@ -65,16 +64,12 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 
 	public ComponentDefinition[] getComponentDefinitions() {
 		Collection<ComponentDefinition> collection = this.componentDefinitions.values();
-		return collection.toArray(new ComponentDefinition[collection.size()]);
+		return collection.toArray(new ComponentDefinition[0]);
 	}
 
 	@Override
 	public void aliasRegistered(AliasDefinition aliasDefinition) {
-		List<AliasDefinition> aliases = this.aliasMap.get(aliasDefinition.getBeanName());
-		if (aliases == null) {
-			aliases = new ArrayList<>();
-			this.aliasMap.put(aliasDefinition.getBeanName(), aliases);
-		}
+		List<AliasDefinition> aliases = this.aliasMap.computeIfAbsent(aliasDefinition.getBeanName(), k -> new ArrayList<>());
 		aliases.add(aliasDefinition);
 	}
 

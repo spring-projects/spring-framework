@@ -166,7 +166,10 @@ public class InvocableHandlerMethodTests {
 
 
 	@SuppressWarnings("unused")
-	private static class Handler {
+	static class Handler {
+
+		public Handler() {
+		}
 
 		public String handle(Integer intArg, String stringArg) {
 			return intArg + "-" + stringArg;
@@ -181,7 +184,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 
-	private static class ExceptionRaisingArgumentResolver implements HandlerMethodArgumentResolver {
+	static class ExceptionRaisingArgumentResolver implements HandlerMethodArgumentResolver {
 
 		@Override
 		public boolean supportsParameter(MethodParameter parameter) {

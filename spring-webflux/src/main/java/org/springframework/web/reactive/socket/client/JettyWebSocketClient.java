@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,23 @@
 
 package org.springframework.web.reactive.socket.client;
 
+import java.io.IOException;
 import java.net.URI;
+import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.UpgradeRequest;
-import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
-import org.eclipse.jetty.websocket.client.io.UpgradeListener;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.context.Lifecycle;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.adapter.ContextWebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 
@@ -48,18 +47,16 @@ import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
  *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  */
 public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 
 	private static final Log logger = LogFactory.getLog(JettyWebSocketClient.class);
 
-
 	private final org.eclipse.jetty.websocket.client.WebSocketClient jettyClient;
 
 	private final boolean externallyManaged;
-
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
 	/**
@@ -67,7 +64,6 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 	 * {@link org.eclipse.jetty.websocket.client.WebSocketClient WebSocketClient}.
 	 * The instance can be obtained with {@link #getJettyClient()} for further
 	 * configuration.
-	 *
 	 * <p><strong>Note: </strong> When this constructor is used {@link Lifecycle}
 	 * methods of this class are delegated to the Jetty {@code WebSocketClient}.
 	 */
@@ -79,7 +75,6 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 	/**
 	 * Constructor that accepts an existing instance of a Jetty
 	 * {@link org.eclipse.jetty.websocket.client.WebSocketClient WebSocketClient}.
-	 *
 	 * <p><strong>Note: </strong> Use of this constructor implies the Jetty
 	 * {@code WebSocketClient} is externally managed and hence {@link Lifecycle}
 	 * methods of this class are not delegated to it.
@@ -139,26 +134,32 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 	}
 
 	private Mono<Void> executeInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		MonoProcessor<Void> completionMono = MonoProcessor.create();
-		return Mono.fromCallable(
-				() -> {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Connecting to " + url);
-					}
-					Object jettyHandler = createHandler(url, handler, completionMono);
-					ClientUpgradeRequest request = new ClientUpgradeRequest();
-					request.setSubProtocols(handler.getSubProtocols());
-					UpgradeListener upgradeListener = new DefaultUpgradeListener(headers);
-					return this.jettyClient.connect(jettyHandler, url, request, upgradeListener);
-				})
-				.then(completionMono);
+		Sinks.Empty<Void> completionSink = Sinks.empty();
+		return Mono.deferContextual(contextView -> {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Connecting to " + url);
+			}
+			Object jettyHandler = createHandler(
+					url, ContextWebSocketHandler.decorate(handler, contextView), completionSink);
+			ClientUpgradeRequest request = new ClientUpgradeRequest();
+			request.setHeaders(headers);
+			request.setSubProtocols(handler.getSubProtocols());
+			try {
+				this.jettyClient.connect(jettyHandler, url, request);
+				return completionSink.asMono();
+			}
+			catch (IOException ex) {
+				return Mono.error(ex);
+			}
+		});
 	}
 
-	private Object createHandler(URI url, WebSocketHandler handler, MonoProcessor<Void> completion) {
-		return new JettyWebSocketHandlerAdapter(handler, session -> {
+	private Object createHandler(URI url, WebSocketHandler handler, Sinks.Empty<Void> completion) {
+		Function<Session, JettyWebSocketSession> sessionFactory = session -> {
 			HandshakeInfo info = createHandshakeInfo(url, session);
-			return new JettyWebSocketSession(session, info, this.bufferFactory, completion);
-		});
+			return new JettyWebSocketSession(session, info, DefaultDataBufferFactory.sharedInstance, completion);
+		};
+		return new JettyWebSocketHandlerAdapter(handler, sessionFactory);
 	}
 
 	private HandshakeInfo createHandshakeInfo(URI url, Session jettySession) {
@@ -166,26 +167,6 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 		jettySession.getUpgradeResponse().getHeaders().forEach(headers::put);
 		String protocol = headers.getFirst("Sec-WebSocket-Protocol");
 		return new HandshakeInfo(url, headers, Mono.empty(), protocol);
-	}
-
-
-	private static class DefaultUpgradeListener implements UpgradeListener {
-
-		private final HttpHeaders headers;
-
-
-		public DefaultUpgradeListener(HttpHeaders headers) {
-			this.headers = headers;
-		}
-
-		@Override
-		public void onHandshakeRequest(UpgradeRequest request) {
-			this.headers.forEach(request::setHeader);
-		}
-
-		@Override
-		public void onHandshakeResponse(UpgradeResponse response) {
-		}
 	}
 
 }

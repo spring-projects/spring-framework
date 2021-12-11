@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package org.springframework.web.servlet.support;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -54,7 +53,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 
 	private int flashMapTimeout = 180;
 
-	private UrlPathHelper urlPathHelper = new UrlPathHelper();
+	private UrlPathHelper urlPathHelper = UrlPathHelper.defaultInstance;
 
 
 	/**
@@ -127,7 +126,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 * Return a list of expired FlashMap instances contained in the given list.
 	 */
 	private List<FlashMap> getExpiredFlashMaps(List<FlashMap> allMaps) {
-		List<FlashMap> result = new LinkedList<>();
+		List<FlashMap> result = new ArrayList<>();
 		for (FlashMap map : allMaps) {
 			if (map.isExpired()) {
 				result.add(map);
@@ -142,7 +141,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 */
 	@Nullable
 	private FlashMap getMatchingFlashMap(List<FlashMap> allMaps, HttpServletRequest request) {
-		List<FlashMap> result = new LinkedList<>();
+		List<FlashMap> result = new ArrayList<>();
 		for (FlashMap flashMap : allMaps) {
 			if (isFlashMapForRequest(flashMap, request)) {
 				result.add(flashMap);
@@ -213,7 +212,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		}
 		else {
 			List<FlashMap> allFlashMaps = retrieveFlashMaps(request);
-			allFlashMaps = (allFlashMaps != null ? allFlashMaps : new LinkedList<>());
+			allFlashMaps = (allFlashMaps != null ? allFlashMaps : new ArrayList<>(1));
 			allFlashMaps.add(flashMap);
 			updateFlashMaps(allFlashMaps, request, response);
 		}

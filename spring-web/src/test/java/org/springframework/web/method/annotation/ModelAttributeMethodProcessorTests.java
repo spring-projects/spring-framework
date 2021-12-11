@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.method.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -58,6 +60,7 @@ import static org.mockito.Mockito.verify;
  * Test fixture with {@link ModelAttributeMethodProcessor}.
  *
  * @author Rossen Stoyanchev
+ * @author Vladislav Kisel
  */
 public class ModelAttributeMethodProcessorTests {
 
@@ -73,6 +76,7 @@ public class ModelAttributeMethodProcessorTests {
 	private MethodParameter paramModelAttr;
 	private MethodParameter paramBindingDisabledAttr;
 	private MethodParameter paramNonSimpleType;
+	private MethodParameter beanWithConstructorArgs;
 
 	private MethodParameter returnParamNamedModelAttr;
 	private MethodParameter returnParamNonSimpleType;
@@ -86,7 +90,7 @@ public class ModelAttributeMethodProcessorTests {
 
 		Method method = ModelAttributeHandler.class.getDeclaredMethod("modelAttribute",
 				TestBean.class, Errors.class, int.class, TestBean.class,
-				TestBean.class, TestBean.class);
+				TestBean.class, TestBean.class, TestBeanWithConstructorArgs.class);
 
 		this.paramNamedValidModelAttr = new SynthesizingMethodParameter(method, 0);
 		this.paramErrors = new SynthesizingMethodParameter(method, 1);
@@ -94,6 +98,7 @@ public class ModelAttributeMethodProcessorTests {
 		this.paramModelAttr = new SynthesizingMethodParameter(method, 3);
 		this.paramBindingDisabledAttr = new SynthesizingMethodParameter(method, 4);
 		this.paramNonSimpleType = new SynthesizingMethodParameter(method, 5);
+		this.beanWithConstructorArgs = new SynthesizingMethodParameter(method, 6);
 
 		method = getClass().getDeclaredMethod("annotatedReturnValue");
 		this.returnParamNamedModelAttr = new MethodParameter(method, -1);
@@ -264,6 +269,26 @@ public class ModelAttributeMethodProcessorTests {
 		assertThat(this.container.getModel().get("testBean")).isSameAs(testBean);
 	}
 
+	@Test // gh-25182
+	public void resolveConstructorListArgumentFromCommaSeparatedRequestParameter() throws Exception {
+		MockHttpServletRequest mockRequest = new MockHttpServletRequest();
+		mockRequest.addParameter("listOfStrings", "1,2");
+		ServletWebRequest requestWithParam = new ServletWebRequest(mockRequest);
+
+		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
+		given(factory.createBinder(any(), any(), eq("testBeanWithConstructorArgs")))
+				.willAnswer(invocation -> {
+					WebRequestDataBinder binder = new WebRequestDataBinder(invocation.getArgument(1));
+
+					// Add conversion service which will convert "1,2" to a list
+					binder.setConversionService(new DefaultFormattingConversionService());
+					return binder;
+				});
+
+		Object resolved = this.processor.resolveArgument(this.beanWithConstructorArgs, this.container, requestWithParam, factory);
+		assertThat(resolved).isInstanceOf(TestBeanWithConstructorArgs.class);
+		assertThat(((TestBeanWithConstructorArgs) resolved).listOfStrings).containsExactly("1", "2");
+	}
 
 	private void testGetAttributeFromModel(String expectedAttrName, MethodParameter param) throws Exception {
 		Object target = new TestBean();
@@ -330,10 +355,20 @@ public class ModelAttributeMethodProcessorTests {
 				int intArg,
 				@ModelAttribute TestBean defaultNameAttr,
 				@ModelAttribute(name="noBindAttr", binding=false) @Valid TestBean noBindAttr,
-				TestBean notAnnotatedAttr) {
+				TestBean notAnnotatedAttr,
+				TestBeanWithConstructorArgs beanWithConstructorArgs) {
 		}
 	}
 
+	static class TestBeanWithConstructorArgs {
+
+		final List<String> listOfStrings;
+
+		public TestBeanWithConstructorArgs(List<String> listOfStrings) {
+			this.listOfStrings = listOfStrings;
+		}
+
+	}
 
 	@ModelAttribute("modelAttrName") @SuppressWarnings("unused")
 	private String annotatedReturnValue() {

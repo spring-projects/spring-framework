@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket;
 
 import java.util.ArrayList;
@@ -25,8 +26,6 @@ import java.util.regex.Pattern;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.CompositeByteBuf;
-import io.rsocket.metadata.CompositeMetadataFlyweight;
-import io.rsocket.metadata.TaggingMetadataFlyweight;
 import io.rsocket.metadata.WellKnownMimeType;
 import reactor.core.publisher.Mono;
 
@@ -51,7 +50,7 @@ import org.springframework.util.ObjectUtils;
 final class MetadataEncoder {
 
 	/** For route variable replacement. */
-	private static final Pattern VARS_PATTERN = Pattern.compile("\\{([^/]+?)}");
+	private static final Pattern VARS_PATTERN = Pattern.compile("\\{(.+?)}");
 
 	private static final Object NO_VALUE = new Object();
 
@@ -113,6 +112,7 @@ final class MetadataEncoder {
 			matcher.appendReplacement(sb, value);
 			index++;
 		}
+		matcher.appendTail(sb);
 		return sb.toString();
 	}
 
@@ -179,17 +179,18 @@ final class MetadataEncoder {
 				Mono.fromCallable(() -> encodeEntries(this.metadataEntries));
 	}
 
+	@SuppressWarnings("deprecation")
 	private DataBuffer encodeEntries(List<MetadataEntry> entries) {
 		if (this.isComposite) {
 			CompositeByteBuf composite = this.allocator.compositeBuffer();
 			try {
 				if (this.route != null) {
-					CompositeMetadataFlyweight.encodeAndAddMetadata(composite, this.allocator,
+					io.rsocket.metadata.CompositeMetadataCodec.encodeAndAddMetadata(composite, this.allocator,
 							WellKnownMimeType.MESSAGE_RSOCKET_ROUTING, encodeRoute());
 				}
 				entries.forEach(entry -> {
 					Object value = entry.value();
-					CompositeMetadataFlyweight.encodeAndAddMetadata(
+					io.rsocket.metadata.CompositeMetadataCodec.encodeAndAddMetadata(
 							composite, this.allocator, entry.mimeType().toString(),
 							value instanceof ByteBuf ? (ByteBuf) value : PayloadUtils.asByteBuf(encodeEntry(entry)));
 				});
@@ -220,7 +221,7 @@ final class MetadataEncoder {
 	}
 
 	private ByteBuf encodeRoute() {
-		return TaggingMetadataFlyweight.createRoutingMetadata(
+		return io.rsocket.metadata.TaggingMetadataCodec.createRoutingMetadata(
 				this.allocator, Collections.singletonList(this.route)).getContent();
 	}
 

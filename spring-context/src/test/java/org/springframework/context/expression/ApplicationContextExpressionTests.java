@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,9 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URL;
-import java.security.AccessControlException;
-import java.security.Permission;
 import java.util.Optional;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.ObjectFactory;
@@ -40,7 +36,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -52,14 +47,10 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.core.testfixture.Assume;
-import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
@@ -67,9 +58,6 @@ import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
  * @since 3.0
  */
 class ApplicationContextExpressionTests {
-
-	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
-
 
 	@Test
 	@SuppressWarnings("deprecation")
@@ -186,7 +174,7 @@ class ApplicationContextExpressionTests {
 			assertThat(tb3.optionalValue3.isPresent()).isFalse();
 			assertThat(tb3.tb).isSameAs(tb0);
 
-			tb3 = (ValueTestBean) SerializationTestUtils.serializeAndDeserialize(tb3);
+			tb3 = SerializationTestUtils.serializeAndDeserialize(tb3);
 			assertThat(tb3.countryFactory.getObject()).isEqualTo("123 UK");
 
 			ConstructorValueTestBean tb4 = ac.getBean("tb4", ConstructorValueTestBean.class);
@@ -245,74 +233,6 @@ class ApplicationContextExpressionTests {
 			System.getProperties().remove("name");
 			System.getProperties().remove("country");
 		}
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	void prototypeCreationIsFastEnough() {
-		Assume.notLogging(factoryLog);
-		GenericApplicationContext ac = new GenericApplicationContext();
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
-		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue("#{systemProperties.name}");
-		rbd.getPropertyValues().add("country", "#{systemProperties.country}");
-		ac.registerBeanDefinition("test", rbd);
-		ac.refresh();
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		System.getProperties().put("name", "juergen");
-		System.getProperties().put("country", "UK");
-		try {
-			for (int i = 0; i < 100000; i++) {
-				TestBean tb = (TestBean) ac.getBean("test");
-				assertThat(tb.getName()).isEqualTo("juergen");
-				assertThat(tb.getCountry()).isEqualTo("UK");
-			}
-			sw.stop();
-		}
-		finally {
-			System.getProperties().remove("country");
-			System.getProperties().remove("name");
-		}
-		assertThat(sw.getTotalTimeMillis() < 6000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
-		ac.close();
-	}
-
-	@Test
-	void systemPropertiesSecurityManager() {
-		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
-
-		GenericBeanDefinition bd = new GenericBeanDefinition();
-		bd.setBeanClass(TestBean.class);
-		bd.getPropertyValues().add("country", "#{systemProperties.country}");
-		ac.registerBeanDefinition("tb", bd);
-
-		SecurityManager oldSecurityManager = System.getSecurityManager();
-		try {
-			System.setProperty("country", "NL");
-
-			SecurityManager securityManager = new SecurityManager() {
-				@Override
-				public void checkPropertiesAccess() {
-					throw new AccessControlException("Not Allowed");
-				}
-				@Override
-				public void checkPermission(Permission perm) {
-					// allow everything else
-				}
-			};
-			System.setSecurityManager(securityManager);
-			ac.refresh();
-
-			TestBean tb = ac.getBean("tb", TestBean.class);
-			assertThat(tb.getCountry()).isEqualTo("NL");
-
-		}
-		finally {
-			System.setSecurityManager(oldSecurityManager);
-			System.getProperties().remove("country");
-		}
-		ac.close();
 	}
 
 	@Test

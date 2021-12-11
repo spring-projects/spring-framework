@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
+import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -53,6 +54,7 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
@@ -135,16 +137,15 @@ public class HttpEntityMethodProcessorMockTests {
 	public void setup() throws Exception {
 
 		stringHttpMessageConverter = mock(HttpMessageConverter.class);
-		given(stringHttpMessageConverter.getSupportedMediaTypes())
-				.willReturn(Collections.singletonList(TEXT_PLAIN));
+		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(TEXT_PLAIN));
 
 		resourceMessageConverter = mock(HttpMessageConverter.class);
-		given(resourceMessageConverter.getSupportedMediaTypes())
-				.willReturn(Collections.singletonList(MediaType.ALL));
+		given(resourceMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
+		given(resourceMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.ALL));
 
 		resourceRegionMessageConverter = mock(HttpMessageConverter.class);
-		given(resourceRegionMessageConverter.getSupportedMediaTypes())
-				.willReturn(Collections.singletonList(MediaType.ALL));
+		given(resourceRegionMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
+		given(resourceRegionMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.ALL));
 
 		processor = new HttpEntityMethodProcessor(Arrays.asList(
 				stringHttpMessageConverter, resourceMessageConverter, resourceRegionMessageConverter));
@@ -238,7 +239,7 @@ public class HttpEntityMethodProcessorMockTests {
 		servletRequest.setMethod("POST");
 		servletRequest.addHeader("Content-Type", contentType.toString());
 
-		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(contentType));
+		given(stringHttpMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(contentType));
 		given(stringHttpMessageConverter.canRead(String.class, contentType)).willReturn(false);
 
 		assertThatExceptionOfType(HttpMediaTypeNotSupportedException.class).isThrownBy(() ->
@@ -311,7 +312,7 @@ public class HttpEntityMethodProcessorMockTests {
 		servletRequest.addHeader("Accept", accepted.toString());
 
 		given(stringHttpMessageConverter.canWrite(String.class, null)).willReturn(true);
-		given(stringHttpMessageConverter.getSupportedMediaTypes())
+		given(stringHttpMessageConverter.getSupportedMediaTypes(any()))
 				.willReturn(Collections.singletonList(TEXT_PLAIN));
 
 		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
@@ -325,7 +326,7 @@ public class HttpEntityMethodProcessorMockTests {
 				.body("<foo/>");
 
 		given(stringHttpMessageConverter.canWrite(String.class, TEXT_PLAIN)).willReturn(true);
-		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(TEXT_PLAIN));
+		given(stringHttpMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(TEXT_PLAIN));
 
 		assertThatThrownBy(() ->
 				processor.handleReturnValue(
@@ -342,7 +343,7 @@ public class HttpEntityMethodProcessorMockTests {
 		ResponseEntity<String> returnValue = ResponseEntity.ok().body("<foo/>");
 
 		given(stringHttpMessageConverter.canWrite(String.class, TEXT_PLAIN)).willReturn(true);
-		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(TEXT_PLAIN));
+		given(stringHttpMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(TEXT_PLAIN));
 
 		assertThatThrownBy(() ->
 				processor.handleReturnValue(
@@ -359,7 +360,7 @@ public class HttpEntityMethodProcessorMockTests {
 		servletRequest.addHeader("Accept", accepted.toString());
 
 		given(stringHttpMessageConverter.canWrite(String.class, null)).willReturn(true);
-		given(stringHttpMessageConverter.getSupportedMediaTypes())
+		given(stringHttpMessageConverter.getSupportedMediaTypes(any()))
 				.willReturn(Collections.singletonList(TEXT_PLAIN));
 		given(stringHttpMessageConverter.canWrite(String.class, accepted)).willReturn(false);
 
@@ -427,6 +428,28 @@ public class HttpEntityMethodProcessorMockTests {
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
 		assertConditionalResponse(HttpStatus.NOT_MODIFIED, null, etagValue, -1);
+	}
+
+	@Test
+	public void handleEtagWithHttp304AndEtagFilterHasNoImpact() throws Exception {
+
+		String eTagValue = "\"deadb33f8badf00d\"";
+
+		FilterChain chain = (req, res) -> {
+			servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, eTagValue);
+			ResponseEntity<String> returnValue = ResponseEntity.ok().eTag(eTagValue).body("body");
+			initStringMessageConversion(TEXT_PLAIN);
+			try {
+				processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException(ex);
+			}
+		};
+
+		new ShallowEtagHeaderFilter().doFilter(this.servletRequest, this.servletResponse, chain);
+
+		assertConditionalResponse(HttpStatus.NOT_MODIFIED, null, eTagValue, -1);
 	}
 
 	@Test  // SPR-14559
@@ -550,7 +573,7 @@ public class HttpEntityMethodProcessorMockTests {
 				.ok(new ByteArrayResource("Content".getBytes(StandardCharsets.UTF_8)));
 
 		given(resourceMessageConverter.canWrite(ByteArrayResource.class, null)).willReturn(true);
-		given(resourceMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
+		given(resourceMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.ALL));
 		given(resourceMessageConverter.canWrite(ByteArrayResource.class, APPLICATION_OCTET_STREAM)).willReturn(true);
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
@@ -710,6 +733,7 @@ public class HttpEntityMethodProcessorMockTests {
 	private void initStringMessageConversion(MediaType accepted) {
 		given(stringHttpMessageConverter.canWrite(String.class, null)).willReturn(true);
 		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(TEXT_PLAIN));
+		given(stringHttpMessageConverter.getSupportedMediaTypes(String.class)).willReturn(Collections.singletonList(TEXT_PLAIN));
 		given(stringHttpMessageConverter.canWrite(String.class, accepted)).willReturn(true);
 	}
 

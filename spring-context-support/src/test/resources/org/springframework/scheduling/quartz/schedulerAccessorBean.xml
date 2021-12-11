@@ -21,7 +21,7 @@
 				<property name="targetMethod" value="doExport"/>
 			</bean>
 		</property>
-		<property name="repeatInterval" value="1000"/>
+		<property name="repeatInterval" value="200"/>
 		<property name="repeatCount" value="1"/>
 	</bean>
 
@@ -32,7 +32,7 @@
 				<property name="targetMethod" value="doImport"/>
 			</bean>
 		</property>
-		<property name="repeatInterval" value="1000"/>
+		<property name="repeatInterval" value="200"/>
 		<property name="repeatCount" value="1"/>
 	</bean>
 

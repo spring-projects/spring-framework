@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,28 +29,41 @@ import org.springframework.transaction.TransactionDefinition;
 /**
  * Describes a transaction attribute on an individual method or on a class.
  *
- * <p>At the class level, this annotation applies as a default to all methods of
- * the declaring class and its subclasses. Note that it does not apply to ancestor
- * classes up the class hierarchy; methods need to be locally redeclared in order
- * to participate in a subclass-level annotation.
+ * <p>When this annotation is declared at the class level, it applies as a default
+ * to all methods of the declaring class and its subclasses. Note that it does not
+ * apply to ancestor classes up the class hierarchy; inherited methods need to be
+ * locally redeclared in order to participate in a subclass-level annotation. For
+ * details on method visibility constraints, consult the
+ * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/data-access.html#transaction">Transaction Management</a>
+ * section of the reference manual.
  *
  * <p>This annotation type is generally directly comparable to Spring's
  * {@link org.springframework.transaction.interceptor.RuleBasedTransactionAttribute}
  * class, and in fact {@link AnnotationTransactionAttributeSource} will directly
  * convert the data to the latter class, so that Spring's transaction support code
- * does not have to know about annotations. If no rules are relevant to the exception,
- * it will be treated like
- * {@link org.springframework.transaction.interceptor.DefaultTransactionAttribute}
- * (rolling back on {@link RuntimeException} and {@link Error} but not on checked
- * exceptions).
+ * does not have to know about annotations. If no custom rollback rules apply,
+ * the transaction will roll back on {@link RuntimeException} and {@link Error}
+ * but not on checked exceptions.
  *
  * <p>For specific information about the semantics of this annotation's attributes,
  * consult the {@link org.springframework.transaction.TransactionDefinition} and
  * {@link org.springframework.transaction.interceptor.TransactionAttribute} javadocs.
  *
+ * <p>This annotation commonly works with thread-bound transactions managed by a
+ * {@link org.springframework.transaction.PlatformTransactionManager}, exposing a
+ * transaction to all data access operations within the current execution thread.
+ * <b>Note: This does NOT propagate to newly started threads within the method.</b>
+ *
+ * <p>Alternatively, this annotation may demarcate a reactive transaction managed
+ * by a {@link org.springframework.transaction.ReactiveTransactionManager} which
+ * uses the Reactor context instead of thread-local variables. As a consequence,
+ * all participating data access operations need to execute within the same
+ * Reactor context in the same reactive pipeline.
+ *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Mark Paluch
  * @since 1.2
  * @see org.springframework.transaction.interceptor.TransactionAttribute
  * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute
@@ -71,15 +84,29 @@ public @interface Transactional {
 
 	/**
 	 * A <em>qualifier</em> value for the specified transaction.
-	 * <p>May be used to determine the target transaction manager,
-	 * matching the qualifier value (or the bean name) of a specific
-	 * {@link org.springframework.transaction.PlatformTransactionManager}
+	 * <p>May be used to determine the target transaction manager, matching the
+	 * qualifier value (or the bean name) of a specific
+	 * {@link org.springframework.transaction.TransactionManager TransactionManager}
 	 * bean definition.
 	 * @since 4.2
 	 * @see #value
+	 * @see org.springframework.transaction.PlatformTransactionManager
+	 * @see org.springframework.transaction.ReactiveTransactionManager
 	 */
 	@AliasFor("value")
 	String transactionManager() default "";
+
+	/**
+	 * Defines zero (0) or more transaction labels.
+	 * <p>Labels may be used to describe a transaction, and they can be evaluated
+	 * by individual transaction managers. Labels may serve a solely descriptive
+	 * purpose or map to pre-defined transaction manager-specific options.
+	 * <p>See the documentation of the actual transaction manager implementation
+	 * for details on how it evaluates transaction labels.
+	 * @since 5.3
+	 * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#getLabels()
+	 */
+	String[] label() default {};
 
 	/**
 	 * The transaction propagation type.
@@ -108,9 +135,22 @@ public @interface Transactional {
 	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
 	 * {@link Propagation#REQUIRES_NEW} since it only applies to newly started
 	 * transactions.
+	 * @return the timeout in seconds
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getTimeout()
 	 */
 	int timeout() default TransactionDefinition.TIMEOUT_DEFAULT;
+
+	/**
+	 * The timeout for this transaction (in seconds).
+	 * <p>Defaults to the default timeout of the underlying transaction system.
+	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
+	 * {@link Propagation#REQUIRES_NEW} since it only applies to newly started
+	 * transactions.
+	 * @return the timeout in seconds as a String value, e.g. a placeholder
+	 * @since 5.3
+	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getTimeout()
+	 */
+	String timeoutString() default "";
 
 	/**
 	 * A boolean flag that can be set to {@code true} if the transaction is
@@ -148,7 +188,7 @@ public @interface Transactional {
 	 * a transaction rollback.
 	 * <p>This can be a substring of a fully qualified class name, with no wildcard
 	 * support at present. For example, a value of {@code "ServletException"} would
-	 * match {@code javax.servlet.ServletException} and its subclasses.
+	 * match {@code jakarta.servlet.ServletException} and its subclasses.
 	 * <p><b>NB:</b> Consider carefully how specific the pattern is and whether
 	 * to include package information (which isn't mandatory). For example,
 	 * {@code "Exception"} will match nearly anything and will probably hide other

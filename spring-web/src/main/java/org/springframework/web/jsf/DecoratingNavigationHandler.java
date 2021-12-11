@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.jsf;
 
-import javax.faces.application.NavigationHandler;
-import javax.faces.context.FacesContext;
+import jakarta.faces.application.NavigationHandler;
+import jakarta.faces.context.FacesContext;
 
 import org.springframework.lang.Nullable;
 
@@ -34,7 +34,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @since 1.2.7
- * @see #handleNavigation(javax.faces.context.FacesContext, String, String, NavigationHandler)
+ * @see #handleNavigation(jakarta.faces.context.FacesContext, String, String, NavigationHandler)
  * @see DelegatingNavigationHandlerProxy
  */
 public abstract class DecoratingNavigationHandler extends NavigationHandler {
@@ -71,7 +71,7 @@ public abstract class DecoratingNavigationHandler extends NavigationHandler {
 	 * This implementation of the standard JSF {@code handleNavigation} method
 	 * delegates to the overloaded variant, passing in constructor-injected
 	 * NavigationHandler as argument.
-	 * @see #handleNavigation(javax.faces.context.FacesContext, String, String, javax.faces.application.NavigationHandler)
+	 * @see #handleNavigation(jakarta.faces.context.FacesContext, String, String, jakarta.faces.application.NavigationHandler)
 	 */
 	@Override
 	public final void handleNavigation(FacesContext facesContext, String fromAction, String outcome) {
@@ -135,10 +135,9 @@ public abstract class DecoratingNavigationHandler extends NavigationHandler {
 
 		NavigationHandler decoratedNavigationHandler = getDecoratedNavigationHandler();
 
-		if (decoratedNavigationHandler instanceof DecoratingNavigationHandler) {
+		if (decoratedNavigationHandler instanceof DecoratingNavigationHandler decHandler) {
 			// DecoratingNavigationHandler specified through constructor argument:
 			// Call it with original NavigationHandler passed in.
-			DecoratingNavigationHandler decHandler = (DecoratingNavigationHandler) decoratedNavigationHandler;
 			decHandler.handleNavigation(facesContext, fromAction, outcome, originalNavigationHandler);
 		}
 		else if (decoratedNavigationHandler != null) {

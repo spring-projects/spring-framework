@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -35,6 +34,7 @@ import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.Mirr
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -905,7 +905,7 @@ public abstract class AnnotationUtils {
 		if (!methods.hasDefaultValueMethod()) {
 			return Collections.emptyMap();
 		}
-		Map<String, DefaultValueHolder> result = new LinkedHashMap<>(methods.size());
+		Map<String, DefaultValueHolder> result = CollectionUtils.newLinkedHashMap(methods.size());
 		if (!methods.hasNestedAnnotation()) {
 			// Use simpler method if there are no nested annotations
 			for (int i = 0; i < methods.size(); i++) {
@@ -1006,12 +1006,10 @@ public abstract class AnnotationUtils {
 				return names;
 			}
 		}
-		if (value instanceof Annotation) {
-			Annotation annotation = (Annotation) value;
+		if (value instanceof Annotation annotation) {
 			return MergedAnnotation.from(annotatedElement, annotation).synthesize();
 		}
-		if (value instanceof Annotation[]) {
-			Annotation[] annotations = (Annotation[]) value;
+		if (value instanceof Annotation[] annotations) {
 			Annotation[] synthesized = (Annotation[]) Array.newInstance(
 					annotations.getClass().getComponentType(), annotations.length);
 			for (int i = 0; i < annotations.length; i++) {

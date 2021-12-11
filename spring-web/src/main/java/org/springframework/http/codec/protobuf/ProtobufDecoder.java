@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ import org.springframework.util.MimeType;
  * {@code "application/x-protobuf"} and {@code "application/octet-stream"} with
  * the official {@code "com.google.protobuf:protobuf-java"} library.
  *
- * @author Sébastien Deleuze
+ * @author Sebastien Deleuze
  * @since 5.1
  * @see ProtobufEncoder
  */
@@ -227,8 +227,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 						this.output = input.factory().allocateBuffer(this.messageBytesToRead);
 					}
 
-					chunkBytesToRead = this.messageBytesToRead >= input.readableByteCount() ?
-							input.readableByteCount() : this.messageBytesToRead;
+					chunkBytesToRead = Math.min(this.messageBytesToRead, input.readableByteCount());
 					remainingBytesToRead = input.readableByteCount() - chunkBytesToRead;
 
 					byte[] bytesToWrite = new byte[chunkBytesToRead];
@@ -266,10 +265,9 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 		 * Parse message size as a varint from the input stream, updating {@code messageBytesToRead} and
 		 * {@code offset} fields if needed to allow processing of upcoming chunks.
 		 * Inspired from {@link CodedInputStream#readRawVarint32(int, java.io.InputStream)}
-		 *
 		 * @return {code true} when the message size is parsed successfully, {code false} when the message size is
 		 * truncated
-		 * @see <a href ="https://developers.google.com/protocol-buffers/docs/encoding#varints">Base 128 Varints</a>
+		 * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">Base 128 Varints</a>
 		 */
 		private boolean readMessageSize(DataBuffer input) {
 			if (this.offset == 0) {
@@ -291,7 +289,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 						return false;
 					}
 					final int b = input.read();
-					this.messageBytesToRead |= (b & 0x7f) << offset;
+					this.messageBytesToRead |= (b & 0x7f) << this.offset;
 					if ((b & 0x80) == 0) {
 						this.offset = 0;
 						return true;

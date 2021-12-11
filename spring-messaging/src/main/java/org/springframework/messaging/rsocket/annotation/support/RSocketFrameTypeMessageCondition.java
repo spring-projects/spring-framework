@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket.annotation.support;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.AbstractMessageCondition;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * A condition to assist with mapping onto handler methods based on the RSocket
@@ -69,26 +70,11 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	public static final RSocketFrameTypeMessageCondition EMPTY_CONDITION = new RSocketFrameTypeMessageCondition();
 
 
-	/**
-	 * Condition to match "REQUEST_FNF", "REQUEST_RESPONSE", "REQUEST_STREAM",
-	 * and "REQUEST_CHANNEL".
-	 * @deprecated as of 5.2.2 because matching to all interaction types is too
-	 * flexible. Please use one of the other constants in this class that match
-	 * to specific frames.
-	 */
-	@Deprecated
-	public static final RSocketFrameTypeMessageCondition REQUEST_CONDITION =
-			new RSocketFrameTypeMessageCondition(
-					FrameType.REQUEST_FNF,
-					FrameType.REQUEST_RESPONSE,
-					FrameType.REQUEST_STREAM,
-					FrameType.REQUEST_CHANNEL);
-
 	/** Per FrameType cache to return ready instances from getMatchingCondition. */
 	private static final Map<String, RSocketFrameTypeMessageCondition> frameTypeConditionCache;
 
 	static {
-		frameTypeConditionCache = new HashMap<>(FrameType.values().length);
+		frameTypeConditionCache = CollectionUtils.newHashMap(FrameType.values().length);
 		for (FrameType type : FrameType.values()) {
 			frameTypeConditionCache.put(type.name(), new RSocketFrameTypeMessageCondition(type));
 		}
@@ -131,7 +117,6 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	 * @param message the current message
 	 * @return the frame type or {@code null} if not found
 	 */
-	@SuppressWarnings("ConstantConditions")
 	@Nullable
 	public static FrameType getFrameType(Message<?> message) {
 		return (FrameType) message.getHeaders().get(RSocketFrameTypeMessageCondition.FRAME_TYPE_HEADER);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,6 +103,10 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		if (this.routerFunction == null) {
 			initRouterFunctions();
 		}
+		if (this.routerFunction != null) {
+			RouterFunctions.changeParser(this.routerFunction, getPathPatternParser());
+		}
+
 	}
 
 	/**
@@ -124,12 +128,15 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	}
 
 	private void logRouterFunctions(List<RouterFunction<?>> routerFunctions) {
-		if (logger.isDebugEnabled()) {
+		if (mappingsLogger.isDebugEnabled()) {
+			routerFunctions.forEach(function -> mappingsLogger.debug("Mapped " + function));
+		}
+		else if (logger.isDebugEnabled()) {
 			int total = routerFunctions.size();
 			String message = total + " RouterFunction(s) in " + formatMappingName();
 			if (logger.isTraceEnabled()) {
 				if (total > 0) {
-					routerFunctions.forEach(routerFunction -> logger.trace("Mapped " + routerFunction));
+					routerFunctions.forEach(function -> logger.trace("Mapped " + function));
 				}
 				else {
 					logger.trace(message);

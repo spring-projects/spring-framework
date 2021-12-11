@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,11 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -49,7 +47,6 @@ import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -66,11 +63,10 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 3.1
  */
 public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodProcessor {
-
-	private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
 
 	/**
 	 * Basic constructor with converters only. Suitable for resolving
@@ -154,8 +150,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	private Type getHttpEntityType(MethodParameter parameter) {
 		Assert.isAssignable(HttpEntity.class, parameter.getParameterType());
 		Type parameterType = parameter.getGenericParameterType();
-		if (parameterType instanceof ParameterizedType) {
-			ParameterizedType type = (ParameterizedType) parameterType;
+		if (parameterType instanceof ParameterizedType type) {
 			if (type.getActualTypeArguments().length != 1) {
 				throw new IllegalArgumentException("Expected single generic parameter on '" +
 						parameter.getParameterName() + "' in method " + parameter.getMethod());
@@ -183,10 +178,10 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
 
 		Assert.isInstanceOf(HttpEntity.class, returnValue);
-		HttpEntity<?> responseEntity = (HttpEntity<?>) returnValue;
+		HttpEntity<?> httpEntity = (HttpEntity<?>) returnValue;
 
 		HttpHeaders outputHeaders = outputMessage.getHeaders();
-		HttpHeaders entityHeaders = responseEntity.getHeaders();
+		HttpHeaders entityHeaders = httpEntity.getHeaders();
 		if (!entityHeaders.isEmpty()) {
 			entityHeaders.forEach((key, value) -> {
 				if (HttpHeaders.VARY.equals(key) && outputHeaders.containsKey(HttpHeaders.VARY)) {
@@ -201,16 +196,14 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			});
 		}
 
-		if (responseEntity instanceof ResponseEntity) {
-			int returnStatus = ((ResponseEntity<?>) responseEntity).getStatusCodeValue();
+		if (httpEntity instanceof ResponseEntity<?> responseEntity) {
+			int returnStatus = responseEntity.getStatusCodeValue();
 			outputMessage.getServletResponse().setStatus(returnStatus);
 			if (returnStatus == 200) {
-				if (SAFE_METHODS.contains(inputMessage.getMethod())
+				HttpMethod method = inputMessage.getMethod();
+				if ((HttpMethod.GET.equals(method) || HttpMethod.HEAD.equals(method))
 						&& isResourceNotModified(inputMessage, outputMessage)) {
-					// Ensure headers are flushed, no body should be written.
 					outputMessage.flush();
-					ShallowEtagHeaderFilter.disableContentCaching(inputMessage.getServletRequest());
-					// Skip call to converters, as they may update the body.
 					return;
 				}
 			}
@@ -223,7 +216,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 
 		// Try even with null body. ResponseBodyAdvice could get involved.
-		writeWithMessageConverters(responseEntity.getBody(), returnType, inputMessage, outputMessage);
+		writeWithMessageConverters(httpEntity.getBody(), returnType, inputMessage, outputMessage);
 
 		// Ensure headers are flushed even if no body was written.
 		outputMessage.flush();
@@ -268,8 +261,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	private void saveFlashAttributes(ModelAndViewContainer mav, NativeWebRequest request, String location) {
 		mav.setRedirectModelScenario(true);
 		ModelMap model = mav.getModel();
-		if (model instanceof RedirectAttributes) {
-			Map<String, ?> flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
+		if (model instanceof RedirectAttributes redirectAttributes) {
+			Map<String, ?> flashAttributes = redirectAttributes.getFlashAttributes();
 			if (!CollectionUtils.isEmpty(flashAttributes)) {
 				HttpServletRequest req = request.getNativeRequest(HttpServletRequest.class);
 				HttpServletResponse res = request.getNativeResponse(HttpServletResponse.class);

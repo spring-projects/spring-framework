@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 
 /**
- * Abstract base class for listener-based server responses, e.g. Servlet 3.1
- * and Undertow.
+ * Abstract base class for listener-based server responses.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -38,12 +37,12 @@ public abstract class AbstractListenerServerHttpResponse extends AbstractServerH
 	private final AtomicBoolean writeCalled = new AtomicBoolean();
 
 
-	public AbstractListenerServerHttpResponse(DataBufferFactory dataBufferFactory) {
-		super(dataBufferFactory);
+	public AbstractListenerServerHttpResponse(DataBufferFactory bufferFactory) {
+		super(bufferFactory);
 	}
 
-	public AbstractListenerServerHttpResponse(DataBufferFactory dataBufferFactory, HttpHeaders headers) {
-		super(dataBufferFactory, headers);
+	public AbstractListenerServerHttpResponse(DataBufferFactory bufferFactory, HttpHeaders headers) {
+		super(bufferFactory, headers);
 	}
 
 
@@ -56,15 +55,15 @@ public abstract class AbstractListenerServerHttpResponse extends AbstractServerH
 	protected final Mono<Void> writeAndFlushWithInternal(
 			Publisher<? extends Publisher<? extends DataBuffer>> body) {
 
-		if (this.writeCalled.compareAndSet(false, true)) {
-			Processor<? super Publisher<? extends DataBuffer>, Void> processor = createBodyFlushProcessor();
-			return Mono.from(subscriber -> {
-				body.subscribe(processor);
-				processor.subscribe(subscriber);
-			});
+		if (!this.writeCalled.compareAndSet(false, true)) {
+			return Mono.error(new IllegalStateException(
+					"writeWith() or writeAndFlushWith() has already been called"));
 		}
-		return Mono.error(new IllegalStateException(
-				"writeWith() or writeAndFlushWith() has already been called"));
+		Processor<? super Publisher<? extends DataBuffer>, Void> processor = createBodyFlushProcessor();
+		return Mono.from(subscriber -> {
+			body.subscribe(processor);
+			processor.subscribe(subscriber);
+		});
 	}
 
 	/**

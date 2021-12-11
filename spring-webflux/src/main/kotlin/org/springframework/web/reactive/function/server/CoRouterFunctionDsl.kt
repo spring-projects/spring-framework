@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.function.server
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpMethod
@@ -467,7 +467,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 * Return a [RequestPredicate] that tests the request's query parameter of the given name
 	 * against the given predicate.
 	 * @param name the name of the query parameter to test against
-	 * @param predicate predicate to test against the query parameter value
+	 * @param predicate the predicate to test against the query parameter value
 	 * @return a predicate that matches the given predicate against the query parameter of the given name
 	 * @see ServerRequest#queryParam
 	 */
@@ -531,8 +531,8 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	fun filter(filterFunction: suspend (ServerRequest, suspend (ServerRequest) -> ServerResponse) -> ServerResponse) {
 		builder.filter { serverRequest, handlerFunction ->
 			mono(Dispatchers.Unconfined) {
-				filterFunction(serverRequest) {
-					handlerFunction.handle(serverRequest).awaitFirst()
+				filterFunction(serverRequest) { handlerRequest ->
+					handlerFunction.handle(handlerRequest).awaitSingle()
 				}
 			}
 		}

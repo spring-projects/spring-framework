@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,18 +75,18 @@ import org.springframework.util.StringUtils;
  *
  * def reader = new GroovyBeanDefinitionReader(myApplicationContext)
  * reader.beans {
- *     dataSource(BasicDataSource) {                  // <--- invokeMethod
+ *     dataSource(BasicDataSource) {                  // &lt;--- invokeMethod
  *         driverClassName = "org.hsqldb.jdbcDriver"
  *         url = "jdbc:hsqldb:mem:grailsDB"
- *         username = "sa"                            // <-- setProperty
+ *         username = "sa"                            // &lt;-- setProperty
  *         password = ""
  *         settings = [mynew:"setting"]
  *     }
  *     sessionFactory(SessionFactory) {
- *         dataSource = dataSource                    // <-- getProperty for retrieving references
+ *         dataSource = dataSource                    // &lt;-- getProperty for retrieving references
  *     }
  *     myService(MyService) {
- *         nestedBean = { AnotherBean bean ->         // <-- setProperty with closure for nested bean
+ *         nestedBean = { AnotherBean bean -&gt;         // &lt;-- setProperty with closure for nested bean
  *             dataSource = dataSource
  *         }
  *     }
@@ -113,7 +113,7 @@ import org.springframework.util.StringUtils;
  *         dataSource = dataSource
  *     }
  *     myService(MyService) {
- *         nestedBean = { AnotherBean bean ->
+ *         nestedBean = { AnotherBean bean -&gt;
  *             dataSource = dataSource
  *         }
  *     }
@@ -244,7 +244,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		}
 
 		@SuppressWarnings("serial")
-		Closure<Object> beans = new Closure<Object>(this) {
+		Closure<Object> beans = new Closure<>(this) {
 			@Override
 			public Object call(Object... args) {
 				invokeBeanDefiningClosure((Closure<?>) args[0]);
@@ -489,9 +489,9 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 						resolveConstructorArguments(args, 2, hasClosureArgument ? args.length - 1 : args.length);
 				this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, (Class<?>) args[1], constructorArgs);
 				Map<?, ?> namedArgs = (Map<?, ?>) args[0];
-				for (Object o : namedArgs.keySet()) {
-					String propName = (String) o;
-					setProperty(propName, namedArgs.get(propName));
+				for (Map.Entry<?, ?> entity : namedArgs.entrySet()) {
+					String propName = (String) entity.getKey();
+					setProperty(propName, entity.getValue());
 				}
 			}
 			// factory method syntax

@@ -17,6 +17,7 @@
 package org.springframework.test.web.client;
 
 import java.net.SocketException;
+import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,7 @@ import org.springframework.test.web.client.MockRestServiceServer.MockRestService
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.test.web.client.ExpectedCount.once;
@@ -169,6 +171,29 @@ public class MockRestServiceServerTests {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(server::verify)
 				.withMessageStartingWith("Some requests did not execute successfully");
+	}
+
+	@Test
+	public void verifyWithTimeout() {
+		MockRestServiceServerBuilder builder = MockRestServiceServer.bindTo(this.restTemplate);
+
+		MockRestServiceServer server1 = builder.build();
+		server1.expect(requestTo("/foo")).andRespond(withSuccess());
+		server1.expect(requestTo("/bar")).andRespond(withSuccess());
+		this.restTemplate.getForObject("/foo", Void.class);
+
+		assertThatThrownBy(() -> server1.verify(Duration.ofMillis(100))).hasMessage(
+				"Further request(s) expected leaving 1 unsatisfied expectation(s).\n" +
+						"1 request(s) executed:\n" +
+						"GET /foo, headers: [Accept:\"application/json, application/*+json\"]\n");
+
+		MockRestServiceServer server2 = builder.build();
+		server2.expect(requestTo("/foo")).andRespond(withSuccess());
+		server2.expect(requestTo("/bar")).andRespond(withSuccess());
+		this.restTemplate.getForObject("/foo", Void.class);
+		this.restTemplate.getForObject("/bar", Void.class);
+
+		server2.verify(Duration.ofMillis(100));
 	}
 
 }

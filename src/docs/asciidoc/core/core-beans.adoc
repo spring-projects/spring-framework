@@ -42,7 +42,7 @@ information on using the `BeanFactory` instead of the `ApplicationContext,` see
 
 In Spring, the objects that form the backbone of your application and that are managed
 by the Spring IoC container are called beans. A bean is an object that is
-instantiated, assembled, and otherwise managed by a Spring IoC container. Otherwise, a
+instantiated, assembled, and managed by a Spring IoC container. Otherwise, a
 bean is simply one of many objects in your application. Beans, and the dependencies
 among them, are reflected in the configuration metadata used by a container.
 
@@ -74,7 +74,7 @@ In most application scenarios, explicit user code is not required to instantiate
 more instances of a Spring IoC container. For example, in a web application scenario, a
 simple eight (or so) lines of boilerplate web descriptor XML in the `web.xml` file
 of the application typically suffices (see <<context-create>>). If you use the
-https://spring.io/tools/sts[Spring Tool Suite] (an Eclipse-powered development
+https://spring.io/tools[Spring Tools for Eclipse] (an Eclipse-powered development
 environment), you can easily create this boilerplate configuration with a few mouse clicks or
 keystrokes.
 
@@ -135,8 +135,7 @@ dependency-inject domain objects with Spring>>.
 
 The following example shows the basic structure of XML-based configuration metadata:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -346,8 +345,8 @@ bean definition files through an `importBeans` directive.
 === Using the Container
 
 The `ApplicationContext` is the interface for an advanced factory capable of maintaining
-a registry of different beans and their dependencies. By using the method `T getBean(String
-name, Class<T> requiredType)`, you can retrieve instances of your beans.
+a registry of different beans and their dependencies. By using the method
+`T getBean(String name, Class<T> requiredType)`, you can retrieve instances of your beans.
 
 The `ApplicationContext` lets you read bean definitions and access them, as the following
 example shows:
@@ -640,17 +639,16 @@ You can use the `Class` property in one of two ways:
   from the invocation of the `static` factory method may be the same class or another
   class entirely.
 
+.Nested class names
 ****
-.Inner class names
-If you want to configure a bean definition for a `static` nested class, you have to use
-the binary name of the nested class.
+If you want to configure a bean definition for a nested class, you may use either the
+binary name or the source name of the nested class.
 
-For example, if you have a class called `SomeThing` in the `com.example` package, and this
-`SomeThing` class has a `static` nested class called `OtherThing`, the value of the `class`
-attribute on a bean definition would be `com.example.SomeThing$OtherThing`.
-
-Notice the use of the `$` character in the name to separate the nested class name from
-the outer class name.
+For example, if you have a class called `SomeThing` in the `com.example` package, and
+this `SomeThing` class has a `static` nested class called `OtherThing`, they can be
+separated by a dollar sign (`$`) or a dot (`.`). So the value of the `class` attribute in
+a bean definition would be `com.example.SomeThing$OtherThing` or
+`com.example.SomeThing.OtherThing`.
 ****
 
 
@@ -849,12 +847,29 @@ This approach shows that the factory bean itself can be managed and configured t
 dependency injection (DI). See <<beans-factory-properties-detailed,Dependencies and
 Configuration in Detail>>.
 
-NOTE: In Spring documentation, "`factory bean`" refers to a bean that is configured in the
+NOTE: In Spring documentation, "factory bean" refers to a bean that is configured in the
 Spring container and that creates objects through an
 <<beans-factory-class-instance-factory-method,instance>> or
 <<beans-factory-class-static-factory-method,static>> factory method. By contrast,
 `FactoryBean` (notice the capitalization) refers to a Spring-specific
-<<beans-factory-extension-factorybean, `FactoryBean` >>.
+<<beans-factory-extension-factorybean, `FactoryBean`>> implementation class.
+
+
+[[beans-factory-type-determination]]
+==== Determining a Bean's Runtime Type
+
+The runtime type of a specific bean is non-trivial to determine. A specified class in
+the bean metadata definition is just an initial class reference, potentially combined
+with a declared factory method or being a `FactoryBean` class which may lead to a
+different runtime type of the bean, or not being set at all in case of an instance-level
+factory method (which is resolved via the specified `factory-bean` name instead).
+Additionally, AOP proxying may wrap a bean instance with an interface-based proxy with
+limited exposure of the target bean's actual type (just its implemented interfaces).
+
+The recommended way to find out about the actual runtime type of a particular bean is
+a `BeanFactory.getType` call for the specified bean name. This takes all of the above
+cases into account and returns the type of object that a `BeanFactory.getBean` call is
+going to return for the same bean name.
 
 
 
@@ -874,9 +889,9 @@ application where objects collaborate to achieve a goal.
 === Dependency Injection
 
 Dependency injection (DI) is a process whereby objects define their dependencies
-(that is, the other objects with which they work) only through constructor arguments, arguments
-to a factory method, or properties that are set on the object instance after it is
-constructed or returned from a factory method. The container then injects those
+(that is, the other objects with which they work) only through constructor arguments,
+arguments to a factory method, or properties that are set on the object instance after
+it is constructed or returned from a factory method. The container then injects those
 dependencies when it creates the bean. This process is fundamentally the inverse (hence
 the name, Inversion of Control) of the bean itself controlling the instantiation
 or location of its dependencies on its own by using direct construction of classes or
@@ -908,7 +923,7 @@ injection:
 	public class SimpleMovieLister {
 
 		// the SimpleMovieLister has a dependency on a MovieFinder
-		private MovieFinder movieFinder;
+		private final MovieFinder movieFinder;
 
 		// a constructor so that the Spring container can inject a MovieFinder
 		public SimpleMovieLister(MovieFinder movieFinder) {
@@ -928,7 +943,7 @@ injection:
 ----
 
 Notice that there is nothing special about this class. It is a POJO that
-has no dependencies on container specific interfaces, base classes or annotations.
+has no dependencies on container specific interfaces, base classes, or annotations.
 
 [[beans-factory-ctor-arguments-resolution]]
 ===== Constructor Argument Resolution
@@ -959,10 +974,10 @@ being instantiated. Consider the following class:
 	class ThingOne(thingTwo: ThingTwo, thingThree: ThingThree)
 ----
 
-Assuming that `ThingTwo` and `ThingThree` classes are not related by inheritance, no potential
-ambiguity exists. Thus, the following configuration works fine, and you do not need to specify
-the constructor argument indexes or types explicitly in the `<constructor-arg/>`
-element.
+Assuming that the `ThingTwo` and `ThingThree` classes are not related by inheritance, no
+potential ambiguity exists. Thus, the following configuration works fine, and you do not
+need to specify the constructor argument indexes or types explicitly in the
+`<constructor-arg/>` element.
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -991,10 +1006,10 @@ by type without help. Consider the following class:
 	public class ExampleBean {
 
 		// Number of years to calculate the Ultimate Answer
-		private int years;
+		private final int years;
 
 		// The Answer to Life, the Universe, and Everything
-		private String ultimateAnswer;
+		private final String ultimateAnswer;
 
 		public ExampleBean(int years, String ultimateAnswer) {
 			this.years = years;
@@ -1009,14 +1024,14 @@ by type without help. Consider the following class:
 
 	class ExampleBean(
 		private val years: Int, // Number of years to calculate the Ultimate Answer
-		private val ultimateAnswer: String// The Answer to Life, the Universe, and Everything
+		private val ultimateAnswer: String // The Answer to Life, the Universe, and Everything
 	)
 ----
 
 .[[beans-factory-ctor-arguments-type]]Constructor argument type matching
 --
 In the preceding scenario, the container can use type matching with simple types if
-you explicitly specify the type of the constructor argument by using the `type` attribute.
+you explicitly specify the type of the constructor argument by using the `type` attribute,
 as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -1236,7 +1251,8 @@ visibility of some configuration issues is why `ApplicationContext` implementati
 default pre-instantiate singleton beans. At the cost of some upfront time and memory to
 create these beans before they are actually needed, you discover configuration issues
 when the `ApplicationContext` is created, not later. You can still override this default
-behavior so that singleton beans initialize lazily, rather than being pre-instantiated.
+behavior so that singleton beans initialize lazily, rather than being eagerly
+pre-instantiated.
 
 If no circular dependencies exist, when one or more collaborating beans are being
 injected into a dependent bean, each collaborating bean is totally configured prior
@@ -1454,7 +1470,7 @@ The following example shows various values being set:
 		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
 		<property name="url" value="jdbc:mysql://localhost:3306/mydb"/>
 		<property name="username" value="root"/>
-		<property name="password" value="masterkaoli"/>
+		<property name="password" value="misterkaoli"/>
 	</bean>
 ----
 
@@ -1474,14 +1490,14 @@ XML configuration:
 			p:driverClassName="com.mysql.jdbc.Driver"
 			p:url="jdbc:mysql://localhost:3306/mydb"
 			p:username="root"
-			p:password="masterkaoli"/>
+			p:password="misterkaoli"/>
 
 	</beans>
 ----
 
 The preceding XML is more succinct. However, typos are discovered at runtime rather than
 design time, unless you use an IDE (such as https://www.jetbrains.com/idea/[IntelliJ
-IDEA] or the https://spring.io/tools/sts[Spring Tool Suite])
+IDEA] or the https://spring.io/tools[Spring Tools for Eclipse])
 that supports automatic property completion when you create bean definitions. Such IDE
 assistance is highly recommended.
 
@@ -1592,7 +1608,7 @@ listings shows how to use the `parent` attribute:
 ----
 	<!-- in the parent context -->
 	<bean id="accountService" class="com.something.SimpleAccountService">
-		<!-- insert dependencies as required as here -->
+		<!-- insert dependencies as required here -->
 	</bean>
 ----
 
@@ -1674,7 +1690,7 @@ respectively. The following example shows how to use them:
 		<property name="someMap">
 			<map>
 				<entry key="an entry" value="just some string"/>
-				<entry key ="a ref" value-ref="myDataSource"/>
+				<entry key="a ref" value-ref="myDataSource"/>
 			</map>
 		</property>
 		<!-- results in a setSomeSet(java.util.Set) call -->
@@ -1818,7 +1834,7 @@ class SomeClass {
 When the `accounts` property of the `something` bean is prepared for injection, the generics
 information about the element type of the strongly-typed `Map<String, Float>` is
 available by reflection. Thus, Spring's type conversion infrastructure recognizes the
-various value elements as being of type `Float`, and the string values (`9.99, 2.75`, and
+various value elements as being of type `Float`, and the string values (`9.99`, `2.75`, and
 `3.99`) are converted into an actual `Float` type.
 
 
@@ -1963,8 +1979,7 @@ then nested `constructor-arg` elements.
 The following example uses the `c:` namespace to do the same thing as the from
 <<beans-constructor-injection>>:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -2013,7 +2028,7 @@ not commonly used since the plain order of declaration is usually sufficient the
 In practice, the constructor resolution
 <<beans-factory-ctor-arguments-resolution,mechanism>> is quite efficient in matching
 arguments, so unless you really need to, we recommend using the name notation
-through-out your configuration.
+throughout your configuration.
 
 
 [[beans-compound-property-names]]
@@ -2108,7 +2123,7 @@ startup, because it must satisfy the singleton's dependencies. The lazy-initiali
 is injected into a singleton bean elsewhere that is not lazy-initialized.
 
 You can also control lazy-initialization at the container level by using the
-`default-lazy-init` attribute on the `<beans/>` element, a the following example shows:
+`default-lazy-init` attribute on the `<beans/>` element, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -2488,13 +2503,13 @@ declared return type of the lookup method:
 	public abstract class CommandManager {
 
 		public Object process(Object commandState) {
-			MyCommand command = createCommand();
+			Command command = createCommand();
 			command.setState(commandState);
 			return command.execute();
 		}
 
 		@Lookup
-		protected abstract MyCommand createCommand();
+		protected abstract Command createCommand();
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -2589,9 +2604,9 @@ interface provides the new method definition, as the following example shows:
 .Kotlin
 ----
 	/**
-	* meant to be used to override the existing computeValue(String)
-	* implementation in MyValueCalculator
-	*/
+	 * meant to be used to override the existing computeValue(String)
+	 * implementation in MyValueCalculator
+	 */
 	class ReplacementComputeValue : MethodReplacer {
 
 		override fun reimplement(obj: Any, method: Method, args: Array<out Any>): Any {
@@ -2791,7 +2806,7 @@ prototype-scoped bean repeatedly at runtime. You cannot dependency-inject a
 prototype-scoped bean into your singleton bean, because that injection occurs only
 once, when the Spring container instantiates the singleton bean and resolves
 and injects its dependencies. If you need a new instance of a prototype bean at
-runtime more than once, see <<beans-factory-method-injection>>
+runtime more than once, see <<beans-factory-method-injection>>.
 
 
 
@@ -2820,12 +2835,11 @@ If you access scoped beans within Spring Web MVC, in effect, within a request th
 processed by the Spring `DispatcherServlet`, no special setup is necessary.
 `DispatcherServlet` already exposes all relevant state.
 
-If you use a Servlet 2.5 web container, with requests processed outside of Spring's
+If you use a Servlet web container, with requests processed outside of Spring's
 `DispatcherServlet` (for example, when using JSF or Struts), you need to register the
 `org.springframework.web.context.request.RequestContextListener` `ServletRequestListener`.
-For Servlet 3.0+, this can be done programmatically by using the `WebApplicationInitializer`
-interface. Alternatively, or for older containers, add the following declaration to
-your web application's `web.xml` file:
+This can be done programmatically by using the `WebApplicationInitializer` interface.
+Alternatively, add the following declaration to your web application's `web.xml` file:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -2954,6 +2968,8 @@ When using annotation-driven components or Java configuration, you can use the
 ----
 
 
+
+
 [[beans-factory-scopes-application]]
 ==== Application Scope
 
@@ -2969,7 +2985,7 @@ The Spring container creates a new instance of the `AppPreferences` bean by usin
 `appPreferences` bean is scoped at the `ServletContext` level and stored as a regular
 `ServletContext` attribute. This is somewhat similar to a Spring singleton bean but
 differs in two important ways: It is a singleton per `ServletContext`, not per Spring
-'ApplicationContext' (for which there may be several in any given web application),
+`ApplicationContext` (for which there may be several in any given web application),
 and it is actually exposed and therefore visible as a `ServletContext` attribute.
 
 When using annotation-driven components or Java configuration, you can use the
@@ -2994,6 +3010,17 @@ following example shows how to do so:
 		// ...
 	}
 ----
+
+
+
+
+[[beans-factory-scopes-websocket]]
+==== WebSocket Scope
+
+WebSocket scope is associated with the lifecycle of a WebSocket session and applies to
+STOMP over WebSocket applications, see
+<<web.adoc#websocket-stomp-websocket-scope,WebSocket scope>> for more details.
+
 
 
 
@@ -3024,7 +3051,7 @@ constructor or setter argument or autowired field) as `ObjectFactory<MyTargetBea
 allowing for a `getObject()` call to retrieve the current instance on demand every
 time it is needed -- without holding on to the instance or storing it separately.
 
-As an extended variant, you may declare `ObjectProvider<MyTargetBean>`, which delivers
+As an extended variant, you may declare `ObjectProvider<MyTargetBean>` which delivers
 several additional access variants, including `getIfAvailable` and `getIfUnique`.
 
 The JSR-330 variant of this is called `Provider` and is used with a `Provider<MyTargetBean>`
@@ -3085,7 +3112,7 @@ to the HTTP `Session`-scoped bean (`userPreferences`). The salient point here is
 `userManager` bean is a singleton: it is instantiated exactly once per
 container, and its dependencies (in this case only one, the `userPreferences` bean) are
 also injected only once. This means that the `userManager` bean operates only on the
-exact same `userPreferences` object (that is, the one with which it was originally injected.
+exact same `userPreferences` object (that is, the one with which it was originally injected).
 
 This is not the behavior you want when injecting a shorter-lived scoped bean into a
 longer-lived scoped bean (for example, injecting an HTTP `Session`-scoped collaborating
@@ -3176,10 +3203,10 @@ which explains the methods you need to implement in more detail.
 The `Scope` interface has four methods to get objects from the scope, remove them from
 the scope, and let them be destroyed.
 
-The session scope
-implementation, for example, returns the session-scoped bean (if it does not exist,
-the method returns a new instance of the bean, after having bound it to the session for
-future reference). The following method returns the object from the underlying scope:
+The session scope implementation, for example, returns the session-scoped bean (if it
+does not exist, the method returns a new instance of the bean, after having bound it to
+the session for future reference). The following method returns the object from the
+underlying scope:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -3192,10 +3219,10 @@ future reference). The following method returns the object from the underlying s
 	fun get(name: String, objectFactory: ObjectFactory<*>): Any
 ----
 
-The session scope
-implementation, for example, removes the session-scoped bean from the underlying session.
-The object should be returned, but you can return null if the object with the specified
-name is not found. The following method removes the object from the underlying scope:
+The session scope implementation, for example, removes the session-scoped bean from the
+underlying session. The object should be returned, but you can return `null` if the
+object with the specified name is not found. The following method removes the object from
+the underlying scope:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -3208,7 +3235,7 @@ name is not found. The following method removes the object from the underlying s
 	fun remove(name: String): Any
 ----
 
-The following method registers the callbacks the scope should execute when it is
+The following method registers a callback that the scope should invoke when it is
 destroyed or when the specified object in the scope is destroyed:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -3237,7 +3264,6 @@ The following method obtains the conversation identifier for the underlying scop
 ----
 	fun getConversationId(): String
 ----
-
 
 This identifier is different for each scope. For a session scoped implementation, this
 identifier can be the session identifier.
@@ -3336,8 +3362,9 @@ of the scope. You can also do the `Scope` registration declaratively, by using t
 	</beans>
 ----
 
-NOTE: When you place `<aop:scoped-proxy/>` in a `FactoryBean` implementation, it is the factory
-bean itself that is scoped, not the object returned from `getObject()`.
+NOTE: When you place `<aop:scoped-proxy/>` within a `<bean>` declaration for a
+`FactoryBean` implementation, it is the factory bean itself that is scoped, not the object
+returned from `getObject()`.
 
 
 
@@ -3393,15 +3420,9 @@ The `org.springframework.beans.factory.InitializingBean` interface lets a bean
 perform initialization work after the container has set all necessary properties on the
 bean. The `InitializingBean` interface specifies a single method:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	void afterPropertiesSet() throws Exception;
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	fun afterPropertiesSet()
 ----
 
 We recommend that you do not use the `InitializingBean` interface, because it
@@ -3412,8 +3433,7 @@ you can use the `init-method` attribute to specify the name of the method that h
 no-argument signature. With Java configuration, you can use the `initMethod` attribute of
 `@Bean`. See <<beans-java-lifecycle-callbacks>>. Consider the following example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/>
 ----
@@ -3479,15 +3499,9 @@ Implementing the `org.springframework.beans.factory.DisposableBean` interface le
 bean get a callback when the container that contains it is destroyed. The
 `DisposableBean` interface specifies a single method:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	void destroy() throws Exception;
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	fun destroy()
 ----
 
 We recommend that you do not use the `DisposableBean` callback interface, because it
@@ -3611,7 +3625,7 @@ following example:
 	class DefaultBlogService : BlogService {
 
 		private var blogDao: BlogDao? = null
-		
+
 		// this is (unsurprisingly) the initialization callback method
 		fun init() {
 			if (blogDao == null) {
@@ -3672,10 +3686,10 @@ As of Spring 2.5, you have three options for controlling bean lifecycle behavior
 annotations>>. You can combine these mechanisms to control a given bean.
 
 NOTE: If multiple lifecycle mechanisms are configured for a bean and each mechanism is
-configured with a different method name, then each configured method is executed in the
+configured with a different method name, then each configured method is run in the
 order listed after this note. However, if the same method name is configured -- for example,
 `init()` for an initialization method -- for more than one of these lifecycle mechanisms,
-that method is executed once, as explained in the
+that method is run once, as explained in the
 <<beans-factory-lifecycle-default-init-destroy-methods, preceding section>>.
 
 Multiple lifecycle mechanisms configured for the same bean, with different
@@ -3699,8 +3713,7 @@ Destroy methods are called in the same order:
 The `Lifecycle` interface defines the essential methods for any object that has its own
 lifecycle requirements (such as starting and stopping some background process):
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Lifecycle {
 
@@ -3711,18 +3724,6 @@ lifecycle requirements (such as starting and stopping some background process):
 		boolean isRunning();
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Lifecycle {
-
-		fun start()
-
-		fun stop()
-
-		val isRunning: Boolean
-	}
-----
 
 Any Spring-managed object may implement the `Lifecycle` interface. Then, when the
 `ApplicationContext` itself receives start and stop signals (for example, for a stop/restart
@@ -3730,24 +3731,13 @@ scenario at runtime), it cascades those calls to all `Lifecycle` implementations
 defined within that context. It does this by delegating to a `LifecycleProcessor`, shown
 in the following listing:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface LifecycleProcessor extends Lifecycle {
 
 		void onRefresh();
 
 		void onClose();
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface LifecycleProcessor : Lifecycle {
-
-		fun onRefresh()
-
-		fun onClose()
 	}
 ----
 
@@ -3765,7 +3755,7 @@ consider implementing `org.springframework.context.SmartLifecycle` instead.
 Also, please note that stop notifications are not guaranteed to come before destruction.
 On regular shutdown, all `Lifecycle` beans first receive a stop notification before
 the general destruction callbacks are being propagated. However, on hot refresh during a
-context's lifetime or on aborted refresh attempts, only destroy methods are called.
+context's lifetime or on stopped refresh attempts, only destroy methods are called.
 ====
 
 The order of startup and shutdown invocations can be important. If a "`depends-on`"
@@ -3776,43 +3766,23 @@ prior to objects of another type. In those cases, the `SmartLifecycle` interface
 another option, namely the `getPhase()` method as defined on its super-interface,
 `Phased`. The following listing shows the definition of the `Phased` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Phased {
 
 		int getPhase();
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface Phased {
-
-		val phase: Int
-	}
-----
 
 The following listing shows the definition of the `SmartLifecycle` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface SmartLifecycle extends Lifecycle, Phased {
 
 		boolean isAutoStartup();
 
 		void stop(Runnable callback);
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface SmartLifecycle : Lifecycle, Phased {
-
-		val isAutoStartup: Boolean
-
-		fun stop(callback: Runnable)
 	}
 ----
 
@@ -3926,21 +3896,11 @@ When an `ApplicationContext` creates an object instance that implements the
 with a reference to that `ApplicationContext`. The following listing shows the definition
 of the `ApplicationContextAware` interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface ApplicationContextAware {
 
 		void setApplicationContext(ApplicationContext applicationContext) throws BeansException;
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface ApplicationContextAware {
-
-		@Throws(BeansException::class)
-		fun setApplicationContext(applicationContext: ApplicationContext)
 	}
 ----
 
@@ -3971,26 +3931,16 @@ When an `ApplicationContext` creates a class that implements the
 a reference to the name defined in its associated object definition. The following listing
 shows the definition of the BeanNameAware interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface BeanNameAware {
 
 		void setBeanName(String name) throws BeansException;
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	interface BeanNameAware {
-
-		@Throws(BeansException::class)
-		fun setBeanName(name: String)
-	}
-----
 
 The callback is invoked after population of normal bean properties but before an
-initialization callback such as `InitializingBean`, `afterPropertiesSet`, or a custom
+initialization callback such as `InitializingBean.afterPropertiesSet()` or a custom
 init-method.
 
 
@@ -4022,16 +3972,11 @@ dependency type. The following table summarizes the most important `Aware` inter
 
 | `BeanFactoryAware`
 | Declaring `BeanFactory`.
-| <<beans-factory-aware>>
+| <<beans-beanfactory>>
 
 | `BeanNameAware`
 | Name of the declaring bean.
 | <<beans-factory-aware>>
-
-| `BootstrapContextAware`
-| Resource adapter `BootstrapContext` the container runs in. Typically available only in
-  JCA-aware `ApplicationContext` instances.
-| <<integration.adoc#cci, JCA CCI>>
 
 | `LoadTimeWeaverAware`
 | Defined weaver for processing class definition at load time.
@@ -4171,7 +4116,7 @@ Spring container finishes instantiating, configuring, and initializing a bean, y
 plug in one or more custom `BeanPostProcessor` implementations.
 
 You can configure multiple `BeanPostProcessor` instances, and you can control the order
-in which these `BeanPostProcessor` instances execute by setting the `order` property.
+in which these `BeanPostProcessor` instances run by setting the `order` property.
 You can set this property only if the `BeanPostProcessor` implements the `Ordered`
 interface. If you write your own `BeanPostProcessor`, you should consider implementing
 the `Ordered` interface, too. For further details, see the javadoc of the
@@ -4209,7 +4154,7 @@ or it may wrap a bean with a proxy. Some Spring AOP infrastructure classes are
 implemented as bean post-processors in order to provide proxy-wrapping logic.
 
 An `ApplicationContext` automatically detects any beans that are defined in the
-configuration metadata that implements the `BeanPostProcessor` interface. The
+configuration metadata that implement the `BeanPostProcessor` interface. The
 `ApplicationContext` registers these beans as post-processors so that they can be called
 later, upon bean creation. Bean post-processors can be deployed in the container in the
 same fashion as any other beans.
@@ -4385,15 +4330,14 @@ org.springframework.scripting.groovy.GroovyMessenger@272961
 ----
 
 
-[[beans-factory-extension-bpp-examples-rabpp]]
-==== Example: The `RequiredAnnotationBeanPostProcessor`
+[[beans-factory-extension-bpp-examples-aabpp]]
+==== Example: The `AutowiredAnnotationBeanPostProcessor`
 
-Using callback interfaces or annotations in conjunction with a custom
-`BeanPostProcessor` implementation is a common means of extending the Spring IoC
-container. An example is Spring's `RequiredAnnotationBeanPostProcessor` -- a
-`BeanPostProcessor` implementation that ships with the Spring distribution and that ensures
-that JavaBean properties on beans that are marked with an (arbitrary) annotation are
-actually (configured to be) dependency-injected with a value.
+Using callback interfaces or annotations in conjunction with a custom `BeanPostProcessor`
+implementation is a common means of extending the Spring IoC container. An example is
+Spring's `AutowiredAnnotationBeanPostProcessor` -- a `BeanPostProcessor` implementation
+that ships with the Spring distribution and autowires annotated fields, setter methods,
+and arbitrary config methods.
 
 
 
@@ -4413,7 +4357,8 @@ which these `BeanFactoryPostProcessor` instances run by setting the `order` prop
 However, you can only set this property if the `BeanFactoryPostProcessor` implements the
 `Ordered` interface. If you write your own `BeanFactoryPostProcessor`, you should
 consider implementing the `Ordered` interface, too. See the javadoc of the
-{api-spring-framework}/beans/factory/config/BeanFactoryPostProcessor.html[`BeanFactoryPostProcessor`] and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces for more details.
+{api-spring-framework}/beans/factory/config/BeanFactoryPostProcessor.html[`BeanFactoryPostProcessor`]
+and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces for more details.
 
 [NOTE]
 ====
@@ -4432,7 +4377,7 @@ in one container are not post-processed by `BeanFactoryPostProcessor` instances 
 container, even if both containers are part of the same hierarchy.
 ====
 
-A bean factory post-processor is automatically executed when it is declared inside an
+A bean factory post-processor is automatically run when it is declared inside an
 `ApplicationContext`, in order to apply changes to the configuration metadata that
 define the container. Spring includes a number of predefined bean factory
 post-processors, such as `PropertyOverrideConfigurer` and
@@ -4607,22 +4552,22 @@ Java as opposed to a (potentially) verbose amount of XML, you can create your ow
 `FactoryBean`, write the complex initialization inside that class, and then plug your
 custom `FactoryBean` into the container.
 
-The `FactoryBean` interface provides three methods:
+The `FactoryBean<T>` interface provides three methods:
 
-* `Object getObject()`: Returns an instance of the object this factory creates. The
+* `T getObject()`: Returns an instance of the object this factory creates. The
   instance can possibly be shared, depending on whether this factory returns singletons
   or prototypes.
 * `boolean isSingleton()`: Returns `true` if this `FactoryBean` returns singletons or
-  `false` otherwise.
-* `Class getObjectType()`: Returns the object type returned by the `getObject()` method
+  `false` otherwise. The default implementation of this method returns `true`.
+* `Class<?> getObjectType()`: Returns the object type returned by the `getObject()` method
   or `null` if the type is not known in advance.
 
-The `FactoryBean` concept and interface is used in a number of places within the Spring
+The `FactoryBean` concept and interface are used in a number of places within the Spring
 Framework. More than 50 implementations of the `FactoryBean` interface ship with Spring
 itself.
 
 When you need to ask a container for an actual `FactoryBean` instance itself instead of
-the bean it produces, preface the bean's `id` with the ampersand symbol (`&`) when
+the bean it produces, prefix the bean's `id` with the ampersand symbol (`&`) when
 calling the `getBean()` method of the `ApplicationContext`. So, for a given `FactoryBean`
 with an `id` of `myBean`, invoking `getBean("myBean")` on the container returns the
 product of the `FactoryBean`, whereas invoking `getBean("&myBean")` returns the
@@ -4649,14 +4594,14 @@ No matter the choice, Spring can accommodate both styles and even mix them toget
 It is worth pointing out that through its <<beans-java, JavaConfig>> option, Spring lets
 annotations be used in a non-invasive way, without touching the target components
 source code and that, in terms of tooling, all configuration styles are supported by the
-https://spring.io/tools/sts[Spring Tool Suite].
+https://spring.io/tools[Spring Tools for Eclipse].
 ****
 
 An alternative to XML setup is provided by annotation-based configuration, which relies on
 the bytecode metadata for wiring up components instead of angle-bracket declarations.
 Instead of using XML to describe a bean wiring, the developer moves the configuration
 into the component class itself by using annotations on the relevant class, method, or
-field declaration. As mentioned in <<beans-factory-extension-bpp-examples-rabpp>>, using
+field declaration. As mentioned in <<beans-factory-extension-bpp-examples-aabpp>>, using
 a `BeanPostProcessor` in conjunction with annotations is a common means of extending the
 Spring IoC container. For example, Spring 2.0 introduced the possibility of enforcing
 required properties with the <<beans-required-annotation,`@Required`>> annotation. Spring
@@ -4665,8 +4610,8 @@ injection. Essentially, the `@Autowired` annotation provides the same capabiliti
 described in <<beans-factory-autowire>> but with more fine-grained control and wider
 applicability. Spring 2.5 also added support for JSR-250 annotations, such as
 `@PostConstruct` and `@PreDestroy`. Spring 3.0 added support for JSR-330 (Dependency
-Injection for Java) annotations contained in the `javax.inject` package such as `@Inject`
-and `@Named`. Details about those annotations can be found in the
+Injection for Java) annotations contained in the `jakarta.inject` package such as
+`@Inject` and `@Named`. Details about those annotations can be found in the
 <<beans-standard-annotations,relevant section>>.
 
 [NOTE]
@@ -4675,8 +4620,8 @@ Annotation injection is performed before XML injection. Thus, the XML configurat
 overrides the annotations for properties wired through both approaches.
 ====
 
-As always, you can register them as individual bean definitions, but they can also be
-implicitly registered by including the following tag in an XML-based Spring
+As always, you can register the post-processors as individual bean definitions, but they
+can also be implicitly registered by including the following tag in an XML-based Spring
 configuration (notice the inclusion of the `context` namespace):
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -4695,12 +4640,13 @@ configuration (notice the inclusion of the `context` namespace):
 	</beans>
 ----
 
-(The implicitly registered post-processors include
-{api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`],
-{api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`],
-{api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`],
-and the aforementioned
-{api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`].)
+The `<context:annotation-config/>` element implicitly registers the following post-processors:
+
+* {api-spring-framework}/context/annotation/ConfigurationClassPostProcessor.html[`ConfigurationClassPostProcessor`]
+* {api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`]
+* {api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`]
+* {api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`]
+* {api-spring-framework}/context/event/EventListenerMethodProcessor.html[`EventListenerMethodProcessor`]
 
 [NOTE]
 ====
@@ -4739,13 +4685,12 @@ example:
 ----
 	class SimpleMovieLister {
 
-	@Required
-	lateinit var movieFinder: MovieFinder
+		@Required
+		lateinit var movieFinder: MovieFinder
 
-	// ...
-}
+		// ...
+	}
 ----
-
 
 This annotation indicates that the affected bean property must be populated at
 configuration time, through an explicit property value in a bean definition or through
@@ -4755,11 +4700,18 @@ instances or the like later on. We still recommend that you put assertions into 
 bean class itself (for example, into an init method). Doing so enforces those required
 references and values even when you use the class outside of a container.
 
+[TIP]
+====
+The {api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`]
+must be registered as a bean to enable support for the `@Required` annotation.
+====
+
 [NOTE]
 ====
-The `@Required` annotation is formally deprecated as of Spring Framework 5.1, in favor
-of using constructor injection for required settings (or a custom implementation of
-`InitializingBean.afterPropertiesSet()` along with bean property setter methods).
+The `@Required` annotation and `RequiredAnnotationBeanPostProcessor` are formally
+deprecated as of Spring Framework 5.1, in favor of using constructor injection for
+required settings (or a custom implementation of `InitializingBean.afterPropertiesSet()`
+or a custom `@PostConstruct` method along with bean property setter methods).
 ====
 
 
@@ -4799,10 +4751,12 @@ You can apply the `@Autowired` annotation to constructors, as the following exam
 
 [NOTE]
 ====
-As of Spring Framework 4.3, an `@Autowired` annotation on such a constructor is
-no longer necessary if the target bean defines only one constructor to begin with.
-However, if several constructors are available, at least one must be annotated 
-with `@Autowired` in order to instruct the container which one to use.
+As of Spring Framework 4.3, an `@Autowired` annotation on such a constructor is no longer
+necessary if the target bean defines only one constructor to begin with. However, if
+several constructors are available and there is no primary/default constructor, at least
+one of the constructors must be annotated with `@Autowired` in order to instruct the
+container which one to use. See the discussion on
+<<beans-autowired-annotation-constructor-resolution, constructor resolution>> for details.
 ====
 
 You can also apply the `@Autowired` annotation to _traditional_ setter methods,
@@ -4977,11 +4931,12 @@ The same applies for typed collections, as the following example shows:
 
 		@Autowired
 		lateinit var movieCatalogs: Set<MovieCatalog>
-		
+
 		// ...
 	}
 ----
 
+[[beans-factory-ordered]]
 [TIP]
 ====
 Your target beans can implement the `org.springframework.core.Ordered` interface or use
@@ -4995,7 +4950,7 @@ use the same bean class). `@Order` values may influence priorities at injection 
 but be aware that they do not influence singleton startup order, which is an
 orthogonal concern determined by dependency relationships and `@DependsOn` declarations.
 
-Note that the standard `javax.annotation.Priority` annotation is not available at the
+Note that the standard `jakarta.annotation.Priority` annotation is not available at the
 `@Bean` level, since it cannot be declared on methods. Its semantics can be modeled
 through `@Order` values in combination with `@Primary` on a single bean for each type.
 ====
@@ -5026,7 +4981,7 @@ corresponding bean names, as the following example shows:
 
 		@Autowired
 		lateinit var movieCatalogs: Map<String, MovieCatalog>
-		
+
 		// ...
 	}
 ----
@@ -5069,7 +5024,9 @@ non-required (i.e., by setting the `required` attribute in `@Autowired` to `fals
 
 A non-required method will not be called at all if its dependency (or one of its
 dependencies, in case of multiple arguments) is not available. A non-required field will
-not get populated at all in such case, leaving its default value in place.
+not get populated at all in such cases, leaving its default value in place.
+
+[[beans-autowired-annotation-constructor-resolution]]
 
 Injected constructor and factory method arguments are a special case since the `required`
 attribute in `@Autowired` has a somewhat different meaning due to Spring's constructor
@@ -5085,21 +5042,24 @@ without an `@Autowired` annotation.
 ====
 Only one constructor of any given bean class may declare `@Autowired` with the `required`
 attribute set to `true`, indicating _the_ constructor to autowire when used as a Spring
-bean. Furthermore, if the `required` attribute is set to `true`, only a single
-constructor may be annotated with `@Autowired`. If multiple _non-required_ constructors
-declare the annotation, they will be considered as candidates for autowiring. The
-constructor with the greatest number of dependencies that can be satisfied by matching
+bean. As a consequence, if the `required` attribute is left at its default value `true`,
+only a single constructor may be annotated with `@Autowired`. If multiple constructors
+declare the annotation, they will all have to declare `required=false` in order to be
+considered as candidates for autowiring (analogous to `autowire=constructor` in XML).
+The constructor with the greatest number of dependencies that can be satisfied by matching
 beans in the Spring container will be chosen. If none of the candidates can be satisfied,
-then a primary/default constructor (if present) will be used. If a class only declares a
-single constructor to begin with, it will always be used, even if not annotated. An
+then a primary/default constructor (if present) will be used. Similarly, if a class
+declares multiple constructors but none of them is annotated with `@Autowired`, then a
+primary/default constructor (if present) will be used. If a class only declares a single
+constructor to begin with, it will always be used, even if not annotated. Note that an
 annotated constructor does not have to be public.
 
 The `required` attribute of `@Autowired` is recommended over the deprecated `@Required`
 annotation on setter methods. Setting the `required` attribute to `false` indicates that
 the property is not required for autowiring purposes, and the property is ignored if it
 cannot be autowired. `@Required`, on the other hand, is stronger in that it enforces the
-property to be set by any means supported by the container, and if no value is defined, a
-corresponding exception is raised.
+property to be set by any means supported by the container, and if no value is defined,
+a corresponding exception is raised.
 ====
 
 Alternatively, you can express the non-required nature of a particular dependency
@@ -5425,7 +5385,7 @@ Letting qualifier values select against target bean names, within the type-match
 candidates, does not require a `@Qualifier` annotation at the injection point.
 If there is no other resolution indicator (such as a qualifier or a primary marker),
 for a non-unique dependency situation, Spring matches the injection point name
-(that is, the field name or parameter name) against the target bean names and choose the
+(that is, the field name or parameter name) against the target bean names and chooses the
 same-named candidate, if any.
 ====
 
@@ -5440,7 +5400,7 @@ matching an `account` qualifier against beans marked with the same qualifier lab
 
 For beans that are themselves defined as a collection, `Map`, or array type, `@Resource`
 is a fine solution, referring to the specific collection or array bean by unique name.
-That said, as of 4.3, collection, you can match `Map`, and array types through Spring's
+That said, as of 4.3, you can match collection, `Map`, and array types through Spring's
 `@Autowired` type matching algorithm as well, as long as the element type information
 is preserved in `@Bean` return type signatures or collection inheritance hierarchies.
 In this case, you can use qualifier values to select among same-typed collections,
@@ -5453,7 +5413,7 @@ references do not participate in regular candidate selection and are therefore i
 particular never primary. On the contrary, they always end up as lowest precedence.
 In practice, you should use self references as a last resort only (for example, for
 calling other methods on the same instance through the bean's transactional proxy).
-Consider factoring out the effected methods to a separate delegate bean in such a scenario.
+Consider factoring out the affected methods to a separate delegate bean in such a scenario.
 Alternatively, you can use `@Resource`, which may obtain a proxy back to the current bean
 by its unique name.
 
@@ -5827,7 +5787,7 @@ configuration:
 
 		@Bean
 		fun stringStore() = StringStore()
-			
+
 		@Bean
 		fun integerStore() = IntegerStore()
 	}
@@ -5915,8 +5875,8 @@ attribute set to `true`, it is selected.
 === Injection with `@Resource`
 
 Spring also supports injection by using the JSR-250 `@Resource` annotation
-(`javax.annotation.Resource`) on fields or bean property setter methods.
-This is a common pattern in Java EE: for example, in JSF-managed beans and JAX-WS
+(`jakarta.annotation.Resource`) on fields or bean property setter methods.
+This is a common pattern in Jakarta EE: for example, in JSF-managed beans and JAX-WS
 endpoints. Spring supports this pattern for Spring-managed objects as well.
 
 `@Resource` takes a name attribute. By default, Spring interprets that value as
@@ -5975,7 +5935,7 @@ named `movieFinder` injected into its setter method:
 
 		@Resource
 		private lateinit var movieFinder: MovieFinder
-		
+
 	}
 ----
 
@@ -6094,14 +6054,14 @@ example shows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-    @Configuration
-    public class AppConfig {
+	@Configuration
+	public class AppConfig {
 
-         @Bean
-         public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
-               return new PropertySourcesPlaceholderConfigurer();
-         }
-    }
+		@Bean
+		public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
+			return new PropertySourcesPlaceholderConfigurer();
+		}
+	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -6127,7 +6087,7 @@ will get properties from `application.properties` and `application.yml` files.
 
 Built-in converter support provided by Spring allows simple type conversion (to `Integer`
 or `int` for example) to be automatically handled. Multiple comma-separated values can be
-automatically converted to String array without extra effort.
+automatically converted to `String` array without extra effort.
 
 It is possible to provide a default value as following:
 
@@ -6151,8 +6111,8 @@ It is possible to provide a default value as following:
 	class MovieRecommender(@Value("\${catalog.name:defaultCatalog}") private val catalog: String)
 ----
 
-A Spring `BeanPostProcessor` uses a `ConversionService` behind the scene to handle the
-process for converting the String value in `@Value` to the target type. If you want to
+A Spring `BeanPostProcessor` uses a `ConversionService` behind the scenes to handle the
+process for converting the `String` value in `@Value` to the target type. If you want to
 provide conversion support for your own custom type, you can provide your own
 `ConversionService` bean instance as the following example shows:
 
@@ -6178,7 +6138,7 @@ provide conversion support for your own custom type, you can provide your own
 
 		@Bean
 		fun conversionService(): ConversionService {
-				return DefaultFormattingConversionService().apply {
+			return DefaultFormattingConversionService().apply {
 				addConverter(MyCustomConverter())
 			}
 		}
@@ -6238,8 +6198,8 @@ SpEL also enables the use of more complex data structures:
 === Using `@PostConstruct` and `@PreDestroy`
 
 The `CommonAnnotationBeanPostProcessor` not only recognizes the `@Resource` annotation
-but also the JSR-250 lifecycle annotations: `javax.annotation.PostConstruct` and
-`javax.annotation.PreDestroy`. Introduced in Spring 2.5, the support for these
+but also the JSR-250 lifecycle annotations: `jakarta.annotation.PostConstruct` and
+`jakarta.annotation.PreDestroy`. Introduced in Spring 2.5, the support for these
 annotations offers an alternative to the lifecycle callback mechanism described in
 <<beans-factory-lifecycle-initializingbean,initialization callbacks>> and
 <<beans-factory-lifecycle-disposablebean,destruction callbacks>>. Provided that the
@@ -6290,8 +6250,9 @@ For details about the effects of combining various lifecycle mechanisms, see
 Like `@Resource`, the `@PostConstruct` and `@PreDestroy` annotation types were a part
 of the standard Java libraries from JDK 6 to 8. However, the entire `javax.annotation`
 package got separated from the core Java modules in JDK 9 and eventually removed in
-JDK 11. If needed, the `javax.annotation-api` artifact needs to be obtained via Maven
-Central now, simply to be added to the application's classpath like any other library.
+JDK 11. As of Jakarta EE 9, the package lives in `jakarta.annotation` now. If needed,
+the `jakarta.annotation-api` artifact needs to be obtained via Maven Central now,
+simply to be added to the application's classpath like any other library.
 ====
 
 
@@ -6367,7 +6328,7 @@ is meta-annotated with `@Component`, as the following example shows:
 		// ...
 	}
 ----
-<1> The `Component` causes `@Service` to be treated in the same way as `@Component`.
+<1> The `@Component` causes `@Service` to be treated in the same way as `@Component`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -6381,7 +6342,7 @@ is meta-annotated with `@Component`, as the following example shows:
 		// ...
 	}
 ----
-<1> The `Component` causes `@Service` to be treated in the same way as `@Component`.
+<1> The `@Component` causes `@Service` to be treated in the same way as `@Component`.
 
 You can also combine meta-annotations to create "`composed annotations`". For example,
 the `@RestController` annotation from Spring MVC is composed of `@Controller` and
@@ -6463,7 +6424,7 @@ You can also override the value for the `proxyMode`, as the following example sh
 	@Service
 	@SessionScope(proxyMode = ScopedProxyMode.INTERFACES)
 	class SessionScopedUserService : UserService {
-		// ...	
+		// ...
 	}
 ----
 
@@ -6513,7 +6474,7 @@ are eligible for such autodetection:
 ----
 	@Repository
 	class JpaMovieFinder : MovieFinder {
-		// implementation elided for clarity	
+		// implementation elided for clarity
 	}
 ----
 
@@ -6643,7 +6604,7 @@ and using "`stub`" repositories instead:
 			includeFilters = @Filter(type = FilterType.REGEX, pattern = ".*Stub.*Repository"),
 			excludeFilters = @Filter(Repository.class))
 	public class AppConfig {
-		...
+		// ...
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -6727,9 +6688,11 @@ factory method and other bean definition properties, such as a qualifier value t
 the `@Qualifier` annotation. Other method-level annotations that can be specified are
 `@Scope`, `@Lazy`, and custom qualifier annotations.
 
-TIP: In addition to its role for component initialization, you can also place the `@Lazy` annotation
-on injection points marked with `@Autowired` or `@Inject`. In this context, it
-leads to the injection of a lazy-resolution proxy.
+TIP: In addition to its role for component initialization, you can also place the `@Lazy`
+annotation on injection points marked with `@Autowired` or `@Inject`. In this context,
+it leads to the injection of a lazy-resolution proxy. However, such a proxy approach
+is rather limited. For sophisticated lazy interactions, in particular in combination
+with optional dependencies, we recommend `ObjectProvider<MyTargetBean>` instead.
 
 Autowired fields and methods are supported, as previously discussed, with additional
 support for autowiring of `@Bean` methods. The following example shows how to do so:
@@ -6818,7 +6781,7 @@ beans of prototype scope. For other scopes, the factory method only ever sees th
 injection point that triggered the creation of a new bean instance in the given scope
 (for example, the dependency that triggered the creation of a lazy singleton bean).
 You can use the provided injection point metadata with semantic care in such scenarios.
-The following example shows how to do use `InjectionPoint`:
+The following example shows how to use `InjectionPoint`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -7138,7 +7101,7 @@ technique:
 	@Component
 	@Genre("Action")
 	class ActionMovieCatalog : MovieCatalog {
-		// ...	
+		// ...
 	}
 ----
 
@@ -7173,10 +7136,10 @@ metadata is provided per-instance rather than per-class.
 
 While classpath scanning is very fast, it is possible to improve the startup performance
 of large applications by creating a static list of candidates at compilation time. In this
-mode, all modules that are target of component scan must use this mechanism.
+mode, all modules that are targets of component scanning must use this mechanism.
 
-NOTE: Your existing `@ComponentScan` or `<context:component-scan` directives must stay as
-is to request the context to scan candidates in certain packages. When the
+NOTE: Your existing `@ComponentScan` or `<context:component-scan/>` directives must remain
+unchanged to request the context to scan candidates in certain packages. When the
 `ApplicationContext` detects such an index, it automatically uses it rather than scanning
 the classpath.
 
@@ -7205,32 +7168,31 @@ configuration, as shown in the following example:
 		compileOnly "org.springframework:spring-context-indexer:{spring-version}"
 	}
 ----
-====
 
 With Gradle 4.6 and later, the dependency should be declared in the `annotationProcessor`
 configuration, as shown in the following example:
 
-====
-[source,groovy,indent=0subs="verbatim,quotes,attributes"]
+[source,groovy,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	dependencies {
 		annotationProcessor "org.springframework:spring-context-indexer:{spring-version}"
 	}
 ----
 
-That process generates a `META-INF/spring.components` file that is
-included in the jar file.
+The `spring-context-indexer` artifact generates a `META-INF/spring.components` file that
+is included in the jar file.
 
 NOTE: When working with this mode in your IDE, the `spring-context-indexer` must be
 registered as an annotation processor to make sure the index is up-to-date when
 candidate components are updated.
 
-TIP: The index is enabled automatically when a `META-INF/spring.components` is found
+TIP: The index is enabled automatically when a `META-INF/spring.components` file is found
 on the classpath. If an index is partially available for some libraries (or use cases)
-but could not be built for the whole application, you can fallback to a regular classpath
-arrangement (as though no index was present at all) by setting `spring.index.ignore` to
-`true`, either as a system property or in a `spring.properties` file at the root of the
-classpath.
+but could not be built for the whole application, you can fall back to a regular classpath
+arrangement (as though no index were present at all) by setting `spring.index.ignore` to
+`true`, either as a JVM system property or via the
+<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism.
+
 
 
 
@@ -7243,16 +7205,16 @@ annotations. To use them, you need to have the relevant jars in your classpath.
 
 [NOTE]
 =====
-If you use Maven, the `javax.inject` artifact is available in the standard Maven
+If you use Maven, the `jakarta.inject` artifact is available in the standard Maven
 repository (
-https://repo1.maven.org/maven2/javax/inject/javax.inject/1/[https://repo1.maven.org/maven2/javax/inject/javax.inject/1/]).
+https://repo1.maven.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/[https://repo1.maven.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/]).
 You can add the following dependency to your file pom.xml:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<dependency>
-		<groupId>javax.inject</groupId>
-		<artifactId>javax.inject</artifactId>
+		<groupId>jakarta.inject</groupId>
+		<artifactId>jakarta.inject-api</artifactId>
 		<version>1</version>
 	</dependency>
 ----
@@ -7263,12 +7225,12 @@ You can add the following dependency to your file pom.xml:
 [[beans-inject-named]]
 === Dependency Injection with `@Inject` and `@Named`
 
-Instead of `@Autowired`, you can use `@javax.inject.Inject` as follows:
+Instead of `@Autowired`, you can use `@jakarta.inject.Inject` as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import javax.inject.Inject;
+	import jakarta.inject.Inject;
 
 	public class SimpleMovieLister {
 
@@ -7288,7 +7250,7 @@ Instead of `@Autowired`, you can use `@javax.inject.Inject` as follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import javax.inject.Inject
+	import jakarta.inject.Inject
 
 	class SimpleMovieLister {
 
@@ -7312,8 +7274,8 @@ preceding example:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import javax.inject.Inject;
-	import javax.inject.Provider;
+	import jakarta.inject.Inject;
+	import jakarta.inject.Provider;
 
 	public class SimpleMovieLister {
 
@@ -7333,7 +7295,7 @@ preceding example:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import javax.inject.Inject
+	import jakarta.inject.Inject
 
 	class SimpleMovieLister {
 
@@ -7354,8 +7316,8 @@ you should use the `@Named` annotation, as the following example shows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import javax.inject.Inject;
-	import javax.inject.Named;
+	import jakarta.inject.Inject;
+	import jakarta.inject.Named;
 
 	public class SimpleMovieLister {
 
@@ -7372,8 +7334,8 @@ you should use the `@Named` annotation, as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import javax.inject.Inject
-	import javax.inject.Named
+	import jakarta.inject.Inject
+	import jakarta.inject.Named
 
 	class SimpleMovieLister {
 
@@ -7430,14 +7392,14 @@ a `required` attribute. The following pair of examples show how to use `@Inject`
 [[beans-named]]
 === `@Named` and `@ManagedBean`: Standard Equivalents to the `@Component` Annotation
 
-Instead of `@Component`, you can use `@javax.inject.Named` or `javax.annotation.ManagedBean`,
+Instead of `@Component`, you can use `@jakarta.inject.Named` or `jakarta.annotation.ManagedBean`,
 as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import javax.inject.Inject;
-	import javax.inject.Named;
+	import jakarta.inject.Inject;
+	import jakarta.inject.Named;
 
 	@Named("movieListener")  // @ManagedBean("movieListener") could be used as well
 	public class SimpleMovieLister {
@@ -7455,8 +7417,8 @@ as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import javax.inject.Inject
-	import javax.inject.Named
+	import jakarta.inject.Inject
+	import jakarta.inject.Named
 
 	@Named("movieListener")  // @ManagedBean("movieListener") could be used as well
 	class SimpleMovieLister {
@@ -7474,8 +7436,8 @@ It is very common to use `@Component` without specifying a name for the componen
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import javax.inject.Inject;
-	import javax.inject.Named;
+	import jakarta.inject.Inject;
+	import jakarta.inject.Named;
 
 	@Named
 	public class SimpleMovieLister {
@@ -7493,8 +7455,8 @@ It is very common to use `@Component` without specifying a name for the componen
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import javax.inject.Inject
-	import javax.inject.Named
+	import jakarta.inject.Inject
+	import jakarta.inject.Named
 
 	@Named
 	class SimpleMovieLister {
@@ -7543,7 +7505,7 @@ features are not available, as the following table shows:
 [[annotations-comparison]]
 .Spring component model elements versus JSR-330 variants
 |===
-| Spring| javax.inject.*| javax.inject restrictions / comments
+| Spring| jakarta.inject.*| jakarta.inject restrictions / comments
 
 | @Autowired
 | @Inject
@@ -7558,15 +7520,15 @@ features are not available, as the following table shows:
 | The JSR-330 default scope is like Spring's `prototype`. However, in order to keep it
   consistent with Spring's general defaults, a JSR-330 bean declared in the Spring
   container is a `singleton` by default. In order to use a scope other than `singleton`,
-  you should use Spring's `@Scope` annotation. `javax.inject` also provides a
-  https://download.oracle.com/javaee/6/api/javax/inject/Scope.html[@Scope] annotation.
-  Nevertheless, this one is only intended to be used for creating your own annotations.
+  you should use Spring's `@Scope` annotation. `jakarta.inject` also provides a
+  `jakarta.inject.Scope` annotation: however, this one is only intended to be used
+  for creating custom annotations.
 
 | @Qualifier
 | @Qualifier / @Named
-| `javax.inject.Qualifier` is just a meta-annotation for building custom qualifiers.
+| `jakarta.inject.Qualifier` is just a meta-annotation for building custom qualifiers.
   Concrete `String` qualifiers (like Spring's `@Qualifier` with a value) can be associated
-  through `javax.inject.Named`.
+  through `jakarta.inject.Named`.
 
 | @Value
 | -
@@ -7582,7 +7544,7 @@ features are not available, as the following table shows:
 
 | ObjectFactory
 | Provider
-| `javax.inject.Provider` is a direct alternative to Spring's `ObjectFactory`,
+| `jakarta.inject.Provider` is a direct alternative to Spring's `ObjectFactory`,
   only with a shorter `get()` method name. It can also be used in combination with
   Spring's `@Autowired` or with non-annotated constructors and setter methods.
 |===
@@ -7684,7 +7646,7 @@ to reduce subtle bugs that can be hard to track down when operating in "`lite`" 
 ****
 
 The `@Bean` and `@Configuration` annotations are discussed in depth in the following sections.
-First, however, we cover the various ways of creating a spring container using by
+First, however, we cover the various ways of creating a spring container by using
 Java-based configuration.
 
 
@@ -7811,7 +7773,7 @@ To enable component scanning, you can annotate your `@Configuration` class as fo
 	@Configuration
 	@ComponentScan(basePackages = "com.acme") // <1>
 	public class AppConfig  {
-		...
+		// ...
 	}
 ----
 <1> This annotation enables component scanning.
@@ -7833,8 +7795,7 @@ To enable component scanning, you can annotate your `@Configuration` class as fo
 Experienced Spring users may be familiar with the XML declaration equivalent from
 Spring's `context:` namespace, shown in the following example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<context:component-scan base-package="com.acme"/>
@@ -7946,6 +7907,7 @@ init-param):
 
 `@Bean` is a method-level annotation and a direct analog of the XML `<bean/>` element.
 The annotation supports some of the attributes offered by `<bean/>`, such as:
+
 * <<beans-factory-lifecycle-initializingbean, init-method>>
 * <<beans-factory-lifecycle-disposablebean, destroy-method>>
 * <<beans-factory-autowire,autowiring>>
@@ -8004,6 +7966,26 @@ following text image shows:
 transferService -> com.acme.TransferServiceImpl
 ----
 
+You can also use default methods to define beans. This allows composition of bean
+configurations by implementing interfaces with bean definitions on default methods.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public interface BaseConfig {
+
+		@Bean
+		default TransferServiceImpl transferService() {
+			return new TransferServiceImpl();
+		}
+	}
+
+	@Configuration
+	public class AppConfig implements BaseConfig {
+
+	}
+----
+
 You can also declare your `@Bean` method with an interface (or base class)
 return type, as the following example shows:
 
@@ -8034,7 +8016,7 @@ return type, as the following example shows:
 
 However, this limits the visibility for advance type prediction to the specified
 interface type (`TransferService`). Then, with the full type (`TransferServiceImpl`)
-known to the container only once, the affected singleton bean has been instantiated.
+known to the container only once the affected singleton bean has been instantiated.
 Non-lazy singleton beans get instantiated according to their declaration order,
 so you may see different type matching results depending on when another component
 tries to match by a non-declared type (such as `@Autowired TransferServiceImpl`,
@@ -8175,7 +8157,7 @@ default `(inferred)` mode.
 
 You may want to do that by default for a resource that you acquire with JNDI, as its
 lifecycle is managed outside the application. In particular, make sure to always do it
-for a `DataSource`, as it is known to be problematic on Java EE application servers.
+for a `DataSource`, as it is known to be problematic on Jakarta EE application servers.
 
 The following example shows how to prevent an automatic destruction callback for a
 `DataSource`:
@@ -8292,8 +8274,10 @@ Spring offers a convenient way of working with scoped dependencies through
 <<beans-factory-scopes-other-injection, scoped proxies>>. The easiest way to create
 such a proxy when using the XML configuration is the `<aop:scoped-proxy/>` element.
 Configuring your beans in Java with a `@Scope` annotation offers equivalent support
-with the `proxyMode` attribute. The default is no proxy (`ScopedProxyMode.NO`),
-but you can specify `ScopedProxyMode.TARGET_CLASS` or `ScopedProxyMode.INTERFACES`.
+with the `proxyMode` attribute. The default is `ScopedProxyMode.DEFAULT`, which
+typically indicates that no scoped proxy should be created unless a different default
+has been configured at the component-scan instruction level. You can specify
+`ScopedProxyMode.TARGET_CLASS`, `ScopedProxyMode.INTERFACES` or `ScopedProxyMode.NO`.
 
 If you port the scoped proxy example from the XML reference documentation (see
 <<beans-factory-scopes-other-injection, scoped proxies>>) to our `@Bean` using Java,
@@ -8329,7 +8313,7 @@ it resembles the following:
 	fun userService(): Service {
 		return SimpleUserService().apply {
 			// a reference to the proxied userPreferences bean
-			setUserPreferences(userPreferences()
+			setUserPreferences(userPreferences())
 		}
 	}
 ----
@@ -8347,7 +8331,7 @@ as the following example shows:
 	@Configuration
 	public class AppConfig {
 
-		@Bean(name = "myThing")
+		@Bean("myThing")
 		public Thing thing() {
 			return new Thing();
 		}
@@ -8440,7 +8424,7 @@ annotation, as the following example shows:
 === Using the `@Configuration` annotation
 
 `@Configuration` is a class-level annotation indicating that an object is a source of
-bean definitions. `@Configuration` classes declare beans through public `@Bean` annotated
+bean definitions. `@Configuration` classes declare beans through `@Bean`-annotated
 methods. Calls to `@Bean` methods on `@Configuration` classes can also be used to define
 inter-bean dependencies. See <<beans-java-basic-concepts>> for a general introduction.
 
@@ -8876,8 +8860,9 @@ parameter-based injection, as in the preceding example.
 
 Also, be particularly careful with `BeanPostProcessor` and `BeanFactoryPostProcessor` definitions
 through `@Bean`. Those should usually be declared as `static @Bean` methods, not triggering the
-instantiation of their containing configuration class. Otherwise, `@Autowired` and `@Value` do not
-work on the configuration class itself, since it is being created as a bean instance too early.
+instantiation of their containing configuration class. Otherwise, `@Autowired` and `@Value` may not
+work on the configuration class itself, since it is possible to create it as a bean instance earlier than
+{api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`].
 ====
 
 The following example shows how one bean can be autowired to another bean:
@@ -8984,7 +8969,7 @@ modularity, but determining exactly where the autowired bean definitions are dec
 still somewhat ambiguous. For example, as a developer looking at `ServiceConfig`, how do
 you know exactly where the `@Autowired AccountRepository` bean is declared? It is not
 explicit in the code, and this may be just fine. Remember that the
-https://spring.io/tools/sts[Spring Tool Suite] provides tooling that
+https://spring.io/tools[Spring Tools for Eclipse] provides tooling that
 can render graphs showing how everything is wired, which may be all you need. Also,
 your Java IDE can easily find all declarations and uses of the `AccountRepository` type
 and quickly show you the location of `@Bean` methods that return that type.
@@ -9188,7 +9173,7 @@ method that returns `true` or `false`. For example, the following listing shows 
 		val attrs = metadata.getAllAnnotationAttributes(Profile::class.java.name)
 		if (attrs != null) {
 			for (value in attrs["value"]!!) {
-				if (context.environment.acceptsProfiles(Profiles .of(*value as Array<String>))) {
+				if (context.environment.acceptsProfiles(Profiles.of(*value as Array<String>))) {
 					return true
 				}
 			}
@@ -9871,7 +9856,7 @@ it programmatically against the `Environment` API which is available through an
 	val ctx = AnnotationConfigApplicationContext().apply {
 		environment.setActiveProfiles("development")
 		register(SomeConfig::class.java, StandaloneDataConfig::class.java, JndiDataConfig::class.java)
-		refresh()	
+		refresh()
 	}
 ----
 
@@ -9952,7 +9937,7 @@ as a way to provide a default definition for one or more beans. If any
 profile is enabled, the default profile does not apply.
 
 You can change the name of the default profile by using `setDefaultProfiles()` on
-the `Environment` or ,declaratively, by using the `spring.profiles.default` property.
+the `Environment` or, declaratively, by using the `spring.profiles.default` property.
 
 
 
@@ -10226,7 +10211,7 @@ interfaces to provide additional functionality in a more application
 framework-oriented style. Many people use the `ApplicationContext` in a completely
 declarative fashion, not even creating it programmatically, but instead relying on
 support classes such as `ContextLoader` to automatically instantiate an
-`ApplicationContext` as part of the normal startup process of a Java EE web application.
+`ApplicationContext` as part of the normal startup process of a Jakarta EE web application.
 
 To enhance `BeanFactory` functionality in a more framework-oriented style, the context
 package also provides the following functionality:
@@ -10271,8 +10256,8 @@ bean with the same name. If it does, it uses that bean as the `MessageSource`. I
 `DelegatingMessageSource` is instantiated in order to be able to accept calls to the
 methods defined above.
 
-Spring provides two `MessageSource` implementations, `ResourceBundleMessageSource` and
-`StaticMessageSource`. Both implement `HierarchicalMessageSource` in order to do nested
+Spring provides three `MessageSource` implementations, `ResourceBundleMessageSource`, `ReloadableResourceBundleMessageSource`
+and `StaticMessageSource`. All of them implement `HierarchicalMessageSource` in order to do nested
 messaging. The `StaticMessageSource` is rarely used but provides programmatic ways to
 add messages to the source. The following example shows `ResourceBundleMessageSource`:
 
@@ -10310,7 +10295,7 @@ are as follows:
 	argument.required=The {0} argument is required.
 ----
 
-The next example shows a program to execute the `MessageSource` functionality.
+The next example shows a program to run the `MessageSource` functionality.
 Remember that all `ApplicationContext` implementations are also `MessageSource`
 implementations and so can be cast to the `MessageSource` interface.
 
@@ -10421,7 +10406,7 @@ resolved is specified manually:
 [literal,subs="verbatim,quotes"]
 ----
 # in exceptions_en_GB.properties
-argument.required=Ebagum lad, the {0} argument is required, I say, required.
+argument.required=Ebagum lad, the ''{0}'' argument is required, I say, required.
 ----
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -10456,6 +10441,10 @@ You can also use the `MessageSourceAware` interface to acquire a reference to an
 `MessageSource` that has been defined. Any bean that is defined in an
 `ApplicationContext` that implements the `MessageSourceAware` interface is injected with
 the application context's `MessageSource` when the bean is created and configured.
+
+NOTE: Because Spring's `MessageSource` is based on Java's `ResourceBundle`, it does not merge
+bundles with the same base name, but will only use the first bundle found.
+Subsequent message bundles with the same base name are ignored.
 
 NOTE: As an alternative to `ResourceBundleMessageSource`, Spring provides a
 `ReloadableResourceBundleMessageSource` class. This variant supports the same bundle
@@ -10537,12 +10526,12 @@ simple class that extends Spring's `ApplicationEvent` base class:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	public class BlackListEvent extends ApplicationEvent {
+	public class BlockedListEvent extends ApplicationEvent {
 
 		private final String address;
 		private final String content;
 
-		public BlackListEvent(Object source, String address, String content) {
+		public BlockedListEvent(Object source, String address, String content) {
 			super(source);
 			this.address = address;
 			this.content = content;
@@ -10554,7 +10543,7 @@ simple class that extends Spring's `ApplicationEvent` base class:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	class BlackListEvent(source: Any,
+	class BlockedListEvent(source: Any,
 						val address: String,
 						val content: String) : ApplicationEvent(source)
 ----
@@ -10569,11 +10558,11 @@ example shows such a class:
 ----
 	public class EmailService implements ApplicationEventPublisherAware {
 
-		private List<String> blackList;
+		private List<String> blockedList;
 		private ApplicationEventPublisher publisher;
 
-		public void setBlackList(List<String> blackList) {
-			this.blackList = blackList;
+		public void setBlockedList(List<String> blockedList) {
+			this.blockedList = blockedList;
 		}
 
 		public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
@@ -10581,8 +10570,8 @@ example shows such a class:
 		}
 
 		public void sendEmail(String address, String content) {
-			if (blackList.contains(address)) {
-				publisher.publishEvent(new BlackListEvent(this, address, content));
+			if (blockedList.contains(address)) {
+				publisher.publishEvent(new BlockedListEvent(this, address, content));
 				return;
 			}
 			// send email...
@@ -10594,11 +10583,11 @@ example shows such a class:
 ----
 	class EmailService : ApplicationEventPublisherAware {
 
-		private lateinit var blackList: List<String>
+		private lateinit var blockedList: List<String>
 		private lateinit var publisher: ApplicationEventPublisher
 
-		fun setBlackList(blackList: List<String>) {
-			this.blackList = blackList
+		fun setBlockedList(blockedList: List<String>) {
+			this.blockedList = blockedList
 		}
 
 		override fun setApplicationEventPublisher(publisher: ApplicationEventPublisher) {
@@ -10606,8 +10595,8 @@ example shows such a class:
 		}
 
 		fun sendEmail(address: String, content: String) {
-			if (blackList!!.contains(address)) {
-				publisher!!.publishEvent(BlackListEvent(this, address, content))
+			if (blockedList!!.contains(address)) {
+				publisher!!.publishEvent(BlockedListEvent(this, address, content))
 				return
 			}
 			// send email...
@@ -10628,7 +10617,7 @@ shows such a class:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	public class BlackListNotifier implements ApplicationListener<BlackListEvent> {
+	public class BlockedListNotifier implements ApplicationListener<BlockedListEvent> {
 
 		private String notificationAddress;
 
@@ -10636,7 +10625,7 @@ shows such a class:
 			this.notificationAddress = notificationAddress;
 		}
 
-		public void onApplicationEvent(BlackListEvent event) {
+		public void onApplicationEvent(BlockedListEvent event) {
 			// notify appropriate parties via notificationAddress...
 		}
 	}
@@ -10644,25 +10633,26 @@ shows such a class:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	class BlackListNotifier : ApplicationListener<BlackListEvent> {
+	class BlockedListNotifier : ApplicationListener<BlockedListEvent> {
 
 		lateinit var notificationAddres: String
 
-		override fun onApplicationEvent(event: BlackListEvent) {
+		override fun onApplicationEvent(event: BlockedListEvent) {
 			// notify appropriate parties via notificationAddress...
 		}
 	}
 ----
 
 Notice that `ApplicationListener` is generically parameterized with the type of your
-custom event (`BlackListEvent` in the preceding example). This means that the `onApplicationEvent()` method can
-remain type-safe, avoiding any need for downcasting. You can register as many event
-listeners as you wish, but note that, by default, event listeners receive events
-synchronously. This means that the `publishEvent()` method blocks until all listeners have
-finished processing the event. One advantage of this synchronous and single-threaded
-approach is that, when a listener receives an event, it operates inside the transaction
-context of the publisher if a transaction context is available. If another strategy for
-event publication becomes necessary, see the javadoc for Spring's
+custom event (`BlockedListEvent` in the preceding example). This means that the
+`onApplicationEvent()` method can remain type-safe, avoiding any need for downcasting.
+You can register as many event listeners as you wish, but note that, by default, event
+listeners receive events synchronously. This means that the `publishEvent()` method
+blocks until all listeners have finished processing the event. One advantage of this
+synchronous and single-threaded approach is that, when a listener receives an event, it
+operates inside the transaction context of the publisher if a transaction context is
+available. If another strategy for event publication becomes necessary, see the javadoc
+for Spring's
 {api-spring-framework}/context/event/ApplicationEventMulticaster.html[`ApplicationEventMulticaster`] interface
 and {api-spring-framework}/context/event/SimpleApplicationEventMulticaster.html[`SimpleApplicationEventMulticaster`]
 implementation for configuration options.
@@ -10673,7 +10663,7 @@ the classes above:
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="emailService" class="example.EmailService">
-		<property name="blackList">
+		<property name="blockedList">
 			<list>
 				<value>known.spammer@example.org</value>
 				<value>known.hacker@example.org</value>
@@ -10682,15 +10672,15 @@ the classes above:
 		</property>
 	</bean>
 
-	<bean id="blackListNotifier" class="example.BlackListNotifier">
-		<property name="notificationAddress" value="blacklist@example.org"/>
+	<bean id="blockedListNotifier" class="example.BlockedListNotifier">
+		<property name="notificationAddress" value="blockedlist@example.org"/>
 	</bean>
 ----
 
 Putting it all together, when the `sendEmail()` method of the `emailService` bean is
-called, if there are any email messages that should be blacklisted, a custom event of type
-`BlackListEvent` is published. The `blackListNotifier` bean is registered as an
-`ApplicationListener` and receives the `BlackListEvent`, at which point it can
+called, if there are any email messages that should be blocked, a custom event of type
+`BlockedListEvent` is published. The `blockedListNotifier` bean is registered as an
+`ApplicationListener` and receives the `BlockedListEvent`, at which point it can
 notify appropriate parties.
 
 NOTE: Spring's eventing mechanism is designed for simple communication between Spring beans
@@ -10705,14 +10695,13 @@ architectures that build upon the well-known Spring programming model.
 [[context-functionality-events-annotation]]
 ==== Annotation-based Event Listeners
 
-As of Spring 4.2, you can register an event listener on any public method of a managed
-bean by using the `@EventListener` annotation. The `BlackListNotifier` can be rewritten as
-follows:
+You can register an event listener on any method of a managed bean by using the
+`@EventListener` annotation. The `BlockedListNotifier` can be rewritten as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	public class BlackListNotifier {
+	public class BlockedListNotifier {
 
 		private String notificationAddress;
 
@@ -10721,7 +10710,7 @@ follows:
 		}
 
 		@EventListener
-		public void processBlackListEvent(BlackListEvent event) {
+		public void processBlockedListEvent(BlockedListEvent event) {
 			// notify appropriate parties via notificationAddress...
 		}
 	}
@@ -10729,12 +10718,12 @@ follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	class BlackListNotifier {
+	class BlockedListNotifier {
 
 		lateinit var notificationAddress: String
 
 		@EventListener
-		fun processBlackListEvent(event: BlackListEvent) {
+		fun processBlockedListEvent(event: BlockedListEvent) {
 			// notify appropriate parties via notificationAddress...
 		}
 	}
@@ -10767,7 +10756,7 @@ following example shows how to do so:
 ----
 
 It is also possible to add additional runtime filtering by using the `condition` attribute
-of the annotation that defines a <<expressions, `SpEL` expression>> , which should match
+of the annotation that defines a <<expressions, `SpEL` expression>>, which should match
 to actually invoke the method for a particular event.
 
 The following example shows how our notifier can be rewritten to be invoked only if the
@@ -10777,7 +10766,7 @@ The following example shows how our notifier can be rewritten to be invoked only
 .Java
 ----
 	@EventListener(condition = "#blEvent.content == 'my-event'")
-	public void processBlackListEvent(BlackListEvent blEvent) {
+	public void processBlockedListEvent(BlockedListEvent blEvent) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----
@@ -10785,7 +10774,7 @@ The following example shows how our notifier can be rewritten to be invoked only
 .Kotlin
 ----
 	@EventListener(condition = "#blEvent.content == 'my-event'")
-	fun processBlackListEvent(blEvent: BlackListEvent) {
+	fun processBlockedListEvent(blEvent: BlockedListEvent) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----
@@ -10827,7 +10816,7 @@ method signature to return the event that should be published, as the following 
 .Java
 ----
 	@EventListener
-	public ListUpdateEvent handleBlackListEvent(BlackListEvent event) {
+	public ListUpdateEvent handleBlockedListEvent(BlockedListEvent event) {
 		// notify appropriate parties via notificationAddress and
 		// then publish a ListUpdateEvent...
 	}
@@ -10836,7 +10825,7 @@ method signature to return the event that should be published, as the following 
 .Kotlin
 ----
 	@EventListener
-	fun handleBlackListEvent(event: BlackListEvent): ListUpdateEvent {
+	fun handleBlockedListEvent(event: BlockedListEvent): ListUpdateEvent {
 		// notify appropriate parties via notificationAddress and
 		// then publish a ListUpdateEvent...
 	}
@@ -10845,9 +10834,9 @@ method signature to return the event that should be published, as the following 
 NOTE: This feature is not supported for
 <<context-functionality-events-async, asynchronous listeners>>.
 
-This new method publishes a new `ListUpdateEvent` for every `BlackListEvent` handled by the
-method above. If you need to publish several events, you can return a `Collection` of events
-instead.
+The `handleBlockedListEvent()` method publishes a new `ListUpdateEvent` for every
+`BlockedListEvent` that it handles. If you need to publish several events, you can return
+a `Collection` or an array of events instead.
 
 
 [[context-functionality-events-async]]
@@ -10862,8 +10851,8 @@ The following example shows how to do so:
 ----
 	@EventListener
 	@Async
-	public void processBlackListEvent(BlackListEvent event) {
-		// BlackListEvent is processed in a separate thread
+	public void processBlockedListEvent(BlockedListEvent event) {
+		// BlockedListEvent is processed in a separate thread
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -10871,18 +10860,20 @@ The following example shows how to do so:
 ----
 	@EventListener
 	@Async
-	fun processBlackListEvent(event: BlackListEvent) {
-		// BlackListEvent is processed in a separate thread
+	fun processBlockedListEvent(event: BlockedListEvent) {
+		// BlockedListEvent is processed in a separate thread
 	}
 ----
 
 Be aware of the following limitations when using asynchronous events:
 
 * If an asynchronous event listener throws an `Exception`, it is not propagated to the
-  caller. See `AsyncUncaughtExceptionHandler` for more details.
+  caller. See
+  {api-spring-framework}/aop/interceptor/AsyncUncaughtExceptionHandler.html[`AsyncUncaughtExceptionHandler`]
+  for more details.
 * Asynchronous event listener methods cannot publish a subsequent event by returning a
   value. If you need to publish another event as the result of the processing, inject an
-  {api-spring-framework}/aop/interceptor/AsyncUncaughtExceptionHandler.html[`ApplicationEventPublisher`]
+  {api-spring-framework}/context/ApplicationEventPublisher.html[`ApplicationEventPublisher`]
   to publish the event manually.
 
 
@@ -10897,7 +10888,7 @@ annotation to the method declaration, as the following example shows:
 ----
 	@EventListener
 	@Order(42)
-	public void processBlackListEvent(BlackListEvent event) {
+	public void processBlockedListEvent(BlockedListEvent event) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----
@@ -10906,7 +10897,7 @@ annotation to the method declaration, as the following example shows:
 ----
 	@EventListener
 	@Order(42)
-	fun processBlackListEvent(event: BlackListEvent) {
+	fun processBlockedListEvent(event: BlockedListEvent) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----
@@ -11009,6 +11000,76 @@ regardless of the actual context type.
 
 
 
+[[context-functionality-startup]]
+=== Application Startup Tracking
+
+The `ApplicationContext` manages the lifecycle of Spring applications and provides a rich
+programming model around components. As a result, complex applications can have equally
+complex component graphs and startup phases.
+
+Tracking the application startup steps with specific metrics can help understand where
+time is being spent during the startup phase, but it can also be used as a way to better
+understand the context lifecycle as a whole.
+
+The `AbstractApplicationContext` (and its subclasses) is instrumented with an
+`ApplicationStartup`, which collects `StartupStep` data about various startup phases:
+
+* application context lifecycle (base packages scanning, config classes management)
+* beans lifecycle (instantiation, smart initialization, post processing)
+* application events processing
+
+Here is an example of instrumentation in the `AnnotationConfigApplicationContext`:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// create a startup step and start recording
+	StartupStep scanPackages = this.getApplicationStartup().start("spring.context.base-packages.scan");
+	// add tagging information to the current step
+	scanPackages.tag("packages", () -> Arrays.toString(basePackages));
+	// perform the actual phase we're instrumenting
+	this.scanner.scan(basePackages);
+	// end the current step
+	scanPackages.end();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// create a startup step and start recording
+	val scanPackages = this.getApplicationStartup().start("spring.context.base-packages.scan")
+	// add tagging information to the current step
+	scanPackages.tag("packages", () -> Arrays.toString(basePackages))
+	// perform the actual phase we're instrumenting
+	this.scanner.scan(basePackages)
+	// end the current step
+	scanPackages.end()
+----
+
+The application context is already instrumented with multiple steps.
+Once recorded, these startup steps can be collected, displayed and analyzed with specific tools.
+For a complete list of existing startup steps, you can check out the
+<<application-startup-steps, dedicated appendix section>>.
+
+The default `ApplicationStartup` implementation is a no-op variant, for minimal overhead.
+This means no metrics will be collected during application startup by default.
+Spring Framework ships with an implementation for tracking startup steps with Java Flight Recorder:
+`FlightRecorderApplicationStartup`. To use this variant, you must configure an instance of it
+to the `ApplicationContext` as soon as it's been created.
+
+Developers can also use the `ApplicationStartup` infrastructure if they're providing their own
+`AbstractApplicationContext` subclass, or if they wish to collect more precise data.
+
+WARNING: `ApplicationStartup` is meant to be only used during application startup and for
+the core container; this is by no means a replacement for Java profilers or
+metrics libraries like https://micrometer.io[Micrometer].
+
+To start collecting custom `StartupStep`, components can either get the `ApplicationStartup`
+instance from the application context directly, make their component implement `ApplicationStartupAware`,
+or ask for the `ApplicationStartup` type on any injection point.
+
+NOTE: Developers should not use the `"spring.*"` namespace when creating custom startup steps.
+This namespace is reserved for internal Spring usage and is subject to change.
+
 [[context-create]]
 === Convenient ApplicationContext Instantiation for Web Applications
 
@@ -11043,15 +11104,15 @@ Examples are `/WEB-INF/{asterisk}Context.xml` (for all files with names that end
 
 
 [[context-deploy-rar]]
-=== Deploying a Spring `ApplicationContext` as a Java EE RAR File
+=== Deploying a Spring `ApplicationContext` as a Jakarta EE RAR File
 
 It is possible to deploy a Spring `ApplicationContext` as a RAR file, encapsulating the
-context and all of its required bean classes and library JARs in a Java EE RAR deployment
+context and all of its required bean classes and library JARs in a Jakarta EE RAR deployment
 unit. This is the equivalent of bootstrapping a stand-alone `ApplicationContext` (only hosted
-in Java EE environment) being able to access the Java EE servers facilities. RAR deployment
+in Jakarta EE environment) being able to access the Jakarta EE servers facilities. RAR deployment
 is a more natural alternative to a scenario of deploying a headless WAR file -- in effect,
 a WAR file without any HTTP entry points that is used only for bootstrapping a Spring
-`ApplicationContext` in a Java EE environment.
+`ApplicationContext` in a Jakarta EE environment.
 
 RAR deployment is ideal for application contexts that do not need HTTP entry points but
 rather consist only of message endpoints and scheduled jobs. Beans in such a context can
@@ -11065,13 +11126,13 @@ See the javadoc of the
 {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[`SpringContextResourceAdapter`]
 class for the configuration details involved in RAR deployment.
 
-For a simple deployment of a Spring ApplicationContext as a Java EE RAR file:
+For a simple deployment of a Spring ApplicationContext as a Jakarta EE RAR file:
 
 . Package
 all application classes into a RAR file (which is a standard JAR file with a different
 file extension).
-.Add all required library JARs into the root of the RAR archive.
-.Add a
+. Add all required library JARs into the root of the RAR archive.
+. Add a
 `META-INF/ra.xml` deployment descriptor (as shown in the {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[javadoc for `SpringContextResourceAdapter`])
 and the corresponding Spring XML bean definition file(s) (typically
 `META-INF/applicationContext.xml`).
@@ -11165,7 +11226,7 @@ The following table lists features provided by the `BeanFactory` and
 | No
 | Yes
 
-| Convenient `MessageSource` access (for internalization)
+| Convenient `MessageSource` access (for internationalization)
 | No
 | Yes
 

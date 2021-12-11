@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,6 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
-
-import static org.springframework.http.RequestEntity.get;
-import static org.springframework.http.RequestEntity.options;
-import static org.springframework.http.RequestEntity.post;
 
 /**
  * Base class for integration tests with {@code @RequestMapping methods}.
@@ -124,14 +120,14 @@ public abstract class AbstractRequestMappingIntegrationTests extends AbstractHtt
 
 	private RequestEntity<Void> prepareGet(String url, HttpHeaders headers) throws Exception {
 		URI uri = new URI("http://localhost:" + this.port + url);
-		RequestEntity.HeadersBuilder<?> builder = get(uri);
+		RequestEntity.HeadersBuilder<?> builder = RequestEntity.get(uri);
 		addHeaders(builder, headers);
 		return builder.build();
 	}
 
 	private RequestEntity<Void> prepareOptions(String url, HttpHeaders headers) throws Exception {
 		URI uri = new URI("http://localhost:" + this.port + url);
-		RequestEntity.HeadersBuilder<?> builder = options(uri);
+		RequestEntity.HeadersBuilder<?> builder = RequestEntity.options(uri);
 		addHeaders(builder, headers);
 		return builder.build();
 	}
@@ -146,7 +142,7 @@ public abstract class AbstractRequestMappingIntegrationTests extends AbstractHtt
 
 	private RequestEntity<?> preparePost(String url, HttpHeaders headers, Object body) throws Exception {
 		URI uri = new URI("http://localhost:" + this.port + url);
-		RequestEntity.BodyBuilder builder = post(uri);
+		RequestEntity.BodyBuilder builder = RequestEntity.post(uri);
 		addHeaders(builder, headers);
 		return builder.body(body);
 	}

@@ -16,9 +16,9 @@
 
 package org.springframework.web.context.request;
 
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletRequestListener;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletRequestEvent;
+import jakarta.servlet.ServletRequestListener;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 
@@ -37,7 +37,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see javax.servlet.ServletRequestListener
+ * @see jakarta.servlet.ServletRequestListener
  * @see org.springframework.context.i18n.LocaleContextHolder
  * @see RequestContextHolder
  * @see org.springframework.web.filter.RequestContextFilter

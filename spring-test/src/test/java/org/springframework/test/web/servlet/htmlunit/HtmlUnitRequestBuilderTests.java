@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,20 +28,23 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpSession;
-
 import com.gargoylesoftware.htmlunit.FormEncodingType;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.util.KeyDataPair;
+import com.gargoylesoftware.htmlunit.util.MimeType;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockServletContext;
@@ -48,6 +54,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 /**
@@ -416,6 +423,75 @@ public class HtmlUnitRequestBuilderTests {
 		assertThat(actualRequest.getParameterMap().size()).isEqualTo(2);
 		assertThat(actualRequest.getParameter("name1")).isEqualTo("value1");
 		assertThat(actualRequest.getParameter("name2")).isEqualTo("value2");
+	}
+
+	@Test // gh-24926
+	public void buildRequestParameterMapViaWebRequestDotSetRequestParametersWithFileToUploadAsParameter() throws Exception {
+		webRequest.setRequestParameters(Collections.singletonList(
+				new KeyDataPair("key",
+						new ClassPathResource("org/springframework/test/web/htmlunit/test.txt").getFile(),
+						"test.txt", MimeType.TEXT_PLAIN, StandardCharsets.UTF_8)));
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getParts()).hasSize(1);
+		Part part = actualRequest.getPart("key");
+		assertThat(part).isNotNull();
+		assertThat(part.getName()).isEqualTo("key");
+		assertThat(IOUtils.toString(part.getInputStream(), StandardCharsets.UTF_8)).isEqualTo("test file");
+		assertThat(part.getSubmittedFileName()).isEqualTo("test.txt");
+		assertThat(part.getContentType()).isEqualTo(MimeType.TEXT_PLAIN);
+	}
+
+	@Test // gh-27199
+	public void buildRequestParameterMapViaWebRequestDotSetRequestParametersWithFileDataAsParameter() throws Exception {
+		String data = "{}";
+		KeyDataPair keyDataPair = new KeyDataPair("key", new File("test.json"), null, MimeType.APPLICATION_JSON, StandardCharsets.UTF_8);
+		keyDataPair.setData(data.getBytes());
+
+		webRequest.setRequestParameters(Collections.singletonList(keyDataPair));
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getParts()).hasSize(1);
+		Part part = actualRequest.getPart("key");
+
+		assertSoftly(softly -> {
+			softly.assertThat(part).as("part").isNotNull();
+			softly.assertThat(part.getName()).as("name").isEqualTo("key");
+			softly.assertThat(part.getSubmittedFileName()).as("file name").isEqualTo("test.json");
+			softly.assertThat(part.getContentType()).as("content type").isEqualTo(MimeType.APPLICATION_JSON);
+			try {
+				softly.assertThat(IOUtils.toString(part.getInputStream(), StandardCharsets.UTF_8)).as("content").isEqualTo(data);
+			}
+			catch (IOException ex) {
+				softly.fail("failed to get InputStream", ex);
+			}
+		});
+	}
+
+	@Test // gh-26799
+	public void buildRequestParameterMapViaWebRequestDotSetRequestParametersWithNullFileToUploadAsParameter() throws Exception {
+		webRequest.setRequestParameters(Collections.singletonList(new KeyDataPair("key", null, null, null, (Charset) null)));
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getParts()).hasSize(1);
+		Part part = actualRequest.getPart("key");
+
+		assertSoftly(softly -> {
+			softly.assertThat(part).as("part").isNotNull();
+			softly.assertThat(part.getName()).as("name").isEqualTo("key");
+			softly.assertThat(part.getSize()).as("size").isEqualTo(0);
+			try {
+				softly.assertThat(part.getInputStream()).as("input stream").isEmpty();
+			}
+			catch (IOException ex) {
+				softly.fail("failed to get InputStream", ex);
+			}
+			softly.assertThat(part.getSubmittedFileName()).as("filename").isEqualTo("");
+			softly.assertThat(part.getContentType()).as("content-type").isEqualTo("application/octet-stream");
+		});
 	}
 
 	@Test

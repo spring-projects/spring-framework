@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,9 @@ public abstract class JCacheOperationSourcePointcut extends StaticMethodMatcherP
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof JCacheOperationSourcePointcut)) {
+		if (!(other instanceof JCacheOperationSourcePointcut otherPc)) {
 			return false;
 		}
-		JCacheOperationSourcePointcut otherPc = (JCacheOperationSourcePointcut) other;
 		return ObjectUtils.nullSafeEquals(getCacheOperationSource(), otherPc.getCacheOperationSource());
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * Abstract base class for testing implementations of
  * {@link ClassMetadata#getMemberClassNames()}.
@@ -30,48 +29,45 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public abstract class AbstractClassMetadataMemberClassTests {
 
-	public abstract ClassMetadata getClassMetadataFor(Class<?> clazz);
+	protected abstract ClassMetadata getClassMetadataFor(Class<?> clazz);
 
 	@Test
 	void withNoMemberClasses() {
 		ClassMetadata metadata = getClassMetadataFor(L0_a.class);
 		String[] nestedClasses = metadata.getMemberClassNames();
-		assertThat(nestedClasses).isEqualTo(new String[]{});
+		assertThat(nestedClasses).isEmpty();
 	}
-
-	public static class L0_a {
-	}
-
 
 	@Test
 	void withPublicMemberClasses() {
 		ClassMetadata metadata = getClassMetadataFor(L0_b.class);
 		String[] nestedClasses = metadata.getMemberClassNames();
-		assertThat(nestedClasses).isEqualTo(new String[]{L0_b.L1.class.getName()});
+		assertThat(nestedClasses).containsOnly(L0_b.L1.class.getName());
+	}
+
+	@Test
+	void withNonPublicMemberClasses() {
+		ClassMetadata metadata = getClassMetadataFor(L0_c.class);
+		String[] nestedClasses = metadata.getMemberClassNames();
+		assertThat(nestedClasses).containsOnly(L0_c.L1.class.getName());
+	}
+
+	@Test
+	void againstMemberClass() {
+		ClassMetadata metadata = getClassMetadataFor(L0_b.L1.class);
+		String[] nestedClasses = metadata.getMemberClassNames();
+		assertThat(nestedClasses).isEmpty();
+	}
+
+	public static class L0_a {
 	}
 
 	public static class L0_b {
 		public static class L1 { }
 	}
 
-
-	@Test
-	void withNonPublicMemberClasses() {
-		ClassMetadata metadata = getClassMetadataFor(L0_c.class);
-		String[] nestedClasses = metadata.getMemberClassNames();
-		assertThat(nestedClasses).isEqualTo(new String[]{L0_c.L1.class.getName()});
-	}
-
 	public static class L0_c {
 		private static class L1 { }
-	}
-
-
-	@Test
-	void againstMemberClass() {
-		ClassMetadata metadata = getClassMetadataFor(L0_b.L1.class);
-		String[] nestedClasses = metadata.getMemberClassNames();
-		assertThat(nestedClasses).isEqualTo(new String[]{});
 	}
 
 }

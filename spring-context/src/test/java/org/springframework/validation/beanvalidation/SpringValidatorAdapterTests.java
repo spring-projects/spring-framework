@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,24 +26,24 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
-import javax.validation.Constraint;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.ConstraintViolation;
-import javax.validation.Payload;
-import javax.validation.Valid;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-
+import jakarta.validation.Constraint;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Payload;
+import jakarta.validation.Valid;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -229,6 +229,48 @@ public class SpringValidatorAdapterTests {
 		return Arrays.asList(child1, child2);
 	}
 
+	@Test  // SPR-15839
+	public void testListElementConstraint() {
+		BeanWithListElementConstraint bean = new BeanWithListElementConstraint();
+		bean.setProperty(Arrays.asList("no", "element", "can", "be", null));
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(bean, "bean");
+		validatorAdapter.validate(bean, errors);
+
+		assertThat(errors.getFieldErrorCount("property[4]")).isEqualTo(1);
+		assertThat(errors.getFieldValue("property[4]")).isNull();
+	}
+
+	@Test  // SPR-15839
+	public void testMapValueConstraint() {
+		Map<String, String> property = new HashMap<>();
+		property.put("no value can be", null);
+
+		BeanWithMapEntryConstraint bean = new BeanWithMapEntryConstraint();
+		bean.setProperty(property);
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(bean, "bean");
+		validatorAdapter.validate(bean, errors);
+
+		assertThat(errors.getFieldErrorCount("property[no value can be]")).isEqualTo(1);
+		assertThat(errors.getFieldValue("property[no value can be]")).isNull();
+	}
+
+	@Test  // SPR-15839
+	public void testMapEntryConstraint() {
+		Map<String, String> property = new HashMap<>();
+		property.put(null, null);
+
+		BeanWithMapEntryConstraint bean = new BeanWithMapEntryConstraint();
+		bean.setProperty(property);
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(bean, "bean");
+		validatorAdapter.validate(bean, errors);
+
+		assertThat(errors.hasFieldErrors("property[]")).isTrue();
+		assertThat(errors.getFieldValue("property[]")).isNull();
+	}
+
 
 	@Same(field = "password", comparingField = "confirmPassword")
 	@Same(field = "email", comparingField = "confirmEmail")
@@ -361,7 +403,7 @@ public class SpringValidatorAdapterTests {
 		private Set<Child> childSet = new LinkedHashSet<>();
 
 		@Valid
-		private List<Child> childList = new LinkedList<>();
+		private List<Child> childList = new ArrayList<>();
 
 		public Integer getId() {
 			return id;
@@ -483,6 +525,36 @@ public class SpringValidatorAdapterTests {
 				}
 			});
 			return fieldsErrors.isEmpty();
+		}
+	}
+
+
+	public class BeanWithListElementConstraint {
+
+		@Valid
+		private List<@NotNull String> property;
+
+		public List<String> getProperty() {
+			return property;
+		}
+
+		public void setProperty(List<String> property) {
+			this.property = property;
+		}
+	}
+
+
+	public class BeanWithMapEntryConstraint {
+
+		@Valid
+		private Map<@NotNull String, @NotNull String> property;
+
+		public Map<String, String> getProperty() {
+			return property;
+		}
+
+		public void setProperty(Map<String, String> property) {
+			this.property = property;
 		}
 	}
 

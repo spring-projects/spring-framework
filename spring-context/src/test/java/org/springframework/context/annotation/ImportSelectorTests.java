@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -541,6 +540,7 @@ public class ImportSelectorTests {
 					.collect(Collectors.toMap(entry -> entry.getKey().getClassName(),
 							Map.Entry::getValue));
 		}
+
 		private final List<Entry> instanceImports = new ArrayList<>();
 
 		@Override
@@ -554,7 +554,7 @@ public class ImportSelectorTests {
 
 		@Override
 		public Iterable<Entry> selectImports() {
-			LinkedList<Entry> content = new LinkedList<>(this.instanceImports);
+			ArrayList<Entry> content = new ArrayList<>(this.instanceImports);
 			Collections.reverse(content);
 			return content;
 		}

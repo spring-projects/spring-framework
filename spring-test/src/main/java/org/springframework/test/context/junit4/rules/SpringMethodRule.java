@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,10 @@ import org.springframework.test.context.junit4.statements.SpringRepeat;
  * <p><strong>NOTE:</strong> As of Spring Framework 4.3, this class requires JUnit 4.12 or higher.
  *
  * <p><strong>WARNING:</strong> Due to the shortcomings of JUnit rules, the
+ * {@code SpringMethodRule}
+ * {@linkplain org.springframework.test.context.TestExecutionListener#prepareTestInstance
+ * prepares the test instance} before {@code @Before} lifecycle methods instead of
+ * immediately after instantiation of the test class. In addition, the
  * {@code SpringMethodRule} does <strong>not</strong> support the
  * {@code beforeTestExecution()} and {@code afterTestExecution()} callbacks of the
  * {@link org.springframework.test.context.TestExecutionListener TestExecutionListener}

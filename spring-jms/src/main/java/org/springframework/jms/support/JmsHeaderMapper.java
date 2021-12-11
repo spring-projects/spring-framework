@@ -16,13 +16,13 @@
 
 package org.springframework.jms.support;
 
-import javax.jms.Message;
+import jakarta.jms.Message;
 
 import org.springframework.messaging.support.HeaderMapper;
 
 /**
  * Strategy interface for mapping {@link org.springframework.messaging.Message}
- * headers to an outbound JMS {@link javax.jms.Message} (e.g. to configure JMS
+ * headers to an outbound JMS {@link jakarta.jms.Message} (e.g. to configure JMS
  * properties) or extracting messaging header values from an inbound JMS Message.
  *
  * @author Mark Fisher

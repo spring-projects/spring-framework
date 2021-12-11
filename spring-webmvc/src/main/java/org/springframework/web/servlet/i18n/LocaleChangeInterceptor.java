@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,17 @@ package org.springframework.web.servlet.i18n;
 
 import java.util.Locale;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
@@ -41,7 +40,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @since 20.06.2003
  * @see org.springframework.web.servlet.LocaleResolver
  */
-public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
+public class LocaleChangeInterceptor implements HandlerInterceptor {
 
 	/**
 	 * Default name of the locale specification parameter: "locale".
@@ -107,34 +106,6 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 	 */
 	public boolean isIgnoreInvalidLocale() {
 		return this.ignoreInvalidLocale;
-	}
-
-	/**
-	 * Specify whether to parse request parameter values as BCP 47 language tags
-	 * instead of Java's legacy locale specification format.
-	 * <p><b>NOTE: As of 5.1, this resolver leniently accepts the legacy
-	 * {@link Locale#toString} format as well as BCP 47 language tags.</b>
-	 * @since 4.3
-	 * @see Locale#forLanguageTag(String)
-	 * @see Locale#toLanguageTag()
-	 * @deprecated as of 5.1 since it only accepts {@code true} now
-	 */
-	@Deprecated
-	public void setLanguageTagCompliant(boolean languageTagCompliant) {
-		if (!languageTagCompliant) {
-			throw new IllegalArgumentException("LocaleChangeInterceptor always accepts BCP 47 language tags");
-		}
-	}
-
-	/**
-	 * Return whether to use BCP 47 language tags instead of Java's legacy
-	 * locale specification format.
-	 * @since 4.3
-	 * @deprecated as of 5.1 since it always returns {@code true} now
-	 */
-	@Deprecated
-	public boolean isLanguageTagCompliant() {
-		return true;
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
@@ -69,8 +66,6 @@ public class InjectionMetadata {
 	};
 
 
-	private static final Log logger = LogFactory.getLog(InjectionMetadata.class);
-
 	private final Class<?> targetClass;
 
 	private final Collection<InjectedElement> injectedElements;
@@ -110,9 +105,6 @@ public class InjectionMetadata {
 			if (!beanDefinition.isExternallyManagedConfigMember(member)) {
 				beanDefinition.registerExternallyManagedConfigMember(member);
 				checkedElements.add(element);
-				if (logger.isTraceEnabled()) {
-					logger.trace("Registered injected element on class [" + this.targetClass.getName() + "]: " + element);
-				}
 			}
 		}
 		this.checkedElements = checkedElements;
@@ -124,9 +116,6 @@ public class InjectionMetadata {
 				(checkedElements != null ? checkedElements : this.injectedElements);
 		if (!elementsToIterate.isEmpty()) {
 			for (InjectedElement element : elementsToIterate) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Processing injected element of bean '" + beanName + "': " + element);
-				}
 				element.inject(target, beanName, pvs);
 			}
 		}
@@ -152,12 +141,12 @@ public class InjectionMetadata {
 	 * Return an {@code InjectionMetadata} instance, possibly for empty elements.
 	 * @param elements the elements to inject (possibly empty)
 	 * @param clazz the target class
-	 * @return a new {@link #InjectionMetadata(Class, Collection)} instance,
-	 * or {@link #EMPTY} in case of no elements
+	 * @return a new {@link #InjectionMetadata(Class, Collection)} instance
 	 * @since 5.2
 	 */
 	public static InjectionMetadata forElements(Collection<InjectedElement> elements, Class<?> clazz) {
-		return (elements.isEmpty() ? InjectionMetadata.EMPTY : new InjectionMetadata(clazz, elements));
+		return (elements.isEmpty() ? new InjectionMetadata(clazz, Collections.emptyList()) :
+				new InjectionMetadata(clazz, elements));
 	}
 
 	/**
@@ -315,10 +304,9 @@ public class InjectionMetadata {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof InjectedElement)) {
+			if (!(other instanceof InjectedElement otherElement)) {
 				return false;
 			}
-			InjectedElement otherElement = (InjectedElement) other;
 			return this.member.equals(otherElement.member);
 		}
 
