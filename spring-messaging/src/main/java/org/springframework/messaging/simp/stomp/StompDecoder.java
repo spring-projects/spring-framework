@@ -143,7 +143,7 @@ public class StompDecoder {
 				StompCommand stompCommand = StompCommand.valueOf(command);
 				headerAccessor = StompHeaderAccessor.create(stompCommand);
 				initHeaders(headerAccessor);
-				readHeaders(stompCommand, byteBuffer, headerAccessor);
+				readHeaders(byteBuffer, headerAccessor, stompCommand);
 				payload = readPayload(byteBuffer, headerAccessor);
 			}
 			if (payload != null) {
@@ -215,9 +215,12 @@ public class StompDecoder {
 		return StreamUtils.copyToString(command, StandardCharsets.UTF_8);
 	}
 
-	private void readHeaders(StompCommand stompCommand, ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
-		boolean shouldUnescape = (stompCommand != StompCommand.CONNECT && stompCommand != StompCommand.STOMP
-				&& stompCommand != StompCommand.CONNECTED);
+	private void readHeaders(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor, StompCommand command) {
+
+		boolean shouldUnescape = (command != StompCommand.CONNECT &&
+				command != StompCommand.CONNECTED &&
+				command != StompCommand.STOMP);
+
 		while (true) {
 			ByteArrayOutputStream headerStream = new ByteArrayOutputStream(256);
 			boolean headerComplete = false;
