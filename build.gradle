@@ -112,41 +112,38 @@ configure(allprojects) { project ->
 			dependency "org.quartz-scheduler:quartz:2.3.2"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core-jakarta:5.6.1.Final"
+			dependency "org.hibernate:hibernate-core-jakarta:5.6.2.Final"
 			dependency "org.hibernate:hibernate-validator:7.0.1.Final"
 			dependency "org.webjars:webjars-locator-core:0.48"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '10.0.13') {
+			dependencySet(group: 'org.apache.tomcat', version: '10.0.14') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '10.0.13') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '10.0.14') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.2.13.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.14.Final') {
 				entry 'undertow-core'
-				entry 'undertow-servlet-jakartaee9'
-				entry 'undertow-websockets-jsr-jakartaee9'
+				entry 'undertow-servlet-jakarta'
+				entry 'undertow-websockets-jsr-jakarta'
 			}
 
+			dependency "org.eclipse.jetty:jetty-reactive-httpclient:3.0.4"
+			dependency 'org.apache.httpcomponents.client5:httpclient5:5.1.2'
+			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.1.2'
+			dependency("org.apache.httpcomponents:httpclient:4.5.13") {
+				exclude group: "commons-logging", name: "commons-logging"
+			}
 			dependencySet(group: 'com.squareup.okhttp3', version: '3.14.9') {
 				entry 'okhttp'
 				entry 'mockwebserver'
 			}
-			dependency("org.apache.httpcomponents:httpclient:4.5.13") {
-				exclude group: "commons-logging", name: "commons-logging"
-			}
-			dependency("org.apache.httpcomponents:httpasyncclient:4.1.4") {
-				exclude group: "commons-logging", name: "commons-logging"
-			}
-			dependency 'org.apache.httpcomponents.client5:httpclient5:5.1'
-			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.1.1'
-			dependency "org.eclipse.jetty:jetty-reactive-httpclient:3.0.4"
 
 			dependency "org.jruby:jruby:9.3.2.0"
 			dependency "org.python:jython-standalone:2.7.1"
@@ -180,7 +177,7 @@ configure(allprojects) { project ->
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '4.0.0') {
+			dependencySet(group: 'org.mockito', version: '4.1.0') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
@@ -201,7 +198,6 @@ configure(allprojects) { project ->
 			dependency "org.skyscreamer:jsonassert:1.5.0"
 			dependency "com.jayway.jsonpath:json-path:2.6.0"
 			dependency "org.bouncycastle:bcpkix-jdk15on:1.66"
-			dependency "com.jamonapi:jamon:2.82"
 
 			dependency "javax.cache:cache-api:1.1.1"
 			dependency "javax.money:money-api:1.1"
