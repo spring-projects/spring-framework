@@ -51,7 +51,7 @@ configure(allprojects) { project ->
 			}
 			dependency "com.google.code.findbugs:jsr305:3.0.2"
 
-			dependencySet(group: 'org.aspectj', version: '1.9.8.RC1') {
+			dependencySet(group: 'org.aspectj', version: '1.9.8.RC3') {
 				entry 'aspectjrt'
 				entry 'aspectjtools'
 				entry 'aspectjweaver'
