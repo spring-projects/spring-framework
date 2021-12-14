@@ -69,17 +69,17 @@ configure(allprojects) { project ->
 			dependency "io.projectreactor.tools:blockhound:1.0.6.RELEASE"
 
 			dependency "com.fasterxml:aalto-xml:1.3.0"
-			dependency("com.fasterxml.woodstox:woodstox-core:6.2.6") {
+			dependency("com.fasterxml.woodstox:woodstox-core:6.2.7") {
 				exclude group: "stax", name: "stax-api"
 			}
-			dependency "com.google.code.gson:gson:2.8.8"
-			dependency "com.google.protobuf:protobuf-java-util:3.18.0"
+			dependency "com.google.code.gson:gson:2.8.9"
+			dependency "com.google.protobuf:protobuf-java-util:3.19.1"
 			dependency "com.googlecode.protobuf-java-format:protobuf-java-format:1.4"
 			dependency("com.thoughtworks.xstream:xstream:1.4.18") {
 				exclude group: "xpp3", name: "xpp3_min"
 				exclude group: "xmlpull", name: "xmlpull"
 			}
-			dependency "org.eclipse:yasson:2.0.2"
+			dependency "org.eclipse:yasson:2.0.3"
 			dependency("org.codehaus.jettison:jettison:1.3.8") {
 				exclude group: "stax", name: "stax-api"
 			}
@@ -87,7 +87,7 @@ configure(allprojects) { project ->
 			dependency "org.yaml:snakeyaml:1.29"
 
 			dependency "com.h2database:h2:1.4.200"
-			dependency "com.github.ben-manes.caffeine:caffeine:3.0.4"
+			dependency "com.github.ben-manes.caffeine:caffeine:3.0.5"
 			dependency "com.github.librepdf:openpdf:1.3.26"
 			dependency "com.rometools:rome:1.16.0"
 			dependency "commons-io:commons-io:2.5"
