@@ -45,8 +45,9 @@ import org.springframework.core.NativeDetector;
  * @see AdvisedSupport#setProxyTargetClass
  * @see AdvisedSupport#setInterfaces
  */
-@SuppressWarnings("serial")
 public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
+
+	private static final long serialVersionUID = 7930414337282325166L;
 
 
 	@Override
