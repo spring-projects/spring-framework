@@ -77,6 +77,7 @@ import static org.springframework.web.servlet.mvc.method.annotation.MvcUriCompon
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
+@SuppressWarnings("unused")
 public class MvcUriComponentsBuilderTests {
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
@@ -455,7 +456,8 @@ public class MvcUriComponentsBuilderTests {
 		this.request.setServerPort(9999);
 		this.request.setContextPath("/base");
 
-		assertThat(fromController(PersonsAddressesController.class).buildAndExpand("123").toString()).isEqualTo("https://example.org:9999/base/api/people/123/addresses");
+		assertThat(fromController(PersonsAddressesController.class).buildAndExpand("123").toString())
+				.isEqualTo("https://example.org:9999/base/api/people/123/addresses");
 	}
 
 	@Test
@@ -468,8 +470,12 @@ public class MvcUriComponentsBuilderTests {
 		this.request.setServerPort(9999);
 		this.request.setContextPath("/base");
 
-		assertThat(fromMethodCall(on(PersonsAddressesController.class).getAddressesForCountry("DE"))
-				.buildAndExpand("123").toString()).isEqualTo("https://example.org:9999/base/api/people/123/addresses/DE");
+		String url = fromMethodCall(on(PersonsAddressesController.class)
+				.getAddressesForCountry("DE"))
+				.buildAndExpand("123")
+				.toString();
+
+		assertThat(url).isEqualTo("https://example.org:9999/base/api/people/123/addresses/DE");
 	}
 
 	private void initWebApplicationContext(Class<?> configClass) {
@@ -500,6 +506,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 
+	@Controller
 	@RequestMapping("/people/{id}/addresses")
 	static class PersonsAddressesController {
 
@@ -509,6 +516,7 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
+	@Controller
 	@RequestMapping({"people"})
 	static class PathWithoutLeadingSlashController {
 
