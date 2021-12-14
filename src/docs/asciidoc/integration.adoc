@@ -6615,7 +6615,6 @@ has it applied automatically:
 		protected void executeInternal(JobExecutionContext ctx) throws JobExecutionException {
 			// do the actual work
 		}
-
 	}
 ----
 
@@ -6740,10 +6739,16 @@ seconds and one running every morning at 6 AM. To finalize everything, we need t
 	</bean>
 ----
 
-More properties are available for the `SchedulerFactoryBean`, such as the calendars
-used by the job details, properties to customize Quartz with, and others. See the
-{api-spring-framework}/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean`]
+More properties are available for the `SchedulerFactoryBean`, such as the calendars used by the
+job details, properties to customize Quartz with, and a Spring-provided JDBC DataSource. See
+the {api-spring-framework}/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean`]
 javadoc for more information.
+
+NOTE: `SchedulerFactoryBean` also recognizes a `quartz.properties` file in the classpath,
+based on Quartz property keys, as with regular Quartz configuration. Please note that many
+`SchedulerFactoryBean` settings interact with common Quartz settings in the properties file;
+it is therefore not recommended to specify values at both levels. For example, do not set
+an "org.quartz.jobStore.class" property if you mean to rely on a Spring-provided DataSource.
 
 
 
@@ -6756,8 +6761,8 @@ an existing Spring application. Similar to the <<data-access.adoc#transaction, t
 support, the caching abstraction allows consistent use of various caching solutions with
 minimal impact on the code.
 
-As from Spring 4.1, the cache abstraction has been significantly extended with the
-support of <<cache-jsr-107,JSR-107 annotations>> and more customization options.
+In Spring Framework 4.1, the cache abstraction was significantly extended with support
+for <<cache-jsr-107,JSR-107 annotations>> and more customization options.
 
 
 
@@ -6815,15 +6820,16 @@ compliant caches (such as Ehcache 3.x). See <<cache-plug>> for more information 
 plugging in other cache stores and providers.
 
 IMPORTANT: The caching abstraction has no special handling for multi-threaded and
-multi-process environments, as such features are handled by the cache implementation. .
+multi-process environments, as such features are handled by the cache implementation.
 
 If you have a multi-process environment (that is, an application deployed on several nodes),
 you need to configure your cache provider accordingly. Depending on your use cases, a copy
 of the same data on several nodes can be enough. However, if you change the data during
 the course of the application, you may need to enable other propagation mechanisms.
 
-Caching a particular item is a direct equivalent of the typical get-if-not-found-then-
-proceed-and-put-eventually code blocks found with programmatic cache interaction.
+Caching a particular item is a direct equivalent of the typical
+get-if-not-found-then-proceed-and-put-eventually code blocks
+found with programmatic cache interaction.
 No locks are applied, and several threads may try to load the same item concurrently.
 The same applies to eviction. If several threads are trying to update or evict data
 concurrently, you may use stale data. Certain cache providers offer advanced features
@@ -6875,7 +6881,7 @@ method -- if at least one cache is hit, the associated value is returned.
 NOTE: All the other caches that do not contain the value are also updated, even though
 the cached method was not actually invoked.
 
-The following example uses `@Cacheable` on the `findBook` method:
+The following example uses `@Cacheable` on the `findBook` method with multiple caches:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -7028,7 +7034,7 @@ regardless of the content of the annotation.
 
 Similarly to `key` and `keyGenerator`, the `cacheManager` and `cacheResolver`
 parameters are mutually exclusive, and an operation specifying both
-results in an exception. as a custom `CacheManager` is ignored by the
+results in an exception, as a custom `CacheManager` is ignored by the
 `CacheResolver` implementation. This is probably not what you expect.
 ====
 
@@ -7052,7 +7058,6 @@ is updated in the cache. The following example shows how to use the `sync` attri
 	public Foo executeExpensiveOperation(String id) {...}
 ----
 <1> Using the `sync` attribute.
-
 
 NOTE: This is an optional feature, and your favorite cache library may not support it.
 All `CacheManager` implementations provided by the core framework support it. See the
@@ -7092,9 +7097,11 @@ want to cache paperback books, as the following example does:
 <1> Using the `unless` attribute to block hardbacks.
 
 
-The cache abstraction supports `java.util.Optional`, using its content as the cached value
-only if it is present. `#result` always refers to the business entity and never a
-supported wrapper, so the previous example can be rewritten as follows:
+The cache abstraction supports `java.util.Optional` return types. If an `Optional` value
+is _present_, it will be stored in the associated cache. If an `Optional` value is not
+present, `null` will be stored in the associated cache. `#result` always refers to the
+business entity and never a supported wrapper, so the previous example can be rewritten
+as follows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -7103,8 +7110,8 @@ supported wrapper, so the previous example can be rewritten as follows:
 	public Optional<Book> findBook(String name)
 ----
 
-Note that `result` still refers to `Book` and not `Optional`. As it might be `null`, we
-should use the safe navigation operator.
+Note that `#result` still refers to `Book` and not `Optional<Book>`. Since it might be
+`null`, we use SpEL's <<core.adoc#expressions-operator-safe-navigation, safe navigation operator>>.
 
 [[cache-spel-context]]
 ===== Available Caching SpEL Evaluation Context
@@ -7214,7 +7221,6 @@ all entries from the `books` cache:
 ----
 <1> Using the `allEntries` attribute to evict all entries from the cache.
 
-
 This option comes in handy when an entire cache region needs to be cleared out.
 Rather than evicting each entry (which would take a long time, since it is inefficient),
 all the entries are removed in one operation, as the preceding example shows.
@@ -7274,7 +7280,6 @@ comes into play. The following examples uses `@CacheConfig` to set the name of t
 	}
 ----
 <1> Using `@CacheConfig` to set the name of the cache.
-
 
 `@CacheConfig` is a class-level annotation that allows sharing the cache names,
 the custom `KeyGenerator`, the custom `CacheManager`, and the custom `CacheResolver`.
@@ -7418,13 +7423,11 @@ if you need to annotate non-public methods, as it changes the bytecode itself.
 ****
 
 TIP: Spring recommends that you only annotate concrete classes (and methods of concrete
-classes) with the `@Cache{asterisk}` annotation, as opposed to annotating interfaces.
-You certainly can place the `@Cache{asterisk}` annotation on an interface (or an interface
-method), but this works only as you would expect it to if you use interface-based proxies.
-The fact that Java annotations are not inherited from interfaces means that, if you use
-class-based proxies (`proxy-target-class="true"`) or the weaving-based aspect
-(`mode="aspectj"`), the caching settings are not recognized by the proxying and weaving
-infrastructure, and the object is not wrapped in a caching proxy.
+classes) with the `@Cache{asterisk}` annotations, as opposed to annotating interfaces.
+You certainly can place an `@Cache{asterisk}` annotation on an interface (or an interface
+method), but this works only if you use the proxy mode (`mode="proxy"`). If you use the
+weaving-based aspect (`mode="aspectj"`), the caching settings are not recognized on
+interface-level declarations by the weaving infrastructure.
 
 NOTE: In proxy mode (the default), only external method calls coming in through the
 proxy are intercepted. This means that self-invocation (in effect, a method within the
@@ -7499,7 +7502,7 @@ up its declaration at runtime and understands its meaning. Note that, as mention
 === JCache (JSR-107) Annotations
 
 Since version 4.1, Spring's caching abstraction fully supports the JCache standard
-annotations: `@CacheResult`, `@CachePut`, `@CacheRemove`, and `@CacheRemoveAll`
+(JSR-107) annotations: `@CacheResult`, `@CachePut`, `@CacheRemove`, and `@CacheRemoveAll`
 as well as the `@CacheDefaults`, `@CacheKey`, and `@CacheValue` companions.
 You can use these annotations even without migrating your cache store to JSR-107.
 The internal implementation uses Spring's caching abstraction and provides default
@@ -7513,8 +7516,8 @@ you can switch to these standard annotations without changing your cache storage
 ==== Feature Summary
 
 For those who are familiar with Spring's caching annotations, the following table
-describes the main differences between the Spring annotations and the JSR-107
-counterpart:
+describes the main differences between the Spring annotations and their JSR-107
+counterparts:
 
 .Spring vs. JSR-107 caching annotations
 [cols="1,1,3"]
@@ -7565,7 +7568,6 @@ to customize the factory for each cache operation, as the following example show
 ----
 <1> Customizing the factory for this operation.
 
-
 NOTE: For all referenced classes, Spring tries to locate a bean with the given type.
 If more than one match exists, a new instance is created and can use the regular
 bean lifecycle callbacks, such as dependency injection.
@@ -7609,16 +7611,15 @@ invoking the method again:
 
 ==== Enabling JSR-107 Support
 
-You need do nothing specific to enable the JSR-107 support alongside Spring's
-declarative annotation support. Both `@EnableCaching` and the
-`cache:annotation-driven` element automatically enable the JCache support
-if both the JSR-107 API and the `spring-context-support` module are present
-in the classpath.
+You do not need to do anything specific to enable the JSR-107 support alongside Spring's
+declarative annotation support. Both `@EnableCaching` and the `cache:annotation-driven`
+XML element automatically enable the JCache support if both the JSR-107 API and the
+`spring-context-support` module are present in the classpath.
 
-NOTE: Depending on your use case, the choice is basically yours. You can even
-mix and match services by using the JSR-107 API on some and using Spring's own
-annotations on others. However, if these services impact the same caches,
-you should use a consistent and identical key generation implementation.
+NOTE: Depending on your use case, the choice is basically yours. You can even mix and
+match services by using the JSR-107 API on some and using Spring's own annotations on
+others. However, if these services impact the same caches, you should use a consistent
+and identical key generation implementation.
 
 
 
@@ -7848,15 +7849,13 @@ invoked every time.
 === Plugging-in Different Back-end Caches
 
 Clearly, there are plenty of caching products out there that you can use as a backing
-store. To plug them in, you need to provide a `CacheManager` and a `Cache` implementation,
-since, unfortunately, there is no available standard that we can use instead.
-This may sound harder than it is, since, in practice, the classes tend to be simple
-https://en.wikipedia.org/wiki/Adapter_pattern[adapters] that map the caching abstraction
-framework on top of the storage API, as the `ehcache` classes do. Most `CacheManager`
-classes can use the classes in the `org.springframework.cache.support` package
-(such as `AbstractCacheManager` which takes care of the boiler-plate code,
-leaving only the actual mapping to be completed). We hope that, in time, the libraries
-that provide integration with Spring can fill in this small configuration gap.
+store. For those that do not support JSR-107 you need to provide a `CacheManager` and a
+`Cache` implementation. This may sound harder than it is, since, in practice, the classes
+tend to be simple https://en.wikipedia.org/wiki/Adapter_pattern[adapters] that map the
+caching abstraction framework on top of the storage API, as the `ehcache` classes do.
+Most `CacheManager` classes can use the classes in the
+`org.springframework.cache.support` package (such as `AbstractCacheManager` which takes
+care of the boiler-plate code, leaving only the actual mapping to be completed).
 
 
 
