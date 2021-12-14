@@ -719,14 +719,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
 			throws NoSuchBeanDefinitionException {
 
-		return findMergedAnnotationOnBean(beanName, annotationType)
+		return findAnnotationOnBean(beanName, annotationType, true);
+	}
+
+	@Override
+	@Nullable
+	public <A extends Annotation> A findAnnotationOnBean(
+			String beanName, Class<A> annotationType, boolean allowFactoryBeanInit)
+			throws NoSuchBeanDefinitionException {
+
+		return findMergedAnnotationOnBean(beanName, annotationType, allowFactoryBeanInit)
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
 	}
 
 	private <A extends Annotation> MergedAnnotation<A> findMergedAnnotationOnBean(
-			String beanName, Class<A> annotationType) {
+			String beanName, Class<A> annotationType, boolean allowFactoryBeanInit) {
 
-		Class<?> beanType = getType(beanName);
+		Class<?> beanType = getType(beanName, allowFactoryBeanInit);
 		if (beanType != null) {
 			MergedAnnotation<A> annotation =
 					MergedAnnotations.from(beanType, SearchStrategy.TYPE_HIERARCHY).get(annotationType);

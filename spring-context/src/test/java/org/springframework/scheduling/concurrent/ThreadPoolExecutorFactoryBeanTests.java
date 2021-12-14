@@ -76,6 +76,7 @@ class ThreadPoolExecutorFactoryBeanTests {
 		verify(threadPoolExecutor).prestartAllCoreThreads();
 	}
 
+
 	@Configuration
 	static class ExecutorConfig {
 
@@ -83,9 +84,10 @@ class ThreadPoolExecutorFactoryBeanTests {
 		ThreadPoolExecutorFactoryBean executor() {
 			return new ThreadPoolExecutorFactoryBean();
 		}
-
 	}
 
+
+	@SuppressWarnings("serial")
 	private static class TestThreadPoolExecutorFactoryBean extends ThreadPoolExecutorFactoryBean {
 
 		@Override

@@ -97,6 +97,19 @@ public class EnableCachingIntegrationTests {
 	}
 
 	@Test
+	public void barServiceWithCacheableInterfaceCglib() {
+		this.context = new AnnotationConfigApplicationContext(BarConfigCglib.class);
+		BarService service = this.context.getBean(BarService.class);
+		Cache cache = getCache();
+
+		Object key = new Object();
+		assertCacheMiss(key, cache);
+
+		Object value = service.getSimple(key);
+		assertCacheHit(key, value, cache);
+	}
+
+	@Test
 	public void beanConditionOff() {
 		this.context = new AnnotationConfigApplicationContext(BeanConditionConfig.class);
 		FooService service = this.context.getBean(FooService.class);
@@ -222,6 +235,36 @@ public class EnableCachingIntegrationTests {
 			return this.counter.getAndIncrement();
 		}
 	}
+
+	@Configuration
+	@Import(SharedConfig.class)
+	@EnableCaching(proxyTargetClass = true)
+	static class BarConfigCglib {
+
+		@Bean
+		public BarService barService() {
+			return new BarServiceImpl();
+		}
+	}
+
+
+	interface BarService {
+
+		@Cacheable(cacheNames = "testCache")
+		Object getSimple(Object key);
+	}
+
+
+	static class BarServiceImpl implements BarService {
+
+		private final AtomicLong counter = new AtomicLong();
+
+		@Override
+		public Object getSimple(Object key) {
+			return this.counter.getAndIncrement();
+		}
+	}
+
 
 	@Configuration
 	@Import(FooConfig.class)

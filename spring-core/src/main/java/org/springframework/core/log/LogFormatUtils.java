@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Utility methods for formatting and logging messages.
@@ -71,10 +72,10 @@ public abstract class LogFormatUtils {
 		}
 		String result;
 		try {
-			result = value.toString();
+			result = ObjectUtils.nullSafeToString(value);
 		}
 		catch (Throwable ex) {
-			result = ex.toString();
+			result = ObjectUtils.nullSafeToString(ex);
 		}
 		if (maxLength != -1) {
 			result = (result.length() > maxLength ? result.substring(0, maxLength) + " (truncated)..." : result);
