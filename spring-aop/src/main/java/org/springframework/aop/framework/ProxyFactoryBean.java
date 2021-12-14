@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -421,11 +421,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * are unaffected by such changes.
 	 */
 	private synchronized void initializeAdvisorChain() throws AopConfigException, BeansException {
-		if (this.advisorChainInitialized) {
-			return;
-		}
-
-		if (!ObjectUtils.isEmpty(this.interceptorNames)) {
+		if (!this.advisorChainInitialized && !ObjectUtils.isEmpty(this.interceptorNames)) {
 			if (this.beanFactory == null) {
 				throw new IllegalStateException("No BeanFactory available anymore (probably due to serialization) " +
 						"- cannot resolve interceptor names " + Arrays.asList(this.interceptorNames));
@@ -464,9 +460,9 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 					addAdvisorOnChainCreation(advice);
 				}
 			}
-		}
 
-		this.advisorChainInitialized = true;
+			this.advisorChainInitialized = true;
+		}
 	}
 
 
