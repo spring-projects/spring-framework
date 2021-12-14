@@ -5396,6 +5396,7 @@ You can use these macros instead of the six-digit value, thus: `@Scheduled(cron 
 |===
 
 
+
 [[scheduling-quartz]]
 === Using the Quartz Scheduler
 
@@ -5451,7 +5452,6 @@ has it applied automatically:
 		protected void executeInternal(JobExecutionContext ctx) throws JobExecutionException {
 			// do the actual work
 		}
-
 	}
 ----
 
@@ -5571,10 +5571,18 @@ seconds and one running every morning at 6 AM. To finalize everything, we need t
 	</bean>
 ----
 
-More properties are available for the `SchedulerFactoryBean`, such as the calendars
-used by the job details, properties to customize Quartz with, and others. See the
-{api-spring-framework}/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean`]
+More properties are available for the `SchedulerFactoryBean`, such as the calendars used by the
+job details, properties to customize Quartz with, and a Spring-provided JDBC DataSource. See
+the {api-spring-framework}/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean`]
 javadoc for more information.
+
+NOTE: `SchedulerFactoryBean` also recognizes a `quartz.properties` file in the classpath,
+based on Quartz property keys, as with regular Quartz configuration. Please note that many
+`SchedulerFactoryBean` settings interact with common Quartz settings in the properties file;
+it is therefore not recommended to specify values at both levels. For example, do not set
+an "org.quartz.jobStore.class" property if you mean to rely on a Spring-provided DataSource,
+or specify an `org.springframework.scheduling.quartz.LocalDataSourceJobStore` variant which
+is a full-fledged replacement for the standard `org.quartz.impl.jdbcjobstore.JobStoreTX`.
 
 
 
@@ -5877,7 +5885,6 @@ is updated in the cache. The following example shows how to use the `sync` attri
 ----
 <1> Using the `sync` attribute.
 
-
 NOTE: This is an optional feature, and your favorite cache library may not support it.
 All `CacheManager` implementations provided by the core framework support it. See the
 documentation of your cache provider for more details.
@@ -6035,7 +6042,6 @@ all entries from the `books` cache:
 ----
 <1> Using the `allEntries` attribute to evict all entries from the cache.
 
-
 This option comes in handy when an entire cache region needs to be cleared out.
 Rather than evicting each entry (which would take a long time, since it is inefficient),
 all the entries are removed in one operation, as the preceding example shows.
@@ -6093,7 +6099,6 @@ comes into play. The following examples uses `@CacheConfig` to set the name of t
 	}
 ----
 <1> Using `@CacheConfig` to set the name of the cache.
-
 
 `@CacheConfig` is a class-level annotation that allows sharing the cache names,
 the custom `KeyGenerator`, the custom `CacheManager`, and the custom `CacheResolver`.
@@ -6235,13 +6240,11 @@ if you need to annotate non-public methods, as it changes the bytecode itself.
 ****
 
 TIP: Spring recommends that you only annotate concrete classes (and methods of concrete
-classes) with the `@Cache{asterisk}` annotation, as opposed to annotating interfaces.
-You certainly can place the `@Cache{asterisk}` annotation on an interface (or an interface
-method), but this works only as you would expect it to if you use interface-based proxies.
-The fact that Java annotations are not inherited from interfaces means that, if you use
-class-based proxies (`proxy-target-class="true"`) or the weaving-based aspect
-(`mode="aspectj"`), the caching settings are not recognized by the proxying and weaving
-infrastructure, and the object is not wrapped in a caching proxy.
+classes) with the `@Cache{asterisk}` annotations, as opposed to annotating interfaces.
+You certainly can place an `@Cache{asterisk}` annotation on an interface (or an interface
+method), but this works only if you use the proxy mode (`mode="proxy"`). If you use the
+weaving-based aspect (`mode="aspectj"`), the caching settings are not recognized on
+interface-level declarations by the weaving infrastructure.
 
 NOTE: In proxy mode (the default), only external method calls coming in through the
 proxy are intercepted. This means that self-invocation (in effect, a method within the
@@ -6377,7 +6380,6 @@ to customize the factory for each cache operation, as the following example show
 	public Book findBook(ISBN isbn)
 ----
 <1> Customizing the factory for this operation.
-
 
 NOTE: For all referenced classes, Spring tries to locate a bean with the given type.
 If more than one match exists, a new instance is created and can use the regular

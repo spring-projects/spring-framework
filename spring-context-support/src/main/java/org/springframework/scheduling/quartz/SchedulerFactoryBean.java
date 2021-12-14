@@ -310,9 +310,11 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	/**
 	 * Set the default {@link DataSource} to be used by the Scheduler.
-	 * If set, this will override corresponding settings in Quartz properties.
 	 * <p>Note: If this is set, the Quartz settings should not define
 	 * a job store "dataSource" to avoid meaningless double configuration.
+	 * Also, do not define a "org.quartz.jobStore.class" property at all.
+	 * (You may explicitly define Spring's {@link LocalDataSourceJobStore}
+	 * but that's the default when using this method anyway.)
 	 * <p>A Spring-specific subclass of Quartz' JobStoreCMT will be used.
 	 * It is therefore strongly recommended to perform all operations on
 	 * the Scheduler within Spring-managed (or plain JTA) transactions.
