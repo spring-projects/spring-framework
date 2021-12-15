@@ -92,7 +92,7 @@ configure(allprojects) { project ->
 				entry 'jibx-run'
 			}
 			dependency "org.ogce:xpp3:1.1.6"
-			dependency "org.yaml:snakeyaml:1.29"
+			dependency "org.yaml:snakeyaml:1.30"
 
 			dependency "com.h2database:h2:1.4.200"
 			dependency "com.github.ben-manes.caffeine:caffeine:2.9.3"
@@ -150,7 +150,7 @@ configure(allprojects) { project ->
 				}
 			}
 
-			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.1.9"
+			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.1.10"
 			dependency 'org.apache.httpcomponents.client5:httpclient5:5.1.2'
 			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.1.2'
 			dependency("org.apache.httpcomponents:httpclient:4.5.13") {
@@ -204,7 +204,7 @@ configure(allprojects) { project ->
 				}
 				entry 'mockito-junit-jupiter'
 			}
-			dependency "io.mockk:mockk:1.12.0"
+			dependency "io.mockk:mockk:1.12.1"
 
 			dependency("net.sourceforge.htmlunit:htmlunit:2.55.0") {
 				exclude group: "commons-logging", name: "commons-logging"
