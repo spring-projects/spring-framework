@@ -128,6 +128,11 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 	}
 
 	@Override
+	public MergedAnnotations getAnnotations() {
+		return this.annotations;
+	}
+
+	@Override
 	public Set<String> getAnnotationTypes() {
 		Set<String> annotationTypes = this.annotationTypes;
 		if (annotationTypes == null) {
@@ -149,13 +154,9 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 				annotatedMethods.add(annotatedMethod);
 			}
 		}
-		return annotatedMethods != null ? annotatedMethods : Collections.emptySet();
+		return (annotatedMethods != null ? annotatedMethods : Collections.emptySet());
 	}
 
-	@Override
-	public MergedAnnotations getAnnotations() {
-		return this.annotations;
-	}
 
 	@Override
 	public boolean equals(@Nullable Object obj) {

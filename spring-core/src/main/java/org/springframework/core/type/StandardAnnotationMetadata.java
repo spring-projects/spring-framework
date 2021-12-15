@@ -162,7 +162,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 				throw new IllegalStateException("Failed to introspect annotated methods on " + getIntrospectedClass(), ex);
 			}
 		}
-		return annotatedMethods != null ? annotatedMethods : Collections.emptySet();
+		return (annotatedMethods != null ? annotatedMethods : Collections.emptySet());
 	}
 
 
