@@ -59,7 +59,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableAsync = AnnotationAttributes.fromMap(
-				importMetadata.getAnnotationAttributes(EnableAsync.class.getName(), false));
+				importMetadata.getAnnotationAttributes(EnableAsync.class.getName()));
 		if (this.enableAsync == null) {
 			throw new IllegalArgumentException(
 					"@EnableAsync is not present on importing class " + importMetadata.getClassName());
@@ -71,7 +71,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	 */
 	@Autowired
 	void setConfigurers(ObjectProvider<AsyncConfigurer> configurers) {
-		Supplier<AsyncConfigurer> asyncConfigurer = SingletonSupplier.of(() -> {
+		Supplier<AsyncConfigurer> configurer = SingletonSupplier.of(() -> {
 			List<AsyncConfigurer> candidates = configurers.stream().collect(Collectors.toList());
 			if (CollectionUtils.isEmpty(candidates)) {
 				return null;
@@ -81,14 +81,14 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 			}
 			return candidates.get(0);
 		});
-		this.executor = adapt(asyncConfigurer, AsyncConfigurer::getAsyncExecutor);
-		this.exceptionHandler = adapt(asyncConfigurer, AsyncConfigurer::getAsyncUncaughtExceptionHandler);
+		this.executor = adapt(configurer, AsyncConfigurer::getAsyncExecutor);
+		this.exceptionHandler = adapt(configurer, AsyncConfigurer::getAsyncUncaughtExceptionHandler);
 	}
 
 	private <T> Supplier<T> adapt(Supplier<AsyncConfigurer> supplier, Function<AsyncConfigurer, T> provider) {
 		return () -> {
-			AsyncConfigurer asyncConfigurer = supplier.get();
-			return (asyncConfigurer != null) ? provider.apply(asyncConfigurer) : null;
+			AsyncConfigurer configurer = supplier.get();
+			return (configurer != null ? provider.apply(configurer) : null);
 		};
 	}
 

@@ -84,7 +84,7 @@ configure(allprojects) { project ->
 				exclude group: "stax", name: "stax-api"
 			}
 			dependency "org.ogce:xpp3:1.1.6"
-			dependency "org.yaml:snakeyaml:1.29"
+			dependency "org.yaml:snakeyaml:1.30"
 
 			dependency "com.h2database:h2:1.4.200"
 			dependency "com.github.ben-manes.caffeine:caffeine:3.0.5"
@@ -183,7 +183,7 @@ configure(allprojects) { project ->
 				}
 				entry 'mockito-junit-jupiter'
 			}
-			dependency "io.mockk:mockk:1.12.0"
+			dependency "io.mockk:mockk:1.12.1"
 
 			dependency("net.sourceforge.htmlunit:htmlunit:2.55.0") {
 				exclude group: "commons-logging", name: "commons-logging"
