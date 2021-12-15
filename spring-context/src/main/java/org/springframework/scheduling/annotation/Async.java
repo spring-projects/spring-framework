@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,8 @@ public @interface Async {
 
 	/**
 	 * A qualifier value for the specified asynchronous operation(s).
+	 * <p>The value support expression such as <code>#{systemProperties.myExecutor}</code>
+	 * or property placeholder such as <code>${my.app.myExecutor}</code>.
 	 * <p>May be used to determine the target executor to be used when executing
 	 * the asynchronous operation(s), matching the qualifier value (or the bean
 	 * name) of a specific {@link java.util.concurrent.Executor Executor} or
