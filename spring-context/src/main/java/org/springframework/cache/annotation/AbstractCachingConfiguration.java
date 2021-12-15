@@ -67,7 +67,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableCaching = AnnotationAttributes.fromMap(
-				importMetadata.getAnnotationAttributes(EnableCaching.class.getName(), false));
+				importMetadata.getAnnotationAttributes(EnableCaching.class.getName()));
 		if (this.enableCaching == null) {
 			throw new IllegalArgumentException(
 					"@EnableCaching is not present on importing class " + importMetadata.getClassName());
@@ -76,7 +76,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 
 	@Autowired
 	void setConfigurers(ObjectProvider<CachingConfigurer> configurers) {
-		Supplier<CachingConfigurer> cachingConfigurer = () -> {
+		Supplier<CachingConfigurer> configurer = () -> {
 			List<CachingConfigurer> candidates = configurers.stream().collect(Collectors.toList());
 			if (CollectionUtils.isEmpty(candidates)) {
 				return null;
@@ -89,7 +89,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 			}
 			return candidates.get(0);
 		};
-		useCachingConfigurer(new CachingConfigurerSupplier(cachingConfigurer));
+		useCachingConfigurer(new CachingConfigurerSupplier(configurer));
 	}
 
 	/**

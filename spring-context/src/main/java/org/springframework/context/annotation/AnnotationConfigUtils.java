@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -282,7 +282,7 @@ public abstract class AnnotationConfigUtils {
 
 	@Nullable
 	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annotationClassName) {
-		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationClassName, false));
+		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationClassName));
 	}
 
 	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
@@ -298,10 +298,10 @@ public abstract class AnnotationConfigUtils {
 		Set<AnnotationAttributes> result = new LinkedHashSet<>();
 
 		// Direct annotation present?
-		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
+		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName));
 
 		// Container annotation present?
-		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName, false);
+		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName);
 		if (container != null && container.containsKey("value")) {
 			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container.get("value")) {
 				addAttributesIfNotNull(result, containedAttributes);
