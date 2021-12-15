@@ -161,6 +161,7 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 		return Collections.unmodifiableSet(this.declaredMethods);
 	}
 
+
 	@Override
 	public boolean equals(@Nullable Object obj) {
 		return ((this == obj) || ((obj instanceof SimpleAnnotationMetadata) &&

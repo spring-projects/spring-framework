@@ -30,7 +30,7 @@ configure(allprojects) { project ->
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.13.0"
 			mavenBom "io.netty:netty-bom:4.1.72.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.14"
-			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR10"
+			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR11"
 			mavenBom "io.rsocket:rsocket-bom:1.1.1"
 			mavenBom "org.eclipse.jetty:jetty-bom:11.0.7"
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.6.10"
@@ -311,12 +311,12 @@ configure([rootProject] + javaProjects) { project ->
 		testImplementation("io.mockk:mockk")
 		testImplementation("org.assertj:assertj-core")
 		// Pull in the latest JUnit 5 Launcher API to ensure proper support in IDEs.
-		testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 		testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+		testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 		testRuntimeOnly("org.junit.platform:junit-platform-suite-engine")
 		testRuntimeOnly("org.apache.logging.log4j:log4j-core")
-		testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j-impl")
 		testRuntimeOnly("org.apache.logging.log4j:log4j-jul")
+		testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j-impl")
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305")
 		testCompileOnly("com.google.code.findbugs:jsr305")

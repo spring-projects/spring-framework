@@ -124,7 +124,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 		public <T> Supplier<T> adapt(Function<CachingConfigurer, T> provider) {
 			return () -> {
 				CachingConfigurer cachingConfigurer = this.supplier.get();
-				return (cachingConfigurer != null) ? provider.apply(cachingConfigurer) : null;
+				return (cachingConfigurer != null ? provider.apply(cachingConfigurer) : null);
 			};
 		}
 
