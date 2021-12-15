@@ -102,7 +102,7 @@ final class MetadataEncoder {
 		if (ObjectUtils.isEmpty(routeVars)) {
 			return route;
 		}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int index = 0;
 		Matcher matcher = VARS_PATTERN.matcher(route);
 		while (matcher.find()) {
