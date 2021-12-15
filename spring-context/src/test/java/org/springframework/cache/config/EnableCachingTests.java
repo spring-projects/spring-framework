@@ -18,7 +18,6 @@ package org.springframework.cache.config;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.cache.CacheManager;
@@ -107,11 +106,8 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 		try {
 			ctx.refresh();
 		}
-		catch (BeanCreationException ex) {
-			Throwable root = ex.getRootCause();
-			boolean condition = root instanceof IllegalStateException;
-			assertThat(condition).isTrue();
-			assertThat(root.getMessage().contains("implementations of CachingConfigurer")).isTrue();
+		catch (IllegalStateException ex) {
+			assertThat(ex.getMessage().contains("implementations of CachingConfigurer")).isTrue();
 		}
 	}
 
