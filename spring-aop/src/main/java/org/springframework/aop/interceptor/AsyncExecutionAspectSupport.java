@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
@@ -41,6 +43,7 @@ import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.function.SingletonSupplier;
 
@@ -207,6 +210,11 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		if (beanFactory == null) {
 			throw new IllegalStateException("BeanFactory must be set on " + getClass().getSimpleName() +
 					" to access qualified executor '" + qualifier + "'");
+		}
+		if (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory) {
+			StringValueResolver embeddedValueResolver = new EmbeddedValueResolver(configurableBeanFactory);
+			String resolvedValue = embeddedValueResolver.resolveStringValue(qualifier);
+			qualifier = resolvedValue != null ? resolvedValue : "";
 		}
 		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, Executor.class, qualifier);
 	}

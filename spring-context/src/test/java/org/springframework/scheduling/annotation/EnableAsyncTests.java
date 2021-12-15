@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -47,6 +48,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
@@ -128,6 +130,29 @@ public class EnableAsyncTests {
 		assertThat(workerThread3.get().getName()).startsWith("otherExecutor-");
 
 		ctx.close();
+	}
+
+	@Test
+	public void withAsyncBeanWithExecutorQualifiedByExpression() throws ExecutionException, InterruptedException {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		System.getProperties().put("myExecutor", "myExecutor1");
+		PropertySourcesPlaceholderConfigurer placeholderConfigurer = new PropertySourcesPlaceholderConfigurer();
+		placeholderConfigurer.setProperties(new Properties() {{
+			put("my.app.myExecutor", "myExecutor2");
+		}});
+		placeholderConfigurer.postProcessBeanFactory(context.getBeanFactory());
+
+		context.register(AsyncWithExecutorQualifiedByExpressionConfig.class);
+		context.refresh();
+
+		AsyncBeanWithExecutorQualifiedByExpression asyncBean = context.getBean(AsyncBeanWithExecutorQualifiedByExpression.class);
+		Future<Thread> workerThread1 = asyncBean.myWork1();
+		assertThat(workerThread1.get().getName()).doesNotStartWith("myExecutor2-").startsWith("myExecutor1-");
+
+		Future<Thread> workerThread2 = asyncBean.myWork2();
+		assertThat(workerThread2.get().getName()).startsWith("myExecutor2-");
+
+		context.close();
 	}
 
 	@Test
@@ -346,6 +371,19 @@ public class EnableAsyncTests {
 		}
 	}
 
+	static class AsyncBeanWithExecutorQualifiedByExpression {
+
+		@Async("#{systemProperties.myExecutor}")
+		public Future<Thread> myWork1() {
+			return new AsyncResult<>(Thread.currentThread());
+		}
+
+		@Async("${my.app.myExecutor}")
+		public Future<Thread> myWork2() {
+			return new AsyncResult<>(Thread.currentThread());
+		}
+	}
+
 
 	static class AsyncBean {
 
@@ -471,6 +509,27 @@ public class EnableAsyncTests {
 		@Bean
 		@Qualifier("e2")
 		public Executor otherExecutor() {
+			return new ThreadPoolTaskExecutor();
+		}
+	}
+
+	@Configuration
+	@EnableAsync
+	static class AsyncWithExecutorQualifiedByExpressionConfig {
+
+		@Bean
+		public AsyncBeanWithExecutorQualifiedByExpression asyncBean() {
+			return new AsyncBeanWithExecutorQualifiedByExpression();
+		}
+
+		@Bean
+		public Executor myExecutor1() {
+			return new ThreadPoolTaskExecutor();
+		}
+
+		@Bean
+		@Qualifier("myExecutor")
+		public Executor myExecutor2() {
 			return new ThreadPoolTaskExecutor();
 		}
 	}
