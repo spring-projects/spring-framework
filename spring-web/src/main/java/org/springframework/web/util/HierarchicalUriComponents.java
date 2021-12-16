@@ -22,7 +22,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
@@ -898,7 +897,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		@Override
 		public List<String> getPathSegments() {
 			String[] segments = StringUtils.tokenizeToStringArray(getPath(), PATH_DELIMITER_STRING);
-			return Collections.unmodifiableList(Arrays.asList(segments));
+			return List.of(segments);
 		}
 
 		@Override

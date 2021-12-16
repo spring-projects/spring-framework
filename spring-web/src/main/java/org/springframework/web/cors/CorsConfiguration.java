@@ -18,7 +18,6 @@ package org.springframework.web.cors;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -65,11 +64,10 @@ public class CorsConfiguration {
 
 	private static final List<String> DEFAULT_PERMIT_ALL = Collections.singletonList(ALL);
 
-	private static final List<HttpMethod> DEFAULT_METHODS = Collections.unmodifiableList(
-			Arrays.asList(HttpMethod.GET, HttpMethod.HEAD));
+	private static final List<HttpMethod> DEFAULT_METHODS = List.of(HttpMethod.GET, HttpMethod.HEAD);
 
-	private static final List<String> DEFAULT_PERMIT_METHODS = Collections.unmodifiableList(
-			Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name()));
+	private static final List<String> DEFAULT_PERMIT_METHODS = List.of(HttpMethod.GET.name(),
+			HttpMethod.HEAD.name(), HttpMethod.POST.name());
 
 
 	@Nullable

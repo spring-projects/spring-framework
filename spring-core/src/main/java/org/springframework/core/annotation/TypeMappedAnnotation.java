@@ -21,7 +21,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,20 +69,16 @@ import org.springframework.util.ReflectionUtils;
  */
 final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnnotation<A> {
 
-	private static final Map<Class<?>, Object> EMPTY_ARRAYS;
-	static {
-		Map<Class<?>, Object> emptyArrays = new HashMap<>();
-		emptyArrays.put(boolean.class, new boolean[0]);
-		emptyArrays.put(byte.class, new byte[0]);
-		emptyArrays.put(char.class, new char[0]);
-		emptyArrays.put(double.class, new double[0]);
-		emptyArrays.put(float.class, new float[0]);
-		emptyArrays.put(int.class, new int[0]);
-		emptyArrays.put(long.class, new long[0]);
-		emptyArrays.put(short.class, new short[0]);
-		emptyArrays.put(String.class, new String[0]);
-		EMPTY_ARRAYS = Collections.unmodifiableMap(emptyArrays);
-	}
+	private static final Map<Class<?>, Object> EMPTY_ARRAYS = Map.of(
+		boolean.class, new boolean[0],
+		byte.class, new byte[0],
+		char.class, new char[0],
+		double.class, new double[0],
+		float.class, new float[0],
+		int.class, new int[0],
+		long.class, new long[0],
+		short.class, new short[0],
+		String.class, new String[0]);
 
 
 	private final AnnotationTypeMapping mapping;
