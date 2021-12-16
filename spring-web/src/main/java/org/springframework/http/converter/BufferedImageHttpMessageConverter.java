@@ -169,6 +169,8 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 		ImageInputStream imageInputStream = null;
 		ImageReader imageReader = null;
+		// We cannot use try-with-resources here as, potential, exception upon closing
+		// would still bubble up the stack
 		try {
 			imageInputStream = createImageInputStream(inputMessage.getBody());
 			MediaType contentType = inputMessage.getHeaders().getContentType();

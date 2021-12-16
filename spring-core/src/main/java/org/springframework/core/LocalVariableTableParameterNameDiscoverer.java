@@ -101,6 +101,8 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			}
 			return NO_DEBUG_INFO_MAP;
 		}
+		// We cannot use try-with-resources here as, potential, exception upon closing
+		// would still bubble up the stack
 		try {
 			ClassReader classReader = new ClassReader(is);
 			Map<Executable, String[]> map = new ConcurrentHashMap<>(32);

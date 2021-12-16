@@ -131,6 +131,8 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 	protected void writeContent(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+		// We cannot use try-with-resources here as, potential, exception upon closing
+		// would still bubble up the stack
 		try {
 			InputStream in = resource.getInputStream();
 			try {

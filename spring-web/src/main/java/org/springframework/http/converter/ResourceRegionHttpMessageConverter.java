@@ -151,6 +151,8 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		responseHeaders.setContentLength(rangeLength);
 
 		InputStream in = region.getResource().getInputStream();
+		// We cannot use try-with-resources here as, potential, exception upon closing
+		// would still bubble up the stack
 		try {
 			StreamUtils.copyRange(in, outputMessage.getBody(), start, end);
 		}
