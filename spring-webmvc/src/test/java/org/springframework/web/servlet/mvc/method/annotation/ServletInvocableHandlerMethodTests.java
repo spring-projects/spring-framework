@@ -196,7 +196,6 @@ public class ServletInvocableHandlerMethodTests {
 		context.refresh();
 
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
-		System.out.println(beanFactory.getType(beanName));
 
 		LocaleContextHolder.setLocale(locale);
 		try {

@@ -189,7 +189,7 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	 * Return the cached request content as a byte array.
 	 * <p>The returned array will never be larger than the content cache limit.
 	 * <p><strong>Note:</strong> The byte array returned from this method
-	 * reflects the amount of content that has has been read at the time when it
+	 * reflects the amount of content that has been read at the time when it
 	 * is called. If the application does not read the content, this method
 	 * returns an empty array.
 	 * @see #ContentCachingRequestWrapper(HttpServletRequest, int)
