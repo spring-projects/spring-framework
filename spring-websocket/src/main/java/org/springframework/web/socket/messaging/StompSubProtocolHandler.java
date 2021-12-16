@@ -374,6 +374,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		headerAccessor.setMessage(error.getMessage());
 
 		byte[] bytes = this.stompEncoder.encode(headerAccessor.getMessageHeaders(), EMPTY_PAYLOAD);
+		// We cannot use try-with-resources here as, potential, exception upon closing
+		// would still bubble up the stack
 		try {
 			session.sendMessage(new TextMessage(bytes));
 		}
