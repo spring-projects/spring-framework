@@ -61,8 +61,7 @@ public class ArgumentTypePreparedStatementSetter implements PreparedStatementSet
 		if (this.args != null && this.argTypes != null) {
 			for (int i = 0; i < this.args.length; i++) {
 				Object arg = this.args[i];
-				if (arg instanceof Collection && this.argTypes[i] != Types.ARRAY) {
-					Collection<?> entries = (Collection<?>) arg;
+				if (arg instanceof Collection<?> entries && this.argTypes[i] != Types.ARRAY) {
 					for (Object entry : entries) {
 						if (entry instanceof Object[] valueArray) {
 							for (Object argValue : valueArray) {
