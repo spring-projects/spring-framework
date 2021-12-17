@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -242,6 +243,14 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		if (requestBody == null) {
 			return;
 		}
+
+		Arrays.asList(requestBody.split("&")).stream()
+			.filter(param -> param.contains("="))
+			.forEach( param -> {
+			String[] entry = param.split("=", 2);
+			request.addParameter(urlDecode(entry[0]), urlDecode(entry[1]));
+		});
+
 		request.setContent(requestBody.getBytes(charset));
 	}
 
