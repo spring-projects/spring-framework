@@ -16,7 +16,6 @@
 
 package org.springframework.util;
 
-import org.springframework.lang.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -26,6 +25,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.springframework.lang.Nullable;
 
 /**
  * {@link PathMatcher} implementation for Ant-style path patterns.
