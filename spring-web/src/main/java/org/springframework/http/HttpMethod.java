@@ -17,8 +17,10 @@
 package org.springframework.http;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -35,10 +37,6 @@ import org.springframework.util.Assert;
 public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 
 	private static final long serialVersionUID = -70133475680645360L;
-
-	private static final HttpMethod[] values;
-
-	private static final Map<String, HttpMethod> mappings = new HashMap<>(16);
 
 
 	/**
@@ -90,12 +88,9 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	public static final HttpMethod TRACE = new HttpMethod("TRACE");
 
 
-	static {
-		values = new HttpMethod[]{GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE};
-		for (HttpMethod httpMethod : values) {
-			mappings.put(httpMethod.name(), httpMethod);
-		}
-	}
+	private static final HttpMethod[] values = new HttpMethod[] { GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE };
+
+	private static final Map<String, HttpMethod> mappings = Arrays.stream(values).collect(Collectors.toUnmodifiableMap(HttpMethod::name, Function.identity()));
 
 
 	private final String name;
@@ -126,7 +121,7 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	 * @return the corresponding {@code HttpMethod}
 	 */
 	public static HttpMethod valueOf(String method) {
-		Assert.notNull(method, "Name must not be null");
+		Assert.notNull(method, "Method must not be null");
 		HttpMethod result = mappings.get(method);
 		if (result != null) {
 			return result;
