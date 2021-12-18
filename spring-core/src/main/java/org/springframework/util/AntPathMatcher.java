@@ -17,7 +17,6 @@
 package org.springframework.util;
 
 import org.springframework.lang.Nullable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -425,7 +424,7 @@ public class AntPathMatcher implements PathMatcher {
 	 */
 	protected String[] tokenizePath(String path) {
 		return Arrays.stream(StringUtils.delimitedListToStringArray(path, this.pathSeparator))
-				.map(t->trimTokens?t.trim():t).filter(StringUtils::hasLength).toArray(String[]::new);
+				.map(t->this.trimTokens?t.trim():t).filter(StringUtils::hasLength).toArray(String[]::new);
 	}
 
 	/**
