@@ -16,16 +16,12 @@
 
 package org.springframework.util;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import org.springframework.lang.Nullable;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.springframework.lang.Nullable;
 
 /**
  * {@link PathMatcher} implementation for Ant-style path patterns.
@@ -423,7 +419,8 @@ public class AntPathMatcher implements PathMatcher {
 	 * @return the tokenized path parts
 	 */
 	protected String[] tokenizePath(String path) {
-		return StringUtils.tokenizeToStringArray(path, this.pathSeparator, this.trimTokens, true);
+		return Arrays.stream(StringUtils.delimitedListToStringArray(path, this.pathSeparator))
+				.map(t->trimTokens?t.trim():t).filter(StringUtils::hasLength).toArray(String[]::new);
 	}
 
 	/**
@@ -488,8 +485,8 @@ public class AntPathMatcher implements PathMatcher {
 	 */
 	@Override
 	public String extractPathWithinPattern(String pattern, String path) {
-		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator, this.trimTokens, true);
-		String[] pathParts = StringUtils.tokenizeToStringArray(path, this.pathSeparator, this.trimTokens, true);
+		String[] patternParts = tokenizePattern(pattern);
+		String[] pathParts = tokenizePath(path);
 		StringBuilder builder = new StringBuilder();
 		boolean pathStarted = false;
 

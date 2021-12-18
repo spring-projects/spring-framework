@@ -134,6 +134,16 @@ class AntPathMatcherTests {
 	}
 
 	@Test
+	void complexSeparatorMatch(){
+		AntPathMatcher antPathMatcher = new AntPathMatcher("\\t");
+		assertThat(antPathMatcher.match("consentreg","consentreg")).isTrue();
+		assertThat(antPathMatcher.match("consent\\treg","consent\\treg")).isTrue();
+		assertThat(antPathMatcher.match("consent\\t\\treg","consent\\t\\treg")).isTrue();
+		assertThat(antPathMatcher.match("consent\\t\\treg","consent\\treg")).isTrue();
+		assertThat(antPathMatcher.match("consent\\treg","consent\\treg")).isTrue();
+	}
+
+	@Test
 	void matchWithNullPath() {
 		assertThat(pathMatcher.match("/test", null)).isFalse();
 		assertThat(pathMatcher.match("/", null)).isFalse();
