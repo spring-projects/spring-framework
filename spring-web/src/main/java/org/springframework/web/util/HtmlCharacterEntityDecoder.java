@@ -77,7 +77,6 @@ class HtmlCharacterEntityDecoder {
 				this.nextPotentialReferencePosition = -1;
 				break;
 			}
-
 			if (this.nextSemicolonPosition - this.nextPotentialReferencePosition < MAX_REFERENCE_SIZE) {
 				break;
 			}
