@@ -38,7 +38,6 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 
 	private static final long serialVersionUID = -70133475680645360L;
 
-
 	/**
 	 * The HTTP method {@code GET}.
 	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.3">HTTP 1.1, section 9.3</a>
@@ -87,10 +86,10 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	 */
 	public static final HttpMethod TRACE = new HttpMethod("TRACE");
 
-
 	private static final HttpMethod[] values = new HttpMethod[] { GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE };
 
-	private static final Map<String, HttpMethod> mappings = Arrays.stream(values).collect(Collectors.toUnmodifiableMap(HttpMethod::name, Function.identity()));
+	private static final Map<String, HttpMethod> mappings = Arrays.stream(values)
+			.collect(Collectors.toUnmodifiableMap(HttpMethod::name, Function.identity()));
 
 
 	private final String name;
