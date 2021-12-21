@@ -364,7 +364,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		if (this.field != null) {
 			if (this.nestingLevel > 1) {
 				Class<?> clazz = getResolvableType().getRawClass();
-				return clazz != null ? clazz : Object.class;
+				return (clazz != null ? clazz : Object.class);
 			}
 			else {
 				return this.field.getType();
