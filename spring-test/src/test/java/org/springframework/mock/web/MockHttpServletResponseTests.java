@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -358,6 +359,14 @@ class MockHttpServletResponseTests {
 	void servletWriterAutoFlushedForString() throws IOException {
 		response.getWriter().write("X");
 		assertThat(response.getContentAsString()).isEqualTo("X");
+	}
+
+	@Test
+	void getContentAsStringWhenContentTypeIsApplicationJsonShouldUseUtf8() throws IOException {
+		String content = "{\"value\": \"테스트\"}";
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		response.getWriter().write(content);
+		assertThat(response.getContentAsString()).isEqualTo(content);
 	}
 
 	@Test
