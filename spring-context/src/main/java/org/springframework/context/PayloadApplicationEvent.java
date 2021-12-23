@@ -46,6 +46,7 @@ public class PayloadApplicationEvent<T> extends ApplicationEvent implements Reso
 	 * @param source the object on which the event initially occurred (never {@code null})
 	 * @param payload the payload object (never {@code null})
 	 * @param payloadType the type object of payload object (can be {@code null})
+	 * @since 6.0.0
 	 */
 	public PayloadApplicationEvent(Object source, T payload, @Nullable ResolvableType payloadType) {
 		super(source);
