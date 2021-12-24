@@ -134,7 +134,7 @@ import org.springframework.core.Ordered;
  * setting of the <em>thread name prefix</em> of the {@code Executor}; this is because
  * the {@code <task:executor>} element does not expose such an attribute. This
  * demonstrates how the JavaConfig-based approach allows for maximum configurability
- * through direct access to actual componentry.
+ * through direct access to actual component.
  *
  * <p>The {@link #mode} attribute controls how advice is applied: If the mode is
  * {@link AdviceMode#PROXY} (the default), then the other attributes control the behavior
