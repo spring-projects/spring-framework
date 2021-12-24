@@ -672,7 +672,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @since 4.3
 	 */
 	protected RequestMappingHandlerAdapter createRequestMappingHandlerAdapter() {
-		return new RequestMappingHandlerAdapter();
+		return new RequestMappingHandlerAdapter(null);
 	}
 
 	/**
@@ -1057,7 +1057,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @since 4.3
 	 */
 	protected ExceptionHandlerExceptionResolver createExceptionHandlerExceptionResolver() {
-		return new ExceptionHandlerExceptionResolver();
+		return new ExceptionHandlerExceptionResolver(null);
 	}
 
 	/**

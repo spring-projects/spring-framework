@@ -128,6 +128,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 	}
 
+	public ExceptionHandlerExceptionResolver(List<HttpMessageConverter<?>> messageConverters) {
+		this.messageConverters = messageConverters;
+	}
 
 	/**
 	 * Provide resolvers for custom argument types. Custom resolvers are ordered

@@ -214,6 +214,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 	}
 
+	public RequestMappingHandlerAdapter(List<HttpMessageConverter<?>> messageConverters) {
+		this.messageConverters = messageConverters;
+	}
 
 	/**
 	 * Provide resolvers for custom argument types. Custom resolvers are ordered
