@@ -34,10 +34,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.TaskRejectedException;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
@@ -408,7 +408,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		}
 	}
 
-	@NotNull
+	@NonNull
 	@Override
 	public List<Runnable> shutdownNow() {
 		return getThreadPoolExecutor().shutdownNow();
@@ -425,13 +425,13 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	}
 
 	@Override
-	public boolean awaitTermination(long timeout, @NotNull TimeUnit unit) throws InterruptedException {
+	public boolean awaitTermination(long timeout, @NonNull TimeUnit unit) throws InterruptedException {
 		return getThreadPoolExecutor().awaitTermination(timeout, unit);
 	}
 
-	@NotNull
+	@NonNull
 	@Override
-	public <T> Future<T> submit(@NotNull Runnable task, T result) {
+	public <T> Future<T> submit(@NonNull Runnable task, T result) {
 		ExecutorService executor = getThreadPoolExecutor();
 		try {
 			return executor.submit(task, result);
@@ -441,32 +441,32 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		}
 	}
 
-	@NotNull
+	@NonNull
 	@Override
-	public <T> List<Future<T>> invokeAll(@NotNull Collection<? extends Callable<T>> tasks)
+	public <T> List<Future<T>> invokeAll(@NonNull Collection<? extends Callable<T>> tasks)
 			throws InterruptedException {
 		return getThreadPoolExecutor().invokeAll(tasks);
 	}
 
-	@NotNull
+	@NonNull
 	@Override
 	public <T> List<Future<T>> invokeAll(
-			@NotNull Collection<? extends Callable<T>> tasks,
-			long timeout, @NotNull TimeUnit unit) throws InterruptedException {
+			@NonNull Collection<? extends Callable<T>> tasks,
+			long timeout, @NonNull TimeUnit unit) throws InterruptedException {
 		return getThreadPoolExecutor().invokeAll(tasks, timeout, unit);
 	}
 
-	@NotNull
+	@NonNull
 	@Override
-	public <T> T invokeAny(@NotNull Collection<? extends Callable<T>> tasks)
+	public <T> T invokeAny(@NonNull Collection<? extends Callable<T>> tasks)
 			throws InterruptedException, ExecutionException {
 		return getThreadPoolExecutor().invokeAny(tasks);
 	}
 
 	@Override
 	public <T> T invokeAny(
-			@NotNull Collection<? extends Callable<T>> tasks,
-			long timeout, @NotNull TimeUnit unit)
+			@NonNull Collection<? extends Callable<T>> tasks,
+			long timeout, @NonNull TimeUnit unit)
 			throws InterruptedException, ExecutionException, TimeoutException {
 		return getThreadPoolExecutor().invokeAny(tasks, timeout, unit);
 	}

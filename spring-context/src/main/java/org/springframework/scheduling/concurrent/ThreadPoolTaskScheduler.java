@@ -35,9 +35,9 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
@@ -438,9 +438,9 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
-	@NotNull
+	@NonNull
 	@Override
-	public ScheduledFuture<?> schedule(@NotNull Runnable task, long delay, @NotNull TimeUnit unit) {
+	public ScheduledFuture<?> schedule(@NonNull Runnable task, long delay, @NonNull TimeUnit unit) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
 			return getScheduledExecutor().schedule(task, delay, unit);
@@ -450,9 +450,9 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
-	@NotNull
+	@NonNull
 	@Override
-	public <V> ScheduledFuture<V> schedule(@NotNull Callable<V> task, long delay, @NotNull TimeUnit unit) {
+	public <V> ScheduledFuture<V> schedule(@NonNull Callable<V> task, long delay, @NonNull TimeUnit unit) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
 			return getScheduledExecutor().schedule(task, delay, unit);
@@ -462,11 +462,11 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
-	@NotNull
+	@NonNull
 	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(
-			@NotNull Runnable task,
-			long initialDelay, long period, @NotNull TimeUnit unit) {
+			@NonNull Runnable task,
+			long initialDelay, long period, @NonNull TimeUnit unit) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
 			return getScheduledExecutor().scheduleAtFixedRate(task, initialDelay, period, unit);
@@ -476,11 +476,11 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
-	@NotNull
+	@NonNull
 	@Override
 	public ScheduledFuture<?> scheduleWithFixedDelay(
-			@NotNull Runnable task,
-			long initialDelay, long delay, @NotNull TimeUnit unit) {
+			@NonNull Runnable task,
+			long initialDelay, long delay, @NonNull TimeUnit unit) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
 			return getScheduledExecutor().scheduleWithFixedDelay(task, initialDelay, delay, unit);
@@ -490,7 +490,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
-	@NotNull
+	@NonNull
 	@Override
 	public List<Runnable> shutdownNow() {
 		return getScheduledExecutor().shutdownNow();
@@ -507,13 +507,13 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	}
 
 	@Override
-	public boolean awaitTermination(long timeout, @NotNull TimeUnit unit) throws InterruptedException {
+	public boolean awaitTermination(long timeout, @NonNull TimeUnit unit) throws InterruptedException {
 		return getScheduledExecutor().awaitTermination(timeout, unit);
 	}
 
-	@NotNull
+	@NonNull
 	@Override
-	public <T> Future<T> submit(@NotNull Runnable task, T result) {
+	public <T> Future<T> submit(@NonNull Runnable task, T result) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
 			return getScheduledExecutor().submit(task, result);
@@ -523,31 +523,31 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
-	@NotNull
+	@NonNull
 	@Override
-	public <T> List<Future<T>> invokeAll(@NotNull Collection<? extends Callable<T>> tasks)
+	public <T> List<Future<T>> invokeAll(@NonNull Collection<? extends Callable<T>> tasks)
 			throws InterruptedException {
 		return getScheduledExecutor().invokeAll(tasks);
 	}
 
-	@NotNull
+	@NonNull
 	@Override
 	public <T> List<Future<T>> invokeAll(
-			@NotNull Collection<? extends Callable<T>> tasks,
-			long timeout, @NotNull TimeUnit unit)
+			@NonNull Collection<? extends Callable<T>> tasks,
+			long timeout, @NonNull TimeUnit unit)
 			throws InterruptedException {
 		return getScheduledExecutor().invokeAll(tasks, timeout, unit);
 	}
 
-	@NotNull
+	@NonNull
 	@Override
-	public <T> T invokeAny(@NotNull Collection<? extends Callable<T>> tasks)
+	public <T> T invokeAny(@NonNull Collection<? extends Callable<T>> tasks)
 			throws InterruptedException, ExecutionException {
 		return getScheduledExecutor().invokeAny(tasks);
 	}
 
 	@Override
-	public <T> T invokeAny(@NotNull Collection<? extends Callable<T>> tasks, long timeout, @NotNull TimeUnit unit)
+	public <T> T invokeAny(@NonNull Collection<? extends Callable<T>> tasks, long timeout, @NonNull TimeUnit unit)
 			throws InterruptedException, ExecutionException, TimeoutException {
 		return getScheduledExecutor().invokeAny(tasks, timeout, unit);
 	}
