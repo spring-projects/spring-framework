@@ -16,10 +16,13 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -28,8 +31,10 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.TaskRejectedException;
@@ -60,7 +65,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  *
  * <p><b>NOTE:</b> This class implements Spring's
  * {@link org.springframework.core.task.TaskExecutor} interface as well as the
- * {@link java.util.concurrent.Executor} interface, with the former being the primary
+ * {@link java.util.concurrent.ExecutorService} interface, with the former being the primary
  * interface, the other just serving as secondary convenience. For this reason, the
  * exception handling follows the TaskExecutor contract rather than the Executor contract,
  * in particular regarding the {@link org.springframework.core.task.TaskRejectedException}.
@@ -80,7 +85,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  */
 @SuppressWarnings("serial")
 public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
-		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor {
+		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, ExecutorService {
 
 	private final Object poolSizeMonitor = new Object();
 
@@ -403,4 +408,66 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		}
 	}
 
+	@NotNull
+	@Override
+	public List<Runnable> shutdownNow() {
+		return getThreadPoolExecutor().shutdownNow();
+	}
+
+	@Override
+	public boolean isShutdown() {
+		return getThreadPoolExecutor().isShutdown();
+	}
+
+	@Override
+	public boolean isTerminated() {
+		return getThreadPoolExecutor().isTerminated();
+	}
+
+	@Override
+	public boolean awaitTermination(long timeout, @NotNull TimeUnit unit) throws InterruptedException {
+		return getThreadPoolExecutor().awaitTermination(timeout, unit);
+	}
+
+	@NotNull
+	@Override
+	public <T> Future<T> submit(@NotNull Runnable task, T result) {
+		ExecutorService executor = getThreadPoolExecutor();
+		try {
+			return executor.submit(task, result);
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}
+
+	@NotNull
+	@Override
+	public <T> List<Future<T>> invokeAll(@NotNull Collection<? extends Callable<T>> tasks)
+			throws InterruptedException {
+		return getThreadPoolExecutor().invokeAll(tasks);
+	}
+
+	@NotNull
+	@Override
+	public <T> List<Future<T>> invokeAll(
+			@NotNull Collection<? extends Callable<T>> tasks,
+			long timeout, @NotNull TimeUnit unit) throws InterruptedException {
+		return getThreadPoolExecutor().invokeAll(tasks, timeout, unit);
+	}
+
+	@NotNull
+	@Override
+	public <T> T invokeAny(@NotNull Collection<? extends Callable<T>> tasks)
+			throws InterruptedException, ExecutionException {
+		return getThreadPoolExecutor().invokeAny(tasks);
+	}
+
+	@Override
+	public <T> T invokeAny(
+			@NotNull Collection<? extends Callable<T>> tasks,
+			long timeout, @NotNull TimeUnit unit)
+			throws InterruptedException, ExecutionException, TimeoutException {
+		return getThreadPoolExecutor().invokeAny(tasks, timeout, unit);
+	}
 }

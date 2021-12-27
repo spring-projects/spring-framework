@@ -17,10 +17,13 @@
 package org.springframework.scheduling.concurrent;
 
 import java.time.Clock;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
@@ -29,8 +32,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.lang.Nullable;
@@ -60,7 +65,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  */
 @SuppressWarnings("serial")
 public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
-		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, TaskScheduler {
+		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, TaskScheduler, ScheduledExecutorService {
 
 	private volatile int poolSize = 1;
 
@@ -433,6 +438,119 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@NotNull
+	@Override
+	public ScheduledFuture<?> schedule(@NotNull Runnable task, long delay, @NotNull TimeUnit unit) {
+		ScheduledExecutorService executor = getScheduledExecutor();
+		try {
+			return getScheduledExecutor().schedule(task, delay, unit);
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}
+
+	@NotNull
+	@Override
+	public <V> ScheduledFuture<V> schedule(@NotNull Callable<V> task, long delay, @NotNull TimeUnit unit) {
+		ScheduledExecutorService executor = getScheduledExecutor();
+		try {
+			return getScheduledExecutor().schedule(task, delay, unit);
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}
+
+	@NotNull
+	@Override
+	public ScheduledFuture<?> scheduleAtFixedRate(
+			@NotNull Runnable task,
+			long initialDelay, long period, @NotNull TimeUnit unit) {
+		ScheduledExecutorService executor = getScheduledExecutor();
+		try {
+			return getScheduledExecutor().scheduleAtFixedRate(task, initialDelay, period, unit);
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}
+
+	@NotNull
+	@Override
+	public ScheduledFuture<?> scheduleWithFixedDelay(
+			@NotNull Runnable task,
+			long initialDelay, long delay, @NotNull TimeUnit unit) {
+		ScheduledExecutorService executor = getScheduledExecutor();
+		try {
+			return getScheduledExecutor().scheduleWithFixedDelay(task, initialDelay, delay, unit);
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}
+
+	@NotNull
+	@Override
+	public List<Runnable> shutdownNow() {
+		return getScheduledExecutor().shutdownNow();
+	}
+
+	@Override
+	public boolean isShutdown() {
+		return getScheduledExecutor().isShutdown();
+	}
+
+	@Override
+	public boolean isTerminated() {
+		return getScheduledExecutor().isTerminated();
+	}
+
+	@Override
+	public boolean awaitTermination(long timeout, @NotNull TimeUnit unit) throws InterruptedException {
+		return getScheduledExecutor().awaitTermination(timeout, unit);
+	}
+
+	@NotNull
+	@Override
+	public <T> Future<T> submit(@NotNull Runnable task, T result) {
+		ScheduledExecutorService executor = getScheduledExecutor();
+		try {
+			return getScheduledExecutor().submit(task, result);
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}
+
+	@NotNull
+	@Override
+	public <T> List<Future<T>> invokeAll(@NotNull Collection<? extends Callable<T>> tasks)
+			throws InterruptedException {
+		return getScheduledExecutor().invokeAll(tasks);
+	}
+
+	@NotNull
+	@Override
+	public <T> List<Future<T>> invokeAll(
+			@NotNull Collection<? extends Callable<T>> tasks,
+			long timeout, @NotNull TimeUnit unit)
+			throws InterruptedException {
+		return getScheduledExecutor().invokeAll(tasks, timeout, unit);
+	}
+
+	@NotNull
+	@Override
+	public <T> T invokeAny(@NotNull Collection<? extends Callable<T>> tasks)
+			throws InterruptedException, ExecutionException {
+		return getScheduledExecutor().invokeAny(tasks);
+	}
+
+	@Override
+	public <T> T invokeAny(@NotNull Collection<? extends Callable<T>> tasks, long timeout, @NotNull TimeUnit unit)
+			throws InterruptedException, ExecutionException, TimeoutException {
+		return getScheduledExecutor().invokeAny(tasks, timeout, unit);
+	}
 
 	private Runnable errorHandlingTask(Runnable task, boolean isRepeatingTask) {
 		return TaskUtils.decorateTaskWithErrorHandler(task, this.errorHandler, isRepeatingTask);
