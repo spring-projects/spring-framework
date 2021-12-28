@@ -383,7 +383,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	public Validator webFluxValidator() {
 		Validator validator = getValidator();
 		if (validator == null) {
-			if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
+			if (ClassUtils.isPresent("jakarta.validation.Validator", getClass().getClassLoader())) {
 				Class<?> clazz;
 				try {
 					String name = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";

@@ -51,7 +51,7 @@ import org.springframework.web.server.ServerWebExchange;
  * constructor and then added to the model. Once created the attribute is
  * populated via data binding to the request (form data, query params).
  * Validation also may be applied if the argument is annotated with
- * {@code @javax.validation.Valid} or Spring's own
+ * {@code @jakarta.validation.Valid} or Spring's own
  * {@code @org.springframework.validation.annotation.Validated}.
  *
  * <p>When this handler is created with {@code useDefaultResolution=true}

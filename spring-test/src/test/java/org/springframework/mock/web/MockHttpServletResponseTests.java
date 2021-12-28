@@ -24,9 +24,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

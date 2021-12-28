@@ -29,6 +29,7 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.util.context.Context;
 
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -96,6 +97,11 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 			sink.onRequest(n -> parser.requestBuffer());
 			buffers.subscribe(parser);
 		});
+	}
+
+	@Override
+	public Context currentContext() {
+		return this.sink.currentContext();
 	}
 
 	@Override
@@ -336,33 +342,23 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 
 		/**
 		 * First checks whether the multipart boundary leading to this state
-		 * was the final boundary, or whether {@link #maxHeadersSize} is
-		 * exceeded. Then looks for the header-body boundary
-		 * ({@code CR LF CR LF}) in the given buffer. If found, convert
-		 * all buffers collected so far into a {@link HttpHeaders} object
+		 * was the final boundary. Then looks for the header-body boundary
+		 * ({@code CR LF CR LF}) in the given buffer. If found, checks whether
+		 * the size of all header buffers does not exceed {@link #maxHeadersSize},
+		 * converts all buffers collected so far into a {@link HttpHeaders} object
 		 * and changes to {@link BodyState}, passing the remainder of the
-		 * buffer. If the boundary is not found, the buffer is collected.
+		 * buffer. If the boundary is not found, the buffer is collected if
+		 * its size does not exceed {@link #maxHeadersSize}.
 		 */
 		@Override
 		public void onNext(DataBuffer buf) {
-			long prevCount = this.byteCount.get();
-			long count = this.byteCount.addAndGet(buf.readableByteCount());
-			if (prevCount < 2 && count >= 2) {
-				if (isLastBoundary(buf)) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Last boundary found in " + buf);
-					}
-
-					if (changeState(this, DisposedState.INSTANCE, buf)) {
-						emitComplete();
-					}
-					return;
+			if (isLastBoundary(buf)) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Last boundary found in " + buf);
 				}
-			}
-			else if (count > MultipartParser.this.maxHeadersSize) {
+
 				if (changeState(this, DisposedState.INSTANCE, buf)) {
-					emitError(new DataBufferLimitException("Part headers exceeded the memory usage limit of " +
-							MultipartParser.this.maxHeadersSize + " bytes"));
+					emitComplete();
 				}
 				return;
 			}
@@ -371,17 +367,23 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 				if (logger.isTraceEnabled()) {
 					logger.trace("End of headers found @" + endIdx + " in " + buf);
 				}
-				DataBuffer headerBuf = MultipartUtils.sliceTo(buf, endIdx);
-				this.buffers.add(headerBuf);
-				DataBuffer bodyBuf = MultipartUtils.sliceFrom(buf, endIdx);
-				DataBufferUtils.release(buf);
+				long count = this.byteCount.addAndGet(endIdx);
+				if (belowMaxHeaderSize(count)) {
+					DataBuffer headerBuf = MultipartUtils.sliceTo(buf, endIdx);
+					this.buffers.add(headerBuf);
+					DataBuffer bodyBuf = MultipartUtils.sliceFrom(buf, endIdx);
+					DataBufferUtils.release(buf);
 
-				emitHeaders(parseHeaders());
-				changeState(this, new BodyState(), bodyBuf);
+					emitHeaders(parseHeaders());
+					changeState(this, new BodyState(), bodyBuf);
+				}
 			}
 			else {
-				this.buffers.add(buf);
-				requestBuffer();
+				long count = this.byteCount.addAndGet(buf.readableByteCount());
+				if (belowMaxHeaderSize(count)) {
+					this.buffers.add(buf);
+					requestBuffer();
+				}
 			}
 		}
 
@@ -399,6 +401,21 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 							this.buffers.get(0).getByte(0) == HYPHEN &&
 							buf.readableByteCount() >= 1 &&
 							buf.getByte(0) == HYPHEN);
+		}
+
+		/**
+		 * Checks whether the given {@code count} is below or equal to {@link #maxHeadersSize}
+		 * and emits a {@link DataBufferLimitException} if not.
+		 */
+		private boolean belowMaxHeaderSize(long count) {
+			if (count <= MultipartParser.this.maxHeadersSize) {
+				return true;
+			}
+			else {
+				emitError(new DataBufferLimitException("Part headers exceeded the memory usage limit of " +
+						MultipartParser.this.maxHeadersSize + " bytes"));
+				return false;
+			}
 		}
 
 		/**

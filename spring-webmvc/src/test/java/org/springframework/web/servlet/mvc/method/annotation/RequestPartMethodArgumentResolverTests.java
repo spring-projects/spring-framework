@@ -23,10 +23,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import javax.servlet.http.Part;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
+import jakarta.servlet.http.Part;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1160,6 +1160,20 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	void identifyTypeVariable() throws Exception {
+		Method method = ClassArguments.class.getMethod("typedArgumentFirst", Class.class, Class.class, Class.class);
+		ResolvableType returnType = ResolvableType.forMethodReturnType(method, ClassArguments.class);
+
+		ResolvableType arg0 = ResolvableType.forMethodParameter(method, 0, ClassArguments.class);
+		ResolvableType arg1 = ResolvableType.forMethodParameter(method, 1, ClassArguments.class);
+		ResolvableType arg2 = ResolvableType.forMethodParameter(method, 2, ClassArguments.class);
+
+		assertThat(returnType.getType().equals(arg0.as(Class.class).getGeneric(0).getType())).isTrue();
+		assertThat(returnType.getType().equals(arg1.as(Class.class).getGeneric(0).getType())).isFalse();
+		assertThat(returnType.getType().equals(arg2.as(Class.class).getGeneric(0).getType())).isFalse();
+	}
+
+	@Test
 	void hashCodeAndEquals() throws Exception {
 		ResolvableType forClass = ResolvableType.forClass(List.class);
 		ResolvableType forFieldDirect = ResolvableType.forField(Fields.class.getDeclaredField("stringList"));
@@ -1427,6 +1441,10 @@ class ResolvableTypeTests {
 	}
 
 
+	interface TypedMethods extends Methods<String> {
+	}
+
+
 	static class AssignmentBase<O, C, S> {
 
 		public O o;
@@ -1479,7 +1497,9 @@ class ResolvableTypeTests {
 	}
 
 
-	interface TypedMethods extends Methods<String> {
+	interface ClassArguments {
+
+		<T> T typedArgumentFirst(Class<T> arg0, Class<?> arg1, Class<Object> arg2);
 	}
 
 

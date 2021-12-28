@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,11 @@ public class RequestHandledEvent extends ApplicationEvent {
 
 	/** Session id that applied to the request, if any. */
 	@Nullable
-	private String sessionId;
+	private final String sessionId;
 
 	/** Usually the UserPrincipal. */
 	@Nullable
-	private String userName;
+	private final String userName;
 
 	/** Request processing time. */
 	private final long processingTimeMillis;
@@ -104,7 +104,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	/**
 	 * Return the name of the user that was associated with the request
 	 * (usually the UserPrincipal).
-	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
+	 * @see jakarta.servlet.http.HttpServletRequest#getUserPrincipal()
 	 */
 	@Nullable
 	public String getUserName() {

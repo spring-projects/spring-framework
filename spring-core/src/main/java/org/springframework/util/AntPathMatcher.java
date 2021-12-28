@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	private static final int CACHE_TURNOFF_THRESHOLD = 65536;
 
-	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?}");
+	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?\\}");
 
 	private static final char[] WILDCARD_CHARS = {'*', '?', '{'};
 
@@ -475,14 +475,14 @@ public class AntPathMatcher implements PathMatcher {
 
 	/**
 	 * Given a pattern and a full path, determine the pattern-mapped part. <p>For example: <ul>
-	 * <li>'{@code /docs/cvs/commit.html}' and '{@code /docs/cvs/commit.html} -> ''</li>
-	 * <li>'{@code /docs/*}' and '{@code /docs/cvs/commit} -> '{@code cvs/commit}'</li>
-	 * <li>'{@code /docs/cvs/*.html}' and '{@code /docs/cvs/commit.html} -> '{@code commit.html}'</li>
-	 * <li>'{@code /docs/**}' and '{@code /docs/cvs/commit} -> '{@code cvs/commit}'</li>
-	 * <li>'{@code /docs/**\/*.html}' and '{@code /docs/cvs/commit.html} -> '{@code cvs/commit.html}'</li>
-	 * <li>'{@code /*.html}' and '{@code /docs/cvs/commit.html} -> '{@code docs/cvs/commit.html}'</li>
-	 * <li>'{@code *.html}' and '{@code /docs/cvs/commit.html} -> '{@code /docs/cvs/commit.html}'</li>
-	 * <li>'{@code *}' and '{@code /docs/cvs/commit.html} -> '{@code /docs/cvs/commit.html}'</li> </ul>
+	 * <li>'{@code /docs/cvs/commit.html}' and '{@code /docs/cvs/commit.html} &rarr; ''</li>
+	 * <li>'{@code /docs/*}' and '{@code /docs/cvs/commit} &rarr; '{@code cvs/commit}'</li>
+	 * <li>'{@code /docs/cvs/*.html}' and '{@code /docs/cvs/commit.html} &rarr; '{@code commit.html}'</li>
+	 * <li>'{@code /docs/**}' and '{@code /docs/cvs/commit} &rarr; '{@code cvs/commit}'</li>
+	 * <li>'{@code /docs/**\/*.html}' and '{@code /docs/cvs/commit.html} &rarr; '{@code cvs/commit.html}'</li>
+	 * <li>'{@code /*.html}' and '{@code /docs/cvs/commit.html} &rarr; '{@code docs/cvs/commit.html}'</li>
+	 * <li>'{@code *.html}' and '{@code /docs/cvs/commit.html} &rarr; '{@code /docs/cvs/commit.html}'</li>
+	 * <li>'{@code *}' and '{@code /docs/cvs/commit.html} &rarr; '{@code /docs/cvs/commit.html}'</li> </ul>
 	 * <p>Assumes that {@link #match} returns {@code true} for '{@code pattern}' and '{@code path}', but
 	 * does <strong>not</strong> enforce this.
 	 */
@@ -642,7 +642,7 @@ public class AntPathMatcher implements PathMatcher {
 	 */
 	protected static class AntPathStringMatcher {
 
-		private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?}|[^/{}]|\\\\[{}])+?)}");
+		private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
 
 		private static final String DEFAULT_VARIABLE_PATTERN = "((?s).*)";
 
@@ -733,6 +733,10 @@ public class AntPathMatcher implements PathMatcher {
 						}
 						for (int i = 1; i <= matcher.groupCount(); i++) {
 							String name = this.variableNames.get(i - 1);
+							if (name.startsWith("*")) {
+								throw new IllegalArgumentException("Capturing patterns (" + name + ") are not " +
+										"supported by the AntPathMatcher. Use the PathPatternParser instead.");
+							}
 							String value = matcher.group(i);
 							uriTemplateVariables.put(name, value);
 						}

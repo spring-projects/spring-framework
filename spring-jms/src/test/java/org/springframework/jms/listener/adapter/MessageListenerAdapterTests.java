@@ -19,18 +19,17 @@ package org.springframework.jms.listener.adapter;
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 
-import javax.jms.BytesMessage;
-import javax.jms.InvalidDestinationException;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageProducer;
-import javax.jms.ObjectMessage;
-import javax.jms.Queue;
-import javax.jms.QueueSender;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
+import jakarta.jms.BytesMessage;
+import jakarta.jms.InvalidDestinationException;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.ObjectMessage;
+import jakarta.jms.Queue;
+import jakarta.jms.QueueSender;
+import jakarta.jms.QueueSession;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 

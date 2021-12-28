@@ -27,8 +27,8 @@ import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -85,32 +85,6 @@ public class HandlerMappingIntrospector
 	private Map<HandlerMapping, PathPatternMatchableHandlerMapping> pathPatternHandlerMappings = Collections.emptyMap();
 
 
-	/**
-	 * Constructor for use with {@link ApplicationContextAware}.
-	 */
-	public HandlerMappingIntrospector() {
-	}
-
-	/**
-	 * Constructor that detects the configured {@code HandlerMapping}s in the
-	 * given {@code ApplicationContext} or falls back on
-	 * "DispatcherServlet.properties" like the {@code DispatcherServlet}.
-	 * @deprecated as of 4.3.12, in favor of {@link #setApplicationContext}
-	 */
-	@Deprecated
-	public HandlerMappingIntrospector(ApplicationContext context) {
-		this.handlerMappings = initHandlerMappings(context);
-	}
-
-
-	/**
-	 * Return the configured or detected {@code HandlerMapping}s.
-	 */
-	public List<HandlerMapping> getHandlerMappings() {
-		return (this.handlerMappings != null ? this.handlerMappings : Collections.emptyList());
-	}
-
-
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
@@ -123,6 +97,13 @@ public class HandlerMappingIntrospector
 			this.handlerMappings = initHandlerMappings(this.applicationContext);
 			this.pathPatternHandlerMappings = initPathPatternMatchableHandlerMappings(this.handlerMappings);
 		}
+	}
+
+	/**
+	 * Return the configured or detected {@code HandlerMapping}s.
+	 */
+	public List<HandlerMapping> getHandlerMappings() {
+		return (this.handlerMappings != null ? this.handlerMappings : Collections.emptyList());
 	}
 
 

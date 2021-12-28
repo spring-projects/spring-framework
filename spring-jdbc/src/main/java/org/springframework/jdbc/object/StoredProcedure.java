@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,8 @@ public abstract class StoredProcedure extends SqlCall {
 	 * they appear in the database's stored procedure parameter list.</b>
 	 * <p>Names are purely used to help mapping.
 	 * @param param the parameter object
+	 * @throws InvalidDataAccessApiUsageException if the parameter has no name, or if the
+	 * operation is already compiled, and hence cannot be configured further
 	 */
 	@Override
 	public void declareParameter(SqlParameter param) throws InvalidDataAccessApiUsageException {

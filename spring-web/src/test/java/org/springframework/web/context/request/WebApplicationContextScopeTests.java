@@ -16,8 +16,7 @@
 
 package org.springframework.web.context.request;
 
-import javax.servlet.ServletContextEvent;
-
+import jakarta.servlet.ServletContextEvent;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.GenericBeanDefinition;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@ package org.springframework.orm.jpa.vendor;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.spi.PersistenceProvider;
-import javax.persistence.spi.PersistenceUnitInfo;
-import javax.persistence.spi.PersistenceUnitTransactionType;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.spi.PersistenceProvider;
+import jakarta.persistence.spi.PersistenceUnitInfo;
+import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AvailableSettings;
@@ -45,8 +44,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate
- * EntityManager. Developed and tested against Hibernate 5.3 and 5.4;
- * backwards-compatible with Hibernate 5.2 at runtime on a best-effort basis.
+ * EntityManager.
  *
  * <p>Exposes Hibernate's persistence provider and Hibernate's Session as extended
  * EntityManager interface, and adapts {@link AbstractJpaVendorAdapter}'s common

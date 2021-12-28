@@ -18,7 +18,7 @@ package org.springframework.test.web.servlet
 
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder
-import javax.servlet.http.Part
+import jakarta.servlet.http.Part
 
 /**
  * Provide a [MockMultipartHttpServletRequestBuilder] Kotlin DSL in order to be able to write idiomatic Kotlin code.

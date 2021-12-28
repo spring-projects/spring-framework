@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -244,17 +244,21 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 
 		private static void registerCacheAspect(Element element, ParserContext parserContext) {
 			if (!parserContext.getRegistry().containsBeanDefinition(CacheManagementConfigUtils.JCACHE_ASPECT_BEAN_NAME)) {
-				Object eleSource = parserContext.extractSource(element);
-				RootBeanDefinition def = new RootBeanDefinition();
-				def.setBeanClassName(JCACHE_ASPECT_CLASS_NAME);
-				def.setFactoryMethodName("aspectOf");
-				BeanDefinition sourceDef = createJCacheOperationSourceBeanDefinition(element, eleSource);
-				String sourceName =
-						parserContext.getReaderContext().registerWithGeneratedName(sourceDef);
-				def.getPropertyValues().add("cacheOperationSource", new RuntimeBeanReference(sourceName));
+				Object source = parserContext.extractSource(element);
 
-				parserContext.registerBeanComponent(new BeanComponentDefinition(sourceDef, sourceName));
-				parserContext.registerBeanComponent(new BeanComponentDefinition(def, CacheManagementConfigUtils.JCACHE_ASPECT_BEAN_NAME));
+				BeanDefinition cacheOperationSourceDef = createJCacheOperationSourceBeanDefinition(element, source);
+				String cacheOperationSourceName = parserContext.getReaderContext().registerWithGeneratedName(cacheOperationSourceDef);
+
+				RootBeanDefinition jcacheAspectDef = new RootBeanDefinition();
+				jcacheAspectDef.setBeanClassName(JCACHE_ASPECT_CLASS_NAME);
+				jcacheAspectDef.setFactoryMethodName("aspectOf");
+				jcacheAspectDef.getPropertyValues().add("cacheOperationSource", new RuntimeBeanReference(cacheOperationSourceName));
+				parserContext.getRegistry().registerBeanDefinition(CacheManagementConfigUtils.JCACHE_ASPECT_BEAN_NAME, jcacheAspectDef);
+
+				CompositeComponentDefinition compositeDef = new CompositeComponentDefinition(element.getTagName(), source);
+				compositeDef.addNestedComponent(new BeanComponentDefinition(cacheOperationSourceDef, cacheOperationSourceName));
+				compositeDef.addNestedComponent(new BeanComponentDefinition(jcacheAspectDef, CacheManagementConfigUtils.JCACHE_ASPECT_BEAN_NAME));
+				parserContext.registerComponent(compositeDef);
 			}
 		}
 

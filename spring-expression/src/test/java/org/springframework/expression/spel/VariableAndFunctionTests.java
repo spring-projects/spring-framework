@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Tests the evaluation of expressions that access variables and functions (lambda/java).
  *
  * @author Andy Clement
+ * @author Sam Brannen
  */
 public class VariableAndFunctionTests extends AbstractExpressionTests {
 
@@ -58,16 +59,33 @@ public class VariableAndFunctionTests extends AbstractExpressionTests {
 
 	@Test
 	public void testCallVarargsFunction() {
-		evaluate("#varargsFunctionReverseStringsAndMerge('a','b','c')", "cba", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge('a')", "a", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge()", "", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge('b',25)", "25b", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge(25)", "25", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge2(1,'a','b','c')", "1cba", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge2(2,'a')", "2a", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge2(3)", "3", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge2(4,'b',25)", "425b", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge2(5,25)", "525", String.class);
+		evaluate("#varargsFunction()", "[]", String.class);
+		evaluate("#varargsFunction(new String[0])", "[]", String.class);
+		evaluate("#varargsFunction('a')", "[a]", String.class);
+		evaluate("#varargsFunction('a','b','c')", "[a, b, c]", String.class);
+		// Conversion from int to String
+		evaluate("#varargsFunction(25)", "[25]", String.class);
+		evaluate("#varargsFunction('b',25)", "[b, 25]", String.class);
+		// Strings that contain a comma
+		evaluate("#varargsFunction('a,b')", "[a,b]", String.class);
+		evaluate("#varargsFunction('a', 'x,y', 'd')", "[a, x,y, d]", String.class);
+		// null values
+		evaluate("#varargsFunction(null)", "[null]", String.class);
+		evaluate("#varargsFunction('a',null,'b')", "[a, null, b]", String.class);
+
+		evaluate("#varargsFunction2(9)", "9-[]", String.class);
+		evaluate("#varargsFunction2(9, new String[0])", "9-[]", String.class);
+		evaluate("#varargsFunction2(9,'a')", "9-[a]", String.class);
+		evaluate("#varargsFunction2(9,'a','b','c')", "9-[a, b, c]", String.class);
+		// Conversion from int to String
+		evaluate("#varargsFunction2(9,25)", "9-[25]", String.class);
+		evaluate("#varargsFunction2(9,'b',25)", "9-[b, 25]", String.class);
+		// Strings that contain a comma:
+		evaluate("#varargsFunction2(9, 'a,b')", "9-[a,b]", String.class);
+		evaluate("#varargsFunction2(9, 'a', 'x,y', 'd')", "9-[a, x,y, d]", String.class);
+		// null values
+		evaluate("#varargsFunction2(9,null)", "9-[null]", String.class);
+		evaluate("#varargsFunction2(9,'a',null,'b')", "9-[a, null, b]", String.class);
 	}
 
 	@Test

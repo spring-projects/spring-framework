@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,14 +71,6 @@ public class XmlConfigTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody().json("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}");
-	}
-
-	@Test
-	public void tilesDefinitions() {
-		testClient.get().uri("/")
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().valueEquals("Forwarded-Url", "/WEB-INF/layouts/standardLayout.jsp");
 	}
 
 }

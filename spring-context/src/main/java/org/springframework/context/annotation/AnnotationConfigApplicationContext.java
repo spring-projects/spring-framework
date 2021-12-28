@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * Standalone application context, accepting <em>component classes</em> as input &mdash;
  * in particular {@link Configuration @Configuration}-annotated classes, but also plain
  * {@link org.springframework.stereotype.Component @Component} types and JSR-330 compliant
- * classes using {@code javax.inject} annotations.
+ * classes using {@code jakarta.inject} annotations.
  *
  * <p>Allows for registering classes one by one using {@link #register(Class...)}
  * as well as for classpath scanning using {@link #scan(String...)}.

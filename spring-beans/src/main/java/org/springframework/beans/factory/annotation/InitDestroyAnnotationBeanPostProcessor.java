@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,9 +66,9 @@ import org.springframework.util.ReflectionUtils;
  * init method and destroy method, respectively.
  *
  * <p>Spring's {@link org.springframework.context.annotation.CommonAnnotationBeanPostProcessor}
- * supports the JSR-250 {@link javax.annotation.PostConstruct} and {@link javax.annotation.PreDestroy}
+ * supports the {@link jakarta.annotation.PostConstruct} and {@link jakarta.annotation.PreDestroy}
  * annotations out of the box, as init annotation and destroy annotation, respectively.
- * Furthermore, it also supports the {@link javax.annotation.Resource} annotation
+ * Furthermore, it also supports the {@link jakarta.annotation.Resource} annotation
  * for annotation-driven injection of named beans.
  *
  * @author Juergen Hoeller
@@ -117,7 +117,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	 * methods to call after configuration of a bean.
 	 * <p>Any custom annotation can be used, since there are no required
 	 * annotation attributes. There is no default, although a typical choice
-	 * is the JSR-250 {@link javax.annotation.PostConstruct} annotation.
+	 * is the {@link jakarta.annotation.PostConstruct} annotation.
 	 */
 	public void setInitAnnotationType(Class<? extends Annotation> initAnnotationType) {
 		this.initAnnotationType = initAnnotationType;
@@ -128,7 +128,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	 * methods to call when the context is shutting down.
 	 * <p>Any custom annotation can be used, since there are no required
 	 * annotation attributes. There is no default, although a typical choice
-	 * is the JSR-250 {@link javax.annotation.PreDestroy} annotation.
+	 * is the {@link jakarta.annotation.PreDestroy} annotation.
 	 */
 	public void setDestroyAnnotationType(Class<? extends Annotation> destroyAnnotationType) {
 		this.destroyAnnotationType = destroyAnnotationType;
@@ -394,10 +394,9 @@ public class InitDestroyAnnotationBeanPostProcessor
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof LifecycleElement)) {
+			if (!(other instanceof LifecycleElement otherElement)) {
 				return false;
 			}
-			LifecycleElement otherElement = (LifecycleElement) other;
 			return (this.identifier.equals(otherElement.identifier));
 		}
 

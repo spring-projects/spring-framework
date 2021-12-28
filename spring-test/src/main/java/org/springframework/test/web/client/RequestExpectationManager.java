@@ -42,7 +42,6 @@ public interface RequestExpectationManager {
 	 * used to add more expectations and define a response.
 	 * <p>This is a delegate for
 	 * {@link MockRestServiceServer#expect(ExpectedCount, RequestMatcher)}.
-	 *
 	 * @param requestMatcher a request expectation
 	 * @return for setting up further expectations and define a response
 	 * @see MockRestServiceServer#expect(RequestMatcher)

@@ -24,9 +24,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.Part;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -141,7 +141,13 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 
 	@Override
 	public HttpMethod getRequestMethod() {
-		return HttpMethod.resolve(getMethod());
+		String method = getMethod();
+		if (method != null) {
+			return HttpMethod.valueOf(method);
+		}
+		else {
+			return null;
+		}
 	}
 
 	@Override

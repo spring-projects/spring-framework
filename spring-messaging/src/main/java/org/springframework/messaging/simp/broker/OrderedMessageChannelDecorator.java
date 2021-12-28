@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,8 +154,7 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 				execChannel.addInterceptor(0, new CallbackInterceptor());
 			}
 		}
-		else if (channel instanceof ExecutorSubscribableChannel) {
-			ExecutorSubscribableChannel execChannel = (ExecutorSubscribableChannel) channel;
+		else if (channel instanceof ExecutorSubscribableChannel execChannel) {
 			execChannel.getInterceptors().stream().filter(i -> i instanceof CallbackInterceptor)
 					.findFirst().map(execChannel::removeInterceptor);
 

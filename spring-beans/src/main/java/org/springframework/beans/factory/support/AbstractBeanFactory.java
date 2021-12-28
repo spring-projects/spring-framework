@@ -352,7 +352,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				else {
 					String scopeName = mbd.getScope();
 					if (!StringUtils.hasLength(scopeName)) {
-						throw new IllegalStateException("No scope name defined for bean ´" + beanName + "'");
+						throw new IllegalStateException("No scope name defined for bean '" + beanName + "'");
 					}
 					Scope scope = this.scopes.get(scopeName);
 					if (scope == null) {
@@ -1054,8 +1054,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		setCacheBeanMetadata(otherFactory.isCacheBeanMetadata());
 		setBeanExpressionResolver(otherFactory.getBeanExpressionResolver());
 		setConversionService(otherFactory.getConversionService());
-		if (otherFactory instanceof AbstractBeanFactory) {
-			AbstractBeanFactory otherAbstractFactory = (AbstractBeanFactory) otherFactory;
+		if (otherFactory instanceof AbstractBeanFactory otherAbstractFactory) {
 			this.propertyEditorRegistrars.addAll(otherAbstractFactory.propertyEditorRegistrars);
 			this.customEditors.putAll(otherAbstractFactory.customEditors);
 			this.typeConverter = otherAbstractFactory.typeConverter;
@@ -1512,8 +1511,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (tempClassLoader != null) {
 				dynamicLoader = tempClassLoader;
 				freshResolve = true;
-				if (tempClassLoader instanceof DecoratingClassLoader) {
-					DecoratingClassLoader dcl = (DecoratingClassLoader) tempClassLoader;
+				if (tempClassLoader instanceof DecoratingClassLoader dcl) {
 					for (Class<?> typeToMatch : typesToMatch) {
 						dcl.excludeClass(typeToMatch.getName());
 					}
@@ -1694,28 +1692,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return ResolvableType.forClass((Class<?>) attribute);
 		}
 		return ResolvableType.NONE;
-	}
-
-	/**
-	 * Determine the bean type for the given FactoryBean definition, as far as possible.
-	 * Only called if there is no singleton instance registered for the target bean already.
-	 * <p>The default implementation creates the FactoryBean via {@code getBean}
-	 * to call its {@code getObjectType} method. Subclasses are encouraged to optimize
-	 * this, typically by just instantiating the FactoryBean but not populating it yet,
-	 * trying whether its {@code getObjectType} method already returns a type.
-	 * If no type found, a full FactoryBean creation as performed by this implementation
-	 * should be used as fallback.
-	 * @param beanName the name of the bean
-	 * @param mbd the merged bean definition for the bean
-	 * @return the type for the bean if determinable, or {@code null} otherwise
-	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
-	 * @see #getBean(String)
-	 * @deprecated since 5.2 in favor of {@link #getTypeForFactoryBean(String, RootBeanDefinition, boolean)}
-	 */
-	@Nullable
-	@Deprecated
-	protected Class<?> getTypeForFactoryBean(String beanName, RootBeanDefinition mbd) {
-		return getTypeForFactoryBean(beanName, mbd, true).resolve();
 	}
 
 	/**

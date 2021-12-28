@@ -33,7 +33,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Utility methods for AOP proxy factories.
@@ -47,11 +46,6 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.aop.support.AopUtils
  */
 public abstract class AopProxyUtils {
-
-	// JDK 17 Class.isSealed() method available?
-	@Nullable
-	private static final Method isSealedMethod = ClassUtils.getMethodIfAvailable(Class.class, "isSealed");
-
 
 	/**
 	 * Obtain the singleton target object behind the given proxy, if any.
@@ -142,7 +136,7 @@ public abstract class AopProxyUtils {
 		List<Class<?>> proxiedInterfaces = new ArrayList<>(specifiedInterfaces.length + 3);
 		for (Class<?> ifc : specifiedInterfaces) {
 			// Only non-sealed interfaces are actually eligible for JDK proxying (on JDK 17)
-			if (isSealedMethod == null || Boolean.FALSE.equals(ReflectionUtils.invokeMethod(isSealedMethod, ifc))) {
+			if (!ifc.isSealed()) {
 				proxiedInterfaces.add(ifc);
 			}
 		}

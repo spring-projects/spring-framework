@@ -37,11 +37,11 @@ class IntegerToEnumConverterFactoryTests {
 
 
 	@ParameterizedTest
-	@CsvSource({
-		"0, RED",
-		"1, BLUE",
-		"2, GREEN"
-	})
+	@CsvSource(textBlock = """
+		0, RED
+		1, BLUE
+		2, GREEN
+	""")
 	void convertsIntegerToEnum(int index, Color color) {
 		assertThat(converter.convert(index)).isEqualTo(color);
 	}

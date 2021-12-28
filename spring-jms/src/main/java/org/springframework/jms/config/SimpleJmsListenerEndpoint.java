@@ -16,7 +16,7 @@
 
 package org.springframework.jms.config;
 
-import javax.jms.MessageListener;
+import jakarta.jms.MessageListener;
 
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.lang.Nullable;

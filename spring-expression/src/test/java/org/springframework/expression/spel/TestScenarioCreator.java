@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel;
 
+import java.util.Arrays;
 import java.util.GregorianCalendar;
 
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -51,10 +52,10 @@ public class TestScenarioCreator {
 					TestScenarioCreator.class.getDeclaredMethod("reverseInt", Integer.TYPE, Integer.TYPE, Integer.TYPE));
 			testContext.registerFunction("reverseString",
 					TestScenarioCreator.class.getDeclaredMethod("reverseString", String.class));
-			testContext.registerFunction("varargsFunctionReverseStringsAndMerge",
-					TestScenarioCreator.class.getDeclaredMethod("varargsFunctionReverseStringsAndMerge", String[].class));
-			testContext.registerFunction("varargsFunctionReverseStringsAndMerge2",
-					TestScenarioCreator.class.getDeclaredMethod("varargsFunctionReverseStringsAndMerge2", Integer.TYPE, String[].class));
+			testContext.registerFunction("varargsFunction",
+					TestScenarioCreator.class.getDeclaredMethod("varargsFunction", String[].class));
+			testContext.registerFunction("varargsFunction2",
+					TestScenarioCreator.class.getDeclaredMethod("varargsFunction2", Integer.TYPE, String[].class));
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(ex);
@@ -108,25 +109,12 @@ public class TestScenarioCreator {
 		return backwards.toString();
 	}
 
-	public static String varargsFunctionReverseStringsAndMerge(String... strings) {
-		StringBuilder sb = new StringBuilder();
-		if (strings != null) {
-			for (int i = strings.length - 1; i >= 0; i--) {
-				sb.append(strings[i]);
-			}
-		}
-		return sb.toString();
+	public static String varargsFunction(String... strings) {
+		return Arrays.toString(strings);
 	}
 
-	public static String varargsFunctionReverseStringsAndMerge2(int j, String... strings) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(j);
-		if (strings != null) {
-			for (int i = strings.length - 1; i >= 0; i--) {
-				sb.append(strings[i]);
-			}
-		}
-		return sb.toString();
+	public static String varargsFunction2(int i, String... strings) {
+		return String.valueOf(i) + "-" + Arrays.toString(strings);
 	}
 
 }

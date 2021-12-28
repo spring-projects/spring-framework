@@ -25,9 +25,9 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
@@ -62,8 +62,8 @@ public class ClientHttpConnectorTests {
 
 	private static final int BUF_SIZE = 1024;
 
-	private static final EnumSet<HttpMethod> METHODS_WITH_BODY =
-			EnumSet.of(HttpMethod.PUT, HttpMethod.POST, HttpMethod.PATCH);
+	private static final Set<HttpMethod> METHODS_WITH_BODY =
+			Set.of(HttpMethod.PUT, HttpMethod.POST, HttpMethod.PATCH);
 
 	private final MockWebServer server = new MockWebServer();
 

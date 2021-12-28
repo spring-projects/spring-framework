@@ -17,6 +17,7 @@
 package org.springframework.test.web.reactive.server;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.hamcrest.Matcher;
@@ -188,7 +189,7 @@ public class CookieAssertions {
 	public WebTestClient.ResponseSpec httpOnly(String name, boolean expected) {
 		boolean isHttpOnly = getCookie(name).isHttpOnly();
 		this.exchangeResult.assertWithDiagnostics(() -> {
-			String message = getMessage(name) + " secure";
+			String message = getMessage(name) + " httpOnly";
 			AssertionErrors.assertEquals(message, expected, isHttpOnly);
 		});
 		return this.responseSpec;
@@ -200,7 +201,7 @@ public class CookieAssertions {
 	public WebTestClient.ResponseSpec sameSite(String name, String expected) {
 		String sameSite = getCookie(name).getSameSite();
 		this.exchangeResult.assertWithDiagnostics(() -> {
-			String message = getMessage(name) + " secure";
+			String message = getMessage(name) + " sameSite";
 			AssertionErrors.assertEquals(message, expected, sameSite);
 		});
 		return this.responseSpec;
@@ -210,10 +211,10 @@ public class CookieAssertions {
 	private ResponseCookie getCookie(String name) {
 		ResponseCookie cookie = this.exchangeResult.getResponseCookies().getFirst(name);
 		if (cookie == null) {
-			String message = "No cookie with name '" + name + "'";
-			this.exchangeResult.assertWithDiagnostics(() -> AssertionErrors.fail(message));
+			this.exchangeResult.assertWithDiagnostics(() ->
+					AssertionErrors.fail("No cookie with name '" + name + "'"));
 		}
-		return cookie;
+		return Objects.requireNonNull(cookie);
 	}
 
 	private String getMessage(String cookie) {

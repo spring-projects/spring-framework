@@ -18,7 +18,6 @@ package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
@@ -33,17 +32,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.FormEncodingType;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.util.KeyDataPair;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.http.MediaType;
@@ -371,8 +369,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			});
 		});
 		for (NameValuePair param : this.webRequest.getRequestParameters()) {
-			if (param instanceof KeyDataPair) {
-				KeyDataPair pair = (KeyDataPair) param;
+			if (param instanceof KeyDataPair pair) {
 				File file = pair.getFile();
 				MockPart part;
 				if (file != null) {
@@ -398,12 +395,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 	private String urlDecode(String value) {
-		try {
-			return URLDecoder.decode(value, "UTF-8");
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw new IllegalStateException(ex);
-		}
+		return URLDecoder.decode(value, StandardCharsets.UTF_8);
 	}
 
 	private byte[] readAllBytes(File file) {

@@ -27,20 +27,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.validation.Configuration;
-import javax.validation.ConstraintValidatorFactory;
-import javax.validation.MessageInterpolator;
-import javax.validation.ParameterNameProvider;
-import javax.validation.TraversableResolver;
-import javax.validation.Validation;
-import javax.validation.ValidationException;
-import javax.validation.ValidationProviderResolver;
-import javax.validation.Validator;
-import javax.validation.ValidatorContext;
-import javax.validation.ValidatorFactory;
-import javax.validation.bootstrap.GenericBootstrap;
-import javax.validation.bootstrap.ProviderSpecificBootstrap;
-
+import jakarta.validation.ClockProvider;
+import jakarta.validation.Configuration;
+import jakarta.validation.ConstraintValidatorFactory;
+import jakarta.validation.MessageInterpolator;
+import jakarta.validation.ParameterNameProvider;
+import jakarta.validation.TraversableResolver;
+import jakarta.validation.Validation;
+import jakarta.validation.ValidationException;
+import jakarta.validation.ValidationProviderResolver;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorContext;
+import jakarta.validation.ValidatorFactory;
+import jakarta.validation.bootstrap.GenericBootstrap;
+import jakarta.validation.bootstrap.ProviderSpecificBootstrap;
 import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -57,11 +57,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * This is the central class for {@code javax.validation} (JSR-303) setup in a Spring
- * application context: It bootstraps a {@code javax.validation.ValidationFactory} and
+ * This is the central class for {@code jakarta.validation} (JSR-303) setup in a Spring
+ * application context: It bootstraps a {@code jakarta.validation.ValidationFactory} and
  * exposes it through the Spring {@link org.springframework.validation.Validator} interface
- * as well as through the JSR-303 {@link javax.validation.Validator} interface and the
- * {@link javax.validation.ValidatorFactory} interface itself.
+ * as well as through the JSR-303 {@link jakarta.validation.Validator} interface and the
+ * {@link jakarta.validation.ValidatorFactory} interface itself.
  *
  * <p>When talking to an instance of this bean through the Spring or JSR-303 Validator interfaces,
  * you'll be talking to the default Validator of the underlying ValidatorFactory. This is very
@@ -69,22 +69,15 @@ import org.springframework.util.ReflectionUtils;
  * you will almost always use the default Validator anyway. This can also be injected directly
  * into any target dependency of type {@link org.springframework.validation.Validator}!
  *
- * <p><b>As of Spring 5.0, this class requires Bean Validation 1.1+, with special support
- * for Hibernate Validator 5.x</b> (see {@link #setValidationMessageSource}).
- * This class is also runtime-compatible with Bean Validation 2.0 and Hibernate Validator 6.0,
- * with one special note: If you'd like to call BV 2.0's {@code getClockProvider()} method,
- * obtain the native {@code ValidatorFactory} through {@code #unwrap(ValidatorFactory.class)}
- * and call the {@code getClockProvider()} method on the returned native reference there.
- *
  * <p>This class is also being used by Spring's MVC configuration namespace, in case of the
- * {@code javax.validation} API being present but no explicit Validator having been configured.
+ * {@code jakarta.validation} API being present but no explicit Validator having been configured.
  *
  * @author Juergen Hoeller
  * @since 3.0
- * @see javax.validation.ValidatorFactory
- * @see javax.validation.Validator
- * @see javax.validation.Validation#buildDefaultValidatorFactory()
- * @see javax.validation.ValidatorFactory#getValidator()
+ * @see jakarta.validation.ValidatorFactory
+ * @see jakarta.validation.Validator
+ * @see jakarta.validation.Validation#buildDefaultValidatorFactory()
+ * @see jakarta.validation.ValidatorFactory#getValidator()
  */
 public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		implements ValidatorFactory, ApplicationContextAware, InitializingBean, DisposableBean {
@@ -123,8 +116,8 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	/**
 	 * Specify the desired provider class, if any.
 	 * <p>If not specified, JSR-303's default search mechanism will be used.
-	 * @see javax.validation.Validation#byProvider(Class)
-	 * @see javax.validation.Validation#byDefaultProvider()
+	 * @see jakarta.validation.Validation#byProvider(Class)
+	 * @see jakarta.validation.Validation#byDefaultProvider()
 	 */
 	@SuppressWarnings("rawtypes")
 	public void setProviderClass(Class providerClass) {
@@ -208,7 +201,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 * Specify bean validation properties to be passed to the validation provider.
 	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
 	 * or a "props" element in XML bean definitions.
-	 * @see javax.validation.Configuration#addProperty(String, String)
+	 * @see jakarta.validation.Configuration#addProperty(String, String)
 	 */
 	public void setValidationProperties(Properties jpaProperties) {
 		CollectionUtils.mergePropertiesIntoMap(jpaProperties, this.validationPropertyMap);
@@ -217,7 +210,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	/**
 	 * Specify bean validation properties to be passed to the validation provider as a Map.
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
-	 * @see javax.validation.Configuration#addProperty(String, String)
+	 * @see jakarta.validation.Configuration#addProperty(String, String)
 	 */
 	public void setValidationPropertyMap(@Nullable Map<String, String> validationProperties) {
 		if (validationProperties != null) {
@@ -400,18 +393,11 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		return this.validatorFactory.getParameterNameProvider();
 	}
 
-	// Bean Validation 2.0: currently not implemented here since it would imply
-	// a hard dependency on the new javax.validation.ClockProvider interface.
-	// To be resolved once Spring Framework requires Bean Validation 2.0+.
-	// Obtain the native ValidatorFactory through unwrap(ValidatorFactory.class)
-	// instead which will fully support a getClockProvider() call as well.
-	/*
 	@Override
-	public javax.validation.ClockProvider getClockProvider() {
+	public ClockProvider getClockProvider() {
 		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
 		return this.validatorFactory.getClockProvider();
 	}
-	*/
 
 	@Override
 	@SuppressWarnings("unchecked")

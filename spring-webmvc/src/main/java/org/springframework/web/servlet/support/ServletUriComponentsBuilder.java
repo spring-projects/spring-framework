@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.support;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;

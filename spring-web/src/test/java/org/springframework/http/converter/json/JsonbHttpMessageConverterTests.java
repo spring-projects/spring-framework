@@ -162,7 +162,7 @@ public class JsonbHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		String body = "H\u00e9llo W\u00f6rld";
 		this.converter.write(body, contentType, outputMessage);
-		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_16BE)).as("Invalid result").isEqualTo(body);
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_16BE)).as("Invalid result").isEqualTo("\"" + body + "\"");
 		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(contentType);
 	}
 
@@ -260,7 +260,7 @@ public class JsonbHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setPrefixJson(true);
 		this.converter.writeInternal("foo", null, outputMessage);
-		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(")]}', foo");
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(")]}', \"foo\"");
 	}
 
 	@Test
@@ -268,7 +268,7 @@ public class JsonbHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setJsonPrefix(")))");
 		this.converter.writeInternal("foo", null, outputMessage);
-		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(")))foo");
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(")))\"foo\"");
 	}
 
 

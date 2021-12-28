@@ -16,7 +16,7 @@
 
 package org.springframework.web.bind.support;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.http.HttpHeaders;
@@ -104,13 +104,12 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 * @param request the request with parameters to bind (can be multipart)
 	 * @see org.springframework.web.multipart.MultipartRequest
 	 * @see org.springframework.web.multipart.MultipartFile
-	 * @see javax.servlet.http.Part
+	 * @see jakarta.servlet.http.Part
 	 * @see #bind(org.springframework.beans.PropertyValues)
 	 */
 	public void bind(WebRequest request) {
 		MutablePropertyValues mpvs = new MutablePropertyValues(request.getParameterMap());
-		if (request instanceof NativeWebRequest) {
-			NativeWebRequest nativeRequest = (NativeWebRequest) request;
+		if (request instanceof NativeWebRequest nativeRequest) {
 			MultipartRequest multipartRequest = nativeRequest.getNativeRequest(MultipartRequest.class);
 			if (multipartRequest != null) {
 				bindMultipart(multipartRequest.getMultiFileMap(), mpvs);

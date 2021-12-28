@@ -44,9 +44,9 @@ import org.springframework.util.Assert;
  * ConnectionFactory factory = …
  *
  * DatabaseClient client = DatabaseClient.create(factory);
- * Mono&gtActor;lt actor = client.sql("select first_name, last_name from t_actor")
- *     .map(row -> new Actor(row.get("first_name, String.class"),
- *     row.get("last_name, String.class")))
+ * Mono&lt;Actor&gt; actor = client.sql("select first_name, last_name from t_actor")
+ *     .map(row -&gt; new Actor(row.get("first_name, String.class"),
+ *          row.get("last_name, String.class")))
  *     .first();
  * </pre>
  *
@@ -190,7 +190,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * before it is executed. For example:
 		 * <pre class="code">
 		 * DatabaseClient client = …;
-		 * client.sql("SELECT book_id FROM book").filter(statement -> statement.fetchSize(100))
+		 * client.sql("SELECT book_id FROM book").filter(statement -&gt; statement.fetchSize(100))
 		 * </pre>
 		 * @param filterFunction the filter to be added to the chain
 		 */
@@ -205,7 +205,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * before it is executed. For example:
 		 * <pre class="code">
 		 * DatabaseClient client = …;
-		 * client.sql("SELECT book_id FROM book").filter((statement, next) -> next.execute(statement.fetchSize(100)))
+		 * client.sql("SELECT book_id FROM book").filter((statement, next) -&gt; next.execute(statement.fetchSize(100)))
 		 * </pre>
 		 * @param filter the filter to be added to the chain
 		 */

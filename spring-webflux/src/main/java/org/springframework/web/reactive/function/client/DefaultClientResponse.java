@@ -195,15 +195,9 @@ class DefaultClientResponse implements ClientResponse {
 
 	@Override
 	public Mono<WebClientResponseException> createException() {
-		return DataBufferUtils.join(body(BodyExtractors.toDataBuffers()))
-				.map(dataBuffer -> {
-					byte[] bytes = new byte[dataBuffer.readableByteCount()];
-					dataBuffer.read(bytes);
-					DataBufferUtils.release(dataBuffer);
-					return bytes;
-				})
+		return bodyToMono(byte[].class)
 				.defaultIfEmpty(EMPTY)
-				.onErrorReturn(IllegalStateException.class::isInstance, EMPTY)
+				.onErrorReturn(ex -> !(ex instanceof Error), EMPTY)
 				.map(bodyBytes -> {
 					HttpRequest request = this.requestSupplier.get();
 					Charset charset = headers().contentType().map(MimeType::getCharset).orElse(null);
@@ -227,6 +221,11 @@ class DefaultClientResponse implements ClientResponse {
 								request);
 					}
 				});
+	}
+
+	@Override
+	public <T> Mono<T> createError() {
+		return createException().flatMap(Mono::error);
 	}
 
 	@Override

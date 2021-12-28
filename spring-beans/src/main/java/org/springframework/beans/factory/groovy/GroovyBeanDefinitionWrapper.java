@@ -194,9 +194,8 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 				}
 			}
 			// constructorArgs
-			else if (CONSTRUCTOR_ARGS.equals(property) && newValue instanceof List) {
+			else if (CONSTRUCTOR_ARGS.equals(property) && newValue instanceof List<?> args) {
 				ConstructorArgumentValues cav = new ConstructorArgumentValues();
-				List<?> args = (List<?>) newValue;
 				for (Object arg : args) {
 					cav.addGenericArgumentValue(arg);
 				}

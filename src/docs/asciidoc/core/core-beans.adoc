@@ -2835,12 +2835,11 @@ If you access scoped beans within Spring Web MVC, in effect, within a request th
 processed by the Spring `DispatcherServlet`, no special setup is necessary.
 `DispatcherServlet` already exposes all relevant state.
 
-If you use a Servlet 2.5 web container, with requests processed outside of Spring's
+If you use a Servlet web container, with requests processed outside of Spring's
 `DispatcherServlet` (for example, when using JSF or Struts), you need to register the
 `org.springframework.web.context.request.RequestContextListener` `ServletRequestListener`.
-For Servlet 3.0+, this can be done programmatically by using the `WebApplicationInitializer`
-interface. Alternatively, or for older containers, add the following declaration to
-your web application's `web.xml` file:
+This can be done programmatically by using the `WebApplicationInitializer` interface.
+Alternatively, add the following declaration to your web application's `web.xml` file:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -2969,6 +2968,8 @@ When using annotation-driven components or Java configuration, you can use the
 ----
 
 
+
+
 [[beans-factory-scopes-application]]
 ==== Application Scope
 
@@ -3012,6 +3013,17 @@ following example shows how to do so:
 
 
 
+
+[[beans-factory-scopes-websocket]]
+==== WebSocket Scope
+
+WebSocket scope is associated with the lifecycle of a WebSocket session and applies to
+STOMP over WebSocket applications, see
+<<web.adoc#websocket-stomp-websocket-scope,WebSocket scope>> for more details.
+
+
+
+
 [[beans-factory-scopes-other-injection]]
 ==== Scoped Beans as Dependencies
 
@@ -3039,7 +3051,7 @@ constructor or setter argument or autowired field) as `ObjectFactory<MyTargetBea
 allowing for a `getObject()` call to retrieve the current instance on demand every
 time it is needed -- without holding on to the instance or storing it separately.
 
-As an extended variant, you may declare `ObjectProvider<MyTargetBean>`, which delivers
+As an extended variant, you may declare `ObjectProvider<MyTargetBean>` which delivers
 several additional access variants, including `getIfAvailable` and `getIfUnique`.
 
 The JSR-330 variant of this is called `Provider` and is used with a `Provider<MyTargetBean>`
@@ -4598,8 +4610,8 @@ injection. Essentially, the `@Autowired` annotation provides the same capabiliti
 described in <<beans-factory-autowire>> but with more fine-grained control and wider
 applicability. Spring 2.5 also added support for JSR-250 annotations, such as
 `@PostConstruct` and `@PreDestroy`. Spring 3.0 added support for JSR-330 (Dependency
-Injection for Java) annotations contained in the `javax.inject` package such as `@Inject`
-and `@Named`. Details about those annotations can be found in the
+Injection for Java) annotations contained in the `jakarta.inject` package such as
+`@Inject` and `@Named`. Details about those annotations can be found in the
 <<beans-standard-annotations,relevant section>>.
 
 [NOTE]
@@ -4938,7 +4950,7 @@ use the same bean class). `@Order` values may influence priorities at injection 
 but be aware that they do not influence singleton startup order, which is an
 orthogonal concern determined by dependency relationships and `@DependsOn` declarations.
 
-Note that the standard `javax.annotation.Priority` annotation is not available at the
+Note that the standard `jakarta.annotation.Priority` annotation is not available at the
 `@Bean` level, since it cannot be declared on methods. Its semantics can be modeled
 through `@Order` values in combination with `@Primary` on a single bean for each type.
 ====
@@ -5863,8 +5875,8 @@ attribute set to `true`, it is selected.
 === Injection with `@Resource`
 
 Spring also supports injection by using the JSR-250 `@Resource` annotation
-(`javax.annotation.Resource`) on fields or bean property setter methods.
-This is a common pattern in Java EE: for example, in JSF-managed beans and JAX-WS
+(`jakarta.annotation.Resource`) on fields or bean property setter methods.
+This is a common pattern in Jakarta EE: for example, in JSF-managed beans and JAX-WS
 endpoints. Spring supports this pattern for Spring-managed objects as well.
 
 `@Resource` takes a name attribute. By default, Spring interprets that value as
@@ -6186,8 +6198,8 @@ SpEL also enables the use of more complex data structures:
 === Using `@PostConstruct` and `@PreDestroy`
 
 The `CommonAnnotationBeanPostProcessor` not only recognizes the `@Resource` annotation
-but also the JSR-250 lifecycle annotations: `javax.annotation.PostConstruct` and
-`javax.annotation.PreDestroy`. Introduced in Spring 2.5, the support for these
+but also the JSR-250 lifecycle annotations: `jakarta.annotation.PostConstruct` and
+`jakarta.annotation.PreDestroy`. Introduced in Spring 2.5, the support for these
 annotations offers an alternative to the lifecycle callback mechanism described in
 <<beans-factory-lifecycle-initializingbean,initialization callbacks>> and
 <<beans-factory-lifecycle-disposablebean,destruction callbacks>>. Provided that the
@@ -6238,8 +6250,9 @@ For details about the effects of combining various lifecycle mechanisms, see
 Like `@Resource`, the `@PostConstruct` and `@PreDestroy` annotation types were a part
 of the standard Java libraries from JDK 6 to 8. However, the entire `javax.annotation`
 package got separated from the core Java modules in JDK 9 and eventually removed in
-JDK 11. If needed, the `javax.annotation-api` artifact needs to be obtained via Maven
-Central now, simply to be added to the application's classpath like any other library.
+JDK 11. As of Jakarta EE 9, the package lives in `jakarta.annotation` now. If needed,
+the `jakarta.annotation-api` artifact needs to be obtained via Maven Central now,
+simply to be added to the application's classpath like any other library.
 ====
 
 
@@ -6675,9 +6688,11 @@ factory method and other bean definition properties, such as a qualifier value t
 the `@Qualifier` annotation. Other method-level annotations that can be specified are
 `@Scope`, `@Lazy`, and custom qualifier annotations.
 
-TIP: In addition to its role for component initialization, you can also place the `@Lazy` annotation
-on injection points marked with `@Autowired` or `@Inject`. In this context, it
-leads to the injection of a lazy-resolution proxy.
+TIP: In addition to its role for component initialization, you can also place the `@Lazy`
+annotation on injection points marked with `@Autowired` or `@Inject`. In this context,
+it leads to the injection of a lazy-resolution proxy. However, such a proxy approach
+is rather limited. For sophisticated lazy interactions, in particular in combination
+with optional dependencies, we recommend `ObjectProvider<MyTargetBean>` instead.
 
 Autowired fields and methods are supported, as previously discussed, with additional
 support for autowiring of `@Bean` methods. The following example shows how to do so:
@@ -7190,16 +7205,16 @@ annotations. To use them, you need to have the relevant jars in your classpath.
 
 [NOTE]
 =====
-If you use Maven, the `javax.inject` artifact is available in the standard Maven
+If you use Maven, the `jakarta.inject` artifact is available in the standard Maven
 repository (
-https://repo1.maven.org/maven2/javax/inject/javax.inject/1/[https://repo1.maven.org/maven2/javax/inject/javax.inject/1/]).
+https://repo1.maven.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/[https://repo1.maven.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/]).
 You can add the following dependency to your file pom.xml:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<dependency>
-		<groupId>javax.inject</groupId>
-		<artifactId>javax.inject</artifactId>
+		<groupId>jakarta.inject</groupId>
+		<artifactId>jakarta.inject-api</artifactId>
 		<version>1</version>
 	</dependency>
 ----
@@ -7210,12 +7225,12 @@ You can add the following dependency to your file pom.xml:
 [[beans-inject-named]]
 === Dependency Injection with `@Inject` and `@Named`
 
-Instead of `@Autowired`, you can use `@javax.inject.Inject` as follows:
+Instead of `@Autowired`, you can use `@jakarta.inject.Inject` as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import javax.inject.Inject;
+	import jakarta.inject.Inject;
 
 	public class SimpleMovieLister {
 
@@ -7235,7 +7250,7 @@ Instead of `@Autowired`, you can use `@javax.inject.Inject` as follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import javax.inject.Inject
+	import jakarta.inject.Inject
 
 	class SimpleMovieLister {
 
@@ -7259,8 +7274,8 @@ preceding example:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import javax.inject.Inject;
-	import javax.inject.Provider;
+	import jakarta.inject.Inject;
+	import jakarta.inject.Provider;
 
 	public class SimpleMovieLister {
 
@@ -7280,7 +7295,7 @@ preceding example:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import javax.inject.Inject
+	import jakarta.inject.Inject
 
 	class SimpleMovieLister {
 
@@ -7301,8 +7316,8 @@ you should use the `@Named` annotation, as the following example shows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import javax.inject.Inject;
-	import javax.inject.Named;
+	import jakarta.inject.Inject;
+	import jakarta.inject.Named;
 
 	public class SimpleMovieLister {
 
@@ -7319,8 +7334,8 @@ you should use the `@Named` annotation, as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import javax.inject.Inject
-	import javax.inject.Named
+	import jakarta.inject.Inject
+	import jakarta.inject.Named
 
 	class SimpleMovieLister {
 
@@ -7377,14 +7392,14 @@ a `required` attribute. The following pair of examples show how to use `@Inject`
 [[beans-named]]
 === `@Named` and `@ManagedBean`: Standard Equivalents to the `@Component` Annotation
 
-Instead of `@Component`, you can use `@javax.inject.Named` or `javax.annotation.ManagedBean`,
+Instead of `@Component`, you can use `@jakarta.inject.Named` or `jakarta.annotation.ManagedBean`,
 as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import javax.inject.Inject;
-	import javax.inject.Named;
+	import jakarta.inject.Inject;
+	import jakarta.inject.Named;
 
 	@Named("movieListener")  // @ManagedBean("movieListener") could be used as well
 	public class SimpleMovieLister {
@@ -7402,8 +7417,8 @@ as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import javax.inject.Inject
-	import javax.inject.Named
+	import jakarta.inject.Inject
+	import jakarta.inject.Named
 
 	@Named("movieListener")  // @ManagedBean("movieListener") could be used as well
 	class SimpleMovieLister {
@@ -7421,8 +7436,8 @@ It is very common to use `@Component` without specifying a name for the componen
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import javax.inject.Inject;
-	import javax.inject.Named;
+	import jakarta.inject.Inject;
+	import jakarta.inject.Named;
 
 	@Named
 	public class SimpleMovieLister {
@@ -7440,8 +7455,8 @@ It is very common to use `@Component` without specifying a name for the componen
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import javax.inject.Inject
-	import javax.inject.Named
+	import jakarta.inject.Inject
+	import jakarta.inject.Named
 
 	@Named
 	class SimpleMovieLister {
@@ -7490,7 +7505,7 @@ features are not available, as the following table shows:
 [[annotations-comparison]]
 .Spring component model elements versus JSR-330 variants
 |===
-| Spring| javax.inject.*| javax.inject restrictions / comments
+| Spring| jakarta.inject.*| jakarta.inject restrictions / comments
 
 | @Autowired
 | @Inject
@@ -7505,15 +7520,15 @@ features are not available, as the following table shows:
 | The JSR-330 default scope is like Spring's `prototype`. However, in order to keep it
   consistent with Spring's general defaults, a JSR-330 bean declared in the Spring
   container is a `singleton` by default. In order to use a scope other than `singleton`,
-  you should use Spring's `@Scope` annotation. `javax.inject` also provides a
-  https://download.oracle.com/javaee/6/api/javax/inject/Scope.html[@Scope] annotation.
-  Nevertheless, this one is only intended to be used for creating your own annotations.
+  you should use Spring's `@Scope` annotation. `jakarta.inject` also provides a
+  `jakarta.inject.Scope` annotation: however, this one is only intended to be used
+  for creating custom annotations.
 
 | @Qualifier
 | @Qualifier / @Named
-| `javax.inject.Qualifier` is just a meta-annotation for building custom qualifiers.
+| `jakarta.inject.Qualifier` is just a meta-annotation for building custom qualifiers.
   Concrete `String` qualifiers (like Spring's `@Qualifier` with a value) can be associated
-  through `javax.inject.Named`.
+  through `jakarta.inject.Named`.
 
 | @Value
 | -
@@ -7529,7 +7544,7 @@ features are not available, as the following table shows:
 
 | ObjectFactory
 | Provider
-| `javax.inject.Provider` is a direct alternative to Spring's `ObjectFactory`,
+| `jakarta.inject.Provider` is a direct alternative to Spring's `ObjectFactory`,
   only with a shorter `get()` method name. It can also be used in combination with
   Spring's `@Autowired` or with non-annotated constructors and setter methods.
 |===
@@ -7951,6 +7966,26 @@ following text image shows:
 transferService -> com.acme.TransferServiceImpl
 ----
 
+You can also use default methods to define beans. This allows composition of bean
+configurations by implementing interfaces with bean definitions on default methods.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public interface BaseConfig {
+
+		@Bean
+		default TransferServiceImpl transferService() {
+			return new TransferServiceImpl();
+		}
+	}
+
+	@Configuration
+	public class AppConfig implements BaseConfig {
+
+	}
+----
+
 You can also declare your `@Bean` method with an interface (or base class)
 return type, as the following example shows:
 
@@ -8122,7 +8157,7 @@ default `(inferred)` mode.
 
 You may want to do that by default for a resource that you acquire with JNDI, as its
 lifecycle is managed outside the application. In particular, make sure to always do it
-for a `DataSource`, as it is known to be problematic on Java EE application servers.
+for a `DataSource`, as it is known to be problematic on Jakarta EE application servers.
 
 The following example shows how to prevent an automatic destruction callback for a
 `DataSource`:
@@ -10176,7 +10211,7 @@ interfaces to provide additional functionality in a more application
 framework-oriented style. Many people use the `ApplicationContext` in a completely
 declarative fashion, not even creating it programmatically, but instead relying on
 support classes such as `ContextLoader` to automatically instantiate an
-`ApplicationContext` as part of the normal startup process of a Java EE web application.
+`ApplicationContext` as part of the normal startup process of a Jakarta EE web application.
 
 To enhance `BeanFactory` functionality in a more framework-oriented style, the context
 package also provides the following functionality:
@@ -11069,15 +11104,15 @@ Examples are `/WEB-INF/{asterisk}Context.xml` (for all files with names that end
 
 
 [[context-deploy-rar]]
-=== Deploying a Spring `ApplicationContext` as a Java EE RAR File
+=== Deploying a Spring `ApplicationContext` as a Jakarta EE RAR File
 
 It is possible to deploy a Spring `ApplicationContext` as a RAR file, encapsulating the
-context and all of its required bean classes and library JARs in a Java EE RAR deployment
+context and all of its required bean classes and library JARs in a Jakarta EE RAR deployment
 unit. This is the equivalent of bootstrapping a stand-alone `ApplicationContext` (only hosted
-in Java EE environment) being able to access the Java EE servers facilities. RAR deployment
+in Jakarta EE environment) being able to access the Jakarta EE servers facilities. RAR deployment
 is a more natural alternative to a scenario of deploying a headless WAR file -- in effect,
 a WAR file without any HTTP entry points that is used only for bootstrapping a Spring
-`ApplicationContext` in a Java EE environment.
+`ApplicationContext` in a Jakarta EE environment.
 
 RAR deployment is ideal for application contexts that do not need HTTP entry points but
 rather consist only of message endpoints and scheduled jobs. Beans in such a context can
@@ -11091,7 +11126,7 @@ See the javadoc of the
 {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[`SpringContextResourceAdapter`]
 class for the configuration details involved in RAR deployment.
 
-For a simple deployment of a Spring ApplicationContext as a Java EE RAR file:
+For a simple deployment of a Spring ApplicationContext as a Jakarta EE RAR file:
 
 . Package
 all application classes into a RAR file (which is a standard JAR file with a different

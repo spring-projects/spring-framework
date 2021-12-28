@@ -180,9 +180,8 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		assertThat(value).isEqualTo("AaBbCc");
 	}
 
-	@Test // gh-24582
+	@Test  // gh-24582
 	public void writeMultipartRelated() {
-
 		MediaType mediaType = MediaType.parseMediaType("multipart/related;type=foo");
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
@@ -297,9 +296,9 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		MediaType contentType = response.getHeaders().getContentType();
 		assertThat(contentType.getParameter("boundary")).as("No boundary found").isNotNull();
 
-		// see if Synchronoss NIO Multipart can read what we wrote
-		SynchronossPartHttpMessageReader synchronossReader = new SynchronossPartHttpMessageReader();
-		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(synchronossReader);
+		// see if we can read what we wrote
+		DefaultPartHttpMessageReader partReader = new DefaultPartHttpMessageReader();
+		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(partReader);
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.contentType(MediaType.parseMediaType(contentType.toString()))

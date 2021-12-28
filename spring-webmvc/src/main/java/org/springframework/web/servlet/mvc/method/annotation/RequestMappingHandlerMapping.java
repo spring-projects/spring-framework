@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -187,7 +187,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	@SuppressWarnings("deprecation")
 	public void afterPropertiesSet() {
-
 		this.config = new RequestMappingInfo.BuilderConfiguration();
 		this.config.setTrailingSlashMatch(useTrailingSlashMatch());
 		this.config.setContentNegotiationManager(getContentNegotiationManager());
@@ -246,6 +245,19 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return this.config.getFileExtensions();
 	}
 
+	/**
+	 * Obtain a {@link RequestMappingInfo.BuilderConfiguration} that can reflects
+	 * the internal configuration of this {@code HandlerMapping} and can be used
+	 * to set {@link RequestMappingInfo.Builder#options(RequestMappingInfo.BuilderConfiguration)}.
+	 * <p>This is useful for programmatic registration of request mappings via
+	 * {@link #registerHandlerMethod(Object, Method, RequestMappingInfo)}.
+	 * @return the builder configuration that reflects the internal state
+	 * @since 5.3.14
+	 */
+	public RequestMappingInfo.BuilderConfiguration getBuilderConfiguration() {
+		return this.config;
+	}
+
 
 	/**
 	 * {@inheritDoc}
@@ -254,8 +266,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
-		return (AnnotatedElementUtils.hasAnnotation(beanType, Controller.class) ||
-				AnnotatedElementUtils.hasAnnotation(beanType, RequestMapping.class));
+		return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
 	}
 
 	/**
@@ -390,6 +401,19 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		updateConsumesCondition(mapping, method);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p><strong>Note:</strong> To create the {@link RequestMappingInfo},
+	 * please use {@link #getBuilderConfiguration()} and set the options on
+	 * {@link RequestMappingInfo.Builder#options(RequestMappingInfo.BuilderConfiguration)}
+	 * to match how this {@code HandlerMapping} is configured. This
+	 * is important for example to ensure use of
+	 * {@link org.springframework.web.util.pattern.PathPattern} or
+	 * {@link org.springframework.util.PathMatcher} based matching.
+	 * @param handler the bean name of the handler or the handler instance
+	 * @param method the method to register
+	 * @param mapping the mapping conditions associated with the handler method
+	 */
 	@Override
 	protected void registerHandlerMethod(Object handler, Method method, RequestMappingInfo mapping) {
 		super.registerHandlerMethod(handler, method, mapping);

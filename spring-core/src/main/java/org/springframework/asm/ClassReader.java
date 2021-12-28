@@ -194,7 +194,7 @@ public class ClassReader {
     this.b = classFileBuffer;
     // Check the class' major_version. This field is after the magic and minor_version fields, which
     // use 4 and 2 bytes respectively.
-    if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V18) {
+    if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V19) {
       throw new IllegalArgumentException(
           "Unsupported class file major version " + readShort(classFileOffset + 6));
     }
@@ -324,7 +324,9 @@ public class ClassReader {
       }
       outputStream.flush();
       if (readCount == 1) {
-        return data;
+        // SPRING PATCH: some misbehaving InputStreams return -1 but still write to buffer (gh-27429)
+        // return data;
+        // END OF PATCH
       }
       return outputStream.toByteArray();
     } finally {

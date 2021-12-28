@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 /**
  * The {@code <password>} tag renders an HTML 'input' tag with type 'password'

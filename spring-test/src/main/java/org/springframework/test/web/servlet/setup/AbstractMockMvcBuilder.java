@@ -20,8 +20,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.Filter;
-import javax.servlet.ServletContext;
+import jakarta.servlet.Filter;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockServletConfig;
@@ -56,7 +56,7 @@ import org.springframework.web.context.WebApplicationContext;
 public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>>
 		extends MockMvcBuilderSupport implements ConfigurableMockMvcBuilder<B> {
 
-	private List<Filter> filters = new ArrayList<>();
+	private final List<Filter> filters = new ArrayList<>();
 
 	@Nullable
 	private RequestBuilder defaultRequestBuilder;

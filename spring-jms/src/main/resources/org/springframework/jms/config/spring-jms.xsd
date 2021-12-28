@@ -151,7 +151,7 @@
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
-							<tool:expected-type type="javax.jms.ConnectionFactory"/>
+							<tool:expected-type type="jakarta.jms.ConnectionFactory"/>
 						</tool:annotation>
 					</xsd:appinfo>
 				</xsd:annotation>
@@ -178,7 +178,7 @@
 	A reference to the DestinationResolver strategy for resolving destination names.
 	Default is a DynamicDestinationResolver, using the JMS provider's queue/topic
 	name resolution. Alternatively, specify a reference to a JndiDestinationResolver
-	(typically in a Java EE environment).
+	(typically in a Jakarta EE environment).
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
@@ -260,7 +260,7 @@
 	The cache level for JMS resources: "none", "connection", "session", "consumer"
 	or "auto". By default ("auto"), the cache level will effectively be "consumer",
 	unless an external transaction manager has been specified - in which case the
-	effective default will be "none" (assuming Java EE-style transaction management
+	effective default will be "none" (assuming Jakarta EE-style transaction management
 	where the given ConnectionFactory is an XA-aware pool).
 					]]></xsd:documentation>
 				</xsd:annotation>
@@ -411,7 +411,7 @@
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
-							<tool:expected-type type="javax.resource.spi.ResourceAdapter"/>
+							<tool:expected-type type="jakarta.resource.spi.ResourceAdapter"/>
 						</tool:annotation>
 					</xsd:appinfo>
 				</xsd:annotation>
@@ -435,7 +435,7 @@
 					<xsd:documentation><![CDATA[
 	A reference to the DestinationResolver strategy for resolving destination names.
 	Default is to pass in the destination name Strings into the JCA ActivationSpec as-is.
-	Alternatively, specify a reference to a JndiDestinationResolver (typically in a Java EE
+	Alternatively, specify a reference to a JndiDestinationResolver (typically in a Jakarta EE
 	environment, in particular if the server insists on receiving Destination objects).
 					]]></xsd:documentation>
 					<xsd:appinfo>
@@ -516,7 +516,7 @@
 			<xsd:attribute name="transaction-manager" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	A reference to the Spring JtaTransactionManager or [javax.transaction.TransactionManager],
+	A reference to the Spring JtaTransactionManager or [jakarta.transaction.TransactionManager],
 	for kicking off an XA transaction for each incoming message.
 	If not specified, native acknowledging will be used (see "acknowledge" attribute).
 					]]></xsd:documentation>

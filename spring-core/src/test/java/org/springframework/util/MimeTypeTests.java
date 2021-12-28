@@ -402,6 +402,69 @@ class MimeTypeTests {
 		assertThat(m2.compareTo(m1) != 0).as("Invalid comparison result").isTrue();
 	}
 
+	@Test
+	void isMoreSpecific() {
+		MimeType audioBasic = new MimeType("audio", "basic");
+		MimeType audio = new MimeType("audio");
+		MimeType audioWave = new MimeType("audio", "wave");
+		MimeType audioBasicLevel = new MimeType("audio", "basic", singletonMap("level", "1"));
+
+		assertThat(audioBasic.isMoreSpecific(audioBasicLevel)).isFalse();
+		assertThat(audioBasicLevel.isMoreSpecific(audioBasic)).isTrue();
+
+		assertThat(audio.isMoreSpecific(MimeTypeUtils.ALL)).isTrue();
+		assertThat(MimeTypeUtils.ALL.isMoreSpecific(audio)).isFalse();
+
+		assertThat(audioBasicLevel.isMoreSpecific(audioBasic)).isTrue();
+		assertThat(audioBasic.isMoreSpecific(audioBasicLevel)).isFalse();
+
+		assertThat(audioBasic.isMoreSpecific(MimeTypeUtils.TEXT_HTML)).isFalse();
+		assertThat(audioBasic.isMoreSpecific(audioWave)).isFalse();
+		assertThat(audioBasicLevel.isMoreSpecific(MimeTypeUtils.TEXT_HTML)).isFalse();
+	}
+
+	@Test
+	void isLessSpecific() {
+		MimeType audioBasic = new MimeType("audio", "basic");
+		MimeType audio = new MimeType("audio");
+		MimeType audioWave = new MimeType("audio", "wave");
+		MimeType audioBasicLevel = new MimeType("audio", "basic", singletonMap("level", "1"));
+
+		assertThat(audioBasic.isLessSpecific(audioBasicLevel)).isTrue();
+		assertThat(audioBasicLevel.isLessSpecific(audioBasic)).isFalse();
+
+		assertThat(audio.isLessSpecific(MimeTypeUtils.ALL)).isFalse();
+		assertThat(MimeTypeUtils.ALL.isLessSpecific(audio)).isTrue();
+
+		assertThat(audioBasicLevel.isLessSpecific(audioBasic)).isFalse();
+		assertThat(audioBasic.isLessSpecific(audioBasicLevel)).isTrue();
+
+		assertThat(audioBasic.isLessSpecific(MimeTypeUtils.TEXT_HTML)).isFalse();
+		assertThat(audioBasic.isLessSpecific(audioWave)).isFalse();
+		assertThat(audioBasicLevel.isLessSpecific(MimeTypeUtils.TEXT_HTML)).isFalse();
+	}
+
+	@Test
+	void sortBySpecificity() {
+		MimeType audioBasic = new MimeType("audio", "basic");
+		MimeType audio = new MimeType("audio");
+		MimeType audioWave = new MimeType("audio", "wave");
+		MimeType audioBasicLevel = new MimeType("audio", "basic", singletonMap("level", "1"));
+
+		List<MimeType> mimeTypes = new ArrayList<>(List.of(MimeTypeUtils.ALL, audio, audioWave, audioBasic,
+				audioBasicLevel));
+		MimeTypeUtils.sortBySpecificity(mimeTypes);
+
+		assertThat(mimeTypes).containsExactly(audioWave, audioBasicLevel, audioBasic, audio, MimeTypeUtils.ALL);
+	}
+
+	@Test
+	void bubbleSort() {
+		List<Integer> list = new ArrayList<>(List.of(10, 9, 8, 7, 6, 5, 4, 3, 2, 1));
+		MimeTypeUtils.bubbleSort(list, (i1, i2) -> i1 > i2);
+		assertThat(list).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+	}
+
 	@Test  // SPR-13157
 	void equalsIsCaseInsensitiveForCharsets() {
 		MimeType m1 = new MimeType("text", "plain", singletonMap("charset", "UTF-8"));

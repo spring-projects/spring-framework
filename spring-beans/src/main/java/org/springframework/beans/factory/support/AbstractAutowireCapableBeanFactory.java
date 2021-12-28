@@ -303,9 +303,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	@Override
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
 		super.copyConfigurationFrom(otherFactory);
-		if (otherFactory instanceof AbstractAutowireCapableBeanFactory) {
-			AbstractAutowireCapableBeanFactory otherAutowireFactory =
-					(AbstractAutowireCapableBeanFactory) otherFactory;
+		if (otherFactory instanceof AbstractAutowireCapableBeanFactory otherAutowireFactory) {
 			this.instantiationStrategy = otherAutowireFactory.instantiationStrategy;
 			this.allowCircularReferences = otherAutowireFactory.allowCircularReferences;
 			this.ignoredDependencyTypes.addAll(otherAutowireFactory.ignoredDependencyTypes);
@@ -344,8 +342,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		markBeanAsCreated(beanName);
 		BeanDefinition mbd = getMergedBeanDefinition(beanName);
 		RootBeanDefinition bd = null;
-		if (mbd instanceof RootBeanDefinition) {
-			RootBeanDefinition rbd = (RootBeanDefinition) mbd;
+		if (mbd instanceof RootBeanDefinition rbd) {
 			bd = (rbd.isPrototype() ? rbd : rbd.cloneBeanDefinition());
 		}
 		if (bd == null) {
@@ -940,24 +937,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * This implementation attempts to query the FactoryBean's generic parameter metadata
-	 * if present to determine the object type. If not present, i.e. the FactoryBean is
-	 * declared as a raw type, checks the FactoryBean's {@code getObjectType} method
-	 * on a plain instance of the FactoryBean, without bean properties applied yet.
-	 * If this doesn't return a type yet, a full creation of the FactoryBean is
-	 * used as fallback (through delegation to the superclass's implementation).
-	 * <p>The shortcut check for a FactoryBean is only applied in case of a singleton
-	 * FactoryBean. If the FactoryBean instance itself is not kept as singleton,
-	 * it will be fully created to check the type of its exposed object.
-	 */
-	@Override
-	@Deprecated
-	@Nullable
-	protected Class<?> getTypeForFactoryBean(String beanName, RootBeanDefinition mbd) {
-		return getTypeForFactoryBean(beanName, mbd, true).resolve();
-	}
-
-	/**
 	 * Obtain a reference for early access to the specified bean,
 	 * typically for the purpose of resolving a circular reference.
 	 * @param beanName the name of the bean (for error handling purposes)
@@ -1321,7 +1300,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param beanName the name of the bean
 	 * @param mbd the bean definition for the bean
 	 * @param explicitArgs argument values passed in programmatically via the getBean method,
-	 * or {@code null} if none (-> use constructor argument values from bean definition)
+	 * or {@code null} if none (implying the use of constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 * @see #getBean(String, Object[])
 	 */
@@ -1342,7 +1321,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mbd the bean definition for the bean
 	 * @param ctors the chosen candidate constructors
 	 * @param explicitArgs argument values passed in programmatically via the getBean method,
-	 * or {@code null} if none (-> use constructor argument values from bean definition)
+	 * or {@code null} if none (implying the use of constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
 	protected BeanWrapper autowireConstructor(
@@ -1401,7 +1380,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		boolean hasInstAwareBpps = hasInstantiationAwareBeanPostProcessors();
 		boolean needsDepCheck = (mbd.getDependencyCheck() != AbstractBeanDefinition.DEPENDENCY_CHECK_NONE);
 
-		PropertyDescriptor[] filteredPds = null;
 		if (hasInstAwareBpps) {
 			if (pvs == null) {
 				pvs = mbd.getPropertyValues();
@@ -1409,21 +1387,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			for (InstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().instantiationAware) {
 				PropertyValues pvsToUse = bp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName);
 				if (pvsToUse == null) {
-					if (filteredPds == null) {
-						filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
-					}
-					pvsToUse = bp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
-					if (pvsToUse == null) {
-						return;
-					}
+					return;
 				}
 				pvs = pvsToUse;
 			}
 		}
 		if (needsDepCheck) {
-			if (filteredPds == null) {
-				filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
-			}
+			PropertyDescriptor[] filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
 			checkDependencies(beanName, mbd, filteredPds, pvs);
 		}
 

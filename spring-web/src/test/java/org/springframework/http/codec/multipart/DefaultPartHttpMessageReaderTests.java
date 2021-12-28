@@ -270,6 +270,31 @@ public class DefaultPartHttpMessageReaderTests  {
 		latch.await();
 	}
 
+	// gh-27612
+	@Test
+	public void exceedHeaderLimit() throws InterruptedException {
+		Flux<DataBuffer> body = DataBufferUtils
+				.readByteChannel((new ClassPathResource("files.multipart", getClass()))::readableChannel, bufferFactory, 282);
+
+		MediaType contentType = new MediaType("multipart", "form-data", singletonMap("boundary", "----WebKitFormBoundaryG8fJ50opQOML0oGD"));
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(contentType)
+				.body(body);
+
+		DefaultPartHttpMessageReader reader = new DefaultPartHttpMessageReader();
+
+		reader.setMaxHeadersSize(230);
+
+		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
+
+		CountDownLatch latch = new CountDownLatch(2);
+		StepVerifier.create(result)
+				.consumeNextWith(part -> testPart(part, null, LOREM_IPSUM, latch))
+				.consumeNextWith(part -> testPart(part, null, MUSPI_MEROL, latch))
+				.verifyComplete();
+
+		latch.await();
+	}
 
 	private void testBrowser(DefaultPartHttpMessageReader reader, Resource resource, String boundary)
 			throws InterruptedException {

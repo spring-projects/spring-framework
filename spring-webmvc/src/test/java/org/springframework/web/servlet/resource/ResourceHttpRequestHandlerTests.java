@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -290,7 +289,6 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test  // SPR-14368
 	public void getResourceWithMediaTypeResolvedThroughServletContext() throws Exception {
-
 		MockServletContext servletContext = new MockServletContext() {
 			@Override
 			public String getMimeType(String filePath) {
@@ -312,9 +310,27 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");
 	}
 
+	@Test  // gh-27538, gh-27624
+	public void filterNonExistingLocations() throws Exception {
+		List<Resource> inputLocations = Arrays.asList(
+				new ClassPathResource("test/", getClass()),
+				new ClassPathResource("testalternatepath/", getClass()),
+				new ClassPathResource("nosuchpath/", getClass()));
+
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.setServletContext(new MockServletContext());
+		handler.setLocations(inputLocations);
+		handler.setOptimizeLocations(true);
+		handler.afterPropertiesSet();
+
+		List<Resource> actual = handler.getLocations();
+		assertThat(actual).hasSize(2);
+		assertThat(actual.get(0).getURL().toString()).endsWith("test/");
+		assertThat(actual.get(1).getURL().toString()).endsWith("testalternatepath/");
+	}
+
 	@Test
 	public void testInvalidPath() throws Exception {
-
 		// Use mock ResourceResolver: i.e. we're only testing upfront validations...
 
 		Resource resource = mock(Resource.class);
@@ -660,7 +676,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(ranges[11]).isEqualTo("t.");
 	}
 
-	@Test // gh-25976
+	@Test  // gh-25976
 	public void partialContentByteRangeWithEncodedResource(GzipSupport.GzippedFiles gzippedFiles) throws Exception {
 		String path = "js/foo.js";
 		gzippedFiles.create(path);
@@ -689,7 +705,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.getHeaderValues("Vary")).containsExactly("Accept-Encoding");
 	}
 
-	@Test // gh-25976
+	@Test  // gh-25976
 	public void partialContentWithHttpHead() throws Exception {
 		this.request.setMethod("HEAD");
 		this.request.addHeader("Range", "bytes=0-1");

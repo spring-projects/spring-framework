@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import org.springframework.web.util.UriUtils;
  */
 public class RedirectView extends AbstractUrlBasedView {
 
-	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)}");
+	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 
 	private HttpStatus statusCode = HttpStatus.SEE_OTHER;
@@ -296,7 +296,7 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	/**
 	 * Whether the given targetUrl has a host that is a "foreign" system in which
-	 * case {@link javax.servlet.http.HttpServletResponse#encodeRedirectURL} will not be applied.
+	 * case {@link jakarta.servlet.http.HttpServletResponse#encodeRedirectURL} will not be applied.
 	 * This method returns {@code true} if the {@link #setHosts(String[])}
 	 * property is configured and the target URL has a host that does not match.
 	 * @param targetUrl the target redirect URL

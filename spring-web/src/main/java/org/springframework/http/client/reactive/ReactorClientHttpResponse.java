@@ -105,8 +105,8 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 		if (reactorNettyRequestChannelOperationsIdPresent) {
 			id = ChannelOperationsIdHelper.getId(this.response);
 		}
-		if (id == null && this.response instanceof Connection) {
-			id = ((Connection) this.response).channel().id().asShortText();
+		if (id == null && this.response instanceof Connection connection) {
+			id = connection.channel().id().asShortText();
 		}
 		return (id != null ? id : ObjectUtils.getIdentityHexString(this));
 	}
@@ -163,8 +163,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Nullable
 	private static String getSameSite(Cookie cookie) {
-		if (cookie instanceof DefaultCookie) {
-			DefaultCookie defaultCookie = (DefaultCookie) cookie;
+		if (cookie instanceof DefaultCookie defaultCookie) {
 			if (defaultCookie.sameSite() != null) {
 				return defaultCookie.sameSite().name();
 			}
@@ -206,10 +205,8 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 		@Nullable
 		public static String getId(HttpClientResponse response) {
-			if (response instanceof reactor.netty.ChannelOperationsId) {
-				return (logger.isDebugEnabled() ?
-						((reactor.netty.ChannelOperationsId) response).asLongText() :
-						((reactor.netty.ChannelOperationsId) response).asShortText());
+			if (response instanceof reactor.netty.ChannelOperationsId id) {
+				return (logger.isDebugEnabled() ? id.asLongText() : id.asShortText());
 			}
 			return null;
 		}

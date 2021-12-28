@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;

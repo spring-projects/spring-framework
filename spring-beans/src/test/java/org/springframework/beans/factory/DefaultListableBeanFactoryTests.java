@@ -36,8 +36,7 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.annotation.Priority;
-
+import jakarta.annotation.Priority;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;

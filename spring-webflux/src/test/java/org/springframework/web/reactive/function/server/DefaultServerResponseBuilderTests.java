@@ -21,7 +21,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -198,7 +197,7 @@ public class DefaultServerResponseBuilderTests {
 	@Test
 	public void allow() {
 		Mono<ServerResponse> result = ServerResponse.ok().allow(HttpMethod.GET).build();
-		Set<HttpMethod> expected = EnumSet.of(HttpMethod.GET);
+		Set<HttpMethod> expected = Set.of(HttpMethod.GET);
 		StepVerifier.create(result)
 				.expectNextMatches(response -> expected.equals(response.headers().getAllow()))
 				.expectComplete()
@@ -318,6 +317,23 @@ public class DefaultServerResponseBuilderTests {
 
 
 		assertThat(serverResponse.block().cookies().isEmpty()).isFalse();
+	}
+
+	@Test
+	public void overwriteHeaders() {
+		ServerResponse serverResponse =
+				ServerResponse.ok().headers(headers -> headers.set("Foo", "Bar")).build().block();
+		assertThat(serverResponse).isNotNull();
+
+		MockServerWebExchange mockExchange = MockServerWebExchange
+				.builder(MockServerHttpRequest.get("https://example.org"))
+				.build();
+		MockServerHttpResponse response = mockExchange.getResponse();
+		response.getHeaders().set("Foo", "Baz");
+
+		serverResponse.writeTo(mockExchange, EMPTY_CONTEXT).block();
+
+		assertThat(response.getHeaders().getFirst("Foo")).isEqualTo("Bar");
 	}
 
 

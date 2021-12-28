@@ -195,7 +195,7 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	@Override
 	public Mono<EntityResponse<T>> build() {
-		return Mono.just(new DefaultEntityResponse<T>(
+		return Mono.just(new DefaultEntityResponse<>(
 				this.status, this.headers, this.cookies, this.entity, this.inserter, this.hints));
 	}
 

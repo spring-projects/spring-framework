@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,15 @@ package org.springframework.web.reactive.function.client;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -31,6 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,9 +67,12 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
+import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.util.SocketUtils;
 import org.springframework.web.reactive.function.BodyExtractors;
+import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,7 +91,7 @@ class WebClientIntegrationTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "[{index}] webClient [{0}]")
+	@ParameterizedTest(name = "[{index}] {displayName} [{0}]")
 	@MethodSource("arguments")
 	@interface ParameterizedWebClientTest {
 	}
@@ -91,6 +99,7 @@ class WebClientIntegrationTests {
 	static Stream<ClientHttpConnector> arguments() {
 		return Stream.of(
 				new ReactorClientHttpConnector(),
+				new JdkClientHttpConnector(),
 				new JettyClientHttpConnector(),
 				new HttpComponentsClientHttpConnector()
 		);
@@ -113,7 +122,9 @@ class WebClientIntegrationTests {
 
 	@AfterEach
 	void shutdown() throws IOException {
-		this.server.shutdown();
+		if (server != null) {
+			this.server.shutdown();
+		}
 	}
 
 
@@ -1209,6 +1220,65 @@ class WebClientIntegrationTests {
 				.verify();
 	}
 
+	@ParameterizedWebClientTest
+	void malformedResponseChunksOnBodilessEntity(ClientHttpConnector connector) {
+		Mono<?> result = doMalformedChunkedResponseTest(connector, ResponseSpec::toBodilessEntity);
+		StepVerifier.create(result)
+				.expectErrorSatisfies(throwable -> {
+					assertThat(throwable).isInstanceOf(WebClientException.class);
+					WebClientException ex = (WebClientException) throwable;
+					assertThat(ex.getCause()).isInstanceOf(IOException.class);
+				})
+				.verify();
+	}
+
+	@ParameterizedWebClientTest
+	void malformedResponseChunksOnEntityWithBody(ClientHttpConnector connector) {
+		Mono<?> result = doMalformedChunkedResponseTest(connector, spec -> spec.toEntity(String.class));
+		StepVerifier.create(result)
+				.expectErrorSatisfies(throwable -> {
+					assertThat(throwable).isInstanceOf(WebClientException.class);
+					WebClientException ex = (WebClientException) throwable;
+					assertThat(ex.getCause()).isInstanceOf(IOException.class);
+				})
+				.verify();
+	}
+
+	private <T> Mono<T> doMalformedChunkedResponseTest(
+			ClientHttpConnector connector, Function<ResponseSpec, Mono<T>> handler) {
+
+		int port = SocketUtils.findAvailableTcpPort();
+
+		Thread serverThread = new Thread(() -> {
+			// No way to simulate a malformed chunked response through MockWebServer.
+			try (ServerSocket serverSocket = new ServerSocket(port)) {
+				Socket socket = serverSocket.accept();
+				InputStream is = socket.getInputStream();
+
+				//noinspection ResultOfMethodCallIgnored
+				is.read(new byte[4096]);
+
+				OutputStream os = socket.getOutputStream();
+				os.write("HTTP/1.1 200 OK\r\n".getBytes(StandardCharsets.UTF_8));
+				os.write("Transfer-Encoding: chunked\r\n".getBytes(StandardCharsets.UTF_8));
+				os.write("\r\n".getBytes(StandardCharsets.UTF_8));
+				os.write("lskdu018973t09sylgasjkfg1][]'./.sdlv".getBytes(StandardCharsets.UTF_8));
+				socket.close();
+			}
+			catch (IOException ex) {
+				throw new RuntimeException(ex);
+			}
+		});
+
+		serverThread.start();
+
+		WebClient client = WebClient.builder()
+				.clientConnector(connector)
+				.baseUrl("http://localhost:" + port)
+				.build();
+
+		return handler.apply(client.post().retrieve());
+	}
 
 	private void prepareResponse(Consumer<MockResponse> consumer) {
 		MockResponse response = new MockResponse();
@@ -1252,5 +1322,4 @@ class WebClientIntegrationTests {
 			this.containerValue = containerValue;
 		}
 	}
-
 }

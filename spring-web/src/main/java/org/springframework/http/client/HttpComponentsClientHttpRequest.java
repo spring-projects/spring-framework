@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,12 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 
 
 	@Override
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.httpRequest.getMethod());
+	}
+
+	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.httpRequest.getMethod();
 	}
@@ -79,8 +85,7 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
 		addHeaders(this.httpRequest, headers);
 
-		if (this.httpRequest instanceof HttpEntityEnclosingRequest) {
-			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) this.httpRequest;
+		if (this.httpRequest instanceof HttpEntityEnclosingRequest entityEnclosingRequest) {
 			HttpEntity requestEntity = new ByteArrayEntity(bufferedOutput);
 			entityEnclosingRequest.setEntity(requestEntity);
 		}

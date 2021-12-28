@@ -21,7 +21,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * Thrown by {@link MessageConverter} implementations when the conversion
- * of an object to/from a {@link javax.jms.Message} fails.
+ * of an object to/from a {@link jakarta.jms.Message} fails.
  *
  * @author Mark Pollack
  * @since 1.1

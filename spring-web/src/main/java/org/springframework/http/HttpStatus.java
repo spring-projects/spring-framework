@@ -285,21 +285,21 @@ public enum HttpStatus {
 	I_AM_A_TEAPOT(418, Series.CLIENT_ERROR, "I'm a teapot"),
 	/**
 	 * @deprecated See
-	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&amp;url2=draft-ietf-webdav-protocol-06.txt">
 	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
 	INSUFFICIENT_SPACE_ON_RESOURCE(419, Series.CLIENT_ERROR, "Insufficient Space On Resource"),
 	/**
 	 * @deprecated See
-	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&amp;url2=draft-ietf-webdav-protocol-06.txt">
 	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
 	METHOD_FAILURE(420, Series.CLIENT_ERROR, "Method Failure"),
 	/**
 	 * @deprecated
-	 * See <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 * See <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&amp;url2=draft-ietf-webdav-protocol-06.txt">
 	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated

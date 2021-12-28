@@ -14,21 +14,21 @@ dependencies {
 	optional(project(":spring-webflux"))
 	optional(project(":spring-webmvc"))
 	optional(project(":spring-websocket"))
-	optional("javax.activation:javax.activation-api")
-	optional("javax.el:javax.el-api")
-	optional("javax.inject:javax.inject")
-	optional("javax.servlet:javax.servlet-api")
-	optional("javax.servlet.jsp:javax.servlet.jsp-api")
-	optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api")
-	optional("javax.xml.bind:jaxb-api")
-	optional("javax.websocket:javax.websocket-api")
+	optional("jakarta.activation:jakarta.activation-api")
+	optional("jakarta.el:jakarta.el-api")
+	optional("jakarta.inject:jakarta.inject-api")
+	optional("jakarta.servlet:jakarta.servlet-api")
+	optional("jakarta.servlet.jsp:jakarta.servlet.jsp-api")
+	optional("jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api")
+	optional("jakarta.xml.bind:jakarta.xml.bind-api")
+	optional("jakarta.websocket:jakarta.websocket-api")
 	optional("junit:junit")
+	optional("org.apache.tomcat.embed:tomcat-embed-core")
 	optional("org.junit.jupiter:junit-jupiter-api")
 	optional("org.testng:testng")
 	optional("org.aspectj:aspectjweaver")
 	optional("org.codehaus.groovy:groovy")
 	optional("org.hamcrest:hamcrest")
-	optional("org.apache.taglibs:taglibs-standard-jstlel")
 	optional("net.sourceforge.htmlunit:htmlunit")
 	optional("org.seleniumhq.selenium:htmlunit-driver") {
 		exclude group: "net.bytebuddy", module: "byte-buddy"
@@ -39,7 +39,6 @@ dependencies {
 	optional("org.xmlunit:xmlunit-matchers")
 	optional("org.skyscreamer:jsonassert")
 	optional("com.jayway.jsonpath:json-path")
-	optional("commons-fileupload:commons-fileupload")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("io.projectreactor:reactor-test")
@@ -52,24 +51,18 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-tx")))
 	testImplementation(testFixtures(project(":spring-web")))
-	testImplementation("javax.annotation:javax.annotation-api")
+	testImplementation("jakarta.annotation:jakarta.annotation-api")
 	testImplementation("javax.cache:cache-api")
-	testImplementation("javax.ejb:javax.ejb-api")
-	testImplementation("javax.interceptor:javax.interceptor-api")
-	testImplementation("javax.mail:javax.mail-api")
-	testImplementation("org.hibernate:hibernate-core")
+	testImplementation("jakarta.ejb:jakarta.ejb-api")
+	testImplementation("jakarta.interceptor:jakarta.interceptor-api")
+	testImplementation("jakarta.mail:jakarta.mail-api")
+	testImplementation("org.hibernate:hibernate-core-jakarta")
 	testImplementation("org.hibernate:hibernate-validator")
-	testImplementation("javax.validation:validation-api")
-	testImplementation("org.junit.platform:junit-platform-runner") {
-		exclude group: "junit", module: "junit"
-	}
+	testImplementation("jakarta.validation:jakarta.validation-api")
 	testImplementation("org.junit.platform:junit-platform-testkit")
 	testImplementation("com.fasterxml.jackson.core:jackson-databind")
 	testImplementation("com.thoughtworks.xstream:xstream")
 	testImplementation("com.rometools:rome")
-	testImplementation("org.apache.tiles:tiles-api")
-	testImplementation("org.apache.tiles:tiles-core")
-	testImplementation("org.apache.tiles:tiles-servlet")
 	testImplementation("org.hsqldb:hsqldb")
 	testImplementation("org.apache.httpcomponents:httpclient")
 	testImplementation("io.projectreactor.netty:reactor-netty-http")
@@ -77,43 +70,33 @@ dependencies {
 	testRuntimeOnly("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "junit", module: "junit"
 	}
-	testRuntimeOnly("org.glassfish:javax.el")
+	testRuntimeOnly("org.junit.support:testng-engine")
+	testRuntimeOnly("org.glassfish:jakarta.el")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 }
 
-task junit(type: Test) {
-	description = "Runs JUnit 4 and JUnit Jupiter tests."
+// Prevent xml-apis from being used so that the corresponding XML APIs from
+// the JDK's `java.xml` module are used instead. This allows spring-test to
+// build in Eclipse IDE which fails to compile if there is a split package
+// between a JDK system module and the unnamed module (for JARs on the
+// classpath).
+configurations.optional {
+	exclude group: "xml-apis", module: "xml-apis"
+}
+
+test {
+	description = "Runs JUnit 4, JUnit Jupiter, and TestNG tests."
 	useJUnitPlatform {
+		includeEngines "junit-vintage", "junit-jupiter", "testng"
 		excludeTags "failing-test-case"
 	}
+	// We use `include` instead of `filter.includeTestsMatching`, since
+	// the latter results in some tests being executed/reported
+	// multiple times.
 	include(["**/*Tests.class", "**/*Test.class"])
-	exclude(["**/testng/**/*.*"])
+	filter.excludeTestsMatching("*TestCase")
 	systemProperty("testGroups", project.properties.get("testGroups"))
 	// Java Util Logging for the JUnit Platform.
 	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
 }
-
-task testNG(type: Test) {
-	description = "Runs TestNG tests."
-	useTestNG()
-	include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
-	systemProperty("testGroups", project.properties.get("testGroups"))
-	// Show STD_OUT & STD_ERR of the test JVM(s) on the console:
-	// testLogging.showStandardStreams = true
-	// forkEvery 1
-}
-
-test {
-	description = "Runs all tests."
-	dependsOn junit, testNG
-	exclude(["**/*.*"])
-}
-
-task aggregateTestReports(type: TestReport) {
-	description = "Aggregates JUnit and TestNG test reports."
-	destinationDir = test.reports.html.outputLocation.get().getAsFile()
-	reportOn junit, testNG
-}
-
-check.dependsOn aggregateTestReports

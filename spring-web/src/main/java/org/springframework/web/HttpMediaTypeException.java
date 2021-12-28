@@ -19,7 +19,7 @@ package org.springframework.web;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.springframework.http.MediaType;
 

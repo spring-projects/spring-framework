@@ -16,11 +16,14 @@
 
 package org.springframework.format.datetime.standard;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.MonthDay;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
@@ -43,6 +46,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Kazuki Shimizu
  * @since 4.0
  * @see org.springframework.format.annotation.DateTimeFormat
  */
@@ -54,15 +58,17 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValu
 	static {
 		// Create the set of field types that may be annotated with @DateTimeFormat.
 		Set<Class<?>> fieldTypes = new HashSet<>(8);
+		fieldTypes.add(Instant.class);
 		fieldTypes.add(LocalDate.class);
 		fieldTypes.add(LocalTime.class);
 		fieldTypes.add(LocalDateTime.class);
 		fieldTypes.add(ZonedDateTime.class);
 		fieldTypes.add(OffsetDateTime.class);
 		fieldTypes.add(OffsetTime.class);
+		fieldTypes.add(YearMonth.class);
+		fieldTypes.add(MonthDay.class);
 		FIELD_TYPES = Collections.unmodifiableSet(fieldTypes);
 	}
-
 
 	@Override
 	public final Set<Class<?>> getFieldTypes() {

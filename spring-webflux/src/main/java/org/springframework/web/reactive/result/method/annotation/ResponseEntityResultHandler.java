@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Instant;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -51,7 +51,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ResponseEntityResultHandler extends AbstractMessageWriterResultHandler implements HandlerResultHandler {
 
-	private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
+	private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
 
 
 	/**
@@ -108,6 +108,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 
 	@Override
+	@SuppressWarnings("ConstantConditions")
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 
 		Mono<?> returnValueMono;
@@ -118,7 +119,9 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 		if (adapter != null) {
 			Assert.isTrue(!adapter.isMultiValue(), "Only a single ResponseEntity supported");
 			returnValueMono = Mono.from(adapter.toPublisher(result.getReturnValue()));
-			bodyParameter = actualParameter.nested().nested();
+			boolean isContinuation = (KotlinDetector.isSuspendingFunction(actualParameter.getMethod()) &&
+					!COROUTINES_FLOW_CLASS_NAME.equals(actualParameter.getParameterType().getName()));
+			bodyParameter = (isContinuation ? actualParameter.nested() : actualParameter.nested().nested());
 		}
 		else {
 			returnValueMono = Mono.justOrEmpty(result.getReturnValue());

@@ -19,6 +19,8 @@ package org.springframework.util.xml;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Transformer;
@@ -64,10 +66,12 @@ abstract class AbstractStaxXMLReaderTests {
 
 
 	@BeforeEach
-	@SuppressWarnings("deprecation")  // on JDK 9
 	void setUp() throws Exception {
 		inputFactory = XMLInputFactory.newInstance();
-		standardReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
+		SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+		saxParserFactory.setNamespaceAware(true);
+		SAXParser saxParser = saxParserFactory.newSAXParser();
+		standardReader = saxParser.getXMLReader();
 		standardContentHandler = mockContentHandler();
 		standardReader.setContentHandler(standardContentHandler);
 	}

@@ -203,7 +203,6 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 * Delegates to the configured {@link TestContextManager} to
 	 * {@linkplain TestContextManager#afterTestMethod(Object, Method, Throwable)
 	 * post-process} the test method after the actual test has executed.
-	 *
 	 * @param testMethod the test method which has just been executed on the
 	 * test instance
 	 * @throws Exception allows all exceptions to propagate

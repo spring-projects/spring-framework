@@ -16,8 +16,7 @@
 
 package org.springframework.test.context.junit4;
 
-import javax.annotation.Resource;
-
+import jakarta.annotation.Resource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

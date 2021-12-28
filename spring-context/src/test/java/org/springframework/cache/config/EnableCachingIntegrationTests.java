@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -84,6 +84,19 @@ public class EnableCachingIntegrationTests {
 	}
 
 	@Test
+	public void barServiceWithCacheableInterfaceCglib() {
+		this.context = new AnnotationConfigApplicationContext(BarConfigCglib.class);
+		BarService service = this.context.getBean(BarService.class);
+		Cache cache = getCache();
+
+		Object key = new Object();
+		assertCacheMiss(key, cache);
+
+		Object value = service.getSimple(key);
+		assertCacheHit(key, value, cache);
+	}
+
+	@Test
 	public void beanConditionOff() {
 		this.context = new AnnotationConfigApplicationContext(BeanConditionConfig.class);
 		FooService service = this.context.getBean(FooService.class);
@@ -124,7 +137,7 @@ public class EnableCachingIntegrationTests {
 
 
 	@Configuration
-	static class SharedConfig extends CachingConfigurerSupport {
+	static class SharedConfig implements CachingConfigurer {
 
 		@Override
 		@Bean
@@ -180,6 +193,36 @@ public class EnableCachingIntegrationTests {
 		@Override
 		@Cacheable(condition = "@bar.enabled")
 		public Object getWithCondition(Object key) {
+			return this.counter.getAndIncrement();
+		}
+	}
+
+
+	@Configuration
+	@Import(SharedConfig.class)
+	@EnableCaching(proxyTargetClass = true)
+	static class BarConfigCglib {
+
+		@Bean
+		public BarService barService() {
+			return new BarServiceImpl();
+		}
+	}
+
+
+	interface BarService {
+
+		@Cacheable(cacheNames = "testCache")
+		Object getSimple(Object key);
+	}
+
+
+	static class BarServiceImpl implements BarService {
+
+		private final AtomicLong counter = new AtomicLong();
+
+		@Override
+		public Object getSimple(Object key) {
 			return this.counter.getAndIncrement();
 		}
 	}

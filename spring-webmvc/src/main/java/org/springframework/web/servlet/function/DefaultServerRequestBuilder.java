@@ -33,13 +33,13 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.servlet.ReadListener;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -68,7 +68,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
-	private String methodName;
+	private HttpMethod method;
 
 	private URI uri;
 
@@ -90,7 +90,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		Assert.notNull(other, "ServerRequest must not be null");
 		this.servletRequest = other.servletRequest();
 		this.messageConverters = new ArrayList<>(other.messageConverters());
-		this.methodName = other.methodName();
+		this.method = other.method();
 		this.uri = other.uri();
 		headers(headers -> headers.addAll(other.headers().asHttpHeaders()));
 		cookies(cookies -> cookies.addAll(other.cookies()));
@@ -102,7 +102,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	@Override
 	public ServerRequest.Builder method(HttpMethod method) {
 		Assert.notNull(method, "HttpMethod must not be null");
-		this.methodName = method.name();
+		this.method = method;
 		return this;
 	}
 
@@ -188,14 +188,14 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest build() {
-		return new BuiltServerRequest(this.servletRequest, this.methodName, this.uri, this.headers, this.cookies,
+		return new BuiltServerRequest(this.servletRequest, this.method, this.uri, this.headers, this.cookies,
 				this.attributes, this.params, this.remoteAddress, this.body, this.messageConverters);
 	}
 
 
 	private static class BuiltServerRequest implements ServerRequest {
 
-		private final String methodName;
+		private final HttpMethod method;
 
 		private final URI uri;
 
@@ -216,13 +216,13 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		@Nullable
 		private final InetSocketAddress remoteAddress;
 
-		public BuiltServerRequest(HttpServletRequest servletRequest, String methodName, URI uri,
+		public BuiltServerRequest(HttpServletRequest servletRequest, HttpMethod method, URI uri,
 				HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
 				Map<String, Object> attributes, MultiValueMap<String, String> params,
 				@Nullable InetSocketAddress remoteAddress, byte[] body, List<HttpMessageConverter<?>> messageConverters) {
 
 			this.servletRequest = servletRequest;
-			this.methodName = methodName;
+			this.method = method;
 			this.uri = uri;
 			this.headers = new HttpHeaders(headers);
 			this.cookies = new LinkedMultiValueMap<>(cookies);
@@ -234,8 +234,14 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		}
 
 		@Override
+		public HttpMethod method() {
+			return this.method;
+		}
+
+		@Override
+		@Deprecated
 		public String methodName() {
-			return this.methodName;
+			return this.method.name();
 		}
 
 		@Override

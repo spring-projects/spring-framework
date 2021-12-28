@@ -18,11 +18,10 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
-import javax.servlet.ServletException;
-
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.ConversionNotSupportedException;
@@ -103,7 +102,7 @@ public class ResponseEntityExceptionHandlerTests {
 		Exception ex = new HttpRequestMethodNotSupportedException("GET", supported);
 
 		ResponseEntity<Object> responseEntity = testException(ex);
-		assertThat(responseEntity.getHeaders().getAllow()).isEqualTo(EnumSet.of(HttpMethod.POST, HttpMethod.DELETE));
+		assertThat(responseEntity.getHeaders().getAllow()).isEqualTo(Set.of(HttpMethod.POST, HttpMethod.DELETE));
 	}
 
 	@Test
@@ -287,7 +286,7 @@ public class ResponseEntityExceptionHandlerTests {
 
 			// SPR-9653
 			if (HttpStatus.INTERNAL_SERVER_ERROR.equals(responseEntity.getStatusCode())) {
-				assertThat(this.servletRequest.getAttribute("javax.servlet.error.exception")).isSameAs(ex);
+				assertThat(this.servletRequest.getAttribute("jakarta.servlet.error.exception")).isSameAs(ex);
 			}
 
 			this.defaultExceptionResolver.resolveException(this.servletRequest, this.servletResponse, null, ex);

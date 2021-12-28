@@ -63,7 +63,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 
 	private int maxInMemorySize = 256 * 1024;
 
-	private int maxHeadersSize = 8 * 1024;
+	private int maxHeadersSize = 10 * 1024;
 
 	private long maxDiskUsagePerPart = -1;
 

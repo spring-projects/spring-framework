@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -325,7 +325,6 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	 * that do not allow to check request origin (Iframe based transports) are
 	 * disabled. As a consequence, IE 6 to 9 are not supported when origins are
 	 * restricted.
-	 *
 	 * @since 4.1.2
 	 * @see #setAllowedOriginPatterns(Collection)
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
@@ -378,7 +377,8 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 		if (sockJsPath == null) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Expected SockJS path. Failing request: " + request.getURI());
+				logger.warn(LogFormatUtils.formatValue(
+						"Expected SockJS path. Failing request: " + request.getURI(), -1, true));
 			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
@@ -448,7 +448,8 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
 				if (pathSegments.length != 3) {
 					if (logger.isWarnEnabled()) {
-						logger.warn("Invalid SockJS path '" + sockJsPath + "' - required to have 3 path segments");
+						logger.warn(LogFormatUtils.formatValue("Invalid SockJS path '" + sockJsPath + "' - " +
+								"required to have 3 path segments", -1, true));
 					}
 					if (requestInfo != null) {
 						logger.debug("Ignoring transport request: " + requestInfo);

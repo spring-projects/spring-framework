@@ -16,7 +16,7 @@
 
 package org.springframework.web.util;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.PropertyPlaceholderHelper;

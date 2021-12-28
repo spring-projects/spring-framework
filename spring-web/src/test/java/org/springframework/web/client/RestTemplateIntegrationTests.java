@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.lang.annotation.Target;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -92,7 +91,6 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		return Stream.of(
 			new SimpleClientHttpRequestFactory(),
 			new HttpComponentsClientHttpRequestFactory(),
-			new org.springframework.http.client.Netty4ClientHttpRequestFactory(),
 			new OkHttp3ClientHttpRequestFactory()
 		);
 	}
@@ -276,7 +274,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		setUpClient(clientHttpRequestFactory);
 
 		Set<HttpMethod> allowed = template.optionsForAllow(new URI(baseUrl + "/get"));
-		assertThat(allowed).as("Invalid response").isEqualTo(EnumSet.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.TRACE));
+		assertThat(allowed).as("Invalid response").isEqualTo(Set.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.TRACE));
 	}
 
 	@ParameterizedRestTemplateTest

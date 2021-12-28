@@ -26,14 +26,13 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.AsyncListener;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import reactor.core.publisher.Flux;
 
@@ -42,6 +41,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -159,8 +159,13 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return (headers != null ? headers : headerValues);
 	}
 
+	@Override
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.request.getMethod());
+	}
 
 	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.request.getMethod();
 	}
@@ -203,12 +208,12 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Nullable
 	private String getSslSessionId() {
-		return (String) this.request.getAttribute("javax.servlet.request.ssl_session_id");
+		return (String) this.request.getAttribute("jakarta.servlet.request.ssl_session_id");
 	}
 
 	@Nullable
 	private X509Certificate[] getX509Certificates() {
-		String name = "javax.servlet.request.X509Certificate";
+		String name = "jakarta.servlet.request.X509Certificate";
 		return (X509Certificate[]) this.request.getAttribute(name);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,6 @@ import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kotlin.ranges.IntRange;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
@@ -263,10 +261,6 @@ class Jackson2ObjectMapperBuilderTests {
 	void wellKnownModules() throws JsonProcessingException, UnsupportedEncodingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
 
-		Long timestamp = 1322903730000L;
-		DateTime dateTime = new DateTime(timestamp, DateTimeZone.UTC);
-		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo(timestamp.toString());
-
 		Path file = Paths.get("foo");
 		assertThat(new String(objectMapper.writeValueAsBytes(file), "UTF-8").endsWith("foo\"")).isTrue();
 
@@ -276,41 +270,6 @@ class Jackson2ObjectMapperBuilderTests {
 		// Kotlin module
 		IntRange range = new IntRange(1, 3);
 		assertThat(new String(objectMapper.writeValueAsBytes(range), "UTF-8")).isEqualTo("{\"start\":1,\"end\":3}");
-	}
-
-	@Test  // SPR-12634
-	void customizeWellKnownModulesWithModule()
-			throws JsonProcessingException, UnsupportedEncodingException {
-
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
-				.modulesToInstall(new CustomIntegerModule())
-				.build();
-		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
-		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo("1322903730000");
-		assertThat(new String(objectMapper.writeValueAsBytes(4), "UTF-8")).contains("customid");
-	}
-
-	@Test  // SPR-12634
-	void customizeWellKnownModulesWithModuleClass()
-			throws JsonProcessingException, UnsupportedEncodingException {
-
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
-				.modulesToInstall(CustomIntegerModule.class)
-				.build();
-		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
-		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo("1322903730000");
-		assertThat(new String(objectMapper.writeValueAsBytes(4), "UTF-8")).contains("customid");
-	}
-
-	@Test  // SPR-12634
-	void customizeWellKnownModulesWithSerializer()
-			throws JsonProcessingException, UnsupportedEncodingException {
-
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
-				.serializerByType(Integer.class, new CustomIntegerSerializer()).build();
-		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
-		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo("1322903730000");
-		assertThat(new String(objectMapper.writeValueAsBytes(4), "UTF-8")).contains("customid");
 	}
 
 	@Test  // gh-22576

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,14 +66,14 @@ public class PatternParseException extends IllegalArgumentException {
 	 * with a pointer to the error position, as well as the error message.
 	 */
 	public String toDetailedString() {
-		StringBuilder buf = new StringBuilder();
-		buf.append(this.pattern).append('\n');
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.pattern).append('\n');
 		for (int i = 0; i < this.position; i++) {
-			buf.append(' ');
+			sb.append(' ');
 		}
-		buf.append("^\n");
-		buf.append(getMessage());
-		return buf.toString();
+		sb.append("^\n");
+		sb.append(getMessage());
+		return sb.toString();
 	}
 
 	public int getPosition() {

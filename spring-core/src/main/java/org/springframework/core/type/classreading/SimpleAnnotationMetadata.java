@@ -25,6 +25,7 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link AnnotationMetadata} created from a
@@ -32,6 +33,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 5.2
  */
 final class SimpleAnnotationMetadata implements AnnotationMetadata {
@@ -48,11 +50,11 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 
 	private final boolean independentInnerClass;
 
-	private final String[] interfaceNames;
+	private final Set<String> interfaceNames;
 
-	private final String[] memberClassNames;
+	private final Set<String> memberClassNames;
 
-	private final MethodMetadata[] annotatedMethods;
+	private final Set<MethodMetadata> declaredMethods;
 
 	private final MergedAnnotations annotations;
 
@@ -61,8 +63,8 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 
 
 	SimpleAnnotationMetadata(String className, int access, @Nullable String enclosingClassName,
-			@Nullable String superClassName, boolean independentInnerClass, String[] interfaceNames,
-			String[] memberClassNames, MethodMetadata[] annotatedMethods, MergedAnnotations annotations) {
+			@Nullable String superClassName, boolean independentInnerClass, Set<String> interfaceNames,
+			Set<String> memberClassNames, Set<MethodMetadata> declaredMethods, MergedAnnotations annotations) {
 
 		this.className = className;
 		this.access = access;
@@ -71,7 +73,7 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 		this.independentInnerClass = independentInnerClass;
 		this.interfaceNames = interfaceNames;
 		this.memberClassNames = memberClassNames;
-		this.annotatedMethods = annotatedMethods;
+		this.declaredMethods = declaredMethods;
 		this.annotations = annotations;
 	}
 
@@ -119,12 +121,17 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 
 	@Override
 	public String[] getInterfaceNames() {
-		return this.interfaceNames.clone();
+		return StringUtils.toStringArray(this.interfaceNames);
 	}
 
 	@Override
 	public String[] getMemberClassNames() {
-		return this.memberClassNames.clone();
+		return StringUtils.toStringArray(this.memberClassNames);
+	}
+
+	@Override
+	public MergedAnnotations getAnnotations() {
+		return this.annotations;
 	}
 
 	@Override
@@ -140,22 +147,20 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 
 	@Override
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationName) {
-		Set<MethodMetadata> annotatedMethods = null;
-		for (MethodMetadata annotatedMethod : this.annotatedMethods) {
+		Set<MethodMetadata> result = new LinkedHashSet<>(4);
+		for (MethodMetadata annotatedMethod : this.declaredMethods) {
 			if (annotatedMethod.isAnnotated(annotationName)) {
-				if (annotatedMethods == null) {
-					annotatedMethods = new LinkedHashSet<>(4);
-				}
-				annotatedMethods.add(annotatedMethod);
+				result.add(annotatedMethod);
 			}
 		}
-		return annotatedMethods != null ? annotatedMethods : Collections.emptySet();
+		return Collections.unmodifiableSet(result);
 	}
 
 	@Override
-	public MergedAnnotations getAnnotations() {
-		return this.annotations;
+	public Set<MethodMetadata> getDeclaredMethods() {
+		return Collections.unmodifiableSet(this.declaredMethods);
 	}
+
 
 	@Override
 	public boolean equals(@Nullable Object obj) {

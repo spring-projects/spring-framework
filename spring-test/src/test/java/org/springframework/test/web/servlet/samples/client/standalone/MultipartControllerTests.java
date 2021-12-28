@@ -23,13 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
-
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;

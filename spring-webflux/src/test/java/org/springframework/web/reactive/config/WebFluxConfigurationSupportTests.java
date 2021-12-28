@@ -23,9 +23,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import com.google.protobuf.Message;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;

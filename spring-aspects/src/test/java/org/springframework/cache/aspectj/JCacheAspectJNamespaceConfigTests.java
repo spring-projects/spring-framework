@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,18 @@ import org.springframework.contextsupport.testfixture.jcache.AbstractJCacheAnnot
 
 /**
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 public class JCacheAspectJNamespaceConfigTests extends AbstractJCacheAnnotationTests {
 
 	@Override
 	protected ApplicationContext getApplicationContext() {
-		return new GenericXmlApplicationContext(
-				"/org/springframework/cache/config/annotation-jcache-aspectj.xml");
+		GenericXmlApplicationContext context = new GenericXmlApplicationContext();
+		// Disallow bean definition overriding to test https://github.com/spring-projects/spring-framework/pull/27499
+		context.setAllowBeanDefinitionOverriding(false);
+		context.load("/org/springframework/cache/config/annotation-jcache-aspectj.xml");
+		context.refresh();
+		return context;
 	}
 
 }

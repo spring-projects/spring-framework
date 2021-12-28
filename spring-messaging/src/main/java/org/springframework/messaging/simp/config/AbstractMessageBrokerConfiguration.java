@@ -112,7 +112,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
+		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 	}
 
@@ -504,27 +504,13 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	@SuppressWarnings("deprecation")
 	public SimpUserRegistry userRegistry(
 			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel) {
 
-		SimpUserRegistry userRegistry = createLocalUserRegistry();
 		MessageBrokerRegistry brokerRegistry = getBrokerRegistry(clientInboundChannel, clientOutboundChannel);
-		if (userRegistry == null) {
-			userRegistry = createLocalUserRegistry(brokerRegistry.getUserRegistryOrder());
-		}
+		SimpUserRegistry userRegistry = createLocalUserRegistry(brokerRegistry.getUserRegistryOrder());
 		boolean broadcast = brokerRegistry.getUserRegistryBroadcast() != null;
 		return (broadcast ? new MultiServerUserRegistry(userRegistry) : userRegistry);
-	}
-
-	/**
-	 * Create the user registry that provides access to local users.
-	 * @deprecated as of 5.1 in favor of {@link #createLocalUserRegistry(Integer)}
-	 */
-	@Deprecated
-	@Nullable
-	protected SimpUserRegistry createLocalUserRegistry() {
-		return null;
 	}
 
 	/**
@@ -553,7 +539,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			if (this.applicationContext != null && this.applicationContext.containsBean(MVC_VALIDATOR_NAME)) {
 				validator = this.applicationContext.getBean(MVC_VALIDATOR_NAME, Validator.class);
 			}
-			else if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
+			else if (ClassUtils.isPresent("jakarta.validation.Validator", getClass().getClassLoader())) {
 				Class<?> clazz;
 				try {
 					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";

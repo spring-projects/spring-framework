@@ -19,9 +19,9 @@ package org.springframework.jms;
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.TextMessage;
 
 /**
  * Stub JMS Message implementation intended for testing purposes only.

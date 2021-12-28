@@ -25,7 +25,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Auto proxy creator that identifies beans to proxy via a list of names.
@@ -61,7 +60,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	 * FactoryBean will get proxied. This default behavior applies as of Spring 2.0.
 	 * If you intend to proxy a FactoryBean instance itself (a rare use case, but
 	 * Spring 1.2's default behavior), specify the bean name of the FactoryBean
-	 * including the factory-bean prefix "&": e.g. "&myFactoryBean".
+	 * including the factory-bean prefix "&amp;": e.g. "&amp;myFactoryBean".
 	 * @see org.springframework.beans.factory.FactoryBean
 	 * @see org.springframework.beans.factory.BeanFactory#FACTORY_BEAN_PREFIX
 	 */
@@ -69,7 +68,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 		Assert.notEmpty(beanNames, "'beanNames' must not be empty");
 		this.beanNames = new ArrayList<>(beanNames.length);
 		for (String mappedName : beanNames) {
-			this.beanNames.add(StringUtils.trimWhitespace(mappedName));
+			this.beanNames.add(mappedName.strip());
 		}
 	}
 

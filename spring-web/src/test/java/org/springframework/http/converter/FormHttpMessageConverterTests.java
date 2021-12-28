@@ -29,11 +29,12 @@ import java.util.Map;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileUpload;
-import org.apache.commons.fileupload.RequestContext;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.FileItemFactory;
+import org.apache.tomcat.util.http.fileupload.FileUpload;
+import org.apache.tomcat.util.http.fileupload.RequestContext;
+import org.apache.tomcat.util.http.fileupload.UploadContext;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -327,15 +328,16 @@ public class FormHttpMessageConverterTests {
 	}
 
 
-	private static class MockHttpOutputMessageRequestContext implements RequestContext {
+	private static class MockHttpOutputMessageRequestContext implements UploadContext {
 
 		private final MockHttpOutputMessage outputMessage;
 
+		private final byte[] body;
 
 		private MockHttpOutputMessageRequestContext(MockHttpOutputMessage outputMessage) {
 			this.outputMessage = outputMessage;
+			this.body = this.outputMessage.getBodyAsBytes();
 		}
-
 
 		@Override
 		public String getCharacterEncoding() {
@@ -350,16 +352,16 @@ public class FormHttpMessageConverterTests {
 		}
 
 		@Override
-		@Deprecated
-		public int getContentLength() {
-			return this.outputMessage.getBodyAsBytes().length;
+		public InputStream getInputStream() throws IOException {
+			return new ByteArrayInputStream(body);
 		}
 
 		@Override
-		public InputStream getInputStream() throws IOException {
-			return new ByteArrayInputStream(this.outputMessage.getBodyAsBytes());
+		public long contentLength() {
+			return body.length;
 		}
 	}
+
 
 	public static class MyBean {
 

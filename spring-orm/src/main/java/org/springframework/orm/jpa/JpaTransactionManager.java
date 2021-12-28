@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.function.Consumer;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.PersistenceException;
-import javax.persistence.RollbackException;
 import javax.sql.DataSource;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.RollbackException;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -58,7 +59,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
- * for a single JPA {@link javax.persistence.EntityManagerFactory}. Binds a JPA
+ * for a single JPA {@link jakarta.persistence.EntityManagerFactory}. Binds a JPA
  * EntityManager from the specified factory to the thread, potentially allowing for
  * one thread-bound EntityManager per factory. {@link SharedEntityManagerCreator} and
  * {@code @PersistenceContext} are aware of thread-bound entity managers and participate
@@ -209,7 +210,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * {@code EntityManagerFactory.createEntityManager(Map)} (if any).
 	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
 	 * or a "props" element in XML bean definitions.
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 * @see jakarta.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
 	public void setJpaProperties(@Nullable Properties jpaProperties) {
 		CollectionUtils.mergePropertiesIntoMap(jpaProperties, this.jpaPropertyMap);
@@ -219,7 +220,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * Specify JPA properties as a Map, to be passed into
 	 * {@code EntityManagerFactory.createEntityManager(Map)} (if any).
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 * @see jakarta.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
 	public void setJpaPropertyMap(@Nullable Map<String, ?> jpaProperties) {
 		if (jpaProperties != null) {
@@ -325,11 +326,10 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (getEntityManagerFactory() == null) {
-			if (!(beanFactory instanceof ListableBeanFactory)) {
+			if (!(beanFactory instanceof ListableBeanFactory lbf)) {
 				throw new IllegalStateException("Cannot retrieve EntityManagerFactory by persistence unit name " +
 						"in a non-listable BeanFactory: " + beanFactory);
 			}
-			ListableBeanFactory lbf = (ListableBeanFactory) beanFactory;
 			setEntityManagerFactory(EntityManagerFactoryUtils.findEntityManagerFactory(lbf, getPersistenceUnitName()));
 		}
 	}
@@ -475,7 +475,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * {@link EntityManagerFactoryInfo#createNativeEntityManager}
 	 * if possible which in turns applies
 	 * {@link JpaVendorAdapter#postProcessEntityManager(EntityManager)}.
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager()
+	 * @see jakarta.persistence.EntityManagerFactory#createEntityManager()
 	 */
 	protected EntityManager createEntityManagerForTransaction() {
 		EntityManagerFactory emf = obtainEntityManagerFactory();

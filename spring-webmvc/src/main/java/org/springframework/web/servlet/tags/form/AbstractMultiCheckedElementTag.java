@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;

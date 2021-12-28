@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,11 @@
 package org.springframework.web.reactive.resource;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -39,6 +38,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -72,8 +72,8 @@ import org.springframework.web.server.WebHandler;
  * <p>This request handler may also be configured with a
  * {@link #setResourceResolvers(List) resourcesResolver} and
  * {@link #setResourceTransformers(List) resourceTransformer} chains to support
- * arbitrary resolution and transformation of resources being served. By default a
- * {@link PathResourceResolver} simply finds resources based on the configured
+ * arbitrary resolution and transformation of resources being served. By default
+ * a {@link PathResourceResolver} simply finds resources based on the configured
  * "locations". An application can configure additional resolvers and
  * transformers such as the {@link VersionResourceResolver} which can resolve
  * and prepare URLs for resources with a version in the URL.
@@ -85,18 +85,24 @@ import org.springframework.web.server.WebHandler;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 5.0
  */
 public class ResourceWebHandler implements WebHandler, InitializingBean {
 
-	private static final Set<HttpMethod> SUPPORTED_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
+	private static final Set<HttpMethod> SUPPORTED_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
 
 	private static final Log logger = LogFactory.getLog(ResourceWebHandler.class);
 
 
+	@Nullable
+	private ResourceLoader resourceLoader;
+
 	private final List<String> locationValues = new ArrayList<>(4);
 
-	private final List<Resource> locations = new ArrayList<>(4);
+	private final List<Resource> locationResources = new ArrayList<>(4);
+
+	private final List<Resource> locationsToUse = new ArrayList<>(4);
 
 	private final List<ResourceResolver> resourceResolvers = new ArrayList<>(4);
 
@@ -117,11 +123,18 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	@Nullable
 	private Map<String, MediaType> mediaTypes;
 
-	@Nullable
-	private ResourceLoader resourceLoader;
-
 	private boolean useLastModified = true;
 
+	private boolean optimizeLocations = false;
+
+
+	/**
+	 * Provide the ResourceLoader to load {@link #setLocationValues location values} with.
+	 * @since 5.1
+	 */
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+	}
 
 	/**
 	 * Accepts a list of String-based location values to be resolved into
@@ -147,9 +160,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * for serving static resources.
 	 */
 	public void setLocations(@Nullable List<Resource> locations) {
-		this.locations.clear();
+		this.locationResources.clear();
 		if (locations != null) {
-			this.locations.addAll(locations);
+			this.locationResources.addAll(locations);
 		}
 	}
 
@@ -159,11 +172,18 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * <p>Note that if {@link #setLocationValues(List) locationValues} are provided,
 	 * instead of loaded Resource-based locations, this method will return
 	 * empty until after initialization via {@link #afterPropertiesSet()}.
+	 * <p><strong>Note:</strong> As of 5.3.11 the list of locations may be filtered to
+	 * exclude those that don't actually exist and therefore the list returned from this
+	 * method may be a subset of all given locations. See {@link #setOptimizeLocations}.
 	 * @see #setLocationValues
 	 * @see #setLocations
 	 */
 	public List<Resource> getLocations() {
-		return this.locations;
+		if (this.locationsToUse.isEmpty()) {
+			// Possibly not yet initialized, return only what we have so far
+			return this.locationResources;
+		}
+		return this.locationsToUse;
 	}
 
 	/**
@@ -204,6 +224,22 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	}
 
 	/**
+	 * Configure the {@link ResourceHttpMessageWriter} to use.
+	 * <p>By default a {@link ResourceHttpMessageWriter} will be configured.
+	 */
+	public void setResourceHttpMessageWriter(@Nullable ResourceHttpMessageWriter httpMessageWriter) {
+		this.resourceHttpMessageWriter = httpMessageWriter;
+	}
+
+	/**
+	 * Return the configured resource message writer.
+	 */
+	@Nullable
+	public ResourceHttpMessageWriter getResourceHttpMessageWriter() {
+		return this.resourceHttpMessageWriter;
+	}
+
+	/**
 	 * Set the {@link org.springframework.http.CacheControl} instance to build
 	 * the Cache-Control HTTP response header.
 	 */
@@ -221,19 +257,48 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	}
 
 	/**
-	 * Configure the {@link ResourceHttpMessageWriter} to use.
-	 * <p>By default a {@link ResourceHttpMessageWriter} will be configured.
+	 * Set whether we should look at the {@link Resource#lastModified()}
+	 * when serving resources and use this information to drive {@code "Last-Modified"}
+	 * HTTP response headers.
+	 * <p>This option is enabled by default and should be turned off if the metadata of
+	 * the static files should be ignored.
+	 * @since 5.3
 	 */
-	public void setResourceHttpMessageWriter(@Nullable ResourceHttpMessageWriter httpMessageWriter) {
-		this.resourceHttpMessageWriter = httpMessageWriter;
+	public void setUseLastModified(boolean useLastModified) {
+		this.useLastModified = useLastModified;
 	}
 
 	/**
-	 * Return the configured resource message writer.
+	 * Return whether the {@link Resource#lastModified()} information is used
+	 * to drive HTTP responses when serving static resources.
+	 * @since 5.3
 	 */
-	@Nullable
-	public ResourceHttpMessageWriter getResourceHttpMessageWriter() {
-		return this.resourceHttpMessageWriter;
+	public boolean isUseLastModified() {
+		return this.useLastModified;
+	}
+
+	/**
+	 * Set whether to optimize the specified locations through an existence
+	 * check on startup, filtering non-existing directories upfront so that
+	 * they do not have to be checked on every resource access.
+	 * <p>The default is {@code false}, for defensiveness against zip files
+	 * without directory entries which are unable to expose the existence of
+	 * a directory upfront. Switch this flag to {@code true} for optimized
+	 * access in case of a consistent jar layout with directory entries.
+	 * @since 5.3.13
+	 */
+	public void setOptimizeLocations(boolean optimizeLocations) {
+		this.optimizeLocations = optimizeLocations;
+	}
+
+	/**
+	 * Return whether to optimize the specified locations through an existence
+	 * check on startup, filtering non-existing directories upfront so that
+	 * they do not have to be checked on every resource access.
+	 * @since 5.3.13
+	 */
+	public boolean isOptimizeLocations() {
+		return this.optimizeLocations;
 	}
 
 	/**
@@ -260,45 +325,10 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		return (this.mediaTypes != null ? this.mediaTypes : Collections.emptyMap());
 	}
 
-	/**
-	 * Provide the ResourceLoader to load {@link #setLocationValues(List)
-	 * location values} with.
-	 * @since 5.1
-	 */
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
-	}
-
-	/**
-	 * Return whether the {@link Resource#lastModified()} information is used
-	 * to drive HTTP responses when serving static resources.
-	 * @since 5.3
-	 */
-	public boolean isUseLastModified() {
-		return this.useLastModified;
-	}
-
-	/**
-	 * Set whether we should look at the {@link Resource#lastModified()}
-	 * when serving resources and use this information to drive {@code "Last-Modified"}
-	 * HTTP response headers.
-	 * <p>This option is enabled by default and should be turned off if the metadata of
-	 * the static files should be ignored.
-	 * @param useLastModified whether to use the resource last-modified information.
-	 * @since 5.3
-	 */
-	public void setUseLastModified(boolean useLastModified) {
-		this.useLastModified = useLastModified;
-	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		resolveResourceLocations();
-
-		if (logger.isWarnEnabled() && CollectionUtils.isEmpty(this.locations)) {
-			logger.warn("Locations list is empty. No resources will be served unless a " +
-					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
-		}
 
 		if (this.resourceResolvers.isEmpty()) {
 			this.resourceResolvers.add(new PathResourceResolver());
@@ -316,21 +346,24 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	}
 
 	private void resolveResourceLocations() {
-		if (CollectionUtils.isEmpty(this.locationValues)) {
-			return;
-		}
-		else if (!CollectionUtils.isEmpty(this.locations)) {
-			throw new IllegalArgumentException("Please set either Resource-based \"locations\" or " +
-					"String-based \"locationValues\", but not both.");
+		List<Resource> result = new ArrayList<>(this.locationResources);
+
+		if (!this.locationValues.isEmpty()) {
+			Assert.notNull(this.resourceLoader,
+					"ResourceLoader is required when \"locationValues\" are configured.");
+			Assert.isTrue(CollectionUtils.isEmpty(this.locationResources), "Please set " +
+					"either Resource-based \"locations\" or String-based \"locationValues\", but not both.");
+			for (String location : this.locationValues) {
+				result.add(this.resourceLoader.getResource(location));
+			}
 		}
 
-		Assert.notNull(this.resourceLoader,
-				"ResourceLoader is required when \"locationValues\" are configured.");
-
-		for (String location : this.locationValues) {
-			Resource resource = this.resourceLoader.getResource(location);
-			this.locations.add(resource);
+		if (isOptimizeLocations()) {
+			result = result.stream().filter(Resource::exists).collect(Collectors.toList());
 		}
+
+		this.locationsToUse.clear();
+		this.locationsToUse.addAll(result);
 	}
 
 	/**
@@ -339,16 +372,11 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * match the {@link #setLocations locations} configured on this class.
 	 */
 	protected void initAllowedLocations() {
-		if (CollectionUtils.isEmpty(this.locations)) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Locations list is empty. No resources will be served unless a " +
-						"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
-			}
+		if (CollectionUtils.isEmpty(getLocations())) {
 			return;
 		}
 		for (int i = getResourceResolvers().size() - 1; i >= 0; i--) {
-			if (getResourceResolvers().get(i) instanceof PathResourceResolver) {
-				PathResourceResolver resolver = (PathResourceResolver) getResourceResolvers().get(i);
+			if (getResourceResolvers().get(i) instanceof PathResourceResolver resolver) {
 				if (ObjectUtils.isEmpty(resolver.getAllowedLocations())) {
 					resolver.setAllowedLocations(getLocations().toArray(new Resource[0]));
 				}
@@ -379,7 +407,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 				}))
 				.flatMap(resource -> {
 					try {
-						if (HttpMethod.OPTIONS.matches(exchange.getRequest().getMethodValue())) {
+						if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
 							exchange.getResponse().getHeaders().add("Allow", "GET,HEAD,OPTIONS");
 							return Mono.empty();
 						}
@@ -388,7 +416,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						HttpMethod httpMethod = exchange.getRequest().getMethod();
 						if (!SUPPORTED_METHODS.contains(httpMethod)) {
 							return Mono.error(new MethodNotAllowedException(
-									exchange.getRequest().getMethodValue(), SUPPORTED_METHODS));
+									exchange.getRequest().getMethod(), SUPPORTED_METHODS));
 						}
 
 						// Header phase
@@ -506,7 +534,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		if (path.contains("%")) {
 			try {
 				// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
-				String decodedPath = URLDecoder.decode(path, "UTF-8");
+				String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
 				if (isInvalidPath(decodedPath)) {
 					return true;
 				}
@@ -517,9 +545,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			}
 			catch (IllegalArgumentException ex) {
 				// May not be possible to decode...
-			}
-			catch (UnsupportedEncodingException ex) {
-				// Should never happen...
 			}
 		}
 		return false;
@@ -543,7 +568,8 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	protected boolean isInvalidPath(String path) {
 		if (path.contains("WEB-INF") || path.contains("META-INF")) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Path with \"WEB-INF\" or \"META-INF\": [" + path + "]");
+				logger.warn(LogFormatUtils.formatValue(
+						"Path with \"WEB-INF\" or \"META-INF\": [" + path + "]", -1, true));
 			}
 			return true;
 		}
@@ -551,14 +577,16 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
 			if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("Path represents URL or has \"url:\" prefix: [" + path + "]");
+					logger.warn(LogFormatUtils.formatValue(
+							"Path represents URL or has \"url:\" prefix: [" + path + "]", -1, true));
 				}
 				return true;
 			}
 		}
 		if (path.contains("..") && StringUtils.cleanPath(path).contains("../")) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Path contains \"../\" after call to StringUtils#cleanPath: [" + path + "]");
+				logger.warn(LogFormatUtils.formatValue(
+						"Path contains \"../\" after call to StringUtils#cleanPath: [" + path + "]", -1, true));
 			}
 			return true;
 		}
@@ -602,27 +630,21 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			headers.setContentType(mediaType);
 		}
 
-		if (resource instanceof HttpResource) {
-			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
-			exchange.getResponse().getHeaders().putAll(resourceHeaders);
+		if (resource instanceof HttpResource httpResource) {
+			exchange.getResponse().getHeaders().putAll(httpResource.getResponseHeaders());
 		}
 	}
 
 
 	@Override
 	public String toString() {
-		return "ResourceWebHandler " + formatLocations();
+		return "ResourceWebHandler " + locationToString(getLocations());
 	}
 
-	private Object formatLocations() {
-		if (!this.locationValues.isEmpty()) {
-			return this.locationValues.stream().collect(Collectors.joining("\", \"", "[\"", "\"]"));
-		}
-		else if (!this.locations.isEmpty()) {
-			return "[" + this.locations.toString()
-					.replaceAll("class path resource", "Classpath")
-					.replaceAll("ServletContext resource", "ServletContext") + "]";
-		}
-		return Collections.emptyList();
+	private String locationToString(List<Resource> locations) {
+		return locations.toString()
+				.replaceAll("class path resource", "classpath")
+				.replaceAll("ServletContext resource", "ServletContext");
 	}
+
 }

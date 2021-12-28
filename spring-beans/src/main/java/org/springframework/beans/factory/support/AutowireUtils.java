@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,8 +198,7 @@ abstract class AutowireUtils {
 				Type methodParameterType = methodParameterTypes[i];
 				Object arg = args[i];
 				if (methodParameterType.equals(genericReturnType)) {
-					if (arg instanceof TypedStringValue) {
-						TypedStringValue typedValue = ((TypedStringValue) arg);
+					if (arg instanceof TypedStringValue typedValue) {
 						if (typedValue.hasTargetType()) {
 							return typedValue.getTargetType();
 						}
@@ -220,8 +219,7 @@ abstract class AutowireUtils {
 					}
 					return method.getReturnType();
 				}
-				else if (methodParameterType instanceof ParameterizedType) {
-					ParameterizedType parameterizedType = (ParameterizedType) methodParameterType;
+				else if (methodParameterType instanceof ParameterizedType parameterizedType) {
 					Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 					for (Type typeArg : actualTypeArguments) {
 						if (typeArg.equals(genericReturnType)) {
@@ -233,8 +231,7 @@ abstract class AutowireUtils {
 								if (arg instanceof String) {
 									className = (String) arg;
 								}
-								else if (arg instanceof TypedStringValue) {
-									TypedStringValue typedValue = ((TypedStringValue) arg);
+								else if (arg instanceof TypedStringValue typedValue) {
 									String targetTypeName = typedValue.getTargetTypeName();
 									if (targetTypeName == null || Class.class.getName().equals(targetTypeName)) {
 										className = typedValue.getValue();

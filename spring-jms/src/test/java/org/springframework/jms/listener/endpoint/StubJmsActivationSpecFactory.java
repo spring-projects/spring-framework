@@ -16,8 +16,8 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import javax.resource.spi.ActivationSpec;
-import javax.resource.spi.ResourceAdapter;
+import jakarta.resource.spi.ActivationSpec;
+import jakarta.resource.spi.ResourceAdapter;
 
 import org.springframework.jca.StubActivationSpec;
 

@@ -24,8 +24,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -99,7 +98,7 @@ public final class WebAsyncManager {
 
 	/**
 	 * Package-private constructor.
-	 * @see WebAsyncUtils#getAsyncManager(javax.servlet.ServletRequest)
+	 * @see WebAsyncUtils#getAsyncManager(jakarta.servlet.ServletRequest)
 	 * @see WebAsyncUtils#getAsyncManager(org.springframework.web.context.request.WebRequest)
 	 */
 	WebAsyncManager() {

@@ -21,10 +21,9 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.FilterRegistration;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletRegistration;
-
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletRegistration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import java.security.Principal;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,12 +35,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -54,6 +53,7 @@ import org.springframework.http.server.RequestPath;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.util.UriBuilder;
@@ -66,6 +66,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * request matching operations, such as matching based on path, HTTP method, etc.
  *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 5.2
  */
 public abstract class RequestPredicates {
@@ -434,12 +435,12 @@ public abstract class RequestPredicates {
 
 		public HttpMethodPredicate(HttpMethod httpMethod) {
 			Assert.notNull(httpMethod, "HttpMethod must not be null");
-			this.httpMethods = EnumSet.of(httpMethod);
+			this.httpMethods = Set.of(httpMethod);
 		}
 
 		public HttpMethodPredicate(HttpMethod... httpMethods) {
 			Assert.notEmpty(httpMethods, "HttpMethods must not be empty");
-			this.httpMethods = EnumSet.copyOf(Arrays.asList(httpMethods));
+			this.httpMethods = new LinkedHashSet<>(Arrays.asList(httpMethods));
 		}
 
 		@Override
@@ -450,16 +451,15 @@ public abstract class RequestPredicates {
 			return match;
 		}
 
-		@Nullable
 		private static HttpMethod method(ServerRequest request) {
 			if (CorsUtils.isPreFlightRequest(request.servletRequest())) {
 				String accessControlRequestMethod =
 						request.headers().firstHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
-				return HttpMethod.resolve(accessControlRequestMethod);
+				if (accessControlRequestMethod != null) {
+					return HttpMethod.valueOf(accessControlRequestMethod);
+				}
 			}
-			else {
-				return request.method();
-			}
+			return request.method();
 		}
 
 		@Override
@@ -628,7 +628,7 @@ public abstract class RequestPredicates {
 				acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
 			}
 			else {
-				MediaType.sortBySpecificityAndQuality(acceptedMediaTypes);
+				MimeTypeUtils.sortBySpecificity(acceptedMediaTypes);
 			}
 			return acceptedMediaTypes;
 		}
@@ -793,11 +793,11 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void changeParser(PathPatternParser parser) {
-			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+			if (this.left instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
-			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+			if (this.right instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
 		}
 
@@ -838,8 +838,8 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void changeParser(PathPatternParser parser) {
-			if (this.delegate instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) delegate).changeParser(parser);
+			if (this.delegate instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
 		}
 
@@ -905,11 +905,11 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void changeParser(PathPatternParser parser) {
-			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+			if (this.left instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
-			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+			if (this.right instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
 		}
 
@@ -924,7 +924,7 @@ public abstract class RequestPredicates {
 
 		private final ServerRequest request;
 
-		private RequestPath requestPath;
+		private final RequestPath requestPath;
 
 		private final Map<String, Object> attributes;
 
@@ -965,6 +965,7 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		@Deprecated
 		public String methodName() {
 			return this.request.methodName();
 		}

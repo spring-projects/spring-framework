@@ -21,16 +21,16 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Set;
 
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.DeploymentException;
-import javax.websocket.Endpoint;
-import javax.websocket.Extension;
-import javax.websocket.Session;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpointConfig;
+import jakarta.websocket.ClientEndpointConfig;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.Extension;
+import jakarta.websocket.Session;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerEndpointConfig;
 
 /**
- * Mock implementation of the {@link javax.websocket.server.ServerContainer} interface.
+ * Mock implementation of the {@link jakarta.websocket.server.ServerContainer} interface.
  *
  * @author Sam Brannen
  * @since 4.3.1

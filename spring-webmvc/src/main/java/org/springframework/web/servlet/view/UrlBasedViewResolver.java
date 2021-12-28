@@ -21,7 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
@@ -49,7 +49,7 @@ import org.springframework.web.servlet.View;
  * specified prefix and/or suffix. Exporting an attribute that holds the
  * RequestContext to all views is explicitly supported.
  *
- * <p>Example: prefix="/WEB-INF/jsp/", suffix=".jsp", viewname="test" ->
+ * <p>Example: prefix="/WEB-INF/jsp/", suffix=".jsp", viewname="test" &rarr;
  * "/WEB-INF/jsp/test.jsp"
  *
  * <p>As a special feature, redirect URLs can be specified via the "redirect:"
@@ -342,14 +342,16 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	}
 
 	/**
-	 * Specify whether views resolved by this resolver should add path variables to the model or not.
-	 * <p>>The default setting is to let each View decide (see {@link AbstractView#setExposePathVariables}.
-	 * However, you can use this property to override that.
+	 * Specify whether views resolved by this resolver should add path
+	 * variables to the model or not.
+	 * <p>The default setting is to let each View decide
+	 * (see {@link AbstractView#setExposePathVariables}). However, you
+	 * can use this property to override that.
 	 * @param exposePathVariables
 	 * <ul>
 	 * <li>{@code true} - all Views resolved by this resolver will expose path variables
 	 * <li>{@code false} - no Views resolved by this resolver will expose path variables
-	 * <li>{@code null} - individual Views can decide for themselves (this is used by the default)
+	 * <li>{@code null} - individual Views can decide for themselves (this is used by default)
 	 * </ul>
 	 * @see AbstractView#setExposePathVariables
 	 */

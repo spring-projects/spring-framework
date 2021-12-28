@@ -778,7 +778,7 @@ public abstract class ClassUtils {
 	 * conflicting method signatures (or a similar constraint is violated)
 	 * @see java.lang.reflect.Proxy#getProxyClass
 	 */
-	@SuppressWarnings("deprecation")  // on JDK 9
+	@SuppressWarnings("deprecation")
 	public static Class<?> createCompositeInterface(Class<?>[] interfaces, @Nullable ClassLoader classLoader) {
 		Assert.notEmpty(interfaces, "Interface array must not be empty");
 		return Proxy.getProxyClass(classLoader, interfaces);

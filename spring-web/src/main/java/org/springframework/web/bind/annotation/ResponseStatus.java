@@ -53,7 +53,7 @@ import org.springframework.http.HttpStatus;
  * @author Sam Brannen
  * @since 3.0
  * @see org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver
- * @see javax.servlet.http.HttpServletResponse#sendError(int, String)
+ * @see jakarta.servlet.http.HttpServletResponse#sendError(int, String)
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -71,8 +71,8 @@ public @interface ResponseStatus {
 	 * <p>Default is {@link HttpStatus#INTERNAL_SERVER_ERROR}, which should
 	 * typically be changed to something more appropriate.
 	 * @since 4.2
-	 * @see javax.servlet.http.HttpServletResponse#setStatus(int)
-	 * @see javax.servlet.http.HttpServletResponse#sendError(int)
+	 * @see jakarta.servlet.http.HttpServletResponse#setStatus(int)
+	 * @see jakarta.servlet.http.HttpServletResponse#sendError(int)
 	 */
 	@AliasFor("value")
 	HttpStatus code() default HttpStatus.INTERNAL_SERVER_ERROR;
@@ -81,7 +81,7 @@ public @interface ResponseStatus {
 	 * The <em>reason</em> to be used for the response.
 	 * <p>Defaults to an empty string which will be ignored. Set the reason to a
 	 * non-empty value to have it used for the response.
-	 * @see javax.servlet.http.HttpServletResponse#sendError(int, String)
+	 * @see jakarta.servlet.http.HttpServletResponse#sendError(int, String)
 	 */
 	String reason() default "";
 

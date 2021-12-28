@@ -1,7 +1,7 @@
 tasks.findByName("dokkaHtmlPartial")?.configure {
-    outputDirectory.set(new File(buildDir, "docs/kdoc"))
-    dokkaSourceSets {
-        configureEach {
+	outputDirectory.set(new File(buildDir, "docs/kdoc"))
+	dokkaSourceSets {
+		configureEach {
 			sourceRoots.setFrom(file("src/main/kotlin"))
 			classpath.from(sourceSets["main"].runtimeClasspath)
 			externalDocumentationLink {
@@ -17,14 +17,14 @@ tasks.findByName("dokkaHtmlPartial")?.configure {
 				url.set(new URL("https://kotlin.github.io/kotlinx.coroutines/"))
 			}
 			externalDocumentationLink {
-				url.set(new URL("https://hamcrest.org/JavaHamcrest/javadoc/2.1/"))
+				url.set(new URL("https://javadoc.io/doc/org.hamcrest/hamcrest/2.1/"))
 			}
 			externalDocumentationLink {
-				url.set(new URL("https://javadoc.io/doc/javax.servlet/javax.servlet-api/latest/"))
+				url.set(new URL("https://javadoc.io/doc/jakarta.servlet/jakarta.servlet-api/latest/"))
 			}
 			externalDocumentationLink {
 				url.set(new URL("https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/"))
 			}
 		}
-    }
+	}
 }

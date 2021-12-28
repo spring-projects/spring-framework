@@ -20,11 +20,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import javax.servlet.http.Cookie;
-
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

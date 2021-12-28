@@ -74,6 +74,7 @@ public class ResourceWebHandlerTests {
 
 	private ResourceWebHandler handler;
 
+
 	@BeforeEach
 	public void setup() throws Exception {
 		List<Resource> locations = new ArrayList<>(2);
@@ -251,6 +252,24 @@ public class ResourceWebHandlerTests {
 		assertThat(headers.getContentType()).isEqualTo(MediaType.parseMediaType("text/css"));
 		assertThat(headers.getContentLength()).isEqualTo(17);
 		assertResponseBody(exchange, "h1 { color:red; }");
+	}
+
+	@Test  // gh-27538, gh-27624
+	public void filterNonExistingLocations() throws Exception {
+		List<Resource> inputLocations = Arrays.asList(
+				new ClassPathResource("test/", getClass()),
+				new ClassPathResource("testalternatepath/", getClass()),
+				new ClassPathResource("nosuchpath/", getClass()));
+
+		ResourceWebHandler handler = new ResourceWebHandler();
+		handler.setLocations(inputLocations);
+		handler.setOptimizeLocations(true);
+		handler.afterPropertiesSet();
+
+		List<Resource> actual = handler.getLocations();
+		assertThat(actual).hasSize(2);
+		assertThat(actual.get(0).getURL().toString()).endsWith("test/");
+		assertThat(actual.get(1).getURL().toString()).endsWith("testalternatepath/");
 	}
 
 	@Test // SPR-14577

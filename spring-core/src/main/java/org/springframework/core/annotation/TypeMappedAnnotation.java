@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -439,8 +439,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			}
 			value = names;
 		}
-		else if (value instanceof String[] && type == Class[].class) {
-			String[] names = (String[]) value;
+		else if (value instanceof String[] names && type == Class[].class) {
 			Class<?>[] classes = new Class<?>[names.length];
 			for (int i = 0; i < names.length; i++) {
 				classes[i] = ClassUtils.resolveClassName(names[i], getClassLoader());
@@ -573,7 +572,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		}
 		if (this.source != null) {
 			if (this.source instanceof Class) {
-				return ((Class<?>) source).getClassLoader();
+				return ((Class<?>) this.source).getClassLoader();
 			}
 			if (this.source instanceof Member) {
 				((Member) this.source).getDeclaringClass().getClassLoader();

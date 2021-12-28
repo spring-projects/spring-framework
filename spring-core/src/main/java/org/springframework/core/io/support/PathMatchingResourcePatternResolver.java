@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -368,9 +368,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @since 4.1.1
 	 */
 	protected void addAllClassLoaderJarRoots(@Nullable ClassLoader classLoader, Set<Resource> result) {
-		if (classLoader instanceof URLClassLoader) {
+		if (classLoader instanceof URLClassLoader urlClassLoader) {
 			try {
-				for (URL url : ((URLClassLoader) classLoader).getURLs()) {
+				for (URL url : urlClassLoader.getURLs()) {
 					try {
 						UrlResource jarResource = (ResourceUtils.URL_PROTOCOL_JAR.equals(url.getProtocol()) ?
 								new UrlResource(url) :
@@ -597,9 +597,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		String rootEntryPath;
 		boolean closeJarFile;
 
-		if (con instanceof JarURLConnection) {
+		if (con instanceof JarURLConnection jarCon) {
 			// Should usually be the case for traditional JAR files.
-			JarURLConnection jarCon = (JarURLConnection) con;
 			ResourceUtils.useCachesIfNecessary(jarCon);
 			jarFile = jarCon.getJarFile();
 			jarFileUrl = jarCon.getJarFileURL().toExternalForm();

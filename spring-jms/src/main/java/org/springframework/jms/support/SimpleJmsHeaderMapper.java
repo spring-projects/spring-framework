@@ -23,9 +23,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.AbstractHeaderMapper;
@@ -61,7 +61,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 
 
 	@Override
-	public void fromHeaders(MessageHeaders headers, javax.jms.Message jmsMessage) {
+	public void fromHeaders(MessageHeaders headers, jakarta.jms.Message jmsMessage) {
 		try {
 			Object jmsCorrelationId = headers.get(JmsHeaders.CORRELATION_ID);
 			if (jmsCorrelationId instanceof Number) {
@@ -125,7 +125,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 	}
 
 	@Override
-	public MessageHeaders toHeaders(javax.jms.Message jmsMessage) {
+	public MessageHeaders toHeaders(jakarta.jms.Message jmsMessage) {
 		Map<String, Object> headers = new HashMap<>();
 		try {
 			try {

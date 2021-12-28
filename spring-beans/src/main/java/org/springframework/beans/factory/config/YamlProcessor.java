@@ -86,7 +86,7 @@ public abstract class YamlProcessor {
 	 * </pre>
 	 * when mapped with
 	 * <pre class="code">
-	 * setDocumentMatchers(properties ->
+	 * setDocumentMatchers(properties -&gt;
 	 *     ("prod".equals(properties.getProperty("environment")) ? MatchStatus.FOUND : MatchStatus.NOT_FOUND));
 	 * </pre>
 	 * would end up as
@@ -146,7 +146,7 @@ public abstract class YamlProcessor {
 		else {
 			Assert.noNullElements(supportedTypes, "'supportedTypes' must not contain null elements");
 			this.supportedTypes = Arrays.stream(supportedTypes).map(Class::getName)
-					.collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
+					.collect(Collectors.toUnmodifiableSet());
 		}
 	}
 

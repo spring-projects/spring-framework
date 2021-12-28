@@ -29,9 +29,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.Tag;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;

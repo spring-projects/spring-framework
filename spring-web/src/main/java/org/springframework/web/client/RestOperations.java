@@ -448,7 +448,6 @@ public interface RestOperations {
 	/**
 	 * Delete the resources at the specified URI.
 	 * <p>URI Template variables are expanded using the given map.
-	 *
 	 * @param url the URL
 	 * @param uriVariables the variables to expand the template
 	 */

@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 

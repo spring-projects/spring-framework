@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean;
-import org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean;
 import org.springframework.jndi.JndiObjectFactoryBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -93,44 +91,15 @@ public class JeeNamespaceHandlerTests {
 	@Test
 	public void testSimpleLocalSlsb() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleLocalEjb");
-		assertThat(beanDefinition.getBeanClassName()).isEqualTo(LocalStatelessSessionProxyFactoryBean.class.getName());
-		assertPropertyValue(beanDefinition, "businessInterface", ITestBean.class.getName());
+		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyLocalBean");
 	}
 
 	@Test
 	public void testSimpleRemoteSlsb() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleRemoteEjb");
-		assertThat(beanDefinition.getBeanClassName()).isEqualTo(SimpleRemoteStatelessSessionProxyFactoryBean.class.getName());
-		assertPropertyValue(beanDefinition, "businessInterface", ITestBean.class.getName());
+		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyRemoteBean");
-	}
-
-	@Test
-	public void testComplexLocalSlsb() {
-		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexLocalEjb");
-		assertThat(beanDefinition.getBeanClassName()).isEqualTo(LocalStatelessSessionProxyFactoryBean.class.getName());
-		assertPropertyValue(beanDefinition, "businessInterface", ITestBean.class.getName());
-		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyLocalBean");
-		assertPropertyValue(beanDefinition, "cacheHome", "true");
-		assertPropertyValue(beanDefinition, "lookupHomeOnStartup", "true");
-		assertPropertyValue(beanDefinition, "resourceRef", "true");
-		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
-	}
-
-	@Test
-	public void testComplexRemoteSlsb() {
-		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexRemoteEjb");
-		assertThat(beanDefinition.getBeanClassName()).isEqualTo(SimpleRemoteStatelessSessionProxyFactoryBean.class.getName());
-		assertPropertyValue(beanDefinition, "businessInterface", ITestBean.class.getName());
-		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyRemoteBean");
-		assertPropertyValue(beanDefinition, "cacheHome", "true");
-		assertPropertyValue(beanDefinition, "lookupHomeOnStartup", "true");
-		assertPropertyValue(beanDefinition, "resourceRef", "true");
-		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
-		assertPropertyValue(beanDefinition, "homeInterface", "org.springframework.beans.testfixture.beans.ITestBean");
-		assertPropertyValue(beanDefinition, "refreshHomeOnConnectFailure", "true");
-		assertPropertyValue(beanDefinition, "cacheSessionBean", "true");
 	}
 
 	@Test

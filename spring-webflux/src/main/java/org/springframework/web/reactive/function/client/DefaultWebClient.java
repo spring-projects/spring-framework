@@ -378,6 +378,7 @@ class DefaultWebClient implements WebClient {
 					return httpMethod;
 				}
 				@Override
+				@Deprecated
 				public String getMethodValue() {
 					return httpMethod.name();
 				}
@@ -612,7 +613,9 @@ class DefaultWebClient implements WebClient {
 		public Mono<ResponseEntity<Void>> toBodilessEntity() {
 			return this.responseMono.flatMap(response ->
 					WebClientUtils.mapToEntity(response, handleBodyMono(response, Mono.<Void>empty()))
-							.flatMap(entity -> response.releaseBody().thenReturn(entity))
+							.flatMap(entity -> response.releaseBody()
+									.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response))
+									.thenReturn(entity))
 			);
 		}
 
@@ -665,7 +668,7 @@ class DefaultWebClient implements WebClient {
 		}
 
 		private <T> Mono<T> insertCheckpoint(Mono<T> result, int statusCode, HttpRequest request) {
-			String httpMethod = request.getMethodValue();
+			HttpMethod httpMethod = request.getMethod();
 			URI uri = request.getURI();
 			String description = statusCode + " from " + httpMethod + " " + uri + " [DefaultWebClient]";
 			return result.checkpoint(description);

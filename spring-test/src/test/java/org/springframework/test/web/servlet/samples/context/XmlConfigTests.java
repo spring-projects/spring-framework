@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -73,13 +72,6 @@ public class XmlConfigTests {
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
-	}
-
-	@Test
-	public void tilesDefinitions() throws Exception {
-		this.mockMvc.perform(get("/"))//
-		.andExpect(status().isOk())//
-		.andExpect(forwardedUrl("/WEB-INF/layouts/standardLayout.jsp"));
 	}
 
 }

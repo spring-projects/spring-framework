@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -657,6 +657,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 
+		@Override
 		public String getSessionId() {
 			return this.sessionId;
 		}
@@ -797,7 +798,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		 * @since 5.3
 		 */
 		void updateClientSendMessageCount(long now) {
-			if (this.clientSendMessageCount != null && this.clientSendInterval > (now - clientSendMessageTimestamp)) {
+			if (this.clientSendMessageCount != null && this.clientSendInterval > (now - this.clientSendMessageTimestamp)) {
 				this.clientSendMessageCount.set(0);
 				this.clientSendMessageTimestamp = now;
 			}
@@ -984,6 +985,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			sendSystemSubscriptions();
 		}
 
+		@Override
 		protected void initHeartbeats(StompHeaderAccessor connectedHeaders) {
 			TcpConnection<byte[]> con = getTcpConnection();
 			Assert.state(con != null, "No TcpConnection available");

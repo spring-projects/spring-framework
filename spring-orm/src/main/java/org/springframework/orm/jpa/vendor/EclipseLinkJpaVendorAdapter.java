@@ -20,9 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-import javax.persistence.EntityManager;
-import javax.persistence.spi.PersistenceProvider;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.spi.PersistenceProvider;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.eclipse.persistence.config.TargetDatabase;
 import org.eclipse.persistence.jpa.JpaEntityManager;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
@@ -183,7 +182,6 @@ class ConfigurationClassBeanDefinitionReader {
 	 * Read the given {@link BeanMethod}, registering bean definitions
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
-	@SuppressWarnings("deprecation")  // for RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE
 	private void loadBeanDefinitionsForBeanMethod(BeanMethod beanMethod) {
 		ConfigurationClass configClass = beanMethod.getConfigurationClass();
 		MethodMetadata metadata = beanMethod.getMetadata();
@@ -244,15 +242,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		beanDef.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-		beanDef.setAttribute(org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor.
-				SKIP_REQUIRED_CHECK_ATTRIBUTE, Boolean.TRUE);
-
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(beanDef, metadata);
-
-		Autowire autowire = bean.getEnum("autowire");
-		if (autowire.isAutowire()) {
-			beanDef.setAutowireMode(autowire.value());
-		}
 
 		boolean autowireCandidate = bean.getBoolean("autowireCandidate");
 		if (!autowireCandidate) {
@@ -305,8 +295,7 @@ class ConfigurationClassBeanDefinitionReader {
 		// -> allow the current bean method to override, since both are at second-pass level.
 		// However, if the bean method is an overloaded case on the same configuration class,
 		// preserve the existing bean definition.
-		if (existingBeanDef instanceof ConfigurationClassBeanDefinition) {
-			ConfigurationClassBeanDefinition ccbd = (ConfigurationClassBeanDefinition) existingBeanDef;
+		if (existingBeanDef instanceof ConfigurationClassBeanDefinition ccbd) {
 			if (ccbd.getMetadata().getClassName().equals(
 					beanMethod.getConfigurationClass().getMetadata().getClassName())) {
 				if (ccbd.getFactoryMethodMetadata().getMethodName().equals(ccbd.getFactoryMethodName())) {
@@ -373,8 +362,7 @@ class ConfigurationClassBeanDefinitionReader {
 					// Instantiate the specified BeanDefinitionReader
 					reader = readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
 					// Delegate the current ResourceLoader to it if possible
-					if (reader instanceof AbstractBeanDefinitionReader) {
-						AbstractBeanDefinitionReader abdr = ((AbstractBeanDefinitionReader) reader);
+					if (reader instanceof AbstractBeanDefinitionReader abdr) {
 						abdr.setResourceLoader(this.resourceLoader);
 						abdr.setEnvironment(this.environment);
 					}

@@ -4,8 +4,8 @@ import org.gradle.plugins.ide.eclipse.model.SourceFolder
 apply plugin: 'eclipse'
 
 eclipse.jdt {
-	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
+	sourceCompatibility = 17
+	targetCompatibility = 17
 }
 
 // Replace classpath entries with project dependencies (GRADLE-1116)
@@ -69,42 +69,20 @@ eclipse.classpath.file.whenMerged {
 	}
 }
 
-// Allow projects to be used as WTP modules
-eclipse.project.natures 'org.eclipse.wst.common.project.facet.core.nature'
-
 // Include project specific settings
 task eclipseSettings(type: Copy) {
 	from rootProject.files(
-		'src/eclipse/org.eclipse.jdt.ui.prefs',
-		'src/eclipse/org.eclipse.wst.common.project.facet.core.xml')
+		'src/eclipse/org.eclipse.jdt.core.prefs',
+		'src/eclipse/org.eclipse.jdt.ui.prefs')
 	into project.file('.settings/')
-	outputs.upToDateWhen { false }
-}
-
-task eclipseJdtSettings(type: Copy) {
-	from rootProject.file('src/eclipse/org.eclipse.jdt.core.prefs')
-	into project.file('.settings/')
-	outputs.upToDateWhen { false }
-}
-
-task eclipseBuildship {
-	dependsOn eclipseSettings, eclipseJdtSettings
-}
-
-task eclipseWstComponentSettings(type: Copy) {
-	from rootProject.files('src/eclipse/org.eclipse.wst.common.component')
-	into project.file('.settings/')
-	expand(deployname: project.name)
 	outputs.upToDateWhen { false }
 }
 
 task cleanEclipseSettings(type: Delete) {
 	delete project.file('.settings/org.eclipse.jdt.core.prefs')
 	delete project.file('.settings/org.eclipse.jdt.ui.prefs')
-	delete project.file('.settings/org.eclipse.wst.common.component')
-	delete project.file('.settings/org.eclipse.wst.common.project.facet.core.xml')
 }
 
-tasks['eclipse'].dependsOn(eclipseSettings, eclipseJdtSettings, eclipseWstComponentSettings)
-tasks['eclipseJdt'].dependsOn(eclipseJdtSettings)
+tasks['eclipse'].dependsOn(eclipseSettings)
+tasks['eclipseJdt'].dependsOn(eclipseSettings)
 tasks['cleanEclipse'].dependsOn(cleanEclipseSettings)

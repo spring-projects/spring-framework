@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Destination;
+import jakarta.jms.ExceptionListener;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.Session;
 
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.lang.Nullable;
@@ -59,7 +59,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see javax.jms.MessageConsumer#setMessageListener
+ * @see jakarta.jms.MessageConsumer#setMessageListener
  * @see DefaultMessageListenerContainer
  * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
  */
@@ -126,7 +126,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		try {
 			int separatorIndex = concurrency.indexOf('-');
 			if (separatorIndex != -1) {
-				setConcurrentConsumers(Integer.parseInt(concurrency.substring(separatorIndex + 1)));
+				setConcurrentConsumers(Integer.parseInt(concurrency, separatorIndex + 1, concurrency.length(), 10));
 			}
 			else {
 				setConcurrentConsumers(Integer.parseInt(concurrency));
@@ -174,10 +174,9 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * underlying Session.</b> As a consequence, it is not recommended to use
 	 * this setting with a {@link SessionAwareMessageListener}, at least not
 	 * if the latter performs actual work on the given Session. A standard
-	 * {@link javax.jms.MessageListener} will work fine, in general.
+	 * {@link jakarta.jms.MessageListener} will work fine, in general.
 	 * @see #setConcurrentConsumers
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
-	 * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
 	 */
 	public void setTaskExecutor(Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;

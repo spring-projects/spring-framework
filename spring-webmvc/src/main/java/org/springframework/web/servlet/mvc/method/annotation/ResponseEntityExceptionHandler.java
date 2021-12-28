@@ -19,8 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -231,8 +230,7 @@ public abstract class ResponseEntityExceptionHandler {
 		List<MediaType> mediaTypes = ex.getSupportedMediaTypes();
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			headers.setAccept(mediaTypes);
-			if (request instanceof ServletWebRequest) {
-				ServletWebRequest servletWebRequest = (ServletWebRequest) request;
+			if (request instanceof ServletWebRequest servletWebRequest) {
 				if (HttpMethod.PATCH.equals(servletWebRequest.getHttpMethod())) {
 					headers.setAcceptPatch(mediaTypes);
 				}
@@ -438,8 +436,7 @@ public abstract class ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleAsyncRequestTimeoutException(
 			AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatus status, WebRequest webRequest) {
 
-		if (webRequest instanceof ServletWebRequest) {
-			ServletWebRequest servletWebRequest = (ServletWebRequest) webRequest;
+		if (webRequest instanceof ServletWebRequest servletWebRequest) {
 			HttpServletResponse response = servletWebRequest.getResponse();
 			if (response != null && response.isCommitted()) {
 				if (logger.isWarnEnabled()) {

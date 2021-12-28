@@ -16,7 +16,7 @@
 
 package org.springframework.jms;
 
-import javax.jms.Topic;
+import jakarta.jms.Topic;
 
 /**
  * Stub implementation of the {@link Topic} interface.

@@ -16,7 +16,7 @@
 
 package org.springframework.web.multipart.support;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.springframework.web.multipart.MultipartResolver;
 

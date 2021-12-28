@@ -20,12 +20,12 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import reactor.core.publisher.Mono;
 
@@ -171,9 +171,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		ServerHttpRequest request = exchange.getRequest();
 
 		if (helper.hasMethodsMismatch()) {
-			String httpMethod = request.getMethodValue();
+			HttpMethod httpMethod = request.getMethod();
 			Set<HttpMethod> methods = helper.getAllowedMethods();
-			if (HttpMethod.OPTIONS.matches(httpMethod)) {
+			if (HttpMethod.OPTIONS.equals(httpMethod)) {
 				Set<MediaType> mediaTypes = helper.getConsumablePatchMediaTypes();
 				HttpOptionsHandler handler = new HttpOptionsHandler(methods, mediaTypes);
 				return new HandlerMethod(handler, HTTP_OPTIONS_HANDLE_METHOD);
@@ -269,7 +269,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		public Set<HttpMethod> getAllowedMethods() {
 			return this.partialMatches.stream().
 					flatMap(m -> m.getInfo().getMethodsCondition().getMethods().stream()).
-					map(requestMethod -> HttpMethod.resolve(requestMethod.name())).
+					map(requestMethod -> HttpMethod.valueOf(requestMethod.name())).
 					collect(Collectors.toSet());
 		}
 
@@ -392,8 +392,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		private static Set<HttpMethod> initAllowedHttpMethods(Set<HttpMethod> declaredMethods) {
 			if (declaredMethods.isEmpty()) {
-				return EnumSet.allOf(HttpMethod.class).stream()
-						.filter(method -> method != HttpMethod.TRACE)
+				return Stream.of(HttpMethod.values())
+						.filter(method -> !HttpMethod.TRACE.equals(method))
 						.collect(Collectors.toSet());
 			}
 			else {

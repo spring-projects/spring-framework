@@ -22,11 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
-import javax.websocket.DeploymentException;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpoint;
-import javax.websocket.server.ServerEndpointConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerEndpoint;
+import jakarta.websocket.server.ServerEndpointConfig;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /**
- * Detects beans of type {@link javax.websocket.server.ServerEndpointConfig} and registers
+ * Detects beans of type {@link jakarta.websocket.server.ServerEndpointConfig} and registers
  * with the standard Java WebSocket runtime. Also detects beans annotated with
  * {@link ServerEndpoint} and registers them as well. Although not required, it is likely
  * annotated endpoints should have their {@code configurator} property set to
@@ -93,7 +93,7 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 	protected void initServletContext(ServletContext servletContext) {
 		if (this.serverContainer == null) {
 			this.serverContainer =
-					(ServerContainer) servletContext.getAttribute("javax.websocket.server.ServerContainer");
+					(ServerContainer) servletContext.getAttribute("jakarta.websocket.server.ServerContainer");
 		}
 	}
 
@@ -104,7 +104,7 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 
 	@Override
 	public void afterPropertiesSet() {
-		Assert.state(getServerContainer() != null, "javax.websocket.server.ServerContainer not available");
+		Assert.state(getServerContainer() != null, "jakarta.websocket.server.ServerContainer not available");
 	}
 
 	@Override

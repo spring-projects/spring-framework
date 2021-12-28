@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,8 @@ public abstract class DataSourceUtils {
 	 * @return a JDBC Connection from the given DataSource
 	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
 	 * if the attempt to get a Connection failed
-	 * @see #releaseConnection
+	 * @see #releaseConnection(Connection, DataSource)
+	 * @see #isConnectionTransactional(Connection, DataSource)
 	 */
 	public static Connection getConnection(DataSource dataSource) throws CannotGetJdbcConnectionException {
 		try {
@@ -298,6 +299,7 @@ public abstract class DataSourceUtils {
 	 * @param dataSource the DataSource that the Connection was obtained from
 	 * (may be {@code null})
 	 * @return whether the Connection is transactional
+	 * @see #getConnection(DataSource)
 	 */
 	public static boolean isConnectionTransactional(Connection con, @Nullable DataSource dataSource) {
 		if (dataSource == null) {
@@ -472,7 +474,7 @@ public abstract class DataSourceUtils {
 
 		private final DataSource dataSource;
 
-		private int order;
+		private final int order;
 
 		private boolean holderActive = true;
 

@@ -9,18 +9,19 @@ dependencies {
 	api("io.projectreactor:reactor-core")
 	optional(project(":spring-context"))
 	optional(project(":spring-context-support"))  // for FreeMarker support
-	optional("javax.servlet:javax.servlet-api")
-	optional("javax.websocket:javax.websocket-api")
+	optional("jakarta.servlet:jakarta.servlet-api")
+	optional("jakarta.websocket:jakarta.websocket-api")
 	optional("org.webjars:webjars-locator-core")
 	optional("org.freemarker:freemarker")
 	optional("com.fasterxml.jackson.core:jackson-databind")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile")
 	optional("io.projectreactor.netty:reactor-netty-http")
 	optional("org.apache.tomcat:tomcat-websocket")
-	optional("org.eclipse.jetty.websocket:websocket-server") {
-		exclude group: "javax.servlet", module: "javax.servlet"
+	optional("org.eclipse.jetty.websocket:websocket-jetty-server") {
+		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
-	optional("io.undertow:undertow-websockets-jsr")
+	optional("org.eclipse.jetty.websocket:websocket-jetty-client")
+	optional("io.undertow:undertow-websockets-jsr-jakarta")
 	optional("org.apache.httpcomponents:httpclient")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
@@ -29,10 +30,10 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-web")))
-	testImplementation("javax.xml.bind:jaxb-api")
+	testImplementation("jakarta.xml.bind:jakarta.xml.bind-api")
 	testImplementation("com.fasterxml:aalto-xml")
 	testImplementation("org.hibernate:hibernate-validator")
-	testImplementation("javax.validation:validation-api")
+	testImplementation("jakarta.validation:jakarta.validation-api")
 	testImplementation("io.reactivex.rxjava3:rxjava")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("io.undertow:undertow-core")
@@ -48,12 +49,11 @@ dependencies {
 	testRuntimeOnly("org.jetbrains.kotlin:kotlin-scripting-jsr223")
 	testRuntimeOnly("org.jruby:jruby")
 	testRuntimeOnly("org.python:jython-standalone")
-	testRuntimeOnly("org.synchronoss.cloud:nio-multipart-parser")
 	testRuntimeOnly("org.webjars:underscorejs")
-	testRuntimeOnly("org.glassfish:javax.el")
+	testRuntimeOnly("org.glassfish:jakarta.el")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
-	testRuntimeOnly("com.sun.activation:javax.activation")
+	testRuntimeOnly("com.sun.activation:jakarta.activation")
 }
 
 test {

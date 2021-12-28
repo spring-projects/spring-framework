@@ -16,17 +16,16 @@
 
 package org.springframework.jms.connection;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicSession;
-
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.JMSException;
+import jakarta.jms.QueueConnection;
+import jakarta.jms.QueueConnectionFactory;
+import jakarta.jms.QueueSession;
+import jakarta.jms.Session;
+import jakarta.jms.TopicConnection;
+import jakarta.jms.TopicConnectionFactory;
+import jakarta.jms.TopicSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -36,7 +35,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 /**
- * Helper class for managing a JMS {@link javax.jms.ConnectionFactory}, in particular
+ * Helper class for managing a JMS {@link jakarta.jms.ConnectionFactory}, in particular
  * for obtaining transactional JMS resources for a given ConnectionFactory.
  *
  * <p>Mainly for internal use within the framework. Used by
@@ -264,7 +263,7 @@ public abstract class ConnectionFactoryUtils {
 	 * JMS resources
 	 * @return the transactional Session, or {@code null} if none found
 	 * @throws JMSException in case of JMS failure
-	 * @see #doGetTransactionalSession(javax.jms.ConnectionFactory, ResourceFactory, boolean)
+	 * @see #doGetTransactionalSession(jakarta.jms.ConnectionFactory, ResourceFactory, boolean)
 	 */
 	@Nullable
 	public static Session doGetTransactionalSession(

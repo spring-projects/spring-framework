@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,9 +122,7 @@ public class DefaultTestContext implements TestContext {
 	@Override
 	public ApplicationContext getApplicationContext() {
 		ApplicationContext context = this.cacheAwareContextLoaderDelegate.loadContext(this.mergedContextConfiguration);
-		if (context instanceof ConfigurableApplicationContext) {
-			@SuppressWarnings("resource")
-			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
+		if (context instanceof ConfigurableApplicationContext cac) {
 			Assert.state(cac.isActive(), () ->
 					"The ApplicationContext loaded for [" + this.mergedContextConfiguration +
 					"] is not active. This may be due to one of the following reasons: " +

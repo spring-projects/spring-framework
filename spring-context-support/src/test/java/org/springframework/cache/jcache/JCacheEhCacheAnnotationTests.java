@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
@@ -64,7 +64,7 @@ public class JCacheEhCacheAnnotationTests extends AbstractCacheAnnotationTests {
 	}
 
 	protected CachingProvider getCachingProvider() {
-		return Caching.getCachingProvider("org.ehcache.jcache.JCacheCachingProvider");
+		return Caching.getCachingProvider("org.ehcache.jsr107.EhcacheCachingProvider");
 	}
 
 	@AfterEach
@@ -104,7 +104,7 @@ public class JCacheEhCacheAnnotationTests extends AbstractCacheAnnotationTests {
 
 	@Configuration
 	@EnableCaching
-	static class EnableCachingConfig extends CachingConfigurerSupport {
+	static class EnableCachingConfig implements CachingConfigurer {
 
 		@Autowired
 		CachingProvider cachingProvider;

@@ -19,7 +19,7 @@ package org.springframework.web.accept;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;

@@ -57,7 +57,7 @@ import org.springframework.lang.Nullable;
  * without paying a performance penalty if no actual data access happens.
  *
  * <p>This DataSource proxy gives you behavior analogous to JTA and a
- * transactional JNDI DataSource (as provided by the Java EE server), even
+ * transactional JNDI DataSource (as provided by the Jakarta EE server), even
  * with a local transaction strategy like DataSourceTransactionManager or
  * HibernateTransactionManager. It does not add value with Spring's
  * JtaTransactionManager as transaction strategy.
@@ -111,7 +111,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 	/**
 	 * Set the default auto-commit mode to expose when no target Connection
-	 * has been fetched yet (-> actual JDBC Connection default not known yet).
+	 * has been fetched yet (when the actual JDBC Connection default is not known yet).
 	 * <p>If not specified, the default gets determined by checking a target
 	 * Connection on startup. If that check fails, the default will be determined
 	 * lazily on first access of a Connection.
@@ -123,7 +123,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 	/**
 	 * Set the default transaction isolation level to expose when no target Connection
-	 * has been fetched yet (-> actual JDBC Connection default not known yet).
+	 * has been fetched yet (when the actual JDBC Connection default is not known yet).
 	 * <p>This property accepts the int constant value (e.g. 8) as defined in the
 	 * {@link java.sql.Connection} interface; it is mainly intended for programmatic
 	 * use. Consider using the "defaultTransactionIsolationName" property for setting

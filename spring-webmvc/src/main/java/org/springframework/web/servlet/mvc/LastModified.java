@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.mvc;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Supports last-modified HTTP requests to facilitate content caching.
@@ -34,16 +34,16 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see jakarta.servlet.http.HttpServlet#getLastModified
+ * @see Controller
+ * @see SimpleControllerHandlerAdapter
+ * @see org.springframework.web.HttpRequestHandler
+ * @see HttpRequestHandlerAdapter
  * @deprecated as of 5.3.9 in favor of using the {@code checkNotModified} methods
  * in {@link org.springframework.web.context.request.WebRequest}, or from an
  * annotated controller method, returning a
  * {@link org.springframework.http.ResponseEntity} with an "ETag" and/or
  * "Last-Modified" headers set.
- * @see javax.servlet.http.HttpServlet#getLastModified
- * @see Controller
- * @see SimpleControllerHandlerAdapter
- * @see org.springframework.web.HttpRequestHandler
- * @see HttpRequestHandlerAdapter
  */
 @Deprecated
 public interface LastModified {
@@ -58,7 +58,7 @@ public interface LastModified {
 	 * @return the time the underlying resource was last modified, or -1
 	 * meaning that the content must always be regenerated
 	 * @see org.springframework.web.servlet.HandlerAdapter#getLastModified
-	 * @see javax.servlet.http.HttpServlet#getLastModified
+	 * @see jakarta.servlet.http.HttpServlet#getLastModified
 	 */
 	long getLastModified(HttpServletRequest request);
 

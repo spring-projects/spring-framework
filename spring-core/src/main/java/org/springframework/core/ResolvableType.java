@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -594,8 +594,7 @@ public class ResolvableType implements Serializable {
 	 * without specific bounds (i.e., equal to {@code ? extends Object}).
 	 */
 	private boolean isWildcardWithoutBounds() {
-		if (this.type instanceof WildcardType) {
-			WildcardType wt = (WildcardType) this.type;
+		if (this.type instanceof WildcardType wt) {
 			if (wt.getLowerBounds().length == 0) {
 				Type[] upperBounds = wt.getUpperBounds();
 				if (upperBounds.length == 0 || (upperBounds.length == 1 && Object.class == upperBounds[0])) {
@@ -870,8 +869,7 @@ public class ResolvableType implements Serializable {
 		if (this.type instanceof TypeVariable) {
 			return resolveType().resolveVariable(variable);
 		}
-		if (this.type instanceof ParameterizedType) {
-			ParameterizedType parameterizedType = (ParameterizedType) this.type;
+		if (this.type instanceof ParameterizedType parameterizedType) {
 			Class<?> resolved = resolve();
 			if (resolved == null) {
 				return null;
@@ -906,11 +904,10 @@ public class ResolvableType implements Serializable {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ResolvableType)) {
+		if (!(other instanceof ResolvableType otherType)) {
 			return false;
 		}
 
-		ResolvableType otherType = (ResolvableType) other;
 		if (!ObjectUtils.nullSafeEquals(this.type, otherType.type)) {
 			return false;
 		}
@@ -979,8 +976,7 @@ public class ResolvableType implements Serializable {
 		if (this.resolved == null) {
 			return "?";
 		}
-		if (this.type instanceof TypeVariable) {
-			TypeVariable<?> variable = (TypeVariable<?>) this.type;
+		if (this.type instanceof TypeVariable<?> variable) {
 			if (this.variableResolver == null || this.variableResolver.resolveVariable(variable) == null) {
 				// Don't bother with variable boundaries for toString()...
 				// Can cause infinite recursions in case of self-references
@@ -1573,10 +1569,9 @@ public class ResolvableType implements Serializable {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof ParameterizedType)) {
+			if (!(other instanceof ParameterizedType otherType)) {
 				return false;
 			}
-			ParameterizedType otherType = (ParameterizedType) other;
 			return (otherType.getOwnerType() == null && this.rawType.equals(otherType.getRawType()) &&
 					Arrays.equals(this.typeArguments, otherType.getActualTypeArguments()));
 		}

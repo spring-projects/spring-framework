@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Map;
 
-import javax.servlet.ServletRequest;
+import jakarta.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.lang.Nullable;
@@ -69,9 +69,8 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 		if (uriVars != null) {
 			uriVars.forEach((name, value) -> {
 				if (mpvs.contains(name)) {
-					if (logger.isWarnEnabled()) {
-						logger.warn("Skipping URI variable '" + name +
-								"' because request contains bind value with same name.");
+					if (logger.isDebugEnabled()) {
+						logger.debug("URI variable '" + name + "' overridden by request bind value.");
 					}
 				}
 				else {

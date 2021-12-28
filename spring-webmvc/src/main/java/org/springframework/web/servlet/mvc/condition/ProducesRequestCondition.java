@@ -22,11 +22,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeException;
@@ -238,13 +239,14 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * Compares this and another "produces" condition as follows:
 	 * <ol>
 	 * <li>Sort 'Accept' header media types by quality value via
-	 * {@link MediaType#sortByQualityValue(List)} and iterate the list.
+	 * {@link org.springframework.util.MimeTypeUtils#sortBySpecificity(List)}
+	 * and iterate the list.
 	 * <li>Get the first index of matching media types in each "produces"
 	 * condition first matching with {@link MediaType#equals(Object)} and
 	 * then with {@link MediaType#includes(MediaType)}.
 	 * <li>If a lower index is found, the condition at that index wins.
 	 * <li>If both indexes are equal, the media types at the index are
-	 * compared further with {@link MediaType#SPECIFICITY_COMPARATOR}.
+	 * compared further with {@link MediaType#isMoreSpecific(MimeType)}.
 	 * </ol>
 	 * <p>It is assumed that both instances have been obtained via
 	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance

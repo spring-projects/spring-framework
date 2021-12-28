@@ -58,7 +58,7 @@ and <<transaction-solutions-to-common-problems, solutions to common problems>>.
 [[transaction-motivation]]
 === Advantages of the Spring Framework's Transaction Support Model
 
-Traditionally, Java EE developers have had two choices for transaction management:
+Traditionally, EE application developers have had two choices for transaction management:
 global or local transactions, both of which have profound limitations. Global
 and local transaction management is reviewed in the next two sections, followed by a
 discussion of how the Spring Framework's transaction management support addresses the
@@ -133,7 +133,7 @@ applications. Many high-end applications use a single, highly scalable database 
 Oracle RAC) instead. Stand-alone transaction managers (such as
 https://www.atomikos.com/[Atomikos Transactions] and http://jotm.objectweb.org/[JOTM])
 are other options. Of course, you may need other application server capabilities, such as
-Java Message Service (JMS) and Java EE Connector Architecture (JCA).
+Java Message Service (JMS) and Jakarta EE Connector Architecture (JCA).
 
 The Spring Framework gives you the choice of when to scale your application to a fully
 loaded application server. Gone are the days when the only alternative to using EJB
@@ -189,7 +189,7 @@ The `getTransaction(..)` method returns a `TransactionStatus` object, depending 
 `TransactionDefinition` parameter. The returned `TransactionStatus` might represent a
 new transaction or can represent an existing transaction, if a matching transaction
 exists in the current call stack. The implication in this latter case is that, as with
-Java EE transaction contexts, a `TransactionStatus` is associated with a thread of
+Jakarta EE transaction contexts, a `TransactionStatus` is associated with a thread of
 execution.
 
 As of Spring Framework 5.2, Spring also provides a transaction management abstraction for
@@ -295,7 +295,7 @@ The related `PlatformTransactionManager` bean definition then has a reference to
 	</bean>
 ----
 
-If you use JTA in a Java EE container, then you use a container `DataSource`, obtained
+If you use JTA in a Jakarta EE container, then you use a container `DataSource`, obtained
 through JNDI, in conjunction with Spring's `JtaTransactionManager`. The following example
 shows what the JTA and JNDI lookup version would look like:
 
@@ -349,8 +349,8 @@ The `DataSource` bean definition is similar to the local JDBC example shown prev
 and, thus, is not shown in the following example.
 
 NOTE: If the `DataSource` (used by any non-JTA transaction manager) is looked up through
-JNDI and managed by a Java EE container, it should be non-transactional, because the
-Spring Framework (rather than the Java EE container) manages the transactions.
+JNDI and managed by a Jakarta EE container, it should be non-transactional, because the
+Spring Framework (rather than the Jakarta EE container) manages the transactions.
 
 The `txManager` bean in this case is of the `HibernateTransactionManager` type. In the
 same way as the `DataSourceTransactionManager` needs a reference to the `DataSource`, the
@@ -378,7 +378,7 @@ example declares `sessionFactory` and `txManager` beans:
 	</bean>
 ----
 
-If you use Hibernate and Java EE container-managed JTA transactions, you should use the
+If you use Hibernate and Jakarta EE container-managed JTA transactions, you should use the
 same `JtaTransactionManager` as in the previous JTA example for JDBC, as the following
 example shows. Also, it is recommended to make Hibernate aware of JTA through its
 transaction coordinator and possibly also its connection release mode configuration:
@@ -502,7 +502,7 @@ behind the scenes and you need not write any special code.
 At the very lowest level exists the `TransactionAwareDataSourceProxy` class. This is a
 proxy for a target `DataSource`, which wraps the target `DataSource` to add awareness of
 Spring-managed transactions. In this respect, it is similar to a transactional JNDI
-`DataSource`, as provided by a Java EE server.
+`DataSource`, as provided by a Jakarta EE server.
 
 You should almost never need or want to use this class, except when existing
 code must be called and passed a standard JDBC `DataSource` interface implementation. In
@@ -1297,8 +1297,8 @@ source code puts the declarations much closer to the affected code. There is not
 danger of undue coupling, because code that is meant to be used transactionally is
 almost always deployed that way anyway.
 
-NOTE: The standard `javax.transaction.Transactional` annotation is also supported as a
-drop-in replacement to Spring's own annotation. Please refer to JTA 1.2 documentation
+NOTE: The standard `jakarta.transaction.Transactional` annotation is also supported as
+a drop-in replacement to Spring's own annotation. Please refer to the JTA documentation
 for more details.
 
 The ease-of-use afforded by the use of the `@Transactional` annotation is best
@@ -2750,7 +2750,7 @@ supporting transaction suspension. See the
 {api-spring-framework}/transaction/jta/JtaTransactionManager.html[`JtaTransactionManager`]
 javadoc for details.
 
-Spring's `JtaTransactionManager` is the standard choice to run on Java EE application
+Spring's `JtaTransactionManager` is the standard choice to run on Jakarta EE application
 servers and is known to work on all common servers. Advanced functionality, such as
 transaction suspension, works on many servers as well (including GlassFish, JBoss and
 Geronimo) without any special configuration required. However, for fully supported
@@ -3108,7 +3108,7 @@ class and the related support classes. See <<jdbc-core>>, <<jdbc-advanced-jdbc>>
 
 * `datasource`: The `org.springframework.jdbc.datasource` package contains a utility class for easy
 `DataSource` access and various simple `DataSource` implementations that you can use for
-testing and running unmodified JDBC code outside of a Java EE container. A subpackage
+testing and running unmodified JDBC code outside of a Jakarta EE container. A subpackage
 named `org.springfamework.jdbc.datasource.embedded` provides support for creating
 embedded databases by using Java database engines, such as HSQL, H2, and Derby. See
 <<jdbc-connections>> and <<jdbc-embedded-database-support>>.
@@ -4249,7 +4249,7 @@ The `DriverManagerDataSource` class is an implementation of the standard `DataSo
 interface that configures a plain JDBC driver through bean properties and returns a new
 `Connection` every time.
 
-This implementation is useful for test and stand-alone environments outside of a Java EE
+This implementation is useful for test and stand-alone environments outside of a Jakarta EE
 container, either as a `DataSource` bean in a Spring IoC container or in conjunction
 with a simple JNDI environment. Pool-assuming `Connection.close()` calls
 close the connection, so any `DataSource`-aware persistence code should work. However,
@@ -4263,7 +4263,7 @@ environment, that it is almost always preferable to use such a connection pool o
 
 `TransactionAwareDataSourceProxy` is a proxy for a target `DataSource`. The proxy wraps that
 target `DataSource` to add awareness of Spring-managed transactions. In this respect, it
-is similar to a transactional JNDI `DataSource`, as provided by a Java EE server.
+is similar to a transactional JNDI `DataSource`, as provided by a Jakarta EE server.
 
 NOTE: It is rarely desirable to use this class, except when already existing code must be
 called and passed a standard JDBC `DataSource` interface implementation. In this case,
@@ -4285,7 +4285,7 @@ specified data source to the currently executing thread, potentially allowing fo
 thread connection per data source.
 
 Application code is required to retrieve the JDBC connection through
-`DataSourceUtils.getConnection(DataSource)` instead of Java EE's standard
+`DataSourceUtils.getConnection(DataSource)` instead of Jakarta EE's standard
 `DataSource.getConnection`. It throws unchecked `org.springframework.dao` exceptions
 instead of checked `SQLExceptions`. All framework classes (such as `JdbcTemplate`) use this
 strategy implicitly. If not used with this transaction manager, the lookup strategy
@@ -6788,20 +6788,20 @@ You can take control over result mapping by supplying a `Function<Row, T>` that 
 called for each `Row` so it can can return arbitrary values (singular values,
 collections and maps, and objects).
 
-The following example extracts the `id` column and emits its value:
+The following example extracts the `name` column and emits its value:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	Flux<String> names = client.sql("SELECT name FROM person")
-	        .map(row -> row.get("id", String.class))
+	        .map(row -> row.get("name", String.class))
 	        .all();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val names = client.sql("SELECT name FROM person")
-	        .map{ row: Row -> row.get("id", String.class) }
+	        .map{ row: Row -> row.get("name", String.class) }
 	        .flow()
 ----
 
@@ -7809,7 +7809,7 @@ resource definitions in the container or locally within the application is mainl
 matter of the transaction strategy that you use. Compared to a Spring-defined local
 `SessionFactory`, a manually registered JNDI `SessionFactory` does not provide any
 benefits. Deploying a `SessionFactory` through Hibernate's JCA connector provides the
-added value of participating in the Java EE server's management infrastructure, but does
+added value of participating in the Jakarta EE server's management infrastructure, but does
 not add actual value beyond that.
 
 Spring's transaction support is not bound to a container. When configured with any strategy
@@ -7819,11 +7819,7 @@ local transaction support is a lightweight and powerful alternative to JTA. When
 local EJB stateless session beans to drive transactions, you depend both on an EJB
 container and on JTA, even if you access only a single database and use only stateless
 session beans to provide declarative transactions through container-managed
-transactions. Direct use of JTA programmatically also requires a Java EE environment.
-JTA does not involve only container dependencies in terms of JTA itself and of
-JNDI `DataSource` instances. For non-Spring, JTA-driven Hibernate transactions, you have
-to use the Hibernate JCA connector or extra Hibernate transaction code with the
-`TransactionManagerLookup` configured for proper JVM-level caching.
+transactions. Direct use of JTA programmatically also requires a Jakarta EE environment.
 
 Spring-driven transactions can work as well with a locally defined Hibernate
 `SessionFactory` as they do with a local JDBC `DataSource`, provided they access a
@@ -7831,12 +7827,7 @@ single database. Thus, you need only use Spring's JTA transaction strategy when 
 have distributed transaction requirements. A JCA connector requires container-specific
 deployment steps, and (obviously) JCA support in the first place. This configuration
 requires more work than deploying a simple web application with local resource
-definitions and Spring-driven transactions. Also, you often need the Enterprise Edition
-of your container if you use, for example, WebLogic Express, which does not
-provide JCA. A Spring application with local resources and transactions that span one
-single database works in any Java EE web container (without JTA, JCA, or EJB), such as
-Tomcat, Resin, or even plain Jetty. Additionally, you can easily reuse such a middle
-tier in desktop applications or test suites.
+definitions and Spring-driven transactions.
 
 All things considered, if you do not use EJBs, stick with local `SessionFactory` setup
 and Spring's `HibernateTransactionManager` or `JtaTransactionManager`. You get all of
@@ -7964,11 +7955,11 @@ the JPA specification is designed.
 [[orm-jpa-setup-jndi]]
 ===== Obtaining an EntityManagerFactory from JNDI
 
-You can use this option when deploying to a Java EE server. Check your server's documentation
+You can use this option when deploying to a Jakarta EE server. Check your server's documentation
 on how to deploy a custom JPA provider into your server, allowing for a different
 provider than the server's default.
 
-Obtaining an `EntityManagerFactory` from JNDI (for example in a Java EE environment),
+Obtaining an `EntityManagerFactory` from JNDI (for example in a Jakarta EE environment),
 is a matter of changing the XML configuration, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -7978,13 +7969,13 @@ is a matter of changing the XML configuration, as the following example shows:
 	</beans>
 ----
 
-This action assumes standard Java EE bootstrapping. The Java EE server auto-detects
+This action assumes standard Jakarta EE bootstrapping. The Jakarta EE server auto-detects
 persistence units (in effect, `META-INF/persistence.xml` files in application jars) and
-`persistence-unit-ref` entries in the Java EE deployment descriptor (for example,
+`persistence-unit-ref` entries in the Jakarta EE deployment descriptor (for example,
 `web.xml`) and defines environment naming context locations for those persistence units.
 
 In such a scenario, the entire persistence unit deployment, including the weaving
-(byte-code transformation) of persistent classes, is up to the Java EE server. The JDBC
+(byte-code transformation) of persistent classes, is up to the Jakarta EE server. The JDBC
 `DataSource` is defined through a JNDI location in the `META-INF/persistence.xml` file.
 `EntityManager` transactions are integrated with the server's JTA subsystem. Spring merely
 uses the obtained `EntityManagerFactory`, passing it on to application objects through
@@ -8056,12 +8047,12 @@ so on. However, it also imposes requirements on the runtime environment, such as
 availability of a weaving-capable class loader if the persistence provider demands
 byte-code transformation.
 
-This option may conflict with the built-in JPA capabilities of a Java EE server. In a
-full Java EE environment, consider obtaining your `EntityManagerFactory` from JNDI.
+This option may conflict with the built-in JPA capabilities of a Jakarta EE server. In a
+full Jakarta EE environment, consider obtaining your `EntityManagerFactory` from JNDI.
 Alternatively, specify a custom `persistenceXmlLocation` on your
 `LocalContainerEntityManagerFactoryBean` definition (for example,
 META-INF/my-persistence.xml) and include only a descriptor with that name in your
-application jar files. Because the Java EE server looks only for default
+application jar files. Because the Jakarta EE server looks only for default
 `META-INF/persistence.xml` files, it ignores such custom persistence units and, hence,
 avoids conflicts with a Spring-driven JPA setup upfront. (This applies to Resin 3.1, for
 example.)
@@ -8343,7 +8334,7 @@ protected, or private) does not matter.
 
 What about class-level annotations?
 
-On the Java EE platform, they are used for dependency declaration and not for resource
+On the Jakarta EE platform, they are used for dependency declaration and not for resource
 injection.
 ****
 
@@ -8416,13 +8407,13 @@ more details of its operations and how they are used within Spring's JPA support
 ==== Setting up JPA with JTA Transaction Management
 
 As an alternative to `JpaTransactionManager`, Spring also allows for multi-resource
-transaction coordination through JTA, either in a Java EE environment or with a
+transaction coordination through JTA, either in a Jakarta EE environment or with a
 stand-alone transaction coordinator, such as Atomikos. Aside from choosing Spring's
 `JtaTransactionManager` instead of `JpaTransactionManager`, you need to take few further
 steps:
 
 * The underlying JDBC connection pools need to be XA-capable and be integrated with
-your transaction coordinator. This is usually straightforward in a Java EE environment,
+your transaction coordinator. This is usually straightforward in a Jakarta EE environment,
 exposing a different kind of `DataSource` through JNDI. See your application server
 documentation for details. Analogously, a standalone transaction coordinator usually
 comes with special XA-integrated `DataSource` variants. Again, check its documentation.

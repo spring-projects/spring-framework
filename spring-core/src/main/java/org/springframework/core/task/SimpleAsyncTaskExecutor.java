@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @see #setConcurrencyLimit
  * @see SyncTaskExecutor
  * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
- * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
  */
 @SuppressWarnings("serial")
 public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
@@ -102,7 +101,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * Specify an external factory to use for creating new Threads,
 	 * instead of relying on the local properties of this executor.
 	 * <p>You may specify an inner ThreadFactory bean or also a ThreadFactory reference
-	 * obtained from JNDI (on a Java EE 6 server) or some other lookup mechanism.
+	 * obtained from JNDI (on a Jakarta EE server) or some other lookup mechanism.
 	 * @see #setThreadNamePrefix
 	 * @see #setThreadPriority
 	 */

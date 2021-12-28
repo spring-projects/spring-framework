@@ -154,6 +154,11 @@ public class ClientResponseWrapper implements ClientResponse {
 	}
 
 	@Override
+	public <T> Mono<T> createError() {
+		return this.delegate.createError();
+	}
+
+	@Override
 	public String logPrefix() {
 		return this.delegate.logPrefix();
 	}

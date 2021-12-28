@@ -16,10 +16,15 @@
 
 package org.springframework.http.codec.multipart;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
+import java.util.concurrent.Callable;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -50,17 +55,40 @@ abstract class DefaultParts {
 	}
 
 	/**
-	 * Create a new {@link Part} or {@link FilePart} with the given parameters.
+	 * Create a new {@link Part} or {@link FilePart} based on a flux of data
+	 * buffers. Returns {@link FilePart} if the {@code Content-Disposition} of
+	 * the given headers contains a filename, or a "normal" {@link Part}
+	 * otherwise.
+	 * @param headers the part headers
+	 * @param dataBuffers the content of the part
+	 * @return {@link Part} or {@link FilePart}, depending on {@link HttpHeaders#getContentDisposition()}
+	 */
+	public static Part part(HttpHeaders headers, Flux<DataBuffer> dataBuffers) {
+		Assert.notNull(headers, "Headers must not be null");
+		Assert.notNull(dataBuffers, "DataBuffers must not be null");
+
+		return partInternal(headers, new FluxContent(dataBuffers));
+	}
+
+	/**
+	 * Create a new {@link Part} or {@link FilePart} based on the given file.
 	 * Returns {@link FilePart} if the {@code Content-Disposition} of the given
 	 * headers contains a filename, or a "normal" {@link Part} otherwise
 	 * @param headers the part headers
-	 * @param content the content of the part
+	 * @param file  the file
+	 * @param scheduler the scheduler used for reading the file
 	 * @return {@link Part} or {@link FilePart}, depending on {@link HttpHeaders#getContentDisposition()}
 	 */
-	public static Part part(HttpHeaders headers, Flux<DataBuffer> content) {
+	public static Part part(HttpHeaders headers, Path file, Scheduler scheduler) {
 		Assert.notNull(headers, "Headers must not be null");
-		Assert.notNull(content, "Content must not be null");
+		Assert.notNull(file, "File must not be null");
+		Assert.notNull(scheduler, "Scheduler must not be null");
 
+		return partInternal(headers, new FileContent(file, scheduler));
+	}
+
+
+	private static Part partInternal(HttpHeaders headers, Content content) {
 		String filename = headers.getContentDisposition().getFilename();
 		if (filename != null) {
 			return new DefaultFilePart(headers, content);
@@ -142,16 +170,22 @@ abstract class DefaultParts {
 	 */
 	private static class DefaultPart extends AbstractPart {
 
-		private final Flux<DataBuffer> content;
+		protected final Content content;
 
-		public DefaultPart(HttpHeaders headers, Flux<DataBuffer> content) {
+
+		public DefaultPart(HttpHeaders headers, Content content) {
 			super(headers);
 			this.content = content;
 		}
 
 		@Override
 		public Flux<DataBuffer> content() {
-			return this.content;
+			return this.content.content();
+		}
+
+		@Override
+		public Mono<Void> delete() {
+			return this.content.delete();
 		}
 
 		@Override
@@ -171,9 +205,9 @@ abstract class DefaultParts {
 	/**
 	 * Default implementation of {@link FilePart}.
 	 */
-	private static class DefaultFilePart extends DefaultPart implements FilePart {
+	private static final class DefaultFilePart extends DefaultPart implements FilePart {
 
-		public DefaultFilePart(HttpHeaders headers, Flux<DataBuffer> content) {
+		public DefaultFilePart(HttpHeaders headers, Content content) {
 			super(headers, content);
 		}
 
@@ -186,7 +220,7 @@ abstract class DefaultParts {
 
 		@Override
 		public Mono<Void> transferTo(Path dest) {
-			return DataBufferUtils.write(content(), dest);
+			return this.content.transferTo(dest);
 		}
 
 		@Override
@@ -195,13 +229,109 @@ abstract class DefaultParts {
 			String name = contentDisposition.getName();
 			String filename = contentDisposition.getFilename();
 			if (name != null) {
-				return "DefaultFilePart{" + name() + " (" + filename + ")}";
+				return "DefaultFilePart{" + name + " (" + filename + ")}";
 			}
 			else {
 				return "DefaultFilePart{(" + filename + ")}";
 			}
 		}
 
+	}
+
+
+	/**
+	 * Part content abstraction.
+	 */
+	private interface Content {
+
+		Flux<DataBuffer> content();
+
+		Mono<Void> transferTo(Path dest);
+
+		Mono<Void> delete();
+
+	}
+
+	/**
+	 * {@code Content} implementation based on a flux of data buffers.
+	 */
+	private static final class FluxContent implements Content {
+
+		private final Flux<DataBuffer> content;
+
+
+		public FluxContent(Flux<DataBuffer> content) {
+			this.content = content;
+		}
+
+
+		@Override
+		public Flux<DataBuffer> content() {
+			return this.content;
+		}
+
+		@Override
+		public Mono<Void> transferTo(Path dest) {
+			return DataBufferUtils.write(this.content, dest);
+		}
+
+		@Override
+		public Mono<Void> delete() {
+			return Mono.empty();
+		}
+
+	}
+
+
+	/**
+	 * {@code Content} implementation based on a file.
+	 */
+	private static final class FileContent implements Content {
+
+		private final Path file;
+
+		private final Scheduler scheduler;
+
+
+		public FileContent(Path file, Scheduler scheduler) {
+			this.file = file;
+			this.scheduler = scheduler;
+		}
+
+
+		@Override
+		public Flux<DataBuffer> content() {
+			return DataBufferUtils.readByteChannel(
+					() -> Files.newByteChannel(this.file, StandardOpenOption.READ),
+							DefaultDataBufferFactory.sharedInstance, 1024)
+					.subscribeOn(this.scheduler);
+		}
+
+		@Override
+		public Mono<Void> transferTo(Path dest) {
+			return blockingOperation(() -> Files.copy(this.file, dest, StandardCopyOption.REPLACE_EXISTING));
+		}
+
+		@Override
+		public Mono<Void> delete() {
+			return blockingOperation(() -> {
+				Files.delete(this.file);
+				return null;
+			});
+		}
+
+		private Mono<Void> blockingOperation(Callable<?> callable) {
+			return Mono.<Void>create(sink -> {
+						try {
+							callable.call();
+							sink.success();
+						}
+						catch (Exception ex) {
+							sink.error(ex);
+						}
+					})
+					.subscribeOn(this.scheduler);
+		}
 	}
 
 }

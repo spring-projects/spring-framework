@@ -24,11 +24,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -313,7 +313,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 * @param usedParams set of parameter names that have been applied as
 	 * template params
 	 * @param includeQueryStringDelimiter true if the query string should start
-	 * with a '?' instead of '&'
+	 * with a '?' instead of '&amp;'
 	 * @return the query string
 	 */
 	protected String createQueryString(List<Param> params, Set<String> usedParams, boolean includeQueryStringDelimiter)

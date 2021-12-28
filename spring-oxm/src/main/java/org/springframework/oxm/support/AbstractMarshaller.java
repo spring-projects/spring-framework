@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.io.Writer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamReader;
@@ -188,12 +190,15 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 * Create an {@code XMLReader} that this marshaller will when passed an empty {@code SAXSource}.
 	 * @return the XMLReader
 	 * @throws SAXException if thrown by JAXP methods
+	 * @throws ParserConfigurationException if thrown by JAXP methods
 	 */
-	@SuppressWarnings("deprecation")  // on JDK 9
-	protected XMLReader createXmlReader() throws SAXException {
-		XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
-		xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-		xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+	protected XMLReader createXmlReader() throws SAXException, ParserConfigurationException {
+		SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+		saxParserFactory.setNamespaceAware(true);
+		saxParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+		saxParserFactory.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+		SAXParser saxParser = saxParserFactory.newSAXParser();
+		XMLReader xmlReader = saxParser.getXMLReader();
 		if (!isProcessExternalEntities()) {
 			xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
 		}
@@ -431,7 +436,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 			try {
 				saxSource.setXMLReader(createXmlReader());
 			}
-			catch (SAXException ex) {
+			catch (SAXException | ParserConfigurationException ex) {
 				throw new UnmarshallingFailureException("Could not create XMLReader for SAXSource", ex);
 			}
 		}
