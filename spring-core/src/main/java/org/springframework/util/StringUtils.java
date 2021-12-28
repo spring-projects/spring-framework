@@ -407,6 +407,29 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Counte the occurences of the {@code subString} within string {@code sourceString} disregarding the letters case
+	 * @param sourceString - source string to search in
+	 * @param subString - subString to search for
+	 */
+	public static int countOccurrencesOfIgnoreCase(String sourceString, String subString) {
+		if (!hasLength(sourceString) || !hasLength(subString)) {
+			return 0;
+		} else {
+			String lowerCaseSourceString = sourceString.toLowerCase();
+			String lowerCaseSubString = subString.toLowerCase();
+
+			int resultCounter = 0;
+			int currentSearchIndex = 0;
+			int idx;
+			while ((idx = lowerCaseSourceString.indexOf(lowerCaseSubString, currentSearchIndex)) != -1) {
+				++resultCounter;
+				currentSearchIndex = idx + lowerCaseSubString.length();
+			}
+			return resultCounter;
+		}
+	}
+
+	/**
 	 * Replace all occurrences of a substring within a string with another string.
 	 * @param inString {@code String} to examine
 	 * @param oldPattern {@code String} to replace

@@ -777,4 +777,13 @@ class StringUtilsTests {
 		assertThat(StringUtils.split(null, null)).isNull();
 	}
 
+	@Test
+	void countOccurrencesOfIgnoreCase() {
+		assertThat(StringUtils.countOccurrencesOfIgnoreCase(null, null)).isEqualTo(0);
+		assertThat(StringUtils.countOccurrencesOfIgnoreCase(null, "")).isEqualTo(0);
+		assertThat(StringUtils.countOccurrencesOfIgnoreCase("", null)).isEqualTo(0);
+		assertThat(StringUtils.countOccurrencesOfIgnoreCase("SELECT * FROM TABLE WHERE KEY1 = ? AND key2 = ? AND KeY3 IN (?, ?)", "key")).isEqualTo(3);
+		assertThat(StringUtils.countOccurrencesOfIgnoreCase("SELECT * FROM SCHEMA.TABLE GROUP BY schema.column ORDER BY SchEma.column", "SCHEMA")).isEqualTo(3);
+		assertThat(StringUtils.countOccurrencesOfIgnoreCase("INSERT INTO SCHEMA.TABLE VALUES('abc', 123)", "into")).isEqualTo(1);
+	}
 }
