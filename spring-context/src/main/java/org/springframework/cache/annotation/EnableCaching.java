@@ -103,7 +103,7 @@ import org.springframework.core.Ordered;
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableCaching
- * public class AppConfig extends CachingConfigurerSupport {
+ * public class AppConfig implements CachingConfigurer {
  *
  *     &#064;Bean
  *     public MyService myService() {
