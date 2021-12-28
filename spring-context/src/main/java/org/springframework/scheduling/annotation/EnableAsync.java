@@ -104,8 +104,7 @@ import org.springframework.core.Ordered;
  * }</pre>
  *
  * <p>If only one item needs to be customized, {@code null} can be returned to
- * keep the default settings. Consider also extending from {@link AsyncConfigurerSupport}
- * when possible.
+ * keep the default settings.
  *
  * <p>Note: In the above example the {@code ThreadPoolTaskExecutor} is not a fully managed
  * Spring bean. Add the {@code @Bean} annotation to the {@code getAsyncExecutor()} method
