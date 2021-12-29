@@ -46,7 +46,7 @@ public interface JCacheConfigurer extends CachingConfigurer {
 	 * <pre class="code">
 	 * &#064;Configuration
 	 * &#064;EnableCaching
-	 * public class AppConfig extends JCacheConfigurerSupport {
+	 * public class AppConfig implements JCacheConfigurer {
 	 *     &#064;Bean // important!
 	 *     &#064;Override
 	 *     public CacheResolver exceptionCacheResolver() {
