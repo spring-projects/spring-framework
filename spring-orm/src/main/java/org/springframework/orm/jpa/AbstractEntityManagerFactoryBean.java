@@ -409,23 +409,24 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			emf = createNativeEntityManagerFactory();
 		}
 		catch (PersistenceException ex) {
-			if (ex.getClass() == PersistenceException.class) {
+			PersistenceException persistenceException = ex;
+			if (persistenceException.getClass() == PersistenceException.class) {
 				// Plain PersistenceException wrapper for underlying exception?
 				// Make sure the nested exception message is properly exposed,
 				// along the lines of Spring's NestedRuntimeException.getMessage()
-				Throwable cause = ex.getCause();
+				Throwable cause = persistenceException.getCause();
 				if (cause != null) {
-					String message = ex.getMessage();
+					String message = persistenceException.getMessage();
 					String causeString = cause.toString();
 					if (!message.endsWith(causeString)) {
-						ex = new PersistenceException(message + "; nested exception is " + causeString, cause);
+						persistenceException = new PersistenceException(message + "; nested exception is " + causeString, cause);
 					}
 				}
 			}
 			if (logger.isErrorEnabled()) {
-				logger.error("Failed to initialize JPA EntityManagerFactory: " + ex.getMessage());
+				logger.error("Failed to initialize JPA EntityManagerFactory: " + persistenceException.getMessage());
 			}
-			throw ex;
+			throw persistenceException;
 		}
 
 		JpaVendorAdapter jpaVendorAdapter = getJpaVendorAdapter();

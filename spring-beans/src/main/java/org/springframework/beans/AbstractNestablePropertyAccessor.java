@@ -446,12 +446,13 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 							oldValue = ph.getValue();
 						}
 						catch (Exception ex) {
-							if (ex instanceof PrivilegedActionException) {
-								ex = ((PrivilegedActionException) ex).getException();
+							Exception exception = ex;
+							if (exception instanceof PrivilegedActionException) {
+								exception = ((PrivilegedActionException) exception).getException();
 							}
 							if (logger.isDebugEnabled()) {
 								logger.debug("Could not read previous value of property '" +
-										this.nestedPath + tokens.canonicalName + "'", ex);
+										this.nestedPath + tokens.canonicalName + "'", exception);
 							}
 						}
 					}
