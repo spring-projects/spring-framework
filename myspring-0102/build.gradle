@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+}
+
+group 'org.springframework'
+version '6.0.0-SNAPSHOT'
+
+
+repositories {
+    mavenLocal()
+    maven {
+        url 'https://repo.maven.apache.org/maven2'
+    }
+    mavenCentral()
+}
+
+dependencies {
+
+    implementation(project(":spring-beans"))
+    implementation(project(":spring-core"))
+    implementation(project(":spring-context"))
+
+    compileOnly 'org.projectlombok:lombok:1.18.16'
+    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+    testCompileOnly 'org.projectlombok:lombok:1.18.16'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
+}
+
+test {
+
+}
+
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+    options.encoding = "UTF-8"
+}
+
+task 'create-dirs' {
+    doLast {
+        sourceSets*.java.srcDirs*.each {
+            it.mkdirs()
+        }
+        sourceSets*.resources.srcDirs*.each {
+            it.mkdirs()
+        }
+    }
+}

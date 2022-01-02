@@ -54,3 +54,5 @@ settings.gradle.projectsLoaded {
 		}
 	}
 }
+include 'myspring-0102'
+
