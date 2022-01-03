@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ class MockServerHttpRequestTests {
 		assertThat(ex.getMessage()).contains("HTTP method is required.");
 	}
 
+	@SuppressWarnings("deprecation")
 	static Stream<Executable> httpMethodNotNullOrEmpty() {
 		String uriTemplate = "/foo bar?a=b";
 		return Stream.of(
@@ -80,4 +81,5 @@ class MockServerHttpRequestTests {
 				() -> MockServerHttpRequest.method("   ", uriTemplate).build()
 		);
 	}
+
 }
