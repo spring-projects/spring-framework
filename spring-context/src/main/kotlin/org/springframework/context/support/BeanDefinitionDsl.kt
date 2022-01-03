@@ -178,7 +178,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 									  role: Role? = null) {
 
 		val customizer = BeanDefinitionCustomizer { bd ->
-			scope?.let { bd.scope = scope.name.toLowerCase() }
+			scope?.let { bd.scope = scope.name.lowercase() }
 			isLazyInit?.let { bd.isLazyInit = isLazyInit }
 			isPrimary?.let { bd.isPrimary = isPrimary }
 			isAutowireCandidate?.let { bd.isAutowireCandidate = isAutowireCandidate }
@@ -221,7 +221,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 									  crossinline function: BeanSupplierContext.() -> T) {
 
 		val customizer = BeanDefinitionCustomizer { bd ->
-			scope?.let { bd.scope = scope.name.toLowerCase() }
+			scope?.let { bd.scope = scope.name.lowercase() }
 			isLazyInit?.let { bd.isLazyInit = isLazyInit }
 			isPrimary?.let { bd.isPrimary = isPrimary }
 			isAutowireCandidate?.let { bd.isAutowireCandidate = isAutowireCandidate }

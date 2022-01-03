@@ -70,18 +70,14 @@ class HtmlCharacterEntityDecoder {
 				this.nextSemicolonPosition = this.originalMessage.indexOf(';', this.nextPotentialReferencePosition + 1);
 			}
 
-			boolean isPotentialReference = (this.nextPotentialReferencePosition != -1 &&
-					this.nextSemicolonPosition != -1 &&
-					this.nextSemicolonPosition - this.nextPotentialReferencePosition < MAX_REFERENCE_SIZE);
-
-			if (isPotentialReference) {
-				break;
-			}
 			if (this.nextPotentialReferencePosition == -1) {
 				break;
 			}
 			if (this.nextSemicolonPosition == -1) {
 				this.nextPotentialReferencePosition = -1;
+				break;
+			}
+			if (this.nextSemicolonPosition - this.nextPotentialReferencePosition < MAX_REFERENCE_SIZE) {
 				break;
 			}
 

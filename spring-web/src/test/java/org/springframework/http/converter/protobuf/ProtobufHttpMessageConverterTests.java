@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,6 +147,7 @@ public class ProtobufHttpMessageConverterTests {
 				new ProtobufHttpMessageConverter.ProtobufJavaFormatSupport(),
 				this.extensionRegistry);
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		@SuppressWarnings("deprecation")
 		MediaType contentType = MediaType.APPLICATION_JSON_UTF8;
 		this.converter.write(this.testMsg, contentType, outputMessage);
 

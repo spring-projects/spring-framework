@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,7 @@ import org.springframework.util.Assert;
 /**
  * Helper methods for named parameter parsing.
  *
- * <p>Only intended for internal use within Spring's R2DBC
- * framework.
+ * <p>Only intended for internal use within Spring's R2DBC framework.
  *
  * <p>References to the same parameter name are substituted with
  * the same bind marker placeholder if a {@link BindMarkersFactory} uses
@@ -48,6 +47,7 @@ import org.springframework.util.Assert;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @author Mark Paluch
+ * @author Anton Naydenov
  * @since 5.3
  */
 abstract class NamedParameterUtils {
@@ -66,7 +66,7 @@ abstract class NamedParameterUtils {
 	 * Set of characters that qualify as parameter separators,
 	 * indicating that a parameter name in an SQL String has ended.
 	 */
-	private static final String PARAMETER_SEPARATORS = "\"':&,;()|=+-*%/\\<>^";
+	private static final String PARAMETER_SEPARATORS = "\"':&,;()|=+-*%/\\<>^[]";
 
 	/**
 	 * An index with separator flags per character code.

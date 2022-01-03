@@ -1348,6 +1348,29 @@ directly to the response body versus view resolution and rendering with an HTML 
 
 
 
+[[webflux-ann-requestmapping-proxying]]
+==== AOP Proxies
+[.small]#<<web.adoc#mvc-ann-requestmapping-proxying, Web MVC>>#
+
+In some cases, you may need to decorate a controller with an AOP proxy at runtime.
+One example is if you choose to have `@Transactional` annotations directly on the
+controller. When this is the case, for controllers specifically, we recommend
+using class-based proxying. This is automatically the case with such annotations
+directly on the controller.
+
+If the controller implements an interface, and needs AOP proxying, you may need to
+explicitly configure class-based proxying. For example, with `@EnableTransactionManagement`
+you can change to `@EnableTransactionManagement(proxyTargetClass = true)`, and with
+`<tx:annotation-driven/>` you can change to `<tx:annotation-driven proxy-target-class="true"/>`.
+
+NOTE: Keep in mind that as of 6.0, with interface proxying, Spring WebFlux no longer detects
+controllers based solely on a type-level `@RequestMapping` annotation on the interface.
+Please, enable class based proxying, or otherwise the interface must also have an
+`@Controller` annotation.
+
+
+
+
 [[webflux-ann-requestmapping]]
 === Request Mapping
 [.small]#<<web.adoc#mvc-ann-requestmapping, Web MVC>>#

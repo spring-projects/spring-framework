@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.http;
 import java.net.URI;
 
 /**
- * Represents an HTTP request message, consisting of
- * {@linkplain #getMethod() method} and {@linkplain #getURI() uri}.
+ * Represents an HTTP request message, consisting of a
+ * {@linkplain #getMethod() method} and a {@linkplain #getURI() URI}.
  *
  * @author Arjen Poutsma
  * @since 3.1
@@ -39,7 +39,7 @@ public interface HttpRequest extends HttpMessage {
 	 * @return the HTTP method as a plain String
 	 * @since 5.0
 	 * @see #getMethod()
-	 * @deprecated in favor of {@link #getMethod()} and
+	 * @deprecated as of Spring Framework 6.0 in favor of {@link #getMethod()} and
 	 * {@link HttpMethod#name()}
 	 */
 	@Deprecated

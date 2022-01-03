@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,10 +65,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 
 /**
- * @since 13.03.2003
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @since 13.03.2003
  */
 public class ProxyFactoryBeanTests {
 
@@ -633,18 +633,48 @@ public class ProxyFactoryBeanTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(FROZEN_CONTEXT, CLASS));
 
-		Advised advised = (Advised)bf.getBean("frozen");
+		Advised advised = (Advised) bf.getBean("frozen");
 		assertThat(advised.isFrozen()).as("The proxy should be frozen").isTrue();
 	}
 
 	@Test
-	public void testDetectsInterfaces() throws Exception {
+	public void testDetectsInterfaces() {
 		ProxyFactoryBean fb = new ProxyFactoryBean();
 		fb.setTarget(new TestBean());
 		fb.addAdvice(new DebugInterceptor());
 		fb.setBeanFactory(new DefaultListableBeanFactory());
+
 		ITestBean proxy = (ITestBean) fb.getObject();
 		assertThat(AopUtils.isJdkDynamicProxy(proxy)).isTrue();
+	}
+
+	@Test
+	public void testWithInterceptorNames() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerSingleton("debug", new DebugInterceptor());
+
+		ProxyFactoryBean fb = new ProxyFactoryBean();
+		fb.setTarget(new TestBean());
+		fb.setInterceptorNames("debug");
+		fb.setBeanFactory(bf);
+
+		Advised proxy = (Advised) fb.getObject();
+		assertThat(proxy.getAdvisorCount()).isEqualTo(1);
+	}
+
+	@Test
+	public void testWithLateInterceptorNames() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerSingleton("debug", new DebugInterceptor());
+
+		ProxyFactoryBean fb = new ProxyFactoryBean();
+		fb.setTarget(new TestBean());
+		fb.setBeanFactory(bf);
+		fb.getObject();
+
+		fb.setInterceptorNames("debug");
+		Advised proxy = (Advised) fb.getObject();
+		assertThat(proxy.getAdvisorCount()).isEqualTo(1);
 	}
 
 

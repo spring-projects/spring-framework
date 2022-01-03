@@ -129,7 +129,7 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	 * method will be invoked on each instance, delegating the {@code ServletContext} such
 	 * that each instance may register and configure servlets such as Spring's
 	 * {@code DispatcherServlet}, listeners such as Spring's {@code ContextLoaderListener},
-	 * or any other Servlet API componentry such as filters.
+	 * or any other Servlet API features such as filters.
 	 * @param webAppInitializerClasses all implementations of
 	 * {@link WebApplicationInitializer} found on the application classpath
 	 * @param servletContext the servlet context to be initialized

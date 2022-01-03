@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.ref.Reference;
@@ -719,14 +720,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
 			throws NoSuchBeanDefinitionException {
 
-		return findMergedAnnotationOnBean(beanName, annotationType)
+		return findAnnotationOnBean(beanName, annotationType, true);
+	}
+
+	@Override
+	@Nullable
+	public <A extends Annotation> A findAnnotationOnBean(
+			String beanName, Class<A> annotationType, boolean allowFactoryBeanInit)
+			throws NoSuchBeanDefinitionException {
+
+		return findMergedAnnotationOnBean(beanName, annotationType, allowFactoryBeanInit)
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
 	}
 
 	private <A extends Annotation> MergedAnnotation<A> findMergedAnnotationOnBean(
-			String beanName, Class<A> annotationType) {
+			String beanName, Class<A> annotationType, boolean allowFactoryBeanInit) {
 
-		Class<?> beanType = getType(beanName);
+		Class<?> beanType = getType(beanName, allowFactoryBeanInit);
 		if (beanType != null) {
 			MergedAnnotation<A> annotation =
 					MergedAnnotations.from(beanType, SearchStrategy.TYPE_HIERARCHY).get(annotationType);
@@ -912,8 +922,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
 				if (isFactoryBean(beanName)) {
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
-					if (bean instanceof FactoryBean) {
-						FactoryBean<?> factory = (FactoryBean<?>) bean;
+					if (bean instanceof FactoryBean<?> factory) {
 						boolean isEagerInit = (factory instanceof SmartFactoryBean &&
 								((SmartFactoryBean<?>) factory).isEagerInit());
 						if (isEagerInit) {
@@ -930,10 +939,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		// Trigger post-initialization callback for all applicable beans...
 		for (String beanName : beanNames) {
 			Object singletonInstance = getSingleton(beanName);
-			if (singletonInstance instanceof SmartInitializingSingleton) {
+			if (singletonInstance instanceof SmartInitializingSingleton smartSingleton) {
 				StartupStep smartInitialize = this.getApplicationStartup().start("spring.beans.smart-initialize")
 						.tag("beanName", beanName);
-				SmartInitializingSingleton smartSingleton = (SmartInitializingSingleton) singletonInstance;
 				smartSingleton.afterSingletonsInstantiated();
 				smartInitialize.end();
 			}
@@ -1837,11 +1845,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Serialization support
 	//---------------------------------------------------------------------
 
+	@Serial
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
 		throw new NotSerializableException("DefaultListableBeanFactory itself is not deserializable - " +
 				"just a SerializedBeanFactoryReference is");
 	}
 
+	@Serial
 	protected Object writeReplace() throws ObjectStreamException {
 		if (this.serializationId != null) {
 			return new SerializedBeanFactoryReference(this.serializationId);

@@ -55,7 +55,7 @@ public abstract class NamedParameterUtils {
 	 * Set of characters that qualify as parameter separators,
 	 * indicating that a parameter name in an SQL String has ended.
 	 */
-	private static final String PARAMETER_SEPARATORS = "\"':&,;()|=+-*%/\\<>^";
+	private static final String PARAMETER_SEPARATORS = "\"':&,;()|=+-*%/\\<>^[]";
 
 	/**
 	 * An index with separator flags per character code.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -291,6 +291,7 @@ public class MediaTypeTests {
 		MediaType allXml = new MediaType("application", "*+xml");
 		MediaType all = MediaType.ALL;
 
+		@SuppressWarnings("deprecation")
 		Comparator<MediaType> comp = MediaType.SPECIFICITY_COMPARATOR;
 
 		// equal
@@ -334,6 +335,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void sortBySpecificityRelated() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audio = new MediaType("audio");
@@ -364,6 +366,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void sortBySpecificityUnrelated() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audioWave = new MediaType("audio", "wave");
@@ -395,6 +398,7 @@ public class MediaTypeTests {
 		MediaType allXml = new MediaType("application", "*+xml");
 		MediaType all = MediaType.ALL;
 
+		@SuppressWarnings("deprecation")
 		Comparator<MediaType> comp = MediaType.QUALITY_VALUE_COMPARATOR;
 
 		// equal
@@ -438,6 +442,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void sortByQualityRelated() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audio = new MediaType("audio");
@@ -468,6 +473,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void sortByQualityUnrelated() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audioWave = new MediaType("audio", "wave");

@@ -976,8 +976,7 @@ public class ResolvableType implements Serializable {
 		if (this.resolved == null) {
 			return "?";
 		}
-		if (this.type instanceof TypeVariable) {
-			TypeVariable<?> variable = (TypeVariable<?>) this.type;
+		if (this.type instanceof TypeVariable<?> variable) {
 			if (this.variableResolver == null || this.variableResolver.resolveVariable(variable) == null) {
 				// Don't bother with variable boundaries for toString()...
 				// Can cause infinite recursions in case of self-references

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,8 +218,8 @@ public class AsyncAnnotationBeanPostProcessorTests {
 	private void assertFutureWithException(Future<Object> result,
 			TestableAsyncUncaughtExceptionHandler exceptionHandler) {
 		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
-				result::get)
-			.withCauseExactlyInstanceOf(UnsupportedOperationException.class);
+						result::get)
+				.withCauseExactlyInstanceOf(UnsupportedOperationException.class);
 		assertThat(exceptionHandler.isCalled()).as("handler should never be called with Future return type").isFalse();
 	}
 
@@ -343,7 +343,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 
 	@Configuration
 	@EnableAsync
-	static class ConfigWithExceptionHandler extends AsyncConfigurerSupport {
+	static class ConfigWithExceptionHandler implements AsyncConfigurer {
 
 		@Bean
 		public ITestBean target() {

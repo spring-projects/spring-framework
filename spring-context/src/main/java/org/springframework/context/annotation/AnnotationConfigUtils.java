@@ -298,7 +298,7 @@ public abstract class AnnotationConfigUtils {
 
 	@Nullable
 	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annotationClassName) {
-		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationClassName, false));
+		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationClassName));
 	}
 
 	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
@@ -314,10 +314,10 @@ public abstract class AnnotationConfigUtils {
 		Set<AnnotationAttributes> result = new LinkedHashSet<>();
 
 		// Direct annotation present?
-		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
+		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName));
 
 		// Container annotation present?
-		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName, false);
+		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName);
 		if (container != null && container.containsKey("value")) {
 			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container.get("value")) {
 				addAttributesIfNotNull(result, containedAttributes);

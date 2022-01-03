@@ -18,11 +18,10 @@ package org.springframework.cache.config;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheInterceptor;
@@ -107,11 +106,8 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 		try {
 			ctx.refresh();
 		}
-		catch (BeanCreationException ex) {
-			Throwable root = ex.getRootCause();
-			boolean condition = root instanceof IllegalStateException;
-			assertThat(condition).isTrue();
-			assertThat(root.getMessage().contains("implementations of CachingConfigurer")).isTrue();
+		catch (IllegalStateException ex) {
+			assertThat(ex.getMessage().contains("implementations of CachingConfigurer")).isTrue();
 		}
 	}
 
@@ -150,7 +146,7 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 
 	@Configuration
 	@EnableCaching
-	static class EnableCachingConfig extends CachingConfigurerSupport {
+	static class EnableCachingConfig implements CachingConfigurer {
 
 		@Override
 		@Bean
@@ -227,7 +223,7 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 
 	@Configuration
 	@EnableCaching
-	static class MultiCacheManagerConfigurer extends CachingConfigurerSupport {
+	static class MultiCacheManagerConfigurer implements CachingConfigurer {
 
 		@Bean
 		public CacheManager cm1() {
@@ -253,7 +249,7 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 
 	@Configuration
 	@EnableCaching
-	static class EmptyConfigSupportConfig extends CachingConfigurerSupport {
+	static class EmptyConfigSupportConfig implements CachingConfigurer {
 
 		@Bean
 		public CacheManager cm() {
@@ -264,7 +260,7 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 
 	@Configuration
 	@EnableCaching
-	static class FullCachingConfig extends CachingConfigurerSupport {
+	static class FullCachingConfig implements CachingConfigurer {
 
 		@Override
 		@Bean

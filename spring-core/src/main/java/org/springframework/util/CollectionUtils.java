@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,9 +129,7 @@ public abstract class CollectionUtils {
 	@SuppressWarnings("unchecked")
 	public static <E> void mergeArrayIntoCollection(@Nullable Object array, Collection<E> collection) {
 		Object[] arr = ObjectUtils.toObjectArray(array);
-		for (Object elem : arr) {
-			collection.add((E) elem);
-		}
+		Collections.addAll(collection, (E[])arr);
 	}
 
 	/**

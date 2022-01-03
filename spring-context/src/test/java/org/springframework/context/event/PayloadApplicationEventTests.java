@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,11 +43,12 @@ class PayloadApplicationEventTests {
 		PayloadApplicationEvent<NumberHolder<Integer>> event = new PayloadApplicationEvent<>(this, payload);
 		assertThat(event.getResolvableType()).satisfies(eventType -> {
 			assertThat(eventType.toClass()).isEqualTo(PayloadApplicationEvent.class);
-			assertThat(eventType.getGenerics()).hasSize(1);
-			assertThat(eventType.getGenerics()[0]).satisfies(bodyType -> {
-				assertThat(bodyType.toClass()).isEqualTo(NumberHolder.class);
-				assertThat(bodyType.hasUnresolvableGenerics()).isTrue();
-			});
+			assertThat(eventType.getGenerics())
+				.hasSize(1)
+				.allSatisfy(bodyType -> {
+					assertThat(bodyType.toClass()).isEqualTo(NumberHolder.class);
+					assertThat(bodyType.hasUnresolvableGenerics()).isTrue();
+				});
 		});
 	}
 
@@ -58,16 +59,18 @@ class PayloadApplicationEventTests {
 		PayloadApplicationEvent<NumberHolder<Integer>> event = new PayloadApplicationEvent<>(this, payload, payloadType);
 		assertThat(event.getResolvableType()).satisfies(eventType -> {
 			assertThat(eventType.toClass()).isEqualTo(PayloadApplicationEvent.class);
-			assertThat(eventType.getGenerics()).hasSize(1);
-			assertThat(eventType.getGenerics()[0]).satisfies(bodyType -> {
-				assertThat(bodyType.toClass()).isEqualTo(NumberHolder.class);
-				assertThat(bodyType.hasUnresolvableGenerics()).isFalse();
-				assertThat(bodyType.getGenerics()[0].toClass()).isEqualTo(Integer.class);
-			});
+			assertThat(eventType.getGenerics())
+				.hasSize(1)
+				.allSatisfy(bodyType -> {
+					assertThat(bodyType.toClass()).isEqualTo(NumberHolder.class);
+					assertThat(bodyType.hasUnresolvableGenerics()).isFalse();
+					assertThat(bodyType.getGenerics()[0].toClass()).isEqualTo(Integer.class);
+				});
 		});
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	void testEventClassWithInterface() {
 		ApplicationContext ac = new AnnotationConfigApplicationContext(AuditableListener.class);
 
@@ -77,6 +80,7 @@ class PayloadApplicationEventTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	void testProgrammaticEventListener() {
 		List<Auditable> events = new ArrayList<>();
 		ApplicationListener<AuditablePayloadEvent<String>> listener = events::add;
@@ -93,6 +97,7 @@ class PayloadApplicationEventTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	void testProgrammaticPayloadListener() {
 		List<String> events = new ArrayList<>();
 		ApplicationListener<PayloadApplicationEvent<String>> listener = ApplicationListener.forPayload(events::add);
@@ -135,10 +140,7 @@ class PayloadApplicationEventTests {
 
 	static class NumberHolder<T extends Number> {
 
-		private T number;
-
 		public NumberHolder(T number) {
-			this.number = number;
 		}
 
 	}

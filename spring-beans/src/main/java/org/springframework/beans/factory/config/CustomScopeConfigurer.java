@@ -101,8 +101,7 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 				if (value instanceof Scope) {
 					beanFactory.registerScope(scopeKey, (Scope) value);
 				}
-				else if (value instanceof Class) {
-					Class<?> scopeClass = (Class<?>) value;
+				else if (value instanceof Class<?> scopeClass) {
 					Assert.isAssignable(Scope.class, scopeClass, "Invalid scope class");
 					beanFactory.registerScope(scopeKey, (Scope) BeanUtils.instantiateClass(scopeClass));
 				}

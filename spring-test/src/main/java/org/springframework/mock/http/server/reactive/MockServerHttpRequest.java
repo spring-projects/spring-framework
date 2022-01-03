@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -238,7 +238,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * @param vars variables to expand into the template
 	 * @return the created builder
 	 * @since 5.2.7
-	 * @deprecated in favor of {@link #method(HttpMethod, String, Object...)}
+	 * @deprecated as of Spring Framework 6.0 in favor of {@link #method(HttpMethod, String, Object...)}
 	 */
 	@Deprecated
 	public static BodyBuilder method(String httpMethod, String uri, Object... vars) {
