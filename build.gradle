@@ -34,7 +34,7 @@ configure(allprojects) { project ->
 			mavenBom "io.rsocket:rsocket-bom:1.1.1"
 			mavenBom "org.eclipse.jetty:jetty-bom:11.0.7"
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.6.10"
-			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.5.2"
+			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.0"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.2.2"
 			mavenBom "org.junit:junit-bom:5.8.2"
 		}
