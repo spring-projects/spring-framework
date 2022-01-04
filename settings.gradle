@@ -56,3 +56,5 @@ settings.gradle.projectsLoaded {
 		}
 	}
 }
+include 'spring-xingzhou'
+
