@@ -107,7 +107,10 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	 * Return the bean factory to register the bean definitions with.
 	 * <p>The factory is exposed through the BeanDefinitionRegistry interface,
 	 * encapsulating the methods that are relevant for bean definition handling.
+	 * @deprecated as of Spring Framework 5.3.15 in favor of {@link #getRegistry()},
+	 * to be removed in Spring Framework 6.0
 	 */
+	@Deprecated
 	public final BeanDefinitionRegistry getBeanFactory() {
 		return this.registry;
 	}
