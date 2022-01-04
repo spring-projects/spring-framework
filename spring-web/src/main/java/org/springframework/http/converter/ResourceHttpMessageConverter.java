@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,6 +131,8 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 	protected void writeContent(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+		// We cannot use try-with-resources here for the InputStream, since we have
+		// custom handling of the close() method in a finally-block.
 		try {
 			InputStream in = resource.getInputStream();
 			try {
