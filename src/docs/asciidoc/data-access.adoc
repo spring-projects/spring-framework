@@ -2444,10 +2444,10 @@ the `TransactionOperator` resembles the next example:
 		}
 
 		public Mono<Object> someServiceMethod() {
-			
+
 			// the code in this method runs in a transactional context
-			
-            Mono<Object> update = updateOperation1();
+
+			Mono<Object> update = updateOperation1();
 
 			return update.then(resultOfUpdateOperation2).as(transactionalOperator::transactional);
 		}
@@ -8221,10 +8221,16 @@ that uses the `@PersistenceUnit` annotation:
 		}
 
 		public Collection loadProductsByCategory(String category) {
-			try (EntityManager em = this.emf.createEntityManager()) {
+			EntityManager em = this.emf.createEntityManager();
+			try {
 				Query query = em.createQuery("from Product as p where p.category = ?1");
 				query.setParameter(1, category);
 				return query.getResultList();
+			}
+			finally {
+				if (em != null) {
+					em.close();
+				}
 			}
 		}
 	}
