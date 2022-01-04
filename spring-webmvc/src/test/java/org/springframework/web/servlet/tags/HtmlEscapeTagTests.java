@@ -131,7 +131,7 @@ class HtmlEscapeTagTests extends AbstractTagTests {
 	@Test
 	void escapeBody() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer result = new StringBuffer();
+		final StringBuilder result = new StringBuilder();
 		EscapeBodyTag tag = new EscapeBodyTag() {
 			@Override
 			protected String readBodyContent() {
@@ -151,7 +151,7 @@ class HtmlEscapeTagTests extends AbstractTagTests {
 	@Test
 	void escapeBodyWithHtmlEscape() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer result = new StringBuffer();
+		final StringBuilder result = new StringBuilder();
 		EscapeBodyTag tag = new EscapeBodyTag() {
 			@Override
 			protected String readBodyContent() {
@@ -172,7 +172,7 @@ class HtmlEscapeTagTests extends AbstractTagTests {
 	@Test
 	void escapeBodyWithJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer result = new StringBuffer();
+		final StringBuilder result = new StringBuilder();
 		EscapeBodyTag tag = new EscapeBodyTag() {
 			@Override
 			protected String readBodyContent() {
@@ -193,7 +193,7 @@ class HtmlEscapeTagTests extends AbstractTagTests {
 	@Test
 	void escapeBodyWithHtmlEscapeAndJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer result = new StringBuffer();
+		final StringBuilder result = new StringBuilder();
 		EscapeBodyTag tag = new EscapeBodyTag() {
 			@Override
 			protected String readBodyContent() {

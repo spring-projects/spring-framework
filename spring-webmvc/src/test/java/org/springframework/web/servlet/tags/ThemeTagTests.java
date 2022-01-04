@@ -43,7 +43,7 @@ class ThemeTagTests extends AbstractTagTests {
 	@SuppressWarnings("serial")
 	void themeTag() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		ThemeTag tag = new ThemeTag() {
 			@Override
 			protected void writeMessage(String msg) {

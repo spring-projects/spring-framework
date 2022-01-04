@@ -96,7 +96,7 @@ class ContextLoaderTests {
 	 */
 	@Test
 	void contextLoaderListenerWithCustomizedContextLoader() {
-		final StringBuffer buffer = new StringBuffer();
+		final StringBuilder builder = new StringBuilder();
 		final String expectedContents = "customizeContext() was called";
 		final MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
@@ -107,11 +107,11 @@ class ContextLoaderTests {
 				assertThat(sc).as("The ServletContext should not be null.").isNotNull();
 				assertThat(sc).as("Verifying that we received the expected ServletContext.").isEqualTo(sc);
 				assertThat(wac.isActive()).as("The ApplicationContext should not yet have been refreshed.").isFalse();
-				buffer.append(expectedContents);
+				builder.append(expectedContents);
 			}
 		};
 		listener.contextInitialized(new ServletContextEvent(sc));
-		assertThat(buffer.toString()).as("customizeContext() should have been called.").isEqualTo(expectedContents);
+		assertThat(builder.toString()).as("customizeContext() should have been called.").isEqualTo(expectedContents);
 	}
 
 	@Test
