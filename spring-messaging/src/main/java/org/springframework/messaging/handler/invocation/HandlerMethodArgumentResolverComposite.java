@@ -88,6 +88,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	 */
 	public void clear() {
 		this.argumentResolvers.clear();
+		this.argumentResolverCache.clear();
 	}
 
 
