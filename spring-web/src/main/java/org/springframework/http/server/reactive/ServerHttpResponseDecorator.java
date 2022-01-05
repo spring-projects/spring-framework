@@ -66,6 +66,16 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 	}
 
 	@Override
+	public boolean setRawStatusCode(@Nullable Integer value) {
+		return getDelegate().setRawStatusCode(value);
+	}
+
+	@Override
+	public Integer getRawStatusCode() {
+		return getDelegate().getRawStatusCode();
+	}
+
+	@Override
 	public HttpHeaders getHeaders() {
 		return getDelegate().getHeaders();
 	}
