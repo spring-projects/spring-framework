@@ -29,7 +29,7 @@ configure(allprojects) { project ->
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.6"
 			mavenBom "io.netty:netty-bom:4.1.72.Final"
-			mavenBom "io.projectreactor:reactor-bom:2020.0.14"
+			mavenBom "io.projectreactor:reactor-bom:2020.0.15-SNAPSHOT"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR11"
 			mavenBom "io.rsocket:rsocket-bom:1.1.1"
 			mavenBom "org.eclipse.jetty:jetty-bom:9.4.44.v20210927"
@@ -292,6 +292,7 @@ configure(allprojects) { project ->
 		repositories {
 			mavenCentral()
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
+			maven { url "https://repo.spring.io/snapshot" } // reactor
 		}
 	}
 	configurations.all {
