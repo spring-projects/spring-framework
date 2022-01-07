@@ -16,30 +16,40 @@
 
 package org.springframework.jdbc.support.incrementer;
 
-import javax.sql.DataSource;
-
 import org.junit.jupiter.api.Test;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Integration tests for {@link H2SequenceMaxValueIncrementer}.
+ *
  * @author Henning Pöttker
+ * @author Sam Brannen
+ * @since 5.3.15
  */
 class H2SequenceMaxValueIncrementerTests {
 
 	@Test
-	void testH2SequenceMaxValueIncrementer() {
-		DataSource dataSource = new EmbeddedDatabaseBuilder()
+	void incrementsSequence() {
+		EmbeddedDatabase database = new EmbeddedDatabaseBuilder()
 				.setType(EmbeddedDatabaseType.H2)
+				.generateUniqueName(true)
 				.addScript("classpath:/org/springframework/jdbc/support/incrementer/schema.sql")
 				.build();
-		H2SequenceMaxValueIncrementer incrementer = new H2SequenceMaxValueIncrementer(dataSource, "SEQ");
 
-		assertThat(incrementer.nextIntValue()).isEqualTo(1);
-		assertThat(incrementer.nextStringValue()).isEqualTo("2");
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(database);
+		assertThat(jdbcTemplate.queryForObject("values next value for SEQ", int.class)).isEqualTo(1);
+
+		H2SequenceMaxValueIncrementer incrementer = new H2SequenceMaxValueIncrementer(database, "SEQ");
+		assertThat(incrementer.nextIntValue()).isEqualTo(2);
+		assertThat(incrementer.nextStringValue()).isEqualTo("3");
+
+		database.shutdown();
 	}
 
 }
