@@ -86,7 +86,7 @@ configure(allprojects) { project ->
 			dependency "org.ogce:xpp3:1.1.6"
 			dependency "org.yaml:snakeyaml:1.30"
 
-			dependency "com.h2database:h2:1.4.200"
+			dependency "com.h2database:h2:2.0.206"
 			dependency "com.github.ben-manes.caffeine:caffeine:3.0.5"
 			dependency "com.github.librepdf:openpdf:1.3.26"
 			dependency "com.rometools:rome:1.16.0"
