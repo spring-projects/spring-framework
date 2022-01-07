@@ -19,6 +19,7 @@ package org.springframework.aop.testfixture.advice;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Abstract superclass for counting advices etc.
@@ -31,7 +32,7 @@ import java.util.HashMap;
 public class MethodCounter implements Serializable {
 
 	/** Method name --> count, does not understand overloading */
-	private HashMap<String, Integer> map = new HashMap<>();
+	private Map<String, Integer> map = new HashMap<>();
 
 	private int allCount;
 
