@@ -72,11 +72,9 @@ class H2SequenceMaxValueIncrementerTests {
 
 	/**
 	 * Tests that the incrementer works when using all supported H2 <em>compatibility modes</em>.
-	 *
-	 * <p>The following modes are only supported with H2 2.x or higher: STRICT, LEGACY, MariaDB
 	 */
 	@ParameterizedTest
-	@ValueSource(strings = { "DB2", "Derby", "HSQLDB", "MSSQLServer", "MySQL", "Oracle", "PostgreSQL" })
+	@ValueSource(strings = { "STRICT", "LEGACY", "DB2", "Derby", "HSQLDB", "MariaDB", "MSSQLServer", "MySQL", "Oracle", "PostgreSQL" })
 	void incrementsSequenceWithExplicitH2CompatibilityMode(String compatibilityMode) {
 		String connectionUrl = String.format("jdbc:h2:mem:%s;MODE=%s", UUID.randomUUID().toString(), compatibilityMode);
 		DataSource dataSource = new SimpleDriverDataSource(new org.h2.Driver(), connectionUrl, "sa", "");
