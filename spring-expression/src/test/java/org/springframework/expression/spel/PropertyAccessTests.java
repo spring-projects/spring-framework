@@ -262,12 +262,12 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 
 	@Test
 	public void propertyAccessWithInstanceMethodResolverAndTypedRootObject() {
-		Person target = new Person("p1");
+		Person rootObject = new Person("p1");
 		EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().
-				withInstanceMethods().withTypedRootObject(target, TypeDescriptor.valueOf(Object.class)).build();
+				withInstanceMethods().withTypedRootObject(rootObject, TypeDescriptor.valueOf(Object.class)).build();
 
-		assertThat(parser.parseExpression("name.substring(1)").getValue(context, target)).isEqualTo("1");
-		assertThat(context.getRootObject().getValue()).isSameAs(target);
+		assertThat(parser.parseExpression("name.substring(1)").getValue(context)).isEqualTo("1");
+		assertThat(context.getRootObject().getValue()).isSameAs(rootObject);
 		assertThat(context.getRootObject().getTypeDescriptor().getType()).isSameAs(Object.class);
 	}
 
