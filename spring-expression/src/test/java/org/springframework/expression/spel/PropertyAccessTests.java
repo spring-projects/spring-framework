@@ -232,17 +232,17 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		assertThat(context.getRootObject().getValue()).isSameAs(target);
 
 		Expression expr = parser.parseExpression("name");
-		assertThat(expr.getValue(context, target)).isEqualTo("p1");
+		assertThat(expr.getValue(context)).isEqualTo("p1");
 		target.setName("p2");
-		assertThat(expr.getValue(context, target)).isEqualTo("p2");
+		assertThat(expr.getValue(context)).isEqualTo("p2");
 
 		parser.parseExpression("name='p3'").getValue(context, target);
 		assertThat(target.getName()).isEqualTo("p3");
-		assertThat(expr.getValue(context, target)).isEqualTo("p3");
+		assertThat(expr.getValue(context)).isEqualTo("p3");
 
-		expr.setValue(context, target, "p4");
+		expr.setValue(context, "p4");
 		assertThat(target.getName()).isEqualTo("p4");
-		assertThat(expr.getValue(context, target)).isEqualTo("p4");
+		assertThat(expr.getValue(context)).isEqualTo("p4");
 	}
 
 	@Test
