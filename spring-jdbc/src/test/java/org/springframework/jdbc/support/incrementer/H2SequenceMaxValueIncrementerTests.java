@@ -20,18 +20,16 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import org.h2.engine.Mode.ModeEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,12 +58,7 @@ class H2SequenceMaxValueIncrementerTests {
 				.addScript("classpath:/org/springframework/jdbc/support/incrementer/schema.sql")
 				.build();
 
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(database);
-		assertThat(jdbcTemplate.queryForObject("values next value for SEQ", int.class)).isEqualTo(1);
-
-		H2SequenceMaxValueIncrementer incrementer = new H2SequenceMaxValueIncrementer(database, "SEQ");
-		assertThat(incrementer.nextIntValue()).isEqualTo(2);
-		assertThat(incrementer.nextStringValue()).isEqualTo("3");
+		assertIncrements(database);
 
 		database.shutdown();
 	}
@@ -74,24 +67,24 @@ class H2SequenceMaxValueIncrementerTests {
 	 * Tests that the incrementer works when using all supported H2 <em>compatibility modes</em>.
 	 */
 	@ParameterizedTest
-	@ValueSource(strings = { "STRICT", "LEGACY", "DB2", "Derby", "HSQLDB", "MariaDB", "MSSQLServer", "MySQL", "Oracle", "PostgreSQL" })
-	void incrementsSequenceWithExplicitH2CompatibilityMode(String compatibilityMode) {
-		String connectionUrl = String.format("jdbc:h2:mem:%s;MODE=%s", UUID.randomUUID().toString(), compatibilityMode);
+	@EnumSource(ModeEnum.class)
+	void incrementsSequenceWithExplicitH2CompatibilityMode(ModeEnum mode) {
+		String connectionUrl = String.format("jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false;MODE=%s", UUID.randomUUID().toString(), mode);
 		DataSource dataSource = new SimpleDriverDataSource(new org.h2.Driver(), connectionUrl, "sa", "");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-		PlatformTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
-		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+		jdbcTemplate.execute("CREATE SEQUENCE SEQ");
 
-		transactionTemplate.executeWithoutResult(status -> {
-			jdbcTemplate.execute("CREATE SEQUENCE SEQ");
-			assertThat(jdbcTemplate.queryForObject("values next value for SEQ", int.class)).isEqualTo(1);
-
-			H2SequenceMaxValueIncrementer incrementer = new H2SequenceMaxValueIncrementer(dataSource, "SEQ");
-			assertThat(incrementer.nextIntValue()).isEqualTo(2);
-			assertThat(incrementer.nextStringValue()).isEqualTo("3");
-		});
+		assertIncrements(dataSource);
 
 		jdbcTemplate.execute("SHUTDOWN");
+	}
+
+	private void assertIncrements(DataSource dataSource) {
+		assertThat(new JdbcTemplate(dataSource).queryForObject("values next value for SEQ", int.class)).isEqualTo(1);
+
+		H2SequenceMaxValueIncrementer incrementer = new H2SequenceMaxValueIncrementer(dataSource, "SEQ");
+		assertThat(incrementer.nextIntValue()).isEqualTo(2);
+		assertThat(incrementer.nextStringValue()).isEqualTo("3");
 	}
 
 }
