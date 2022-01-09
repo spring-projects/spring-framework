@@ -1221,9 +1221,10 @@ class ResolvableTypeTests {
 
 	@Test
 	void forClassWithMismatchedGenerics() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				ResolvableType.forClassWithGenerics(Map.class, Integer.class))
-			.withMessageContaining("Mismatched number of generics specified");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> ResolvableType.forClassWithGenerics(Map.class, Integer.class))
+			.withMessageContaining("Mismatched number of generics specified for")
+			.withMessageContaining("java.util.Map<K,V>");
 	}
 
 	@Test
