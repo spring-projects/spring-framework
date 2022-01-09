@@ -29,7 +29,7 @@ configure(allprojects) { project ->
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.13.0"
 			mavenBom "io.netty:netty-bom:4.1.72.Final"
-			mavenBom "io.projectreactor:reactor-bom:2020.0.14"
+			mavenBom "io.projectreactor:reactor-bom:2020.0.15-SNAPSHOT"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR11"
 			mavenBom "io.rsocket:rsocket-bom:1.1.1"
 			mavenBom "org.eclipse.jetty:jetty-bom:11.0.7"
@@ -86,7 +86,7 @@ configure(allprojects) { project ->
 			dependency "org.ogce:xpp3:1.1.6"
 			dependency "org.yaml:snakeyaml:1.30"
 
-			dependency "com.h2database:h2:1.4.200"
+			dependency "com.h2database:h2:2.0.206"
 			dependency "com.github.ben-manes.caffeine:caffeine:3.0.5"
 			dependency "com.github.librepdf:openpdf:1.3.26"
 			dependency "com.rometools:rome:1.16.0"
@@ -250,6 +250,7 @@ configure(allprojects) { project ->
 		repositories {
 			mavenCentral()
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
+			maven { url "https://repo.spring.io/snapshot" } // reactor
 		}
 	}
 	configurations.all {
