@@ -3868,7 +3868,7 @@ as the following example shows:
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
-		public Validator getValidator(); {
+		public Validator getValidator() {
 			// ...
 		}
 
