@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@ class ProfilesTests {
 
 	@Test
 	void ofWhenEmptyThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				Profiles.of())
+		assertThatIllegalArgumentException()
+			.isThrownBy(Profiles::of)
 			.withMessageContaining("Must specify at least one profile");
 	}
 
@@ -354,8 +354,8 @@ class ProfilesTests {
 
 
 	private static void assertMalformed(Supplier<Profiles> supplier) {
-		assertThatIllegalArgumentException().isThrownBy(
-				supplier::get)
+		assertThatIllegalArgumentException()
+			.isThrownBy(supplier::get)
 			.withMessageContaining("Malformed");
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,12 +183,9 @@ abstract class AbstractStaxXMLReaderTests {
 		ContentHandler contentHandler = mock(ContentHandler.class);
 		willAnswer(new CopyCharsAnswer()).given(contentHandler).characters(any(char[].class), anyInt(), anyInt());
 		willAnswer(new CopyCharsAnswer()).given(contentHandler).ignorableWhitespace(any(char[].class), anyInt(), anyInt());
-		willAnswer(new Answer<Object>() {
-			@Override
-			public Object answer(InvocationOnMock invocation) throws Throwable {
-				invocation.getArguments()[3] = new AttributesImpl((Attributes) invocation.getArguments()[3]);
-				return null;
-			}
+		willAnswer(invocation -> {
+			invocation.getArguments()[3] = new AttributesImpl((Attributes) invocation.getArguments()[3]);
+			return null;
 		}).given(contentHandler).startElement(anyString(), anyString(), anyString(), any(Attributes.class));
 		return contentHandler;
 	}
