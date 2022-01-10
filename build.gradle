@@ -329,6 +329,8 @@ configure([rootProject] + javaProjects) { project ->
 			"https://jakarta.ee/specifications/platform/9/apidocs/",
 			"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
 			"https://www.ibm.com/docs/api/v1/content/SSEQTP_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/",
+			"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
+			"https://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",
 			"https://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
 			"https://fasterxml.github.io/jackson-core/javadoc/2.10/",
