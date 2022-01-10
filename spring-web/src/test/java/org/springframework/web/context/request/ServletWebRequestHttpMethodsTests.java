@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -323,7 +323,7 @@ class ServletWebRequestHttpMethodsTests {
 
 		assertThat(request.checkNotModified(oneMinuteAgo)).isFalse();
 		assertThat(servletResponse.getStatus()).isEqualTo(200);
-		assertThat(servletResponse.getHeader("Last-Modified")).isEqualTo(null);
+		assertThat(servletResponse.getHeader("Last-Modified")).isNull();
 	}
 
 	@ParameterizedHttpMethodTest
@@ -337,7 +337,7 @@ class ServletWebRequestHttpMethodsTests {
 
 		assertThat(request.checkNotModified(currentEpoch)).isTrue();
 		assertThat(servletResponse.getStatus()).isEqualTo(412);
-		assertThat(servletResponse.getHeader("Last-Modified")).isEqualTo(null);
+		assertThat(servletResponse.getHeader("Last-Modified")).isNull();
 	}
 
 	private void setUpRequest(String method) {

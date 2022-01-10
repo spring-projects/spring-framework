@@ -37,18 +37,18 @@ class StringUtilsTests {
 	@Test
 	void hasTextBlank() {
 		String blank = "          ";
-		assertThat(StringUtils.hasText(blank)).isEqualTo(false);
+		assertThat(StringUtils.hasText(blank)).isFalse();
 	}
 
 	@Test
 	void hasTextNullEmpty() {
-		assertThat(StringUtils.hasText(null)).isEqualTo(false);
-		assertThat(StringUtils.hasText("")).isEqualTo(false);
+		assertThat(StringUtils.hasText(null)).isFalse();
+		assertThat(StringUtils.hasText("")).isFalse();
 	}
 
 	@Test
 	void hasTextValid() {
-		assertThat(StringUtils.hasText("t")).isEqualTo(true);
+		assertThat(StringUtils.hasText("t")).isTrue();
 	}
 
 	@Test
@@ -68,7 +68,7 @@ class StringUtilsTests {
 
 	@Test
 	void trimWhitespace() {
-		assertThat(StringUtils.trimWhitespace(null)).isEqualTo(null);
+		assertThat(StringUtils.trimWhitespace(null)).isNull();
 		assertThat(StringUtils.trimWhitespace("")).isEqualTo("");
 		assertThat(StringUtils.trimWhitespace(" ")).isEqualTo("");
 		assertThat(StringUtils.trimWhitespace("\t")).isEqualTo("");
@@ -83,7 +83,7 @@ class StringUtilsTests {
 
 	@Test
 	void trimAllWhitespace() {
-		assertThat(StringUtils.trimAllWhitespace(null)).isEqualTo(null);
+		assertThat(StringUtils.trimAllWhitespace(null)).isNull();
 		assertThat(StringUtils.trimAllWhitespace("")).isEqualTo("");
 		assertThat(StringUtils.trimAllWhitespace(" ")).isEqualTo("");
 		assertThat(StringUtils.trimAllWhitespace("\t")).isEqualTo("");
@@ -98,7 +98,7 @@ class StringUtilsTests {
 
 	@Test
 	void trimLeadingWhitespace() {
-		assertThat(StringUtils.trimLeadingWhitespace(null)).isEqualTo(null);
+		assertThat(StringUtils.trimLeadingWhitespace(null)).isNull();
 		assertThat(StringUtils.trimLeadingWhitespace("")).isEqualTo("");
 		assertThat(StringUtils.trimLeadingWhitespace(" ")).isEqualTo("");
 		assertThat(StringUtils.trimLeadingWhitespace("\t")).isEqualTo("");
@@ -113,7 +113,7 @@ class StringUtilsTests {
 
 	@Test
 	void trimTrailingWhitespace() {
-		assertThat(StringUtils.trimTrailingWhitespace(null)).isEqualTo(null);
+		assertThat(StringUtils.trimTrailingWhitespace(null)).isNull();
 		assertThat(StringUtils.trimTrailingWhitespace("")).isEqualTo("");
 		assertThat(StringUtils.trimTrailingWhitespace(" ")).isEqualTo("");
 		assertThat(StringUtils.trimTrailingWhitespace("\t")).isEqualTo("");
@@ -128,7 +128,7 @@ class StringUtilsTests {
 
 	@Test
 	void trimLeadingCharacter() {
-		assertThat(StringUtils.trimLeadingCharacter(null, ' ')).isEqualTo(null);
+		assertThat(StringUtils.trimLeadingCharacter(null, ' ')).isNull();
 		assertThat(StringUtils.trimLeadingCharacter("", ' ')).isEqualTo("");
 		assertThat(StringUtils.trimLeadingCharacter(" ", ' ')).isEqualTo("");
 		assertThat(StringUtils.trimLeadingCharacter("\t", ' ')).isEqualTo("\t");
@@ -141,7 +141,7 @@ class StringUtilsTests {
 
 	@Test
 	void trimTrailingCharacter() {
-		assertThat(StringUtils.trimTrailingCharacter(null, ' ')).isEqualTo(null);
+		assertThat(StringUtils.trimTrailingCharacter(null, ' ')).isNull();
 		assertThat(StringUtils.trimTrailingCharacter("", ' ')).isEqualTo("");
 		assertThat(StringUtils.trimTrailingCharacter(" ", ' ')).isEqualTo("");
 		assertThat(StringUtils.trimTrailingCharacter("\t", ' ')).isEqualTo("\t");
@@ -340,7 +340,7 @@ class StringUtilsTests {
 
 	@Test
 	void getFilename() {
-		assertThat(StringUtils.getFilename(null)).isEqualTo(null);
+		assertThat(StringUtils.getFilename(null)).isNull();
 		assertThat(StringUtils.getFilename("")).isEqualTo("");
 		assertThat(StringUtils.getFilename("myfile")).isEqualTo("myfile");
 		assertThat(StringUtils.getFilename("mypath/myfile")).isEqualTo("myfile");
@@ -352,11 +352,11 @@ class StringUtilsTests {
 
 	@Test
 	void getFilenameExtension() {
-		assertThat(StringUtils.getFilenameExtension(null)).isEqualTo(null);
-		assertThat(StringUtils.getFilenameExtension("")).isEqualTo(null);
-		assertThat(StringUtils.getFilenameExtension("myfile")).isEqualTo(null);
-		assertThat(StringUtils.getFilenameExtension("myPath/myfile")).isEqualTo(null);
-		assertThat(StringUtils.getFilenameExtension("/home/user/.m2/settings/myfile")).isEqualTo(null);
+		assertThat(StringUtils.getFilenameExtension(null)).isNull();
+		assertThat(StringUtils.getFilenameExtension("")).isNull();
+		assertThat(StringUtils.getFilenameExtension("myfile")).isNull();
+		assertThat(StringUtils.getFilenameExtension("myPath/myfile")).isNull();
+		assertThat(StringUtils.getFilenameExtension("/home/user/.m2/settings/myfile")).isNull();
 		assertThat(StringUtils.getFilenameExtension("myfile.")).isEqualTo("");
 		assertThat(StringUtils.getFilenameExtension("myPath/myfile.")).isEqualTo("");
 		assertThat(StringUtils.getFilenameExtension("myfile.txt")).isEqualTo("txt");

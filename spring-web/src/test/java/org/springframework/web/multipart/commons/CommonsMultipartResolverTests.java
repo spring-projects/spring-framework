@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,8 +287,8 @@ public class CommonsMultipartResolverTests {
 			MultipartHttpServletRequest request) throws UnsupportedEncodingException {
 
 		MultipartTestBean1 mtb1 = new MultipartTestBean1();
-		assertThat(mtb1.getField1()).isEqualTo(null);
-		assertThat(mtb1.getField2()).isEqualTo(null);
+		assertThat(mtb1.getField1()).isNull();
+		assertThat(mtb1.getField2()).isNull();
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(mtb1, "mybean");
 		binder.registerCustomEditor(byte[].class, new ByteArrayMultipartFileEditor());
 		binder.bind(request);
@@ -301,8 +301,8 @@ public class CommonsMultipartResolverTests {
 		assertThat(new String(mtb1.getField2())).isEqualTo(new String(file2.getBytes()));
 
 		MultipartTestBean2 mtb2 = new MultipartTestBean2();
-		assertThat(mtb2.getField1()).isEqualTo(null);
-		assertThat(mtb2.getField2()).isEqualTo(null);
+		assertThat(mtb2.getField1()).isNull();
+		assertThat(mtb2.getField2()).isNull();
 		binder = new ServletRequestDataBinder(mtb2, "mybean");
 		binder.registerCustomEditor(String.class, "field1", new StringMultipartFileEditor());
 		binder.registerCustomEditor(String.class, "field2", new StringMultipartFileEditor("UTF-16"));

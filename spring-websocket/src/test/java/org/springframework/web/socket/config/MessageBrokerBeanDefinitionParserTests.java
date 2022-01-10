@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,6 +91,7 @@ import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
 
 /**
  * Test fixture for {@link MessageBrokerBeanDefinitionParser}.
@@ -128,7 +129,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		WebSocketSession session = new TestWebSocketSession("id");
 		wsHttpRequestHandler.getWebSocketHandler().afterConnectionEstablished(session);
-		assertThat(session.getAttributes().get("decorated")).isEqualTo(true);
+		assertThat(session.getAttributes().get("decorated")).asInstanceOf(BOOLEAN).isTrue();
 
 		WebSocketHandler wsHandler = wsHttpRequestHandler.getWebSocketHandler();
 		assertThat(wsHandler).isInstanceOf(ExceptionWebSocketHandlerDecorator.class);

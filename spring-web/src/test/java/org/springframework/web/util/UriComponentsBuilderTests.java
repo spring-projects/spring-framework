@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1066,7 +1066,7 @@ class UriComponentsBuilderTests {
 		assertThat(result1.getPath()).isEqualTo("/p1/%s/%s", vars.get("ps1"), vars.get("ps2"));
 		assertThat(result1.getQuery()).isEqualTo("q1");
 		assertThat(result1.getFragment()).isEqualTo("f1");
-		assertThat(result1.getSchemeSpecificPart()).isEqualTo(null);
+		assertThat(result1.getSchemeSpecificPart()).isNull();
 
 		UriComponents result2 = builder2.build();
 		assertThat(result2.getScheme()).isEqualTo("http");
@@ -1075,7 +1075,7 @@ class UriComponentsBuilderTests {
 		assertThat(result2.getPath()).isEqualTo("/p1/%s/%s", vars.get("ps1"), vars.get("ps2"));
 		assertThat(result2.getQuery()).isEqualTo("q1");
 		assertThat(result2.getFragment()).isEqualTo("f1");
-		assertThat(result1.getSchemeSpecificPart()).isEqualTo(null);
+		assertThat(result1.getSchemeSpecificPart()).isNull();
 	}
 
 	@Test // gh-26466
