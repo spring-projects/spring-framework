@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		MyRepository repository = ctx.getBean(MyRepository.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
-		assertThat(AopUtils.isCglibProxy(repository)).isEqualTo(true);
+		assertThat(AopUtils.isCglibProxy(repository)).isTrue();
 		assertThat(repository.getInvocationCount()).isGreaterThan(0);
 		assertThat(txManager.commits).isGreaterThan(0);
 	}

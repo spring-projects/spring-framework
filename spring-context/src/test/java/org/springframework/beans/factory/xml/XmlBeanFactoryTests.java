@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -876,7 +876,7 @@ class XmlBeanFactoryTests {
 		// should have been autowired
 		assertThat(rod1.getSpouse1()).isEqualTo(kerry);
 		assertThat(rod1.getAge()).isEqualTo(0);
-		assertThat(rod1.getName()).isEqualTo(null);
+		assertThat(rod1.getName()).isNull();
 
 		ConstructorDependenciesBean rod2 = (ConstructorDependenciesBean) xbf.getBean("rod2");
 		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
@@ -885,7 +885,7 @@ class XmlBeanFactoryTests {
 		assertThat(rod2.getSpouse1()).isEqualTo(kerry2);
 		assertThat(rod2.getSpouse2()).isEqualTo(kerry1);
 		assertThat(rod2.getAge()).isEqualTo(0);
-		assertThat(rod2.getName()).isEqualTo(null);
+		assertThat(rod2.getName()).isNull();
 
 		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod3");
 		IndexedTestBean other = (IndexedTestBean) xbf.getBean("other");
@@ -894,7 +894,7 @@ class XmlBeanFactoryTests {
 		assertThat(rod.getSpouse2()).isEqualTo(kerry);
 		assertThat(rod.getOther()).isEqualTo(other);
 		assertThat(rod.getAge()).isEqualTo(0);
-		assertThat(rod.getName()).isEqualTo(null);
+		assertThat(rod.getName()).isNull();
 
 		xbf.getBean("rod4", ConstructorDependenciesBean.class);
 		// should have been autowired
@@ -902,7 +902,7 @@ class XmlBeanFactoryTests {
 		assertThat(rod.getSpouse2()).isEqualTo(kerry);
 		assertThat(rod.getOther()).isEqualTo(other);
 		assertThat(rod.getAge()).isEqualTo(0);
-		assertThat(rod.getName()).isEqualTo(null);
+		assertThat(rod.getName()).isNull();
 	}
 
 	@Test
@@ -929,7 +929,7 @@ class XmlBeanFactoryTests {
 		assertThat(rod6.getSpouse2()).isEqualTo(kerry1);
 		assertThat(rod6.getOther()).isEqualTo(other);
 		assertThat(rod6.getAge()).isEqualTo(0);
-		assertThat(rod6.getName()).isEqualTo(null);
+		assertThat(rod6.getName()).isNull();
 
 		xbf.destroySingletons();
 		assertThat(rod6.destroyed).isTrue();
@@ -967,7 +967,7 @@ class XmlBeanFactoryTests {
 		assertThat(rod9c.getAge()).isEqualTo(97);
 
 		ConstructorDependenciesBean rod10 = (ConstructorDependenciesBean) xbf.getBean("rod10");
-		assertThat(rod10.getName()).isEqualTo(null);
+		assertThat(rod10.getName()).isNull();
 
 		ConstructorDependenciesBean rod11 = (ConstructorDependenciesBean) xbf.getBean("rod11");
 		assertThat(rod11.getSpouse1()).isEqualTo(kerry2);
@@ -1331,7 +1331,7 @@ class XmlBeanFactoryTests {
 
 		OverrideOneMethodSubclass ooms = (OverrideOneMethodSubclass) xbf.getBean("replaceVoidMethod");
 		DoSomethingReplacer dos = (DoSomethingReplacer) xbf.getBean("doSomethingReplacer");
-		assertThat(dos.lastArg).isEqualTo(null);
+		assertThat(dos.lastArg).isNull();
 		String s1 = "";
 		String s2 = "foo bar black sheep";
 		ooms.doSomething(s1);

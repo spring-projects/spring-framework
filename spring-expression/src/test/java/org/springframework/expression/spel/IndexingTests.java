@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ class IndexingTests {
 		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("java.util.Map<java.lang.Integer, java.lang.Integer>");
 		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("parameterizedMap['9']");
-		assertThat(expression.getValue(this)).isEqualTo(null);
+		assertThat(expression.getValue(this)).isNull();
 		expression.setValue(this, "37");
 		assertThat(expression.getValue(this)).isEqualTo(37);
 	}

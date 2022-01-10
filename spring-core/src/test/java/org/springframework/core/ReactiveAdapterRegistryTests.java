@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -225,9 +225,9 @@ class ReactiveAdapterRegistryTests {
 
 		@Test
 		void deferred() {
-			assertThat(getAdapter(CompletableFuture.class).getDescriptor().isDeferred()).isEqualTo(false);
-			assertThat(getAdapter(Deferred.class).getDescriptor().isDeferred()).isEqualTo(true);
-			assertThat(getAdapter(kotlinx.coroutines.flow.Flow.class).getDescriptor().isDeferred()).isEqualTo(true);
+			assertThat(getAdapter(CompletableFuture.class).getDescriptor().isDeferred()).isFalse();
+			assertThat(getAdapter(Deferred.class).getDescriptor().isDeferred()).isTrue();
+			assertThat(getAdapter(kotlinx.coroutines.flow.Flow.class).getDescriptor().isDeferred()).isTrue();
 		}
 	}
 

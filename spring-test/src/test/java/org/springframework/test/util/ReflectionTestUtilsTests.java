@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,7 +155,7 @@ class ReflectionTestUtilsTests {
 		assertThat(person.getName()).as("name (protected field)").isEqualTo("Tom");
 		assertThat(person.getAge()).as("age (private field)").isEqualTo(42);
 		assertThat(person.getEyeColor()).as("eye color (package private field)").isEqualTo("blue");
-		assertThat(person.likesPets()).as("'likes pets' flag (package private boolean field)").isEqualTo(true);
+		assertThat(person.likesPets()).as("'likes pets' flag (package private boolean field)").isTrue();
 		assertThat(person.getFavoriteNumber()).as("'favorite number' (package field)").isEqualTo(PI);
 	}
 
@@ -167,7 +167,7 @@ class ReflectionTestUtilsTests {
 		assertThat(target.getName()).as("name (protected field)").isEqualTo("Tom");
 		assertThat(target.getAge()).as("age (private field)").isEqualTo(42);
 		assertThat(target.getEyeColor()).as("eye color (package private field)").isEqualTo("blue");
-		assertThat(target.likesPets()).as("'likes pets' flag (package private boolean field)").isEqualTo(true);
+		assertThat(target.likesPets()).as("'likes pets' flag (package private boolean field)").isTrue();
 		assertThat(target.getFavoriteNumber()).as("'favorite number' (package field)").isEqualTo(PI);
 	}
 
@@ -260,7 +260,7 @@ class ReflectionTestUtilsTests {
 		assertThat(person.getName()).as("name (private method)").isEqualTo("Jerry");
 		assertThat(person.getAge()).as("age (protected method)").isEqualTo(33);
 		assertThat(person.getEyeColor()).as("eye color (package private method)").isEqualTo("green");
-		assertThat(person.likesPets()).as("'likes pets' flag (protected method for a boolean)").isEqualTo(false);
+		assertThat(person.likesPets()).as("'likes pets' flag (protected method for a boolean)").isFalse();
 		assertThat(person.getFavoriteNumber()).as("'favorite number' (protected method for a Number)").isEqualTo(Integer.valueOf(42));
 
 		assertThat(invokeGetterMethod(person, "getId")).isEqualTo(Long.valueOf(1));
@@ -284,7 +284,7 @@ class ReflectionTestUtilsTests {
 		assertThat(person.getName()).as("name (private method)").isEqualTo("Tom");
 		assertThat(person.getAge()).as("age (protected method)").isEqualTo(42);
 		assertThat(person.getEyeColor()).as("eye color (package private method)").isEqualTo("blue");
-		assertThat(person.likesPets()).as("'likes pets' flag (protected method for a boolean)").isEqualTo(true);
+		assertThat(person.likesPets()).as("'likes pets' flag (protected method for a boolean)").isTrue();
 		assertThat(person.getFavoriteNumber()).as("'favorite number' (protected method for a Number)").isEqualTo(PI);
 
 		assertThat(invokeGetterMethod(person, "id")).isEqualTo(Long.valueOf(99));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import org.springframework.validation.annotation.Validated;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -569,7 +570,7 @@ class MethodJmsListenerEndpointTests {
 			this.invocations.put("resolveJmsMessageHeaderAccessor", true);
 			assertThat(headers).as("MessageHeaders not injected").isNotNull();
 			assertThat(headers.getPriority()).as("Missing JMS message priority header").isEqualTo(Integer.valueOf(9));
-			assertThat(headers.getHeader("customBoolean")).as("Missing custom header").isEqualTo(true);
+			assertThat(headers.getHeader("customBoolean")).as("Missing custom header").asInstanceOf(BOOLEAN).isTrue();
 		}
 
 		public void resolveObjectPayload(MyBean bean) {

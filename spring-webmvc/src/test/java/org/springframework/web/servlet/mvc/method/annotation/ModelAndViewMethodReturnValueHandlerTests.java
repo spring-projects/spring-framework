@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
 
 		ModelMap model = mavContainer.getModel();
-		assertThat(mavContainer.getView()).isEqualTo(null);
+		assertThat(mavContainer.getView()).isNull();
 		assertThat(mavContainer.getModel().isEmpty()).isTrue();
 		assertThat(model).as("RedirectAttributes should not be used if controller doesn't redirect").isNotSameAs(redirectAttributes);
 	}
