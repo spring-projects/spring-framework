@@ -125,6 +125,10 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 		});
 	}
 
+	@Override
+	protected HttpHeaders initReadOnlyHeaders() {
+		return HttpHeaders.readOnlyHttpHeaders(new JettyHeadersAdapter(this.jettyRequest.getHeaders()));
+	}
 
 	@Override
 	protected void applyCookies() {
