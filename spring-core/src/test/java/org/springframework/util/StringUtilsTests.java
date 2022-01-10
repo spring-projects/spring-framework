@@ -770,5 +770,13 @@ class StringUtilsTests {
 	void collectionToDelimitedStringWithNullValuesShouldNotFail() {
 		assertThat(StringUtils.collectionToCommaDelimitedString(Collections.singletonList(null))).isEqualTo("null");
 	}
+	
+	@Test
+	void matchesCharacter() {
+		assertThat(StringUtils.matchesCharacter(null, '/')).isFalse();
+		assertThat(StringUtils.matchesCharacter("/a", '/')).isFalse();
+		assertThat(StringUtils.matchesCharacter("a", '/')).isFalse();
+		assertThat(StringUtils.matchesCharacter("/", '/')).isTrue();
+	}
 
 }
