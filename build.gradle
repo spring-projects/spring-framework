@@ -371,6 +371,8 @@ configure([rootProject] + javaProjects) { project ->
 			"https://docs.oracle.com/javaee/7/api/",
 			"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
 			"https://www.ibm.com/docs/api/v1/content/SSEQTP_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/",
+			"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
+			"https://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",
 			"https://tiles.apache.org/tiles-request/apidocs/",
 			"https://tiles.apache.org/framework/apidocs/",
 			"https://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
