@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,6 +150,14 @@ class StringUtilsTests {
 		assertThat(StringUtils.trimTrailingCharacter(" a ", ' ')).isEqualTo(" a");
 		assertThat(StringUtils.trimTrailingCharacter(" a b ", ' ')).isEqualTo(" a b");
 		assertThat(StringUtils.trimTrailingCharacter(" a b  c ", ' ')).isEqualTo(" a b  c");
+	}
+
+	@Test
+	void matchesCharacter() {
+		assertThat(StringUtils.matchesCharacter(null, '/')).isFalse();
+		assertThat(StringUtils.matchesCharacter("/a", '/')).isFalse();
+		assertThat(StringUtils.matchesCharacter("a", '/')).isFalse();
+		assertThat(StringUtils.matchesCharacter("/", '/')).isTrue();
 	}
 
 	@Test
