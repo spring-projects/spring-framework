@@ -31,6 +31,7 @@ import reactor.netty.http.client.HttpClientRequest;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
 
@@ -119,6 +120,11 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 	@Override
 	public Mono<Void> setComplete() {
 		return doCommit(this.outbound::then);
+	}
+
+	@Override
+	protected HttpHeaders initReadOnlyHeaders() {
+		return HttpHeaders.readOnlyHttpHeaders(new NettyHeadersAdapter(this.request.requestHeaders()));
 	}
 
 	@Override

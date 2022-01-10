@@ -119,6 +119,11 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	@Override
+	protected HttpHeaders initReadOnlyHeaders() {
+		return HttpHeaders.readOnlyHttpHeaders(new HttpComponentsHeadersAdapter(this.httpRequest));
+	}
+
+	@Override
 	protected void applyHeaders() {
 		HttpHeaders headers = getHeaders();
 

@@ -74,14 +74,13 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		this.cookies = new LinkedMultiValueMap<>();
 	}
 
-
 	@Override
 	public HttpHeaders getHeaders() {
 		if (this.readOnlyHeaders != null) {
 			return this.readOnlyHeaders;
 		}
 		else if (State.COMMITTED.equals(this.state.get())) {
-			this.readOnlyHeaders = HttpHeaders.readOnlyHttpHeaders(this.headers);
+			this.readOnlyHeaders = initReadOnlyHeaders();
 			return this.readOnlyHeaders;
 		}
 		else {
@@ -142,6 +141,14 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 				.map(Supplier::get).collect(Collectors.toList());
 
 		return Flux.concat(actions).then();
+	}
+
+	/**
+	 * Initialize read-only headers with underlying request headers.
+	 * @return read-only headers
+	 */
+	protected HttpHeaders initReadOnlyHeaders() {
+		return HttpHeaders.readOnlyHttpHeaders(this.headers);
 	}
 
 
