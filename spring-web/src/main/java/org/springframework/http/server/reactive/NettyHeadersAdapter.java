@@ -147,7 +147,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public void putAll(Map<? extends String, ? extends List<String>> map) {
-		map.forEach(this.headers::add);
+		map.forEach(this.headers::set);
 	}
 
 	@Override
