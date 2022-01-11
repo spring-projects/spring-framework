@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		this.cookies = new LinkedMultiValueMap<>();
 	}
 
+
 	@Override
 	public HttpHeaders getHeaders() {
 		if (this.readOnlyHeaders != null) {
@@ -86,6 +87,16 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		else {
 			return this.headers;
 		}
+	}
+
+	/**
+	 * Initialize the read-only headers after the request is committed.
+	 * <p>By default, this method simply applies a read-only wrapper.
+	 * Subclasses can do the same for headers from the native request.
+	 * @since 5.3.15
+	 */
+	protected HttpHeaders initReadOnlyHeaders() {
+		return HttpHeaders.readOnlyHttpHeaders(this.headers);
 	}
 
 	@Override
@@ -141,14 +152,6 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 				.map(Supplier::get).collect(Collectors.toList());
 
 		return Flux.concat(actions).then();
-	}
-
-	/**
-	 * Initialize read-only headers with underlying request headers.
-	 * @return read-only headers
-	 */
-	protected HttpHeaders initReadOnlyHeaders() {
-		return HttpHeaders.readOnlyHttpHeaders(this.headers);
 	}
 
 

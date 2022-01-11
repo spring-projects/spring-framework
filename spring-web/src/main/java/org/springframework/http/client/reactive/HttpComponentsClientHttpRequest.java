@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,8 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 	@Nullable
 	private Flux<ByteBuffer> byteBufferFlux;
 
+	private transient long contentLength = -1;
+
 
 	public HttpComponentsClientHttpRequest(HttpMethod method, URI uri, HttpClientContext context,
 			DataBufferFactory dataBufferFactory) {
@@ -119,11 +121,6 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	@Override
-	protected HttpHeaders initReadOnlyHeaders() {
-		return HttpHeaders.readOnlyHttpHeaders(new HttpComponentsHeadersAdapter(this.httpRequest));
-	}
-
-	@Override
 	protected void applyHeaders() {
 		HttpHeaders headers = getHeaders();
 
@@ -135,6 +132,8 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 		if (!this.httpRequest.containsHeader(HttpHeaders.ACCEPT)) {
 			this.httpRequest.addHeader(HttpHeaders.ACCEPT, ALL_VALUE);
 		}
+
+		this.contentLength = headers.getContentLength();
 	}
 
 	@Override
@@ -156,6 +155,11 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 				});
 	}
 
+	@Override
+	protected HttpHeaders initReadOnlyHeaders() {
+		return HttpHeaders.readOnlyHttpHeaders(new HttpComponentsHeadersAdapter(this.httpRequest));
+	}
+
 	public AsyncRequestProducer toRequestProducer() {
 		ReactiveEntityProducer reactiveEntityProducer = null;
 
@@ -165,8 +169,8 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 			if (getHeaders().getContentType() != null) {
 				contentType = ContentType.parse(getHeaders().getContentType().toString());
 			}
-			reactiveEntityProducer = new ReactiveEntityProducer(this.byteBufferFlux, getHeaders().getContentLength(),
-					contentType, contentEncoding);
+			reactiveEntityProducer = new ReactiveEntityProducer(
+					this.byteBufferFlux, this.contentLength, contentType, contentEncoding);
 		}
 
 		return new BasicRequestProducer(this.httpRequest, reactiveEntityProducer);
