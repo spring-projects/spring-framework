@@ -80,7 +80,7 @@ public class WebSocketConfigurationSupport {
 	 * </pre>
 	 */
 	@Bean
-	public DefaultSockJsSchedulerContainer defaultSockJsSchedulerContainer() {
+	DefaultSockJsSchedulerContainer defaultSockJsSchedulerContainer() {
 		return (initHandlerRegistry().requiresTaskScheduler() ?
 				new DefaultSockJsSchedulerContainer(initDefaultSockJsScheduler()) :
 				new DefaultSockJsSchedulerContainer(null));
