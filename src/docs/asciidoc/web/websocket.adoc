@@ -896,7 +896,7 @@ destination:/queue/trade
 content-type:application/json
 content-length:44
 
-{"action":"BUY","ticker":"MMM","shares",44}^@
+{"action":"BUY","ticket":"MMM","shares":44}^@
 ----
 
 After the execution, the server can
