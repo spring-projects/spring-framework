@@ -57,6 +57,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Internal class used to transform a {@link WebRequest} into a
@@ -262,6 +263,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		String path = uriComponents.getPath();
 		String requestPath = (path != null ? path : "");
 		String servletPath = requestPath.substring(request.getContextPath().length());
+		servletPath = UriUtils.decode(servletPath, StandardCharsets.UTF_8);
 		request.setServletPath(servletPath);
 	}
 

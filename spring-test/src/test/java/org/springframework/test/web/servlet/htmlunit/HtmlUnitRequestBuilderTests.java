@@ -782,6 +782,16 @@ public class HtmlUnitRequestBuilderTests {
 		assertThat(actualRequest.getServletPath()).isEqualTo("/this/here");
 	}
 
+	@Test // gh-27837
+	public void buildRequestServletPathWithEncodedUrl() throws Exception {
+		webRequest.setUrl(new URL("http://localhost/test/Fr%C3%BChling%20Sommer%20Herbst%20Winter"));
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getRequestURI()).isEqualTo("/test/Fr%C3%BChling%20Sommer%20Herbst%20Winter");
+		assertThat(actualRequest.getServletPath()).isEqualTo("/Frühling Sommer Herbst Winter");
+	}
+
 	@Test
 	public void buildRequestSession() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
