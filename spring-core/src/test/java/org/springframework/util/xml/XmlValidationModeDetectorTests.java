@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.util.xml;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,8 +40,16 @@ class XmlValidationModeDetectorTests {
 	@ValueSource(strings = { "dtdWithTrailingComment.xml", "dtdWithLeadingComment.xml", "dtdWithCommentOnNextLine.xml",
 		"dtdWithMultipleComments.xml" })
 	void dtdDetection(String fileName) throws Exception {
-		InputStream inputStream = getClass().getResourceAsStream(fileName);
-		assertThat(xmlValidationModeDetector.detectValidationMode(inputStream)).isEqualTo(VALIDATION_DTD);
+		assertValidationMode(fileName, VALIDATION_DTD);
+	}
+
+
+	private void assertValidationMode(String fileName, int expectedValidationMode) throws IOException {
+		try (InputStream inputStream = getClass().getResourceAsStream(fileName)) {
+			assertThat(xmlValidationModeDetector.detectValidationMode(inputStream))
+				.as("Validation Mode")
+				.isEqualTo(expectedValidationMode);
+		}
 	}
 
 }
