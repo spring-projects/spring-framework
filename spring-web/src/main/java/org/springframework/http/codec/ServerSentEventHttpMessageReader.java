@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  */
 public class ServerSentEventHttpMessageReader implements HttpMessageReader<Object> {
@@ -140,22 +141,23 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	private Object buildEvent(List<String> lines, ResolvableType valueType, boolean shouldWrap,
 			Map<String, Object> hints) {
 
-		ServerSentEvent.Builder<Object> sseBuilder = shouldWrap ? ServerSentEvent.builder() : null;
+		ServerSentEvent.Builder<Object> sseBuilder = (shouldWrap ? ServerSentEvent.builder() : null);
 		StringBuilder data = null;
 		StringBuilder comment = null;
 
 		for (String line : lines) {
 			if (line.startsWith("data:")) {
-				data = (data != null ? data : new StringBuilder());
-				if (line.charAt(5) != ' ') {
-					data.append(line, 5, line.length());
+				int length = line.length();
+				if (length > 5) {
+					int index = (line.charAt(5) != ' ' ? 5 : 6);
+					if (length > index) {
+						data = (data != null ? data : new StringBuilder());
+						data.append(line, index, line.length());
+						data.append('\n');
+					}
 				}
-				else {
-					data.append(line, 6, line.length());
-				}
-				data.append('\n');
 			}
-			if (shouldWrap) {
+			else if (shouldWrap) {
 				if (line.startsWith("id:")) {
 					sseBuilder.id(line.substring(3).trim());
 				}

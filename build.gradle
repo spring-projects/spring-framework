@@ -170,14 +170,14 @@ configure(allprojects) { project ->
 			dependency "org.junit.support:testng-engine:1.0.1"
 			dependency "org.hamcrest:hamcrest:2.1"
 			dependency "org.awaitility:awaitility:3.1.6"
-			dependency "org.assertj:assertj-core:3.21.0"
-			dependencySet(group: 'org.xmlunit', version: '2.8.3') {
+			dependency "org.assertj:assertj-core:3.22.0"
+			dependencySet(group: 'org.xmlunit', version: '2.8.4') {
 				entry 'xmlunit-assertj'
 				entry('xmlunit-matchers') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '4.1.0') {
+			dependencySet(group: 'org.mockito', version: '4.2.0') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
@@ -185,10 +185,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.12.1"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.55.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.56.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.55.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.56.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
