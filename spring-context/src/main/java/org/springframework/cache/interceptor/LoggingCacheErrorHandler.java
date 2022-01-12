@@ -21,63 +21,91 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cache.Cache;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
- * A {@link CacheErrorHandler} implementation that simply logs exception.
+ * A {@link CacheErrorHandler} implementation that simply logs error message.
  *
  * @author Adam Ostrožlík
  * @since 5.3
  */
-public class LoggingCacheErrorHandler implements CacheErrorHandler {
+public final class LoggingCacheErrorHandler implements CacheErrorHandler {
 
-	protected static final Log logger = LogFactory.getLog(LoggingCacheErrorHandler.class);
+	private final Log logger;
 	private final boolean includeStacktrace;
-
-	/**
-	 * Construct new {@link LoggingCacheErrorHandler} that does not log stacktraces.
-	 */
-	public LoggingCacheErrorHandler() {
-		this.includeStacktrace = false;
-	}
 
 	/**
 	 * Construct new {@link LoggingCacheErrorHandler} that may log stacktraces.
 	 * @param includeStacktrace whether to log or not log stacktraces.
+	 * @param logger custom logger.
 	 */
-	public LoggingCacheErrorHandler(boolean includeStacktrace) {
+	private LoggingCacheErrorHandler(boolean includeStacktrace, Log logger) {
+		Assert.notNull(logger, "logger cannot be null");
 		this.includeStacktrace = includeStacktrace;
+		this.logger = logger;
 	}
 
 	@Override
 	public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
-		logCacheError("Cache get error for key " + key + " and cache " + cache.getName(), exception);
+		logCacheError("Cache '" + cache.getName() + "' failed to get entry with key '" + key + "'", exception);
 	}
 
 	@Override
 	public void handleCachePutError(RuntimeException exception, Cache cache, Object key, @Nullable Object value) {
-		logCacheError("Cache put error for key " + key + " and cache " + cache.getName(), exception);
+		logCacheError("Cache '" + cache.getName() + "' failed to put entry with key '" + key + "'", exception);
 	}
 
 	@Override
 	public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
-		logCacheError("Cache evict error for key " + key + " and cache " + cache.getName(), exception);
+		logCacheError("Cache '" + cache.getName() + "' failed to evict entry with key '" + key + "'", exception);
 	}
 
 	@Override
 	public void handleCacheClearError(RuntimeException exception, Cache cache) {
-		logCacheError("Cache clear error for cache " + cache.getName(), exception);
+		logCacheError("Cache '" + cache.getName() + "' failed to clear itself", exception);
 	}
 
-	public boolean isIncludeStacktrace() {
-		return this.includeStacktrace;
-	}
-
-	protected void logCacheError(String msg, RuntimeException ex) {
-		if (isIncludeStacktrace()) {
+	private void logCacheError(String msg, RuntimeException ex) {
+		if (this.includeStacktrace) {
 			logger.warn(msg, ex);
 		}
 		else {
 			logger.warn(msg);
+		}
+	}
+
+	/**
+	 * Builder class for {@link LoggingCacheErrorHandler}.
+	 */
+	public static class Builder {
+		private Log logger;
+		private boolean includeStacktrace;
+
+		/**
+		 * Overrides default logger.
+		 * @param logger new logger.
+		 * @return this builder.
+		 */
+		public Builder setLogger(Log logger) {
+			this.logger = logger;
+			return this;
+		}
+
+		/**
+		 * Enable/disable logging of stacktraces.
+		 * @param includeStacktrace true - include stacktraces; false otherwise.
+		 * @return this builder.
+		 */
+		public Builder setIncludeStacktrace(boolean includeStacktrace) {
+			this.includeStacktrace = includeStacktrace;
+			return this;
+		}
+
+		public LoggingCacheErrorHandler build() {
+			if (logger == null) {
+				return new LoggingCacheErrorHandler(this.includeStacktrace, LogFactory.getLog(LoggingCacheErrorHandler.class));
+			}
+			return new LoggingCacheErrorHandler(this.includeStacktrace, logger);
 		}
 	}
 }
