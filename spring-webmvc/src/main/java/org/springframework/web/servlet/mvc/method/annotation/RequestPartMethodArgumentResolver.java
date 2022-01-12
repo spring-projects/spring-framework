@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -178,6 +180,19 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			}
 		}
 		return partName;
+	}
+
+	@Override
+	void closeStreamIfNecessary(InputStream body) {
+		// RequestPartServletServerHttpRequest exposes individual part streams,
+		// potentially from temporary files -> explicit close call after resolution
+		// in order to prevent file descriptor leaks.
+		try {
+			body.close();
+		}
+		catch (IOException ex) {
+			// ignore
+		}
 	}
 
 }

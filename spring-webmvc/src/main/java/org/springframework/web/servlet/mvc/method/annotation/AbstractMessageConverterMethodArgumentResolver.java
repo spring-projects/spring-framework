@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,7 +169,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		HttpMethod httpMethod = (inputMessage instanceof HttpRequest ? ((HttpRequest) inputMessage).getMethod() : null);
 		Object body = NO_VALUE;
 
-		EmptyBodyCheckingHttpInputMessage message;
+		EmptyBodyCheckingHttpInputMessage message = null;
 		try {
 			message = new EmptyBodyCheckingHttpInputMessage(inputMessage);
 
@@ -195,6 +195,11 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		}
 		catch (IOException ex) {
 			throw new HttpMessageNotReadableException("I/O error while reading input message", ex, inputMessage);
+		}
+		finally {
+			if (message != null && message.hasBody()) {
+				closeStreamIfNecessary(message.getBody());
+			}
 		}
 
 		if (body == NO_VALUE) {
@@ -296,6 +301,15 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			}
 		}
 		return arg;
+	}
+
+	/**
+	 * Allow for closing the body stream if necessary,
+	 * e.g. for part streams in a multipart request.
+	 */
+	void closeStreamIfNecessary(InputStream body) {
+		// No-op by default: A standard HttpInputMessage exposes the HTTP request stream
+		// (ServletRequest#getInputStream), with its lifecycle managed by the container.
 	}
 
 
