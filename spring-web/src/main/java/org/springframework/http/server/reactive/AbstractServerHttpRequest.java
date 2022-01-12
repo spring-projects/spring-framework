@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,9 +211,18 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 */
 	String getLogPrefix() {
 		if (this.logPrefix == null) {
-			this.logPrefix = "[" + getId() + "] ";
+			this.logPrefix = "[" + initLogPrefix() + "] ";
 		}
 		return this.logPrefix;
+	}
+
+	/**
+	 * Subclasses can override this to provide the prefix to use for log messages.
+	 * <p>By default, this is {@link #getId()}.
+	 * @since 5.3.15
+	 */
+	protected String initLogPrefix() {
+		return getId();
 	}
 
 }
