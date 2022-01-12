@@ -77,7 +77,8 @@ public class XmlValidationModeDetector {
 	/**
 	 * Indicates whether or not the current parse position is inside an XML comment.
 	 */
-	private boolean inComment;
+	private boolean nextInComment;
+	private boolean nowInComment;
 
 
 	/**
@@ -95,7 +96,7 @@ public class XmlValidationModeDetector {
 			String content;
 			while ((content = reader.readLine()) != null) {
 				content = consumeCommentTokens(content);
-				if (this.inComment || !StringUtils.hasText(content)) {
+				if (this.nowInComment || !StringUtils.hasText(content)) {
 					continue;
 				}
 				if (hasDoctype(content)) {
@@ -130,7 +131,7 @@ public class XmlValidationModeDetector {
 	 * tokens will have consumed for the supplied content before passing the remainder to this method.
 	 */
 	private boolean hasOpeningTag(String content) {
-		if (this.inComment) {
+		if (this.nextInComment) {
 			return false;
 		}
 		int openTagIndex = content.indexOf('<');
@@ -145,6 +146,7 @@ public class XmlValidationModeDetector {
 	 */
 	@Nullable
 	private String consumeCommentTokens(String line) {
+		this.nowInComment = this.nextInComment;
 		int indexOfStartComment = line.indexOf(START_COMMENT);
 		if (indexOfStartComment == -1 && !line.contains(END_COMMENT)) {
 			return line;
@@ -152,17 +154,22 @@ public class XmlValidationModeDetector {
 
 		String result = "";
 		String currLine = line;
-		if (indexOfStartComment >= 0) {
+		if (indexOfStartComment >= 0 && !this.nextInComment) {
 			result = line.substring(0, indexOfStartComment);
 			currLine = line.substring(indexOfStartComment);
 		}
 
-		while ((currLine = consume(currLine)) != null) {
-			if (!this.inComment && !currLine.trim().startsWith(START_COMMENT)) {
-				return result + currLine;
-			}
+		int index = endComment(result);
+		if(index != -1) {
+			result = result.substring(index);
 		}
-		return null;
+
+		String resultCurrLine = null;
+		while ((currLine = consume(currLine)) != null) {
+			resultCurrLine = currLine;
+		}
+
+		return result + resultCurrLine;
 	}
 
 	/**
@@ -171,8 +178,18 @@ public class XmlValidationModeDetector {
 	 */
 	@Nullable
 	private String consume(String line) {
-		int index = (this.inComment ? endComment(line) : startComment(line));
-		return (index == -1 ? null : line.substring(index));
+		if(this.nextInComment) {
+			int endIndex;
+			if((endIndex = endComment(line)) == -1)
+				return null;
+			return line.substring(endIndex);
+		}else {
+			int startIndex, endIndex;
+			if((startIndex = startComment(line)) == -1)
+				return null;
+			endIndex = endComment(line);
+			return line.substring(0, startIndex - START_COMMENT.length()) + (endIndex == -1 ? "" : line.substring(endIndex));
+		}
 	}
 
 	/**
@@ -195,7 +212,8 @@ public class XmlValidationModeDetector {
 	private int commentToken(String line, String token, boolean inCommentIfPresent) {
 		int index = line.indexOf(token);
 		if (index > - 1) {
-			this.inComment = inCommentIfPresent;
+			if(!inCommentIfPresent) this.nowInComment = false;
+			this.nextInComment = inCommentIfPresent;
 		}
 		return (index == -1 ? index : index + token.length());
 	}
