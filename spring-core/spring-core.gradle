@@ -47,6 +47,7 @@ dependencies {
 	optional("io.reactivex.rxjava3:rxjava")
 	optional("io.smallrye.reactive:mutiny")
 	optional("io.netty:netty-buffer")
+	optional("io.micrometer:micrometer-core")
 	testImplementation("jakarta.annotation:jakarta.annotation-api")
 	testImplementation("jakarta.xml.bind:jakarta.xml.bind-api")
 	testImplementation("com.google.code.findbugs:jsr305")
