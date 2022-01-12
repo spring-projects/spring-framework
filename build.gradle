@@ -27,7 +27,7 @@ configure(allprojects) { project ->
 
 	dependencyManagement {
 		imports {
-			mavenBom "com.fasterxml.jackson:jackson-bom:2.13.0"
+			mavenBom "com.fasterxml.jackson:jackson-bom:2.13.1"
 			mavenBom "io.netty:netty-bom:4.1.72.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.15"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR11"
@@ -112,8 +112,8 @@ configure(allprojects) { project ->
 			dependency "org.quartz-scheduler:quartz:2.3.2"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core-jakarta:5.6.2.Final"
-			dependency "org.hibernate:hibernate-validator:7.0.1.Final"
+			dependency "org.hibernate:hibernate-core-jakarta:5.6.3.Final"
+			dependency "org.hibernate:hibernate-validator:7.0.2.Final"
 			dependency "org.webjars:webjars-locator-core:0.48"
 			dependency "org.webjars:underscorejs:1.8.3"
 
