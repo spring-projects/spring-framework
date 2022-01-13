@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * Default implementation of {@link WebMvcTagsProvider}.
  *
  * @author Jon Schneider
- * @since 2.0.0
+ * @since 6.0.0
  */
 public class DefaultWebMvcTagsProvider implements WebMvcTagsProvider {
 
@@ -44,7 +44,6 @@ public class DefaultWebMvcTagsProvider implements WebMvcTagsProvider {
 	 * Creates a new {@link DefaultWebMvcTagsProvider} that will provide tags from the
 	 * given {@code contributors} in addition to its own.
 	 * @param contributors the contributors that will provide additional tags
-	 * @since 2.3.0
 	 */
 	public DefaultWebMvcTagsProvider(List<WebMvcTagsContributor> contributors) {
 		this(false, contributors);
@@ -60,7 +59,6 @@ public class DefaultWebMvcTagsProvider implements WebMvcTagsProvider {
 	 * @param ignoreTrailingSlash whether trailing slashes should be ignored when
 	 * determining the {@code uri} tag.
 	 * @param contributors the contributors that will provide additional tags
-	 * @since 2.3.0
 	 */
 	public DefaultWebMvcTagsProvider(boolean ignoreTrailingSlash, List<WebMvcTagsContributor> contributors) {
 		this.ignoreTrailingSlash = ignoreTrailingSlash;

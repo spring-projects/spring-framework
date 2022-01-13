@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package org.springframework.web.servlet.observability;
 import java.util.regex.Pattern;
 
 import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.binder.http.Outcome;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.boot.actuate.metrics.http.Outcome;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerMapping;
@@ -36,7 +36,7 @@ import org.springframework.web.util.pattern.PathPattern;
  * @author Andy Wilkinson
  * @author Brian Clozel
  * @author Michael McFadyen
- * @since 2.0.0
+ * @since 6.0.0
  */
 public final class WebMvcTags {
 
@@ -180,7 +180,6 @@ public final class WebMvcTags {
 	 * Creates an {@code outcome} tag based on the status of the given {@code response}.
 	 * @param response the HTTP response
 	 * @return the outcome tag derived from the status of the response
-	 * @since 2.1.0
 	 */
 	public static Tag outcome(HttpServletResponse response) {
 		Outcome outcome = (response != null) ? Outcome.forStatus(response.getStatus()) : Outcome.UNKNOWN;
