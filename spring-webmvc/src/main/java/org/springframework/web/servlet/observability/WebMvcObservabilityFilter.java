@@ -42,17 +42,16 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.NestedServletException;
 
 /**
- * Intercepts incoming HTTP requests handled by Spring MVC handlers and records metrics
- * about execution time and results.
+ * Intercepts incoming HTTP requests handled by Spring MVC handlers and records them.
  *
  * @author Jon Schneider
  * @author Phillip Webb
  * @author Chanhyeong LEE
  * @since 6.0.0
  */
-public class WebMvcMetricsFilter extends OncePerRequestFilter {
+public class WebMvcObservabilityFilter extends OncePerRequestFilter {
 
-	private static final Log logger = LogFactory.getLog(WebMvcMetricsFilter.class);
+	private static final Log logger = LogFactory.getLog(WebMvcObservabilityFilter.class);
 
 	private final MeterRegistry registry;
 
@@ -63,13 +62,13 @@ public class WebMvcMetricsFilter extends OncePerRequestFilter {
 	private final AutoTimer autoTimer;
 
 	/**
-	 * Create a new {@link WebMvcMetricsFilter} instance.
+	 * Create a new {@link WebMvcObservabilityFilter} instance.
 	 * @param registry the meter registry
 	 * @param tagsProvider the tags provider
 	 * @param metricName the metric name
 	 * @param autoTimer the auto-timers to apply or {@code null} to disable auto-timing
 	 */
-	public WebMvcMetricsFilter(MeterRegistry registry, WebMvcTagsProvider tagsProvider, String metricName,
+	public WebMvcObservabilityFilter(MeterRegistry registry, WebMvcTagsProvider tagsProvider, String metricName,
 			AutoTimer autoTimer) {
 		this.registry = registry;
 		this.tagsProvider = tagsProvider;
