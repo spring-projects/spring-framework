@@ -69,10 +69,10 @@ class PrintingResultHandlerIntegrationTests {
 
 		standaloneSetup(new SimpleController()).build()
 			// "Hallöchen" is German slang for "hello".
-			.perform(get("/utf8").accept(MediaType.APPLICATION_JSON).content("Hallöchen, Welt!".getBytes()).characterEncoding(UTF_8))
+			.perform(get("/utf8").accept(MediaType.APPLICATION_JSON).content("Hallöchen, Welt!".getBytes(UTF_8)).characterEncoding(UTF_8))
 			.andDo(print(writer))
 			// "Grüß dich!" is German for "greetings to you".
-			.andExpect(content().bytes("Grüß dich!".getBytes()));
+			.andExpect(content().bytes("Grüß dich!".getBytes(UTF_8)));
 
 		assertThat(writer).asString()
 			.contains("Body = Hallöchen, Welt!")
