@@ -77,8 +77,8 @@ public class XmlValidationModeDetector {
 	/**
 	 * Indicates whether or not the current parse position is inside an XML comment.
 	 */
-	private boolean nextInComment;
-	private boolean nowInComment;
+	private boolean inComment;
+//	private boolean nowInComment;
 
 
 	/**
@@ -96,7 +96,7 @@ public class XmlValidationModeDetector {
 			String content;
 			while ((content = reader.readLine()) != null) {
 				content = consumeCommentTokens(content);
-				if (this.nowInComment || !StringUtils.hasText(content)) {
+				if (!StringUtils.hasText(content)) {
 					continue;
 				}
 				if (hasDoctype(content)) {
@@ -131,7 +131,7 @@ public class XmlValidationModeDetector {
 	 * tokens will have consumed for the supplied content before passing the remainder to this method.
 	 */
 	private boolean hasOpeningTag(String content) {
-		if (this.nextInComment) {
+		if (this.inComment) {
 			return false;
 		}
 		int openTagIndex = content.indexOf('<');
@@ -146,15 +146,15 @@ public class XmlValidationModeDetector {
 	 */
 	@Nullable
 	private String consumeCommentTokens(String line) {
-		this.nowInComment = this.nextInComment;
 		int indexOfStartComment = line.indexOf(START_COMMENT);
 		if (indexOfStartComment == -1 && !line.contains(END_COMMENT)) {
+			if(inComment) return null;
 			return line;
 		}
 
 		String result = "";
 		String currLine = line;
-		if (indexOfStartComment >= 0 && !this.nextInComment) {
+		if (indexOfStartComment >= 0 && !this.inComment) {
 			result = line.substring(0, indexOfStartComment);
 			currLine = line.substring(indexOfStartComment);
 		}
@@ -178,7 +178,7 @@ public class XmlValidationModeDetector {
 	 */
 	@Nullable
 	private String consume(String line) {
-		if(this.nextInComment) {
+		if(this.inComment) {
 			int endIndex;
 			if((endIndex = endComment(line)) == -1)
 				return null;
@@ -212,8 +212,7 @@ public class XmlValidationModeDetector {
 	private int commentToken(String line, String token, boolean inCommentIfPresent) {
 		int index = line.indexOf(token);
 		if (index > - 1) {
-			if(!inCommentIfPresent) this.nowInComment = false;
-			this.nextInComment = inCommentIfPresent;
+			this.inComment = inCommentIfPresent;
 		}
 		return (index == -1 ? index : index + token.length());
 	}
