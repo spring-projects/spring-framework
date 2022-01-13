@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpSe
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
@@ -164,10 +165,9 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@ParameterizedHttpServerTest
 	void transferTo(HttpServer httpServer) throws Exception {
-		// TODO: check why Undertow fails
-		if (httpServer instanceof UndertowHttpServer) {
-			return;
-		}
+		// TODO Determine why Undertow fails: https://github.com/spring-projects/spring-framework/issues/25310
+		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails with transferTo");
+
 		startServer(httpServer);
 
 		Flux<String> result = webClient
