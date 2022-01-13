@@ -97,7 +97,7 @@ public class XmlValidationModeDetector {
 			String content;
 			while ((content = reader.readLine()) != null) {
 				content = consumeCommentTokens(content);
-				if (this.inComment || !StringUtils.hasText(content)) {
+				if (!StringUtils.hasText(content)) {
 					continue;
 				}
 				if (hasDoctype(content)) {
@@ -143,11 +143,10 @@ public class XmlValidationModeDetector {
 	}
 
 	/**
-	 * Consume all leading and trailing comments in the given String and return
-	 * the remaining content, which may be empty since the supplied content might
-	 * be all comment data.
+	 * Consume all comments in the given String and return the remaining content,
+	 * which may be empty since the supplied content might be all comment data.
+	 * <p>This method takes the current "in comment" parsing state into account.
 	 */
-	@Nullable
 	private String consumeCommentTokens(String line) {
 		int indexOfStartComment = line.indexOf(START_COMMENT);
 		if (indexOfStartComment == -1 && !line.contains(END_COMMENT)) {
@@ -156,17 +155,15 @@ public class XmlValidationModeDetector {
 
 		String result = "";
 		String currLine = line;
-		if (indexOfStartComment >= 0) {
+		if (!this.inComment && (indexOfStartComment >= 0)) {
 			result = line.substring(0, indexOfStartComment);
 			currLine = line.substring(indexOfStartComment);
 		}
 
-		while ((currLine = consume(currLine)) != null) {
-			if (!this.inComment && !currLine.trim().startsWith(START_COMMENT)) {
-				return result + currLine;
-			}
+		if ((currLine = consume(currLine)) != null) {
+			result += consumeCommentTokens(currLine);
 		}
-		return null;
+		return result;
 	}
 
 	/**

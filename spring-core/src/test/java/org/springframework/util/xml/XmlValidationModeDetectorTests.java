@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.util.xml.XmlValidationModeDetector.VALIDATION_DTD;
+import static org.springframework.util.xml.XmlValidationModeDetector.VALIDATION_XSD;
 
 /**
  * Unit tests for {@link XmlValidationModeDetector}.
@@ -37,10 +38,27 @@ class XmlValidationModeDetectorTests {
 
 
 	@ParameterizedTest
-	@ValueSource(strings = { "dtdWithTrailingComment.xml", "dtdWithLeadingComment.xml", "dtdWithCommentOnNextLine.xml",
-		"dtdWithMultipleComments.xml" })
+	@ValueSource(strings = {
+		"dtdWithNoComments.xml",
+		"dtdWithLeadingComment.xml",
+		"dtdWithTrailingComment.xml",
+		"dtdWithTrailingCommentAcrossMultipleLines.xml",
+		"dtdWithCommentOnNextLine.xml",
+		"dtdWithMultipleComments.xml"
+	})
 	void dtdDetection(String fileName) throws Exception {
 		assertValidationMode(fileName, VALIDATION_DTD);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"xsdWithNoComments.xml",
+		"xsdWithMultipleComments.xml",
+		"xsdWithDoctypeInComment.xml",
+		"xsdWithDoctypeInOpenCommentWithAdditionalCommentOnSameLine.xml"
+	})
+	void xsdDetection(String fileName) throws Exception {
+		assertValidationMode(fileName, VALIDATION_XSD);
 	}
 
 
