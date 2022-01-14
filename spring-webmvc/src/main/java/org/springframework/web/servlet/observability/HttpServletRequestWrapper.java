@@ -32,7 +32,7 @@ import org.springframework.web.servlet.HandlerMapping;
  *
  * @since 6.0.0
  */
-public class HttpServletRequestWrapper implements HttpServerRequest {
+public final class HttpServletRequestWrapper implements HttpServerRequest {
 	private final HttpServletRequest request;
 
 	private HttpServletRequestWrapper(HttpServletRequest request) {
@@ -40,7 +40,8 @@ public class HttpServletRequestWrapper implements HttpServerRequest {
 	}
 
 	/**
-	 * @param request The request to wrap
+	 * Static factory method to create an instance.
+	 * @param request the request to wrap
 	 * @return an {@link HttpServletRequestWrapper} instance that uses the provided request.
 	 */
 	static HttpServletRequestWrapper wrap(HttpServletRequest request) {

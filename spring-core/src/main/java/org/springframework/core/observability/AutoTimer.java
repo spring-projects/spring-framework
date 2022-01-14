@@ -42,7 +42,7 @@ public interface AutoTimer {
 	 * An {@link AutoTimer} implementation that is enabled but applies no additional
 	 * customizations.
 	 */
-	AutoTimer ENABLED = (builder) -> {
+	AutoTimer ENABLED = builder -> {
 	};
 
 	/**

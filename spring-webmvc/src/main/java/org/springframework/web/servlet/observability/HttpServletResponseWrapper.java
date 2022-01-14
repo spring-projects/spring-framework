@@ -30,7 +30,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @since 6.0.0
  */
-public class HttpServletResponseWrapper implements HttpServerResponse {
+public final class HttpServletResponseWrapper implements HttpServerResponse {
 	private final HttpServerRequest request;
 	private final HttpServletResponse response;
 	private final Throwable error;
@@ -42,10 +42,10 @@ public class HttpServletResponseWrapper implements HttpServerResponse {
 	}
 
 	/**
-	 *
-	 * @param request The request to wrap
-	 * @param response The response to wrap
-	 * @param error The error to wrap
+	 * Static factory method to create an instance.
+	 * @param request the request to wrap
+	 * @param response the response to wrap
+	 * @param error the error to wrap
 	 * @return an {@link HttpServletResponseWrapper} instance that uses the provided response.
 	 */
 	static HttpServletResponseWrapper wrap(HttpServerRequest request, HttpServletResponse response, Throwable error) {

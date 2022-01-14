@@ -35,14 +35,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.observability.DefaultWebMvcTagsProvider;
 import org.springframework.web.servlet.observability.WebMvcObservabilityFilter;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * Just a demo to try MVC instrumentation out with Zipkin, will be deleted later.
  */
 public class ObservabilityPlaygroundTests extends SampleTestRunner {
-	private MockMvc mockMvc;
+	private final MockMvc mockMvc;
 
 	public ObservabilityPlaygroundTests() {
 		super(SampleTestRunner.SamplerRunnerConfig.builder().build());

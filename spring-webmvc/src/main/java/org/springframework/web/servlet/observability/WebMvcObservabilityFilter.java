@@ -132,7 +132,7 @@ public class WebMvcObservabilityFilter extends OncePerRequestFilter {
 			HttpServerHandlerContext handlerContext = timingContext.getHandlerContext();
 			handlerContext.setResponse(HttpServletResponseWrapper.wrap(handlerContext.getRequest(), response, exception));
 			AutoTimer.apply(this.autoTimer, this.metricName, annotations,
-					(builder) -> timerSample.stop(enhanceBuilder(builder, handler, request, response, exception)));
+					builder -> timerSample.stop(enhanceBuilder(builder, handler, request, response, exception)));
 		}
 		catch (Exception ex) {
 			logger.warn("Failed to record timer metrics", ex);
