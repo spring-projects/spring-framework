@@ -23,6 +23,8 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map;
 
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
@@ -101,6 +103,16 @@ class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 		// TODO Determine why Undertow fails: https://github.com/spring-projects/spring-framework/issues/25310
 		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails with transferTo");
 
+		verifyTransferTo(httpServer);
+	}
+
+	@Disabled("Unstable on Undertow,Use @RepeatedTest(100) for verify")
+	@Test
+	void transferToWithUndertow() throws Exception {
+		verifyTransferTo(new UndertowHttpServer());
+	}
+
+	private void verifyTransferTo(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		Mono<String> result = webClient
