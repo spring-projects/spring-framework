@@ -106,7 +106,8 @@ class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 		verifyTransferTo(httpServer);
 	}
 
-	@Disabled("Unstable on Undertow,Use @RepeatedTest(100) for verify")
+	@Disabled("Unstable on Undertow: https://github.com/spring-projects/spring-framework/issues/25310")
+	// Using @RepeatedTest(100), this test fails approximately 10% - 20% of the time.
 	@Test
 	void transferToWithUndertow() throws Exception {
 		verifyTransferTo(new UndertowHttpServer());
