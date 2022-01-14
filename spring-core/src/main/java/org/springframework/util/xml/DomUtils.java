@@ -45,7 +45,11 @@ import org.springframework.util.Assert;
  * @see org.w3c.dom.Node
  * @see org.w3c.dom.Element
  */
-public abstract class DomUtils {
+public class DomUtils {
+
+	private DomUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Retrieves all child elements of the given DOM element that match any of the given element names.

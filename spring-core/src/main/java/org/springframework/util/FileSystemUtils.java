@@ -40,7 +40,11 @@ import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
  * @see java.nio.file.Path
  * @see java.nio.file.Files
  */
-public abstract class FileSystemUtils {
+public class FileSystemUtils {
+
+	private FileSystemUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Delete the supplied {@link File} - for directories,

@@ -55,7 +55,7 @@ import org.springframework.util.StringUtils;
  * @author Sebastien Deleuze
  * @author Sam Brannen
  */
-public abstract class WebUtils {
+public class WebUtils {
 
 	/**
 	 * Standard Servlet 2.3+ spec request attribute for include request URI.
@@ -221,6 +221,9 @@ public abstract class WebUtils {
 	/** Key for the mutex session attribute. */
 	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
 
+	private WebUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Set a system property to the web application root directory.

@@ -54,7 +54,7 @@ import org.springframework.lang.Nullable;
  * @see TypeUtils
  * @see ReflectionUtils
  */
-public abstract class ClassUtils {
+public class ClassUtils {
 
 	/** Suffix for array class names: {@code "[]"}. */
 	public static final String ARRAY_SUFFIX = "[]";
@@ -83,6 +83,9 @@ public abstract class ClassUtils {
 	/** The ".class" file suffix. */
 	public static final String CLASS_FILE_SUFFIX = ".class";
 
+	private ClassUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Map with primitive wrapper type as key and corresponding primitive

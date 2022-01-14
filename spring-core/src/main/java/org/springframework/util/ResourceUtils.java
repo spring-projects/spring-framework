@@ -45,7 +45,7 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.core.io.UrlResource
  * @see org.springframework.core.io.ResourceLoader
  */
-public abstract class ResourceUtils {
+public class ResourceUtils {
 
 	/** Pseudo URL prefix for loading from the class path: "classpath:". */
 	public static final String CLASSPATH_URL_PREFIX = "classpath:";
@@ -92,6 +92,9 @@ public abstract class ResourceUtils {
 	/** Special separator between WAR URL and jar part on Tomcat. */
 	public static final String WAR_URL_SEPARATOR = "*/";
 
+	private ResourceUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Return whether the given resource location is a URL:

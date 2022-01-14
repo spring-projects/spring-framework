@@ -41,7 +41,7 @@ import org.springframework.lang.Nullable;
  * @author Arjen Poutsma
  * @since 1.1.3
  */
-public abstract class CollectionUtils {
+public class CollectionUtils {
 
 	/**
 	 * Default load factor for {@link HashMap}/{@link LinkedHashMap} variants.
@@ -49,6 +49,10 @@ public abstract class CollectionUtils {
 	 * @see #newLinkedHashMap(int)
 	 */
 	static final float DEFAULT_LOAD_FACTOR = 0.75f;
+
+	private CollectionUtils() {
+		throw new AssertionError();
+	}
 
 
 	/**

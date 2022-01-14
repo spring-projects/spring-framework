@@ -90,7 +90,11 @@ import org.springframework.util.MultiValueMap;
  * @see AnnotationUtils
  * @see BridgeMethodResolver
  */
-public abstract class AnnotatedElementUtils {
+public class AnnotatedElementUtils {
+
+	private AnnotatedElementUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Build an adapted {@link AnnotatedElement} for the given annotations,

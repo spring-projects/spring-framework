@@ -33,7 +33,11 @@ import org.springframework.lang.Nullable;
  * @author Sam Brannen
  * @since 2.0.7
  */
-public abstract class TypeUtils {
+public class TypeUtils {
+
+	private TypeUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Check if the right-hand side type may be assigned to the left-hand side

@@ -43,11 +43,14 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 5.3
  */
-public abstract class ServletRequestPathUtils {
+public class ServletRequestPathUtils {
 
 	/** Name of Servlet request attribute that holds the parsed {@link RequestPath}. */
 	public static final String PATH_ATTRIBUTE = ServletRequestPathUtils.class.getName() + ".PATH";
 
+	private ServletRequestPathUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Parse the {@link HttpServletRequest#getRequestURI() requestURI} to a

@@ -33,13 +33,16 @@ import java.security.NoSuchAlgorithmException;
  * @author Craig Andrews
  * @since 3.0
  */
-public abstract class DigestUtils {
+public class DigestUtils {
 
 	private static final String MD5_ALGORITHM_NAME = "MD5";
 
 	private static final char[] HEX_CHARS =
 			{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
+	private DigestUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Calculate the MD5 digest of the given bytes.

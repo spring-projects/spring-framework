@@ -51,7 +51,11 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  * @see <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>
  */
-public abstract class UriUtils {
+public class UriUtils {
+
+	private UriUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Encode the given URI scheme with the given encoding.

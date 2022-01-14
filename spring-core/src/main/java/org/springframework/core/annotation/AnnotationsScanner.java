@@ -42,7 +42,7 @@ import org.springframework.util.ReflectionUtils;
  * @since 5.2
  * @see AnnotationsProcessor
  */
-abstract class AnnotationsScanner {
+class AnnotationsScanner {
 
 	private static final Annotation[] NO_ANNOTATIONS = {};
 
@@ -57,6 +57,7 @@ abstract class AnnotationsScanner {
 
 
 	private AnnotationsScanner() {
+		throw new AssertionError();
 	}
 
 

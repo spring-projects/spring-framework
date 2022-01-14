@@ -33,7 +33,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * @see Order
  * @see jakarta.annotation.Priority
  */
-public abstract class OrderUtils {
+public class OrderUtils {
 
 	/** Cache marker for a non-annotated Class. */
 	private static final Object NOT_ANNOTATED = new Object();
@@ -43,6 +43,9 @@ public abstract class OrderUtils {
 	/** Cache for @Order value (or NOT_ANNOTATED marker) per Class. */
 	private static final Map<AnnotatedElement, Object> orderCache = new ConcurrentReferenceHashMap<>(64);
 
+	private OrderUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Return the order on the specified {@code type}, or the specified

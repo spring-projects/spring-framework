@@ -35,7 +35,7 @@ import org.springframework.util.SystemPropertyUtils;
  * @see SystemPropertyUtils
  * @see ServletContext#getInitParameter(String)
  */
-public abstract class ServletContextPropertyUtils {
+public class ServletContextPropertyUtils {
 
 	private static final PropertyPlaceholderHelper strictHelper =
 			new PropertyPlaceholderHelper(SystemPropertyUtils.PLACEHOLDER_PREFIX,
@@ -45,6 +45,9 @@ public abstract class ServletContextPropertyUtils {
 			new PropertyPlaceholderHelper(SystemPropertyUtils.PLACEHOLDER_PREFIX,
 					SystemPropertyUtils.PLACEHOLDER_SUFFIX, SystemPropertyUtils.VALUE_SEPARATOR, true);
 
+	private ServletContextPropertyUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Resolve ${...} placeholders in the given text, replacing them with corresponding

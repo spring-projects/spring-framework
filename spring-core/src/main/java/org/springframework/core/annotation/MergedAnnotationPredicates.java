@@ -34,9 +34,10 @@ import org.springframework.util.ObjectUtils;
  * @author Phillip Webb
  * @since 5.2
  */
-public abstract class MergedAnnotationPredicates {
+public class MergedAnnotationPredicates {
 
 	private MergedAnnotationPredicates() {
+		throw new AssertionError();
 	}
 
 

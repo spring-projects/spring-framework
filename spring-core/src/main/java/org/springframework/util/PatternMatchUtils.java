@@ -25,7 +25,11 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public abstract class PatternMatchUtils {
+public class PatternMatchUtils {
+
+	private PatternMatchUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Match a String against the given pattern, supporting the following simple

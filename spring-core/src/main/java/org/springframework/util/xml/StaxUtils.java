@@ -51,7 +51,11 @@ import org.springframework.util.StreamUtils;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public abstract class StaxUtils {
+public class StaxUtils {
+
+	private StaxUtils() {
+		throw new AssertionError();
+	}
 
 	private static final XMLResolver NO_OP_XML_RESOLVER =
 			(publicID, systemID, base, ns) -> StreamUtils.emptyInput();

@@ -33,7 +33,11 @@ import org.springframework.lang.Nullable;
  * @see #PLACEHOLDER_SUFFIX
  * @see System#getProperty(String)
  */
-public abstract class SystemPropertyUtils {
+public class SystemPropertyUtils {
+
+	private SystemPropertyUtils() {
+		throw new AssertionError();
+	}
 
 	/** Prefix for system property placeholders: "${". */
 	public static final String PLACEHOLDER_PREFIX = "${";

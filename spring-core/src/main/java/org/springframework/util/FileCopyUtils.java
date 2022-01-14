@@ -43,13 +43,16 @@ import org.springframework.lang.Nullable;
  * @see StreamUtils
  * @see FileSystemUtils
  */
-public abstract class FileCopyUtils {
+public class FileCopyUtils {
 
 	/**
 	 * The default buffer size used when copying bytes.
 	 */
 	public static final int BUFFER_SIZE = StreamUtils.BUFFER_SIZE;
 
+	private FileCopyUtils() {
+		throw new AssertionError();
+	}
 
 	//---------------------------------------------------------------------
 	// Copy methods for java.io.File

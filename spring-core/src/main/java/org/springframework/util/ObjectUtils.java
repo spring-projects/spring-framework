@@ -43,7 +43,7 @@ import org.springframework.lang.Nullable;
  * @see CollectionUtils
  * @see StringUtils
  */
-public abstract class ObjectUtils {
+public class ObjectUtils {
 
 	private static final int INITIAL_HASH = 7;
 	private static final int MULTIPLIER = 31;
@@ -56,6 +56,9 @@ public abstract class ObjectUtils {
 	private static final String ARRAY_ELEMENT_SEPARATOR = ", ";
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
+	private ObjectUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Return whether the given throwable is a checked exception:
