@@ -25,6 +25,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.core.instrument.Timer.Builder;
 import io.micrometer.core.instrument.Timer.Sample;
+import io.micrometer.core.instrument.tracing.context.HttpServerHandlerContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -111,8 +112,9 @@ public class WebMvcObservabilityFilter extends OncePerRequestFilter {
 	}
 
 	private TimingContext startAndAttachTimingContext(HttpServletRequest request) {
-		Sample timerSample = Timer.start(this.registry);
-		TimingContext timingContext = new TimingContext(timerSample);
+		HttpServerHandlerContext handlerContext = new HttpServerHandlerContext(HttpServletRequestWrapper.wrap(request));
+		Sample timerSample = Timer.start(this.registry, handlerContext);
+		TimingContext timingContext = new TimingContext(timerSample, handlerContext);
 		timingContext.attachTo(request);
 		return timingContext;
 	}
@@ -127,6 +129,8 @@ public class WebMvcObservabilityFilter extends OncePerRequestFilter {
 			Object handler = getHandler(request);
 			Set<Timed> annotations = getTimedAnnotations(handler);
 			Sample timerSample = timingContext.getTimerSample();
+			HttpServerHandlerContext handlerContext = timingContext.getHandlerContext();
+			handlerContext.setResponse(HttpServletResponseWrapper.wrap(handlerContext.getRequest(), response, exception));
 			AutoTimer.apply(this.autoTimer, this.metricName, annotations,
 					(builder) -> timerSample.stop(enhanceBuilder(builder, handler, request, response, exception)));
 		}
@@ -162,13 +166,19 @@ public class WebMvcObservabilityFilter extends OncePerRequestFilter {
 		private static final String ATTRIBUTE = TimingContext.class.getName();
 
 		private final Sample timerSample;
+		private final HttpServerHandlerContext handlerContext;
 
-		TimingContext(Sample timerSample) {
+		TimingContext(Sample timerSample, HttpServerHandlerContext handlerContext) {
 			this.timerSample = timerSample;
+			this.handlerContext = handlerContext;
 		}
 
 		Sample getTimerSample() {
 			return this.timerSample;
+		}
+
+		HttpServerHandlerContext getHandlerContext() {
+			return this.handlerContext;
 		}
 
 		void attachTo(HttpServletRequest request) {
