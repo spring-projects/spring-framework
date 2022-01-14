@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.5.5
  */
-public abstract class TransformerUtils {
+public class TransformerUtils {
 
 	/**
 	 * The indent amount of characters if {@link #enableIndenting indenting is enabled}.
@@ -37,6 +37,9 @@ public abstract class TransformerUtils {
 	 */
 	public static final int DEFAULT_INDENT_AMOUNT = 2;
 
+	private TransformerUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Enable indenting for the supplied {@link javax.xml.transform.Transformer}.

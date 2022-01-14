@@ -38,7 +38,7 @@ import org.springframework.util.MultiValueMap;
  * @author Sam Brannen
  * @since 5.2
  */
-public abstract class MergedAnnotationCollectors {
+public class MergedAnnotationCollectors {
 
 	private static final Characteristics[] NO_CHARACTERISTICS = {};
 
@@ -46,6 +46,7 @@ public abstract class MergedAnnotationCollectors {
 
 
 	private MergedAnnotationCollectors() {
+		throw new AssertionError();
 	}
 
 

@@ -28,7 +28,7 @@ import java.util.function.Predicate;
  * @see MergedAnnotations#get(Class, Predicate, MergedAnnotationSelector)
  * @see MergedAnnotations#get(String, Predicate, MergedAnnotationSelector)
  */
-public abstract class MergedAnnotationSelectors {
+public class MergedAnnotationSelectors {
 
 	private static final MergedAnnotationSelector<?> NEAREST = new Nearest();
 
@@ -36,6 +36,7 @@ public abstract class MergedAnnotationSelectors {
 
 
 	private MergedAnnotationSelectors() {
+		throw new AssertionError();
 	}
 
 

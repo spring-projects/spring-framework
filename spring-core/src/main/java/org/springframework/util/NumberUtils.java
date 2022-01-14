@@ -34,11 +34,15 @@ import org.springframework.lang.Nullable;
  * @author Rob Harrop
  * @since 1.1.2
  */
-public abstract class NumberUtils {
+public class NumberUtils {
 
 	private static final BigInteger LONG_MIN = BigInteger.valueOf(Long.MIN_VALUE);
 
 	private static final BigInteger LONG_MAX = BigInteger.valueOf(Long.MAX_VALUE);
+
+	private NumberUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Standard number types (all immutable):

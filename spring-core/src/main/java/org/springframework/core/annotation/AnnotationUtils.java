@@ -102,7 +102,7 @@ import org.springframework.util.StringUtils;
  * @see java.lang.reflect.AnnotatedElement#getAnnotation(Class)
  * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotations()
  */
-public abstract class AnnotationUtils {
+public class AnnotationUtils {
 
 	/**
 	 * The attribute name for annotations with a single element.
@@ -115,6 +115,10 @@ public abstract class AnnotationUtils {
 	private static final Map<Class<? extends Annotation>, Map<String, DefaultValueHolder>> defaultValuesCache =
 			new ConcurrentReferenceHashMap<>();
 
+
+	private AnnotationUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Determine whether the given class is a candidate for carrying one of the specified

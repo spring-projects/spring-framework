@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Rick Evans
  */
-public abstract class TagUtils {
+public class TagUtils {
 
 	/** Constant identifying the page scope. */
 	public static final String SCOPE_PAGE = "page";
@@ -56,6 +56,9 @@ public abstract class TagUtils {
 	/** Constant identifying the application scope. */
 	public static final String SCOPE_APPLICATION = "application";
 
+	private TagUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Determines the scope for a given input {@code String}.

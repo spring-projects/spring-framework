@@ -30,10 +30,13 @@ import java.util.Base64;
  * @since 4.1
  * @see java.util.Base64
  */
-public abstract class Base64Utils {
+public class Base64Utils {
 
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+	private Base64Utils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Base64-encode the given byte array.

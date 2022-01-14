@@ -30,7 +30,11 @@ import org.springframework.lang.Nullable;
  * @author Dave Syer
  * @since 3.0.5
  */
-public abstract class SerializationUtils {
+public class SerializationUtils {
+
+	private SerializationUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Serialize the given object to a byte array.

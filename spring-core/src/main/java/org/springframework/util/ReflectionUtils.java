@@ -43,7 +43,7 @@ import org.springframework.lang.Nullable;
  * @author Chris Beams
  * @since 1.2.2
  */
-public abstract class ReflectionUtils {
+public class ReflectionUtils {
 
 	/**
 	 * Pre-built MethodFilter that matches all non-bridge non-synthetic methods
@@ -86,6 +86,9 @@ public abstract class ReflectionUtils {
 	 */
 	private static final Map<Class<?>, Field[]> declaredFieldsCache = new ConcurrentReferenceHashMap<>(256);
 
+	private ReflectionUtils() {
+		throw new AssertionError();
+	}
 
 	// Exception handling
 

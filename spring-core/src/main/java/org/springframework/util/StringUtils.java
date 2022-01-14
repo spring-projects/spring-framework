@@ -59,7 +59,7 @@ import org.springframework.lang.Nullable;
  * @author Brian Clozel
  * @since 16 April 2001
  */
-public abstract class StringUtils {
+public class StringUtils {
 
 	private static final String[] EMPTY_STRING_ARRAY = {};
 
@@ -73,6 +73,9 @@ public abstract class StringUtils {
 
 	private static final char EXTENSION_SEPARATOR = '.';
 
+	private StringUtils() {
+		throw new AssertionError();
+	}
 
 	//---------------------------------------------------------------------
 	// General convenience methods for working with Strings

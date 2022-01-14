@@ -25,7 +25,11 @@ import java.util.Comparator;
  * @author Juergen Hoeller
  * @since 5.0
  */
-public abstract class Comparators {
+public class Comparators {
+
+	private Comparators() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Return a {@link Comparable} adapter.

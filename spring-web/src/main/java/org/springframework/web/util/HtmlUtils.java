@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  * @author Craig Andrews
  * @since 01.03.2003
  */
-public abstract class HtmlUtils {
+public class HtmlUtils {
 
 	/**
 	 * Shared instance of pre-parsed HTML character entity references.
@@ -46,6 +46,9 @@ public abstract class HtmlUtils {
 	private static final HtmlCharacterEntityReferences characterEntityReferences =
 			new HtmlCharacterEntityReferences();
 
+	private HtmlUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Turn special characters into HTML character references.

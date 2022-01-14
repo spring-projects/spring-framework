@@ -43,7 +43,7 @@ import org.springframework.lang.Nullable;
  * @since 3.2.2
  * @see FileCopyUtils
  */
-public abstract class StreamUtils {
+public class StreamUtils {
 
 	/**
 	 * The default buffer size used when copying bytes.
@@ -52,6 +52,9 @@ public abstract class StreamUtils {
 
 	private static final byte[] EMPTY_CONTENT = new byte[0];
 
+	private StreamUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Copy the contents of the given InputStream into a new byte array.

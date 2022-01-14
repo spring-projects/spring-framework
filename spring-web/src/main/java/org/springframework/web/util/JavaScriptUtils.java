@@ -29,7 +29,11 @@ package org.springframework.web.util;
  * @author Rossen Stoyanchev
  * @since 1.1.1
  */
-public abstract class JavaScriptUtils {
+public class JavaScriptUtils {
+
+	private JavaScriptUtils() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Turn JavaScript special characters into escaped characters.

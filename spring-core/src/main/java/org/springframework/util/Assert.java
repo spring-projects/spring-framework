@@ -59,7 +59,11 @@ import org.springframework.lang.Nullable;
  * @author Rob Harrop
  * @since 1.1.2
  */
-public abstract class Assert {
+public class Assert {
+
+	private Assert() {
+		throw new AssertionError();
+	}
 
 	/**
 	 * Assert a boolean expression, throwing an {@code IllegalStateException}
