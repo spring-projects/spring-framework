@@ -33,6 +33,7 @@ configure(allprojects) { project ->
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR12"
 			mavenBom "io.rsocket:rsocket-bom:1.1.1"
 			mavenBom "io.micrometer:micrometer-bom:2.0.0-M1"
+			mavenBom "io.micrometer:micrometer-tracing-bom:1.0.0-M1"
 			mavenBom "org.eclipse.jetty:jetty-bom:11.0.7"
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.6.10"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.0"
