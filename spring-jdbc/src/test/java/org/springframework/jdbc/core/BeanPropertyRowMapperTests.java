@@ -19,6 +19,8 @@ package org.springframework.jdbc.core;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -147,6 +149,20 @@ class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 		assertThat(result).hasSize(1);
 		verifyPerson(result.get(0));
 		mock.verifyClosed();
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"age, age",
+		"lastName, last_name",
+		"Name, name",
+		"FirstName, first_name",
+		"EMail, e_mail",
+		"URL, u_r_l", // likely undesirable, but that's the status quo
+	})
+	void underscoreName(String input, String expected) {
+		BeanPropertyRowMapper<?> mapper = new BeanPropertyRowMapper<>(Object.class);
+		assertThat(mapper.underscoreName(input)).isEqualTo(expected);
 	}
 
 }
