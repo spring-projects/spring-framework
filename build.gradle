@@ -365,7 +365,7 @@ configure(rootProject) {
 	apply from: "${rootDir}/gradle/docs.gradle"
 
 	nohttp {
-		source.exclude "**/test-output/**"
+		source.exclude ( "**/test-output/**", ".venv/**" )
 		allowlistFile = project.file("src/nohttp/allowlist.lines")
 		def rootPath = file(rootDir).toPath()
 		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc"
