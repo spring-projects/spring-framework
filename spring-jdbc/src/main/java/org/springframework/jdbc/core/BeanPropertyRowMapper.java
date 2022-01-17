@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,7 +273,8 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 		}
 
 		StringBuilder result = new StringBuilder();
-		for (int i = 0; i < name.length(); i++) {
+		result.append(Character.toLowerCase(name.charAt(0)));
+		for (int i = 1; i < name.length(); i++) {
 			char c = name.charAt(i);
 			if (Character.isUpperCase(c)) {
 				result.append('_').append(Character.toLowerCase(c));

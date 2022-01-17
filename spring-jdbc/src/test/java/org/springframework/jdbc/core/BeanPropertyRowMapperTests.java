@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.DatePerson;
+import org.springframework.jdbc.core.test.EmailPerson;
 import org.springframework.jdbc.core.test.ExtendedPerson;
 import org.springframework.jdbc.core.test.Person;
 import org.springframework.jdbc.core.test.SpacePerson;
@@ -133,5 +134,17 @@ public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 		verifyPerson(result.get(0));
 		mock.verifyClosed();
 	}
+
+	@Test
+	public void testQueryWithUnderscoreAndPersonWithMultiUppercase() throws Exception {
+		Mock mock = new Mock();
+		List<EmailPerson> result = mock.getJdbcTemplate().query(
+				"select name, age, birth_date, balance, e_mail from people",
+				new BeanPropertyRowMapper<>(EmailPerson.class));
+		assertThat(result.size()).isEqualTo(1);
+		verifyPerson(result.get(0));
+		mock.verifyClosed();
+	}
+
 
 }
