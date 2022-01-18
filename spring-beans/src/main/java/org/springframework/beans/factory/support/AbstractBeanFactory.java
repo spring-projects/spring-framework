@@ -1935,6 +1935,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 *
 	 * @since 5.3
 	 */
+	@SuppressWarnings("serial")
 	private class BeanPostProcessorCacheAwareList extends CopyOnWriteArrayList<BeanPostProcessor> {
 
 		@Override
