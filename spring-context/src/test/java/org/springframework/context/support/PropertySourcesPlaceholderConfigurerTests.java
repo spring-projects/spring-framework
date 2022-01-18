@@ -445,7 +445,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class IgnoreUnresolvablePlaceholdersFalseConfig {
 
 		@Value("${my.key}")
@@ -457,7 +457,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class IgnoreUnresolvablePlaceholdersTrueConfig {
 
 		@Value("${my.key}")
