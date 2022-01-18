@@ -541,9 +541,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	 * @param ann the Autowired annotation
 	 * @return whether the annotation indicates that a dependency is required
 	 */
+	@SuppressWarnings("cast")
 	protected boolean determineRequiredStatus(MergedAnnotation<?> ann) {
-		// Cast to (AnnotationAttributes) is required. Otherwise, the :spring-beans:compileGroovy
-		// task fails in the Gradle build.
 		return determineRequiredStatus((AnnotationAttributes)
 				ann.asMap(mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType())));
 	}
