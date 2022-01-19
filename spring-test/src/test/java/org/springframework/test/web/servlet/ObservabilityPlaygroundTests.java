@@ -103,6 +103,16 @@ public class ObservabilityPlaygroundTests extends SampleTestRunner {
 		}
 
 		@Override
+		public void onScopeOpened(Timer.Sample sample, HttpServerHandlerContext context) {
+			System.out.println(sample + " scope opened " + context);
+		}
+
+		@Override
+		public void onScopeClosed(Timer.Sample sample, HttpServerHandlerContext context) {
+			System.out.println(sample + " scope closed " + context);
+		}
+
+		@Override
 		public boolean supportsContext(Timer.HandlerContext context) {
 			return context instanceof HttpServerHandlerContext;
 		}
