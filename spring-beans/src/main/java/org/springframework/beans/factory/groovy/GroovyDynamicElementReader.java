@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import groovy.lang.Writable;
 import groovy.xml.StreamingMarkupBuilder;
 import org.w3c.dom.Element;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
  *
  * @author Jeff Brown
  * @author Juergen Hoeller
+ * @author Dave Syer
  * @since 4.0
  */
 class GroovyDynamicElementReader extends GroovyObjectSupport {
@@ -67,13 +69,13 @@ class GroovyDynamicElementReader extends GroovyObjectSupport {
 
 	@Override
 	public Object invokeMethod(String name, Object obj) {
-		Object[] args = ((Object[])obj);
+		Object[] args = (Object[]) obj;
 		if (name.equals("doCall")) {
 			@SuppressWarnings("unchecked")
 			Closure<Object> callable = (Closure<Object>) args[0];
 			callable.setResolveStrategy(Closure.DELEGATE_FIRST);
 			callable.setDelegate(this);
-			var result = callable.call();
+			Object result = callable.call();
 
 			if (this.callAfterInvocation) {
 				afterInvocation();
@@ -81,20 +83,17 @@ class GroovyDynamicElementReader extends GroovyObjectSupport {
 			}
 			return result;
 		}
-
 		else {
 			StreamingMarkupBuilder builder = new StreamingMarkupBuilder();
-			var myNamespace = this.rootNamespace;
-			var myNamespaces = this.xmlNamespaces;
+			String myNamespace = this.rootNamespace;
+			Map<String, String> myNamespaces = this.xmlNamespaces;
 
 			Closure<Object> callable = new Closure<>(this) {
 				@Override
-				public Object call(Object... its) {
+				public Object call(Object... arguments) {
 					((GroovyObject) getProperty("mkp")).invokeMethod("declareNamespace", new Object[] {myNamespaces});
 					int len = args.length;
-					if (len > 0 && args[len-1] instanceof Closure) {
-						@SuppressWarnings("unchecked")
-						Closure<Object> callable = (Closure<Object>) args[len-1];
+					if (len > 0 && args[len-1] instanceof Closure<?> callable) {
 						callable.setResolveStrategy(Closure.DELEGATE_FIRST);
 						callable.setDelegate(builder);
 					}
@@ -105,7 +104,7 @@ class GroovyDynamicElementReader extends GroovyObjectSupport {
 			callable.setResolveStrategy(Closure.DELEGATE_FIRST);
 			callable.setDelegate(builder);
 			Writable writable = (Writable) builder.bind(callable);
-			var sw = new StringWriter();
+			StringWriter sw = new StringWriter();
 			try {
 				writable.writeTo(sw);
 			}
@@ -121,8 +120,8 @@ class GroovyDynamicElementReader extends GroovyObjectSupport {
 				this.beanDefinition.setBeanDefinitionHolder(holder);
 			}
 			else {
-				var beanDefinition = this.delegate.parseCustomElement(element);
-				if (beanDefinition!=null) {
+				BeanDefinition beanDefinition = this.delegate.parseCustomElement(element);
+				if (beanDefinition != null) {
 					this.beanDefinition.setBeanDefinition((AbstractBeanDefinition) beanDefinition);
 				}
 			}
@@ -135,7 +134,7 @@ class GroovyDynamicElementReader extends GroovyObjectSupport {
 	}
 
 	/**
-	 * Hook that subclass or anonymous classes can overwrite to implement custom behavior
+	 * Hook that subclasses or anonymous classes can override to implement custom behavior
 	 * after invocation completes.
 	 */
 	protected void afterInvocation() {

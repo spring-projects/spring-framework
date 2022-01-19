@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,9 +91,9 @@ public class GroovyBeanDefinitionReaderTests {
 		""").getBytes()));
 		appCtx.refresh();
 
-		assertThat(appCtx.isSingleton("singletonBean")).isTrue().as("singletonBean should have been a singleton");
-		assertThat(appCtx.isSingleton("nonSingletonBean")).isFalse().as("nonSingletonBean should not have been a singleton");
-		assertThat(appCtx.isSingleton("unSpecifiedScopeBean")).isTrue().as("unSpecifiedScopeBean should not have been a singleton");
+		assertThat(appCtx.isSingleton("singletonBean")).as("singletonBean should have been a singleton").isTrue();
+		assertThat(appCtx.isSingleton("nonSingletonBean")).as("nonSingletonBean should not have been a singleton").isFalse();
+		assertThat(appCtx.isSingleton("unSpecifiedScopeBean")).as("unSpecifiedScopeBean should not have been a singleton").isTrue();
 	}
 
 	@Test
@@ -194,7 +194,7 @@ public class GroovyBeanDefinitionReaderTests {
 		beans {
 			xmlns aop:"http://www.springframework.org/schema/aop"
 			xmlns util:"http://www.springframework.org/schema/util"
-			scopedList(Bean1) { bean ->
+			bean1(Bean1) { bean ->
 				bean.scope = "test"
 				aop.'scoped-proxy'()
 			}
@@ -206,11 +206,11 @@ public class GroovyBeanDefinitionReaderTests {
 		""").getBytes()));
 		appCtx.refresh();
 
-		assertThat((List<String>)appCtx.getBean("foo")).contains("one", "two");
+		assertThat((List<String>)appCtx.getBean("foo")).containsExactly("one", "two");
 
-		assertThat(appCtx.getBean("scopedList")).isNotNull();
-		assertThat(((Bean1)appCtx.getBean("scopedList")).getPerson()).isNull();
-		assertThat(((Bean1)appCtx.getBean("scopedList")).getPerson()).isNull();
+		assertThat(appCtx.getBean("bean1")).isNotNull();
+		assertThat(((Bean1)appCtx.getBean("bean1")).getPerson()).isNull();
+		assertThat(((Bean1)appCtx.getBean("bean1")).getPerson()).isNull();
 
 		// should only be true because bean not initialized until proxy called
 		assertThat(scope.instanceCount).isEqualTo(2);
@@ -225,7 +225,7 @@ public class GroovyBeanDefinitionReaderTests {
 		beans {
 			xmlns aop:"http://www.springframework.org/schema/aop",
 				util:"http://www.springframework.org/schema/util"
-			scopedList(Bean1) { bean ->
+			bean1(Bean1) { bean ->
 				bean.scope = "test"
 				aop.'scoped-proxy'()
 			}
@@ -237,11 +237,11 @@ public class GroovyBeanDefinitionReaderTests {
 		""").getBytes()));
 		appCtx.refresh();
 
-		assertThat((List<String>)appCtx.getBean("foo")).contains("one", "two");
+		assertThat((List<String>)appCtx.getBean("foo")).containsExactly("one", "two");
 
-		assertThat(appCtx.getBean("scopedList")).isNotNull();
-		assertThat(((Bean1)appCtx.getBean("scopedList")).getPerson()).isNull();
-		assertThat(((Bean1)appCtx.getBean("scopedList")).getPerson()).isNull();
+		assertThat(appCtx.getBean("bean1")).isNotNull();
+		assertThat(((Bean1)appCtx.getBean("bean1")).getPerson()).isNull();
+		assertThat(((Bean1)appCtx.getBean("bean1")).getPerson()).isNull();
 
 		// should only be true because bean not initialized until proxy called
 		assertThat(scope.instanceCount).isEqualTo(4);
@@ -419,7 +419,7 @@ public class GroovyBeanDefinitionReaderTests {
 		var b1 = appCtx.getProperty("myBean");
 		var b2 = appCtx.getProperty("myBean");
 
-		assert b1 != b2;
+		assertThat(b1).isNotSameAs(b2);
 
 		b1 = appCtx.getProperty("myBean2");
 		b2 = appCtx.getProperty("myBean2");
@@ -444,14 +444,14 @@ public class GroovyBeanDefinitionReaderTests {
 		""").getBytes()));
 		appCtx.refresh();
 
-		assert appCtx.containsBean("bean1");
+		assertThat(appCtx.containsBean("bean1")).isTrue();
 		Bean1 bean1 = (Bean1) appCtx.getBean("bean1");
 
 		assertThat(bean1.person).isEqualTo("homer");
 		assertThat(bean1.age).isEqualTo(45);
 		assertThat(bean1.props.getProperty("overweight")).isEqualTo("true");
 		assertThat(bean1.props.getProperty("height")).isEqualTo("1.8m");
-		assertThat(bean1.children).contains("bart", "lisa");
+		assertThat(bean1.children).containsExactly("bart", "lisa");
 
 	}
 
@@ -485,7 +485,7 @@ public class GroovyBeanDefinitionReaderTests {
 		""").getBytes()));
 		appCtx.refresh();
 
-		assert appCtx.containsBean("bart");
+		assertThat(appCtx.containsBean("bart")).isTrue();
 		Bean2 bart = (Bean2) appCtx.getBean("bart");
 		assertThat(bart.parent.person).isEqualTo("homer");
 	}
@@ -592,8 +592,7 @@ public class GroovyBeanDefinitionReaderTests {
 		assertThat(marge.bean1).isEqualTo(homer);
 		assertThat(marge.children).hasSize(2);
 
-		assertThat(marge.children).contains(bart);
-		assertThat(marge.children).contains(lisa);
+		assertThat(marge.children).containsExactlyInAnyOrder(bart, lisa);
 	}
 
 	@Test
@@ -631,7 +630,7 @@ public class GroovyBeanDefinitionReaderTests {
 				person = "homer"
 				age = 45
 			}
-			var marge = marge(Bean4) {
+			def marge = marge(Bean4) {
 				person = "marge"
 			}
 			marge.factoryMethod = "getInstance"
@@ -776,7 +775,7 @@ public class GroovyBeanDefinitionReaderTests {
 	void loadExternalBeans() {
 		var appCtx = new GenericGroovyApplicationContext("org/springframework/context/groovy/applicationContext.groovy");
 
-		assertThat( appCtx.containsBean("foo")).isNotNull();
+		assertThat(appCtx.containsBean("foo")).isTrue();
 		var foo = appCtx.getBean("foo");
 		assertThat(foo).isEqualTo("hello");
 	}
@@ -787,7 +786,7 @@ public class GroovyBeanDefinitionReaderTests {
 		appCtx.load("org/springframework/context/groovy/applicationContext.groovy");
 		appCtx.refresh();
 
-		assertThat( appCtx.containsBean("foo")).isNotNull();
+		assertThat(appCtx.containsBean("foo")).isTrue();
 		var foo = appCtx.getBean("foo");
 		assertThat(foo).isEqualTo("hello");
 	}
@@ -800,11 +799,11 @@ public class GroovyBeanDefinitionReaderTests {
 		reader.loadBeanDefinitions(new ByteArrayResource(("""
 		package org.springframework.context.groovy
 		beans {
-		quest(HolyGrailQuest)
+			quest(HolyGrailQuest)
 
-		knight(KnightOfTheRoundTable, "Bedivere") {
-		quest = ref("quest")
-		}
+			knight(KnightOfTheRoundTable, "Bedivere") {
+				quest = ref("quest")
+			}
 		}
 		""").getBytes()));
 
@@ -856,7 +855,7 @@ public class GroovyBeanDefinitionReaderTests {
 	@Test
 	void groovyBeanDefinitionReaderWithScript() throws Exception {
 		var script = """
-var appCtx = new org.springframework.context.support.GenericGroovyApplicationContext()
+def appCtx = new org.springframework.context.support.GenericGroovyApplicationContext()
 appCtx.reader.beans {
 quest(org.springframework.context.groovy.HolyGrailQuest) {}
 
