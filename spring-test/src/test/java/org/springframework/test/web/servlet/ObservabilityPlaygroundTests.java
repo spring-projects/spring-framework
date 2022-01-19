@@ -42,19 +42,30 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * Just a demo to try MVC instrumentation out with Zipkin, will be deleted later.
  */
 public class ObservabilityPlaygroundTests extends SampleTestRunner {
+	private final SimpleMeterRegistry meterRegistry;
 	private final MockMvc mockMvc;
 
 	public ObservabilityPlaygroundTests() {
-		super(SampleTestRunner.SamplerRunnerConfig.builder().build());
-		this.mockMvc = standaloneSetup(new TestController())
-				.addFilters(new WebMvcObservabilityFilter(meterRegistry, new DefaultWebMvcTagsProvider(), "http.server.rq", null))
-				.build();
+		this.meterRegistry = new SimpleMeterRegistry();
 		this.meterRegistry.config().timerRecordingHandler(new TestTimerRecordingHandler());
+		this.mockMvc = standaloneSetup(new TestController())
+				.addFilters(new WebMvcObservabilityFilter(this.meterRegistry, new DefaultWebMvcTagsProvider(), "http.server.rq", null))
+				.build();
+	}
+
+	@Override
+	protected MeterRegistry getMeterRegistry() {
+		return this.meterRegistry;
+	}
+
+	@Override
+	protected SampleRunnerConfig getSampleRunnerConfig() {
+		return SampleRunnerConfig.builder().build();
 	}
 
 	@Override
 	public BiConsumer<Tracer, MeterRegistry> yourCode() {
-		return ((tracer, meterRegistry1) -> {
+		return ((tracer, registry) -> {
 			try {
 				mockMvc.perform(get("/"));
 				mockMvc.perform(get("/api/people/12345"));
@@ -63,7 +74,8 @@ public class ObservabilityPlaygroundTests extends SampleTestRunner {
 			catch (Exception e) {
 				e.printStackTrace();
 			}
-			System.out.println(((SimpleMeterRegistry) meterRegistry).getMetersAsString());
+
+			System.out.println(meterRegistry.getMetersAsString());
 		});
 	}
 
