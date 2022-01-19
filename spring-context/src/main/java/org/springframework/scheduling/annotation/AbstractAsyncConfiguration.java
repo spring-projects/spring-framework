@@ -70,7 +70,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	 * Collect any {@link AsyncConfigurer} beans through autowiring.
 	 */
 	@Autowired
-	void setConfigurers(ObjectProvider<AsyncConfigurer> configurers) {
+	void setConfigurers(ObjectProvider<AsyncConfigurer> configurers, ObjectProvider<AsyncConfigurerExecutorCustomizer> customizers) {
 		Supplier<AsyncConfigurer> configurer = SingletonSupplier.of(() -> {
 			List<AsyncConfigurer> candidates = configurers.stream().collect(Collectors.toList());
 			if (CollectionUtils.isEmpty(candidates)) {
@@ -81,7 +81,8 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 			}
 			return candidates.get(0);
 		});
-		this.executor = adapt(configurer, AsyncConfigurer::getAsyncExecutor);
+		Supplier<Executor> adaptedExecutor = adapt(configurer, AsyncConfigurer::getAsyncExecutor);
+		customizers.ifAvailable(customizer -> this.executor = () -> customizer.customize(adaptedExecutor.get()));
 		this.exceptionHandler = adapt(configurer, AsyncConfigurer::getAsyncUncaughtExceptionHandler);
 	}
 
