@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
 public abstract class ServletRequestPathUtils {
 
 	/** Name of Servlet request attribute that holds the parsed {@link RequestPath}. */
-	public static final String PATH_ATTRIBUTE = ServletRequestPathUtils.class.getName() + ".PATH";
+	public static final String PATH_ATTRIBUTE = "org.springframework.web.util.ServletRequestPathUtils.PATH";
 
 
 	/**
