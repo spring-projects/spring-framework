@@ -67,7 +67,7 @@ dependencies {
 	testImplementation("org.apache.httpcomponents:httpclient")
 	testImplementation("io.projectreactor.netty:reactor-netty-http")
 	testImplementation("de.bechte.junit:junit-hierarchicalcontextrunner")
-	testImplementation("io.micrometer:micrometer-tracing-test")
+	testImplementation("io.micrometer:micrometer-tracing-integration-test")
 	testRuntimeOnly("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "junit", module: "junit"
 	}
