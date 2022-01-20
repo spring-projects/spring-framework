@@ -51,11 +51,10 @@ public enum HttpStatus {
 	 */
 	PROCESSING(102, Series.INFORMATIONAL, "Processing"),
 	/**
-	 * {@code 103 Checkpoint}.
-	 * @see <a href="https://code.google.com/p/gears/wiki/ResumableHttpRequestsProposal">A proposal for supporting
-	 * resumable POST/PUT HTTP requests in HTTP/1.0</a>
+	 * {@code 103 Early Hints}.
+	 * @see <a href="https://tools.ietf.org/html/rfc8297#section-2">An HTTP Status Code for Indicating Hints</a>
 	 */
-	CHECKPOINT(103, Series.INFORMATIONAL, "Checkpoint"),
+	EARLY_HINTS(103, Series.INFORMATIONAL, "Early Hints"),
 
 	// 2xx Success
 

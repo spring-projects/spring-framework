@@ -37,7 +37,7 @@ class HttpStatusTests {
 		statusCodes.put(100, "CONTINUE");
 		statusCodes.put(101, "SWITCHING_PROTOCOLS");
 		statusCodes.put(102, "PROCESSING");
-		statusCodes.put(103, "CHECKPOINT");
+		statusCodes.put(103, "EARLY_HINTS");
 
 		statusCodes.put(200, "OK");
 		statusCodes.put(201, "CREATED");

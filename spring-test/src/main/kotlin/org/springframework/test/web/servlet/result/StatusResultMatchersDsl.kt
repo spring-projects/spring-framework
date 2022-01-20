@@ -115,10 +115,10 @@ class StatusResultMatchersDsl internal constructor (private val actions: ResultA
 	}
 
 	/**
-	 * @see StatusResultMatchers.isCheckpoint
+	 * @see StatusResultMatchers.isEarlyHints
 	 */
-	fun isCheckpoint() {
-		actions.andExpect(matchers.isCheckpoint())
+	fun isEarlyHints() {
+		actions.andExpect(matchers.isEarlyHints())
 	}
 
 	/**

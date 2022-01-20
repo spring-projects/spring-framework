@@ -145,9 +145,9 @@ public class StatusResultMatchers {
 	}
 
 	/**
-	 * Assert the response status code is {@code HttpStatus.CHECKPOINT} (103).
+	 * Assert the response status code is {@code HttpStatus.EARLY_HINTS} (103).
 	 */
-	public ResultMatcher isCheckpoint() {
+	public ResultMatcher isEarlyHints() {
 		return matcher(HttpStatus.valueOf(103));
 	}
 
