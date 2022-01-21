@@ -49,7 +49,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void importSpringXml() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			beans {
@@ -62,7 +62,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void importBeansFromGroovy() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			beans {
@@ -75,7 +75,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void singletonPropertyOnBeanDefinition() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy;
@@ -97,7 +97,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void inheritPropertiesFromAbstractBean() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy;
@@ -124,7 +124,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void contextComponentScanSpringTag() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			beans {
@@ -139,7 +139,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void useSpringNamespaceAsMethod() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy;
@@ -175,7 +175,7 @@ class GroovyBeanDefinitionReaderTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void useTwoSpringNamespaces() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 		TestScope scope = new TestScope();
 		appCtx.getBeanFactory().registerScope("test", scope);
 
@@ -235,7 +235,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void springAopSupport() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -268,7 +268,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void springScopedProxyBean() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		TestScope scope = new TestScope();
 		appCtx.getBeanFactory().registerScope("test", scope);
@@ -294,7 +294,7 @@ class GroovyBeanDefinitionReaderTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void springNamespaceBean() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -312,7 +312,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void namedArgumentConstructor() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -332,7 +332,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void abstractBeanDefinition() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
 			beans {
@@ -358,7 +358,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void abstractBeanDefinitionWithClass() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
 			beans {
@@ -386,7 +386,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void scopes() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
 			beans {
@@ -397,8 +397,8 @@ class GroovyBeanDefinitionReaderTests {
 			}
 			""");
 
-		var b1 = appCtx.getBean("myBean");
-		var b2 = appCtx.getBean("myBean");
+		Object b1 = appCtx.getBean("myBean");
+		Object b2 = appCtx.getBean("myBean");
 
 		assertThat(b1).isNotSameAs(b2);
 
@@ -412,7 +412,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void simpleBean() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -440,7 +440,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void beanWithParentRef() {
-		var parentAppCtx = new GenericApplicationContext();
+		GenericApplicationContext parentAppCtx = new GenericApplicationContext();
 		loadGroovyDsl(parentAppCtx, """
 			package org.springframework.context.groovy
 			beans {
@@ -453,7 +453,7 @@ class GroovyBeanDefinitionReaderTests {
 			}
 			""");
 
-		var appCtx = new GenericApplicationContext(parentAppCtx);
+		GenericApplicationContext appCtx = new GenericApplicationContext(parentAppCtx);
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
 			beans {
@@ -471,7 +471,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void withAnonymousInnerBean() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -502,7 +502,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void withUntypedAnonymousInnerBean() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -533,7 +533,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void beanReferences() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -560,7 +560,7 @@ class GroovyBeanDefinitionReaderTests {
 			}
 			""");
 
-		var homer = appCtx.getBean("homer");
+		Object homer = appCtx.getBean("homer");
 		Bean2 marge = (Bean2) appCtx.getBean("marge");
 		Bean1 bart = (Bean1) appCtx.getBean("bart");
 		Bean1 lisa = (Bean1) appCtx.getBean("lisa");
@@ -573,7 +573,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void beanWithConstructor() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -596,7 +596,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void beanWithFactoryMethod() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -618,7 +618,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void beanWithFactoryMethodUsingClosureArgs() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -640,7 +640,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void beanWithFactoryMethodWithConstructorArgs() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -672,8 +672,8 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void getBeanDefinitions() {
-		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
+		GenericApplicationContext appCtx = new GenericApplicationContext();
+		GroovyBeanDefinitionReader reader = new GroovyBeanDefinitionReader(appCtx);
 
 		reader.loadBeanDefinitions(new ByteArrayResource(("""
 			package org.springframework.context.groovy
@@ -700,7 +700,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void beanWithFactoryBean() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -722,7 +722,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void beanWithFactoryBeanAndMethod() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -742,7 +742,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void loadExternalBeans() {
-		var appCtx = new GenericGroovyApplicationContext("org/springframework/context/groovy/applicationContext.groovy");
+		GenericApplicationContext appCtx = new GenericGroovyApplicationContext("org/springframework/context/groovy/applicationContext.groovy");
 
 		assertThat(appCtx.containsBean("foo")).isTrue();
 		assertThat(appCtx.getBean("foo")).isEqualTo("hello");
@@ -752,9 +752,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void loadExternalBeansWithExplicitRefresh() {
-		var appCtx = new GenericGroovyApplicationContext();
-		appCtx.load("org/springframework/context/groovy/applicationContext.groovy");
-		appCtx.refresh();
+		GenericGroovyApplicationContext appCtx = new GenericGroovyApplicationContext("org/springframework/context/groovy/applicationContext.groovy");
 
 		assertThat(appCtx.containsBean("foo")).isTrue();
 		assertThat(appCtx.getBean("foo")).isEqualTo("hello");
@@ -764,7 +762,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void holyGrailWiring() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -783,7 +781,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void abstractBeanSpecifyingClass() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -820,7 +818,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void groovyBeanDefinitionReaderWithScript() throws Exception {
-		var script = """
+		String script = """
 			def appCtx = new org.springframework.context.support.GenericGroovyApplicationContext()
 			appCtx.reader.beans {
 				quest(org.springframework.context.groovy.HolyGrailQuest)
@@ -842,7 +840,7 @@ class GroovyBeanDefinitionReaderTests {
 	// test for GRAILS-5057
 	@Test
 	void registerBeans() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -870,7 +868,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void listOfBeansAsConstructorArg() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -889,7 +887,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void beanWithListAndMapConstructor() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -921,7 +919,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void anonymousInnerBeanViaBeanMethod() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy
@@ -953,7 +951,7 @@ class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void anonymousInnerBeanViaBeanMethodWithConstructorArgs() {
-		var appCtx = new GenericApplicationContext();
+		GenericApplicationContext appCtx = new GenericApplicationContext();
 
 		loadGroovyDsl(appCtx, """
 			package org.springframework.context.groovy

@@ -33,11 +33,9 @@ class GroovyApplicationContextDynamicBeanPropertyTests {
 
 	@Test
 	void accessDynamicBeanProperties() {
-		var ctx = new GenericGroovyApplicationContext();
-		ctx.getReader().loadBeanDefinitions("org/springframework/context/groovy/applicationContext.groovy");
-		ctx.refresh();
+		GenericGroovyApplicationContext ctx = new GenericGroovyApplicationContext("org/springframework/context/groovy/applicationContext.groovy");
 
-		var framework = ctx.getProperty("framework");
+		Object framework = ctx.getBean("framework");
 		assertThat(framework).as("could not find framework bean").isNotNull();
 		assertThat(framework).isEqualTo("Grails");
 
@@ -45,13 +43,11 @@ class GroovyApplicationContextDynamicBeanPropertyTests {
 	}
 
 	@Test
-	void accessingNonExistentBeanViaDynamicProperty() {
-		var ctx = new GenericGroovyApplicationContext();
-		ctx.getReader().loadBeanDefinitions("org/springframework/context/groovy/applicationContext.groovy");
-		ctx.refresh();
+	void accessNonExistentBeanViaDynamicProperty() {
+		GenericGroovyApplicationContext ctx = new GenericGroovyApplicationContext("org/springframework/context/groovy/applicationContext.groovy");
 
 		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
-			.isThrownBy(() -> ctx.getProperty("someNonExistentBean"))
+			.isThrownBy(() -> ctx.getBean("someNonExistentBean"))
 			.withMessage("No bean named 'someNonExistentBean' available");
 
 		ctx.close();
