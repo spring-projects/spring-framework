@@ -20,12 +20,10 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
-import io.micrometer.core.annotation.Timed;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
-import io.micrometer.core.instrument.Timer.Builder;
-import io.micrometer.core.instrument.Timer.Sample;
-import io.micrometer.core.instrument.tracing.context.HttpServerHandlerContext;
+import io.micrometer.api.annotation.Timed;
+import io.micrometer.api.instrument.MeterRegistry;
+import io.micrometer.api.instrument.Timer;
+import io.micrometer.api.instrument.transport.http.context.HttpServerHandlerContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -113,7 +111,7 @@ public class WebMvcObservabilityFilter extends OncePerRequestFilter {
 
 	private TimingContext startAndAttachTimingContext(HttpServletRequest request) {
 		HttpServerHandlerContext handlerContext = new HttpServerHandlerContext(HttpServletRequestWrapper.wrap(request));
-		Sample sample = Timer.start(this.registry, handlerContext);
+		Timer.Sample sample = Timer.start(this.registry, handlerContext);
 		Timer.Scope scope = sample.makeCurrent();
 		TimingContext timingContext = new TimingContext(sample, scope, handlerContext);
 		timingContext.attachTo(request);
@@ -152,12 +150,12 @@ public class WebMvcObservabilityFilter extends OncePerRequestFilter {
 		return Collections.emptySet();
 	}
 
-	private void stop(Builder builder, TimingContext timingContext) {
+	private void stop(Timer.Builder builder, TimingContext timingContext) {
 		timingContext.getScope().close();
 		timingContext.getSample().stop(builder);
 	}
 
-	private Timer.Builder enhanceBuilder(Builder builder, Object handler, HttpServletRequest request, HttpServletResponse response,
+	private Timer.Builder enhanceBuilder(Timer.Builder builder, Object handler, HttpServletRequest request, HttpServletResponse response,
 			Throwable exception) {
 		return builder.tags(this.tagsProvider.getTags(request, response, handler, exception));
 	}
@@ -170,17 +168,17 @@ public class WebMvcObservabilityFilter extends OncePerRequestFilter {
 
 		private static final String ATTRIBUTE = TimingContext.class.getName();
 
-		private final Sample sample;
+		private final Timer.Sample sample;
 		private final Timer.Scope scope;
 		private final HttpServerHandlerContext handlerContext;
 
-		TimingContext(Sample sample, Timer.Scope scope, HttpServerHandlerContext handlerContext) {
+		TimingContext(Timer.Sample sample, Timer.Scope scope, HttpServerHandlerContext handlerContext) {
 			this.sample = sample;
 			this.scope = scope;
 			this.handlerContext = handlerContext;
 		}
 
-		Sample getSample() {
+		Timer.Sample getSample() {
 			return this.sample;
 		}
 

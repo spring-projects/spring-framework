@@ -18,8 +18,8 @@ package org.springframework.web.servlet.observability;
 
 import java.util.regex.Pattern;
 
-import io.micrometer.core.instrument.Tag;
-import io.micrometer.core.instrument.binder.http.Outcome;
+import io.micrometer.api.instrument.Tag;
+import io.micrometer.api.instrument.transport.http.tags.Outcome;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 

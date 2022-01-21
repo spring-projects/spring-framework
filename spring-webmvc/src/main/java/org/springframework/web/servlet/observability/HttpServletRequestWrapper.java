@@ -19,7 +19,7 @@ package org.springframework.web.servlet.observability;
 import java.util.Collection;
 import java.util.Collections;
 
-import io.micrometer.core.instrument.transport.http.HttpServerRequest;
+import io.micrometer.api.instrument.transport.http.HttpServerRequest;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.web.servlet.HandlerMapping;

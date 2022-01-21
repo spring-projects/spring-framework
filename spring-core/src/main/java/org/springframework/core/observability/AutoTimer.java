@@ -20,9 +20,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import io.micrometer.core.annotation.Timed;
-import io.micrometer.core.instrument.Timer;
-import io.micrometer.core.instrument.Timer.Builder;
+import io.micrometer.api.annotation.Timed;
+import io.micrometer.api.instrument.Timer;
+import io.micrometer.api.instrument.Timer.Builder;
 
 import org.springframework.util.CollectionUtils;
 

@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet.observability;
 
-import io.micrometer.core.instrument.LongTaskTimer;
-import io.micrometer.core.instrument.Tag;
+import io.micrometer.api.instrument.LongTaskTimer;
+import io.micrometer.api.instrument.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 

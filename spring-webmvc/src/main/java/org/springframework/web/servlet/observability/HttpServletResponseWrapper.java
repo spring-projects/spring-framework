@@ -18,8 +18,8 @@ package org.springframework.web.servlet.observability;
 
 import java.util.Collection;
 
-import io.micrometer.core.instrument.transport.http.HttpServerRequest;
-import io.micrometer.core.instrument.transport.http.HttpServerResponse;
+import io.micrometer.api.instrument.transport.http.HttpServerRequest;
+import io.micrometer.api.instrument.transport.http.HttpServerResponse;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**

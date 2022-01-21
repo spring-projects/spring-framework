@@ -19,12 +19,12 @@ package org.springframework.test.web.servlet;
 import java.time.Duration;
 import java.util.function.BiConsumer;
 
-import io.micrometer.core.annotation.Timed;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
-import io.micrometer.core.instrument.TimerRecordingHandler;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import io.micrometer.core.instrument.tracing.context.HttpServerHandlerContext;
+import io.micrometer.api.annotation.Timed;
+import io.micrometer.api.instrument.MeterRegistry;
+import io.micrometer.api.instrument.Timer;
+import io.micrometer.api.instrument.TimerRecordingHandler;
+import io.micrometer.api.instrument.simple.SimpleMeterRegistry;
+import io.micrometer.api.instrument.transport.http.context.HttpServerHandlerContext;
 import io.micrometer.tracing.Tracer;
 import io.micrometer.tracing.test.SampleTestRunner;
 
