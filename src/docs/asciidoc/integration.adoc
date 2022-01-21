@@ -6545,7 +6545,7 @@ are made available by the manager. The following example shows how to do so:
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager" class="org.springframework.cache.caffeine.CaffeineCacheManager">
-		<property name="caches">
+		<property name="cacheNames">
 			<set>
 				<value>default</value>
 				<value>books</value>
