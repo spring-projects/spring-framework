@@ -26,6 +26,7 @@ import groovy.lang.GroovyShell;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.SpringProxy;
+import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
@@ -37,59 +38,57 @@ import org.springframework.stereotype.Component;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class GroovyBeanDefinitionReaderTests {
+/**
+ * Tests for {@link GroovyBeanDefinitionReader}.
+ *
+ * @author Jeff Brown
+ * @author Dave Syer
+ * @author Sam Brannen
+ */
+class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void importSpringXml() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
 
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
+		loadGroovyDsl(appCtx, """
 			beans {
 				importBeans "classpath:org/springframework/context/groovy/test.xml"
 			}
-			""").getBytes()));
+			""");
 
-		appCtx.refresh();
-
-		var foo = appCtx.getBean("foo");
-		assertThat(foo).isEqualTo("hello");
+		assertThat(appCtx.getBean("foo")).isEqualTo("hello");
 	}
 
 	@Test
 	void importBeansFromGroovy() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
 
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
+		loadGroovyDsl(appCtx, """
 			beans {
 				importBeans "classpath:org/springframework/context/groovy/applicationContext.groovy"
 			}
-			""").getBytes()));
+			""");
 
-		appCtx.refresh();
-
-		var foo = appCtx.getBean("foo");
-		assertThat(foo).isEqualTo("hello");
+		assertThat(appCtx.getBean("foo")).isEqualTo("hello");
 	}
 
 	@Test
 	void singletonPropertyOnBeanDefinition() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy;
-		beans {
-			singletonBean(Bean1) { bean ->
-				bean.singleton = true
+
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy;
+			beans {
+				singletonBean(Bean1Impl) { bean ->
+					bean.singleton = true
+				}
+				nonSingletonBean(Bean1Impl) { bean ->
+					bean.singleton = false
+				}
+				unSpecifiedScopeBean(Bean1Impl)
 			}
-			nonSingletonBean(Bean1) { bean ->
-				bean.singleton = false
-			}
-			unSpecifiedScopeBean(Bean1)
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		assertThat(appCtx.isSingleton("singletonBean")).as("singletonBean should have been a singleton").isTrue();
 		assertThat(appCtx.isSingleton("nonSingletonBean")).as("nonSingletonBean should not have been a singleton").isFalse();
@@ -99,77 +98,69 @@ public class GroovyBeanDefinitionReaderTests {
 	@Test
 	void inheritPropertiesFromAbstractBean() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
 
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy;
-		beans {
-			myB(Bean1){
-				person = "wombat"
-			}
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy;
+			beans {
+				myB(Bean1Impl) {
+					person = "wombat"
+				}
 
-			myAbstractA(Bean2){ bean ->
-				bean."abstract" = true
-				age = 10
-				bean1 = myB
+				myAbstractA(Bean2) { bean ->
+					bean."abstract" = true
+					age = 10
+					bean1 = myB
+				}
+				myConcreteB {
+					it.parent = myAbstractA
+				}
 			}
-			myConcreteB {
-				it.parent = myAbstractA
-			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		Bean2 bean = (Bean2) appCtx.getBean("myConcreteB");
-		assertThat(bean.age).isEqualTo(10);
+		assertThat(bean.getAge()).isEqualTo(10);
 		assertThat(bean.bean1).isNotNull();
 	}
 
 	@Test
 	void contextComponentScanSpringTag() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
 
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		beans {
-			xmlns context:"http://www.springframework.org/schema/context"
+		loadGroovyDsl(appCtx, """
+			beans {
+				xmlns context:"http://www.springframework.org/schema/context"
 
-			context.'component-scan'( 'base-package':"org.springframework.context.groovy" )
-		}
-		""").getBytes()));
-		appCtx.refresh();
+				context.'component-scan'( 'base-package':"org.springframework.context.groovy" )
+			}
+			""");
 
-		var p = appCtx.getBean("person");
-		assertThat(p).isInstanceOf(AdvisedPerson.class);
+		assertThat(appCtx.getBean("person")).isInstanceOf(AdvisedPerson.class);
 	}
 
 	@Test
 	void useSpringNamespaceAsMethod() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
 
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy;
-		beans {
-			xmlns aop:"http://www.springframework.org/schema/aop"
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy;
+			beans {
+				xmlns aop:"http://www.springframework.org/schema/aop"
 
-			fred(AdvisedPerson) {
-				name = "Fred"
-				age = 45
-			}
-			birthdayCardSenderAspect(BirthdayCardSender)
+				fred(AdvisedPersonImpl) {
+					name = "Fred"
+					age = 45
+				}
+				birthdayCardSenderAspect(BirthdayCardSender)
 
-			aop {
-				config("proxy-target-class":true) {
-					aspect( id:"sendBirthdayCard",ref:"birthdayCardSenderAspect" ) {
-						after method:"onBirthday", pointcut: "execution(void org.springframework.context.groovy.AdvisedPerson.birthday()) and this(person)"
+				aop {
+					config("proxy-target-class": false) {
+						aspect(id: "sendBirthdayCard", ref: "birthdayCardSenderAspect") {
+							after method: "onBirthday", pointcut: "execution(void org.springframework.context.groovy.AdvisedPerson.birthday()) and this(person)"
+						}
 					}
 				}
 			}
-		}
-		""").getBytes()));
-
-		appCtx.refresh();
+			""");
 
 		AdvisedPerson fred = (AdvisedPerson) appCtx.getBean("fred");
 		assertThat(fred).isInstanceOf(SpringProxy.class);
@@ -181,30 +172,28 @@ public class GroovyBeanDefinitionReaderTests {
 		assertThat(birthDaySender.peopleSentCards.get(0).getName()).isEqualTo("Fred");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings("unchecked")
 	void useTwoSpringNamespaces() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
 		TestScope scope = new TestScope();
 		appCtx.getBeanFactory().registerScope("test", scope);
 
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			xmlns aop:"http://www.springframework.org/schema/aop"
-			xmlns util:"http://www.springframework.org/schema/util"
-			bean1(Bean1) { bean ->
-				bean.scope = "test"
-				aop.'scoped-proxy'()
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				xmlns aop:"http://www.springframework.org/schema/aop"
+				xmlns util:"http://www.springframework.org/schema/util"
+				bean1(Bean1Impl) { bean ->
+					bean.scope = "test"
+					aop.'scoped-proxy'("proxy-target-class": false)
+				}
+				util.list(id: 'foo') {
+					value 'one'
+					value 'two'
+				}
 			}
-			util.list(id: 'foo') {
-				value 'one'
-				value 'two'
-			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		assertThat((List<String>)appCtx.getBean("foo")).containsExactly("one", "two");
 
@@ -216,26 +205,23 @@ public class GroovyBeanDefinitionReaderTests {
 		assertThat(scope.instanceCount).isEqualTo(2);
 
 		appCtx = new GenericApplicationContext();
-		reader = new GroovyBeanDefinitionReader(appCtx);
 		appCtx.getBeanFactory().registerScope("test", scope);
 
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		import java.util.ArrayList
-		beans {
-			xmlns aop:"http://www.springframework.org/schema/aop",
-				util:"http://www.springframework.org/schema/util"
-			bean1(Bean1) { bean ->
-				bean.scope = "test"
-				aop.'scoped-proxy'()
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			import java.util.ArrayList
+			beans {
+				xmlns aop:"http://www.springframework.org/schema/aop", util:"http://www.springframework.org/schema/util"
+				bean1(Bean1Impl) { bean ->
+					bean.scope = "test"
+					aop.'scoped-proxy'("proxy-target-class": false)
+				}
+				util.list(id: 'foo') {
+					value 'one'
+					value 'two'
+				}
 			}
-			util.list(id: 'foo') {
-				value 'one'
-				value 'two'
-			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		assertThat((List<String>)appCtx.getBean("foo")).containsExactly("one", "two");
 
@@ -250,28 +236,25 @@ public class GroovyBeanDefinitionReaderTests {
 	@Test
 	void springAopSupport() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
 
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			xmlns aop:"http://www.springframework.org/schema/aop"
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				xmlns aop:"http://www.springframework.org/schema/aop"
 
-			fred(AdvisedPerson) {
-				name = "Fred"
-				age = 45
-			}
-			birthdayCardSenderAspect(BirthdayCardSender)
+				fred(AdvisedPersonImpl) {
+					name = "Fred"
+					age = 45
+				}
+				birthdayCardSenderAspect(BirthdayCardSender)
 
-			aop.config("proxy-target-class":true) {
-				aspect( id:"sendBirthdayCard",ref:"birthdayCardSenderAspect" ) {
-					after method:"onBirthday", pointcut: "execution(void org.springframework.context.groovy.AdvisedPerson.birthday()) and this(person)"
+				aop.config("proxy-target-class": false) {
+					aspect(id: "sendBirthdayCard", ref: "birthdayCardSenderAspect") {
+						after method:"onBirthday", pointcut: "execution(void org.springframework.context.groovy.AdvisedPerson.birthday()) and this(person)"
+					}
 				}
 			}
-		}
-		""").getBytes()));
-
-		appCtx.refresh();
+			""");
 
 		AdvisedPerson fred = (AdvisedPerson) appCtx.getBean("fred");
 		assertThat(fred).isInstanceOf(SpringProxy.class);
@@ -286,63 +269,60 @@ public class GroovyBeanDefinitionReaderTests {
 	@Test
 	void springScopedProxyBean() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
 
 		TestScope scope = new TestScope();
 		appCtx.getBeanFactory().registerScope("test", scope);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			xmlns aop:"http://www.springframework.org/schema/aop"
-			scopedList(Bean1) { bean ->
-				bean.scope = "test"
-				aop.'scoped-proxy'()
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				xmlns aop:"http://www.springframework.org/schema/aop"
+				bean1(Bean1Impl) { bean ->
+					bean.scope = "test"
+					aop.'scoped-proxy'('proxy-target-class': false)
+				}
 			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
-		assertThat(appCtx.getBean("scopedList")).isNotNull();
-		assertThat(((Bean1)appCtx.getBean("scopedList")).getPerson()).isNull();
-		assertThat(((Bean1)appCtx.getBean("scopedList")).getPerson()).isNull();
+		assertThat(appCtx.getBean("bean1")).isNotNull();
+		assertThat(((Bean1)appCtx.getBean("bean1")).getPerson()).isNull();
+		assertThat(((Bean1)appCtx.getBean("bean1")).getPerson()).isNull();
 
 		// should only be true because bean not initialized until proxy called
 		assertThat(scope.instanceCount).isEqualTo(2);
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void springNamespaceBean() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			xmlns util: 'http://www.springframework.org/schema/util'
-			util.list(id: 'foo') {
-				value 'one'
-				value 'two'
-			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
 
-		assertThat((List<String>)appCtx.getBean("foo")).contains("one", "two");
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				xmlns util: 'http://www.springframework.org/schema/util'
+				util.list(id: 'foo') {
+					value 'one'
+					value 'two'
+				}
+			}
+			""");
+
+		assertThat((List<String>) appCtx.getBean("foo")).containsExactly("one", "two");
 	}
 
 	@Test
 	void namedArgumentConstructor() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			holyGrail(HolyGrailQuest)
-			knights(KnightOfTheRoundTable, "Camelot", leader:"lancelot", quest: holyGrail)
-		}
-		""").getBytes()));
-		appCtx.refresh();
 
-		KnightOfTheRoundTable knights = (KnightOfTheRoundTable) appCtx.getBean("knights");
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				holyGrail(HolyGrailQuest)
+				knights(KnightsOfTheRoundTable, "Camelot", leader: "lancelot", quest: holyGrail)
+			}
+			""");
+
+		KnightsOfTheRoundTable knights = (KnightsOfTheRoundTable) appCtx.getBean("knights");
 		HolyGrailQuest quest = (HolyGrailQuest) appCtx.getBean("holyGrail");
 
 		assertThat(knights.getName()).isEqualTo("Camelot");
@@ -352,237 +332,233 @@ public class GroovyBeanDefinitionReaderTests {
 
 	@Test
 	void abstractBeanDefinition() {
-		var appCtx = new GenericGroovyApplicationContext();
-		appCtx.getReader().loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			abstractBean {
-				leader = "Lancelot"
+		var appCtx = new GenericApplicationContext();
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				abstractBean {
+					leader = "Lancelot"
+				}
+				quest(HolyGrailQuest)
+				knights(KnightsOfTheRoundTable, "Camelot") { bean ->
+					bean.parent = abstractBean
+					quest = quest
+				}
 			}
-			quest(HolyGrailQuest)
-			knights(KnightOfTheRoundTable, "Camelot") { bean ->
-				bean.parent = abstractBean
-				quest = quest
-			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
-		KnightOfTheRoundTable knights = (KnightOfTheRoundTable) appCtx.getProperty("knights");
+		KnightsOfTheRoundTable knights = (KnightsOfTheRoundTable) appCtx.getBean("knights");
 		assertThat(knights).isNotNull();
-		assertThatExceptionOfType(org.springframework.beans.factory.BeanIsAbstractException.class).isThrownBy(() ->
-			appCtx.getProperty("abstractBean"));
+		assertThatExceptionOfType(BeanIsAbstractException.class)
+			.isThrownBy(() -> appCtx.getBean("abstractBean"));
 		assertThat(knights.leader).isEqualTo("Lancelot");
+
+		appCtx.close();
 	}
 
 	@Test
 	void abstractBeanDefinitionWithClass() {
-		var appCtx = new GenericGroovyApplicationContext();
-		appCtx.getReader().loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			abstractBean(KnightOfTheRoundTable) { bean ->
-				bean.'abstract' = true
-				leader = "Lancelot"
+		var appCtx = new GenericApplicationContext();
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				abstractBean(KnightsOfTheRoundTable) { bean ->
+					bean.'abstract' = true
+					leader = "Lancelot"
+				}
+				quest(HolyGrailQuest)
+				knights("Camelot") { bean ->
+					bean.parent = abstractBean
+					quest = quest
+				}
 			}
-			quest(HolyGrailQuest)
-			knights("Camelot") { bean ->
-				bean.parent = abstractBean
-				quest = quest
-			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
-		assertThatExceptionOfType(org.springframework.beans.factory.BeanIsAbstractException.class).isThrownBy(() ->
-			appCtx.getProperty("abstractBean"));
+		assertThatExceptionOfType(BeanIsAbstractException.class)
+			.isThrownBy(() -> appCtx.getBean("abstractBean"));
 
-		KnightOfTheRoundTable knights = (KnightOfTheRoundTable) appCtx.getProperty("knights");
+		KnightsOfTheRoundTable knights = (KnightsOfTheRoundTable) appCtx.getBean("knights");
 		assertThat(knights).isNotNull();
 		assertThat(knights.leader).isEqualTo("Lancelot");
+
+		appCtx.close();
 	}
 
 	@Test
 	void scopes() {
-		var appCtx = new GenericGroovyApplicationContext();
-		appCtx.getReader().loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			myBean(ScopeTestBean) { bean ->
-				bean.scope = "prototype"
+		var appCtx = new GenericApplicationContext();
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				myBean(ScopeTestBean) { bean ->
+					bean.scope = "prototype"
+				}
+				myBean2(ScopeTestBean)
 			}
-			myBean2(ScopeTestBean)
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
-		var b1 = appCtx.getProperty("myBean");
-		var b2 = appCtx.getProperty("myBean");
+		var b1 = appCtx.getBean("myBean");
+		var b2 = appCtx.getBean("myBean");
 
 		assertThat(b1).isNotSameAs(b2);
 
-		b1 = appCtx.getProperty("myBean2");
-		b2 = appCtx.getProperty("myBean2");
+		b1 = appCtx.getBean("myBean2");
+		b2 = appCtx.getBean("myBean2");
 
 		assertThat(b1).isEqualTo(b2);
+
+		appCtx.close();
 	}
 
 	@Test
 	void simpleBean() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			bean1(Bean1) {
-				person = "homer"
-				age = 45
-				props = [overweight:"true", height:"1.8m"]
-				children = ["bart", "lisa"]
+
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				bean1(Bean1Impl) {
+					person = "homer"
+					age = 45
+					props = [overweight:"true", height:"1.8m"]
+					children = ["bart", "lisa"]
+				}
 			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		assertThat(appCtx.containsBean("bean1")).isTrue();
 		Bean1 bean1 = (Bean1) appCtx.getBean("bean1");
 
-		assertThat(bean1.person).isEqualTo("homer");
-		assertThat(bean1.age).isEqualTo(45);
-		assertThat(bean1.props.getProperty("overweight")).isEqualTo("true");
-		assertThat(bean1.props.getProperty("height")).isEqualTo("1.8m");
-		assertThat(bean1.children).containsExactly("bart", "lisa");
+		assertThat(bean1.getPerson()).isEqualTo("homer");
+		assertThat(bean1.getAge()).isEqualTo(45);
+		assertThat(bean1.getProps().getProperty("overweight")).isEqualTo("true");
+		assertThat(bean1.getProps().getProperty("height")).isEqualTo("1.8m");
+		assertThat(bean1.getChildren()).containsExactly("bart", "lisa");
 
+		appCtx.close();
 	}
 
 	@Test
 	void beanWithParentRef() {
 		var parentAppCtx = new GenericApplicationContext();
-		var parentBeanReader = new GroovyBeanDefinitionReader(parentAppCtx);
-		parentBeanReader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			homer(Bean1) {
-				person = "homer"
-				age = 45
-				props = [overweight:true, height:"1.8m"]
-				children = ["bart", "lisa"]
+		loadGroovyDsl(parentAppCtx, """
+			package org.springframework.context.groovy
+			beans {
+				homer(Bean1Impl) {
+					person = "homer"
+					age = 45
+					props = [overweight:true, height:"1.8m"]
+					children = ["bart", "lisa"]
+				}
 			}
-		}
-		""").getBytes()));
-		parentAppCtx.refresh();
+			""");
 
 		var appCtx = new GenericApplicationContext(parentAppCtx);
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			bart(Bean2) {
-				person = "bart"
-				parent = ref("homer", true)
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				bart(Bean2) {
+					person = "bart"
+					parent = ref("homer", true)
+				}
 			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		assertThat(appCtx.containsBean("bart")).isTrue();
 		Bean2 bart = (Bean2) appCtx.getBean("bart");
-		assertThat(bart.parent.person).isEqualTo("homer");
+		assertThat(bart.parent.getPerson()).isEqualTo("homer");
 	}
 
 	@Test
 	void withAnonymousInnerBean() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			bart(Bean1) {
-				person = "bart"
-				age = 11
+
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				bart(Bean1Impl) {
+					person = "bart"
+					age = 11
+				}
+				lisa(Bean1Impl) {
+					person = "lisa"
+					age = 9
+				}
+				marge(Bean2) {
+					person = "marge"
+					bean1 =  { Bean1Impl b ->
+								person = "homer"
+								age = 45
+								props = [overweight:true, height:"1.8m"]
+								children = ["bart", "lisa"] }
+					children = [bart, lisa]
+				}
 			}
-			lisa(Bean1) {
-				person = "lisa"
-				age = 9
-			}
-			marge(Bean2) {
-				person = "marge"
-				bean1 =  { Bean1 b ->
-							person = "homer"
-							age = 45
-							props = [overweight:true, height:"1.8m"]
-							children = ["bart", "lisa"] }
-				children = [bart, lisa]
-			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		Bean2 marge = (Bean2) appCtx.getBean("marge");
-		assertThat(marge.bean1.person).isEqualTo("homer");
+		assertThat(marge.bean1.getPerson()).isEqualTo("homer");
 	}
 
 	@Test
 	void withUntypedAnonymousInnerBean() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			homer(Bean1Factory)
-			bart(Bean1) {
-				person = "bart"
-				age = 11
+
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				homer(Bean1Factory)
+				bart(Bean1Impl) {
+					person = "bart"
+					age = 11
+				}
+				lisa(Bean1Impl) {
+					person = "lisa"
+					age = 9
+				}
+				marge(Bean2) {
+					person = "marge"
+					bean1 =  { bean ->
+								bean.factoryBean = "homer"
+								bean.factoryMethod = "newInstance"
+								person = "homer" }
+					children = [bart, lisa]
+				}
 			}
-			lisa(Bean1) {
-				person = "lisa"
-				age = 9
-			}
-			marge(Bean2) {
-				person = "marge"
-				bean1 =  { bean ->
-							bean.factoryBean = "homer"
-							bean.factoryMethod = "newInstance"
-							person = "homer" }
-				children = [bart, lisa]
-			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		Bean2 marge = (Bean2) appCtx.getBean("marge");
-		assertThat(marge.bean1.person).isEqualTo("homer");
+		assertThat(marge.bean1.getPerson()).isEqualTo("homer");
 	}
 
 	@Test
 	void beanReferences() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			homer(Bean1) {
-				person = "homer"
-				age = 45
-				props = [overweight:true, height:"1.8m"]
-				children = ["bart", "lisa"]
+
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				homer(Bean1Impl) {
+					person = "homer"
+					age = 45
+					props = [overweight:true, height:"1.8m"]
+					children = ["bart", "lisa"]
+				}
+				bart(Bean1Impl) {
+					person = "bart"
+					age = 11
+				}
+				lisa(Bean1Impl) {
+					person = "lisa"
+					age = 9
+				}
+				marge(Bean2) {
+					person = "marge"
+					bean1 = homer
+					children = [bart, lisa]
+				}
 			}
-			bart(Bean1) {
-				person = "bart"
-				age = 11
-			}
-			lisa(Bean1) {
-				person = "lisa"
-				age = 9
-			}
-			marge(Bean2) {
-				person = "marge"
-				bean1 = homer
-				children = [bart, lisa]
-			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		var homer = appCtx.getBean("homer");
 		Bean2 marge = (Bean2) appCtx.getBean("marge");
@@ -590,135 +566,131 @@ public class GroovyBeanDefinitionReaderTests {
 		Bean1 lisa = (Bean1) appCtx.getBean("lisa");
 
 		assertThat(marge.bean1).isEqualTo(homer);
-		assertThat(marge.children).hasSize(2);
+		assertThat(marge.getChildren()).hasSize(2);
 
-		assertThat(marge.children).containsExactlyInAnyOrder(bart, lisa);
+		assertThat(marge.getChildren()).containsExactly(bart, lisa);
 	}
 
 	@Test
 	void beanWithConstructor() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			homer(Bean1) {
-				person = "homer"
-				age = 45
+
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				homer(Bean1Impl) {
+					person = "homer"
+					age = 45
+				}
+				marge(Bean3, "marge", homer) {
+					age = 40
+				}
 			}
-			marge(Bean3, "marge", homer) {
-				age = 40
-			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		Bean3 marge = (Bean3) appCtx.getBean("marge");
-		assertThat(marge.person).isEqualTo("marge");
-		assertThat(marge.bean1.person).isEqualTo("homer");
-		assertThat(marge.age).isEqualTo(40);
+		assertThat(marge.getPerson()).isEqualTo("marge");
+		assertThat(marge.bean1.getPerson()).isEqualTo("homer");
+		assertThat(marge.getAge()).isEqualTo(40);
 	}
 
 	@Test
 	void beanWithFactoryMethod() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			homer(Bean1) {
-				person = "homer"
-				age = 45
+
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				homer(Bean1Impl) {
+					person = "homer"
+					age = 45
+				}
+				def marge = marge(Bean4) {
+					person = "marge"
+				}
+				marge.factoryMethod = "getInstance"
 			}
-			def marge = marge(Bean4) {
-				person = "marge"
-			}
-			marge.factoryMethod = "getInstance"
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		Bean4 marge = (Bean4) appCtx.getBean("marge");
-		assertThat(marge.person).isEqualTo("marge");
+		assertThat(marge.getPerson()).isEqualTo("marge");
 	}
 
 	@Test
 	void beanWithFactoryMethodUsingClosureArgs() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			homer(Bean1) {
-				person = "homer"
-				age = 45
+
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				homer(Bean1Impl) {
+					person = "homer"
+					age = 45
+				}
+				marge(Bean4) { bean ->
+					bean.factoryMethod = "getInstance"
+					person = "marge"
+				}
 			}
-			marge(Bean4) { bean ->
-				bean.factoryMethod = "getInstance"
-				person = "marge"
-			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		Bean4 marge = (Bean4) appCtx.getBean("marge");
-		assertThat(marge.person).isEqualTo("marge");
+		assertThat(marge.getPerson()).isEqualTo("marge");
 	}
 
 	@Test
 	void beanWithFactoryMethodWithConstructorArgs() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			beanFactory(Bean1FactoryWithArgs){}
 
-			homer(beanFactory:"newInstance", "homer") {
-				age = 45
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				beanFactory(Bean1FactoryWithArgs){}
+
+				homer(beanFactory:"newInstance", "homer") {
+					age = 45
+				}
+				//Test with no closure body
+				marge(beanFactory:"newInstance", "marge")
+
+				//Test more verbose method
+				mcBain("mcBain") { bean ->
+					bean.factoryBean="beanFactory"
+					bean.factoryMethod="newInstance"
+				}
 			}
-			//Test with no closure body
-			marge(beanFactory:"newInstance", "marge")
-
-			//Test more verbose method
-			mcBain("mcBain"){
-				bean ->
-				bean.factoryBean="beanFactory"
-				bean.factoryMethod="newInstance"
-
-			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		Bean1 homer = (Bean1) appCtx.getBean("homer");
 
-		assertThat(homer.person).isEqualTo("homer");
-		assertThat(homer.age).isEqualTo(45);
+		assertThat(homer.getPerson()).isEqualTo("homer");
+		assertThat(homer.getAge()).isEqualTo(45);
 
-		assertThat(((Bean1)appCtx.getBean("marge")).person).isEqualTo("marge");
-
-		assertThat(((Bean1)appCtx.getBean("mcBain")).person).isEqualTo("mcBain");
+		assertThat(((Bean1)appCtx.getBean("marge")).getPerson()).isEqualTo("marge");
+		assertThat(((Bean1)appCtx.getBean("mcBain")).getPerson()).isEqualTo("mcBain");
 	}
 
 	@Test
 	void getBeanDefinitions() {
 		var appCtx = new GenericApplicationContext();
 		var reader = new GroovyBeanDefinitionReader(appCtx);
+
 		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			jeff(Bean1) {
-				person = 'jeff'
+			package org.springframework.context.groovy
+			beans {
+				jeff(Bean1Impl) {
+					person = 'jeff'
+				}
+				graeme(Bean1Impl) {
+					person = 'graeme'
+				}
+				guillaume(Bean1Impl) {
+					person = 'guillaume'
+				}
 			}
-			graeme(Bean1) {
-				person = 'graeme'
-			}
-			guillaume(Bean1) {
-				person = 'guillaume'
-			}
-		}
-		""").getBytes()));
+			""").getBytes()));
+
+		appCtx.refresh();
 
 		assertThat(reader.getRegistry().getBeanDefinitionCount()).as("beanDefinitions was the wrong size").isEqualTo(3);
 		assertThat(reader.getRegistry().getBeanDefinition("jeff")).as("beanDefinitions did not contain jeff").isNotNull();
@@ -729,46 +701,43 @@ public class GroovyBeanDefinitionReaderTests {
 	@Test
 	void beanWithFactoryBean() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			myFactory(Bean1Factory)
 
-			homer(myFactory) { bean ->
-				bean.factoryMethod = "newInstance"
-				person = "homer"
-				age = 45
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				myFactory(Bean1Factory)
+
+				homer(myFactory) { bean ->
+					bean.factoryMethod = "newInstance"
+					person = "homer"
+					age = 45
+				}
 			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		Bean1 homer = (Bean1) appCtx.getBean("homer");
 
-		assertThat(homer.person).isEqualTo("homer");
+		assertThat(homer.getPerson()).isEqualTo("homer");
 	}
 
 	@Test
 	void beanWithFactoryBeanAndMethod() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			myFactory(Bean1Factory)
 
-			homer(myFactory:"newInstance") { bean ->
-				person = "homer"
-				age = 45
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				myFactory(Bean1Factory)
+
+				homer(myFactory:"newInstance") { bean ->
+					person = "homer"
+					age = 45
+				}
 			}
-		}
-		""").getBytes()));
-
-		appCtx.refresh();
+			""");
 
 		Bean1 homer = (Bean1) appCtx.getBean("homer");
-		assertThat(homer.person).isEqualTo("homer");
+		assertThat(homer.getPerson()).isEqualTo("homer");
 	}
 
 	@Test
@@ -776,8 +745,9 @@ public class GroovyBeanDefinitionReaderTests {
 		var appCtx = new GenericGroovyApplicationContext("org/springframework/context/groovy/applicationContext.groovy");
 
 		assertThat(appCtx.containsBean("foo")).isTrue();
-		var foo = appCtx.getBean("foo");
-		assertThat(foo).isEqualTo("hello");
+		assertThat(appCtx.getBean("foo")).isEqualTo("hello");
+
+		appCtx.close();
 	}
 
 	@Test
@@ -787,136 +757,130 @@ public class GroovyBeanDefinitionReaderTests {
 		appCtx.refresh();
 
 		assertThat(appCtx.containsBean("foo")).isTrue();
-		var foo = appCtx.getBean("foo");
-		assertThat(foo).isEqualTo("hello");
+		assertThat(appCtx.getBean("foo")).isEqualTo("hello");
+
+		appCtx.close();
 	}
 
 	@Test
 	void holyGrailWiring() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
 
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			quest(HolyGrailQuest)
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				quest(HolyGrailQuest)
 
-			knight(KnightOfTheRoundTable, "Bedivere") {
-				quest = ref("quest")
+				knights(KnightsOfTheRoundTable, "Bedivere") {
+					quest = ref("quest")
+				}
 			}
-		}
-		""").getBytes()));
+			""");
 
-		appCtx.refresh();
-
-		KnightOfTheRoundTable knight = (KnightOfTheRoundTable) appCtx.getBean("knight");
-		knight.embarkOnQuest();
+		KnightsOfTheRoundTable knights = (KnightsOfTheRoundTable) appCtx.getBean("knights");
+		knights.embarkOnQuest();
 	}
 
 	@Test
 	void abstractBeanSpecifyingClass() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
 
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			abstractKnight(KnightOfTheRoundTable) { bean ->
-				bean.'abstract' = true
-				leader = "King Arthur"
-			}
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				abstractKnight(KnightsOfTheRoundTable) { bean ->
+					bean.'abstract' = true
+					leader = "King Arthur"
+				}
 
-			lancelot("lancelot") { bean ->
-				bean.parent = ref("abstractKnight")
-			}
+				lancelot("lancelot") { bean ->
+					bean.parent = ref("abstractKnight")
+				}
 
-			abstractPerson(Bean1) { bean ->
-				bean.'abstract'=true
-				age = 45
+				abstractPerson(Bean1Impl) { bean ->
+					bean.'abstract'=true
+					age = 45
+				}
+				homerBean { bean ->
+					bean.parent = ref("abstractPerson")
+					person = "homer"
+				}
 			}
-			homerBean { bean ->
-				bean.parent = ref("abstractPerson")
-				person = "homer"
-			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
-		KnightOfTheRoundTable lancelot = (KnightOfTheRoundTable) appCtx.getBean("lancelot");
+		KnightsOfTheRoundTable lancelot = (KnightsOfTheRoundTable) appCtx.getBean("lancelot");
 		assertThat(lancelot.leader).isEqualTo("King Arthur");
 		assertThat(lancelot.name).isEqualTo("lancelot");
 
 		Bean1 homerBean = (Bean1) appCtx.getBean("homerBean");
 
-		assertThat(homerBean.age).isEqualTo(45);
-		assertThat(homerBean.person).isEqualTo("homer");
+		assertThat(homerBean.getAge()).isEqualTo(45);
+		assertThat(homerBean.getPerson()).isEqualTo("homer");
 	}
 
 	@Test
 	void groovyBeanDefinitionReaderWithScript() throws Exception {
 		var script = """
-def appCtx = new org.springframework.context.support.GenericGroovyApplicationContext()
-appCtx.reader.beans {
-quest(org.springframework.context.groovy.HolyGrailQuest) {}
+			def appCtx = new org.springframework.context.support.GenericGroovyApplicationContext()
+			appCtx.reader.beans {
+				quest(org.springframework.context.groovy.HolyGrailQuest)
 
-knight(org.springframework.context.groovy.KnightOfTheRoundTable, "Bedivere") { quest = quest }
-}
-appCtx.refresh()
-return appCtx
-""";
+				knights(org.springframework.context.groovy.KnightsOfTheRoundTable, "Bedivere") {
+					quest = quest
+				}
+			}
+			appCtx.refresh()
+			return appCtx
+			""";
+
 		GenericGroovyApplicationContext appCtx = (GenericGroovyApplicationContext) new GroovyShell().evaluate(script);
 
-		KnightOfTheRoundTable knight = (KnightOfTheRoundTable) appCtx.getBean("knight");
-		knight.embarkOnQuest();
+		KnightsOfTheRoundTable knights = (KnightsOfTheRoundTable) appCtx.getBean("knights");
+		knights.embarkOnQuest();
 	}
 
 	// test for GRAILS-5057
 	@Test
 	void registerBeans() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
 
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			personA(AdvisedPerson) {
-				name = "Bob"
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				personA(AdvisedPersonImpl) {
+					name = "Bob"
+				}
 			}
-		}
-		""").getBytes()));
+			""");
 
-		appCtx.refresh();
-		assertThat(((AdvisedPerson)appCtx.getBean("personA")).name).isEqualTo("Bob");
+		assertThat(((AdvisedPerson)appCtx.getBean("personA")).getName()).isEqualTo("Bob");
 
 		appCtx = new GenericApplicationContext();
-		reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			personA(AdvisedPerson) {
-				name = "Fred"
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				personA(AdvisedPersonImpl) {
+					name = "Fred"
+				}
 			}
-		}
-		""").getBytes()));
+			""");
 
-		appCtx.refresh();
-		assertThat(((AdvisedPerson)appCtx.getBean("personA")).name).isEqualTo("Fred");
+		assertThat(((AdvisedPerson)appCtx.getBean("personA")).getName()).isEqualTo("Fred");
 	}
 
 	@Test
 	void listOfBeansAsConstructorArg() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
 
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			someotherbean(SomeOtherClass, new File('somefile.txt'))
-			someotherbean2(SomeOtherClass, new File('somefile.txt'))
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				someotherbean(SomeOtherClass, new File('somefile.txt'))
+				someotherbean2(SomeOtherClass, new File('somefile.txt'))
 
-			somebean(SomeClass,  [someotherbean, someotherbean2])
-		}
-		""").getBytes()));
+				somebean(SomeClass, [someotherbean, someotherbean2])
+			}
+			""");
 
 		assertThat(appCtx.containsBean("someotherbean")).isTrue();
 		assertThat(appCtx.containsBean("someotherbean2")).isTrue();
@@ -926,113 +890,117 @@ return appCtx
 	@Test
 	void beanWithListAndMapConstructor() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			bart(Bean1) {
-				person = "bart"
-				age = 11
-			}
-			lisa(Bean1) {
-				person = "lisa"
-				age = 9
-			}
 
-			beanWithList(Bean5, [bart, lisa])
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				bart(Bean1Impl) {
+					person = "bart"
+					age = 11
+				}
+				lisa(Bean1Impl) {
+					person = "lisa"
+					age = 9
+				}
 
-			// test runtime references both as ref() and as plain name
-			beanWithMap(Bean6, [bart:bart, lisa:ref('lisa')])
-		}
-		""").getBytes()));
-		appCtx.refresh();
+				beanWithList(Bean5, [bart, lisa])
+
+				// test runtime references both as ref() and as plain name
+				beanWithMap(Bean6, [bart:bart, lisa:ref('lisa')])
+			}
+			""");
 
 		Bean5 beanWithList = (Bean5) appCtx.getBean("beanWithList");
-		assertThat(beanWithList.people).hasSize(2);
-		assertThat(beanWithList.people.get(0).person).isEqualTo("bart");
+		assertThat(beanWithList.people).extracting(Bean1::getPerson).containsExactly("bart", "lisa");
 
 		Bean6 beanWithMap = (Bean6) appCtx.getBean("beanWithMap");
-		assertThat(beanWithMap.peopleByName.get("lisa").age).isEqualTo(9);
-		assertThat(beanWithMap.peopleByName.get("bart").person).isEqualTo("bart");
+		assertThat(beanWithMap.peopleByName).hasSize(2);
+		assertThat(beanWithMap.peopleByName.get("lisa").getAge()).isEqualTo(9);
+		assertThat(beanWithMap.peopleByName.get("bart").getPerson()).isEqualTo("bart");
 	}
 
 	@Test
 	void anonymousInnerBeanViaBeanMethod() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			bart(Bean1) {
-				person = "bart"
-				age = 11
-			}
-			lisa(Bean1) {
-				person = "lisa"
-				age = 9
-			}
-			marge(Bean2) {
-				person = "marge"
-				bean1 =  bean(Bean1) {
-					person = "homer"
-					age = 45
-					props = [overweight:true, height:"1.8m"]
-					children = ["bart", "lisa"]
+
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				bart(Bean1Impl) {
+					person = "bart"
+					age = 11
 				}
-				children = [bart, lisa]
+				lisa(Bean1Impl) {
+					person = "lisa"
+					age = 9
+				}
+				marge(Bean2) {
+					person = "marge"
+					bean1 =  bean(Bean1Impl) {
+						person = "homer"
+						age = 45
+						props = [overweight:true, height:"1.8m"]
+						children = ["bart", "lisa"]
+					}
+					children = [bart, lisa]
+				}
 			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		Bean2 marge = (Bean2) appCtx.getBean("marge");
-		assertThat(marge.bean1.person).isEqualTo("homer");
+		assertThat(marge.bean1.getPerson()).isEqualTo("homer");
 	}
 
 	@Test
 	void anonymousInnerBeanViaBeanMethodWithConstructorArgs() {
 		var appCtx = new GenericApplicationContext();
-		var reader = new GroovyBeanDefinitionReader(appCtx);
-		reader.loadBeanDefinitions(new ByteArrayResource(("""
-		package org.springframework.context.groovy
-		beans {
-			bart(Bean1) {
-				person = "bart"
-				age = 11
-			}
-			lisa(Bean1) {
-				person = "lisa"
-				age = 9
-			}
-			marge(Bean2) {
-				person = "marge"
-				bean3 =  bean(Bean3, "homer", lisa) {
-					person = "homer"
-					age = 45
+
+		loadGroovyDsl(appCtx, """
+			package org.springframework.context.groovy
+			beans {
+				bart(Bean1Impl) {
+					person = "bart"
+					age = 11
 				}
-				children = [bart, lisa]
+				lisa(Bean1Impl) {
+					person = "lisa"
+					age = 9
+				}
+				marge(Bean2) {
+					person = "marge"
+					bean3 =  bean(Bean3, "homer", lisa) {
+						person = "homer"
+						age = 45
+					}
+					children = [bart, lisa]
+				}
 			}
-		}
-		""").getBytes()));
-		appCtx.refresh();
+			""");
 
 		Bean2 marge = (Bean2) appCtx.getBean("marge");
 
-		assertThat(marge.bean3.person).isEqualTo("homer");
-		assertThat(marge.bean3.bean1.person).isEqualTo("lisa");
+		assertThat(marge.bean3.getPerson()).isEqualTo("homer");
+		assertThat(marge.bean3.bean1.getPerson()).isEqualTo("lisa");
+	}
+
+	private static void loadGroovyDsl(GenericApplicationContext context, String script) {
+		new GroovyBeanDefinitionReader(context).loadBeanDefinitions(new ByteArrayResource((script).getBytes()));
+		context.refresh();
 	}
 
 }
 
 class HolyGrailQuest {
-	void start() { System.out.println("lets begin"); }
+	void start() {
+		/* no-op */
+	}
 }
 
-class KnightOfTheRoundTable {
+class KnightsOfTheRoundTable {
 	String name;
 	String leader;
 
-	KnightOfTheRoundTable(String n) {
+	KnightsOfTheRoundTable(String n) {
 		this.name = n;
 	}
 
@@ -1068,32 +1036,51 @@ class KnightOfTheRoundTable {
 }
 
 // simple bean
-class Bean1 {
+interface Bean1 {
+	String getPerson();
+	void setPerson(String person);
+	int getAge();
+	void setAge(int age);
+	Properties getProps();
+	void setProps(Properties props);
+	List<String> getChildren();
+	void setChildren(List<String> children);
+}
+
+class Bean1Impl implements Bean1 {
 	String person;
 	int age;
 	Properties props = new Properties();
 	List<String> children = new ArrayList<>();
+	@Override
 	public String getPerson() {
 		return person;
 	}
+	@Override
 	public void setPerson(String person) {
 		this.person = person;
 	}
+	@Override
 	public int getAge() {
 		return age;
 	}
+	@Override
 	public void setAge(int age) {
 		this.age = age;
 	}
+	@Override
 	public Properties getProps() {
 		return props;
 	}
+	@Override
 	public void setProps(Properties props) {
 		this.props.putAll(props);
 	}
+	@Override
 	public List<String> getChildren() {
 		return children;
 	}
+	@Override
 	public void setChildren(List<String> children) {
 		this.children = children;
 	}
@@ -1208,7 +1195,7 @@ class Bean6 {
 // a factory bean
 class Bean1Factory {
 	Bean1 newInstance() {
-		return new Bean1();
+		return new Bean1Impl();
 	}
 }
 
@@ -1231,7 +1218,7 @@ class TestScope implements Scope {
 
 	@Override
 	public String getConversationId() {
-		return "mock";
+		return null;
 	}
 
 	@Override
@@ -1242,7 +1229,7 @@ class TestScope implements Scope {
 
 	@Override
 	public Object resolveContextualObject(String s) {
-		return null;  // noop
+		return null;
 	}
 }
 
@@ -1254,27 +1241,40 @@ class BirthdayCardSender {
 	}
 }
 
-@Component(value = "person")
-class AdvisedPerson {
+interface AdvisedPerson {
+	void birthday();
+	int getAge();
+	void setAge(int age);
+	String getName();
+	void setName(String name);
+}
+
+@Component("person")
+class AdvisedPersonImpl implements AdvisedPerson {
 	int age;
 	String name;
 
+	@Override
 	public void birthday() {
 		++age;
 	}
 
+	@Override
 	public int getAge() {
 		return age;
 	}
 
+	@Override
 	public void setAge(int age) {
 		this.age = age;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -1291,8 +1291,8 @@ class SomeOtherClass {
 // a factory bean that takes arguments
 class Bean1FactoryWithArgs {
 	Bean1 newInstance(String name) {
-		Bean1 bean = new Bean1();
-		bean.person = name;
+		Bean1 bean = new Bean1Impl();
+		bean.setPerson(name);
 		return bean;
 	}
 }
