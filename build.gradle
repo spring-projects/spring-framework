@@ -388,7 +388,13 @@ configure([rootProject] + javaProjects) { project ->
 			// "https://junit.org/junit5/docs/5.8.2/api/",
 			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
 			"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
-			"https://r2dbc.io/spec/0.8.5.RELEASE/api/"
+			"https://r2dbc.io/spec/0.8.5.RELEASE/api/",
+			// The external Javadoc link for JSR 305 must come last to ensure that types from
+			// JSR 250 (such as @PostConstruct) are still supported. This is due to the fact
+			// that JSR 250 and JSR 305 both define types in javax.annotation, which results
+			// in a split package, and the javadoc tool does not support split packages
+			// across multiple external Javadoc sites.
+			"https://www.javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/"
 	] as String[]
 }
 
