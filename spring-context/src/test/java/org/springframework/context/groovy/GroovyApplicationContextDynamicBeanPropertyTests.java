@@ -28,6 +28,7 @@ import static groovy.test.GroovyAssert.assertThrows;
 /**
  * @author Jeff Brown
  * @author Sam Brannen
+ * @author Dave Syer
  */
 class GroovyApplicationContextDynamicBeanPropertyTests {
 
