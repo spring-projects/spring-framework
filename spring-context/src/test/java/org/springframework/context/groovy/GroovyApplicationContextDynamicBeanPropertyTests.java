@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.support.GenericGroovyApplicationContext;
 
-import static groovy.test.GroovyAssert.assertEquals;
-import static groovy.test.GroovyAssert.assertNotNull;
-import static groovy.test.GroovyAssert.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Jeff Brown
@@ -33,26 +32,28 @@ import static groovy.test.GroovyAssert.assertThrows;
 class GroovyApplicationContextDynamicBeanPropertyTests {
 
 	@Test
-	void testAccessDynamicBeanProperties() {
+	void accessDynamicBeanProperties() {
 		var ctx = new GenericGroovyApplicationContext();
 		ctx.getReader().loadBeanDefinitions("org/springframework/context/groovy/applicationContext.groovy");
 		ctx.refresh();
 
 		var framework = ctx.getProperty("framework");
-		assertNotNull("could not find framework bean", framework);
-		assertEquals("Grails", framework);
+		assertThat(framework).as("could not find framework bean").isNotNull();
+		assertThat(framework).isEqualTo("Grails");
+
 		ctx.close();
 	}
 
 	@Test
-	void testAccessingNonExistentBeanViaDynamicProperty() {
+	void accessingNonExistentBeanViaDynamicProperty() {
 		var ctx = new GenericGroovyApplicationContext();
 		ctx.getReader().loadBeanDefinitions("org/springframework/context/groovy/applicationContext.groovy");
 		ctx.refresh();
 
-		var err = assertThrows(NoSuchBeanDefinitionException.class, () -> ctx.getProperty("someNonExistentBean"));
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
+			.isThrownBy(() -> ctx.getProperty("someNonExistentBean"))
+			.withMessage("No bean named 'someNonExistentBean' available");
 
-		assertEquals("No bean named 'someNonExistentBean' available", err.getMessage());
 		ctx.close();
 	}
 

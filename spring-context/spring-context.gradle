@@ -27,7 +27,6 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation("io.projectreactor:reactor-core")
 	testImplementation("org.codehaus.groovy:groovy-jsr223")
-	testImplementation("org.codehaus.groovy:groovy-test")
 	testImplementation("org.codehaus.groovy:groovy-xml")
 	testImplementation("org.apache.commons:commons-pool2")
 	testImplementation("org.awaitility:awaitility")
