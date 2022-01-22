@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.web.multipart.support;
 
-import jakarta.servlet.ServletException;
-
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.multipart.MultipartResolver;
 
 /**
@@ -30,10 +29,11 @@ import org.springframework.web.multipart.MultipartResolver;
  * e.g. no {@link MultipartResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Wonchul Heo
  * @since 3.1
  */
 @SuppressWarnings("serial")
-public class MissingServletRequestPartException extends ServletException {
+public class MissingServletRequestPartException extends ServletRequestBindingException {
 
 	private final String requestPartName;
 

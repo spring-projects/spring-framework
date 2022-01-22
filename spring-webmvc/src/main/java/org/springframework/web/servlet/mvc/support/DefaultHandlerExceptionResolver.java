@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,10 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  * <td><p>400 (SC_BAD_REQUEST)</p></td>
  * </tr>
  * <tr class="rowColor">
+ * <td><p>MissingServletRequestPartException</p></td>
+ * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * </tr>
+ * <tr class="rowColor">
  * <td><p>ServletRequestBindingException</p></td>
  * <td><p>400 (SC_BAD_REQUEST)</p></td>
  * </tr>
@@ -113,10 +117,6 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  * <td><p>MethodArgumentNotValidException</p></td>
  * <td><p>400 (SC_BAD_REQUEST)</p></td>
  * </tr>
- * <tr class="rowColor">
- * <td><p>MissingServletRequestPartException</p></td>
- * <td><p>400 (SC_BAD_REQUEST)</p></td>
- * </tr>
  * <tr class="altColor">
  * <td><p>BindException</p></td>
  * <td><p>400 (SC_BAD_REQUEST)</p></td>
@@ -135,6 +135,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Wonchul Heo
  * @since 3.0
  * @see org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
  */
@@ -188,6 +189,10 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 				return handleMissingServletRequestParameter(
 						(MissingServletRequestParameterException) ex, request, response, handler);
 			}
+			else if (ex instanceof MissingServletRequestPartException) {
+				return handleMissingServletRequestPartException(
+						(MissingServletRequestPartException) ex, request, response, handler);
+			}
 			else if (ex instanceof ServletRequestBindingException) {
 				return handleServletRequestBindingException(
 						(ServletRequestBindingException) ex, request, response, handler);
@@ -211,10 +216,6 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			else if (ex instanceof MethodArgumentNotValidException) {
 				return handleMethodArgumentNotValidException(
 						(MethodArgumentNotValidException) ex, request, response, handler);
-			}
-			else if (ex instanceof MissingServletRequestPartException) {
-				return handleMissingServletRequestPartException(
-						(MissingServletRequestPartException) ex, request, response, handler);
 			}
 			else if (ex instanceof BindException) {
 				return handleBindException((BindException) ex, request, response, handler);
