@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ import org.springframework.web.util.WebUtils;
  * detected, {@link ExceptionHandlerExceptionResolver} must be configured.
  *
  * @author Rossen Stoyanchev
+ * @author Wonchul Heo
  * @since 3.2
  * @see #handleException(Exception, WebRequest)
  * @see org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver
@@ -108,13 +109,13 @@ public abstract class ResponseEntityExceptionHandler {
 			HttpMediaTypeNotAcceptableException.class,
 			MissingPathVariableException.class,
 			MissingServletRequestParameterException.class,
+			MissingServletRequestPartException.class,
 			ServletRequestBindingException.class,
 			ConversionNotSupportedException.class,
 			TypeMismatchException.class,
 			HttpMessageNotReadableException.class,
 			HttpMessageNotWritableException.class,
 			MethodArgumentNotValidException.class,
-			MissingServletRequestPartException.class,
 			BindException.class,
 			NoHandlerFoundException.class,
 			AsyncRequestTimeoutException.class
@@ -143,6 +144,10 @@ public abstract class ResponseEntityExceptionHandler {
 			HttpStatus status = HttpStatus.BAD_REQUEST;
 			return handleMissingServletRequestParameter((MissingServletRequestParameterException) ex, headers, status, request);
 		}
+		else if (ex instanceof MissingServletRequestPartException) {
+			HttpStatus status = HttpStatus.BAD_REQUEST;
+			return handleMissingServletRequestPart((MissingServletRequestPartException) ex, headers, status, request);
+		}
 		else if (ex instanceof ServletRequestBindingException) {
 			HttpStatus status = HttpStatus.BAD_REQUEST;
 			return handleServletRequestBindingException((ServletRequestBindingException) ex, headers, status, request);
@@ -166,10 +171,6 @@ public abstract class ResponseEntityExceptionHandler {
 		else if (ex instanceof MethodArgumentNotValidException) {
 			HttpStatus status = HttpStatus.BAD_REQUEST;
 			return handleMethodArgumentNotValid((MethodArgumentNotValidException) ex, headers, status, request);
-		}
-		else if (ex instanceof MissingServletRequestPartException) {
-			HttpStatus status = HttpStatus.BAD_REQUEST;
-			return handleMissingServletRequestPart((MissingServletRequestPartException) ex, headers, status, request);
 		}
 		else if (ex instanceof BindException) {
 			HttpStatus status = HttpStatus.BAD_REQUEST;
