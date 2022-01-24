@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,27 +184,20 @@ class ReflectionUtilsTests {
 	}
 
 	@Test
-	void doWithProtectedMethods() {
+	void doWithMethodsUsingProtectedFilter() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
 		ReflectionUtils.doWithMethods(TestObject.class, mc, method -> Modifier.isProtected(method.getModifiers()));
-		assertThat(mc.getMethodNames().isEmpty()).isFalse();
-		assertThat(mc.getMethodNames().contains("clone")).as("Must find protected method on Object").isTrue();
-		assertThat(mc.getMethodNames().contains("finalize")).as("Must find protected method on Object").isTrue();
-		assertThat(mc.getMethodNames().contains("hashCode")).as("Public, not protected").isFalse();
-		assertThat(mc.getMethodNames().contains("absquatulate")).as("Public, not protected").isFalse();
+		assertThat(mc.getMethodNames())
+			.hasSizeGreaterThanOrEqualTo(2)
+			.as("Must find protected methods on Object").contains("clone", "finalize")
+			.as("Public, not protected").doesNotContain("hashCode", "absquatulate");
 	}
 
 	@Test
-	void duplicatesFound() {
+	void doWithMethodsFindsDuplicatesInClassHierarchy() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
 		ReflectionUtils.doWithMethods(TestObjectSubclass.class, mc);
-		int absquatulateCount = 0;
-		for (String name : mc.getMethodNames()) {
-			if (name.equals("absquatulate")) {
-				++absquatulateCount;
-			}
-		}
-		assertThat(absquatulateCount).as("Found 2 absquatulates").isEqualTo(2);
+		assertThat(mc.getMethodNames().stream()).filteredOn("absquatulate"::equals).as("Found 2 absquatulates").hasSize(2);
 	}
 
 	@Test
