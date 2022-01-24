@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.objects.TestObject;
+import org.springframework.util.ReflectionUtils.MethodFilter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -191,6 +192,32 @@ class ReflectionUtilsTests {
 			.hasSizeGreaterThanOrEqualTo(2)
 			.as("Must find protected methods on Object").contains("clone", "finalize")
 			.as("Public, not protected").doesNotContain("hashCode", "absquatulate");
+	}
+
+	@Test
+	void doWithMethodsUsingUserDeclaredMethodsFilterStartingWithObject() {
+		ListSavingMethodCallback mc = new ListSavingMethodCallback();
+		ReflectionUtils.doWithMethods(Object.class, mc, ReflectionUtils.USER_DECLARED_METHODS);
+		assertThat(mc.getMethodNames()).isEmpty();
+	}
+
+	@Test
+	void doWithMethodsUsingUserDeclaredMethodsFilterStartingWithTestObject() {
+		ListSavingMethodCallback mc = new ListSavingMethodCallback();
+		ReflectionUtils.doWithMethods(TestObject.class, mc, ReflectionUtils.USER_DECLARED_METHODS);
+		assertThat(mc.getMethodNames())
+			.as("user declared methods").contains("absquatulate", "compareTo", "getName", "setName", "getAge", "setAge", "getSpouse", "setSpouse")
+			.as("methods on Object").doesNotContain("equals", "hashCode", "toString", "clone", "finalize", "getClass", "notify", "notifyAll", "wait");
+	}
+
+	@Test
+	void doWithMethodsUsingUserDeclaredMethodsComposedFilter() {
+		ListSavingMethodCallback mc = new ListSavingMethodCallback();
+		// "q" because both absquatulate() and equals() contain "q"
+		MethodFilter isSetterMethodOrNameContainsQ = m -> m.getName().startsWith("set") || m.getName().contains("q");
+		MethodFilter methodFilter = ReflectionUtils.USER_DECLARED_METHODS.and(isSetterMethodOrNameContainsQ);
+		ReflectionUtils.doWithMethods(TestObject.class, mc, methodFilter);
+		assertThat(mc.getMethodNames()).containsExactlyInAnyOrder("setName", "setAge", "setSpouse", "absquatulate");
 	}
 
 	@Test
