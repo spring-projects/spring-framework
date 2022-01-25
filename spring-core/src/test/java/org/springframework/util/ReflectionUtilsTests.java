@@ -228,7 +228,7 @@ class ReflectionUtilsTests {
 	}
 
 	@Test
-	void findMethod() throws Exception {
+	void findMethod() {
 		assertThat(ReflectionUtils.findMethod(B.class, "bar", String.class)).isNotNull();
 		assertThat(ReflectionUtils.findMethod(B.class, "foo", Integer.class)).isNotNull();
 		assertThat(ReflectionUtils.findMethod(B.class, "getClass")).isNotNull();
@@ -236,7 +236,7 @@ class ReflectionUtilsTests {
 
 	@Disabled("[SPR-8644] findMethod() does not currently support var-args")
 	@Test
-	void findMethodWithVarArgs() throws Exception {
+	void findMethodWithVarArgs() {
 		assertThat(ReflectionUtils.findMethod(B.class, "add", int.class, int.class, int.class)).isNotNull();
 	}
 
@@ -279,37 +279,27 @@ class ReflectionUtilsTests {
 	}
 
 	@Test
-	void getAllDeclaredMethods() throws Exception {
+	void getAllDeclaredMethods() {
 		class Foo {
 			@Override
 			public String toString() {
 				return super.toString();
 			}
 		}
-		int toStringMethodCount = 0;
-		for (Method method : ReflectionUtils.getAllDeclaredMethods(Foo.class)) {
-			if (method.getName().equals("toString")) {
-				toStringMethodCount++;
-			}
-		}
-		assertThat(toStringMethodCount).isEqualTo(2);
+		Method[] allDeclaredMethods = ReflectionUtils.getAllDeclaredMethods(Foo.class);
+		assertThat(allDeclaredMethods).extracting(Method::getName).filteredOn("toString"::equals).hasSize(2);
 	}
 
 	@Test
-	void getUniqueDeclaredMethods() throws Exception {
+	void getUniqueDeclaredMethods() {
 		class Foo {
 			@Override
 			public String toString() {
 				return super.toString();
 			}
 		}
-		int toStringMethodCount = 0;
-		for (Method method : ReflectionUtils.getUniqueDeclaredMethods(Foo.class)) {
-			if (method.getName().equals("toString")) {
-				toStringMethodCount++;
-			}
-		}
-		assertThat(toStringMethodCount).isEqualTo(1);
+		Method[] uniqueDeclaredMethods = ReflectionUtils.getUniqueDeclaredMethods(Foo.class);
+		assertThat(uniqueDeclaredMethods).extracting(Method::getName).filteredOn("toString"::equals).hasSize(1);
 	}
 
 	@Test
@@ -326,16 +316,10 @@ class ReflectionUtilsTests {
 				return Integer.valueOf(42);
 			}
 		}
-		int m1MethodCount = 0;
 		Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(Leaf.class);
-		for (Method method : methods) {
-			if (method.getName().equals("m1")) {
-				m1MethodCount++;
-			}
-		}
-		assertThat(m1MethodCount).isEqualTo(1);
-		assertThat(ObjectUtils.containsElement(methods, Leaf.class.getMethod("m1"))).isTrue();
-		assertThat(ObjectUtils.containsElement(methods, Parent.class.getMethod("m1"))).isFalse();
+		assertThat(methods).extracting(Method::getName).filteredOn("m1"::equals).hasSize(1);
+		assertThat(methods).contains(Leaf.class.getMethod("m1"));
+		assertThat(methods).doesNotContain(Parent.class.getMethod("m1"));
 	}
 
 	@Test
