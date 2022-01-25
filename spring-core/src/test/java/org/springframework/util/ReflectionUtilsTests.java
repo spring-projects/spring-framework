@@ -24,7 +24,6 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.tests.sample.objects.TestObject;
@@ -234,10 +233,9 @@ class ReflectionUtilsTests {
 		assertThat(ReflectionUtils.findMethod(B.class, "getClass")).isNotNull();
 	}
 
-	@Disabled("[SPR-8644] findMethod() does not currently support var-args")
 	@Test
 	void findMethodWithVarArgs() {
-		assertThat(ReflectionUtils.findMethod(B.class, "add", int.class, int.class, int.class)).isNotNull();
+		assertThat(ReflectionUtils.findMethod(B.class, "add", int[].class)).isNotNull();
 	}
 
 	@Test
