@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+
+import io.r2dbc.spi.Parameter;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.Nullable;
@@ -291,10 +293,10 @@ abstract class NamedParameterUtils {
 			actualSql.append(originalSql, lastIndex, startIndex);
 			NamedParameters.NamedParameter marker = markerHolder.getOrCreate(paramName);
 			if (paramSource.hasValue(paramName)) {
-				Object value = paramSource.getValue(paramName);
-				if (value instanceof Collection) {
+				Parameter parameter = paramSource.getValue(paramName);
+				if (parameter.getValue() instanceof Collection<?> c) {
 
-					Iterator<?> entryIter = ((Collection<?>) value).iterator();
+					Iterator<?> entryIter = c.iterator();
 					int k = 0;
 					int counter = 0;
 					while (entryIter.hasNext()) {
@@ -508,14 +510,14 @@ abstract class NamedParameterUtils {
 		}
 
 		@SuppressWarnings("unchecked")
-		public void bind(BindTarget target, String identifier, Object value) {
+		public void bind(BindTarget target, String identifier, Parameter parameter) {
 			List<BindMarker> bindMarkers = getBindMarkers(identifier);
 			if (bindMarkers == null) {
-				target.bind(identifier, value);
+				target.bind(identifier, parameter);
 				return;
 			}
-			if (value instanceof Collection) {
-				Collection<Object> collection = (Collection<Object>) value;
+			if (parameter.getValue() instanceof Collection) {
+				Collection<Object> collection = (Collection<Object>) parameter.getValue();
 				Iterator<Object> iterator = collection.iterator();
 				Iterator<BindMarker> markers = bindMarkers.iterator();
 				while (iterator.hasNext()) {
@@ -532,7 +534,7 @@ abstract class NamedParameterUtils {
 			}
 			else {
 				for (BindMarker bindMarker : bindMarkers) {
-					bindMarker.bind(target, value);
+					bindMarker.bind(target, parameter);
 				}
 			}
 		}
@@ -544,14 +546,14 @@ abstract class NamedParameterUtils {
 			markers.next().bind(target, valueToBind);
 		}
 
-		public void bindNull(BindTarget target, String identifier, Class<?> valueType) {
+		public void bindNull(BindTarget target, String identifier, Parameter parameter) {
 			List<BindMarker> bindMarkers = getBindMarkers(identifier);
 			if (bindMarkers == null) {
-				target.bindNull(identifier, valueType);
+				target.bind(identifier, parameter);
 				return;
 			}
 			for (BindMarker bindMarker : bindMarkers) {
-				bindMarker.bindNull(target, valueType);
+				bindMarker.bind(target, parameter);
 			}
 		}
 
@@ -576,12 +578,12 @@ abstract class NamedParameterUtils {
 		@Override
 		public void bindTo(BindTarget target) {
 			for (String namedParameter : this.parameterSource.getParameterNames()) {
-				Object value = this.parameterSource.getValue(namedParameter);
-				if (value == null) {
-					bindNull(target, namedParameter, this.parameterSource.getType(namedParameter));
+				Parameter parameter = this.parameterSource.getValue(namedParameter);
+				if (parameter.getValue() == null) {
+					bindNull(target, namedParameter, parameter);
 				}
 				else {
-					bind(target, namedParameter, value);
+					bind(target, namedParameter, parameter);
 				}
 			}
 		}
