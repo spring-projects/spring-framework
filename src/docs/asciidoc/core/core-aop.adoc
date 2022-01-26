@@ -1217,29 +1217,56 @@ The last kind of advice is _around_ advice. Around advice runs "around" a matche
 method's execution. It has the opportunity to do work both before and after the method
 runs and to determine when, how, and even if the method actually gets to run at all.
 Around advice is often used if you need to share state before and after a method
-execution in a thread-safe manner (starting and stopping a timer, for example).
-Always use the least powerful form of advice that meets your requirements (that is,
-do not use around advice if before advice would do).
+execution in a thread-safe manner – for example, starting and stopping a timer.
 
-Around advice is declared by using the `@Around` annotation. The first parameter of the
-advice method must be of type `ProceedingJoinPoint`. Within the body of the advice,
-calling `proceed()` on the `ProceedingJoinPoint` causes the underlying method to run.
-The `proceed` method can also pass in an `Object[]`. The values in the array are used
-as the arguments to the method execution when it proceeds.
+[TIP]
+====
+Always use the least powerful form of advice that meets your requirements.
 
-NOTE: The behavior of `proceed` when called with an `Object[]` is a little different than
-the behavior of `proceed` for around advice compiled by the AspectJ compiler. For around
+For example, do not use _around_ advice if _before_ advice is sufficient for your needs.
+====
+
+Around advice is declared by annotating a method with the `@Around` annotation. The
+method should declare `Object` as its return type, and the first parameter of the method
+must be of type `ProceedingJoinPoint`. Within the body of the advice method, you must
+invoke `proceed()` on the `ProceedingJoinPoint` in order for the underlying method to
+run. Invoking `proceed()` without arguments will result in the caller's original
+arguments being supplied to the underlying method when it is invoked. For advanced use
+cases, there is an overloaded variant of the `proceed()` method which accepts an array of
+arguments (`Object[]`). The values in the array will be used as the arguments to the
+underlying method when it is invoked.
+
+[NOTE]
+====
+The behavior of `proceed` when called with an `Object[]` is a little different than the
+behavior of `proceed` for around advice compiled by the AspectJ compiler. For around
 advice written using the traditional AspectJ language, the number of arguments passed to
 `proceed` must match the number of arguments passed to the around advice (not the number
 of arguments taken by the underlying join point), and the value passed to proceed in a
-given argument position supplants the original value at the join point for the entity
-the value was bound to (do not worry if this does not make sense right now). The approach
-taken by Spring is simpler and a better match to its proxy-based, execution-only
-semantics. You only need to be aware of this difference if you compile @AspectJ
-aspects written for Spring and use `proceed` with arguments with the AspectJ compiler
-and weaver. There is a way to write such aspects that is 100% compatible across both
-Spring AOP and AspectJ, and this is discussed in the
-<<aop-ataspectj-advice-params, following section on advice parameters>>.
+given argument position supplants the original value at the join point for the entity the
+value was bound to (do not worry if this does not make sense right now).
+
+The approach taken by Spring is simpler and a better match to its proxy-based,
+execution-only semantics. You only need to be aware of this difference if you compile
+`@AspectJ` aspects written for Spring and use `proceed` with arguments with the AspectJ
+compiler and weaver. There is a way to write such aspects that is 100% compatible across
+both Spring AOP and AspectJ, and this is discussed in the
+<<aop-ataspectj-advice-proceeding-with-the-call, following section on advice parameters>>.
+====
+
+The value returned by the around advice is the return value seen by the caller of the
+method. For example, a simple caching aspect could return a value from a cache if it has
+one or invoke `proceed()` (and return that value) if it does not. Note that `proceed`
+may be invoked once, many times, or not at all within the body of the around advice. All
+of these are legal.
+
+WARNING: If you declare the return type of your around advice method as `void`, `null`
+will always be returned to the caller, effectively ignoring the result of any invocation
+of `proceed()`. It is therefore recommended that an around advice method declare a return
+type of `Object`. The advice method should typically return the value returned from an
+invocation of `proceed()`, even if the underlying method has a `void` return type.
+However, the advice may optionally return a cached value, a wrapped value, or some other
+value depending on the use case.
 
 The following example shows how to use around advice:
 
@@ -1281,12 +1308,6 @@ The following example shows how to use around advice:
 		}
 	}
 ----
-
-The value returned by the around advice is the return value seen by the caller of the
-method. For example, a simple caching aspect could return a value from a cache if it
-has one and invoke `proceed()` if it does not. Note that `proceed` may be invoked once,
-many times, or not at all within the body of the around advice. All of these are legal.
-
 
 [[aop-ataspectj-advice-params]]
 ==== Advice Parameters
@@ -2315,20 +2336,30 @@ You can declare it by using the `after` element, as the following example shows:
 [[aop-schema-advice-around]]
 ==== Around Advice
 
-The last kind of advice is around advice. Around advice runs "around" a matched method
-execution. It has the opportunity to do work both before and after the method runs
-and to determine when, how, and even if the method actually gets to run at all.
-Around advice is often used to share state before and after a method execution in a
-thread-safe manner (starting and stopping a timer, for example). Always use the least
-powerful form of advice that meets your requirements. Do not use around advice if
-before advice can do the job.
+The last kind of advice is _around_ advice. Around advice runs "around" a matched
+method's execution. It has the opportunity to do work both before and after the method
+runs and to determine when, how, and even if the method actually gets to run at all.
+Around advice is often used if you need to share state before and after a method
+execution in a thread-safe manner – for example, starting and stopping a timer.
 
-You can declare around advice by using the `aop:around` element. The first parameter of
-the advice method must be of type `ProceedingJoinPoint`. Within the body of the advice,
-calling `proceed()` on the `ProceedingJoinPoint` causes the underlying method to run.
-The `proceed` method may also be called with an `Object[]`. The values in the array
-are used as the arguments to the method execution when it proceeds.
-See <<aop-ataspectj-around-advice>> for notes on calling `proceed` with an `Object[]`.
+[TIP]
+====
+Always use the least powerful form of advice that meets your requirements.
+
+For example, do not use _around_ advice if _before_ advice is sufficient for your needs.
+====
+
+You can declare around advice by using the `aop:around` element. The advice method should
+declare `Object` as its return type, and the first parameter of the method must be of
+type `ProceedingJoinPoint`. Within the body of the advice method, you must invoke
+`proceed()` on the `ProceedingJoinPoint` in order for the underlying method to run.
+Invoking `proceed()` without arguments will result in the caller's original arguments
+being supplied to the underlying method when it is invoked. For advanced use cases, there
+is an overloaded variant of the `proceed()` method which accepts an array of arguments
+(`Object[]`). The values in the array will be used as the arguments to the underlying
+method when it is invoked. See <<aop-ataspectj-around-advice>> for notes on calling
+`proceed` with an `Object[]`.
+
 The following example shows how to declare around advice in XML:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
