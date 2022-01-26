@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.r2dbc.connection;
 
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.r2dbc.spi.Connection;
@@ -25,6 +26,7 @@ import io.r2dbc.spi.R2dbcBadGrammarException;
 import io.r2dbc.spi.Statement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -65,7 +67,7 @@ class R2dbcTransactionManagerUnitTests {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	void before() {
 		when(connectionFactoryMock.create()).thenReturn((Mono) Mono.just(connectionMock));
-		when(connectionMock.beginTransaction()).thenReturn(Mono.empty());
+		when(connectionMock.beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class))).thenReturn(Mono.empty());
 		when(connectionMock.close()).thenReturn(Mono.empty());
 		tm = new R2dbcTransactionManager(connectionFactoryMock);
 	}
@@ -91,7 +93,7 @@ class R2dbcTransactionManagerUnitTests {
 
 		assertThat(commits).hasValue(1);
 		verify(connectionMock).isAutoCommit();
-		verify(connectionMock).beginTransaction();
+		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).commitTransaction();
 		verify(connectionMock).close();
 		verifyNoMoreInteractions(connectionMock);
@@ -125,13 +127,13 @@ class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	void appliesIsolationLevel() {
+	void appliesTransactionDefinition() {
 		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
-		when(connectionMock.getTransactionIsolationLevel()).thenReturn(
-				IsolationLevel.READ_COMMITTED);
-		when(connectionMock.setTransactionIsolationLevel(any())).thenReturn(Mono.empty());
 
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+		definition.setName("my-transaction");
+		definition.setTimeout(10);
+		definition.setReadOnly(true);
 		definition.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 
 		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
@@ -142,12 +144,17 @@ class R2dbcTransactionManagerUnitTests {
 				.expectNextCount(1)
 				.verifyComplete();
 
-		verify(connectionMock).beginTransaction();
-		verify(connectionMock).setTransactionIsolationLevel(
-				IsolationLevel.READ_COMMITTED);
-		verify(connectionMock).setTransactionIsolationLevel(IsolationLevel.SERIALIZABLE);
+		ArgumentCaptor<io.r2dbc.spi.TransactionDefinition> txCaptor = ArgumentCaptor.forClass(io.r2dbc.spi.TransactionDefinition.class);
+		verify(connectionMock).beginTransaction(txCaptor.capture());
+		verify(connectionMock, never()).setTransactionIsolationLevel(any());
 		verify(connectionMock).commitTransaction();
 		verify(connectionMock).close();
+
+		io.r2dbc.spi.TransactionDefinition def = txCaptor.getValue();
+		assertThat(def.getAttribute(io.r2dbc.spi.TransactionDefinition.NAME)).isEqualTo("my-transaction");
+		assertThat(def.getAttribute(io.r2dbc.spi.TransactionDefinition.LOCK_WAIT_TIMEOUT)).isEqualTo(Duration.ofSeconds(10));
+		assertThat(def.getAttribute(io.r2dbc.spi.TransactionDefinition.READ_ONLY)).isEqualTo(true);
+		assertThat(def.getAttribute(io.r2dbc.spi.TransactionDefinition.ISOLATION_LEVEL)).isEqualTo(IsolationLevel.SERIALIZABLE);
 	}
 
 	@Test
@@ -167,7 +174,7 @@ class R2dbcTransactionManagerUnitTests {
 				.expectNextCount(1)
 				.verifyComplete();
 
-		verify(connectionMock).beginTransaction();
+		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock, never()).setTransactionIsolationLevel(any());
 		verify(connectionMock).commitTransaction();
 	}
@@ -187,7 +194,7 @@ class R2dbcTransactionManagerUnitTests {
 				.expectNextCount(1)
 				.verifyComplete();
 
-		verify(connectionMock).beginTransaction();
+		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock, never()).setAutoCommit(anyBoolean());
 		verify(connectionMock).commitTransaction();
 	}
@@ -208,7 +215,7 @@ class R2dbcTransactionManagerUnitTests {
 				.expectNextCount(1)
 				.verifyComplete();
 
-		verify(connectionMock).beginTransaction();
+		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).setAutoCommit(false);
 		verify(connectionMock).setAutoCommit(true);
 		verify(connectionMock).commitTransaction();
@@ -236,7 +243,7 @@ class R2dbcTransactionManagerUnitTests {
 				.verifyComplete();
 
 		verify(connectionMock).isAutoCommit();
-		verify(connectionMock).beginTransaction();
+		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).createStatement("SET TRANSACTION READ ONLY");
 		verify(connectionMock).commitTransaction();
 		verify(connectionMock).close();
@@ -258,7 +265,7 @@ class R2dbcTransactionManagerUnitTests {
 				.verifyError(IllegalTransactionStateException.class);
 
 		verify(connectionMock).isAutoCommit();
-		verify(connectionMock).beginTransaction();
+		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).createStatement("foo");
 		verify(connectionMock).commitTransaction();
 		verify(connectionMock).close();
@@ -288,7 +295,7 @@ class R2dbcTransactionManagerUnitTests {
 		assertThat(commits).hasValue(0);
 		assertThat(rollbacks).hasValue(1);
 		verify(connectionMock).isAutoCommit();
-		verify(connectionMock).beginTransaction();
+		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).rollbackTransaction();
 		verify(connectionMock).close();
 		verifyNoMoreInteractions(connectionMock);
@@ -311,7 +318,7 @@ class R2dbcTransactionManagerUnitTests {
 				.verifyError(IllegalTransactionStateException.class);
 
 		verify(connectionMock).isAutoCommit();
-		verify(connectionMock).beginTransaction();
+		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).createStatement("foo");
 		verify(connectionMock, never()).commitTransaction();
 		verify(connectionMock).rollbackTransaction();
@@ -341,7 +348,7 @@ class R2dbcTransactionManagerUnitTests {
 				.verifyComplete();
 
 		verify(connectionMock).isAutoCommit();
-		verify(connectionMock).beginTransaction();
+		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).rollbackTransaction();
 		verify(connectionMock).close();
 		verifyNoMoreInteractions(connectionMock);

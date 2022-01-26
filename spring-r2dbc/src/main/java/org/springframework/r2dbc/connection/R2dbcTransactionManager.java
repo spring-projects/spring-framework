@@ -21,8 +21,10 @@ import java.time.Duration;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.IsolationLevel;
+import io.r2dbc.spi.Option;
 import io.r2dbc.spi.R2dbcException;
 import io.r2dbc.spi.Result;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -47,7 +49,7 @@ import org.springframework.util.Assert;
  * <p><b>Note: The {@code ConnectionFactory} that this transaction manager
  * operates on needs to return independent {@code Connection}s.</b>
  * The {@code Connection}s may come from a pool (the typical case), but the
- * {@code ConnectionFactory} must not return scoped scoped {@code Connection}s
+ * {@code ConnectionFactory} must not return scoped {@code Connection}s
  * or the like. This transaction manager will associate {@code Connection}
  * with context-bound transactions itself, according to the specified propagation
  * behavior. It assumes that a separate, independent {@code Connection} can
@@ -71,6 +73,11 @@ import org.springframework.util.Assert;
  * <p>This transaction manager triggers flush callbacks on registered transaction
  * synchronizations (if synchronization is generally active), assuming resources
  * operating on the underlying R2DBC {@code Connection}.
+ *
+ * <p>Spring's {@code TransactionDefinition} attributes are carried forward to R2DBC drivers
+ * using extensible R2DBC {@link io.r2dbc.spi.TransactionDefinition}. Subclasses may
+ * override {@link #createTransactionDefinition(TransactionDefinition)} to customize
+ * transaction definitions for vendor-specific attributes.
  *
  * @author Mark Paluch
  * @since 5.3
@@ -203,7 +210,8 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 			}
 
 			return connectionMono.flatMap(con -> {
-				return prepareTransactionalConnection(con, definition, transaction).then(Mono.from(con.beginTransaction()))
+				return prepareTransactionalConnection(con, definition, transaction)
+						.then(Mono.from(doBegin(definition, con)))
 						.doOnSuccess(v -> {
 							txObject.getConnectionHolder().setTransactionActive(true);
 							Duration timeout = determineTimeout(definition);
@@ -228,6 +236,31 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 				return Mono.error(ex);
 			});
 		}).then();
+	}
+
+	private Publisher<Void> doBegin(TransactionDefinition definition, Connection con) {
+		io.r2dbc.spi.TransactionDefinition transactionDefinition = createTransactionDefinition(definition);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Starting R2DBC transaction on Connection [" + con + "] using [" + transactionDefinition + "]");
+		}
+		return con.beginTransaction(transactionDefinition);
+	}
+
+	/**
+	 * Determine the transaction definition from our {@code TransactionDefinition}.
+	 * Can be overridden to wrap the R2DBC {@code TransactionDefinition} to adjust or
+	 * enhance transaction attributes.
+	 * @param definition the transaction definition
+	 * @return the actual transaction definition to use
+	 * @since 6.0
+	 * @see io.r2dbc.spi.TransactionDefinition
+	 */
+	protected io.r2dbc.spi.TransactionDefinition createTransactionDefinition(TransactionDefinition definition) {
+		// Apply specific isolation level, if any.
+		IsolationLevel isolationLevelToUse = resolveIsolationLevel(definition.getIsolationLevel());
+		return new ExtendedTransactionDefinition(definition.getName(), definition.isReadOnly(),
+				definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT ? isolationLevelToUse : null,
+				determineTimeout(definition));
 	}
 
 	/**
@@ -375,21 +408,6 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 					.then();
 		}
 
-		// Apply specific isolation level, if any.
-		IsolationLevel isolationLevelToUse = resolveIsolationLevel(definition.getIsolationLevel());
-		if (isolationLevelToUse != null && definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("Changing isolation level of R2DBC Connection [" + con + "] to " + isolationLevelToUse.asSql());
-			}
-			IsolationLevel currentIsolation = con.getTransactionIsolationLevel();
-			if (!currentIsolation.asSql().equalsIgnoreCase(isolationLevelToUse.asSql())) {
-
-				txObject.setPreviousIsolationLevel(currentIsolation);
-				prepare = prepare.then(Mono.from(con.setTransactionIsolationLevel(isolationLevelToUse)));
-			}
-		}
-
 		// Switch to manual commit if necessary. This is very expensive in some R2DBC drivers,
 		// so we don't want to do it unnecessarily (for example if we've explicitly
 		// configured the connection pool to set it already).
@@ -433,6 +451,62 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	 */
 	protected RuntimeException translateException(String task, R2dbcException ex) {
 		return ConnectionFactoryUtils.convertR2dbcException(task, null, ex);
+	}
+
+
+	/**
+	 * Extended R2DBC transaction definition object providing transaction attributes
+	 * to R2DBC drivers when starting a transaction.
+	 */
+	private record ExtendedTransactionDefinition(@Nullable String transactionName,
+												boolean readOnly,
+												@Nullable IsolationLevel isolationLevel,
+												Duration lockWaitTimeout) implements io.r2dbc.spi.TransactionDefinition {
+
+		private ExtendedTransactionDefinition(@Nullable String transactionName, boolean readOnly,
+				@Nullable IsolationLevel isolationLevel, Duration lockWaitTimeout) {
+			this.transactionName = transactionName;
+			this.readOnly = readOnly;
+			this.isolationLevel = isolationLevel;
+			this.lockWaitTimeout = lockWaitTimeout;
+		}
+
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> T getAttribute(Option<T> option) {
+			return (T) doGetValue(option);
+		}
+
+		@Nullable
+		private Object doGetValue(Option<?> option) {
+			if (io.r2dbc.spi.TransactionDefinition.ISOLATION_LEVEL.equals(option)) {
+				return this.isolationLevel;
+			}
+			if (io.r2dbc.spi.TransactionDefinition.NAME.equals(option)) {
+				return this.transactionName;
+			}
+			if (io.r2dbc.spi.TransactionDefinition.READ_ONLY.equals(option)) {
+				return this.readOnly;
+			}
+			if (io.r2dbc.spi.TransactionDefinition.LOCK_WAIT_TIMEOUT.equals(option)
+				&& !this.lockWaitTimeout.isZero()) {
+				return this.lockWaitTimeout;
+			}
+			return null;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(getClass().getSimpleName());
+			sb.append(" [transactionName='").append(this.transactionName).append('\'');
+			sb.append(", readOnly=").append(this.readOnly);
+			sb.append(", isolationLevel=").append(this.isolationLevel);
+			sb.append(", lockWaitTimeout=").append(this.lockWaitTimeout);
+			sb.append(']');
+			return sb.toString();
+		}
 	}
 
 
