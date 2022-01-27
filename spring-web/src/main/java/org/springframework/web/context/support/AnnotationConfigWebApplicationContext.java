@@ -46,7 +46,17 @@ import org.springframework.web.context.ContextLoader;
  *
  * <p>This is essentially the equivalent of
  * {@link org.springframework.context.annotation.AnnotationConfigApplicationContext
- * AnnotationConfigApplicationContext} for a web environment.
+ * AnnotationConfigApplicationContext} for a web environment. However, in contrast to
+ * {@code AnnotationConfigApplicationContext}, this class does not extend
+ * {@link org.springframework.context.support.GenericApplicationContext
+ * GenericApplicationContext} and therefore does not provide some of the convenient
+ * {@code registerBean(...)} methods available in a {@code GenericApplicationContext}.
+ * If you wish to register annotated <em>component classes</em> with a
+ * {@code GenericApplicationContext} in a web environment, you may use a
+ * {@code GenericWebApplicationContext} with an
+ * {@link org.springframework.context.annotation.AnnotatedBeanDefinitionReader
+ * AnnotatedBeanDefinitionReader}. See the Javadoc for {@link GenericWebApplicationContext}
+ * for details and an example.
  *
  * <p>To make use of this application context, the
  * {@linkplain ContextLoader#CONTEXT_CLASS_PARAM "contextClass"} context-param for
@@ -81,8 +91,10 @@ import org.springframework.web.context.ContextLoader;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see org.springframework.context.annotation.AnnotationConfigApplicationContext
+ * @see org.springframework.web.context.support.GenericWebApplicationContext
  */
 public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWebApplicationContext
 		implements AnnotationConfigRegistry {

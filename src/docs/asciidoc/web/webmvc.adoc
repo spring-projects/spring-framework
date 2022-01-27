@@ -84,6 +84,11 @@ NOTE: In addition to using the ServletContext API directly, you can also extend
 `AbstractAnnotationConfigDispatcherServletInitializer` and override specific methods
 (see the example under <<mvc-servlet-context-hierarchy>>).
 
+NOTE: For programmatic use cases, a `GenericWebApplicationContext` can be used as an
+alternative to `AnnotationConfigWebApplicationContext`. See the
+{api-spring-framework}/web/context/support/GenericWebApplicationContext.html[`GenericWebApplicationContext`]
+javadoc for details.
+
 The following example of `web.xml` configuration registers and initializes the `DispatcherServlet`:
 
 [source,xml,indent=0,subs="verbatim,quotes"]

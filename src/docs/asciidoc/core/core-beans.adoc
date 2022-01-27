@@ -7900,6 +7900,10 @@ init-param):
 	</web-app>
 ----
 
+NOTE: For programmatic use cases, a `GenericWebApplicationContext` can be used as an
+alternative to `AnnotationConfigWebApplicationContext`. See the
+{api-spring-framework}/web/context/support/GenericWebApplicationContext.html[`GenericWebApplicationContext`]
+javadoc for details.
 
 
 [[beans-java-bean-annotation]]

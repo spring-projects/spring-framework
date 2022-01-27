@@ -53,6 +53,20 @@ import org.springframework.web.context.ServletContextAware;
  * {@link org.springframework.context.support.AbstractApplicationContext AbstractApplicationContext},
  * this class detects a {@link ThemeSource} bean in the context, with the name "themeSource".
  *
+ * <p>If you wish to register annotated <em>component classes</em> with a
+ * {@code GenericWebApplicationContext}, you can use an
+ * {@link org.springframework.context.annotation.AnnotatedBeanDefinitionReader
+ * AnnotatedBeanDefinitionReader}, as demonstrated in the following example.
+ * Component classes include in particular
+ * {@link org.springframework.context.annotation.Configuration @Configuration}
+ * classes but also plain {@link org.springframework.stereotype.Component @Component}
+ * classes as well as JSR-330 compliant classes using {@code javax.inject} annotations.
+ *
+ * <pre class="code">
+ * GenericWebApplicationContext context = new GenericWebApplicationContext();
+ * AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(context);
+ * reader.register(AppConfig.class, UserController.class, UserRepository.class);</pre>
+ *
  * <p>If you intend to implement a {@code WebApplicationContext} that reads bean definitions
  * from configuration files, consider deriving from {@link AbstractRefreshableWebApplicationContext},
  * reading the bean definitions in an implementation of the {@code loadBeanDefinitions}
@@ -60,6 +74,7 @@ import org.springframework.web.context.ServletContextAware;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 1.2
  */
 public class GenericWebApplicationContext extends GenericApplicationContext
