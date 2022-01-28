@@ -45,7 +45,10 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testdata.PersonInOtherPackage;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.within;
 import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
 
 /**
@@ -128,13 +131,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	@Test
 	void malformedIdentifiers() {
-		assertThatThrownBy(() -> {
-			parse("T(java lang String)");
-		}).isInstanceOf(SpelParseException.class);
+		assertThatThrownBy(() -> parse("T(java lang String)")).isInstanceOf(SpelParseException.class);
 
-		assertThatThrownBy(() -> {
-			parse("T(...java.lang.String)");
-		}).isInstanceOf(SpelParseException.class);
+		assertThatThrownBy(() -> parse("T(...java.lang.String)")).isInstanceOf(SpelParseException.class);
 
 		assertThat(parse("T(java.lang.String)").getValue()).isEqualTo(String.class);
 	}

@@ -748,7 +748,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				if(isValidIdent(node)) {
 					qualifiedIdPieces.add(new Identifier(node.stringValue(), node.startPos, node.endPos));
 					nextToken();
-				} else {
+				}
+				else {
 					break;
 				}
 				node = peekToken();
