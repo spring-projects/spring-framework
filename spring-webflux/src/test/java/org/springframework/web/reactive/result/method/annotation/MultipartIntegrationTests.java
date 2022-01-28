@@ -211,10 +211,9 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private static void verifyContents(Path tempFile, Resource resource) {
 		try {
-			byte[] tempBytes = Files.readAllBytes(tempFile);
 			// Use FileCopyUtils since the resource might reside in a JAR instead of in the file system.
 			byte[] resourceBytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
-			assertThat(tempBytes).isEqualTo(resourceBytes);
+			assertThat(tempFile).hasBinaryContent(resourceBytes);
 		}
 		catch (IOException ex) {
 			throw new AssertionError(ex);
