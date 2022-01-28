@@ -53,7 +53,6 @@ public interface BeanDefinitionRegistry extends AliasRegistry {
 	 * @param beanName the name of the bean instance to register
 	 * @param beanDefinition definition of the bean instance to register
 	 * @throws BeanDefinitionStoreException if the BeanDefinition is invalid
-	 * @throws BeanDefinitionOverrideException if there is already a BeanDefinition
 	 * for the specified bean name and we are not allowed to override it
 	 * @see GenericBeanDefinition
 	 * @see RootBeanDefinition

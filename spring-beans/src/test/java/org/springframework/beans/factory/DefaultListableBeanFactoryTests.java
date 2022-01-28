@@ -61,7 +61,6 @@ import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.ManagedList;
@@ -867,13 +866,8 @@ class DefaultListableBeanFactoryTests {
 		BeanDefinition oldDef = new RootBeanDefinition(TestBean.class);
 		BeanDefinition newDef = new RootBeanDefinition(NestedTestBean.class);
 		lbf.registerBeanDefinition("test", oldDef);
-		assertThatExceptionOfType(BeanDefinitionOverrideException.class).isThrownBy(() ->
-				lbf.registerBeanDefinition("test", newDef))
-				.satisfies(ex -> {
-					assertThat(ex.getBeanName()).isEqualTo("test");
-					assertThat(ex.getBeanDefinition()).isEqualTo(newDef);
-					assertThat(ex.getExistingDefinition()).isEqualTo(oldDef);
-				});
+		lbf.registerBeanDefinition("test", newDef);
+		assertThat(lbf.getBean("test")).isInstanceOf(TestBean.class);
 	}
 
 	@Test
