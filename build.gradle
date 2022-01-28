@@ -363,7 +363,6 @@ configure(moduleProjects) { project ->
 configure(rootProject) {
 	description = "Spring Framework"
 
-	apply plugin: "groovy"
 	apply plugin: "kotlin"
 	apply plugin: "io.spring.nohttp"
 	apply plugin: 'org.springframework.build.api-diff'
