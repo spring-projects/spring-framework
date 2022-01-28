@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testdata.PersonInOtherPackage;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
 
 /**
  * Checks SpelCompiler behavior. This should cover compilation all compiled node types.
@@ -209,9 +210,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	@Test
 	void operatorInstanceOf() {
 		expression = parse("'xyz' instanceof T(String)");
-		assertThat(expression.getValue()).isEqualTo(true);
+		assertThat(expression.getValue()).asInstanceOf(BOOLEAN).isTrue();
 		assertCanCompile(expression);
-		assertThat(expression.getValue()).isEqualTo(true);
+		assertThat(expression.getValue()).asInstanceOf(BOOLEAN).isTrue();
 
 		expression = parse("'xyz' instanceof T(Integer)");
 		assertThat(expression.getValue()).isEqualTo(false);
@@ -220,21 +221,21 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		List<String> list = new ArrayList<>();
 		expression = parse("#root instanceof T(java.util.List)");
-		assertThat(expression.getValue(list)).isEqualTo(true);
+		assertThat(expression.getValue(list)).asInstanceOf(BOOLEAN).isTrue();
 		assertCanCompile(expression);
-		assertThat(expression.getValue(list)).isEqualTo(true);
+		assertThat(expression.getValue(list)).asInstanceOf(BOOLEAN).isTrue();
 
 		List<String>[] arrayOfLists = new List[] {new ArrayList<String>()};
 		expression = parse("#root instanceof T(java.util.List[])");
-		assertThat(expression.getValue(arrayOfLists)).isEqualTo(true);
+		assertThat(expression.getValue(arrayOfLists)).asInstanceOf(BOOLEAN).isTrue();
 		assertCanCompile(expression);
-		assertThat(expression.getValue(arrayOfLists)).isEqualTo(true);
+		assertThat(expression.getValue(arrayOfLists)).asInstanceOf(BOOLEAN).isTrue();
 
 		int[] intArray = new int[] {1,2,3};
 		expression = parse("#root instanceof T(int[])");
-		assertThat(expression.getValue(intArray)).isEqualTo(true);
+		assertThat(expression.getValue(intArray)).asInstanceOf(BOOLEAN).isTrue();
 		assertCanCompile(expression);
-		assertThat(expression.getValue(intArray)).isEqualTo(true);
+		assertThat(expression.getValue(intArray)).asInstanceOf(BOOLEAN).isTrue();
 
 		String root = null;
 		expression = parse("#root instanceof T(Integer)");
@@ -250,18 +251,18 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		root = "howdy!";
 		expression = parse("#root instanceof T(java.lang.Object)");
-		assertThat(expression.getValue(root)).isEqualTo(true);
+		assertThat(expression.getValue(root)).asInstanceOf(BOOLEAN).isTrue();
 		assertCanCompile(expression);
-		assertThat(expression.getValue(root)).isEqualTo(true);
+		assertThat(expression.getValue(root)).asInstanceOf(BOOLEAN).isTrue();
 	}
 
 	@Test
 	void operatorInstanceOf_SPR14250() throws Exception {
 		// primitive left operand - should get boxed, return true
 		expression = parse("3 instanceof T(Integer)");
-		assertThat(expression.getValue()).isEqualTo(true);
+		assertThat(expression.getValue()).asInstanceOf(BOOLEAN).isTrue();
 		assertCanCompile(expression);
-		assertThat(expression.getValue()).isEqualTo(true);
+		assertThat(expression.getValue()).asInstanceOf(BOOLEAN).isTrue();
 
 		// primitive left operand - should get boxed, return false
 		expression = parse("3 instanceof T(String)");
@@ -277,9 +278,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		// double slot left operand - should get boxed, return true
 		expression = parse("3.0d instanceof T(Double)");
-		assertThat(expression.getValue()).isEqualTo(true);
+		assertThat(expression.getValue()).asInstanceOf(BOOLEAN).isTrue();
 		assertCanCompile(expression);
-		assertThat(expression.getValue()).isEqualTo(true);
+		assertThat(expression.getValue()).asInstanceOf(BOOLEAN).isTrue();
 
 		// Only when the right hand operand is a direct type reference
 		// will it be compilable.
@@ -657,9 +658,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue()).isEqualTo(false);
 
 		expression = parse("!false");
-		assertThat(expression.getValue()).isEqualTo(true);
+		assertThat(expression.getValue()).asInstanceOf(BOOLEAN).isTrue();
 		assertCanCompile(expression);
-		assertThat(expression.getValue()).isEqualTo(true);
+		assertThat(expression.getValue()).asInstanceOf(BOOLEAN).isTrue();
 
 		boolean b = true;
 		expression = parse("!#root");
@@ -669,9 +670,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		b = false;
 		expression = parse("!#root");
-		assertThat(expression.getValue(b)).isEqualTo(true);
+		assertThat(expression.getValue(b)).asInstanceOf(BOOLEAN).isTrue();
 		assertCanCompile(expression);
-		assertThat(expression.getValue(b)).isEqualTo(true);
+		assertThat(expression.getValue(b)).asInstanceOf(BOOLEAN).isTrue();
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,9 @@ public abstract class SessionFactoryUtils {
 	public static void closeSession(@Nullable Session session) {
 		if (session != null) {
 			try {
-				session.close();
+				if (session.isOpen()) {
+					session.close();
+				}
 			}
 			catch (Throwable ex) {
 				logger.error("Failed to release Hibernate Session", ex);

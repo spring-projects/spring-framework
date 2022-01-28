@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,12 +66,12 @@ public class MarshallingViewTests {
 
 	@Test
 	public void isExposePathVars() {
-		assertThat(view.isExposePathVariables()).as("Must not expose path variables").isEqualTo(false);
+		assertThat(view.isExposePathVariables()).as("Must not expose path variables").isFalse();
 	}
 
 	@Test
 	public void isExposePathVarsDefaultConstructor() {
-		assertThat(new MarshallingView().isExposePathVariables()).as("Must not expose path variables").isEqualTo(false);
+		assertThat(new MarshallingView().isExposePathVariables()).as("Must not expose path variables").isFalse();
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Nicholas Williams
  */
 @SuppressWarnings("serial")
-public class MessageTagTests extends AbstractTagTests {
+class MessageTagTests extends AbstractTagTests {
 
 	@Test
-	public void messageTagWithMessageSourceResolvable() throws JspException {
+	void messageTagWithMessageSourceResolvable() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -64,9 +64,9 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithCode() throws JspException {
+	void messageTagWithCode() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -81,9 +81,9 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithCodeAndArgument() throws JspException {
+	void messageTagWithCodeAndArgument() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -99,9 +99,9 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithCodeAndArguments() throws JspException {
+	void messageTagWithCodeAndArguments() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -117,9 +117,9 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithCodeAndStringArgumentWithCustomSeparator() throws JspException {
+	void messageTagWithCodeAndStringArgumentWithCustomSeparator() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -136,9 +136,9 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithCodeAndArrayArgument() throws JspException {
+	void messageTagWithCodeAndArrayArgument() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -154,9 +154,9 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithCodeAndObjectArgument() throws JspException {
+	void messageTagWithCodeAndObjectArgument() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -172,9 +172,9 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithCodeAndArgumentAndNestedArgument() throws JspException {
+	void messageTagWithCodeAndArgumentAndNestedArgument() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -191,9 +191,9 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithCodeAndNestedArgument() throws JspException {
+	void messageTagWithCodeAndNestedArgument() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -209,9 +209,9 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithCodeAndNestedArguments() throws JspException {
+	void messageTagWithCodeAndNestedArguments() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -228,9 +228,9 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithCodeAndText() throws JspException {
+	void messageTagWithCodeAndText() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -246,9 +246,9 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithText() throws JspException {
+	void messageTagWithText() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -264,11 +264,11 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithTextEncodingEscaped() throws JspException {
+	void messageTagWithTextEncodingEscaped() throws JspException {
 		PageContext pc = createPageContext();
 		pc.getServletContext().setInitParameter(WebUtils.RESPONSE_ENCODED_HTML_ESCAPE_CONTEXT_PARAM, "true");
 		pc.getResponse().setCharacterEncoding("UTF-8");
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -284,9 +284,9 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithTextAndJavaScriptEscape() throws JspException {
+	void messageTagWithTextAndJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -302,9 +302,9 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageTagWithTextAndHtmlEscapeAndJavaScriptEscape() throws JspException {
+	void messageTagWithTextAndHtmlEscapeAndJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		MessageTag tag = new MessageTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -321,7 +321,7 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageWithVarAndScope() throws JspException {
+	void messageWithVarAndScope() throws JspException {
 		PageContext pc = createPageContext();
 		MessageTag tag = new MessageTag();
 		tag.setPageContext(pc);
@@ -344,7 +344,7 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void messageWithVar() throws JspException {
+	void messageWithVar() throws JspException {
 		PageContext pc = createPageContext();
 		MessageTag tag = new MessageTag();
 		tag.setPageContext(pc);
@@ -366,7 +366,7 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void nullMessageSource() throws JspException {
+	void nullMessageSource() throws JspException {
 		PageContext pc = createPageContext();
 		ConfigurableWebApplicationContext ctx = (ConfigurableWebApplicationContext)
 				RequestContextUtils.findWebApplicationContext((HttpServletRequest) pc.getRequest(), pc.getServletContext());
@@ -382,7 +382,7 @@ public class MessageTagTests extends AbstractTagTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void requestContext() throws ServletException {
+	void requestContext() throws ServletException {
 		PageContext pc = createPageContext();
 		RequestContext rc = new RequestContext((HttpServletRequest) pc.getRequest(), pc.getServletContext());
 		assertThat(rc.getMessage("test")).isEqualTo("test message");

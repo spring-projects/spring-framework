@@ -17,6 +17,9 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-context")))
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("io.r2dbc:r2dbc-h2")
+	testImplementation("com.h2database:h2:1.4.200") {
+		because("r2dbc-h2 does not yet support H2 2.0")
+	}
 	testImplementation("io.r2dbc:r2dbc-spi-test:0.8.1.RELEASE") {
 		exclude group: "org.springframework", module: "spring-jdbc"
 	}

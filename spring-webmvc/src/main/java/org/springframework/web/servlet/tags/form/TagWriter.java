@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +96,18 @@ public class TagWriter {
 		}
 		this.writer.append(" ").append(attributeName).append("=\"")
 				.append(attributeValue).append("\"");
+	}
+
+	/**
+	 * Variant of {@link #writeAttribute(String, String)} for writing empty HTML
+	 * attributes without a value such as {@code required}.
+	 * @since 5.3.14
+	 */
+	public void writeAttribute(String attributeName) throws JspException {
+		if (currentState().isBlockTag()) {
+			throw new IllegalStateException("Cannot write attributes after opening tag is closed.");
+		}
+		this.writer.append(" ").append(attributeName);
 	}
 
 	/**

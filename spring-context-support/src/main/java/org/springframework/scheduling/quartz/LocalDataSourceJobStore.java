@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ import org.springframework.lang.Nullable;
  * Subclass of Quartz's {@link JobStoreCMT} class that delegates to a Spring-managed
  * {@link DataSource} instead of using a Quartz-managed JDBC connection pool.
  * This JobStore will be used if SchedulerFactoryBean's "dataSource" property is set.
+ * You may also configure it explicitly, possibly as a custom subclass of this
+ * {@code LocalDataSourceJobStore} or as an equivalent {@code JobStoreCMT} variant.
  *
  * <p>Supports both transactional and non-transactional DataSource access.
  * With a non-XA DataSource and local Spring transactions, a single DataSource
@@ -58,6 +60,8 @@ import org.springframework.lang.Nullable;
  * @since 1.1
  * @see SchedulerFactoryBean#setDataSource
  * @see SchedulerFactoryBean#setNonTransactionalDataSource
+ * @see SchedulerFactoryBean#getConfigTimeDataSource()
+ * @see SchedulerFactoryBean#getConfigTimeNonTransactionalDataSource()
  * @see org.springframework.jdbc.datasource.DataSourceUtils#doGetConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
  */

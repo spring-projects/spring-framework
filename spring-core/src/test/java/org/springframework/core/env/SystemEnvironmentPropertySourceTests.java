@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ class SystemEnvironmentPropertySourceTests {
 
 	@Test
 	void none() {
-		assertThat(ps.containsProperty("a.key")).isEqualTo(false);
+		assertThat(ps.containsProperty("a.key")).isFalse();
 		assertThat(ps.getProperty("a.key")).isNull();
 	}
 
@@ -58,7 +58,7 @@ class SystemEnvironmentPropertySourceTests {
 	void normalWithoutPeriod() {
 		envMap.put("akey", "avalue");
 
-		assertThat(ps.containsProperty("akey")).isEqualTo(true);
+		assertThat(ps.containsProperty("akey")).isTrue();
 		assertThat(ps.getProperty("akey")).isEqualTo("avalue");
 	}
 
@@ -66,7 +66,7 @@ class SystemEnvironmentPropertySourceTests {
 	void normalWithPeriod() {
 		envMap.put("a.key", "a.value");
 
-		assertThat(ps.containsProperty("a.key")).isEqualTo(true);
+		assertThat(ps.containsProperty("a.key")).isTrue();
 		assertThat(ps.getProperty("a.key")).isEqualTo("a.value");
 	}
 
@@ -74,8 +74,8 @@ class SystemEnvironmentPropertySourceTests {
 	void withUnderscore() {
 		envMap.put("a_key", "a_value");
 
-		assertThat(ps.containsProperty("a_key")).isEqualTo(true);
-		assertThat(ps.containsProperty("a.key")).isEqualTo(true);
+		assertThat(ps.containsProperty("a_key")).isTrue();
+		assertThat(ps.containsProperty("a.key")).isTrue();
 
 		assertThat(ps.getProperty("a_key")).isEqualTo("a_value");
 		assertThat( ps.getProperty("a.key")).isEqualTo("a_value");
@@ -97,30 +97,30 @@ class SystemEnvironmentPropertySourceTests {
 		envMap.put("A_DOT.KEY", "a_dot_value");
 		envMap.put("A_HYPHEN-KEY", "a_hyphen_value");
 
-		assertThat(ps.containsProperty("A_KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A.KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A-KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("a_key")).isEqualTo(true);
-		assertThat(ps.containsProperty("a.key")).isEqualTo(true);
-		assertThat(ps.containsProperty("a-key")).isEqualTo(true);
-		assertThat(ps.containsProperty("A_LONG_KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A.LONG.KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A-LONG-KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A.LONG-KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A-LONG.KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A_long_KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A.long.KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A-long-KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A.long-KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A-long.KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A_DOT.KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A-DOT.KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A_dot.KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A-dot.KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A_HYPHEN-KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A.HYPHEN-KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A_hyphen-KEY")).isEqualTo(true);
-		assertThat(ps.containsProperty("A.hyphen-KEY")).isEqualTo(true);
+		assertThat(ps.containsProperty("A_KEY")).isTrue();
+		assertThat(ps.containsProperty("A.KEY")).isTrue();
+		assertThat(ps.containsProperty("A-KEY")).isTrue();
+		assertThat(ps.containsProperty("a_key")).isTrue();
+		assertThat(ps.containsProperty("a.key")).isTrue();
+		assertThat(ps.containsProperty("a-key")).isTrue();
+		assertThat(ps.containsProperty("A_LONG_KEY")).isTrue();
+		assertThat(ps.containsProperty("A.LONG.KEY")).isTrue();
+		assertThat(ps.containsProperty("A-LONG-KEY")).isTrue();
+		assertThat(ps.containsProperty("A.LONG-KEY")).isTrue();
+		assertThat(ps.containsProperty("A-LONG.KEY")).isTrue();
+		assertThat(ps.containsProperty("A_long_KEY")).isTrue();
+		assertThat(ps.containsProperty("A.long.KEY")).isTrue();
+		assertThat(ps.containsProperty("A-long-KEY")).isTrue();
+		assertThat(ps.containsProperty("A.long-KEY")).isTrue();
+		assertThat(ps.containsProperty("A-long.KEY")).isTrue();
+		assertThat(ps.containsProperty("A_DOT.KEY")).isTrue();
+		assertThat(ps.containsProperty("A-DOT.KEY")).isTrue();
+		assertThat(ps.containsProperty("A_dot.KEY")).isTrue();
+		assertThat(ps.containsProperty("A-dot.KEY")).isTrue();
+		assertThat(ps.containsProperty("A_HYPHEN-KEY")).isTrue();
+		assertThat(ps.containsProperty("A.HYPHEN-KEY")).isTrue();
+		assertThat(ps.containsProperty("A_hyphen-KEY")).isTrue();
+		assertThat(ps.containsProperty("A.hyphen-KEY")).isTrue();
 
 		assertThat(ps.getProperty("A_KEY")).isEqualTo("a_value");
 		assertThat(ps.getProperty("A.KEY")).isEqualTo("a_value");
@@ -170,7 +170,7 @@ class SystemEnvironmentPropertySourceTests {
 			}
 		};
 
-		assertThat(ps.containsProperty("A_KEY")).isEqualTo(true);
+		assertThat(ps.containsProperty("A_KEY")).isTrue();
 		assertThat(ps.getProperty("A_KEY")).isEqualTo("a_value");
 	}
 

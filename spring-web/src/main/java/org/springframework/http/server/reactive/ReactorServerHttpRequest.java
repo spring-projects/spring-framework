@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static URI initUri(HttpServerRequest request) throws URISyntaxException {
 		Assert.notNull(request, "HttpServerRequest must not be null");
-		return new URI(resolveBaseUrl(request).toString() + resolveRequestUri(request));
+		return new URI(resolveBaseUrl(request) + resolveRequestUri(request));
 	}
 
 	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
@@ -197,14 +197,26 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	@Nullable
 	protected String initId() {
-		if (reactorNettyRequestChannelOperationsIdPresent) {
-			return (ChannelOperationsIdHelper.getId(this.request));
-		}
 		if (this.request instanceof Connection) {
 			return ((Connection) this.request).channel().id().asShortText() +
 					"-" + logPrefixIndex.incrementAndGet();
 		}
 		return null;
+	}
+
+	@Override
+	protected String initLogPrefix() {
+		if (reactorNettyRequestChannelOperationsIdPresent) {
+			String id = (ChannelOperationsIdHelper.getId(this.request));
+			if (id != null) {
+				return id;
+			}
+		}
+		if (this.request instanceof Connection) {
+			return ((Connection) this.request).channel().id().asShortText() +
+					"-" + logPrefixIndex.incrementAndGet();
+		}
+		return getId();
 	}
 
 

@@ -519,18 +519,15 @@ public interface WebClient {
 		 * scenarios, for example to decode the response differently depending
 		 * on the response status:
 		 * <p><pre>
-		 * Mono&lt;Object&gt; entityMono = client.get()
+		 * Mono&lt;Person&gt; entityMono = client.get()
 		 *     .uri("/persons/1")
 		 *     .accept(MediaType.APPLICATION_JSON)
 		 *     .exchangeToMono(response -&gt; {
 		 *         if (response.statusCode().equals(HttpStatus.OK)) {
 		 *             return response.bodyToMono(Person.class);
 		 *         }
-		 *         else if (response.statusCode().is4xxClientError()) {
-		 *             return response.bodyToMono(ErrorContainer.class);
-		 *         }
 		 *         else {
-		 *             return Mono.error(response.createException());
+		 *             return response.createException().flatMap(Mono::error);
 		 *         }
 		 *     });
 		 * </pre>
@@ -551,18 +548,15 @@ public interface WebClient {
 		 * scenarios, for example to decode the response differently depending
 		 * on the response status:
 		 * <p><pre>
-		 * Mono&lt;Object&gt; entityMono = client.get()
+		 * Flux&lt;Person&gt; entityMono = client.get()
 		 *     .uri("/persons")
 		 *     .accept(MediaType.APPLICATION_JSON)
 		 *     .exchangeToFlux(response -&gt; {
 		 *         if (response.statusCode().equals(HttpStatus.OK)) {
 		 *             return response.bodyToFlux(Person.class);
 		 *         }
-		 *         else if (response.statusCode().is4xxClientError()) {
-		 *             return response.bodyToMono(ErrorContainer.class).flux();
-		 *         }
 		 *         else {
-		 *             return Flux.error(response.createException());
+		 *             return response.createException().flatMapMany(Mono::error);
 		 *         }
 		 *     });
 		 * </pre>

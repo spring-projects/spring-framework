@@ -320,6 +320,23 @@ public class DefaultServerResponseBuilderTests {
 		assertThat(serverResponse.block().cookies().isEmpty()).isFalse();
 	}
 
+	@Test
+	public void overwriteHeaders() {
+		ServerResponse serverResponse =
+				ServerResponse.ok().headers(headers -> headers.set("Foo", "Bar")).build().block();
+		assertThat(serverResponse).isNotNull();
+
+		MockServerWebExchange mockExchange = MockServerWebExchange
+				.builder(MockServerHttpRequest.get("https://example.org"))
+				.build();
+		MockServerHttpResponse response = mockExchange.getResponse();
+		response.getHeaders().set("Foo", "Baz");
+
+		serverResponse.writeTo(mockExchange, EMPTY_CONTEXT).block();
+
+		assertThat(response.getHeaders().getFirst("Foo")).isEqualTo("Bar");
+	}
+
 
 	@Test
 	public void build() {

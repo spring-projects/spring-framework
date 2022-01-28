@@ -16,7 +16,9 @@
 
 package org.springframework.http.codec.multipart;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
@@ -40,6 +42,7 @@ import org.synchronoss.cloud.nio.multipart.MultipartUtils;
 import org.synchronoss.cloud.nio.multipart.NioMultipartParser;
 import org.synchronoss.cloud.nio.multipart.NioMultipartParserListener;
 import org.synchronoss.cloud.nio.multipart.PartBodyStreamStorageFactory;
+import org.synchronoss.cloud.nio.stream.storage.NameAwarePurgableFileInputStream;
 import org.synchronoss.cloud.nio.stream.storage.StreamStorage;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
@@ -496,6 +499,38 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		protected StreamStorage getStorage() {
 			return this.storage;
+		}
+
+		@Override
+		public Mono<Void> delete() {
+			return Mono.fromRunnable(() -> {
+				File file = getFile();
+				if (file != null) {
+					file.delete();
+				}
+			});
+		}
+
+		@Nullable
+		private File getFile() {
+			InputStream inputStream = null;
+			try {
+				inputStream = getStorage().getInputStream();
+				if (inputStream instanceof NameAwarePurgableFileInputStream) {
+					NameAwarePurgableFileInputStream stream = (NameAwarePurgableFileInputStream) inputStream;
+					return stream.getFile();
+				}
+			}
+			finally {
+				if (inputStream != null) {
+					try {
+						inputStream.close();
+					}
+					catch (IOException ignore) {
+					}
+				}
+			}
+			return null;
 		}
 	}
 

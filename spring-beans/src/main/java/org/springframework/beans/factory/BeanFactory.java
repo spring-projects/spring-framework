@@ -214,6 +214,7 @@ public interface BeanFactory {
 	/**
 	 * Return a provider for the specified bean, allowing for lazy on-demand retrieval
 	 * of instances, including availability and uniqueness options.
+	 * <p>For matching a generic type, consider {@link #getBeanProvider(ResolvableType)}.
 	 * @param requiredType type the bean must match; can be an interface or superclass
 	 * @return a corresponding provider handle
 	 * @since 5.1
@@ -223,13 +224,20 @@ public interface BeanFactory {
 
 	/**
 	 * Return a provider for the specified bean, allowing for lazy on-demand retrieval
-	 * of instances, including availability and uniqueness options.
-	 * @param requiredType type the bean must match; can be a generic type declaration.
-	 * Note that collection types are not supported here, in contrast to reflective
+	 * of instances, including availability and uniqueness options. This variant allows
+	 * for specifying a generic type to match, similar to reflective injection points
+	 * with generic type declarations in method/constructor parameters.
+	 * <p>Note that collections of beans are not supported here, in contrast to reflective
 	 * injection points. For programmatically retrieving a list of beans matching a
 	 * specific type, specify the actual bean type as an argument here and subsequently
 	 * use {@link ObjectProvider#orderedStream()} or its lazy streaming/iteration options.
+	 * <p>Also, generics matching is strict here, as per the Java assignment rules.
+	 * For lenient fallback matching with unchecked semantics (similar to the ´unchecked´
+	 * Java compiler warning), consider calling {@link #getBeanProvider(Class)} with the
+	 * raw type as a second step if no full generic match is
+	 * {@link ObjectProvider#getIfAvailable() available} with this variant.
 	 * @return a corresponding provider handle
+	 * @param requiredType type the bean must match; can be a generic type declaration
 	 * @since 5.1
 	 * @see ObjectProvider#iterator()
 	 * @see ObjectProvider#stream()

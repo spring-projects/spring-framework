@@ -48,7 +48,6 @@ import org.springframework.lang.Nullable;
  * <p>Used e.g. by {@link org.springframework.web.filter.AbstractRequestLoggingFilter}.
  * Note: As of Spring Framework 5.0, this wrapper is built on the Servlet 3.1 API.
  *
- *
  * @author Juergen Hoeller
  * @author Brian Clozel
  * @since 4.1.3

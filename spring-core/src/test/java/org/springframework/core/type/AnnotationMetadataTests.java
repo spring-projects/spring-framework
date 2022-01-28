@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ class AnnotationMetadataTests {
 		assertThat(metadata.getAnnotationAttributes(MetaAnnotation.class.getName(), false)).isNull();
 		assertThat(metadata.getAnnotationAttributes(MetaAnnotation.class.getName(), true)).isNull();
 		assertThat(metadata.getAnnotatedMethods(DirectAnnotation.class.getName()).size()).isEqualTo(0);
-		assertThat(metadata.isAnnotated(IsAnnotatedAnnotation.class.getName())).isEqualTo(false);
+		assertThat(metadata.isAnnotated(IsAnnotatedAnnotation.class.getName())).isFalse();
 		assertThat(metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName())).isNull();
 	}
 

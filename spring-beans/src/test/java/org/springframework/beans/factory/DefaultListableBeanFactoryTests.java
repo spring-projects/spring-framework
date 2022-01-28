@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -433,7 +433,7 @@ class DefaultListableBeanFactoryTests {
 		assertThat(lbf.isTypeMatch("x1", Object.class)).isTrue();
 		assertThat(lbf.isTypeMatch("&x1", Object.class)).isFalse();
 		assertThat(lbf.getType("x1")).isEqualTo(TestBean.class);
-		assertThat(lbf.getType("&x1")).isEqualTo(null);
+		assertThat(lbf.getType("&x1")).isNull();
 		assertThat(TestBeanFactory.initialized).isFalse();
 
 		lbf.registerAlias("x1", "x2");
@@ -2622,8 +2622,8 @@ class DefaultListableBeanFactoryTests {
 	void containsBeanReturnsTrueEvenForAbstractBeanDefinition() {
 		lbf.registerBeanDefinition("abs", BeanDefinitionBuilder
 				.rootBeanDefinition(TestBean.class).setAbstract(true).getBeanDefinition());
-		assertThat(lbf.containsBean("abs")).isEqualTo(true);
-		assertThat(lbf.containsBean("bogus")).isEqualTo(false);
+		assertThat(lbf.containsBean("abs")).isTrue();
+		assertThat(lbf.containsBean("bogus")).isFalse();
 	}
 
 	@Test

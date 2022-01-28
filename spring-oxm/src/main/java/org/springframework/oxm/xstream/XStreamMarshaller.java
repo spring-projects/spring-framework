@@ -56,6 +56,7 @@ import com.thoughtworks.xstream.io.xml.DomReader;
 import com.thoughtworks.xstream.io.xml.DomWriter;
 import com.thoughtworks.xstream.io.xml.QNameMap;
 import com.thoughtworks.xstream.io.xml.SaxWriter;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 import com.thoughtworks.xstream.io.xml.StaxReader;
 import com.thoughtworks.xstream.io.xml.StaxWriter;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
@@ -696,7 +697,14 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	@Override
 	protected void marshalXmlStreamWriter(Object graph, XMLStreamWriter streamWriter) throws XmlMappingException {
 		try {
-			doMarshal(graph, new StaxWriter(new QNameMap(), streamWriter, this.nameCoder), null);
+			StaxWriter writer;
+			if (this.streamDriver instanceof StaxDriver) {
+				writer = ((StaxDriver) this.streamDriver).createStaxWriter(streamWriter);
+			}
+			else {
+				writer = new StaxWriter(new QNameMap(), streamWriter, this.nameCoder);
+			}
+			doMarshal(graph, writer, null);
 		}
 		catch (XMLStreamException ex) {
 			throw convertXStreamException(ex, true);

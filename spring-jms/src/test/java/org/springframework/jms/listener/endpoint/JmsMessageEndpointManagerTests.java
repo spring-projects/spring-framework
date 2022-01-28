@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ public class JmsMessageEndpointManagerTests {
 		JmsActivationSpecConfig config = new JmsActivationSpecConfig();
 		config.setPubSubDomain(false);
 		endpoint.setActivationSpecConfig(config);
-		assertThat(endpoint.isPubSubDomain()).isEqualTo(false);
-		assertThat(endpoint.isReplyPubSubDomain()).isEqualTo(false);
+		assertThat(endpoint.isPubSubDomain()).isFalse();
+		assertThat(endpoint.isReplyPubSubDomain()).isFalse();
 	}
 
 	@Test
@@ -44,8 +44,8 @@ public class JmsMessageEndpointManagerTests {
 		JmsActivationSpecConfig config = new JmsActivationSpecConfig();
 		config.setPubSubDomain(true);
 		endpoint.setActivationSpecConfig(config);
-		assertThat(endpoint.isPubSubDomain()).isEqualTo(true);
-		assertThat(endpoint.isReplyPubSubDomain()).isEqualTo(true);
+		assertThat(endpoint.isPubSubDomain()).isTrue();
+		assertThat(endpoint.isReplyPubSubDomain()).isTrue();
 	}
 
 	@Test
@@ -55,8 +55,8 @@ public class JmsMessageEndpointManagerTests {
 		config.setPubSubDomain(true);
 		config.setReplyPubSubDomain(false);
 		endpoint.setActivationSpecConfig(config);
-		assertThat(endpoint.isPubSubDomain()).isEqualTo(true);
-		assertThat(endpoint.isReplyPubSubDomain()).isEqualTo(false);
+		assertThat(endpoint.isPubSubDomain()).isTrue();
+		assertThat(endpoint.isReplyPubSubDomain()).isFalse();
 	}
 
 	@Test

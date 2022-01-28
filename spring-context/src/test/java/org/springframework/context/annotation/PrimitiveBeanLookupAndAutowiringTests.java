@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class PrimitiveBeanLookupAndAutowiringTests {
 	public void primitiveLookupByName() {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class);
 		boolean b = ctx.getBean("b", boolean.class);
-		assertThat(b).isEqualTo(true);
+		assertThat(b).isTrue();
 		int i = ctx.getBean("i", int.class);
 		assertThat(i).isEqualTo(42);
 	}
@@ -56,7 +56,7 @@ public class PrimitiveBeanLookupAndAutowiringTests {
 	public void primitiveLookupByType() {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class);
 		boolean b = ctx.getBean(boolean.class);
-		assertThat(b).isEqualTo(true);
+		assertThat(b).isTrue();
 		int i = ctx.getBean(int.class);
 		assertThat(i).isEqualTo(42);
 	}
@@ -65,7 +65,7 @@ public class PrimitiveBeanLookupAndAutowiringTests {
 	public void primitiveAutowiredInjection() {
 		ApplicationContext ctx =
 				new AnnotationConfigApplicationContext(Config.class, AutowiredComponent.class);
-		assertThat(ctx.getBean(AutowiredComponent.class).b).isEqualTo(true);
+		assertThat(ctx.getBean(AutowiredComponent.class).b).isTrue();
 		assertThat(ctx.getBean(AutowiredComponent.class).i).isEqualTo(42);
 	}
 
@@ -73,7 +73,7 @@ public class PrimitiveBeanLookupAndAutowiringTests {
 	public void primitiveResourceInjection() {
 		ApplicationContext ctx =
 				new AnnotationConfigApplicationContext(Config.class, ResourceComponent.class);
-		assertThat(ctx.getBean(ResourceComponent.class).b).isEqualTo(true);
+		assertThat(ctx.getBean(ResourceComponent.class).b).isTrue();
 		assertThat(ctx.getBean(ResourceComponent.class).i).isEqualTo(42);
 	}
 

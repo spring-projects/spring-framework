@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,10 +58,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @since 12.08.2003
  * @see org.springframework.web.context.support.Spr8510Tests
  */
-public class ContextLoaderTests {
+class ContextLoaderTests {
 
 	@Test
-	public void testContextLoaderListenerWithDefaultContext() {
+	void contextLoaderListenerWithDefaultContext() {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"/org/springframework/web/context/WEB-INF/applicationContext.xml " +
@@ -95,8 +95,8 @@ public class ContextLoaderTests {
 	 * context before calling refresh in ContextLoaders</em>.
 	 */
 	@Test
-	public void testContextLoaderListenerWithCustomizedContextLoader() {
-		final StringBuffer buffer = new StringBuffer();
+	void contextLoaderListenerWithCustomizedContextLoader() {
+		final StringBuilder builder = new StringBuilder();
 		final String expectedContents = "customizeContext() was called";
 		final MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
@@ -107,15 +107,15 @@ public class ContextLoaderTests {
 				assertThat(sc).as("The ServletContext should not be null.").isNotNull();
 				assertThat(sc).as("Verifying that we received the expected ServletContext.").isEqualTo(sc);
 				assertThat(wac.isActive()).as("The ApplicationContext should not yet have been refreshed.").isFalse();
-				buffer.append(expectedContents);
+				builder.append(expectedContents);
 			}
 		};
 		listener.contextInitialized(new ServletContextEvent(sc));
-		assertThat(buffer.toString()).as("customizeContext() should have been called.").isEqualTo(expectedContents);
+		assertThat(builder.toString()).as("customizeContext() should have been called.").isEqualTo(expectedContents);
 	}
 
 	@Test
-	public void testContextLoaderListenerWithLocalContextInitializers() {
+	void contextLoaderListenerWithLocalContextInitializers() {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"org/springframework/web/context/WEB-INF/ContextLoaderTests-acc-context.xml");
@@ -130,7 +130,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderListenerWithGlobalContextInitializers() {
+	void contextLoaderListenerWithGlobalContextInitializers() {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"org/springframework/web/context/WEB-INF/ContextLoaderTests-acc-context.xml");
@@ -145,7 +145,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderListenerWithMixedContextInitializers() {
+	void contextLoaderListenerWithMixedContextInitializers() {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"org/springframework/web/context/WEB-INF/ContextLoaderTests-acc-context.xml");
@@ -160,7 +160,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderListenerWithProgrammaticInitializers() {
+	void contextLoaderListenerWithProgrammaticInitializers() {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"org/springframework/web/context/WEB-INF/ContextLoaderTests-acc-context.xml");
@@ -174,7 +174,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderListenerWithProgrammaticAndLocalInitializers() {
+	void contextLoaderListenerWithProgrammaticAndLocalInitializers() {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"org/springframework/web/context/WEB-INF/ContextLoaderTests-acc-context.xml");
@@ -189,7 +189,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderListenerWithProgrammaticAndGlobalInitializers() {
+	void contextLoaderListenerWithProgrammaticAndGlobalInitializers() {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"org/springframework/web/context/WEB-INF/ContextLoaderTests-acc-context.xml");
@@ -204,7 +204,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testRegisteredContextInitializerCanAccessServletContextParamsViaEnvironment() {
+	void registeredContextInitializerCanAccessServletContextParamsViaEnvironment() {
 		MockServletContext sc = new MockServletContext("");
 		// config file doesn't matter - just a placeholder
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
@@ -218,7 +218,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderListenerWithUnknownContextInitializer() {
+	void contextLoaderListenerWithUnknownContextInitializer() {
 		MockServletContext sc = new MockServletContext("");
 		// config file doesn't matter.  just a placeholder
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
@@ -232,7 +232,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderWithCustomContext() throws Exception {
+	void contextLoaderWithCustomContext() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONTEXT_CLASS_PARAM,
 				"org.springframework.web.servlet.SimpleWebApplicationContext");
@@ -246,7 +246,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderWithInvalidLocation() throws Exception {
+	void contextLoaderWithInvalidLocation() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, "/WEB-INF/myContext.xml");
 		ServletContextListener listener = new ContextLoaderListener();
@@ -257,7 +257,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderWithInvalidContext() throws Exception {
+	void contextLoaderWithInvalidContext() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONTEXT_CLASS_PARAM,
 				"org.springframework.web.context.support.InvalidWebApplicationContext");
@@ -269,7 +269,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderWithDefaultLocation() throws Exception {
+	void contextLoaderWithDefaultLocation() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
@@ -281,7 +281,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testFrameworkServletWithDefaultLocation() throws Exception {
+	void frameworkServletWithDefaultLocation() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet();
 		servlet.setContextClass(XmlWebApplicationContext.class);
 		assertThatExceptionOfType(BeanDefinitionStoreException.class)
@@ -292,7 +292,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testFrameworkServletWithCustomLocation() throws Exception {
+	void frameworkServletWithCustomLocation() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet();
 		servlet.setContextConfigLocation("/org/springframework/web/context/WEB-INF/testNamespace.xml "
 				+ "/org/springframework/web/context/WEB-INF/context-addition.xml");
@@ -303,7 +303,7 @@ public class ContextLoaderTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void testClassPathXmlApplicationContext() throws IOException {
+	void classPathXmlApplicationContext() throws IOException {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"/org/springframework/web/context/WEB-INF/applicationContext.xml");
 		assertThat(context.containsBean("father")).as("Has father").isTrue();
@@ -322,7 +322,7 @@ public class ContextLoaderTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void testSingletonDestructionOnStartupFailure() throws IOException {
+	void singletonDestructionOnStartupFailure() throws IOException {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				new ClassPathXmlApplicationContext(new String[] {
 					"/org/springframework/web/context/WEB-INF/applicationContext.xml",
