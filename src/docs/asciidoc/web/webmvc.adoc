@@ -4107,7 +4107,7 @@ as the following example shows:
 ----
 	HttpServletRequest request = ...
 
-	// Re-uses host, scheme, port, path and query string...
+	// Re-uses scheme, host, port, path, and query string...
 
 	URI uri = ServletUriComponentsBuilder.fromRequest(request)
 			.replaceQueryParam("accountId", "{id}")
@@ -4118,7 +4118,7 @@ as the following example shows:
 ----
 	val request: HttpServletRequest = ...
 
-	// Re-uses host, scheme, port, path and query string...
+	// Re-uses scheme, host, port, path, and query string...
 
 	val uri = ServletUriComponentsBuilder.fromRequest(request)
 			.replaceQueryParam("accountId", "{id}")
@@ -4130,7 +4130,9 @@ You can create URIs relative to the context path, as the following example shows
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	// Re-uses host, port, scheme and context path...
+	HttpServletRequest request = ...
+
+	// Re-uses scheme, host, port, and context path...
 
 	URI uri = ServletUriComponentsBuilder.fromContextPath(request)
 			.path("/accounts")
@@ -4140,7 +4142,9 @@ You can create URIs relative to the context path, as the following example shows
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	// Re-uses host, port, scheme and context path...
+	val request: HttpServletRequest = ...
+
+	// Re-uses scheme, host, port, and context path...
 
 	val uri = ServletUriComponentsBuilder.fromContextPath(request)
 			.path("/accounts")
@@ -4154,7 +4158,9 @@ as the following example shows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	// Re-uses host, port, scheme, context path, and Servlet prefix...
+	HttpServletRequest request = ...
+
+	// Re-uses scheme, host, port, context path, and Servlet mapping prefix...
 
 	URI uri = ServletUriComponentsBuilder.fromServletMapping(request)
 			.path("/accounts")
@@ -4164,7 +4170,9 @@ as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	// Re-uses host, port, scheme, context path, and Servlet prefix...
+	val request: HttpServletRequest = ...
+
+	// Re-uses scheme, host, port, context path, and Servlet mapping prefix...
 
 	val uri = ServletUriComponentsBuilder.fromServletMapping(request)
 			.path("/accounts")
