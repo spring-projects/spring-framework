@@ -4113,24 +4113,22 @@ as the following example shows:
 ----
 	HttpServletRequest request = ...
 
-	// Re-uses host, scheme, port, path and query string...
+	// Re-uses scheme, host, port, path, and query string...
 
-	ServletUriComponentsBuilder ucb = ServletUriComponentsBuilder.fromRequest(request)
-			.replaceQueryParam("accountId", "{id}").build()
-			.expand("123")
-			.encode();
+	URI uri = ServletUriComponentsBuilder.fromRequest(request)
+			.replaceQueryParam("accountId", "{id}")
+			.build("123");
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val request: HttpServletRequest = ...
 
-	// Re-uses host, scheme, port, path and query string...
+	// Re-uses scheme, host, port, path, and query string...
 
-	val ucb = ServletUriComponentsBuilder.fromRequest(request)
-			.replaceQueryParam("accountId", "{id}").build()
-			.expand("123")
-			.encode()
+	val uri = ServletUriComponentsBuilder.fromRequest(request)
+			.replaceQueryParam("accountId", "{id}")
+			.build("123")
 ----
 
 You can create URIs relative to the context path, as the following example shows:
@@ -4138,18 +4136,26 @@ You can create URIs relative to the context path, as the following example shows
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	// Re-uses host, port and context path...
+	HttpServletRequest request = ...
 
-	ServletUriComponentsBuilder ucb = ServletUriComponentsBuilder.fromContextPath(request)
-			.path("/accounts").build()
+	// Re-uses scheme, host, port, and context path...
+
+	URI uri = ServletUriComponentsBuilder.fromContextPath(request)
+			.path("/accounts")
+			.build()
+			.toUri();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	// Re-uses host, port and context path...
+	val request: HttpServletRequest = ...
 
-	val ucb = ServletUriComponentsBuilder.fromContextPath(request)
-			.path("/accounts").build()
+	// Re-uses scheme, host, port, and context path...
+
+	val uri = ServletUriComponentsBuilder.fromContextPath(request)
+			.path("/accounts")
+			.build()
+			.toUri()
 ----
 
 You can create URIs relative to a Servlet (for example, `/main/{asterisk}`),
@@ -4158,18 +4164,26 @@ as the following example shows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	// Re-uses host, port, context path, and Servlet prefix...
+	HttpServletRequest request = ...
 
-	ServletUriComponentsBuilder ucb = ServletUriComponentsBuilder.fromServletMapping(request)
-			.path("/accounts").build()
+	// Re-uses scheme, host, port, context path, and Servlet mapping prefix...
+
+	URI uri = ServletUriComponentsBuilder.fromServletMapping(request)
+			.path("/accounts")
+			.build()
+			.toUri();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	// Re-uses host, port, context path, and Servlet prefix...
+	val request: HttpServletRequest = ...
 
-	val ucb = ServletUriComponentsBuilder.fromServletMapping(request)
-			.path("/accounts").build()
+	// Re-uses scheme, host, port, context path, and Servlet mapping prefix...
+
+	val uri = ServletUriComponentsBuilder.fromServletMapping(request)
+			.path("/accounts")
+			.build()
+			.toUri()
 ----
 
 NOTE: As of 5.1, `ServletUriComponentsBuilder` ignores information from the `Forwarded` and
