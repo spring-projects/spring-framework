@@ -65,7 +65,10 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
+		//先调用父类 super(); GenericApplicationContext();
+		//在父类中初始化beanFactory，即直接new了一个DefaultListableBeanFactory。
 		StartupStep createAnnotatedBeanDefReader = this.getApplicationStartup().start("spring.context.annotated-bean-reader.create");
+		//TODO
 		this.reader = new AnnotatedBeanDefinitionReader(this);
 		createAnnotatedBeanDefReader.end();
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
