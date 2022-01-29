@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 
 /**
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class JettyHttpServer extends AbstractHttpServer {
 
@@ -73,7 +74,10 @@ public class JettyHttpServer extends AbstractHttpServer {
 		finally {
 			try {
 				if (this.jettyServer.isRunning()) {
-					this.jettyServer.setStopTimeout(5000);
+					// Do not configure a large stop timeout. For example, setting a stop timeout
+					// of 5000 adds an additional 1-2 seconds to the runtime of each test using
+					// the Jetty sever, resulting in 2-4 extra minutes of overall build time.
+					this.jettyServer.setStopTimeout(100);
 					this.jettyServer.stop();
 					this.jettyServer.destroy();
 				}
@@ -88,7 +92,10 @@ public class JettyHttpServer extends AbstractHttpServer {
 	protected void resetInternal() {
 		try {
 			if (this.jettyServer.isRunning()) {
-				this.jettyServer.setStopTimeout(5000);
+				// Do not configure a large stop timeout. For example, setting a stop timeout
+				// of 5000 adds an additional 1-2 seconds to the runtime of each test using
+				// the Jetty sever, resulting in 2-4 extra minutes of overall build time.
+				this.jettyServer.setStopTimeout(100);
 				this.jettyServer.stop();
 				this.jettyServer.destroy();
 			}
