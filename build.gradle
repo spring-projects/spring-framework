@@ -60,7 +60,6 @@ configure(allprojects) { project ->
 				entry 'groovy'
 				entry 'groovy-jsr223'
 				entry 'groovy-templates'  // requires findbugs for warning-free compilation
-				entry 'groovy-test'
 				entry 'groovy-xml'
 			}
 
