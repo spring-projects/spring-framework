@@ -125,7 +125,7 @@ public class OkHttp3ClientHttpRequestFactory implements ClientHttpRequestFactory
 		okhttp3.MediaType contentType = getContentType(headers);
 		RequestBody body = (content.length > 0 ||
 				okhttp3.internal.http.HttpMethod.requiresRequestBody(method.name()) ?
-				RequestBody.create(contentType, content) : null);
+				RequestBody.create(content, contentType) : null);
 
 		Request.Builder builder = new Request.Builder().url(uri.toURL()).method(method.name(), body);
 		headers.forEach((headerName, headerValues) -> {
