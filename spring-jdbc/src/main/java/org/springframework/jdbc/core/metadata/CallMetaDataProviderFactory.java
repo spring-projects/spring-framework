@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 
@@ -34,6 +35,7 @@ import org.springframework.jdbc.support.MetaDataAccessException;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Loïc Lefèvre
  * @since 2.5
  */
 public final class CallMetaDataProviderFactory {
@@ -71,9 +73,10 @@ public final class CallMetaDataProviderFactory {
 	 * Create a {@link CallMetaDataProvider} based on the database meta-data.
 	 * @param dataSource the JDBC DataSource to use for retrieving meta-data
 	 * @param context the class that holds configuration and meta-data
+	 * @param parameters the list of parameters to use as a base
 	 * @return instance of the CallMetaDataProvider implementation to be used
 	 */
-	public static CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
+	public static CallMetaDataProvider createMetaDataProvider(DataSource dataSource, CallMetaDataContext context, List<SqlParameter> parameters) {
 		try {
 			return JdbcUtils.extractDatabaseMetaData(dataSource, databaseMetaData -> {
 				String databaseProductName = JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
@@ -134,8 +137,7 @@ public final class CallMetaDataProviderFactory {
 				}
 				provider.initializeWithMetaData(databaseMetaData);
 				if (accessProcedureColumnMetaData) {
-					provider.initializeWithProcedureColumnMetaData(databaseMetaData,
-							context.getCatalogName(), context.getSchemaName(), context.getProcedureName());
+					provider.initializeWithProcedureColumnMetaData(databaseMetaData, context, parameters);
 				}
 				return provider;
 			});
