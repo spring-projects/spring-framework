@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,25 +25,25 @@ import org.springframework.lang.Nullable;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Loïc Lefèvre
  * @since 2.5
  * @see GenericCallMetaDataProvider
  */
 public class CallParameterMetaData {
 
-	private final boolean function;
+	protected final boolean function;
 
 	@Nullable
-	private final String parameterName;
+	protected final String parameterName;
 
-	private final int parameterType;
+	protected final int parameterType;
 
-	private final int sqlType;
+	protected final int sqlType;
 
 	@Nullable
-	private final String typeName;
+	protected final String typeName;
 
-	private final boolean nullable;
-
+	protected final boolean nullable;
 
 	/**
 	 * Constructor taking all the properties including the function marker.

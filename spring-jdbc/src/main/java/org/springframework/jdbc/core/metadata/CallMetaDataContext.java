@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.springframework.util.StringUtils;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @author Kiril Nugmanov
+ * @author Loïc Lefèvre
  * @since 2.5
  */
 public class CallMetaDataContext {
@@ -249,9 +250,10 @@ public class CallMetaDataContext {
 	/**
 	 * Initialize this class with meta-data from the database.
 	 * @param dataSource the DataSource used to retrieve meta-data
+	 * @param parameters the list of parameters to use as a base
 	 */
-	public void initializeMetaData(DataSource dataSource) {
-		this.metaDataProvider = CallMetaDataProviderFactory.createMetaDataProvider(dataSource, this);
+	public void initializeMetaData(DataSource dataSource, List<SqlParameter> parameters) {
+		this.metaDataProvider = CallMetaDataProviderFactory.createMetaDataProvider(dataSource, this, parameters);
 	}
 
 	private CallMetaDataProvider obtainMetaDataProvider() {

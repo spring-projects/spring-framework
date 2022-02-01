@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Loïc Lefèvre
  * @since 2.5
  */
 public abstract class AbstractJdbcCall {
@@ -312,10 +313,11 @@ public abstract class AbstractJdbcCall {
 	protected void compileInternal() {
 		DataSource dataSource = getJdbcTemplate().getDataSource();
 		Assert.state(dataSource != null, "No DataSource set");
-		this.callMetaDataContext.initializeMetaData(dataSource);
+		this.callMetaDataContext.initializeMetaData(dataSource, this.declaredParameters);
 
 		// Iterate over the declared RowMappers and register the corresponding SqlParameter
-		this.declaredRowMappers.forEach((key, value) -> this.declaredParameters.add(this.callMetaDataContext.createReturnResultSetParameter(key, value)));
+		this.declaredRowMappers.forEach((key, value) -> this.declaredParameters.add(
+				this.callMetaDataContext.createReturnResultSetParameter(key, value)));
 		this.callMetaDataContext.processParameters(this.declaredParameters);
 
 		this.callString = this.callMetaDataContext.createCallString();

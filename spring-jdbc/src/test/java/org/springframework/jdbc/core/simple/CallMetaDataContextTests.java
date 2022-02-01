@@ -44,6 +44,7 @@ import static org.mockito.Mockito.verify;
  * Mock object based tests for CallMetaDataContext.
  *
  * @author Thomas Risberg
+ * @author Loïc Lefèvre
  */
 public class CallMetaDataContextTests {
 
@@ -90,7 +91,7 @@ public class CallMetaDataContextTests {
 		parameterSource.addValue("customer_no", "12345XYZ");
 
 		context.setProcedureName(TABLE);
-		context.initializeMetaData(dataSource);
+		context.initializeMetaData(dataSource,parameters);
 		context.processParameters(parameters);
 
 		Map<String, Object> inParameters = context.matchInParameterValuesWithCallParameters(parameterSource);

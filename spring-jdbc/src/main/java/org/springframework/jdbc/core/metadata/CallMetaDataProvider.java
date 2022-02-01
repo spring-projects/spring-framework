@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.lang.Nullable;
  * {@link org.springframework.jdbc.core.simple.SimpleJdbcCall}.
  *
  * @author Thomas Risberg
+ * @author Loïc Lefèvre
  * @since 2.5
  */
 public interface CallMetaDataProvider {
@@ -46,14 +47,13 @@ public interface CallMetaDataProvider {
 	 * This is only called for databases that are supported. This initialization
 	 * can be turned off by specifying that column meta-data should not be used.
 	 * @param databaseMetaData used to retrieve database specific information
-	 * @param catalogName name of catalog to use (or {@code null} if none)
-	 * @param schemaName name of schema name to use (or {@code null} if none)
-	 * @param procedureName name of the stored procedure
+	 * @param context the class that holds configuration and meta-data
+	 * @param parameters the list of parameters to use as a base
 	 * @throws SQLException in case of initialization failure
 	 * @see	org.springframework.jdbc.core.simple.SimpleJdbcCall#withoutProcedureColumnMetaDataAccess()
 	 */
-	void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, @Nullable String catalogName,
-			@Nullable String schemaName, @Nullable String procedureName) throws SQLException;
+	void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData,
+								CallMetaDataContext context, List<SqlParameter> parameters) throws SQLException;
 
 	/**
 	 * Provide any modification of the procedure name passed in to match the meta-data currently used.

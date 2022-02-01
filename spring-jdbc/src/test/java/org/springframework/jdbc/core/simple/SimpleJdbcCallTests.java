@@ -16,10 +16,12 @@
 
 package org.springframework.jdbc.core.simple;
 
+import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -242,6 +244,12 @@ class SimpleJdbcCallTests {
 		given(databaseMetaData.getProcedures("", "ME", "ADD_INVOICE")).willReturn(proceduresResultSet);
 		given(databaseMetaData.getProcedureColumns("", "ME", "ADD_INVOICE", null)).willReturn(procedureColumnsResultSet);
 
+		ResultSetMetaData procedureColumnsResultSetMetadata = mock(ResultSetMetaData.class);
+		given(procedureColumnsResultSet.getMetaData()).willReturn(procedureColumnsResultSetMetadata);
+
+		given(procedureColumnsResultSetMetadata.getColumnCount()).willReturn(22);
+		given(procedureColumnsResultSetMetadata.getColumnName(22)).willReturn("OVERLOAD");
+
 		given(proceduresResultSet.next()).willReturn(true, false);
 		given(proceduresResultSet.getString("PROCEDURE_NAME")).willReturn("add_invoice");
 
@@ -263,6 +271,82 @@ class SimpleJdbcCallTests {
 		verify(procedureColumnsResultSet).close();
 	}
 
+	/**
+	 * Mocking metadata for overloaded function SYS.DBMS_LOCK.REQUEST.
+	 */
+	@Test
+	void workingOverloadedFunction() throws Exception {
+		given(databaseMetaData.getDatabaseProductName()).willReturn("Oracle");
+		given(databaseMetaData.getUserName()).willReturn("ME");
+		given(databaseMetaData.storesUpperCaseIdentifiers()).willReturn(true);
+		given(databaseMetaData.supportsSchemasInProcedureCalls()).willReturn(true);
+
+		ResultSet functionsResultSet = mock(ResultSet.class);
+		ResultSet functionColumnsResultSet = mock(ResultSet.class);
+		given(databaseMetaData.getFunctions("DBMS_LOCK", "SYS", "REQUEST")).willReturn(functionsResultSet);
+		given(databaseMetaData.getFunctionColumns("DBMS_LOCK", "SYS", "REQUEST", null)).willReturn(functionColumnsResultSet);
+
+		given(functionsResultSet.next()).willReturn(true, true, false);
+		given(functionsResultSet.getString("FUNCTION_NAME")).willReturn("REQUEST","REQUEST");
+
+		ResultSetMetaData functionColumnsResultSetMetadata = mock(ResultSetMetaData.class);
+		given(functionColumnsResultSet.getMetaData()).willReturn(functionColumnsResultSetMetadata);
+
+		given(functionColumnsResultSetMetadata.getColumnCount()).willReturn(22);
+		given(functionColumnsResultSetMetadata.getColumnName(22)).willReturn("OVERLOAD");
+
+		given(functionColumnsResultSet.next()).willReturn(true, true, true, true,
+				true, true, true, true, true, true, false);
+
+		given(functionColumnsResultSet.getString("COLUMN_NAME"))
+				.willReturn(null,"ID", "LOCKMODE", "TIMEOUT", "RELEASE_ON_COMMIT",
+							null, "LOCKHANDLE", "LOCKMODE", "TIMEOUT", "RELEASE_ON_COMMIT" );
+
+		given(functionColumnsResultSet.getInt("COLUMN_TYPE"))
+				.willReturn(5, 1, 1, 1, 1, 5, 1, 1, 1, 1);
+
+		given(functionColumnsResultSet.getInt("DATA_TYPE"))
+				.willReturn(2,2, 2, 2, 1111, 2, 12, 2, 2, 1111);
+
+		given(functionColumnsResultSet.getString("TYPE_NAME"))
+				.willReturn("NUMBER","NUMBER", "NUMBER", "NUMBER", "PL/SQL BOOLEAN",
+						"NUMBER","VARCHAR2", "NUMBER", "NUMBER", "PL/SQL BOOLEAN");
+
+		given(functionColumnsResultSet.getInt("NULLABLE"))
+				.willReturn(1,1, 1, 1, 1, 1, 1, 1, 1, 1);
+
+		given(functionColumnsResultSet.getInt("OVERLOAD"))
+				.willReturn(1,1, 1, 1, 1, 2, 2, 2, 2, 2);
+
+		given(connection.prepareCall("{? = call SYS.DBMS_LOCK.REQUEST(lockhandle => ?, lockmode => ?, " +
+				"timeout => ?, release_on_commit => ?)}")).willReturn(callableStatement);
+		given(callableStatement.execute()).willReturn(false);
+		given(callableStatement.getUpdateCount()).willReturn(-1);
+		given(callableStatement.getObject(1)).willReturn(BigDecimal.ZERO);
+
+		SimpleJdbcCall lockByName = new SimpleJdbcCall(dataSource)
+				.withSchemaName("SYS")
+				.withCatalogName("dbms_lock")
+				.withFunctionName("request")
+				.withNamedBinding()
+				.declareParameters(
+						new SqlOutParameter("return", Types.NUMERIC),
+						new SqlParameter("lockhandle", Types.VARCHAR),
+						new SqlParameter("lockmode", Types.NUMERIC),
+						new SqlParameter("timeout", Types.NUMERIC),
+						new SqlParameter("release_on_commit", Types.OTHER)
+				);
+
+		int result = lockByName.executeFunction(BigDecimal.class, new MapSqlParameterSource()
+				.addValue("lockhandle", "1073742005107374200589")
+				.addValue("lockmode", 6)
+				.addValue("timeout", 0)
+				.addValue("release_on_commit", false, 252)).intValue();
+
+		assertThat(result).isEqualTo(0);
+		verify(callableStatement).close();
+		verify(connection, atLeastOnce()).close();
+	}
 
 	private void verifyStatement(SimpleJdbcCall adder, String expected) {
 		assertThat(adder.getCallString()).as("Incorrect call statement").isEqualTo(expected);
@@ -301,26 +385,51 @@ class SimpleJdbcCallTests {
 	}
 
 	private void initializeAddInvoiceWithMetaData(boolean isFunction) throws SQLException {
-		ResultSet proceduresResultSet = mock(ResultSet.class);
-		ResultSet procedureColumnsResultSet = mock(ResultSet.class);
 		given(databaseMetaData.getDatabaseProductName()).willReturn("Oracle");
 		given(databaseMetaData.getUserName()).willReturn("ME");
 		given(databaseMetaData.storesUpperCaseIdentifiers()).willReturn(true);
-		given(databaseMetaData.getProcedures("", "ME", "ADD_INVOICE")).willReturn(proceduresResultSet);
-		given(databaseMetaData.getProcedureColumns("", "ME", "ADD_INVOICE", null)).willReturn(procedureColumnsResultSet);
 
-		given(proceduresResultSet.next()).willReturn(true, false);
-		given(proceduresResultSet.getString("PROCEDURE_NAME")).willReturn("add_invoice");
+		if(isFunction) {
+			ResultSet functionsResultSet = mock(ResultSet.class);
+			ResultSet functionColumnsResultSet = mock(ResultSet.class);
+			given(databaseMetaData.getFunctions("", "ME", "ADD_INVOICE")).willReturn(functionsResultSet);
+			given(databaseMetaData.getFunctionColumns("", "ME", "ADD_INVOICE", null)).willReturn(functionColumnsResultSet);
 
-		given(procedureColumnsResultSet.next()).willReturn(true, true, true, false);
-		given(procedureColumnsResultSet.getInt("DATA_TYPE")).willReturn(4);
-		if (isFunction) {
-			given(procedureColumnsResultSet.getString("COLUMN_NAME")).willReturn(null,"amount", "custid");
-			given(procedureColumnsResultSet.getInt("COLUMN_TYPE")).willReturn(5, 1, 1);
+			given(functionsResultSet.next()).willReturn(true, false);
+			given(functionsResultSet.getString("FUNCTION_NAME")).willReturn("add_invoice");
+
+			ResultSetMetaData functionColumnsResultSetMetadata = mock(ResultSetMetaData.class);
+			given(functionColumnsResultSet.getMetaData()).willReturn(functionColumnsResultSetMetadata);
+
+			given(functionColumnsResultSetMetadata.getColumnCount()).willReturn(22);
+			given(functionColumnsResultSetMetadata.getColumnName(22)).willReturn("OVERLOAD");
+
+			given(functionColumnsResultSet.next()).willReturn(true, true, true, false);
+			given(functionColumnsResultSet.getInt("DATA_TYPE")).willReturn(4);
+
+			given(functionColumnsResultSet.getString("COLUMN_NAME")).willReturn(null,"amount", "custid");
+			given(functionColumnsResultSet.getInt("COLUMN_TYPE")).willReturn(5, 1, 1);
 			given(connection.prepareCall("{? = call ADD_INVOICE(?, ?)}")).willReturn(callableStatement);
 			given(callableStatement.getObject(1)).willReturn(4L);
 		}
 		else {
+			ResultSet proceduresResultSet = mock(ResultSet.class);
+			ResultSet procedureColumnsResultSet = mock(ResultSet.class);
+			given(databaseMetaData.getProcedures("", "ME", "ADD_INVOICE")).willReturn(proceduresResultSet);
+			given(databaseMetaData.getProcedureColumns("", "ME", "ADD_INVOICE", null)).willReturn(procedureColumnsResultSet);
+
+			given(proceduresResultSet.next()).willReturn(true, false);
+			given(proceduresResultSet.getString("PROCEDURE_NAME")).willReturn("add_invoice");
+
+			ResultSetMetaData procedureColumnsResultSetMetadata = mock(ResultSetMetaData.class);
+			given(procedureColumnsResultSet.getMetaData()).willReturn(procedureColumnsResultSetMetadata);
+
+			given(procedureColumnsResultSetMetadata.getColumnCount()).willReturn(22);
+			given(procedureColumnsResultSetMetadata.getColumnName(22)).willReturn("OVERLOAD");
+
+			given(procedureColumnsResultSet.next()).willReturn(true, true, true, false);
+			given(procedureColumnsResultSet.getInt("DATA_TYPE")).willReturn(4);
+
 			given(procedureColumnsResultSet.getString("COLUMN_NAME")).willReturn("amount", "custid", "newid");
 			given(procedureColumnsResultSet.getInt("COLUMN_TYPE")).willReturn(1, 1, 4);
 			given(connection.prepareCall("{call ADD_INVOICE(?, ?, ?)}")).willReturn(callableStatement);
@@ -330,9 +439,15 @@ class SimpleJdbcCallTests {
 	}
 
 	private void verifyAddInvoiceWithMetaData(boolean isFunction) throws SQLException {
-		ResultSet proceduresResultSet = databaseMetaData.getProcedures("", "ME", "ADD_INVOICE");
-		ResultSet procedureColumnsResultSet = databaseMetaData.getProcedureColumns("", "ME", "ADD_INVOICE", null);
-		if (isFunction) {
+		ResultSet proceduresResultSet = isFunction ?
+				databaseMetaData.getFunctions("", "ME", "ADD_INVOICE") :
+				databaseMetaData.getProcedures("", "ME", "ADD_INVOICE");
+		ResultSet procedureColumnsResultSet = isFunction ?
+				databaseMetaData.getFunctionColumns("", "ME", "ADD_INVOICE"
+				, null) :
+				databaseMetaData.getProcedureColumns("", "ME", "ADD_INVOICE"
+				, null);
+		if(isFunction) {
 			verify(callableStatement).registerOutParameter(1, 4);
 			verify(callableStatement).setObject(2, 1103, 4);
 			verify(callableStatement).setObject(3, 3, 4);

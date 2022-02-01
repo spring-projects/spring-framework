@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.util.StringUtils;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Loïc Lefèvre
  * @since 2.5
  */
 public class GenericCallMetaDataProvider implements CallMetaDataProvider {
@@ -60,7 +61,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
 	private boolean procedureColumnMetaDataUsed = false;
 
-	private final List<CallParameterMetaData> callParameterMetaData = new ArrayList<>();
+	protected final List<CallParameterMetaData> callParameterMetaData = new ArrayList<>();
 
 
 	/**
@@ -109,11 +110,10 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	public void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, @Nullable String catalogName,
-			@Nullable String schemaName, @Nullable String procedureName) throws SQLException {
-
+	public void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, CallMetaDataContext context,
+														List<SqlParameter> parameters) throws SQLException {
 		this.procedureColumnMetaDataUsed = true;
-		processProcedureColumns(databaseMetaData, catalogName, schemaName,  procedureName);
+		processProcedureColumns(databaseMetaData, context, parameters);
 	}
 
 	@Override
@@ -319,12 +319,11 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	/**
 	 * Process the procedure column meta-data.
 	 */
-	private void processProcedureColumns(DatabaseMetaData databaseMetaData,
-			@Nullable String catalogName, @Nullable String schemaName, @Nullable String procedureName) {
-
-		String metaDataCatalogName = metaDataCatalogNameToUse(catalogName);
-		String metaDataSchemaName = metaDataSchemaNameToUse(schemaName);
-		String metaDataProcedureName = procedureNameToUse(procedureName);
+	protected void processProcedureColumns(DatabaseMetaData databaseMetaData,
+											CallMetaDataContext context, List<SqlParameter> parameters) {
+		String metaDataCatalogName = metaDataCatalogNameToUse(context.getCatalogName());
+		String metaDataSchemaName = metaDataSchemaNameToUse(context.getSchemaName());
+		String metaDataProcedureName = procedureNameToUse(context.getProcedureName());
 		if (logger.isDebugEnabled()) {
 			logger.debug("Retrieving meta-data for " + metaDataCatalogName + '/' +
 					metaDataSchemaName + '/' + metaDataProcedureName);
@@ -337,7 +336,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 			try (ResultSet procedures = databaseMetaData.getProcedures(
 					metaDataCatalogName, metaDataSchemaName, metaDataProcedureName)) {
 				while (procedures.next()) {
-					found.add(procedures.getString("PROCEDURE_CAT") + '.' + procedures.getString("PROCEDURE_SCHEM") +
+					found.add(procedures.getString("PROCEDURE_CAT") + '.' +
+							procedures.getString("PROCEDURE_SCHEM") +
 							'.' + procedures.getString("PROCEDURE_NAME"));
 				}
 			}
@@ -347,7 +347,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 				try (ResultSet functions = databaseMetaData.getFunctions(
 						metaDataCatalogName, metaDataSchemaName, metaDataProcedureName)) {
 					while (functions.next()) {
-						found.add(functions.getString("FUNCTION_CAT") + '.' + functions.getString("FUNCTION_SCHEM") +
+						found.add(functions.getString("FUNCTION_CAT") + '.' +
+								functions.getString("FUNCTION_SCHEM") +
 								'.' + functions.getString("FUNCTION_NAME"));
 						function = true;
 					}
@@ -386,16 +387,19 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 						metaDataCatalogName + '/' + metaDataSchemaName + '/' + metaDataProcedureName);
 			}
 			try (ResultSet columns = function ?
-					databaseMetaData.getFunctionColumns(metaDataCatalogName, metaDataSchemaName, metaDataProcedureName, null) :
-					databaseMetaData.getProcedureColumns(metaDataCatalogName, metaDataSchemaName, metaDataProcedureName, null)) {
+					databaseMetaData.getFunctionColumns(metaDataCatalogName, metaDataSchemaName,
+							metaDataProcedureName, null) :
+					databaseMetaData.getProcedureColumns(metaDataCatalogName, metaDataSchemaName,
+							metaDataProcedureName, null)) {
 				while (columns.next()) {
 					String columnName = columns.getString("COLUMN_NAME");
 					int columnType = columns.getInt("COLUMN_TYPE");
 					if (columnName == null && isInOrOutColumn(columnType, function)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Skipping meta-data for: " + columnType + " " + columns.getInt("DATA_TYPE") +
-									" " + columns.getString("TYPE_NAME") + " " + columns.getInt("NULLABLE") +
-									" (probably a member of a collection)");
+							logger.debug("Skipping meta-data for: " + columnType + " " +
+									columns.getInt("DATA_TYPE") + " " +
+									columns.getString("TYPE_NAME") + " " +
+									columns.getInt("NULLABLE") + " (probably a member of a collection)");
 						}
 					}
 					else {
@@ -416,7 +420,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Error while retrieving meta-data for procedure columns. " +
-						"Consider declaring explicit parameters -- for example, via SimpleJdbcCall#addDeclaredParameter().",
+						"Consider declaring explicit parameters" +
+						" -- for example, via SimpleJdbcCall#addDeclaredParameter().",
 						ex);
 			}
 			// Although we could invoke `this.callParameterMetaData.clear()` so that
@@ -427,7 +432,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		}
 	}
 
-	private static boolean isInOrOutColumn(int columnType, boolean function) {
+	protected static boolean isInOrOutColumn(int columnType, boolean function) {
 		if (function) {
 			return (columnType == DatabaseMetaData.functionColumnIn ||
 					columnType == DatabaseMetaData.functionColumnInOut ||
