@@ -659,10 +659,10 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public BodyContentSpec json(String json) {
+		public BodyContentSpec json(String json, boolean strict) {
 			this.result.assertWithDiagnostics(() -> {
 				try {
-					new JsonExpectationsHelper().assertJsonEqual(json, getBodyAsString());
+					new JsonExpectationsHelper().assertJsonEqual(json, getBodyAsString(), strict);
 				}
 				catch (Exception ex) {
 					throw new AssertionError("JSON parsing error", ex);

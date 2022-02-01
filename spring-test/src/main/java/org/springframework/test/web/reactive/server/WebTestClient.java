@@ -979,7 +979,24 @@ public interface WebTestClient {
 		 * on to be on the classpath.
 		 * @param expectedJson the expected JSON content.
 		 */
-		BodyContentSpec json(String expectedJson);
+		default BodyContentSpec json(String expectedJson) {
+			return json(expectedJson, false);
+		}
+
+		/**
+		 * Parse the expected and actual response content as JSON and perform a
+		 * comparison in two modes, depending on {@code strict} parameter value, verifying the same attribute-value pairs.
+		 * <ul>
+		 * <li>{@code true}: strict checking.
+		 * <li>{@code false}: lenient checking.
+		 * </ul>
+		 * <p>Use of this option requires the
+		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
+		 * on to be on the classpath.
+		 * @param expectedJson the expected JSON content.
+		 * @param strict enables strict checking
+		 */
+		BodyContentSpec json(String expectedJson, boolean strict);
 
 		/**
 		 * Parse expected and actual response content as XML and assert that
