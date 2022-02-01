@@ -42,7 +42,6 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 
 	private static final String REF_CURSOR_NAME = "REF CURSOR";
 
-
 	public OracleCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		super(databaseMetaData);
 	}
@@ -81,14 +80,15 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 	public SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta) {
 		if (meta.getSqlType() == Types.OTHER && REF_CURSOR_NAME.equals(meta.getTypeName())) {
 			return new SqlOutParameter(parameterName, getRefCursorSqlType(), new ColumnMapRowMapper());
-		} else {
+		}
+		else {
 			return super.createDefaultOutParameter(parameterName, meta);
 		}
 	}
 
 	@Override
-	protected void processProcedureColumns(DatabaseMetaData databaseMetaData, final CallMetaDataContext context, final List<SqlParameter> parameters) {
-
+	protected void processProcedureColumns(DatabaseMetaData databaseMetaData, 
+										final CallMetaDataContext context, final List<SqlParameter> parameters) {
 		String metaDataCatalogName = metaDataCatalogNameToUse(context.getCatalogName());
 		String metaDataSchemaName = metaDataSchemaNameToUse(context.getSchemaName());
 		String metaDataProcedureName = procedureNameToUse(context.getProcedureName());
@@ -107,7 +107,8 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 						objectsFound++;
 					}
 				}
-			} else {
+			}
+			else {
 				try (ResultSet procedures = databaseMetaData.getProcedures(
 						metaDataCatalogName, metaDataSchemaName, metaDataProcedureName)) {
 					while (procedures.next()) {
@@ -124,13 +125,15 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 							"Unable to determine the correct call signature for '" + metaDataProcedureName +
 									"' - package name should be specified separately using '.withCatalogName(\"" +
 									packageName + "\")'");
-				} else if (metaDataSchemaName != null && !"SYS".equalsIgnoreCase(metaDataSchemaName) &&
+				}
+				else if (!"SYS".equalsIgnoreCase(metaDataSchemaName) &&
 						metaDataCatalogName != null && metaDataCatalogName.toLowerCase().startsWith("dbms_")) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Chances are that the package name '" + metaDataCatalogName +
 								"' is owned by internal Oracle 'SYS' user - try using '.withSchemaName(\"SYS\")'");
 					}
-				} else {
+				}
+				else {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Oracle JDBC driver did not return procedure/function/signature for '" +
 								metaDataProcedureName + "' - assuming a non-exposed synonym");
@@ -153,7 +156,8 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 				if (objectsFound > 1 && !overloadColumnPresent) {
 					throw new InvalidDataAccessApiUsageException(
 							"Unable to determine the correct call signature - multiple signatures for '" +
-									metaDataProcedureName + "': found " + objectsFound + " " + (context.isFunction() ? "functions" : "procedures"));
+							metaDataProcedureName + "': found " + objectsFound + " " + 
+							(context.isFunction() ? "functions" : "procedures"));
 				}
 
 				while (columns.next()) {
@@ -165,9 +169,11 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 									" " + columns.getString("TYPE_NAME") + " " + columns.getInt("NULLABLE") +
 									" (probably a member of a collection)");
 						}
-					} else {
+					}
+					else {
 						int nullable = (context.isFunction() ? DatabaseMetaData.functionNullable : DatabaseMetaData.procedureNullable);
-						CallParameterMetaData meta = overloadColumnPresent ? new OracleCallParameterMetaData(context.isFunction(), columnName, columnType,
+						CallParameterMetaData meta = overloadColumnPresent ? 
+								new OracleCallParameterMetaData(context.isFunction(), columnName, columnType,
 								columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"),
 								columns.getInt("NULLABLE") == nullable, columns.getInt("OVERLOAD")) :
 								new CallParameterMetaData(context.isFunction(), columnName, columnType,
@@ -186,7 +192,8 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 					if (parameters.isEmpty()) {
 						throw new InvalidDataAccessApiUsageException(
 								"Unable to determine the correct call signature - multiple signatures for '" +
-										metaDataProcedureName + "': found " + objectsFound + " " + (context.isFunction() ? "functions" : "procedures"));
+								metaDataProcedureName + "': found " + objectsFound + " " + 
+								(context.isFunction() ? "functions" : "procedures"));
 					}
 
 					// now work on the different overloads and keep only the one matching the requested parameters
@@ -202,14 +209,17 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 
 						boolean allMatched = true;
 						for (SqlParameter sqlParameter : parameters) {
-							if (sqlParameter.getSqlType() == meta.getSqlType() && (meta.getParameterName() == null || meta.getParameterName().equalsIgnoreCase(sqlParameter.getName()))) {
+							if (sqlParameter.getSqlType() == meta.getSqlType() && (meta.getParameterName() == null || 
+								meta.getParameterName().equalsIgnoreCase(sqlParameter.getName()))) {
 								if (i < this.callParameterMetaData.size() - 1) {
 									i++;
 									meta = (OracleCallParameterMetaData) callParameterMetaData.get(i);
-								} else {
+								}
+								else {
 									break;
 								}
-							} else {
+							}
+							else {
 								allMatched = false;
 								break;
 							}
@@ -222,7 +232,8 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 							}
 							signatureFound = true;
 							break;
-						} else {
+						}
+						else {
 							// get to the next overload
 							while (i < this.callParameterMetaData.size()) {
 								i++;
@@ -240,17 +251,20 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 						// replace all the parameters meta-data with the right overload ones
 						this.callParameterMetaData.clear();
 						this.callParameterMetaData.addAll(newCallParameterMetaData);
-					} else {
+					}
+					else {
 						throw new InvalidDataAccessApiUsageException(
 								"Unable to determine the correct call signature - multiple signatures for '" +
-										metaDataProcedureName + "': found " + objectsFound + " " + (context.isFunction() ? "functions" : "procedures"));
+								metaDataProcedureName + "': found " + objectsFound + " " + 
+								(context.isFunction() ? "functions" : "procedures"));
 					}
 				}
 			}
-		} catch (SQLException ex) {
+		}
+		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Error while retrieving meta-data for procedure columns. " +
-								"Consider declaring explicit parameters -- for example, via SimpleJdbcCall#addDeclaredParameter().",
+							"Consider declaring explicit parameters -- for example, via SimpleJdbcCall#addDeclaredParameter().",
 						ex);
 			}
 			// Although we could invoke `this.callParameterMetaData.clear()` so that
