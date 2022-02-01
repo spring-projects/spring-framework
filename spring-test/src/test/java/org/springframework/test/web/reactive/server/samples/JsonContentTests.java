@@ -31,8 +31,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.containsString;
-
 
 
 /**
@@ -49,11 +49,30 @@ public class JsonContentTests {
 
 	@Test
 	public void jsonContent() {
-		this.client.get().uri("/persons")
+		this.client.get().uri("/persons/extended")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody().json("[{\"name\":\"Jane\"},{\"name\":\"Jason\"},{\"name\":\"John\"}]");
+	}
+
+	@Test
+	public void jsonContentStrictFail() {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> this.client.get().uri("/persons/extended")
+				.accept(MediaType.APPLICATION_JSON)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody().json("[{\"name\":\"Jane\"},{\"name\":\"Jason\"},{\"name\":\"John\"}]", true)
+		);
+	}
+
+	@Test
+	public void jsonContentStrict() {
+		this.client.get().uri("/persons/extended")
+				.accept(MediaType.APPLICATION_JSON)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody().json("[{\"name\":\"Jane\",\"surname\":\"Williams\"},{\"name\":\"Jason\",\"surname\":\"Johnson\"},{\"name\":\"John\",\"surname\":\"Smith\"}]", true);
 	}
 
 	@Test
@@ -98,6 +117,11 @@ public class JsonContentTests {
 			return Flux.just(new Person("Jane"), new Person("Jason"), new Person("John"));
 		}
 
+		@GetMapping("/extended")
+		Flux<ExtendedPerson> getExtendedPersons() {
+			return Flux.just(new ExtendedPerson("Jane", "Williams"), new ExtendedPerson("Jason", "Johnson"), new ExtendedPerson("John", "Smith"));
+		}
+
 		@GetMapping("/{name}")
 		Person getPerson(@PathVariable String name) {
 			return new Person(name);
@@ -106,6 +130,24 @@ public class JsonContentTests {
 		@PostMapping
 		ResponseEntity<String> savePerson(@RequestBody Person person) {
 			return ResponseEntity.created(URI.create("/persons/" + person.getName())).build();
+		}
+	}
+
+	static class ExtendedPerson {
+		private String name;
+		private String surname;
+
+		public ExtendedPerson(String name, String surname) {
+			this.name = name;
+			this.surname = surname;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getSurname() {
+			return surname;
 		}
 	}
 
