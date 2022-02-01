@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc.core.metadata;
 
-import org.springframework.lang.Nullable;
-
 import java.sql.DatabaseMetaData;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Holder of Orcle meta-data for a specific parameter that is used for call processing.
@@ -36,7 +36,7 @@ public class OracleCallParameterMetaData extends CallParameterMetaData {
 	 * @since 5.3.16
 	 */
 	public OracleCallParameterMetaData(boolean function, @Nullable String columnName, int columnType,
-								 int sqlType, @Nullable String typeName, boolean nullable, int overload) {
+								int sqlType, @Nullable String typeName, boolean nullable, int overload) {
 
 		super(function, columnName, columnType, sqlType, typeName, nullable);
 		this.overload = overload;
