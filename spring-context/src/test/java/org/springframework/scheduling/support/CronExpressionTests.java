@@ -16,13 +16,13 @@
 
 package org.springframework.scheduling.support;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Year;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
 
 import org.assertj.core.api.Condition;
@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 
 import static java.time.DayOfWeek.FRIDAY;
 import static java.time.DayOfWeek.MONDAY;
+import static java.time.DayOfWeek.SATURDAY;
 import static java.time.DayOfWeek.SUNDAY;
 import static java.time.DayOfWeek.THURSDAY;
 import static java.time.DayOfWeek.TUESDAY;
@@ -46,8 +47,8 @@ class CronExpressionTests {
 
 		@Override
 		public boolean matches(Temporal value) {
-			int dayOfWeek = value.get(ChronoField.DAY_OF_WEEK);
-			return dayOfWeek != 6 && dayOfWeek != 7;
+			DayOfWeek dayOfWeek = DayOfWeek.from(value);
+			return dayOfWeek != SATURDAY && dayOfWeek != SUNDAY;
 		}
 	};
 
@@ -954,6 +955,24 @@ class CronExpressionTests {
 
 		last = actual;
 		expected = LocalDateTime.of(2020, 4, 1, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).is(weekday);
+
+		last = LocalDateTime.of(2022, 1, 1, 0, 0);
+		assertThat(last.getDayOfWeek()).isEqualTo(SATURDAY);
+		expected = LocalDateTime.of(2022, 1, 3, 0, 0);
+		assertThat(expected.getDayOfWeek()).isEqualTo(MONDAY);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).is(weekday);
+
+		last = LocalDateTime.of(2021, 8, 1, 0,0);
+		assertThat(last.getDayOfWeek()).isEqualTo(SUNDAY);
+		expected = LocalDateTime.of(2021, 8, 2, 0, 0);
+		assertThat(expected.getDayOfWeek()).isEqualTo(MONDAY);
 		actual = expression.next(last);
 		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);

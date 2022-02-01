@@ -251,41 +251,44 @@ final class QuartzCronField extends CronField {
 	private static TemporalAdjuster weekdayNearestTo(int dayOfMonth) {
 		return temporal -> {
 			int current = Type.DAY_OF_MONTH.get(temporal);
-			int dayOfWeek = temporal.get(ChronoField.DAY_OF_WEEK);
+			DayOfWeek dayOfWeek = DayOfWeek.from(temporal);
 
-			if ((current == dayOfMonth && dayOfWeek < 6) || // dayOfMonth is a weekday
-					(dayOfWeek == 5 && current == dayOfMonth - 1) || // dayOfMonth is a Saturday, so Friday before
-					(dayOfWeek == 1 && current == dayOfMonth + 1) || // dayOfMonth is a Sunday, so Monday after
-					(dayOfWeek == 1 && dayOfMonth == 1 && current == 3)) { // dayOfMonth is the 1st, so Monday 3rd
+			if ((current == dayOfMonth && isWeekday(dayOfWeek)) || // dayOfMonth is a weekday
+					(dayOfWeek == DayOfWeek.FRIDAY && current == dayOfMonth - 1) || // dayOfMonth is a Saturday, so Friday before
+					(dayOfWeek == DayOfWeek.MONDAY && current == dayOfMonth + 1) || // dayOfMonth is a Sunday, so Monday after
+					(dayOfWeek == DayOfWeek.MONDAY && dayOfMonth == 1 && current == 3)) { // dayOfMonth is Saturday 1st, so Monday 3rd
 				return temporal;
 			}
 			int count = 0;
 			while (count++ < CronExpression.MAX_ATTEMPTS) {
-				temporal = Type.DAY_OF_MONTH.elapseUntil(cast(temporal), dayOfMonth);
-				temporal = atMidnight().adjustInto(temporal);
-				current = Type.DAY_OF_MONTH.get(temporal);
 				if (current == dayOfMonth) {
-					dayOfWeek = temporal.get(ChronoField.DAY_OF_WEEK);
+					dayOfWeek = DayOfWeek.from(temporal);
 
-					if (dayOfWeek == 6) { // Saturday
+					if (dayOfWeek == DayOfWeek.SATURDAY) {
 						if (dayOfMonth != 1) {
-							return temporal.minus(1, ChronoUnit.DAYS);
+							temporal = temporal.minus(1, ChronoUnit.DAYS);
 						}
 						else {
-							// exception for "1W" fields: execute on nearest Monday
-							return temporal.plus(2, ChronoUnit.DAYS);
+							// exception for "1W" fields: execute on next Monday
+							temporal = temporal.plus(2, ChronoUnit.DAYS);
 						}
 					}
-					else if (dayOfWeek == 7) { // Sunday
-						return temporal.plus(1, ChronoUnit.DAYS);
+					else if (dayOfWeek == DayOfWeek.SUNDAY) {
+						temporal = temporal.plus(1, ChronoUnit.DAYS);
 					}
-					else {
-						return temporal;
-					}
+					return atMidnight().adjustInto(temporal);
+				}
+				else {
+					temporal = Type.DAY_OF_MONTH.elapseUntil(cast(temporal), dayOfMonth);
+					current = Type.DAY_OF_MONTH.get(temporal);
 				}
 			}
 			return null;
 		};
+	}
+
+	private static boolean isWeekday(DayOfWeek dayOfWeek) {
+		return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
 	}
 
 	/**
