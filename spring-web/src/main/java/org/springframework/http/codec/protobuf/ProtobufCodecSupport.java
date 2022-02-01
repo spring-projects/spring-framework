@@ -16,8 +16,6 @@
 
 package org.springframework.http.codec.protobuf;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.MediaType;
@@ -32,12 +30,11 @@ import org.springframework.util.MimeType;
  */
 public abstract class ProtobufCodecSupport {
 
-	static final List<MimeType> MIME_TYPES = Collections.unmodifiableList(
-			Arrays.asList(
+	static final List<MimeType> MIME_TYPES = List.of(
 					MediaType.APPLICATION_X_PROTOBUF,
 					MediaType.APPLICATION_OCTET_STREAM,
 					MediaType.APPLICATION_VND_GOOGLE_PROTOBUF
-					));
+					);
 
 	static final String DELIMITED_KEY = "delimited";
 
