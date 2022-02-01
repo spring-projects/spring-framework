@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.hamcrest.Matchers.containsString;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 /**
@@ -54,6 +54,17 @@ public class JsonContentTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody().json("[{\"name\":\"Jane\"},{\"name\":\"Jason\"},{\"name\":\"John\"}]");
+	}
+
+	@Test
+	public void jsonContentStrictFail() {
+		assertThrows(AssertionError.class, () -> {
+			this.client.get().uri("/persons/extended")
+					.accept(MediaType.APPLICATION_JSON)
+					.exchange()
+					.expectStatus().isOk()
+					.expectBody().json("[{\"name\":\"Jane\"},{\"name\":\"Jason\"},{\"name\":\"John\"}]", true);
+		});
 	}
 
 	@Test
