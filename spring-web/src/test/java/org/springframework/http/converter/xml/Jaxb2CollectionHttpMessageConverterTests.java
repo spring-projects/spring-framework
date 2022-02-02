@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package org.springframework.http.converter.xml;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -38,6 +41,9 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test fixture for {@link Jaxb2CollectionHttpMessageConverter}.
@@ -79,12 +85,14 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 	@SuppressWarnings("unchecked")
 	public void readXmlRootElementList() throws Exception {
 		String content = "<list><rootElement><type s=\"1\"/></rootElement><rootElement><type s=\"2\"/></rootElement></list>";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		InputStream inputStream = spy(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		List<RootElement> result = (List<RootElement>) converter.read(rootElementListType, null, inputMessage);
 
 		assertThat(result.size()).as("Invalid result").isEqualTo(2);
 		assertThat(result.get(0).type.s).as("Invalid result").isEqualTo("1");
 		assertThat(result.get(1).type.s).as("Invalid result").isEqualTo("2");
+		verify(inputStream, never()).close();
 	}
 
 	@Test

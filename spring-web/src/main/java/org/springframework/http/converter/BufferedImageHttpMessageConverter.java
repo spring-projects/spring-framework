@@ -45,6 +45,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -207,6 +208,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 	private ImageInputStream createImageInputStream(InputStream is) throws IOException {
+		is = StreamUtils.nonClosing(is);
 		if (this.cacheDir != null) {
 			return new FileCacheImageInputStream(is, this.cacheDir);
 		}

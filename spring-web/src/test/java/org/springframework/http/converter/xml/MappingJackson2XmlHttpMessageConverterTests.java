@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.http.converter.xml;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -34,6 +36,9 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.within;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * Jackson 2.x XML converter tests.
@@ -74,7 +79,8 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 				"<array>Bar</array></array>" +
 				"<bool>true</bool>" +
 				"<bytes>AQI=</bytes></MyBean>";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		InputStream inputStream = spy(new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 		MyBean result = (MyBean) converter.read(MyBean.class, inputMessage);
 		assertThat(result.getString()).isEqualTo("Foo");
@@ -83,6 +89,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		assertThat(result.getArray()).isEqualTo(new String[]{"Foo", "Bar"});
 		assertThat(result.isBool()).isTrue();
 		assertThat(result.getBytes()).isEqualTo(new byte[]{0x1, 0x2});
+		verify(inputStream, never()).close();
 	}
 
 	@Test
@@ -104,6 +111,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		assertThat(result.contains("<bool>true</bool>")).isTrue();
 		assertThat(result.contains("<bytes>AQI=</bytes>")).isTrue();
 		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(new MediaType("application", "xml", StandardCharsets.UTF_8));
+		verify(outputMessage.getBody(), never()).close();
 	}
 
 	@Test

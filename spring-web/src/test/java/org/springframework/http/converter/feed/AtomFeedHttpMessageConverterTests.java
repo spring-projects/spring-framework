@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,9 @@ import org.springframework.http.MockHttpOutputMessage;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Arjen Poutsma
@@ -71,8 +74,8 @@ public class AtomFeedHttpMessageConverterTests {
 
 	@Test
 	public void read() throws IOException {
-		InputStream is = getClass().getResourceAsStream("atom.xml");
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(is);
+		InputStream inputStream = spy(getClass().getResourceAsStream("atom.xml"));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		inputMessage.getHeaders().setContentType(ATOM_XML_UTF8);
 		Feed result = converter.read(Feed.class, inputMessage);
 		assertThat(result.getTitle()).isEqualTo("title");
@@ -87,6 +90,7 @@ public class AtomFeedHttpMessageConverterTests {
 		Entry entry2 = (Entry) entries.get(1);
 		assertThat(entry2.getId()).isEqualTo("id2");
 		assertThat(entry2.getTitle()).isEqualTo("title2");
+		verify(inputStream, never()).close();
 	}
 
 	@Test
@@ -119,6 +123,7 @@ public class AtomFeedHttpMessageConverterTests {
 		NodeMatcher nm = new DefaultNodeMatcher(ElementSelectors.byName);
 		assertThat(XmlContent.of(outputMessage.getBodyAsString(StandardCharsets.UTF_8)))
 				.isSimilarToIgnoringWhitespace(expected, nm);
+		verify(outputMessage.getBody(), never()).close();
 	}
 
 	@Test
