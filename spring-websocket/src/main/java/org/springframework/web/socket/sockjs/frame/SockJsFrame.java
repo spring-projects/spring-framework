@@ -170,7 +170,7 @@ public class SockJsFrame {
 	}
 
 	public static SockJsFrame closeFrame(int code, @Nullable String reason) {
-		return new SockJsFrame("c[" + code + ",\"" + (reason != null ? reason : "") + "\"]");
+		return new SockJsFrame("c[" + code + ",\"" + (reason != null ? reason : "") + "\"]\n");
 	}
 
 }
