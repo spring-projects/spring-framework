@@ -113,10 +113,9 @@ public final class Parameter {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof Parameter)) {
+		if (!(obj instanceof Parameter other)) {
 			return false;
 		}
-		Parameter other = (Parameter) obj;
 		return (ObjectUtils.nullSafeEquals(this.value, other.value) &&
 				ObjectUtils.nullSafeEquals(this.type, other.type));
 	}

@@ -303,8 +303,7 @@ abstract class NamedParameterUtils {
 						}
 						k++;
 						Object entryItem = entryIter.next();
-						if (entryItem instanceof Object[]) {
-							Object[] expressionList = (Object[]) entryItem;
+						if (entryItem instanceof Object[] expressionList) {
 							actualSql.append('(');
 							for (int m = 0; m < expressionList.length; m++) {
 								if (m > 0) {
@@ -397,10 +396,9 @@ abstract class NamedParameterUtils {
 			if (this == o) {
 				return true;
 			}
-			if (!(o instanceof ParameterHolder)) {
+			if (!(o instanceof ParameterHolder that)) {
 				return false;
 			}
-			ParameterHolder that = (ParameterHolder) o;
 			return this.startIndex == that.startIndex && this.endIndex == that.endIndex
 					&& Objects.equals(this.parameterName, that.parameterName);
 		}
@@ -522,8 +520,7 @@ abstract class NamedParameterUtils {
 				Iterator<BindMarker> markers = bindMarkers.iterator();
 				while (iterator.hasNext()) {
 					Object valueToBind = iterator.next();
-					if (valueToBind instanceof Object[]) {
-						Object[] objects = (Object[]) valueToBind;
+					if (valueToBind instanceof Object[] objects) {
 						for (Object object : objects) {
 							bind(target, markers, object);
 						}
