@@ -19,7 +19,7 @@ package org.springframework.http.converter.protobuf;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
@@ -158,7 +158,7 @@ public class ProtobufHttpMessageConverterTests {
 
 		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(contentType);
 
-		final String body = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		final String body = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 		assertThat(body.isEmpty()).as("body is empty").isFalse();
 
 		Msg.Builder builder = Msg.newBuilder();
@@ -182,7 +182,7 @@ public class ProtobufHttpMessageConverterTests {
 
 		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(contentType);
 
-		final String body = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		final String body = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 		assertThat(body.isEmpty()).as("body is empty").isFalse();
 
 		Msg.Builder builder = Msg.newBuilder();
@@ -197,7 +197,8 @@ public class ProtobufHttpMessageConverterTests {
 
 	@Test
 	public void defaultContentType() throws Exception {
-		assertThat(this.converter.getDefaultContentType(this.testMsg)).isEqualTo(ProtobufHttpMessageConverter.PROTOBUF);
+		assertThat(this.converter.getDefaultContentType(this.testMsg))
+				.isEqualTo(ProtobufHttpMessageConverter.PROTOBUF);
 	}
 
 	@Test
