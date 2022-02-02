@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,6 +149,13 @@ public class ServletServerHttpRequestTests {
 		assertThat(headerValues.contains(headerValue1)).as("Invalid header values returned").isTrue();
 		assertThat(headerValues.contains(headerValue2)).as("Invalid header values returned").isTrue();
 		assertThat(headers.getContentType()).isNull();
+	}
+
+	@Test // gh-27957
+	void getHeadersWithWildcardContentType() {
+		mockRequest.setContentType("*/*");
+		mockRequest.removeHeader("Content-Type");
+		assertThat(request.getHeaders()).as("Invalid content-type should not raise exception").hasSize(0);
 	}
 
 	@Test
