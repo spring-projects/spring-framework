@@ -985,7 +985,7 @@ public class DispatcherServlet extends FrameworkServlet {
 						.collect(Collectors.joining(", "));
 			}
 			else {
-				params = (request.getParameterMap().isEmpty() ? "" : "masked");
+				params = request.getParameterMap().isEmpty() ? "" : "masked";
 			}
 
 			String queryString = request.getQueryString();
