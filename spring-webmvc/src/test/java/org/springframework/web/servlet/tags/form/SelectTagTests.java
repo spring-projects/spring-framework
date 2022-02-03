@@ -22,7 +22,6 @@ import java.io.StringReader;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -949,12 +948,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	private Map getCountryToLocaleMap() {
-		Map map = new TreeMap(new Comparator() {
-			@Override
-			public int compare(Object o1, Object o2) {
-				return ((Country)o1).getName().compareTo(((Country)o2).getName());
-			}
-		});
+		Map map = new TreeMap((o1, o2) -> ((Country)o1).getName().compareTo(((Country)o2).getName()));
 		map.put(Country.COUNTRY_AT, LOCALE_AT);
 		map.put(Country.COUNTRY_NL, LOCALE_NL);
 		map.put(Country.COUNTRY_US, Locale.US);

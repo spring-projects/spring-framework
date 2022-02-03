@@ -27,7 +27,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 
@@ -613,16 +612,13 @@ public class AsyncExecutionTests {
 
 		public DynamicAsyncInterfaceBean() {
 			ProxyFactory pf = new ProxyFactory(new HashMap<>());
-			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor(new MethodInterceptor() {
-				@Override
-				public Object invoke(MethodInvocation invocation) throws Throwable {
-					boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-					assertThat(condition).isTrue();
-					if (Future.class.equals(invocation.getMethod().getReturnType())) {
-						return new AsyncResult<>(invocation.getArguments()[0].toString());
-					}
-					return null;
+			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor((MethodInterceptor) invocation -> {
+				boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+				assertThat(condition).isTrue();
+				if (Future.class.equals(invocation.getMethod().getReturnType())) {
+					return new AsyncResult<>(invocation.getArguments()[0].toString());
 				}
+				return null;
 			});
 			advisor.addInterface(AsyncInterface.class);
 			pf.addAdvisor(advisor);
@@ -686,16 +682,13 @@ public class AsyncExecutionTests {
 
 		public DynamicAsyncMethodsInterfaceBean() {
 			ProxyFactory pf = new ProxyFactory(new HashMap<>());
-			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor(new MethodInterceptor() {
-				@Override
-				public Object invoke(MethodInvocation invocation) throws Throwable {
-					boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-					assertThat(condition).isTrue();
-					if (Future.class.equals(invocation.getMethod().getReturnType())) {
-						return new AsyncResult<>(invocation.getArguments()[0].toString());
-					}
-					return null;
+			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor((MethodInterceptor) invocation -> {
+				boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+				assertThat(condition).isTrue();
+				if (Future.class.equals(invocation.getMethod().getReturnType())) {
+					return new AsyncResult<>(invocation.getArguments()[0].toString());
 				}
+				return null;
 			});
 			advisor.addInterface(AsyncMethodsInterface.class);
 			pf.addAdvisor(advisor);

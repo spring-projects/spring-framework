@@ -140,7 +140,7 @@ class ConvertingComparatorTests {
 			assertThat(o2).isInstanceOf(Integer.class);
 			this.called = true;
 			return super.compare(o1, o2);
-		};
+		}
 
 		public void assertCalled() {
 			assertThat(this.called).isTrue();

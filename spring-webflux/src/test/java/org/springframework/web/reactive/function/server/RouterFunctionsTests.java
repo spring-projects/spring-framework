@@ -36,7 +36,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
@@ -295,12 +294,9 @@ public class RouterFunctionsTests {
 	public void toHttpHandlerWebFilter() {
 		AtomicBoolean filterInvoked = new AtomicBoolean();
 
-		WebFilter webFilter = new WebFilter() {
-			@Override
-			public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-				filterInvoked.set(true);
-				return chain.filter(exchange);
-			}
+		WebFilter webFilter = (exchange, chain) -> {
+			filterInvoked.set(true);
+			return chain.filter(exchange);
 		};
 
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.accepted().build();

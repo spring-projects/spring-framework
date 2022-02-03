@@ -224,8 +224,8 @@ public class SubscriptionMethodReturnValueHandlerTests {
 	}
 
 
-	private interface MyJacksonView1 {};
-	private interface MyJacksonView2 {};
+	private interface MyJacksonView1 {}
+	private interface MyJacksonView2 {}
 
 	private static class JacksonViewBean {
 

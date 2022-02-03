@@ -16,7 +16,6 @@
 
 package org.springframework.scheduling.config;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 
@@ -59,12 +58,7 @@ public class ExecutorBeanDefinitionParserTests {
 		assertThat(getKeepAliveSeconds(executor)).isEqualTo(60);
 		assertThat(getAllowCoreThreadTimeOut(executor)).isFalse();
 
-		FutureTask<String> task = new FutureTask<>(new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				return "foo";
-			}
-		});
+		FutureTask<String> task = new FutureTask<>(() -> "foo");
 		executor.execute(task);
 		assertThat(task.get()).isEqualTo("foo");
 	}

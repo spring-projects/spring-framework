@@ -36,7 +36,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.ModelAndView;
@@ -50,13 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DefaultEntityResponseBuilderTests {
 
-	static final ServerResponse.Context EMPTY_CONTEXT = new ServerResponse.Context() {
-		@Override
-		public List<HttpMessageConverter<?>> messageConverters() {
-			return Collections.emptyList();
-		}
-
-	};
+	static final ServerResponse.Context EMPTY_CONTEXT = () -> Collections.emptyList();
 
 	@Test
 	public void fromObject() {

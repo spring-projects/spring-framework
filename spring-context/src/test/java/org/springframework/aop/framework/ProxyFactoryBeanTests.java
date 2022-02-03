@@ -304,11 +304,8 @@ public class ProxyFactoryBeanTests {
 
 		final Exception ex = new UnsupportedOperationException("invoke");
 		// Add evil interceptor to head of list
-		config.addAdvice(0, new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				throw ex;
-			}
+		config.addAdvice(0, (MethodInterceptor) invocation -> {
+			throw ex;
 		});
 		assertThat(config.getAdvisors().length).as("Have correct advisor count").isEqualTo(2);
 
@@ -691,12 +688,9 @@ public class ProxyFactoryBeanTests {
 		}
 
 		public PointcutForVoid() {
-			setAdvice(new MethodInterceptor() {
-				@Override
-				public Object invoke(MethodInvocation invocation) throws Throwable {
-					methodNames.add(invocation.getMethod().getName());
-					return invocation.proceed();
-				}
+			setAdvice((MethodInterceptor) invocation -> {
+				methodNames.add(invocation.getMethod().getName());
+				return invocation.proceed();
 			});
 			setPointcut(new DynamicMethodMatcherPointcut() {
 				@Override

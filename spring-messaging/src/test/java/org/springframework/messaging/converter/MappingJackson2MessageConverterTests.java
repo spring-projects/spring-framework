@@ -319,9 +319,9 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 
-	public interface MyJacksonView1 {};
+	public interface MyJacksonView1 {}
 
-	public interface MyJacksonView2 {};
+	public interface MyJacksonView2 {}
 
 
 	public static class JacksonViewBean {

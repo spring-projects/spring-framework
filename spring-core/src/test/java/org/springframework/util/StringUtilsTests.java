@@ -620,14 +620,8 @@ class StringUtilsTests {
 	}
 
 	private void doTestCommaDelimitedListToStringArrayLegalMatch(String[] components) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < components.length; i++) {
-			if (i != 0) {
-				sb.append(',');
-			}
-			sb.append(components[i]);
-		}
-		String[] sa = StringUtils.commaDelimitedListToStringArray(sb.toString());
+		String sb = String.join(String.valueOf(','), components);
+		String[] sa = StringUtils.commaDelimitedListToStringArray(sb);
 		assertThat(sa != null).as("String array isn't null with legal match").isTrue();
 		assertThat(sa.length).as("String array length is correct with legal match").isEqualTo(components.length);
 		assertThat(Arrays.equals(sa, components)).as("Output equals input").isTrue();

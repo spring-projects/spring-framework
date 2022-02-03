@@ -39,7 +39,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
@@ -559,12 +558,9 @@ public class ConfigurationClassProcessingTests {
 
 		// @Bean
 		public BeanFactoryPostProcessor beanFactoryPostProcessor() {
-			return new BeanFactoryPostProcessor() {
-				@Override
-				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-					BeanDefinition bd = beanFactory.getBeanDefinition("beanPostProcessor");
-					bd.getPropertyValues().addPropertyValue("nameSuffix", "-processed-" + myProp);
-				}
+			return beanFactory -> {
+				BeanDefinition bd = beanFactory.getBeanDefinition("beanPostProcessor");
+				bd.getPropertyValues().addPropertyValue("nameSuffix", "-processed-" + myProp);
 			};
 		}
 

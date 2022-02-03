@@ -215,12 +215,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("testBean4", tbd);
 
 		bf.registerResolvableDependency(BeanFactory.class, bf);
-		bf.registerResolvableDependency(INestedTestBean.class, new ObjectFactory<Object>() {
-			@Override
-			public Object getObject() throws BeansException {
-				return new NestedTestBean();
-			}
-		});
+		bf.registerResolvableDependency(INestedTestBean.class, (ObjectFactory<Object>) () -> new NestedTestBean());
 
 		@SuppressWarnings("deprecation")
 		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer ppc = new org.springframework.beans.factory.config.PropertyPlaceholderConfigurer();

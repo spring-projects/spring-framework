@@ -158,8 +158,8 @@ class CommonsPool2TargetSourceTests {
 		pooledInstances[9] = targetSource.getTarget();
 
 		// release all objects
-		for (int i = 0; i < pooledInstances.length; i++) {
-			targetSource.releaseTarget(pooledInstances[i]);
+		for (Object element : pooledInstances) {
+			targetSource.releaseTarget(element);
 		}
 	}
 

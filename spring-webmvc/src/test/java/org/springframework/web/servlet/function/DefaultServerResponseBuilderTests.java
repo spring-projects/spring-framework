@@ -39,7 +39,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
@@ -55,14 +54,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DefaultServerResponseBuilderTests {
 
-	static final ServerResponse.Context EMPTY_CONTEXT = new ServerResponse.Context() {
-		@Override
-		public List<HttpMessageConverter<?>> messageConverters() {
-			return Collections.emptyList();
-
-		}
-
-	};
+	static final ServerResponse.Context EMPTY_CONTEXT = () -> Collections.emptyList();
 
 	@Test
 	public void status() {

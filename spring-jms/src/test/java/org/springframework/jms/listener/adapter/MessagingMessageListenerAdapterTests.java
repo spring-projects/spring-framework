@@ -432,8 +432,8 @@ public class MessagingMessageListenerAdapterTests {
 		}
 	}
 
-	interface Summary {};
-	interface Full extends Summary {};
+	interface Summary {}
+	interface Full extends Summary {}
 
 	@SuppressWarnings("unused")
 	private static class SampleResponse {

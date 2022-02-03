@@ -152,12 +152,12 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithStaticSql() throws Exception {
-		doTestStrings(null, null, null, null, (template, sql, rch) -> template.query(sql, rch));
+		doTestStrings(null, null, null, null, JdbcTemplate::query);
 	}
 
 	@Test
 	public void testStringsWithStaticSqlAndFetchSizeAndMaxRows() throws Exception {
-		doTestStrings(10, 20, 30, null, (template, sql, rch) -> template.query(sql, rch));
+		doTestStrings(10, 20, 30, null, JdbcTemplate::query);
 	}
 
 	@Test
@@ -268,28 +268,22 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testConnectionCallback() throws Exception {
-		String result = this.template.execute(new ConnectionCallback<String>() {
-			@Override
-			public String doInConnection(Connection con) {
-				assertThat(con instanceof ConnectionProxy).isTrue();
-				assertThat(((ConnectionProxy) con).getTargetConnection()).isSameAs(JdbcTemplateTests.this.connection);
-				return "test";
-			}
+		String result = this.template.execute((ConnectionCallback<String>) con -> {
+			assertThat(con instanceof ConnectionProxy).isTrue();
+			assertThat(((ConnectionProxy) con).getTargetConnection()).isSameAs(JdbcTemplateTests.this.connection);
+			return "test";
 		});
 		assertThat(result).isEqualTo("test");
 	}
 
 	@Test
 	public void testConnectionCallbackWithStatementSettings() throws Exception {
-		String result = this.template.execute(new ConnectionCallback<String>() {
-			@Override
-			public String doInConnection(Connection con) throws SQLException {
-				PreparedStatement ps = con.prepareStatement("some SQL");
-				ps.setFetchSize(10);
-				ps.setMaxRows(20);
-				ps.close();
-				return "test";
-			}
+		String result = this.template.execute((ConnectionCallback<String>) con -> {
+			PreparedStatement ps = con.prepareStatement("some SQL");
+			ps.setFetchSize(10);
+			ps.setMaxRows(20);
+			ps.close();
+			return "test";
 		});
 
 		assertThat(result).isEqualTo("test");
