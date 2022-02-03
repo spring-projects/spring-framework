@@ -975,25 +975,12 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	private void logRequest(HttpServletRequest request) {
 		LogFormatUtils.traceDebug(logger, traceOn -> {
-			String params;
-			if (StringUtils.startsWithIgnoreCase(request.getContentType(), "multipart/")) {
-				params = "multipart";
-			}
-			else if (isEnableLoggingRequestDetails()) {
-				params = request.getParameterMap().entrySet().stream()
-						.map(entry -> entry.getKey() + ":" + Arrays.toString(entry.getValue()))
-						.collect(Collectors.joining(", "));
-			}
-			else {
-				params = request.getParameterMap().isEmpty() ? "" : "masked";
-			}
-
 			String queryString = request.getQueryString();
 			String queryClause = (StringUtils.hasLength(queryString) ? "?" + queryString : "");
 			String dispatchType = (!DispatcherType.REQUEST.equals(request.getDispatcherType()) ?
 					"\"" + request.getDispatcherType() + "\" dispatch for " : "");
 			String message = (dispatchType + request.getMethod() + " \"" + getRequestUri(request) +
-					queryClause + "\", parameters={" + params + "}");
+					queryClause + "\", parameters={" + paramsFrom(request) + "}");
 
 			if (traceOn) {
 				List<String> values = Collections.list(request.getHeaderNames());
@@ -1008,6 +995,18 @@ public class DispatcherServlet extends FrameworkServlet {
 				return message;
 			}
 		});
+	}
+
+	private String paramsFrom(HttpServletRequest request) {
+		if (StringUtils.startsWithIgnoreCase(request.getContentType(), "multipart/")) {
+			return "multipart";
+		}
+		if (isEnableLoggingRequestDetails()) {
+			return request.getParameterMap().entrySet().stream()
+					.map(entry -> entry.getKey() + ":" + Arrays.toString(entry.getValue()))
+					.collect(Collectors.joining(", "));
+		}
+		return request.getParameterMap().isEmpty() ? "" : "masked";
 	}
 
 	/**
