@@ -454,7 +454,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		PathContainer pathWithinHandler = exchange.getRequiredAttribute(name);
 
 		String path = processPath(pathWithinHandler.value());
-		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
+		if (path != null || isInvalidPath(path)) {
 			return Mono.empty();
 		}
 		if (isInvalidEncodedPath(path)) {
