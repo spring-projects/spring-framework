@@ -257,7 +257,8 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		synchronized (this.responseLock) {
 			try {
 				if (isClosed()) {
-					response.getBody().write(SockJsFrame.closeFrameGoAway().getContentBytes());
+					String formattedFrame = frameFormat.format(SockJsFrame.closeFrameGoAway());
+					response.getBody().write(formattedFrame.getBytes(SockJsFrame.CHARSET));
 					return;
 				}
 				this.response = response;
