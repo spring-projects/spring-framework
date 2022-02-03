@@ -318,7 +318,7 @@ class ClassPathBeanDefinitionScannerJsr330ScopeIntegrationTests {
 						metadata.setScopedProxyMode(scopedProxyMode);
 						break;
 					}
-					else if (type.startsWith("javax.inject")) {
+					else if (type.startsWith("jakarta.inject")) {
 						metadata.setScopeName(BeanDefinition.SCOPE_PROTOTYPE);
 					}
 				}
