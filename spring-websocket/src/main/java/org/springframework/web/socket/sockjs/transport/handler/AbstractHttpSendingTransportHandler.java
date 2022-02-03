@@ -79,9 +79,11 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 			if (logger.isDebugEnabled()) {
 				logger.debug("Connection already closed (but not removed yet) for " + sockJsSession);
 			}
+			SockJsFrameFormat frameFormat = this.getFrameFormat(request);
 			SockJsFrame frame = SockJsFrame.closeFrameGoAway();
+			String formattedFrame = frameFormat.format(frame);
 			try {
-				response.getBody().write(frame.getContentBytes());
+				response.getBody().write(formattedFrame.getBytes(SockJsFrame.CHARSET));
 			}
 			catch (IOException ex) {
 				throw new SockJsException("Failed to send " + frame, sockJsSession.getId(), ex);
