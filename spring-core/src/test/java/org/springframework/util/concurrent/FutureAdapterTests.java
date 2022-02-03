@@ -41,7 +41,7 @@ class FutureAdapterTests {
 	@SuppressWarnings("unchecked")
 	void setUp() {
 		adaptee = mock(Future.class);
-		adapter = new FutureAdapter<String, Integer>(adaptee) {
+		adapter = new FutureAdapter<>(adaptee) {
 			@Override
 			protected String adapt(Integer adapteeResult) throws ExecutionException {
 				return adapteeResult.toString();

@@ -56,8 +56,8 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		root.addBeanFactoryPostProcessor(beanFactory -> beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
-				if (bean instanceof TestBean) {
-					((TestBean) bean).getFriends().add("myFriend");
+				if (bean instanceof TestBean testBean) {
+					testBean.getFriends().add("myFriend");
 				}
 				return bean;
 			}

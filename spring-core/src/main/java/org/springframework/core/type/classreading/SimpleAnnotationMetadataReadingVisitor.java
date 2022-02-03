@@ -85,8 +85,8 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 		if (supername != null && !isInterface(access)) {
 			this.superClassName = toClassName(supername);
 		}
-		for (int i = 0; i < interfaces.length; i++) {
-			this.interfaceNames.add(toClassName(interfaces[i]));
+		for (String element : interfaces) {
+			this.interfaceNames.add(toClassName(element));
 		}
 	}
 

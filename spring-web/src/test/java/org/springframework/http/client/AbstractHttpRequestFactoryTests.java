@@ -89,8 +89,7 @@ abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebServerTest
 		final byte[] body = "Hello World".getBytes(StandardCharsets.UTF_8);
 		request.getHeaders().setContentLength(body.length);
 
-		if (request instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingRequest = (StreamingHttpOutputMessage) request;
+		if (request instanceof StreamingHttpOutputMessage streamingRequest) {
 			streamingRequest.setBody(outputStream -> StreamUtils.copy(body, outputStream));
 		}
 		else {
@@ -111,8 +110,7 @@ abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebServerTest
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
 
 		final byte[] body = "Hello World".getBytes(StandardCharsets.UTF_8);
-		if (request instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingRequest = (StreamingHttpOutputMessage) request;
+		if (request instanceof StreamingHttpOutputMessage streamingRequest) {
 			streamingRequest.setBody(outputStream -> {
 				StreamUtils.copy(body, outputStream);
 				outputStream.flush();

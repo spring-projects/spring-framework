@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class CronExpressionTests {
 
-	private static final Condition<Temporal> weekday = new Condition<Temporal>("weekday") {
+	private static final Condition<Temporal> weekday = new Condition<>("weekday") {
 
 		@Override
 		public boolean matches(Temporal value) {

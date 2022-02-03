@@ -224,8 +224,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 			if (this == o) {
 				return true;
 			}
-			if (o instanceof RootElement) {
-				RootElement other = (RootElement) o;
+			if (o instanceof RootElement other) {
 				return this.type.equals(other.type);
 			}
 			return false;
@@ -256,8 +255,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 			if (this == o) {
 				return true;
 			}
-			if (o instanceof TestType) {
-				TestType other = (TestType) o;
+			if (o instanceof TestType other) {
 				return this.s.equals(other.s);
 			}
 			return false;

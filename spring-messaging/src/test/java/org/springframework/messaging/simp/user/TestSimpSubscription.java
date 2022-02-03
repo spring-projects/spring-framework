@@ -61,10 +61,9 @@ public class TestSimpSubscription implements SimpSubscription {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof SimpSubscription)) {
+		if (!(other instanceof SimpSubscription otherSubscription)) {
 			return false;
 		}
-		SimpSubscription otherSubscription = (SimpSubscription) other;
 		return (ObjectUtils.nullSafeEquals(getSession(), otherSubscription.getSession()) &&
 				this.id.equals(otherSubscription.getId()));
 	}

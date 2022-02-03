@@ -281,7 +281,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void readAndWriteParameterizedType() throws Exception {
-		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<List<MyBean>>() {};
+		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<>() {};
 
 		String body = "[{" +
 				"\"bytes\":\"AQI=\"," +
@@ -312,8 +312,8 @@ public class MappingJackson2HttpMessageConverterTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void writeParameterizedBaseType() throws Exception {
-		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<List<MyBean>>() {};
-		ParameterizedTypeReference<List<MyBase>> baseList = new ParameterizedTypeReference<List<MyBase>>() {};
+		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<>() {};
+		ParameterizedTypeReference<List<MyBase>> baseList = new ParameterizedTypeReference<>() {};
 
 		String body = "[{" +
 				"\"bytes\":\"AQI=\"," +
@@ -468,7 +468,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		bar.setNumber(123);
 		beans.add(bar);
 		ParameterizedTypeReference<List<MyInterface>> typeReference =
-				new ParameterizedTypeReference<List<MyInterface>>() {};
+				new ParameterizedTypeReference<>() {};
 
 		this.converter.writeInternal(beans, typeReference.getType(), outputMessage);
 

@@ -115,8 +115,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	 */
 	@RegisterExtension
 	TestExecutionExceptionHandler serverErrorToAssertionErrorConverter = (context, throwable) -> {
-		if (throwable instanceof HttpServerErrorException) {
-			HttpServerErrorException ex = (HttpServerErrorException) throwable;
+		if (throwable instanceof HttpServerErrorException ex) {
 			String responseBody = ex.getResponseBodyAsString();
 			String prefix = AssertionError.class.getName() + ": ";
 			if (responseBody.startsWith(prefix)) {

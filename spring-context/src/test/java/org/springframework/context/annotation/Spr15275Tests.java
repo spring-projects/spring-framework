@@ -78,7 +78,7 @@ public class Spr15275Tests {
 
 		@Bean
 		public FactoryBean<Foo> foo() {
-			return new FactoryBean<Foo>() {
+			return new FactoryBean<>() {
 				@Override
 				public Foo getObject() {
 					return new Foo("x");
@@ -103,7 +103,7 @@ public class Spr15275Tests {
 
 		@Bean
 		public FactoryBean<Foo> foo() {
-			return new AbstractFactoryBean<Foo>() {
+			return new AbstractFactoryBean<>() {
 				@Override
 				public Foo createInstance() {
 					return new Foo("x");
@@ -128,7 +128,7 @@ public class Spr15275Tests {
 
 		@Bean
 		public FactoryBean<FooInterface> foo() {
-			return new AbstractFactoryBean<FooInterface>() {
+			return new AbstractFactoryBean<>() {
 				@Override
 				public FooInterface createInstance() {
 					return new Foo("x");
@@ -153,7 +153,7 @@ public class Spr15275Tests {
 
 		@Bean
 		public AbstractFactoryBean<FooInterface> foo() {
-			return new AbstractFactoryBean<FooInterface>() {
+			return new AbstractFactoryBean<>() {
 				@Override
 				public FooInterface createInstance() {
 					return new Foo("x");

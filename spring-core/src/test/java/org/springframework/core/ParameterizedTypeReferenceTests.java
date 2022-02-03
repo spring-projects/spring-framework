@@ -34,21 +34,21 @@ class ParameterizedTypeReferenceTests {
 
 	@Test
 	void stringTypeReference() {
-		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
+		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<>() {};
 		assertThat(typeReference.getType()).isEqualTo(String.class);
 	}
 
 	@Test
 	void mapTypeReference() throws Exception {
 		Type mapType = getClass().getMethod("mapMethod").getGenericReturnType();
-		ParameterizedTypeReference<Map<Object,String>> typeReference = new ParameterizedTypeReference<Map<Object,String>>() {};
+		ParameterizedTypeReference<Map<Object,String>> typeReference = new ParameterizedTypeReference<>() {};
 		assertThat(typeReference.getType()).isEqualTo(mapType);
 	}
 
 	@Test
 	void listTypeReference() throws Exception {
 		Type listType = getClass().getMethod("listMethod").getGenericReturnType();
-		ParameterizedTypeReference<List<String>> typeReference = new ParameterizedTypeReference<List<String>>() {};
+		ParameterizedTypeReference<List<String>> typeReference = new ParameterizedTypeReference<>() {};
 		assertThat(typeReference.getType()).isEqualTo(listType);
 	}
 

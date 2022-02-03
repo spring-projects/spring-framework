@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.jdbc.support;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -69,12 +68,7 @@ class KeyHolderTests {
 
 	@Test
 	void getKeyWithMultipleKeysInMap() {
-		@SuppressWarnings("serial")
-		Map<String, Object> m = new HashMap<String, Object>() {{
-			put("key", 1);
-			put("seq", 2);
-		}};
-		kh.getKeyList().add(m);
+		kh.getKeyList().add(Map.of("key", 1, "seq", 2));
 
 		assertThat(kh.getKeys()).as("two keys should be in the map").hasSize(2);
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
@@ -110,10 +104,7 @@ class KeyHolderTests {
 	@Test
 	void getKeysWithMultipleKeyRows() {
 		@SuppressWarnings("serial")
-		Map<String, Object> m = new HashMap<String, Object>() {{
-			put("key", 1);
-			put("seq", 2);
-		}};
+		Map<String, Object> m = Map.of("key", 1, "seq", 2);
 		kh.getKeyList().addAll(asList(m, m));
 
 		assertThat(kh.getKeyList()).as("two rows should be in the list").hasSize(2);

@@ -646,7 +646,7 @@ class RestTemplateTests {
 	void exchangeParameterizedType() throws Exception {
 		GenericHttpMessageConverter converter = mock(GenericHttpMessageConverter.class);
 		template.setMessageConverters(Collections.<HttpMessageConverter<?>>singletonList(converter));
-		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<List<Integer>>() {};
+		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<>() {};
 		given(converter.canRead(intList.getType(), null, null)).willReturn(true);
 		given(converter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		given(converter.canWrite(String.class, String.class, null)).willReturn(true);

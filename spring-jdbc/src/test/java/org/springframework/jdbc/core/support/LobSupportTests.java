@@ -111,7 +111,7 @@ public class LobSupportTests {
 	}
 
 	private AbstractLobStreamingResultSetExtractor<Void> getResultSetExtractor(final boolean ex) {
-		AbstractLobStreamingResultSetExtractor<Void> lobRse = new AbstractLobStreamingResultSetExtractor<Void>() {
+		AbstractLobStreamingResultSetExtractor<Void> lobRse = new AbstractLobStreamingResultSetExtractor<>() {
 
 			@Override
 			protected void streamData(ResultSet rs) throws SQLException, IOException {

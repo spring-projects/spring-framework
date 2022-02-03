@@ -111,7 +111,7 @@ public class ClientResponseWrapperTests {
 	@Test
 	public void bodyToMonoParameterizedTypeReference() {
 		Mono<String> result = Mono.just("foo");
-		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
+		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<>() {};
 		given(mockResponse.bodyToMono(reference)).willReturn(result);
 
 		assertThat(wrapper.bodyToMono(reference)).isSameAs(result);
@@ -128,7 +128,7 @@ public class ClientResponseWrapperTests {
 	@Test
 	public void bodyToFluxParameterizedTypeReference() {
 		Flux<String> result = Flux.just("foo");
-		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
+		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<>() {};
 		given(mockResponse.bodyToFlux(reference)).willReturn(result);
 
 		assertThat(wrapper.bodyToFlux(reference)).isSameAs(result);
@@ -145,7 +145,7 @@ public class ClientResponseWrapperTests {
 	@Test
 	public void toEntityParameterizedTypeReference() {
 		Mono<ResponseEntity<String>> result = Mono.just(new ResponseEntity<>("foo", HttpStatus.OK));
-		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
+		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<>() {};
 		given(mockResponse.toEntity(reference)).willReturn(result);
 
 		assertThat(wrapper.toEntity(reference)).isSameAs(result);
@@ -162,7 +162,7 @@ public class ClientResponseWrapperTests {
 	@Test
 	public void toEntityListParameterizedTypeReference() {
 		Mono<ResponseEntity<List<String>>> result = Mono.just(new ResponseEntity<>(singletonList("foo"), HttpStatus.OK));
-		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
+		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<>() {};
 		given(mockResponse.toEntityList(reference)).willReturn(result);
 
 		assertThat(wrapper.toEntityList(reference)).isSameAs(result);

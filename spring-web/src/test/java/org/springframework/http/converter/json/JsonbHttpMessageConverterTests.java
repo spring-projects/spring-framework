@@ -207,7 +207,7 @@ public class JsonbHttpMessageConverterTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void readAndWriteParameterizedType() throws Exception {
-		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<List<MyBean>>() {};
+		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<>() {};
 
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";
@@ -233,8 +233,8 @@ public class JsonbHttpMessageConverterTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void writeParameterizedBaseType() throws Exception {
-		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<List<MyBean>>() {};
-		ParameterizedTypeReference<List<MyBase>> baseList = new ParameterizedTypeReference<List<MyBase>>() {};
+		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<>() {};
+		ParameterizedTypeReference<List<MyBase>> baseList = new ParameterizedTypeReference<>() {};
 
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";

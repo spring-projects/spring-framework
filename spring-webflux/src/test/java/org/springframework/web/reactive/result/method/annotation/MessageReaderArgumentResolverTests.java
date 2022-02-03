@@ -353,8 +353,7 @@ public class MessageReaderArgumentResolverTests {
 			if (this == o) {
 				return true;
 			}
-			if (o instanceof TestBean) {
-				TestBean other = (TestBean) o;
+			if (o instanceof TestBean other) {
 				return this.foo.equals(other.foo) && this.bar.equals(other.bar);
 			}
 			return false;

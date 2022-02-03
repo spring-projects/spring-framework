@@ -774,8 +774,7 @@ class AnnotationDrivenEventListenerTests {
 			if (event.content == null) {
 				return null;
 			}
-			else if (event.content instanceof String) {
-				String s = (String) event.content;
+			else if (event.content instanceof String s) {
 				if (s.equals("String")) {
 					return event.content;
 				}

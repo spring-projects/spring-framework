@@ -1282,8 +1282,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public void setSession(HttpSession session) {
 		this.session = session;
-		if (session instanceof MockHttpSession) {
-			MockHttpSession mockSession = ((MockHttpSession) session);
+		if (session instanceof MockHttpSession mockSession) {
 			mockSession.access();
 		}
 	}

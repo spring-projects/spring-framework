@@ -71,7 +71,7 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
 public class RequestMappingMessageConversionIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	private static final ParameterizedTypeReference<List<Person>> PERSON_LIST =
-			new ParameterizedTypeReference<List<Person>>() {};
+			new ParameterizedTypeReference<>() {};
 
 	private static final MediaType JSON = MediaType.APPLICATION_JSON;
 
