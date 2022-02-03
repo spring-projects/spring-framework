@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.Ordered;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpStatus;
@@ -360,12 +359,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 		@Override
 		public void addFormatters(FormatterRegistry registry) {
-			registry.addConverter(new Converter<TestBean, String>() {
-				@Override
-				public String convert(TestBean source) {
-					return "converted";
-				}
-			});
+			registry.addConverter(TestBean.class, String.class, testBean -> "converted");
 		}
 
 		@Override

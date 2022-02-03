@@ -83,9 +83,9 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		MBeanAttributeInfo[] inf = info.getAttributes();
 		assertThat(inf).as("Invalid number of Attributes returned").hasSize(getExpectedAttributeCount());
 
-		for (int x = 0; x < inf.length; x++) {
-			assertThat(inf[x]).as("MBeanAttributeInfo should not be null").isNotNull();
-			assertThat(inf[x].getDescription()).as("Description for MBeanAttributeInfo should not be null").isNotNull();
+		for (MBeanAttributeInfo element : inf) {
+			assertThat(element).as("MBeanAttributeInfo should not be null").isNotNull();
+			assertThat(element.getDescription()).as("Description for MBeanAttributeInfo should not be null").isNotNull();
 		}
 	}
 
@@ -95,9 +95,9 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		MBeanOperationInfo[] inf = info.getOperations();
 		assertThat(inf).as("Invalid number of Operations returned").hasSize(getExpectedOperationCount());
 
-		for (int x = 0; x < inf.length; x++) {
-			assertThat(inf[x]).as("MBeanOperationInfo should not be null").isNotNull();
-			assertThat(inf[x].getDescription()).as("Description for MBeanOperationInfo should not be null").isNotNull();
+		for (MBeanOperationInfo element : inf) {
+			assertThat(element).as("MBeanOperationInfo should not be null").isNotNull();
+			assertThat(element.getDescription()).as("Description for MBeanOperationInfo should not be null").isNotNull();
 		}
 	}
 

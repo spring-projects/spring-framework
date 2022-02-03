@@ -200,12 +200,9 @@ class JmsTemplateTests {
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(this.connectionFactory);
 
-		template.execute(new SessionCallback<Void>() {
-			@Override
-			public Void doInJms(Session session) throws JMSException {
-				session.getTransacted();
-				return null;
-			}
+		template.execute((SessionCallback<Void>) session -> {
+			session.getTransacted();
+			return null;
 		});
 
 		verify(this.session).close();
@@ -220,19 +217,13 @@ class JmsTemplateTests {
 
 		TransactionSynchronizationManager.initSynchronization();
 		try {
-			template.execute(new SessionCallback<Void>() {
-				@Override
-				public Void doInJms(Session session) throws JMSException {
-					session.getTransacted();
-					return null;
-				}
+			template.execute((SessionCallback<Void>) session -> {
+				session.getTransacted();
+				return null;
 			});
-			template.execute(new SessionCallback<Void>() {
-				@Override
-				public Void doInJms(Session session) throws JMSException {
-					session.getTransacted();
-					return null;
-				}
+			template.execute((SessionCallback<Void>) session -> {
+				session.getTransacted();
+				return null;
 			});
 
 			assertThat(ConnectionFactoryUtils.getTransactionalSession(scf, null, false)).isSameAs(this.session);
@@ -374,29 +365,14 @@ class JmsTemplateTests {
 		}
 
 		if (useDefaultDestination) {
-			template.send(new MessageCreator() {
-				@Override
-				public Message createMessage(Session session) throws JMSException {
-					return session.createTextMessage("just testing");
-				}
-			});
+			template.send(session -> session.createTextMessage("just testing"));
 		}
 		else {
 			if (explicitDestination) {
-				template.send(this.queue, new MessageCreator() {
-					@Override
-					public Message createMessage(Session session) throws JMSException {
-						return session.createTextMessage("just testing");
-					}
-				});
+				template.send(this.queue, (MessageCreator) session -> session.createTextMessage("just testing"));
 			}
 			else {
-				template.send(destinationName, new MessageCreator() {
-					@Override
-					public Message createMessage(Session session) throws JMSException {
-						return session.createTextMessage("just testing");
-					}
-				});
+				template.send(destinationName, (MessageCreator) session -> session.createTextMessage("just testing"));
 			}
 		}
 

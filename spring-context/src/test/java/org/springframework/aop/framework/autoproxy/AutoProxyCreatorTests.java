@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package org.springframework.aop.framework.autoproxy;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -434,6 +432,7 @@ public class AutoProxyCreatorTests {
 	@SuppressWarnings("serial")
 	public static class IntroductionTestAutoProxyCreator extends TestAutoProxyCreator {
 
+		@Override
 		protected Object[] getAdvicesAndAdvisors() {
 			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor(this.testInterceptor);
 			advisor.addInterface(Serializable.class);
@@ -491,12 +490,8 @@ public class AutoProxyCreatorTests {
 
 		@Override
 		public ITestBean getObject() {
-			return (ITestBean) Proxy.newProxyInstance(CustomProxyFactoryBean.class.getClassLoader(), new Class<?>[]{ITestBean.class}, new InvocationHandler() {
-				@Override
-				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-					return ReflectionUtils.invokeMethod(method, tb, args);
-				}
-			});
+			return (ITestBean) Proxy.newProxyInstance(CustomProxyFactoryBean.class.getClassLoader(), new Class<?>[]{ITestBean.class},
+					(proxy, method, args) -> ReflectionUtils.invokeMethod(method, tb, args));
 		}
 
 		@Override

@@ -42,8 +42,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
-import org.springframework.beans.PropertyEditorRegistrar;
-import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
@@ -78,7 +76,6 @@ import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
@@ -983,16 +980,13 @@ class DefaultListableBeanFactoryTests {
 	@Test
 	void customConverter() {
 		GenericConversionService conversionService = new DefaultConversionService();
-		conversionService.addConverter(new Converter<String, Float>() {
-			@Override
-			public Float convert(String source) {
-				try {
-					NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
-					return nf.parse(source).floatValue();
-				}
-				catch (ParseException ex) {
-					throw new IllegalArgumentException(ex);
-				}
+		conversionService.addConverter(String.class, Float.class, source -> {
+			try {
+				NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
+				return nf.parse(source).floatValue();
+			}
+			catch (ParseException ex) {
+				throw new IllegalArgumentException(ex);
 			}
 		});
 		lbf.setConversionService(conversionService);
@@ -1007,12 +1001,9 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	void customEditorWithBeanReference() {
-		lbf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
-			@Override
-			public void registerCustomEditors(PropertyEditorRegistry registry) {
-				NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
-				registry.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
-			}
+		lbf.addPropertyEditorRegistrar(registry -> {
+			NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
+			registry.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("myFloat", new RuntimeBeanReference("myFloat"));
@@ -2695,8 +2686,12 @@ class DefaultListableBeanFactoryTests {
 
 		@Override
 		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
 			ConstructorDependency that = (ConstructorDependency) o;
 			return spouseAge == that.spouseAge &&
 					Objects.equals(spouse, that.spouse) &&

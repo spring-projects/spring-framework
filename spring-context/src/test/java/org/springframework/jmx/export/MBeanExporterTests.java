@@ -90,11 +90,8 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	@Test
 	void testRegisterNotificationListenerForNonExistentMBean() throws Exception {
 		Map<String, NotificationListener> listeners = new HashMap<>();
-		NotificationListener dummyListener = new NotificationListener() {
-			@Override
-			public void handleNotification(Notification notification, Object handback) {
-				throw new UnsupportedOperationException();
-			}
+		NotificationListener dummyListener = (notification, handback) -> {
+			throw new UnsupportedOperationException();
 		};
 		// the MBean with the supplied object name does not exist...
 		listeners.put("spring:type=Test", dummyListener);

@@ -136,10 +136,7 @@ public class ConfigurationClassAspectIntegrationTests {
 
 		@Bean
 		Runnable fromInnerClass() {
-			return new Runnable() {
-				@Override
-				public void run() {
-				}
+			return () -> {
 			};
 		}
 

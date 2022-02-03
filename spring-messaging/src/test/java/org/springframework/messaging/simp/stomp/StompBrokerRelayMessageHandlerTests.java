@@ -19,7 +19,6 @@ package org.springframework.messaging.simp.stomp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -286,12 +285,7 @@ class StompBrokerRelayMessageHandlerTests {
 
 
 	private static ListenableFutureTask<Void> getVoidFuture() {
-		ListenableFutureTask<Void> futureTask = new ListenableFutureTask<>(new Callable<Void>() {
-			@Override
-			public Void call() {
-				return null;
-			}
-		});
+		ListenableFutureTask<Void> futureTask = new ListenableFutureTask<>(() -> null);
 		futureTask.run();
 		return futureTask;
 	}

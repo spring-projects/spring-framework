@@ -391,8 +391,8 @@ class ReflectionUtilsTests {
 
 		int add(int... args) {
 			int sum = 0;
-			for (int i = 0; i < args.length; i++) {
-				sum += args[i];
+			for (int arg : args) {
+				sum += arg;
 			}
 			return sum;
 		}

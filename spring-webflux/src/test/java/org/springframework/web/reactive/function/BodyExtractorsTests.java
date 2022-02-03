@@ -111,7 +111,7 @@ public class BodyExtractorsTests {
 				return hints;
 			}
 		};
-		this.hints = new HashMap<String, Object>();
+		this.hints = new HashMap<>();
 	}
 
 

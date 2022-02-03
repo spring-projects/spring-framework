@@ -164,7 +164,7 @@ public class ResourceUrlProviderTests {
 
 
 	private Condition<PathPattern> pathPatternStringOf(String expected) {
-		return new Condition<PathPattern>(
+		return new Condition<>(
 				actual -> actual != null && actual.getPatternString().equals(expected),
 				"Pattern %s", expected);
 	}
