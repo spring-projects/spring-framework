@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 									beanName + "' has a non-boolean parameter - not supported as destroy method");
 						}
 					}
-					destroyMethod = ClassUtils.getInterfaceMethodIfPossible(destroyMethod);
+					destroyMethod = ClassUtils.getInterfaceMethodIfPossible(destroyMethod, bean.getClass());
 				}
 				this.destroyMethod = destroyMethod;
 			}
@@ -252,9 +252,9 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			invokeCustomDestroyMethod(this.destroyMethod);
 		}
 		else if (this.destroyMethodName != null) {
-			Method methodToInvoke = determineDestroyMethod(this.destroyMethodName);
-			if (methodToInvoke != null) {
-				invokeCustomDestroyMethod(ClassUtils.getInterfaceMethodIfPossible(methodToInvoke));
+			Method destroyMethod = determineDestroyMethod(this.destroyMethodName);
+			if (destroyMethod != null) {
+				invokeCustomDestroyMethod(ClassUtils.getInterfaceMethodIfPossible(destroyMethod, this.bean.getClass()));
 			}
 		}
 	}

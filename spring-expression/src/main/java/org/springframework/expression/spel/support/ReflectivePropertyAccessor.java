@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			// The readerCache will only contain gettable properties (let's not worry about setters for now).
 			Property property = new Property(type, method, null);
 			TypeDescriptor typeDescriptor = new TypeDescriptor(property);
-			method = ClassUtils.getInterfaceMethodIfPossible(method);
+			method = ClassUtils.getInterfaceMethodIfPossible(method, type);
 			this.readerCache.put(cacheKey, new InvokerPair(method, typeDescriptor));
 			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;
@@ -182,7 +182,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					// The readerCache will only contain gettable properties (let's not worry about setters for now).
 					Property property = new Property(type, method, null);
 					TypeDescriptor typeDescriptor = new TypeDescriptor(property);
-					method = ClassUtils.getInterfaceMethodIfPossible(method);
+					method = ClassUtils.getInterfaceMethodIfPossible(method, type);
 					invoker = new InvokerPair(method, typeDescriptor);
 					this.lastReadInvokerPair = invoker;
 					this.readerCache.put(cacheKey, invoker);
@@ -242,7 +242,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			// Treat it like a property
 			Property property = new Property(type, null, method);
 			TypeDescriptor typeDescriptor = new TypeDescriptor(property);
-			method = ClassUtils.getInterfaceMethodIfPossible(method);
+			method = ClassUtils.getInterfaceMethodIfPossible(method, type);
 			this.writerCache.put(cacheKey, method);
 			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;
@@ -291,7 +291,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (method == null) {
 				method = findSetterForProperty(name, type, target);
 				if (method != null) {
-					method = ClassUtils.getInterfaceMethodIfPossible(method);
+					method = ClassUtils.getInterfaceMethodIfPossible(method, type);
 					cachedMember = method;
 					this.writerCache.put(cacheKey, cachedMember);
 				}
@@ -533,21 +533,21 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (target == null) {
 			return this;
 		}
-		Class<?> clazz = (target instanceof Class ? (Class<?>) target : target.getClass());
-		if (clazz.isArray()) {
+		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
+		if (type.isArray()) {
 			return this;
 		}
 
-		PropertyCacheKey cacheKey = new PropertyCacheKey(clazz, name, target instanceof Class);
+		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		InvokerPair invocationTarget = this.readerCache.get(cacheKey);
 
 		if (invocationTarget == null || invocationTarget.member instanceof Method) {
 			Method method = (Method) (invocationTarget != null ? invocationTarget.member : null);
 			if (method == null) {
-				method = findGetterForProperty(name, clazz, target);
+				method = findGetterForProperty(name, type, target);
 				if (method != null) {
 					TypeDescriptor typeDescriptor = new TypeDescriptor(new MethodParameter(method, -1));
-					method = ClassUtils.getInterfaceMethodIfPossible(method);
+					method = ClassUtils.getInterfaceMethodIfPossible(method, type);
 					invocationTarget = new InvokerPair(method, typeDescriptor);
 					ReflectionUtils.makeAccessible(method);
 					this.readerCache.put(cacheKey, invocationTarget);
@@ -561,7 +561,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (invocationTarget == null || invocationTarget.member instanceof Field) {
 			Field field = (invocationTarget != null ? (Field) invocationTarget.member : null);
 			if (field == null) {
-				field = findField(name, clazz, target instanceof Class);
+				field = findField(name, type, target instanceof Class);
 				if (field != null) {
 					invocationTarget = new InvokerPair(field, new TypeDescriptor(field));
 					ReflectionUtils.makeAccessible(field);
@@ -600,7 +600,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		private final String property;
 
-		private boolean targetIsClass;
+		private final boolean targetIsClass;
 
 		public PropertyCacheKey(Class<?> clazz, String name, boolean targetIsClass) {
 			this.clazz = clazz;
