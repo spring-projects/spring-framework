@@ -51,7 +51,7 @@
 
 		<!-- Type Names -->
 		<module name="TypeName">
-			<property name="format" value="^[A-Z][a-zA-Z0-9_]*(?&lt;!Test)$" />
+			<property name="format" value="^[A-Z][a-zA-Z0-9_$]*(?&lt;!Test)$" />
 			<property name="tokens" value="CLASS_DEF" />
 			<message key="name.invalidPattern"
 				value="Class name ''{0}'' must not end with ''Test'' (checked pattern ''{1}'')." />
