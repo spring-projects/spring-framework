@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1256,7 +1256,7 @@ public abstract class ClassUtils {
 	 * (may be {@code null} or may not even implement the method)
 	 * @return the specific target method, or the original method if the
 	 * {@code targetClass} does not implement it
-	 * @see #getInterfaceMethodIfPossible
+	 * @see #getInterfaceMethodIfPossible(Method, Class)
 	 */
 	public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
 		if (targetClass != null && targetClass != method.getDeclaringClass() && isOverridable(method, targetClass)) {
@@ -1289,28 +1289,54 @@ public abstract class ClassUtils {
 	 * @param method the method to be invoked, potentially from an implementation class
 	 * @return the corresponding interface method, or the original method if none found
 	 * @since 5.1
+	 * @deprecated in favor of {@link #getInterfaceMethodIfPossible(Method, Class)}
+	 */
+	@Deprecated
+	public static Method getInterfaceMethodIfPossible(Method method) {
+		return getInterfaceMethodIfPossible(method, null);
+	}
+
+	/**
+	 * Determine a corresponding interface method for the given method handle, if possible.
+	 * <p>This is particularly useful for arriving at a public exported type on Jigsaw
+	 * which can be reflectively invoked without an illegal access warning.
+	 * @param method the method to be invoked, potentially from an implementation class
+	 * @param targetClass the target class to check for declared interfaces
+	 * @return the corresponding interface method, or the original method if none found
+	 * @since 5.3.16
 	 * @see #getMostSpecificMethod
 	 */
-	public static Method getInterfaceMethodIfPossible(Method method) {
+	public static Method getInterfaceMethodIfPossible(Method method, @Nullable Class<?> targetClass) {
 		if (!Modifier.isPublic(method.getModifiers()) || method.getDeclaringClass().isInterface()) {
 			return method;
 		}
-		return interfaceMethodCache.computeIfAbsent(method, key -> {
-			Class<?> current = key.getDeclaringClass();
-			while (current != null && current != Object.class) {
-				Class<?>[] ifcs = current.getInterfaces();
-				for (Class<?> ifc : ifcs) {
-					try {
-						return ifc.getMethod(key.getName(), key.getParameterTypes());
-					}
-					catch (NoSuchMethodException ex) {
-						// ignore
-					}
+		// Try cached version of method in its declaring class
+		Method result = interfaceMethodCache.computeIfAbsent(method,
+				key -> findInterfaceMethodIfPossible(key, key.getDeclaringClass(), Object.class));
+		if (result == method && targetClass != null) {
+			// No interface method found yet -> try given target class (possibly a subclass of the
+			// declaring class, late-binding a base class method to a subclass-declared interface:
+			// see e.g. HashMap.HashIterator.hasNext)
+			result = findInterfaceMethodIfPossible(method, targetClass, method.getDeclaringClass());
+		}
+		return result;
+	}
+
+	private static Method findInterfaceMethodIfPossible(Method method, Class<?> startClass, Class<?> endClass) {
+		Class<?> current = startClass;
+		while (current != null && current != endClass) {
+			Class<?>[] ifcs = current.getInterfaces();
+			for (Class<?> ifc : ifcs) {
+				try {
+					return ifc.getMethod(method.getName(), method.getParameterTypes());
 				}
-				current = current.getSuperclass();
+				catch (NoSuchMethodException ex) {
+					// ignore
+				}
 			}
-			return key;
-		});
+			current = current.getSuperclass();
+		}
+		return method;
 	}
 
 	/**
