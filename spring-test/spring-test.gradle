@@ -27,7 +27,7 @@ dependencies {
 	optional("org.junit.jupiter:junit-jupiter-api")
 	optional("org.testng:testng")
 	optional("org.aspectj:aspectjweaver")
-	optional("org.codehaus.groovy:groovy")
+	optional("org.apache.groovy:groovy")
 	optional("org.hamcrest:hamcrest")
 	optional("net.sourceforge.htmlunit:htmlunit")
 	optional("org.seleniumhq.selenium:htmlunit-driver") {

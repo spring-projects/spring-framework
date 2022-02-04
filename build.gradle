@@ -56,7 +56,7 @@ configure(allprojects) { project ->
 				entry 'aspectjtools'
 				entry 'aspectjweaver'
 			}
-			dependencySet(group: 'org.codehaus.groovy', version: '3.0.9') {
+			dependencySet(group: 'org.apache.groovy', version: '4.0.0') {
 				entry 'groovy'
 				entry 'groovy-jsr223'
 				entry 'groovy-templates'  // requires findbugs for warning-free compilation

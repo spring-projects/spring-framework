@@ -47,7 +47,7 @@ dependencies {
 	optional("com.google.protobuf:protobuf-java-util")
 	optional("com.googlecode.protobuf-java-format:protobuf-java-format")
 	optional("com.rometools:rome")
-	optional("org.codehaus.groovy:groovy")
+	optional("org.apache.groovy:groovy")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-json")
