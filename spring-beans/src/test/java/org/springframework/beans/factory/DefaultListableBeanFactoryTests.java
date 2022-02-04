@@ -854,8 +854,11 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
 		lbf.registerAlias("otherTest", "test2");
 		lbf.registerAlias("test", "test2");
+		lbf.registerAlias("test", "testX");
+		lbf.registerBeanDefinition("testX", new RootBeanDefinition(TestBean.class));
 		assertThat(lbf.getBean("test")).isInstanceOf(NestedTestBean.class);
 		assertThat(lbf.getBean("test2")).isInstanceOf(NestedTestBean.class);
+		assertThat(lbf.getBean("testX")).isInstanceOf(TestBean.class);
 	}
 
 	@Test
@@ -864,10 +867,18 @@ class DefaultListableBeanFactoryTests {
 		BeanDefinition oldDef = new RootBeanDefinition(TestBean.class);
 		BeanDefinition newDef = new RootBeanDefinition(NestedTestBean.class);
 		lbf.registerBeanDefinition("test", oldDef);
+		lbf.registerAlias("test", "testX");
 		assertThatExceptionOfType(BeanDefinitionOverrideException.class).isThrownBy(() ->
 				lbf.registerBeanDefinition("test", newDef))
 				.satisfies(ex -> {
 					assertThat(ex.getBeanName()).isEqualTo("test");
+					assertThat(ex.getBeanDefinition()).isEqualTo(newDef);
+					assertThat(ex.getExistingDefinition()).isEqualTo(oldDef);
+				});
+		assertThatExceptionOfType(BeanDefinitionOverrideException.class).isThrownBy(() ->
+						lbf.registerBeanDefinition("testX", newDef))
+				.satisfies(ex -> {
+					assertThat(ex.getBeanName()).isEqualTo("testX");
 					assertThat(ex.getBeanDefinition()).isEqualTo(newDef);
 					assertThat(ex.getExistingDefinition()).isEqualTo(oldDef);
 				});

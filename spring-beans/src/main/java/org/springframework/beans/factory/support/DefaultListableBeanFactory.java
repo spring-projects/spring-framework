@@ -994,6 +994,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			this.beanDefinitionMap.put(beanName, beanDefinition);
 		}
 		else {
+			if (isAlias(beanName)) {
+				if (!isAllowBeanDefinitionOverriding()) {
+					String aliasedName = canonicalName(beanName);
+					if (containsBeanDefinition(aliasedName)) {  // alias for existing bean definition
+						throw new BeanDefinitionOverrideException(
+								beanName, beanDefinition, getBeanDefinition(aliasedName));
+					}
+					else {  // alias pointing to non-existing bean definition
+						throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
+								"Cannot register bean definition for bean '" + beanName +
+								"' since there is already an alias for bean '" + aliasedName + "' bound.");
+					}
+				}
+				else {
+					removeAlias(beanName);
+				}
+			}
 			if (hasBeanCreationStarted()) {
 				// Cannot modify startup-time collection elements anymore (for stable iteration)
 				synchronized (this.beanDefinitionMap) {
