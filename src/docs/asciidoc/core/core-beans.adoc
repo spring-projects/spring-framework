@@ -7490,7 +7490,7 @@ exact same way as when you use Spring annotations, as the following example show
 	}
 ----
 
-NOTE: In contrast to `@Component`, the JSR-330 `@Named` and the JSR-250 `ManagedBean`
+NOTE: In contrast to `@Component`, the JSR-330 `@Named` and the JSR-250 `@ManagedBean`
 annotations are not composable. You should use Spring's stereotype model for building
 custom component annotations.
 
