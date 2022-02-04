@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
-import org.springframework.core.task.TaskTimeoutException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -143,6 +142,7 @@ public class SimpleTaskWorkManager implements WorkManager {
 	 * (or -1 if not applicable or not known)
 	 * @throws WorkException if the TaskExecutor did not accept the Work
 	 */
+	@SuppressWarnings("deprecation")
 	protected long executeWork(TaskExecutor taskExecutor, Work work, long startTimeout, boolean blockUntilStarted,
 			@Nullable ExecutionContext executionContext, @Nullable WorkListener workListener) throws WorkException {
 
@@ -164,7 +164,7 @@ public class SimpleTaskWorkManager implements WorkManager {
 				taskExecutor.execute(workHandle);
 			}
 		}
-		catch (TaskTimeoutException ex) {
+		catch (org.springframework.core.task.TaskTimeoutException ex) {
 			WorkException wex = new WorkRejectedException("TaskExecutor rejected Work because of timeout: " + work, ex);
 			wex.setErrorCode(WorkException.START_TIMED_OUT);
 			workListenerToUse.workRejected(new WorkEvent(this, WorkEvent.WORK_REJECTED, work, wex));
