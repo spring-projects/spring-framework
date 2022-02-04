@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		if (isolationLevelNeeded || definition.isReadOnly()) {
 			if (this.prepareConnection && ConnectionReleaseMode.ON_CLOSE.equals(
 					session.getJdbcCoordinator().getLogicalConnection().getConnectionHandlingMode().getReleaseMode())) {
-				preparedCon = session.connection();
+				preparedCon = session.getJdbcCoordinator().getLogicalConnection().getPhysicalConnection();
 				previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(preparedCon, definition);
 			}
 			else if (isolationLevelNeeded) {
@@ -356,9 +356,9 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			}
 			if (this.needsConnectionReset &&
 					this.session.getJdbcCoordinator().getLogicalConnection().isPhysicallyConnected()) {
-				Connection conToReset = this.session.connection();
+				Connection con = this.session.getJdbcCoordinator().getLogicalConnection().getPhysicalConnection();
 				DataSourceUtils.resetConnectionAfterTransaction(
-						conToReset, this.previousIsolationLevel, this.readOnly);
+						con, this.previousIsolationLevel, this.readOnly);
 			}
 		}
 	}
@@ -374,7 +374,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		@Override
 		public Connection getConnection() {
-			return this.session.connection();
+			return this.session.getJdbcCoordinator().getLogicalConnection().getPhysicalConnection();
 		}
 	}
 
