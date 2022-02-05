@@ -153,11 +153,11 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * @throws IllegalArgumentException in case of an unsupported value type
 	 */
 	protected DataSource resolveSpecifiedDataSource(Object dataSource) throws IllegalArgumentException {
-		if (dataSource instanceof DataSource) {
-			return (DataSource) dataSource;
+		if (dataSource instanceof DataSource result) {
+			return result;
 		}
-		else if (dataSource instanceof String) {
-			return this.dataSourceLookup.getDataSource((String) dataSource);
+		else if (dataSource instanceof String name) {
+			return this.dataSourceLookup.getDataSource(name);
 		}
 		else {
 			throw new IllegalArgumentException(
