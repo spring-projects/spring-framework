@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,16 +29,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Tests with headers and cookies.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class HeaderAndCookieTests {
+class HeaderAndCookieTests {
 
 	private final WebTestClient client = WebTestClient.bindToController(new TestController()).build();
 
 
 	@Test
-	public void requestResponseHeaderPair() throws Exception {
+	void requestResponseHeaderPair() {
 		this.client.get().uri("/header-echo").header("h1", "in")
 				.exchange()
 				.expectStatus().isOk()
@@ -46,7 +47,7 @@ public class HeaderAndCookieTests {
 	}
 
 	@Test
-	public void headerMultipleValues() throws Exception {
+	void headerMultipleValues() {
 		this.client.get().uri("/header-multi-value")
 				.exchange()
 				.expectStatus().isOk()
@@ -54,7 +55,7 @@ public class HeaderAndCookieTests {
 	}
 
 	@Test
-	public void setCookies() {
+	void setCookies() {
 		this.client.get().uri("/cookie-echo")
 				.cookies(cookies -> cookies.add("k1", "v1"))
 				.exchange()

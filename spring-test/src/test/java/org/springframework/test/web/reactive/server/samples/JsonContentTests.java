@@ -41,13 +41,13 @@ import static org.hamcrest.Matchers.containsString;
  * @author Sam Brannen
  * @since 5.0
  */
-public class JsonContentTests {
+class JsonContentTests {
 
 	private final WebTestClient client = WebTestClient.bindToController(new PersonController()).build();
 
 
 	@Test
-	public void jsonContentWithDefaultLenientMode() {
+	void jsonContentWithDefaultLenientMode() {
 		this.client.get().uri("/persons")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
@@ -59,7 +59,7 @@ public class JsonContentTests {
 	}
 
 	@Test
-	public void jsonContentWithStrictMode() {
+	void jsonContentWithStrictMode() {
 		this.client.get().uri("/persons")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
@@ -72,7 +72,7 @@ public class JsonContentTests {
 	}
 
 	@Test
-	public void jsonContentWithStrictModeAndMissingAttributes() {
+	void jsonContentWithStrictModeAndMissingAttributes() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> this.client.get().uri("/persons")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
@@ -85,7 +85,7 @@ public class JsonContentTests {
 	}
 
 	@Test
-	public void jsonPathIsEqualTo() {
+	void jsonPathIsEqualTo() {
 		this.client.get().uri("/persons")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
@@ -97,7 +97,7 @@ public class JsonContentTests {
 	}
 
 	@Test
-	public void jsonPathMatches() {
+	void jsonPathMatches() {
 		this.client.get().uri("/persons/John/Smith")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
@@ -107,7 +107,7 @@ public class JsonContentTests {
 	}
 
 	@Test
-	public void postJsonContent() {
+	void postJsonContent() {
 		this.client.post().uri("/persons")
 				.contentType(MediaType.APPLICATION_JSON)
 				.bodyValue("{\"firstName\":\"John\",\"lastName\":\"Smith\"}")
