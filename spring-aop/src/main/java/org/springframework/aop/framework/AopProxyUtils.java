@@ -246,7 +246,7 @@ public abstract class AopProxyUtils {
 	 * checks that work on modern, main stream JVMs.
 	 * @param clazz the class to check
 	 * @return {@code true} if the class is a lambda implementation class
-	 * @since 5.2.16
+	 * @since 5.3.16
 	 */
 	static boolean isLambda(Class<?> clazz) {
 		return (clazz.isSynthetic() && (clazz.getSuperclass() == Object.class) &&
