@@ -95,19 +95,13 @@ abstract class AnnotationsScanner {
 	private static <C, R> R processClass(C context, Class<?> source,
 			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor) {
 
-		switch (searchStrategy) {
-			case DIRECT:
-				return processElement(context, source, processor);
-			case INHERITED_ANNOTATIONS:
-				return processClassInheritedAnnotations(context, source, searchStrategy, processor);
-			case SUPERCLASS:
-				return processClassHierarchy(context, source, processor, false, false);
-			case TYPE_HIERARCHY:
-				return processClassHierarchy(context, source, processor, true, false);
-			case TYPE_HIERARCHY_AND_ENCLOSING_CLASSES:
-				return processClassHierarchy(context, source, processor, true, true);
-		}
-		throw new IllegalStateException("Unsupported search strategy " + searchStrategy);
+		return switch (searchStrategy) {
+			case DIRECT -> processElement(context, source, processor);
+			case INHERITED_ANNOTATIONS -> processClassInheritedAnnotations(context, source, searchStrategy, processor);
+			case SUPERCLASS -> processClassHierarchy(context, source, processor, false, false);
+			case TYPE_HIERARCHY -> processClassHierarchy(context, source, processor, true, false);
+			case TYPE_HIERARCHY_AND_ENCLOSING_CLASSES -> processClassHierarchy(context, source, processor, true, true);
+		};
 	}
 
 	@Nullable
@@ -238,19 +232,14 @@ abstract class AnnotationsScanner {
 	private static <C, R> R processMethod(C context, Method source,
 			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor) {
 
-		switch (searchStrategy) {
-			case DIRECT:
-			case INHERITED_ANNOTATIONS:
-				return processMethodInheritedAnnotations(context, source, processor);
-			case SUPERCLASS:
-				return processMethodHierarchy(context, new int[] {0}, source.getDeclaringClass(),
-						processor, source, false);
-			case TYPE_HIERARCHY:
-			case TYPE_HIERARCHY_AND_ENCLOSING_CLASSES:
-				return processMethodHierarchy(context, new int[] {0}, source.getDeclaringClass(),
-						processor, source, true);
-		}
-		throw new IllegalStateException("Unsupported search strategy " + searchStrategy);
+		return switch (searchStrategy) {
+			case DIRECT, INHERITED_ANNOTATIONS -> processMethodInheritedAnnotations(context, source, processor);
+			case SUPERCLASS -> processMethodHierarchy(context, new int[]{0}, source.getDeclaringClass(),
+					processor, source, false);
+			case TYPE_HIERARCHY, TYPE_HIERARCHY_AND_ENCLOSING_CLASSES -> processMethodHierarchy(context, new int[]{0},
+					source.getDeclaringClass(),
+					processor, source, true);
+		};
 	}
 
 	@Nullable

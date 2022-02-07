@@ -407,17 +407,14 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	}
 
 	private static List<String> getUndelivered(String[] messages, int i) {
-		switch (messages.length - i) {
-			case 0:
-				return Collections.emptyList();
-			case 1:
-				return (messages[i].trim().isEmpty() ?
-						Collections.emptyList() : Collections.singletonList(messages[i]));
-			default:
-				return Arrays.stream(Arrays.copyOfRange(messages, i, messages.length))
-						.filter(message -> !message.trim().isEmpty())
-						.collect(Collectors.toList());
-		}
+		return switch (messages.length - i) {
+			case 0 -> Collections.emptyList();
+			case 1 -> (messages[i].trim().isEmpty() ?
+					   Collections.<String>emptyList() : Collections.singletonList(messages[i]));
+			default -> Arrays.stream(Arrays.copyOfRange(messages, i, messages.length))
+					.filter(message -> !message.trim().isEmpty())
+					.collect(Collectors.toList());
+		};
 	}
 
 	/**

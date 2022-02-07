@@ -209,12 +209,12 @@ public class Selection extends SpelNodeImpl {
 	}
 
 	private String prefix() {
-		switch (this.variant) {
-			case ALL:   return "?[";
-			case FIRST: return "^[";
-			case LAST:  return "$[";
-		}
-		return "";
+		return switch (this.variant) {
+			case ALL -> "?[";
+			case FIRST -> "^[";
+			case LAST -> "$[";
+			default -> "";
+		};
 	}
 
 }

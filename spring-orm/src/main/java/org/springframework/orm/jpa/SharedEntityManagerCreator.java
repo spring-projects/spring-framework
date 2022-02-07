@@ -266,13 +266,14 @@ public abstract class SharedEntityManagerCreator {
 					this.targetFactory, this.properties, this.synchronizedWithTransaction);
 
 			switch (method.getName()) {
-				case "getTargetEntityManager":
+				case "getTargetEntityManager" -> {
 					// Handle EntityManagerProxy interface.
 					if (target == null) {
 						throw new IllegalStateException("No transactional EntityManager available");
 					}
 					return target;
-				case "unwrap":
+				}
+				case "unwrap" -> {
 					Class<?> targetClass = (Class<?>) args[0];
 					if (targetClass == null) {
 						return (target != null ? target : proxy);
@@ -281,8 +282,8 @@ public abstract class SharedEntityManagerCreator {
 					if (target == null) {
 						throw new IllegalStateException("No transactional EntityManager available");
 					}
-					// Still perform unwrap call on target EntityManager.
-					break;
+				}
+				// Still perform unwrap call on target EntityManager.
 			}
 
 			if (transactionRequiringMethods.contains(method.getName())) {

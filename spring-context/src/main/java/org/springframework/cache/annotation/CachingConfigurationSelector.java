@@ -68,14 +68,10 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	 */
 	@Override
 	public String[] selectImports(AdviceMode adviceMode) {
-		switch (adviceMode) {
-			case PROXY:
-				return getProxyImports();
-			case ASPECTJ:
-				return getAspectJImports();
-			default:
-				return null;
-		}
+		return switch (adviceMode) {
+			case PROXY -> getProxyImports();
+			case ASPECTJ -> getAspectJImports();
+		};
 	}
 
 	/**

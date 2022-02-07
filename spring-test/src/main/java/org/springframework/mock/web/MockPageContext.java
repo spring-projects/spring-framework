@@ -154,20 +154,11 @@ public class MockPageContext extends PageContext {
 	public void setAttribute(String name, @Nullable Object value, int scope) {
 		Assert.notNull(name, "Attribute name must not be null");
 		switch (scope) {
-			case PAGE_SCOPE:
-				setAttribute(name, value);
-				break;
-			case REQUEST_SCOPE:
-				this.request.setAttribute(name, value);
-				break;
-			case SESSION_SCOPE:
-				this.request.getSession().setAttribute(name, value);
-				break;
-			case APPLICATION_SCOPE:
-				this.servletContext.setAttribute(name, value);
-				break;
-			default:
-				throw new IllegalArgumentException("Invalid scope: " + scope);
+			case PAGE_SCOPE -> setAttribute(name, value);
+			case REQUEST_SCOPE -> this.request.setAttribute(name, value);
+			case SESSION_SCOPE -> this.request.getSession().setAttribute(name, value);
+			case APPLICATION_SCOPE -> this.servletContext.setAttribute(name, value);
+			default -> throw new IllegalArgumentException("Invalid scope: " + scope);
 		}
 	}
 
@@ -226,20 +217,11 @@ public class MockPageContext extends PageContext {
 	public void removeAttribute(String name, int scope) {
 		Assert.notNull(name, "Attribute name must not be null");
 		switch (scope) {
-			case PAGE_SCOPE:
-				this.attributes.remove(name);
-				break;
-			case REQUEST_SCOPE:
-				this.request.removeAttribute(name);
-				break;
-			case SESSION_SCOPE:
-				this.request.getSession().removeAttribute(name);
-				break;
-			case APPLICATION_SCOPE:
-				this.servletContext.removeAttribute(name);
-				break;
-			default:
-				throw new IllegalArgumentException("Invalid scope: " + scope);
+			case PAGE_SCOPE -> this.attributes.remove(name);
+			case REQUEST_SCOPE -> this.request.removeAttribute(name);
+			case SESSION_SCOPE -> this.request.getSession().removeAttribute(name);
+			case APPLICATION_SCOPE -> this.servletContext.removeAttribute(name);
+			default -> throw new IllegalArgumentException("Invalid scope: " + scope);
 		}
 	}
 

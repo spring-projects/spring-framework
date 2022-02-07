@@ -415,17 +415,13 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	 */
 	@Nullable
 	protected IsolationLevel resolveIsolationLevel(int isolationLevel) {
-		switch (isolationLevel) {
-			case TransactionDefinition.ISOLATION_READ_COMMITTED:
-				return IsolationLevel.READ_COMMITTED;
-			case TransactionDefinition.ISOLATION_READ_UNCOMMITTED:
-				return IsolationLevel.READ_UNCOMMITTED;
-			case TransactionDefinition.ISOLATION_REPEATABLE_READ:
-				return IsolationLevel.REPEATABLE_READ;
-			case TransactionDefinition.ISOLATION_SERIALIZABLE:
-				return IsolationLevel.SERIALIZABLE;
-		}
-		return null;
+		return switch (isolationLevel) {
+			case TransactionDefinition.ISOLATION_READ_COMMITTED -> IsolationLevel.READ_COMMITTED;
+			case TransactionDefinition.ISOLATION_READ_UNCOMMITTED -> IsolationLevel.READ_UNCOMMITTED;
+			case TransactionDefinition.ISOLATION_REPEATABLE_READ -> IsolationLevel.REPEATABLE_READ;
+			case TransactionDefinition.ISOLATION_SERIALIZABLE -> IsolationLevel.SERIALIZABLE;
+			default -> null;
+		};
 	}
 
 	/**

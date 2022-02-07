@@ -192,20 +192,16 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	 * @since 5.2.2
 	 */
 	public static RSocketFrameTypeMessageCondition getCondition(int cardinalityIn, int cardinalityOut) {
-		switch (cardinalityIn) {
-			case 0:
-			case 1:
-				switch (cardinalityOut) {
-					case 0: return REQUEST_FNF_OR_RESPONSE_CONDITION;
-					case 1: return REQUEST_RESPONSE_CONDITION;
-					case 2: return REQUEST_STREAM_CONDITION;
-					default: throw new IllegalStateException("Invalid cardinality: " + cardinalityOut);
-				}
-			case 2:
-				return REQUEST_CHANNEL_CONDITION;
-			default:
-				throw new IllegalStateException("Invalid cardinality: " + cardinalityIn);
-		}
+		return switch (cardinalityIn) {
+			case 0, 1 -> switch (cardinalityOut) {
+				case 0 -> REQUEST_FNF_OR_RESPONSE_CONDITION;
+				case 1 -> REQUEST_RESPONSE_CONDITION;
+				case 2 -> REQUEST_STREAM_CONDITION;
+				default -> throw new IllegalStateException("Invalid cardinality: " + cardinalityOut);
+			};
+			case 2 -> REQUEST_CHANNEL_CONDITION;
+			default -> throw new IllegalStateException("Invalid cardinality: " + cardinalityIn);
+		};
 	}
 
 }
