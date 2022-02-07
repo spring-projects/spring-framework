@@ -220,21 +220,18 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 		}
 		else {
 			switch (aspectJAnnotation.getAnnotationType()) {
-				case AtPointcut:
-				case AtAround:
+				case AtPointcut, AtAround -> {
 					this.isBeforeAdvice = false;
 					this.isAfterAdvice = false;
-					break;
-				case AtBefore:
+				}
+				case AtBefore -> {
 					this.isBeforeAdvice = true;
 					this.isAfterAdvice = false;
-					break;
-				case AtAfter:
-				case AtAfterReturning:
-				case AtAfterThrowing:
+				}
+				case AtAfter, AtAfterReturning, AtAfterThrowing -> {
 					this.isBeforeAdvice = false;
 					this.isAfterAdvice = true;
-					break;
+				}
 			}
 		}
 	}

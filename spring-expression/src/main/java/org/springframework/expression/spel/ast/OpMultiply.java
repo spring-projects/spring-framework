@@ -140,21 +140,12 @@ public class OpMultiply extends Operator {
 			cf.exitCompilationScope();
 			CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, rightDesc, targetDesc);
 			switch (targetDesc) {
-				case 'I':
-					mv.visitInsn(IMUL);
-					break;
-				case 'J':
-					mv.visitInsn(LMUL);
-					break;
-				case 'F':
-					mv.visitInsn(FMUL);
-					break;
-				case 'D':
-					mv.visitInsn(DMUL);
-					break;
-				default:
-					throw new IllegalStateException(
-							"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
+				case 'I' -> mv.visitInsn(IMUL);
+				case 'J' -> mv.visitInsn(LMUL);
+				case 'F' -> mv.visitInsn(FMUL);
+				case 'D' -> mv.visitInsn(DMUL);
+				default -> throw new IllegalStateException(
+						"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
 			}
 		}
 		cf.pushDescriptor(this.exitTypeDescriptor);

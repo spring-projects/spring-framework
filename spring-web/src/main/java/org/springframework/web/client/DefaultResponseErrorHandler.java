@@ -164,12 +164,9 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 		String message = getErrorMessage(statusCode.value(), statusText, body, charset);
 
 		switch (statusCode.series()) {
-			case CLIENT_ERROR:
-				throw HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
-			case SERVER_ERROR:
-				throw HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);
-			default:
-				throw new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
+			case CLIENT_ERROR -> throw HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
+			case SERVER_ERROR -> throw HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);
+			default -> throw new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
 		}
 	}
 

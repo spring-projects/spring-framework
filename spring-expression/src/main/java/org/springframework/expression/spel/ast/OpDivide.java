@@ -115,21 +115,12 @@ public class OpDivide extends Operator {
 			cf.exitCompilationScope();
 			CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, rightDesc, targetDesc);
 			switch (targetDesc) {
-				case 'I':
-					mv.visitInsn(IDIV);
-					break;
-				case 'J':
-					mv.visitInsn(LDIV);
-					break;
-				case 'F':
-					mv.visitInsn(FDIV);
-					break;
-				case 'D':
-					mv.visitInsn(DDIV);
-					break;
-				default:
-					throw new IllegalStateException(
-							"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
+				case 'I' -> mv.visitInsn(IDIV);
+				case 'J' -> mv.visitInsn(LDIV);
+				case 'F' -> mv.visitInsn(FDIV);
+				case 'D' -> mv.visitInsn(DDIV);
+				default -> throw new IllegalStateException(
+						"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
 			}
 		}
 		cf.pushDescriptor(this.exitTypeDescriptor);

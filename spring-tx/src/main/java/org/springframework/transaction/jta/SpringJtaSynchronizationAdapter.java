@@ -171,14 +171,9 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 		}
 		// Call afterCompletion with the appropriate status indication.
 		switch (status) {
-			case Status.STATUS_COMMITTED:
-				this.springSynchronization.afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
-				break;
-			case Status.STATUS_ROLLEDBACK:
-				this.springSynchronization.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
-				break;
-			default:
-				this.springSynchronization.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
+			case Status.STATUS_COMMITTED -> this.springSynchronization.afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
+			case Status.STATUS_ROLLEDBACK -> this.springSynchronization.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
+			default -> this.springSynchronization.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 		}
 	}
 

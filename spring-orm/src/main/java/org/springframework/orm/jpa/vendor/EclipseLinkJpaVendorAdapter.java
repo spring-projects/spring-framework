@@ -94,19 +94,19 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 */
 	@Nullable
 	protected String determineTargetDatabaseName(Database database) {
-		switch (database) {
-			case DB2: return TargetDatabase.DB2;
-			case DERBY: return TargetDatabase.Derby;
-			case HANA: return TargetDatabase.HANA;
-			case HSQL: return TargetDatabase.HSQL;
-			case INFORMIX: return TargetDatabase.Informix;
-			case MYSQL: return TargetDatabase.MySQL;
-			case ORACLE: return TargetDatabase.Oracle;
-			case POSTGRESQL: return TargetDatabase.PostgreSQL;
-			case SQL_SERVER: return TargetDatabase.SQLServer;
-			case SYBASE: return TargetDatabase.Sybase;
-			default: return null;
-		}
+		return switch (database) {
+			case DB2 -> TargetDatabase.DB2;
+			case DERBY -> TargetDatabase.Derby;
+			case HANA -> TargetDatabase.HANA;
+			case HSQL -> TargetDatabase.HSQL;
+			case INFORMIX -> TargetDatabase.Informix;
+			case MYSQL -> TargetDatabase.MySQL;
+			case ORACLE -> TargetDatabase.Oracle;
+			case POSTGRESQL -> TargetDatabase.PostgreSQL;
+			case SQL_SERVER -> TargetDatabase.SQLServer;
+			case SYBASE -> TargetDatabase.Sybase;
+			default -> null;
+		};
 	}
 
 	@Override

@@ -608,14 +608,11 @@ public abstract class DataBufferUtils {
 
 	private static NestedMatcher createMatcher(byte[] delimiter) {
 		Assert.isTrue(delimiter.length > 0, "Delimiter must not be empty");
-		switch (delimiter.length) {
-			case 1:
-				return (delimiter[0] == 10 ? SingleByteMatcher.NEWLINE_MATCHER : new SingleByteMatcher(delimiter));
-			case 2:
-				return new TwoByteMatcher(delimiter);
-			default:
-				return new KnuthMorrisPrattMatcher(delimiter);
-		}
+		return switch (delimiter.length) {
+			case 1 -> (delimiter[0] == 10 ? SingleByteMatcher.NEWLINE_MATCHER : new SingleByteMatcher(delimiter));
+			case 2 -> new TwoByteMatcher(delimiter);
+			default -> new KnuthMorrisPrattMatcher(delimiter);
+		};
 	}
 
 
