@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,18 +195,24 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	}
 
 	private String toString(Object value) {
+		if (value instanceof String) {
+			return '"' + value.toString() + '"';
+		}
+		if (value instanceof Enum) {
+			return ((Enum<?>) value).name();
+		}
 		if (value instanceof Class) {
-			return ((Class<?>) value).getName();
+			return ((Class<?>) value).getName() + ".class";
 		}
 		if (value.getClass().isArray()) {
-			StringBuilder builder = new StringBuilder("[");
+			StringBuilder builder = new StringBuilder("{");
 			for (int i = 0; i < Array.getLength(value); i++) {
 				if (i > 0) {
 					builder.append(", ");
 				}
 				builder.append(toString(Array.get(value, i)));
 			}
-			builder.append(']');
+			builder.append('}');
 			return builder.toString();
 		}
 		return String.valueOf(value);
