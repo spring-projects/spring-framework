@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.JRE;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
@@ -1860,20 +1861,41 @@ class MergedAnnotationsTests {
 		Method methodWithPath = WebController.class.getMethod("handleMappedWithPathAttribute");
 		RequestMapping webMappingWithAliases = methodWithPath.getAnnotation(RequestMapping.class);
 		assertThat(webMappingWithAliases).isNotNull();
+
 		Method methodWithPathAndValue = WebController.class.getMethod("handleMappedWithSamePathAndValueAttributes");
 		RequestMapping webMappingWithPathAndValue = methodWithPathAndValue.getAnnotation(RequestMapping.class);
 		assertThat(methodWithPathAndValue).isNotNull();
+
 		RequestMapping synthesizedWebMapping1 = MergedAnnotation.from(webMappingWithAliases).synthesize();
 		RequestMapping synthesizedWebMapping2 = MergedAnnotation.from(webMappingWithPathAndValue).synthesize();
+
 		assertThat(webMappingWithAliases.toString()).isNotEqualTo(synthesizedWebMapping1.toString());
+
+		if (JRE.currentVersion().ordinal() > JRE.JAVA_8.ordinal()) {
+			// The unsynthesized annotation for handleMappedWithSamePathAndValueAttributes()
+			// should produce the same toString() results as synthesized annotations for
+			// handleMappedWithPathAttribute() on Java 9 or higher
+			assertToStringForWebMappingWithPathAndValue(webMappingWithPathAndValue);
+		}
 		assertToStringForWebMappingWithPathAndValue(synthesizedWebMapping1);
 		assertToStringForWebMappingWithPathAndValue(synthesizedWebMapping2);
 	}
 
 	private void assertToStringForWebMappingWithPathAndValue(RequestMapping webMapping) {
-		String prefix = "@" + RequestMapping.class.getName() + "(";
-		assertThat(webMapping.toString()).startsWith(prefix).contains("value=[/test]",
-				"path=[/test]", "name=bar", "method=", "[GET, POST]").endsWith(")");
+		String string = webMapping.toString();
+
+		// Formatting common to Spring and JDK 9+
+		assertThat(string)
+			.startsWith("@" + RequestMapping.class.getName() + "(")
+			.contains("value={\"/test\"}", "path={\"/test\"}", "name=\"bar\"", "clazz=java.lang.Object.class")
+			.endsWith(")");
+
+		if (webMapping instanceof SynthesizedAnnotation) {
+			assertThat(string).as("Spring uses Enum#name()").contains("method={GET, POST}");
+		}
+		else {
+			assertThat(string).as("JDK uses Enum#toString()").contains("method={method: get, method: post}");
+		}
 	}
 
 	@Test
@@ -2940,7 +2962,17 @@ class MergedAnnotationsTests {
 	}
 
 	enum RequestMethod {
-		GET, POST
+		GET,
+
+		POST;
+
+		/**
+		 * custom override to verify annotation toString() implementations.
+		 */
+		@Override
+		public String toString() {
+			return "method: " + name().toLowerCase();
+		}
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -2955,6 +2987,9 @@ class MergedAnnotationsTests {
 		String[] path() default "";
 
 		RequestMethod[] method() default {};
+
+		// clazz is only used for testing annotation toString() implementations
+		Class<?> clazz() default Object.class;
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
