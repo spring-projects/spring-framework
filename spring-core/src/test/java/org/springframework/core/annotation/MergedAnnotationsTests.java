@@ -37,7 +37,6 @@ import java.util.stream.Stream;
 
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.JRE;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
@@ -1871,12 +1870,10 @@ class MergedAnnotationsTests {
 
 		assertThat(webMappingWithAliases.toString()).isNotEqualTo(synthesizedWebMapping1.toString());
 
-		if (JRE.currentVersion().ordinal() > JRE.JAVA_8.ordinal()) {
-			// The unsynthesized annotation for handleMappedWithSamePathAndValueAttributes()
-			// should produce the same toString() results as synthesized annotations for
-			// handleMappedWithPathAttribute() on Java 9 or higher
-			assertToStringForWebMappingWithPathAndValue(webMappingWithPathAndValue);
-		}
+		// The unsynthesized annotation for handleMappedWithSamePathAndValueAttributes()
+		// should produce the same toString() results as synthesized annotations for
+		// handleMappedWithPathAttribute() on Java 9 or higher
+		assertToStringForWebMappingWithPathAndValue(webMappingWithPathAndValue);
 		assertToStringForWebMappingWithPathAndValue(synthesizedWebMapping1);
 		assertToStringForWebMappingWithPathAndValue(synthesizedWebMapping2);
 	}
