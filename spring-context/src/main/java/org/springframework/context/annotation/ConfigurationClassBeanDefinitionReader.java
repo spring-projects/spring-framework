@@ -69,6 +69,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Sam Brannen
  * @author Sebastien Deleuze
+ * @author Hakan Altindag
  * @since 3.0
  * @see ConfigurationClassParser
  */
@@ -187,12 +188,26 @@ class ConfigurationClassBeanDefinitionReader {
 		MethodMetadata metadata = beanMethod.getMetadata();
 		String methodName = metadata.getMethodName();
 
-		// Do we need to mark the bean as skipped by its condition?
+		MethodMetadataWrapper metadataWrapper = new MethodMetadataWrapper(metadata);
+
 		if (this.conditionEvaluator.shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN)) {
-			configClass.skippedBeanMethods.add(methodName);
+			configClass.skippedBeanMethods.put(methodName, new MethodMetadataWrapper(metadata));
 			return;
 		}
-		if (configClass.skippedBeanMethods.contains(methodName)) {
+		else if (configClass.skippedBeanMethods.containsKey(methodName)){
+			MethodMetadataWrapper toBeSkippedBeanMethod = configClass.skippedBeanMethods.get(methodName);
+
+			if (!toBeSkippedBeanMethod.getSuperClassForDeclaredBean().isPresent()) {
+				configClass.skippedBeanMethods.remove(methodName);
+			}
+
+			if (toBeSkippedBeanMethod.getClassForDeclaredBean().isPresent()
+				&& metadataWrapper.getSuperClassForDeclaredBean().isPresent()
+				&& toBeSkippedBeanMethod.getClassForDeclaredBean().get() == metadataWrapper.getSuperClassForDeclaredBean().get()) {
+				configClass.skippedBeanMethods.remove(methodName);
+			}
+		}
+		if (configClass.skippedBeanMethods.containsKey(methodName)) {
 			return;
 		}
 

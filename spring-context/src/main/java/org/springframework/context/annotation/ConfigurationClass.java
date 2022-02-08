@@ -16,7 +16,7 @@
 
 package org.springframework.context.annotation;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -65,8 +65,7 @@ final class ConfigurationClass {
 	private final Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> importBeanDefinitionRegistrars =
 			new LinkedHashMap<>();
 
-	final Set<String> skippedBeanMethods = new HashSet<>();
-
+	final Map<String, MethodMetadataWrapper> skippedBeanMethods = new HashMap<>();
 
 	/**
 	 * Create a new {@link ConfigurationClass} with the given name.

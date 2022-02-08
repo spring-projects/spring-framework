@@ -136,9 +136,15 @@ public class ConfigurationClassWithConditionTests {
 	}
 
 	@Test
-	public void conditionOnOverriddenMethodHonored() {
+	public void conditionOnOverriddenMethodHonoredWhenHavingInheritance() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithBeanSkipped.class);
 		assertThat(context.getBeansOfType(ExampleBean.class).size()).isEqualTo(0);
+	}
+
+	@Test
+	public void conditionOnOverriddenMethodHonoredWhenHavingMethodOverloading() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithBeanNotSkippedWithMethodOverloading.class);
+		assertThat(context.getBeansOfType(ExampleBean.class).size()).isEqualTo(1);
 	}
 
 	@Test
@@ -356,6 +362,27 @@ public class ConfigurationClassWithConditionTests {
 		public ExampleBean baz() {
 			return new ExampleBean();
 		}
+	}
+
+	static class ConfigWithBeanNotSkippedWithMethodOverloading {
+
+		@Bean
+		@Conditional(NeverCondition.class)
+		public ExampleBean baz() {
+			return new ExampleBean();
+		}
+
+		@Bean
+		@Conditional(AlwaysCondition.class)
+		public ExampleBean baz(Object foo) {
+			return new ExampleBean();
+		}
+
+		@Bean
+		public Object foo() {
+			return new Object();
+		}
+
 	}
 
 	static class ConfigWithBeanReactivated extends ConfigWithBeanSkipped {
