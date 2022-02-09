@@ -449,16 +449,16 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			return;
 		}
         for (String origin : annotation.origins()) {
-            String[] origins = resolveCorsAnnotationValue(origin).split(",");
-            for (String org : origins) {
-                config.addAllowedOrigin(org);
-            }
-        }
+			String[] origins = resolveCorsAnnotationValue(origin).split(",");
+			for (String org : origins) {
+				config.addAllowedOrigin(org);
+			}
+		}
         for (String pattern : annotation.originPatterns()) {
-            String[] patterns = resolveCorsAnnotationValue(pattern).split(",");
-            for (String pat : patterns) {
-                config.addAllowedOriginPattern(resolveCorsAnnotationValue(pat));
-            }
+			String[] patterns = resolveCorsAnnotationValue(pattern).split(",");
+			for (String pat : patterns) {
+				config.addAllowedOriginPattern(resolveCorsAnnotationValue(pat));
+			}
         }
 		for (RequestMethod method : annotation.methods()) {
 			config.addAllowedMethod(method.name());

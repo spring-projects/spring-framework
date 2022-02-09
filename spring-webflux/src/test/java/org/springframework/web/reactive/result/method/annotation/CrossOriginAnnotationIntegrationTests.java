@@ -205,13 +205,13 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isEqualTo("https://site1.com");
 		assertThat(entity.getBody()).isEqualTo("placeholder");
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.addAll(this.headers);
-        httpHeaders.setOrigin("https://site2.com");
-        ResponseEntity<String> entity2 = performGet("/origin-placeholder", httpHeaders, String.class);
-        assertThat(entity2.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(entity2.getHeaders().getAccessControlAllowOrigin()).isEqualTo("https://site2.com");
-        assertThat(entity2.getBody()).isEqualTo("placeholder");
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.addAll(this.headers);
+		httpHeaders.setOrigin("https://site2.com");
+		ResponseEntity<String> entity2 = performGet("/origin-placeholder", httpHeaders, String.class);
+		assertThat(entity2.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity2.getHeaders().getAccessControlAllowOrigin()).isEqualTo("https://site2.com");
+		assertThat(entity2.getBody()).isEqualTo("placeholder");
 	}
 
 	@ParameterizedHttpServerTest
