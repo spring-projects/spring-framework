@@ -467,7 +467,7 @@ public class CorsConfiguration {
 	 * @since 5.3
 	 */
 	public void validateAllowCredentials() {
-		if (this.allowCredentials &&
+		if (this.allowCredentials == Boolean.TRUE &&
 				this.allowedOrigins != null && this.allowedOrigins.contains(ALL)) {
 
 			throw new IllegalArgumentException(
