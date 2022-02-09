@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.util.Arrays;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
@@ -59,7 +60,8 @@ public class EmbeddedValueResolver implements StringValueResolver {
 				if (evaluated instanceof String[]) {
 					String str = Arrays.toString((String[])evaluated);
 					value = str.substring(1, str.length() - 1);
-				} else {
+				}
+				else {
 					value = evaluated.toString();
 				}
 			}
