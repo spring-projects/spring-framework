@@ -234,7 +234,7 @@ class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
 		assertThat(config.getAllowedOrigins()).isNull();
-		Assertions.assertEquals(2, config.getAllowedOriginPatterns().size());
+		Assertions.assertEquals(4, config.getAllowedOriginPatterns().size());
 		assertThat(config.getAllowCredentials()).isNull();
 	}
 
@@ -494,12 +494,14 @@ class CrossOriginTests {
 		public void customOriginPatternDefinedViaPlaceholder() {
 		}
 
-		@CrossOrigin(originPatterns = "#{'${myDomainPattern}'.split(',')}")
+		@CrossOrigin(
+				originPatterns = {
+					"http://*.example.net,http://*.example.com:[8088,8089]",
+					"#{'${myDomainPattern}'.split(',')}"
+				})
 		@RequestMapping("/customMultiOriginPatternPlaceholder")
-		public void customMultiOriginPatternDefinedViaPlaceholder() {
-		}
+		public void customMultiOriginPatternDefinedViaPlaceholder() {}
 	}
-
 
 	@Controller
 	@SuppressWarnings("unused")

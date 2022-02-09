@@ -20,8 +20,10 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.springframework.context.EmbeddedValueResolverAware;
@@ -313,15 +315,17 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			return;
 		}
 		for (String origin : annotation.origins()) {
-			String[] origins = resolveCorsAnnotationValue(origin).split(",");
+			Set<String> origins = new HashSet<>();
+			resolveOriginOrPatternValue(resolveCorsAnnotationValue(origin), origins);
 			for (String org : origins) {
 				config.addAllowedOrigin(org);
 			}
 		}
 		for (String pattern : annotation.originPatterns()) {
-			String[] patterns = resolveCorsAnnotationValue(pattern).split(",");
+			Set<String> patterns = new HashSet<>();
+			resolveOriginOrPatternValue(resolveCorsAnnotationValue(pattern), patterns);
 			for (String pat : patterns) {
-				config.addAllowedOriginPattern(resolveCorsAnnotationValue(pat));
+				config.addAllowedOriginPattern(pat);
 			}
 		}
 		for (RequestMethod method : annotation.methods()) {
