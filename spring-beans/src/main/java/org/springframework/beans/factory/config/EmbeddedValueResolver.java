@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.Arrays;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
@@ -48,15 +49,22 @@ public class EmbeddedValueResolver implements StringValueResolver {
 	}
 
 
-	@Override
-	@Nullable
-	public String resolveStringValue(String strVal) {
-		String value = this.exprContext.getBeanFactory().resolveEmbeddedValue(strVal);
-		if (this.exprResolver != null && value != null) {
-			Object evaluated = this.exprResolver.evaluate(value, this.exprContext);
-			value = (evaluated != null ? evaluated.toString() : null);
-		}
-		return value;
-	}
+    @Override
+    @Nullable
+    public String resolveStringValue(String strVal) {
+        String value = this.exprContext.getBeanFactory().resolveEmbeddedValue(strVal);
+        if (this.exprResolver != null && value != null) {
+            Object evaluated = this.exprResolver.evaluate(value, this.exprContext);
+            if (evaluated != null) {
+                if (evaluated instanceof String[]) {
+                    String str = Arrays.toString((String[])evaluated);
+                    value = str.substring(1, str.length() - 1);;
+                } else {
+                    value = evaluated.toString();
+                }
+            }
+        }
+        return value;
+    }
 
 }

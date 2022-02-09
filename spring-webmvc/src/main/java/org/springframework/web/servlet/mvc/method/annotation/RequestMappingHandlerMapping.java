@@ -448,12 +448,18 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		if (annotation == null) {
 			return;
 		}
-		for (String origin : annotation.origins()) {
-			config.addAllowedOrigin(resolveCorsAnnotationValue(origin));
-		}
-		for (String patterns : annotation.originPatterns()) {
-			config.addAllowedOriginPattern(resolveCorsAnnotationValue(patterns));
-		}
+        for (String origin : annotation.origins()) {
+            String[] origins = resolveCorsAnnotationValue(origin).split(",");
+            for (String org : origins) {
+                config.addAllowedOrigin(org);
+            }
+        }
+        for (String pattern : annotation.originPatterns()) {
+            String[] patterns = resolveCorsAnnotationValue(pattern).split(",");
+            for (String pat : patterns) {
+                config.addAllowedOriginPattern(resolveCorsAnnotationValue(pat));
+            }
+        }
 		for (RequestMethod method : annotation.methods()) {
 			config.addAllowedMethod(method.name());
 		}

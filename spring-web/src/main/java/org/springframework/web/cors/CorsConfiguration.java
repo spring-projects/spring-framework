@@ -157,14 +157,7 @@ public class CorsConfiguration {
 	 * Variant of {@link #setAllowedOrigins} for adding one origin at a time.
 	 */
 	public void addAllowedOrigin(@Nullable String origin) {
-		this.addAllowedOrigins(origin.split(";"));
-	}
-
-	/**
-	 * Variant of {@link #addAllowedOrigin} for adding multi origin at a time.
-	 */
-	public void addAllowedOrigins(@Nullable String... origins) {
-		if (origins == null) {
+		if (origin == null) {
 			return;
 		}
 		if (this.allowedOrigins == null) {
@@ -173,7 +166,8 @@ public class CorsConfiguration {
 		else if (this.allowedOrigins == DEFAULT_PERMIT_ALL && CollectionUtils.isEmpty(this.allowedOriginPatterns)) {
 			setAllowedOrigins(DEFAULT_PERMIT_ALL);
 		}
-		Arrays.stream(origins).map(this::trimTrailingSlash).forEach(this.allowedOrigins::add);
+		origin = trimTrailingSlash(origin);
+		this.allowedOrigins.add(origin);
 	}
 
 	/**
@@ -228,23 +222,14 @@ public class CorsConfiguration {
 	 * @since 5.3
 	 */
 	public void addAllowedOriginPattern(@Nullable String originPattern) {
-		this.addAllowedOriginPatterns(originPattern.split(";"));
-	}
-
-	/**
-	 * Adding multi origin at a time.
-	 * <P>Support of @CrossOrigin(originPatterns = "${originPatterns}")
-	 * @since 5.3
-	 */
-	public void addAllowedOriginPatterns(@Nullable String... originPatterns) {
-		if (originPatterns == null) {
+		if (originPattern == null) {
 			return;
 		}
 		if (this.allowedOriginPatterns == null) {
 			this.allowedOriginPatterns = new ArrayList<>(4);
 		}
-		Arrays.stream(originPatterns).map(this::trimTrailingSlash)
-				.forEach(originPattern -> this.allowedOriginPatterns.add(new OriginPattern(originPattern)));
+		originPattern = trimTrailingSlash(originPattern);
+		this.allowedOriginPatterns.add(new OriginPattern(originPattern));
 		if (this.allowedOrigins == DEFAULT_PERMIT_ALL) {
 			this.allowedOrigins = null;
 		}
@@ -482,7 +467,7 @@ public class CorsConfiguration {
 	 * @since 5.3
 	 */
 	public void validateAllowCredentials() {
-		if (this.allowCredentials == Boolean.TRUE &&
+		if (this.allowCredentials &&
 				this.allowedOrigins != null && this.allowedOrigins.contains(ALL)) {
 
 			throw new IllegalArgumentException(
