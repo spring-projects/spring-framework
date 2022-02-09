@@ -22,10 +22,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Stream;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -71,8 +73,8 @@ class CrossOriginTests {
 	static Stream<TestRequestMappingInfoHandlerMapping> pathPatternsArguments() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		Properties props = new Properties();
-		props.setProperty("myOrigin", "https://example.com");
-		props.setProperty("myDomainPattern", "http://*.example.com");
+		props.setProperty("myOrigin", "https://example.com,https://example.cn");
+		props.setProperty("myDomainPattern", "http://*.example.com,http://*.example.cn");
 		wac.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("ps", props));
 		wac.registerSingleton("ppc", PropertySourcesPlaceholderConfigurer.class);
 		wac.refresh();
@@ -194,7 +196,8 @@ class CrossOriginTests {
 		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
-		assertThat(config.getAllowedOrigins()).isEqualTo(Collections.singletonList("https://example.com"));
+		Assertions.assertEquals(2, Objects.requireNonNull(config.getAllowedOrigins()).size());
+		Assertions.assertTrue(config.getAllowedOrigins().contains("https://example.com"));
 		assertThat(config.getAllowCredentials()).isNull();
 	}
 
@@ -218,7 +221,20 @@ class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
 		assertThat(config.getAllowedOrigins()).isNull();
-		assertThat(config.getAllowedOriginPatterns()).isEqualTo(Collections.singletonList("http://*.example.com"));
+		Assertions.assertEquals(2, Objects.requireNonNull(config.getAllowedOriginPatterns()).size());
+		Assertions.assertTrue(config.getAllowedOriginPatterns().contains("http://*.example.com"));
+		assertThat(config.getAllowCredentials()).isNull();
+	}
+
+	@PathPatternsParameterizedTest
+	public void customMultiOriginPatternViaPlaceholder(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
+		this.request.setRequestURI("/customMultiOriginPatternPlaceholder");
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins()).isNull();
+		Assertions.assertEquals(2, config.getAllowedOriginPatterns().size());
 		assertThat(config.getAllowCredentials()).isNull();
 	}
 
@@ -476,6 +492,11 @@ class CrossOriginTests {
 		@CrossOrigin(originPatterns = "${myDomainPattern}")
 		@RequestMapping("/customOriginPatternPlaceholder")
 		public void customOriginPatternDefinedViaPlaceholder() {
+		}
+
+		@CrossOrigin(originPatterns = "#{'${myDomainPattern}'.split(',')}")
+		@RequestMapping("/customMultiOriginPatternPlaceholder")
+		public void customMultiOriginPatternDefinedViaPlaceholder() {
 		}
 	}
 
