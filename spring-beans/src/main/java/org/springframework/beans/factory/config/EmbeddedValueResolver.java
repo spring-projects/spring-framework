@@ -49,17 +49,17 @@ public class EmbeddedValueResolver implements StringValueResolver {
 	}
 
 
-    @Override
-    @Nullable
-    public String resolveStringValue(String strVal) {
-        String value = this.exprContext.getBeanFactory().resolveEmbeddedValue(strVal);
+	@Override
+	@Nullable
+	public String resolveStringValue(String strVal) {
+		String value = this.exprContext.getBeanFactory().resolveEmbeddedValue(strVal);
 		if (this.exprResolver != null && value != null) {
 			Object evaluated = this.exprResolver.evaluate(value, this.exprContext);
 			if (evaluated != null) {
 				if (evaluated instanceof String[]) {
 					String str = Arrays.toString((String[])evaluated);
-					value = str.substring(1, str.length() - 1);;
-                } else {
+					value = str.substring(1, str.length() - 1);
+				} else {
 					value = evaluated.toString();
 				}
 			}
