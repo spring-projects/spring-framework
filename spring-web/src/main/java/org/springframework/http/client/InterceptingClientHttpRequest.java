@@ -25,7 +25,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.StreamingHttpOutputMessage;
-import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -62,6 +61,7 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 	}
 
 	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.method.name();
 	}
@@ -94,7 +94,6 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 			}
 			else {
 				HttpMethod method = request.getMethod();
-				Assert.state(method != null, "No standard HTTP method");
 				ClientHttpRequest delegate = requestFactory.createRequest(request.getURI(), method);
 				request.getHeaders().forEach((key, value) -> delegate.getHeaders().addAll(key, value));
 				if (body.length > 0) {

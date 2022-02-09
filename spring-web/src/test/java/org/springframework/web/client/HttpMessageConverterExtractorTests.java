@@ -153,7 +153,7 @@ class HttpMessageConverterExtractorTests {
 	void generics() throws IOException {
 		responseHeaders.setContentType(contentType);
 		String expected = "Foo";
-		ParameterizedTypeReference<List<String>> reference = new ParameterizedTypeReference<List<String>>() {};
+		ParameterizedTypeReference<List<String>> reference = new ParameterizedTypeReference<>() {};
 		Type type = reference.getType();
 
 		GenericHttpMessageConverter<String> converter = mock(GenericHttpMessageConverter.class);

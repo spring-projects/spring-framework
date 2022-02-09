@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @see org.springframework.aop.support.AopUtils
  */
 public abstract class AopProxyUtils {
@@ -127,7 +128,7 @@ public abstract class AopProxyUtils {
 				if (targetClass.isInterface()) {
 					advised.setInterfaces(targetClass);
 				}
-				else if (Proxy.isProxyClass(targetClass)) {
+				else if (Proxy.isProxyClass(targetClass) || isLambda(targetClass)) {
 					advised.setInterfaces(targetClass.getInterfaces());
 				}
 				specifiedInterfaces = advised.getProxiedInterfaces();
@@ -236,6 +237,20 @@ public abstract class AopProxyUtils {
 			}
 		}
 		return arguments;
+	}
+
+	/**
+	 * Determine if the supplied {@link Class} is a JVM-generated implementation
+	 * class for a lambda expression or method reference.
+	 * <p>This method makes a best-effort attempt at determining this, based on
+	 * checks that work on modern, main stream JVMs.
+	 * @param clazz the class to check
+	 * @return {@code true} if the class is a lambda implementation class
+	 * @since 5.3.16
+	 */
+	static boolean isLambda(Class<?> clazz) {
+		return (clazz.isSynthetic() && (clazz.getSuperclass() == Object.class) &&
+				(clazz.getInterfaces().length > 0) && clazz.getName().contains("$$Lambda"));
 	}
 
 }

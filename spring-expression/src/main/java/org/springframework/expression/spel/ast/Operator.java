@@ -24,7 +24,6 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -309,11 +308,8 @@ public abstract class Operator extends SpelNodeImpl {
 			return true;
 		}
 
-		if (left instanceof Comparable && right instanceof Comparable) {
-			Class<?> ancestor = ClassUtils.determineCommonAncestor(left.getClass(), right.getClass());
-			if (ancestor != null && Comparable.class.isAssignableFrom(ancestor)) {
-				return (context.getTypeComparator().compare(left, right) == 0);
-			}
+		if (context.getTypeComparator().canCompare(left, right)) {
+			return context.getTypeComparator().compare(left, right) == 0;
 		}
 
 		return false;

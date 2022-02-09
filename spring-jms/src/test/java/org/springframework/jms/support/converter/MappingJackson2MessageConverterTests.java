@@ -299,9 +299,9 @@ class MappingJackson2MessageConverterTests {
 	}
 
 
-	private interface Summary {};
+	private interface Summary {}
 
-	private interface Full extends Summary {};
+	private interface Full extends Summary {}
 
 
 	@SuppressWarnings("unused")

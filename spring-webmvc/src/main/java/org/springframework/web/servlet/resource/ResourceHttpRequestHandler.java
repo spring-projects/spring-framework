@@ -17,9 +17,9 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +38,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
@@ -139,10 +140,12 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	@Nullable
 	private UrlPathHelper urlPathHelper;
 
+	private boolean useLastModified = true;
+
+	private boolean optimizeLocations = false;
+
 	@Nullable
 	private StringValueResolver embeddedValueResolver;
-
-	private boolean useLastModified = true;
 
 
 	public ResourceHttpRequestHandler() {
@@ -184,13 +187,13 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	/**
 	 * Return the configured {@code List} of {@code Resource} locations including
 	 * both String-based locations provided via
-	 * {@link #setLocationValues(List) setLocationValues} and pre-resolved {@code Resource}
-	 * locations provided via {@link #setLocations(List) setLocations}.
+	 * {@link #setLocationValues(List) setLocationValues} and pre-resolved
+	 * {@code Resource} locations provided via {@link #setLocations(List) setLocations}.
 	 * <p>Note that the returned list is fully initialized only after
 	 * initialization via {@link #afterPropertiesSet()}.
-	 * <p><strong>Note:</strong> As of 5.3.11 the list of locations is filtered
-	 * to exclude those that don't actually exist and therefore the list returned
-	 * from this method may be a subset of all given locations.
+	 * <p><strong>Note:</strong> As of 5.3.11 the list of locations may be filtered to
+	 * exclude those that don't actually exist and therefore the list returned from this
+	 * method may be a subset of all given locations. See {@link #setOptimizeLocations}.
 	 * @see #setLocationValues
 	 * @see #setLocations
 	 */
@@ -292,7 +295,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	/**
 	 * Return the configured content negotiation manager.
 	 * @since 4.3
-	 * @deprecated as of 5.2.4.
+	 * @deprecated as of 5.2.4
 	 */
 	@Nullable
 	@Deprecated
@@ -302,7 +305,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	/**
 	 * Add mappings between file extensions, extracted from the filename of a
-	 * static {@link Resource}, and corresponding media type  to set on the
+	 * static {@link Resource}, and corresponding media type to set on the
 	 * response.
 	 * <p>Use of this method is typically not necessary since mappings are
 	 * otherwise determined via
@@ -360,9 +363,16 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		return this.urlPathHelper;
 	}
 
-	@Override
-	public void setEmbeddedValueResolver(StringValueResolver resolver) {
-		this.embeddedValueResolver = resolver;
+	/**
+	 * Set whether we should look at the {@link Resource#lastModified()} when
+	 * serving resources and use this information to drive {@code "Last-Modified"}
+	 * HTTP response headers.
+	 * <p>This option is enabled by default and should be turned off if the metadata
+	 * of the static files should be ignored.
+	 * @since 5.3
+	 */
+	public void setUseLastModified(boolean useLastModified) {
+		this.useLastModified = useLastModified;
 	}
 
 	/**
@@ -375,17 +385,34 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Set whether we should look at the {@link Resource#lastModified()}
-	 * when serving resources and use this information to drive {@code "Last-Modified"}
-	 * HTTP response headers.
-	 * <p>This option is enabled by default and should be turned off if the metadata of
-	 * the static files should be ignored.
-	 * @param useLastModified whether to use the resource last-modified information.
-	 * @since 5.3
+	 * Set whether to optimize the specified locations through an existence
+	 * check on startup, filtering non-existing directories upfront so that
+	 * they do not have to be checked on every resource access.
+	 * <p>The default is {@code false}, for defensiveness against zip files
+	 * without directory entries which are unable to expose the existence of
+	 * a directory upfront. Switch this flag to {@code true} for optimized
+	 * access in case of a consistent jar layout with directory entries.
+	 * @since 5.3.13
 	 */
-	public void setUseLastModified(boolean useLastModified) {
-		this.useLastModified = useLastModified;
+	public void setOptimizeLocations(boolean optimizeLocations) {
+		this.optimizeLocations = optimizeLocations;
 	}
+
+	/**
+	 * Return whether to optimize the specified locations through an existence
+	 * check on startup, filtering non-existing directories upfront so that
+	 * they do not have to be checked on every resource access.
+	 * @since 5.3.13
+	 */
+	public boolean isOptimizeLocations() {
+		return this.optimizeLocations;
+	}
+
+	@Override
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.embeddedValueResolver = resolver;
+	}
+
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -448,8 +475,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				if (location.equals("/") && !(resource instanceof ServletContextResource)) {
 					throw new IllegalStateException(
 							"The String-based location \"/\" should be relative to the web application root " +
-									"but resolved to a Resource of type: " + resource.getClass() + ". " +
-									"If this is intentional, please pass it as a pre-configured Resource via setLocations.");
+							"but resolved to a Resource of type: " + resource.getClass() + ". " +
+							"If this is intentional, please pass it as a pre-configured Resource via setLocations.");
 				}
 				result.add(resource);
 				if (charset != null) {
@@ -462,7 +489,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 
 		result.addAll(this.locationResources);
-		result = result.stream().filter(Resource::exists).collect(Collectors.toList());
+		if (isOptimizeLocations()) {
+			result = result.stream().filter(Resource::exists).collect(Collectors.toList());
+		}
 
 		this.locationsToUse.clear();
 		this.locationsToUse.addAll(result);
@@ -506,6 +535,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		return null;
 	}
 
+
 	/**
 	 * Processes a resource request.
 	 * <p>Checks for the existence of the requested resource in the configured list of locations.
@@ -531,7 +561,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 
 		if (HttpMethod.OPTIONS.matches(request.getMethod())) {
-			response.setHeader("Allow", getAllowHeader());
+			response.setHeader(HttpHeaders.ALLOW, getAllowHeader());
 			return;
 		}
 
@@ -665,7 +695,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (path.contains("%")) {
 			try {
 				// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
-				String decodedPath = URLDecoder.decode(path, "UTF-8");
+				String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
 				if (isInvalidPath(decodedPath)) {
 					return true;
 				}
@@ -674,8 +704,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 					return true;
 				}
 			}
-			catch (IllegalArgumentException | UnsupportedEncodingException ex) {
-				// May not be possible to decode... | Should never happen...
+			catch (IllegalArgumentException ex) {
+				// May not be possible to decode...
 			}
 		}
 		return false;
@@ -700,7 +730,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	protected boolean isInvalidPath(String path) {
 		if (path.contains("WEB-INF") || path.contains("META-INF")) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Path with \"WEB-INF\" or \"META-INF\": [" + path + "]");
+				logger.warn(LogFormatUtils.formatValue(
+						"Path with \"WEB-INF\" or \"META-INF\": [" + path + "]", -1, true));
 			}
 			return true;
 		}
@@ -708,14 +739,16 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
 			if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("Path represents URL or has \"url:\" prefix: [" + path + "]");
+					logger.warn(LogFormatUtils.formatValue(
+							"Path represents URL or has \"url:\" prefix: [" + path + "]", -1, true));
 				}
 				return true;
 			}
 		}
 		if (path.contains("..") && StringUtils.cleanPath(path).contains("../")) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Path contains \"../\" after call to StringUtils#cleanPath: [" + path + "]");
+				logger.warn(LogFormatUtils.formatValue(
+						"Path contains \"../\" after call to StringUtils#cleanPath: [" + path + "]", -1, true));
 			}
 			return true;
 		}

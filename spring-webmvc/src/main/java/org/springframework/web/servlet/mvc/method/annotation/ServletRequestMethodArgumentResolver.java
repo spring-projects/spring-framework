@@ -171,7 +171,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 			return userPrincipal;
 		}
 		else if (HttpMethod.class == paramType) {
-			return HttpMethod.resolve(request.getMethod());
+			return HttpMethod.valueOf(request.getMethod());
 		}
 		else if (Locale.class == paramType) {
 			return RequestContextUtils.getLocale(request);

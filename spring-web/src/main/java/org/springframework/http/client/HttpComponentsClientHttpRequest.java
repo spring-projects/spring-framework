@@ -61,6 +61,12 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 
 
 	@Override
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.httpRequest.getMethod());
+	}
+
+	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.httpRequest.getMethod();
 	}

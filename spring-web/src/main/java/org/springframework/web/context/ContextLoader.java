@@ -72,7 +72,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>As of Spring 3.1, {@code ContextLoader} supports injecting the root web
  * application context via the {@link #ContextLoader(WebApplicationContext)}
- * constructor, allowing for programmatic configuration in Servlet 3.0+ environments.
+ * constructor, allowing for programmatic configuration in Servlet initializers.
  * See {@link org.springframework.web.WebApplicationInitializer} for usage examples.
  *
  * @author Juergen Hoeller
@@ -193,9 +193,8 @@ public class ContextLoader {
 
 	/**
 	 * Create a new {@code ContextLoader} with the given application context. This
-	 * constructor is useful in Servlet 3.0+ environments where instance-based
-	 * registration of listeners is possible through the {@link ServletContext#addListener}
-	 * API.
+	 * constructor is useful in Servlet initializers where instance-based registration
+	 * of listeners is possible through the {@link ServletContext#addListener} API.
 	 * <p>The context may or may not yet be {@linkplain
 	 * ConfigurableApplicationContext#refresh() refreshed}. If it (a) is an implementation
 	 * of {@link ConfigurableWebApplicationContext} and (b) has <strong>not</strong>

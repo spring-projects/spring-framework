@@ -29,8 +29,6 @@ import jakarta.jms.ObjectMessage;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
@@ -76,12 +74,7 @@ public class SimpleMessageConverterTests {
 
 		given(session.createBytesMessage()).willReturn(message);
 		given(message.getBodyLength()).willReturn((long) content.length);
-		given(message.readBytes(any(byte[].class))).willAnswer(new Answer<Integer>() {
-			@Override
-			public Integer answer(InvocationOnMock invocation) throws Throwable {
-				return byteArrayInputStream.read((byte[]) invocation.getArguments()[0]);
-			}
-		});
+		given(message.readBytes(any(byte[].class))).willAnswer(invocation -> byteArrayInputStream.read((byte[]) invocation.getArguments()[0]));
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message msg = converter.toMessage(content, session);

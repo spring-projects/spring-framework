@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,10 +35,43 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Juergen Hoeller
  */
-public class PayloadApplicationEventTests {
+class PayloadApplicationEventTests {
 
 	@Test
-	public void testEventClassWithInterface() {
+	void payloadApplicationEventWithNoTypeUsesInstance() {
+		NumberHolder<Integer> payload = new NumberHolder<>(42);
+		PayloadApplicationEvent<NumberHolder<Integer>> event = new PayloadApplicationEvent<>(this, payload);
+		assertThat(event.getResolvableType()).satisfies(eventType -> {
+			assertThat(eventType.toClass()).isEqualTo(PayloadApplicationEvent.class);
+			assertThat(eventType.getGenerics())
+				.hasSize(1)
+				.allSatisfy(bodyType -> {
+					assertThat(bodyType.toClass()).isEqualTo(NumberHolder.class);
+					assertThat(bodyType.hasUnresolvableGenerics()).isTrue();
+				});
+		});
+	}
+
+	@Test
+	void payloadApplicationEventWithType() {
+		NumberHolder<Integer> payload = new NumberHolder<>(42);
+		ResolvableType payloadType = ResolvableType.forClassWithGenerics(NumberHolder.class, Integer.class);
+		PayloadApplicationEvent<NumberHolder<Integer>> event = new PayloadApplicationEvent<>(this, payload, payloadType);
+		assertThat(event.getResolvableType()).satisfies(eventType -> {
+			assertThat(eventType.toClass()).isEqualTo(PayloadApplicationEvent.class);
+			assertThat(eventType.getGenerics())
+				.hasSize(1)
+				.allSatisfy(bodyType -> {
+					assertThat(bodyType.toClass()).isEqualTo(NumberHolder.class);
+					assertThat(bodyType.hasUnresolvableGenerics()).isFalse();
+					assertThat(bodyType.getGenerics()[0].toClass()).isEqualTo(Integer.class);
+				});
+		});
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void testEventClassWithInterface() {
 		ApplicationContext ac = new AnnotationConfigApplicationContext(AuditableListener.class);
 
 		AuditablePayloadEvent<String> event = new AuditablePayloadEvent<>(this, "xyz");
@@ -46,7 +80,8 @@ public class PayloadApplicationEventTests {
 	}
 
 	@Test
-	public void testProgrammaticEventListener() {
+	@SuppressWarnings("resource")
+	void testProgrammaticEventListener() {
 		List<Auditable> events = new ArrayList<>();
 		ApplicationListener<AuditablePayloadEvent<String>> listener = events::add;
 		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (event -> event.getPayload().intValue());
@@ -62,10 +97,11 @@ public class PayloadApplicationEventTests {
 	}
 
 	@Test
-	public void testProgrammaticPayloadListener() {
+	@SuppressWarnings("resource")
+	void testProgrammaticPayloadListener() {
 		List<String> events = new ArrayList<>();
 		ApplicationListener<PayloadApplicationEvent<String>> listener = ApplicationListener.forPayload(events::add);
-		ApplicationListener<PayloadApplicationEvent<Integer>> mismatch = ApplicationListener.forPayload(payload -> payload.intValue());
+		ApplicationListener<PayloadApplicationEvent<Integer>> mismatch = ApplicationListener.forPayload(Integer::intValue);
 
 		ConfigurableApplicationContext ac = new GenericApplicationContext();
 		ac.addApplicationListener(listener);
@@ -100,6 +136,13 @@ public class PayloadApplicationEventTests {
 		public void onEvent(Auditable event) {
 			events.add(event);
 		}
+	}
+
+	static class NumberHolder<T extends Number> {
+
+		public NumberHolder(T number) {
+		}
+
 	}
 
 }

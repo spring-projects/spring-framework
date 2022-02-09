@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,7 +247,7 @@ class DefaultDatabaseClientUnitTests {
 	@Test
 	void selectShouldEmitFirstValue() {
 		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
-				MockColumnMetadata.builder().name("name").build()).build();
+				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 
 		MockResult.Builder resultBuilder = MockResult.builder().rowMetadata(metadata);
 		MockResult result = resultBuilder.row(MockRow.builder().identified(0, Object.class, "Walter").build())
@@ -267,7 +267,7 @@ class DefaultDatabaseClientUnitTests {
 	@Test
 	void selectShouldEmitAllValues() {
 		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
-				MockColumnMetadata.builder().name("name").build()).build();
+				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 
 		MockResult.Builder resultBuilder = MockResult.builder().rowMetadata(metadata);
 		MockResult result = resultBuilder.row(MockRow.builder().identified(0, Object.class, "Walter").build())
@@ -289,7 +289,7 @@ class DefaultDatabaseClientUnitTests {
 	void selectOneShouldFailWithException() {
 
 		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
-				MockColumnMetadata.builder().name("name").build()).build();
+				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 
 		MockResult.Builder resultBuilder = MockResult.builder().rowMetadata(metadata);
 		MockResult result = resultBuilder.row(MockRow.builder().identified(0, Object.class, "Walter").build())
@@ -356,7 +356,7 @@ class DefaultDatabaseClientUnitTests {
 	void shouldApplyStatementFilterFunctions() {
 
 		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
-				MockColumnMetadata.builder().name("name").build()).build();
+				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 		MockResult result = MockResult.builder().rowMetadata(metadata).build();
 
 		Statement statement = mockStatement(result);
@@ -434,7 +434,7 @@ class DefaultDatabaseClientUnitTests {
 	private MockResult mockSingleColumnResult(@Nullable MockRow.Builder row) {
 
 		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
-				MockColumnMetadata.builder().name("name").build()).build();
+				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 
 		MockResult.Builder resultBuilder = MockResult.builder().rowMetadata(metadata);
 		if (row != null) {

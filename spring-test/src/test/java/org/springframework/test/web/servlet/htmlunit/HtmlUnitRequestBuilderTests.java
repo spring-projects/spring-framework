@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -782,6 +782,16 @@ public class HtmlUnitRequestBuilderTests {
 		assertThat(actualRequest.getServletPath()).isEqualTo("/this/here");
 	}
 
+	@Test // gh-27837
+	public void buildRequestServletPathWithEncodedUrl() throws Exception {
+		webRequest.setUrl(new URL("http://localhost/test/Fr%C3%BChling%20Sommer%20Herbst%20Winter"));
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getRequestURI()).isEqualTo("/test/Fr%C3%BChling%20Sommer%20Herbst%20Winter");
+		assertThat(actualRequest.getServletPath()).isEqualTo("/Frühling Sommer Herbst Winter");
+	}
+
 	@Test
 	public void buildRequestSession() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
@@ -850,7 +860,7 @@ public class HtmlUnitRequestBuilderTests {
 	public void buildRequestSessionIsNew() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getSession().isNew()).isEqualTo(true);
+		assertThat(actualRequest.getSession().isNew()).isTrue();
 	}
 
 	@Test
@@ -860,7 +870,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getSession().isNew()).isEqualTo(false);
+		assertThat(actualRequest.getSession().isNew()).isFalse();
 	}
 
 	@Test
@@ -872,7 +882,7 @@ public class HtmlUnitRequestBuilderTests {
 		HttpSession sessionToRemove = actualRequest.getSession();
 		sessionToRemove.invalidate();
 
-		assertThat(sessions.containsKey(sessionToRemove.getId())).isEqualTo(false);
+		assertThat(sessions.containsKey(sessionToRemove.getId())).isFalse();
 		assertSingleSessionCookie("JSESSIONID=" + sessionToRemove.getId()
 				+ "; Expires=Thu, 01-Jan-1970 00:00:01 GMT; Path=/test; Domain=example.com");
 
@@ -881,8 +891,8 @@ public class HtmlUnitRequestBuilderTests {
 
 		actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getSession().isNew()).isEqualTo(true);
-		assertThat(sessions.containsKey(sessionToRemove.getId())).isEqualTo(false);
+		assertThat(actualRequest.getSession().isNew()).isTrue();
+		assertThat(sessions.containsKey(sessionToRemove.getId())).isFalse();
 	}
 
 	// --- setContextPath

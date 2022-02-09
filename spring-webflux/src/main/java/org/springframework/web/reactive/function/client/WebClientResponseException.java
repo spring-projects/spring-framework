@@ -73,7 +73,7 @@ public class WebClientResponseException extends WebClientException {
 
 	private static String initMessage(int status, String reasonPhrase, @Nullable HttpRequest request) {
 		return status + " " + reasonPhrase +
-				(request != null ? " from " + request.getMethodValue() + " " + request.getURI() : "");
+				(request != null ? " from " + request.getMethod() + " " + request.getURI() : "");
 	}
 
 	/**

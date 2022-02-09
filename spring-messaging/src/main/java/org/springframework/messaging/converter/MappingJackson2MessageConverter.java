@@ -72,7 +72,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 * the {@code application/json} MIME type with {@code UTF-8} character set.
 	 */
 	public MappingJackson2MessageConverter() {
-		super(new MimeType("application", "json"));
+		super(new MimeType("application", "json"), new MimeType("application", "*+json"));
 		this.objectMapper = initObjectMapper();
 	}
 

@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
@@ -59,12 +58,7 @@ public class DefaultMessageHandlerMethodFactoryTests {
 	public void customConversion() throws Exception {
 		DefaultMessageHandlerMethodFactory instance = createInstance();
 		GenericConversionService conversionService = new GenericConversionService();
-		conversionService.addConverter(SampleBean.class, String.class, new Converter<SampleBean, String>() {
-			@Override
-			public String convert(SampleBean source) {
-				return "foo bar";
-			}
-		});
+		conversionService.addConverter(SampleBean.class, String.class, source -> "foo bar");
 		instance.setConversionService(conversionService);
 		instance.afterPropertiesSet();
 

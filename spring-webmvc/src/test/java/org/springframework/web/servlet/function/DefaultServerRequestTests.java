@@ -317,12 +317,7 @@ class DefaultServerRequestTests {
 	@Test
 	void principal() {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
-		Principal principal = new Principal() {
-			@Override
-			public String getName() {
-				return "foo";
-			}
-		};
+		Principal principal = () -> "foo";
 		servletRequest.setUserPrincipal(principal);
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest,

@@ -52,7 +52,6 @@ public interface MultipartHttpServletRequest extends HttpServletRequest, Multipa
 	/**
 	 * Return this request's method as a convenient HttpMethod instance.
 	 */
-	@Nullable
 	HttpMethod getRequestMethod();
 
 	/**

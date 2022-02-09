@@ -108,7 +108,7 @@ class BitsCronFieldTests {
 	}
 
 	private static Condition<BitsCronField> set(int... indices) {
-		return new Condition<BitsCronField>(String.format("set bits %s", Arrays.toString(indices))) {
+		return new Condition<>(String.format("set bits %s", Arrays.toString(indices))) {
 			@Override
 			public boolean matches(BitsCronField value) {
 				for (int index : indices) {
@@ -122,7 +122,7 @@ class BitsCronFieldTests {
 	}
 
 	private static Condition<BitsCronField> setRange(int min, int max) {
-		return new Condition<BitsCronField>(String.format("set range %d-%d", min, max)) {
+		return new Condition<>(String.format("set range %d-%d", min, max)) {
 			@Override
 			public boolean matches(BitsCronField value) {
 				for (int i = min; i < max; i++) {
@@ -136,7 +136,7 @@ class BitsCronFieldTests {
 	}
 
 	private static Condition<BitsCronField> clear(int... indices) {
-		return new Condition<BitsCronField>(String.format("clear bits %s", Arrays.toString(indices))) {
+		return new Condition<>(String.format("clear bits %s", Arrays.toString(indices))) {
 			@Override
 			public boolean matches(BitsCronField value) {
 				for (int index : indices) {
@@ -150,7 +150,7 @@ class BitsCronFieldTests {
 	}
 
 	private static Condition<BitsCronField> clearRange(int min, int max) {
-		return new Condition<BitsCronField>(String.format("clear range %d-%d", min, max)) {
+		return new Condition<>(String.format("clear range %d-%d", min, max)) {
 			@Override
 			public boolean matches(BitsCronField value) {
 				for (int i = min; i < max; i++) {

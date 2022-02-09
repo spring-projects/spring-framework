@@ -1052,8 +1052,9 @@ The Spring Expression Language supports the following kinds of operators:
 ==== Relational Operators
 
 The relational operators (equal, not equal, less than, less than or equal, greater than,
-and greater than or equal) are supported by using standard operator notation. The
-following listing shows a few examples of operators:
+and greater than or equal) are supported by using standard operator notation.
+These operators work on `Number` types as well as types implementing `Comparable`.
+The following listing shows a few examples of operators:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1066,6 +1067,9 @@ following listing shows a few examples of operators:
 
 	// evaluates to true
 	boolean trueValue = parser.parseExpression("'black' < 'block'").getValue(Boolean.class);
+
+	// uses CustomValue:::compareTo
+	boolean trueValue = parser.parseExpression("new CustomValue(1) < new CustomValue(2)").getValue(Boolean.class);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1078,6 +1082,9 @@ following listing shows a few examples of operators:
 
 	// evaluates to true
 	val trueValue = parser.parseExpression("'black' < 'block'").getValue(Boolean::class.java)
+
+	// uses CustomValue:::compareTo
+	val trueValue = parser.parseExpression("new CustomValue(1) < new CustomValue(2)").getValue(Boolean::class.java);
 ----
 
 [NOTE]

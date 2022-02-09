@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,12 +92,12 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	@Nullable
 	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.servletRequest.getMethod());
+		return HttpMethod.valueOf(this.servletRequest.getMethod());
 	}
 
 	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.servletRequest.getMethod();
 	}
@@ -158,7 +158,9 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 					String requestContentType = this.servletRequest.getContentType();
 					if (StringUtils.hasLength(requestContentType)) {
 						contentType = MediaType.parseMediaType(requestContentType);
-						this.headers.setContentType(contentType);
+						if (contentType.isConcrete()) {
+							this.headers.setContentType(contentType);
+						}
 					}
 				}
 				if (contentType != null && contentType.getCharset() == null) {
@@ -249,10 +251,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 			List<String> values = Arrays.asList(entry.getValue());
 			for (Iterator<String> valueIterator = values.iterator(); valueIterator.hasNext();) {
 				String value = valueIterator.next();
-				writer.write(URLEncoder.encode(name, FORM_CHARSET.name()));
+				writer.write(URLEncoder.encode(name, FORM_CHARSET));
 				if (value != null) {
 					writer.write('=');
-					writer.write(URLEncoder.encode(value, FORM_CHARSET.name()));
+					writer.write(URLEncoder.encode(value, FORM_CHARSET));
 					if (valueIterator.hasNext()) {
 						writer.write('&');
 					}

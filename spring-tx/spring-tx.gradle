@@ -21,7 +21,7 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-context")))
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation("org.aspectj:aspectjweaver")
-	testImplementation("org.codehaus.groovy:groovy")
+	testImplementation("org.apache.groovy:groovy")
 	testImplementation("jakarta.persistence:jakarta.persistence-api")
 	testImplementation("io.projectreactor:reactor-test")
 }

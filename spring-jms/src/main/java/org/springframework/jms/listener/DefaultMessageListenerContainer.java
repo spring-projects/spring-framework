@@ -309,8 +309,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		try {
 			int separatorIndex = concurrency.indexOf('-');
 			if (separatorIndex != -1) {
-				setConcurrentConsumers(Integer.parseInt(concurrency.substring(0, separatorIndex)));
-				setMaxConcurrentConsumers(Integer.parseInt(concurrency.substring(separatorIndex + 1)));
+				setConcurrentConsumers(Integer.parseInt(concurrency, 0, separatorIndex, 10));
+				setMaxConcurrentConsumers(Integer.parseInt(concurrency, separatorIndex + 1, concurrency.length(), 10));
 			}
 			else {
 				setConcurrentConsumers(1);

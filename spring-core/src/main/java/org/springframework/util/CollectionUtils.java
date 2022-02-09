@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,9 +129,7 @@ public abstract class CollectionUtils {
 	@SuppressWarnings("unchecked")
 	public static <E> void mergeArrayIntoCollection(@Nullable Object array, Collection<E> collection) {
 		Object[] arr = ObjectUtils.toObjectArray(array);
-		for (Object elem : arr) {
-			collection.add((E) elem);
-		}
+		Collections.addAll(collection, (E[])arr);
 	}
 
 	/**
@@ -470,13 +468,10 @@ public abstract class CollectionUtils {
 			MultiValueMap<? extends K, ? extends V> targetMap) {
 
 		Assert.notNull(targetMap, "'targetMap' must not be null");
-		Map<K, List<V>> result = newLinkedHashMap(targetMap.size());
-		targetMap.forEach((key, value) -> {
-			List<? extends V> values = Collections.unmodifiableList(value);
-			result.put(key, (List<V>) values);
-		});
-		Map<K, List<V>> unmodifiableMap = Collections.unmodifiableMap(result);
-		return toMultiValueMap(unmodifiableMap);
+		if (targetMap instanceof UnmodifiableMultiValueMap) {
+			return (MultiValueMap<K, V>) targetMap;
+		}
+		return new UnmodifiableMultiValueMap<>(targetMap);
 	}
 
 

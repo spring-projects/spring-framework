@@ -84,14 +84,6 @@ public abstract class AnnotationConfigUtils {
 			"org.springframework.context.annotation.internalAutowiredAnnotationProcessor";
 
 	/**
-	 * The bean name of the internally managed Required annotation processor.
-	 * @deprecated as of 5.1, since no Required processor is registered by default anymore
-	 */
-	@Deprecated
-	public static final String REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME =
-			"org.springframework.context.annotation.internalRequiredAnnotationProcessor";
-
-	/**
 	 * The bean name of the internally managed common annotation processor.
 	 */
 	public static final String COMMON_ANNOTATION_PROCESSOR_BEAN_NAME =
@@ -306,7 +298,7 @@ public abstract class AnnotationConfigUtils {
 
 	@Nullable
 	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annotationClassName) {
-		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationClassName, false));
+		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationClassName));
 	}
 
 	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
@@ -322,10 +314,10 @@ public abstract class AnnotationConfigUtils {
 		Set<AnnotationAttributes> result = new LinkedHashSet<>();
 
 		// Direct annotation present?
-		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
+		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName));
 
 		// Container annotation present?
-		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName, false);
+		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName);
 		if (container != null && container.containsKey("value")) {
 			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container.get("value")) {
 				addAttributesIfNotNull(result, containedAttributes);

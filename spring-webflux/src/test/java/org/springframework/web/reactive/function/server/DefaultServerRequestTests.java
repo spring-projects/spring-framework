@@ -288,7 +288,7 @@ public class DefaultServerRequestTests {
 				.body(body);
 		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
 
-		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
+		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<>() {};
 		Mono<String> resultMono = request.bodyToMono(typeReference);
 		assertThat(resultMono.block()).isEqualTo("foo");
 	}
@@ -346,7 +346,7 @@ public class DefaultServerRequestTests {
 				.body(body);
 		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
 
-		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
+		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<>() {};
 		Flux<String> resultFlux = request.bodyToFlux(typeReference);
 		assertThat(resultFlux.collectList().block()).isEqualTo(Collections.singletonList("foo"));
 	}

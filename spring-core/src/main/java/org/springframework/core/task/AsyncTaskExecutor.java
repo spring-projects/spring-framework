@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ import java.util.concurrent.Future;
 
 /**
  * Extended interface for asynchronous {@link TaskExecutor} implementations,
- * offering an overloaded {@link #execute(Runnable, long)} variant with a start
- * timeout parameter as well support for {@link java.util.concurrent.Callable}.
+ * offering support for {@link java.util.concurrent.Callable}.
  *
  * <p>Note: The {@link java.util.concurrent.Executors} class includes a set of
  * methods that can convert some other common closure-like objects, for example,
@@ -41,10 +40,18 @@ import java.util.concurrent.Future;
  */
 public interface AsyncTaskExecutor extends TaskExecutor {
 
-	/** Constant that indicates immediate execution. */
+	/**
+	 * Constant that indicates immediate execution.
+	 * @deprecated as of 5.3.16 along with {@link #execute(Runnable, long)}
+	 */
+	@Deprecated
 	long TIMEOUT_IMMEDIATE = 0;
 
-	/** Constant that indicates no time limit. */
+	/**
+	 * Constant that indicates no time limit.
+	 * @deprecated as of 5.3.16 along with {@link #execute(Runnable, long)}
+	 */
+	@Deprecated
 	long TIMEOUT_INDEFINITE = Long.MAX_VALUE;
 
 
@@ -58,7 +65,10 @@ public interface AsyncTaskExecutor extends TaskExecutor {
 	 * @throws TaskTimeoutException in case of the task being rejected because
 	 * of the timeout (i.e. it cannot be started in time)
 	 * @throws TaskRejectedException if the given task was not accepted
+	 * @see #execute(Runnable)
+	 * @deprecated as of 5.3.16 since the common executors do not support start timeouts
 	 */
+	@Deprecated
 	void execute(Runnable task, long startTimeout);
 
 	/**

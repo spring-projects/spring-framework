@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -233,7 +233,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 				return beanFactory.getBean(TaskExecutor.class);
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
-				logger.debug("Could not find unique TaskExecutor bean", ex);
+				logger.debug("Could not find unique TaskExecutor bean. " +
+						"Continuing search for an Executor bean named 'taskExecutor'", ex);
 				try {
 					return beanFactory.getBean(DEFAULT_TASK_EXECUTOR_BEAN_NAME, Executor.class);
 				}
@@ -246,7 +247,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 				}
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				logger.debug("Could not find default TaskExecutor bean", ex);
+				logger.debug("Could not find default TaskExecutor bean. " +
+						"Continuing search for an Executor bean named 'taskExecutor'", ex);
 				try {
 					return beanFactory.getBean(DEFAULT_TASK_EXECUTOR_BEAN_NAME, Executor.class);
 				}
@@ -286,9 +288,13 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		else if (Future.class.isAssignableFrom(returnType)) {
 			return executor.submit(task);
 		}
-		else {
+		else if (void.class == returnType) {
 			executor.submit(task);
 			return null;
+		}
+		else {
+			throw new IllegalArgumentException(
+					"Invalid return type for async method (only Future and void supported): " + returnType);
 		}
 	}
 

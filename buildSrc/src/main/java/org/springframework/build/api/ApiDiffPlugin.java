@@ -16,6 +16,7 @@
 package org.springframework.build.api;
 
 import java.io.File;
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -23,10 +24,14 @@ import java.util.List;
 
 import me.champeau.gradle.japicmp.JapicmpPlugin;
 import me.champeau.gradle.japicmp.JapicmpTask;
+import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.repositories.ArtifactRepository;
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
+import org.gradle.api.artifacts.repositories.RepositoryContentDescriptor;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
@@ -52,6 +57,8 @@ public class ApiDiffPlugin implements Plugin<Project> {
 
 	private static final List<String> PACKAGE_INCLUDES = Collections.singletonList("org.springframework.*");
 
+	private static final URI SPRING_MILESTONE_REPOSITORY = URI.create("https://repo.spring.io/milestone");
+
 	@Override
 	public void apply(Project project) {
 		if (project.hasProperty(BASELINE_VERSION_PROPERTY) && project.equals(project.getRootProject())) {
@@ -68,6 +75,10 @@ public class ApiDiffPlugin implements Plugin<Project> {
 
 	private void createApiDiffTask(String baselineVersion, Project project) {
 		if (isProjectEligible(project)) {
+			// Add Spring Milestone repository for generating diffs against previous milestones
+			project.getRootProject()
+					.getRepositories()
+					.maven(mavenArtifactRepository -> mavenArtifactRepository.setUrl(SPRING_MILESTONE_REPOSITORY));
 			JapicmpTask apiDiff = project.getTasks().create(TASK_NAME, JapicmpTask.class);
 			apiDiff.setDescription("Generates an API diff report with japicmp");
 			apiDiff.setGroup(JavaBasePlugin.DOCUMENTATION_GROUP);

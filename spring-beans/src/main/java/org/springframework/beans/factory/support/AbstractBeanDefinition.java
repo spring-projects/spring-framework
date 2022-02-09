@@ -390,13 +390,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Override
 	@Nullable
 	public String getBeanClassName() {
-		Object beanClassObject = this.beanClass;
-		if (beanClassObject instanceof Class) {
-			return ((Class<?>) beanClassObject).getName();
-		}
-		else {
-			return (String) beanClassObject;
-		}
+		return (this.beanClass instanceof Class<?> clazz ? clazz.getName() : (String) this.beanClass);
 	}
 
 	/**
@@ -433,11 +427,11 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		if (beanClassObject == null) {
 			throw new IllegalStateException("No bean class specified on bean definition");
 		}
-		if (!(beanClassObject instanceof Class)) {
+		if (!(beanClassObject instanceof Class<?> clazz)) {
 			throw new IllegalStateException(
 					"Bean class name [" + beanClassObject + "] has not been resolved into an actual Class");
 		}
-		return (Class<?>) beanClassObject;
+		return clazz;
 	}
 
 	/**
@@ -1102,8 +1096,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Override
 	@Nullable
 	public BeanDefinition getOriginatingBeanDefinition() {
-		return (this.resource instanceof BeanDefinitionResource ?
-				((BeanDefinitionResource) this.resource).getBeanDefinition() : null);
+		return (this.resource instanceof BeanDefinitionResource bdr ? bdr.getBeanDefinition() : null);
 	}
 
 	/**

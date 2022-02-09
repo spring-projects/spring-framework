@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,6 +93,8 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	private int queueCapacity = Integer.MAX_VALUE;
 
 	private boolean allowCoreThreadTimeOut = false;
+
+	private boolean prestartAllCoreThreads = false;
 
 	@Nullable
 	private TaskDecorator taskDecorator;
@@ -198,6 +200,16 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	}
 
 	/**
+	 * Specify whether to start all core threads, causing them to idly wait for work.
+	 * <p>Default is "false".
+	 * @since 5.3.14
+	 * @see java.util.concurrent.ThreadPoolExecutor#prestartAllCoreThreads
+	 */
+	public void setPrestartAllCoreThreads(boolean prestartAllCoreThreads) {
+		this.prestartAllCoreThreads = prestartAllCoreThreads;
+	}
+
+	/**
 	 * Specify a custom {@link TaskDecorator} to be applied to any {@link Runnable}
 	 * about to be executed.
 	 * <p>Note that such a decorator is not necessarily being applied to the
@@ -255,6 +267,9 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 
 		if (this.allowCoreThreadTimeOut) {
 			executor.allowCoreThreadTimeOut(true);
+		}
+		if (this.prestartAllCoreThreads) {
+			executor.prestartAllCoreThreads();
 		}
 
 		this.threadPoolExecutor = executor;
@@ -325,6 +340,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Deprecated
 	@Override
 	public void execute(Runnable task, long startTimeout) {
 		execute(task);

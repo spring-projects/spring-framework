@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,8 @@ public class RssChannelHttpMessageConverterTests {
 
 	@Test
 	public void read() throws IOException {
-		InputStream is = getClass().getResourceAsStream("rss.xml");
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(is);
+		InputStream inputStream = getClass().getResourceAsStream("rss.xml");
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		inputMessage.getHeaders().setContentType(RSS_XML_UTF8);
 		Channel result = converter.read(Channel.class, inputMessage);
 		assertThat(result.getTitle()).isEqualTo("title");

@@ -1258,7 +1258,7 @@ The following table describes the method arguments:
 The presence of this annotation is not required since it is, by default, assumed if no
 other argument is matched.
 
-You can annotate payload arguments with `@javax.validation.Valid` or Spring's `@Validated`,
+You can annotate payload arguments with `@jakarta.validation.Valid` or Spring's `@Validated`,
 to have the payload arguments be automatically validated.
 
 | `@Header`
@@ -1439,8 +1439,11 @@ See <<websocket-stomp-destination-separator>>.
 
 If configured with a task scheduler, the simple broker supports
 https://stomp.github.io/stomp-specification-1.2.html#Heart-beating[STOMP heartbeats].
-For that, you can declare your own scheduler or use the one that is automatically
-declared and used internally. The following example shows how to declare your own scheduler:
+To configure a scheduler, you can declare your own `TaskScheduler` bean and set it through
+the `MessageBrokerRegistry`. Alternatively, you can use the one that is automatically
+declared in the built-in WebSocket configuration, however, you'll' need `@Lazy` to avoid
+a cycle between the built-in WebSocket configuration and your
+`WebSocketMessageBrokerConfigurer`. For example:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -1451,13 +1454,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	private TaskScheduler messageBrokerTaskScheduler;
 
 	@Autowired
-	public void setMessageBrokerTaskScheduler(TaskScheduler taskScheduler) {
+	public void setMessageBrokerTaskScheduler(@Lazy TaskScheduler taskScheduler) {
 		this.messageBrokerTaskScheduler = taskScheduler;
 	}
 
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
-
 		registry.enableSimpleBroker("/queue/", "/topic/")
 				.setHeartbeatValue(new long[] {10000, 20000})
 				.setTaskScheduler(this.messageBrokerTaskScheduler);
@@ -1722,19 +1724,11 @@ HTTP session (which is then associated with WebSocket or SockJS sessions created
 for that user) and results in a user header being stamped on every `Message` flowing
 through the application.
 
-Note that the STOMP protocol does have `login` and `passcode` headers
-on the `CONNECT` frame. Those were originally designed for and are still needed,
-for example, for STOMP over TCP. However, for STOMP over WebSocket, by default,
-Spring ignores authorization headers at the STOMP protocol level, assumes that
-the user is already authenticated at the HTTP transport level, and expects that
-the WebSocket or SockJS session contain the authenticated user.
-
-NOTE: Spring Security provides
-https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#websocket[WebSocket sub-protocol authorization]
-that uses a `ChannelInterceptor` to authorize messages based on the user header in them.
-Also, Spring Session provides a
-https://docs.spring.io/spring-session/docs/current/reference/html5/#websocket[WebSocket integration]
-that ensures the user HTTP session does not expire when the WebSocket session is still active.
+The STOMP protocol does have `login` and `passcode` headers on the `CONNECT` frame.
+Those were originally designed for and are needed for STOMP over TCP. However, for STOMP
+over WebSocket, by default, Spring ignores authentication headers at the STOMP protocol
+level, and assumes that the user is already authenticated at the HTTP transport level.
+The expectation is that the WebSocket or SockJS session contain the authenticated user.
 
 
 
@@ -1809,6 +1803,18 @@ you need to ensure that the authentication `ChannelInterceptor` config is ordere
 ahead of Spring Security's. This is best done by declaring the custom interceptor in
 its own implementation of `WebSocketMessageBrokerConfigurer` that is marked with
 `@Order(Ordered.HIGHEST_PRECEDENCE + 99)`.
+
+
+
+[[websocket-stomp-authorization]]
+=== Authorization
+
+Spring Security provides
+https://docs.spring.io/spring-security/reference/servlet/integrations/websocket.html#websocket-authorization[WebSocket sub-protocol authorization]
+that uses a `ChannelInterceptor` to authorize messages based on the user header in them.
+Also, Spring Session provides
+https://docs.spring.io/spring-session/reference/web-socket.html[WebSocket integration]
+that ensures the user's HTTP session does not expire while the WebSocket session is still active.
 
 
 

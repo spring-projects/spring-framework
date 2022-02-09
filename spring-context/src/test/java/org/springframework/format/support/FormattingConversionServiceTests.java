@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package org.springframework.format.support;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.AfterEach;
@@ -27,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -35,7 +30,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.Formatter;
-import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.number.NumberStyleFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -116,7 +110,7 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void printNullDefault() {
 		assertThat(formattingService
-				.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class))).isEqualTo(null);
+				.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class))).isNull();
 	}
 
 	@Test
@@ -128,28 +122,6 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void parseEmptyStringDefault() {
 		assertThat(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
-	}
-
-	@Test
-	public void registerDefaultValueViaFormatter() {
-		registerDefaultValue(Date.class, new Date());
-	}
-
-	private <T> void registerDefaultValue(Class<T> clazz, final T defaultValue) {
-		formattingService.addFormatterForFieldType(clazz, new Formatter<T>() {
-			@Override
-			public T parse(String text, Locale locale) {
-				return defaultValue;
-			}
-			@Override
-			public String print(T t, Locale locale) {
-				return defaultValue.toString();
-			}
-			@Override
-			public String toString() {
-				return defaultValue.toString();
-			}
-		});
 	}
 
 	@Test
@@ -209,80 +181,6 @@ public class FormattingConversionServiceTests {
 	}
 
 
-	public static class ValueBean {
-
-		@Value("10-31-09")
-		@org.springframework.format.annotation.DateTimeFormat(pattern="MM-d-yy")
-		public Date date;
-	}
-
-
-	public static class MetaValueBean {
-
-		@MyDateAnn
-		public Date date;
-
-		@MyNumberAnn
-		public Double number;
-	}
-
-
-	@Value("${myDate}")
-	@org.springframework.format.annotation.DateTimeFormat(pattern="MM-d-yy")
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface MyDateAnn {
-	}
-
-
-	@Value("${myNumber}")
-	@NumberFormat(style = NumberFormat.Style.PERCENT)
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface MyNumberAnn {
-	}
-
-
-	public static class Model {
-
-		@org.springframework.format.annotation.DateTimeFormat(style="S-")
-		public Date date;
-
-		@org.springframework.format.annotation.DateTimeFormat(pattern="M-d-yy")
-		public List<Date> dates;
-
-		public List<Date> getDates() {
-			return dates;
-		}
-
-		public void setDates(List<Date> dates) {
-			this.dates = dates;
-		}
-	}
-
-
-	public static class ModelWithPlaceholders {
-
-		@org.springframework.format.annotation.DateTimeFormat(style="${dateStyle}")
-		public Date date;
-
-		@MyDatePattern
-		public List<Date> dates;
-
-		public List<Date> getDates() {
-			return dates;
-		}
-
-		public void setDates(List<Date> dates) {
-			this.dates = dates;
-		}
-	}
-
-
-	@org.springframework.format.annotation.DateTimeFormat(pattern="${datePattern}")
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface MyDatePattern {
-	}
-
-
 	public static class NullReturningFormatter implements Formatter<Integer> {
 
 		@Override
@@ -294,18 +192,6 @@ public class FormattingConversionServiceTests {
 		public Integer parse(String text, Locale locale) {
 			return null;
 		}
-	}
-
-
-	@SuppressWarnings("serial")
-	public static class MyDate extends Date {
-	}
-
-
-	private static class ModelWithSubclassField {
-
-		@org.springframework.format.annotation.DateTimeFormat(style = "S-")
-		public MyDate date;
 	}
 
 

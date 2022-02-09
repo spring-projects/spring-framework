@@ -20,7 +20,7 @@ tasks.findByName("dokkaHtmlPartial")?.configure {
 				url.set(new URL("https://javadoc.io/doc/org.hamcrest/hamcrest/2.1/"))
 			}
 			externalDocumentationLink {
-				url.set(new URL("https://javadoc.io/doc/javax.servlet/javax.servlet-api/latest/"))
+				url.set(new URL("https://javadoc.io/doc/jakarta.servlet/jakarta.servlet-api/latest/"))
 			}
 			externalDocumentationLink {
 				url.set(new URL("https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/"))

@@ -40,8 +40,9 @@ public class MustBeInitialized implements InitializingBean {
 	 * managed the bean's lifecycle correctly
 	 */
 	public void businessMethod() {
-		if (!this.inited)
+		if (!this.inited) {
 			throw new RuntimeException("Factory didn't call afterPropertiesSet() on MustBeInitialized object");
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
-import org.springframework.beans.PropertyEditorRegistrar;
-import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
@@ -78,7 +76,6 @@ import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
@@ -426,7 +423,7 @@ class DefaultListableBeanFactoryTests {
 		assertThat(lbf.isTypeMatch("x1", Object.class)).isTrue();
 		assertThat(lbf.isTypeMatch("&x1", Object.class)).isFalse();
 		assertThat(lbf.getType("x1")).isEqualTo(TestBean.class);
-		assertThat(lbf.getType("&x1")).isEqualTo(null);
+		assertThat(lbf.getType("&x1")).isNull();
 		assertThat(TestBeanFactory.initialized).isFalse();
 
 		lbf.registerAlias("x1", "x2");
@@ -857,8 +854,11 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
 		lbf.registerAlias("otherTest", "test2");
 		lbf.registerAlias("test", "test2");
+		lbf.registerAlias("test", "testX");
+		lbf.registerBeanDefinition("testX", new RootBeanDefinition(TestBean.class));
 		assertThat(lbf.getBean("test")).isInstanceOf(NestedTestBean.class);
 		assertThat(lbf.getBean("test2")).isInstanceOf(NestedTestBean.class);
+		assertThat(lbf.getBean("testX")).isInstanceOf(TestBean.class);
 	}
 
 	@Test
@@ -867,10 +867,18 @@ class DefaultListableBeanFactoryTests {
 		BeanDefinition oldDef = new RootBeanDefinition(TestBean.class);
 		BeanDefinition newDef = new RootBeanDefinition(NestedTestBean.class);
 		lbf.registerBeanDefinition("test", oldDef);
+		lbf.registerAlias("test", "testX");
 		assertThatExceptionOfType(BeanDefinitionOverrideException.class).isThrownBy(() ->
 				lbf.registerBeanDefinition("test", newDef))
 				.satisfies(ex -> {
 					assertThat(ex.getBeanName()).isEqualTo("test");
+					assertThat(ex.getBeanDefinition()).isEqualTo(newDef);
+					assertThat(ex.getExistingDefinition()).isEqualTo(oldDef);
+				});
+		assertThatExceptionOfType(BeanDefinitionOverrideException.class).isThrownBy(() ->
+						lbf.registerBeanDefinition("testX", newDef))
+				.satisfies(ex -> {
+					assertThat(ex.getBeanName()).isEqualTo("testX");
 					assertThat(ex.getBeanDefinition()).isEqualTo(newDef);
 					assertThat(ex.getExistingDefinition()).isEqualTo(oldDef);
 				});
@@ -983,16 +991,13 @@ class DefaultListableBeanFactoryTests {
 	@Test
 	void customConverter() {
 		GenericConversionService conversionService = new DefaultConversionService();
-		conversionService.addConverter(new Converter<String, Float>() {
-			@Override
-			public Float convert(String source) {
-				try {
-					NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
-					return nf.parse(source).floatValue();
-				}
-				catch (ParseException ex) {
-					throw new IllegalArgumentException(ex);
-				}
+		conversionService.addConverter(String.class, Float.class, source -> {
+			try {
+				NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
+				return nf.parse(source).floatValue();
+			}
+			catch (ParseException ex) {
+				throw new IllegalArgumentException(ex);
 			}
 		});
 		lbf.setConversionService(conversionService);
@@ -1007,12 +1012,9 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	void customEditorWithBeanReference() {
-		lbf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
-			@Override
-			public void registerCustomEditors(PropertyEditorRegistry registry) {
-				NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
-				registry.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
-			}
+		lbf.addPropertyEditorRegistrar(registry -> {
+			NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
+			registry.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("myFloat", new RuntimeBeanReference("myFloat"));
@@ -2599,8 +2601,8 @@ class DefaultListableBeanFactoryTests {
 	void containsBeanReturnsTrueEvenForAbstractBeanDefinition() {
 		lbf.registerBeanDefinition("abs", BeanDefinitionBuilder
 				.rootBeanDefinition(TestBean.class).setAbstract(true).getBeanDefinition());
-		assertThat(lbf.containsBean("abs")).isEqualTo(true);
-		assertThat(lbf.containsBean("bogus")).isEqualTo(false);
+		assertThat(lbf.containsBean("abs")).isTrue();
+		assertThat(lbf.containsBean("bogus")).isFalse();
 	}
 
 	@Test
@@ -2695,8 +2697,12 @@ class DefaultListableBeanFactoryTests {
 
 		@Override
 		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
 			ConstructorDependency that = (ConstructorDependency) o;
 			return spouseAge == that.spouseAge &&
 					Objects.equals(spouse, that.spouse) &&

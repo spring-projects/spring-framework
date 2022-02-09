@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.http.codec.protobuf;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
@@ -31,11 +29,10 @@ import org.springframework.util.MimeType;
  */
 public abstract class ProtobufCodecSupport {
 
-	static final List<MimeType> MIME_TYPES = Collections.unmodifiableList(
-			Arrays.asList(
+	static final List<MimeType> MIME_TYPES = List.of(
 					new MimeType("application", "x-protobuf"),
 					new MimeType("application", "octet-stream"),
-					new MimeType("application", "vnd.google.protobuf")));
+					new MimeType("application", "vnd.google.protobuf"));
 
 	static final String DELIMITED_KEY = "delimited";
 

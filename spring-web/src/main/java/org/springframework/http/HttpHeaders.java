@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -589,18 +589,19 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the value of the {@code Access-Control-Allow-Methods} response header.
 	 */
 	public List<HttpMethod> getAccessControlAllowMethods() {
-		List<HttpMethod> result = new ArrayList<>();
 		String value = getFirst(ACCESS_CONTROL_ALLOW_METHODS);
 		if (value != null) {
 			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+			List<HttpMethod> result = new ArrayList<>();
 			for (String token : tokens) {
-				HttpMethod resolved = HttpMethod.resolve(token);
-				if (resolved != null) {
-					result.add(resolved);
-				}
+				HttpMethod method = HttpMethod.valueOf(token);
+				result.add(method);
 			}
+			return result;
 		}
-		return result;
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	/**
@@ -682,7 +683,13 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	@Nullable
 	public HttpMethod getAccessControlRequestMethod() {
-		return HttpMethod.resolve(getFirst(ACCESS_CONTROL_REQUEST_METHOD));
+		String requestMethod = getFirst(ACCESS_CONTROL_REQUEST_METHOD);
+		if (requestMethod != null) {
+			return HttpMethod.valueOf(requestMethod);
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
@@ -743,17 +750,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		String value = getFirst(ALLOW);
 		if (StringUtils.hasLength(value)) {
 			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
-			List<HttpMethod> result = new ArrayList<>(tokens.length);
+			Set<HttpMethod> result = new LinkedHashSet<>(tokens.length);
 			for (String token : tokens) {
-				HttpMethod resolved = HttpMethod.resolve(token);
-				if (resolved != null) {
-					result.add(resolved);
-				}
+				HttpMethod method = HttpMethod.valueOf(token);
+				result.add(method);
 			}
-			return EnumSet.copyOf(result);
+			return result;
 		}
 		else {
-			return EnumSet.noneOf(HttpMethod.class);
+			return Collections.emptySet();
 		}
 	}
 

@@ -252,8 +252,8 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 			return null;
 		}
 
-		private void handleFrame(ByteArrayOutputStream os) throws IOException {
-			String content = os.toString(SockJsFrame.CHARSET.name());
+		private void handleFrame(ByteArrayOutputStream os) {
+			String content = os.toString(SockJsFrame.CHARSET);
 			os.reset();
 			if (logger.isTraceEnabled()) {
 				logger.trace("XHR receive content: " + content);

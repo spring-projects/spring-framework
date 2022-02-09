@@ -18,10 +18,8 @@ package org.springframework.context.annotation;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,11 +70,8 @@ public class ConfigurationClassAndBFPPTests {
 
 		@Bean
 		public BeanFactoryPostProcessor bfpp() {
-			return new BeanFactoryPostProcessor() {
-				@Override
-				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-					// no-op
-				}
+			return beanFactory -> {
+				// no-op
 			};
 		}
 	}
@@ -88,11 +83,8 @@ public class ConfigurationClassAndBFPPTests {
 
 		@Bean
 		public static final BeanFactoryPostProcessor bfpp() {
-			return new BeanFactoryPostProcessor() {
-				@Override
-				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-					// no-op
-				}
+			return beanFactory -> {
+				// no-op
 			};
 		}
 	}

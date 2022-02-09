@@ -710,7 +710,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 				idx = host.indexOf(':');
 			}
 			if (idx != -1) {
-				return Integer.parseInt(host.substring(idx + 1));
+				return Integer.parseInt(host, idx + 1, host.length(), 10);
 			}
 		}
 
@@ -1282,8 +1282,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public void setSession(HttpSession session) {
 		this.session = session;
-		if (session instanceof MockHttpSession) {
-			MockHttpSession mockSession = ((MockHttpSession) session);
+		if (session instanceof MockHttpSession mockSession) {
 			mockSession.access();
 		}
 	}

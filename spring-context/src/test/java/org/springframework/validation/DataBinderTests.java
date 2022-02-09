@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1242,7 +1242,7 @@ class DataBinderTests {
 		assertThat(errors.getFieldError("name").getCodes()[2]).isEqualTo("NOT_ROD.java.lang.String");
 		assertThat(errors.getFieldError("name").getCodes()[3]).isEqualTo("NOT_ROD");
 		assertThat((errors.getFieldErrors("name").get(0)).getField()).isEqualTo("name");
-		assertThat((errors.getFieldErrors("name").get(0)).getRejectedValue()).isEqualTo(null);
+		assertThat((errors.getFieldErrors("name").get(0)).getRejectedValue()).isNull();
 
 		assertThat(errors.hasFieldErrors("spouse.age")).isTrue();
 		assertThat(errors.getFieldErrorCount("spouse.age")).isEqualTo(1);
@@ -1314,7 +1314,7 @@ class DataBinderTests {
 		assertThat(errors.getFieldError("name").getCodes()[2]).isEqualTo("validation.NOT_ROD.java.lang.String");
 		assertThat(errors.getFieldError("name").getCodes()[3]).isEqualTo("validation.NOT_ROD");
 		assertThat((errors.getFieldErrors("name").get(0)).getField()).isEqualTo("name");
-		assertThat((errors.getFieldErrors("name").get(0)).getRejectedValue()).isEqualTo(null);
+		assertThat((errors.getFieldErrors("name").get(0)).getRejectedValue()).isNull();
 
 		assertThat(errors.hasFieldErrors("spouse.age")).isTrue();
 		assertThat(errors.getFieldErrorCount("spouse.age")).isEqualTo(1);
@@ -1339,7 +1339,7 @@ class DataBinderTests {
 		assertThat(errors.getFieldErrorCount("spouse")).isEqualTo(1);
 		assertThat(errors.getFieldError("spouse").getCode()).isEqualTo("SPOUSE_NOT_AVAILABLE");
 		assertThat((errors.getFieldErrors("spouse").get(0)).getObjectName()).isEqualTo("tb");
-		assertThat((errors.getFieldErrors("spouse").get(0)).getRejectedValue()).isEqualTo(null);
+		assertThat((errors.getFieldErrors("spouse").get(0)).getRejectedValue()).isNull();
 	}
 
 	@Test

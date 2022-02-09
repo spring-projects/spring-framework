@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -973,13 +973,37 @@ public interface WebTestClient {
 
 		/**
 		 * Parse the expected and actual response content as JSON and perform a
-		 * "lenient" comparison verifying the same attribute-value pairs.
-		 * <p>Use of this option requires the
+		 * comparison verifying that they contain the same attribute-value pairs
+		 * regardless of formatting with <em>lenient</em> checking (extensible
+		 * and non-strict array ordering).
+		 * <p>Use of this method requires the
 		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
-		 * on to be on the classpath.
-		 * @param expectedJson the expected JSON content.
+		 * to be on the classpath.
+		 * @param expectedJson the expected JSON content
+		 * @see #json(String, boolean)
 		 */
-		BodyContentSpec json(String expectedJson);
+		default BodyContentSpec json(String expectedJson) {
+			return json(expectedJson, false);
+		}
+
+		/**
+		 * Parse the expected and actual response content as JSON and perform a
+		 * comparison verifying that they contain the same attribute-value pairs
+		 * regardless of formatting.
+		 * <p>Can compare in two modes, depending on the {@code strict} parameter value:
+		 * <ul>
+		 * <li>{@code true}: strict checking. Not extensible and strict array ordering.</li>
+		 * <li>{@code false}: lenient checking. Extensible and non-strict array ordering.</li>
+		 * </ul>
+		 * <p>Use of this method requires the
+		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
+		 * to be on the classpath.
+		 * @param expectedJson the expected JSON content
+		 * @param strict enables strict checking if {@code true}
+		 * @since 5.3.16
+		 * @see #json(String)
+		 */
+		BodyContentSpec json(String expectedJson, boolean strict);
 
 		/**
 		 * Parse expected and actual response content as XML and assert that

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,21 +147,21 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * Resolve the specified data source object into a DataSource instance.
 	 * <p>The default implementation handles DataSource instances and data source
 	 * names (to be resolved via a {@link #setDataSourceLookup DataSourceLookup}).
-	 * @param dataSource the data source value object as specified in the
+	 * @param dataSourceObject the data source value object as specified in the
 	 * {@link #setTargetDataSources targetDataSources} map
 	 * @return the resolved DataSource (never {@code null})
 	 * @throws IllegalArgumentException in case of an unsupported value type
 	 */
-	protected DataSource resolveSpecifiedDataSource(Object dataSource) throws IllegalArgumentException {
-		if (dataSource instanceof DataSource) {
-			return (DataSource) dataSource;
+	protected DataSource resolveSpecifiedDataSource(Object dataSourceObject) throws IllegalArgumentException {
+		if (dataSourceObject instanceof DataSource dataSource) {
+			return dataSource;
 		}
-		else if (dataSource instanceof String) {
-			return this.dataSourceLookup.getDataSource((String) dataSource);
+		else if (dataSourceObject instanceof String dataSourceName) {
+			return this.dataSourceLookup.getDataSource(dataSourceName);
 		}
 		else {
 			throw new IllegalArgumentException(
-					"Illegal data source value - only [javax.sql.DataSource] and String supported: " + dataSource);
+					"Illegal data source value - only [javax.sql.DataSource] and String supported: " + dataSourceObject);
 		}
 	}
 

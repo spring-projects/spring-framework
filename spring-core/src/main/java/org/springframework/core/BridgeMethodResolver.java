@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,12 +93,12 @@ public final class BridgeMethodResolver {
 
 	/**
 	 * Returns {@code true} if the supplied '{@code candidateMethod}' can be
-	 * consider a validate candidate for the {@link Method} that is {@link Method#isBridge() bridged}
+	 * considered a validate candidate for the {@link Method} that is {@link Method#isBridge() bridged}
 	 * by the supplied {@link Method bridge Method}. This method performs inexpensive
-	 * checks and can be used quickly filter for a set of possible matches.
+	 * checks and can be used to quickly filter for a set of possible matches.
 	 */
 	private static boolean isBridgedCandidateFor(Method candidateMethod, Method bridgeMethod) {
-		return (!candidateMethod.isBridge() && !candidateMethod.equals(bridgeMethod) &&
+		return (!candidateMethod.isBridge() &&
 				candidateMethod.getName().equals(bridgeMethod.getName()) &&
 				candidateMethod.getParameterCount() == bridgeMethod.getParameterCount());
 	}

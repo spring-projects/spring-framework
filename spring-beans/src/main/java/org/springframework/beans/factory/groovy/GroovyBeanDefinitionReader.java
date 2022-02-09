@@ -462,8 +462,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 */
 	private GroovyBeanDefinitionWrapper invokeBeanDefiningMethod(String beanName, Object[] args) {
 		boolean hasClosureArgument = (args[args.length - 1] instanceof Closure);
-		if (args[0] instanceof Class) {
-			Class<?> beanClass = (Class<?>) args[0];
+		if (args[0] instanceof Class<?> beanClass) {
 			if (hasClosureArgument) {
 				if (args.length - 1 != 1) {
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(

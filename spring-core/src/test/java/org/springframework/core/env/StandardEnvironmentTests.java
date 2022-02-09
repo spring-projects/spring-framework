@@ -209,7 +209,7 @@ public class StandardEnvironmentTests {
 	void defaultProfileWithCircularPlaceholder() {
 		try {
 			System.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "${spring.profiles.default}");
-			assertThatIllegalArgumentException().isThrownBy(() -> environment.getDefaultProfiles());
+			assertThatIllegalArgumentException().isThrownBy(environment::getDefaultProfiles);
 		}
 		finally {
 			System.clearProperty(DEFAULT_PROFILES_PROPERTY_NAME);

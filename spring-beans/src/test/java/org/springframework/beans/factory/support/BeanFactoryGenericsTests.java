@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -34,8 +33,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import org.springframework.beans.PropertyEditorRegistrar;
-import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
@@ -409,12 +406,7 @@ class BeanFactoryGenericsTests {
 	@Test
 	void testGenericMapWithCollectionValueConstructor() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
-			@Override
-			public void registerCustomEditors(PropertyEditorRegistry registry) {
-				registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
-			}
-		});
+		bf.addPropertyEditorRegistrar(registry -> registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false)));
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
 		Map<String, AbstractCollection<?>> input = new HashMap<>();
@@ -568,12 +560,7 @@ class BeanFactoryGenericsTests {
 	@Test
 	void testGenericMapWithCollectionValueFactoryMethod() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
-			@Override
-			public void registerCustomEditors(PropertyEditorRegistry registry) {
-				registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
-			}
-		});
+		bf.addPropertyEditorRegistrar(registry -> registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false)));
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
@@ -1010,11 +997,8 @@ class BeanFactoryGenericsTests {
 		@SuppressWarnings("unchecked")
 		public <T> T createMock(Class<T> toMock) {
 			return (T) Proxy.newProxyInstance(BeanFactoryGenericsTests.class.getClassLoader(), new Class<?>[] {toMock},
-					new InvocationHandler() {
-						@Override
-						public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-							throw new UnsupportedOperationException("mocked!");
-						}
+					(InvocationHandler) (proxy, method, args) -> {
+						throw new UnsupportedOperationException("mocked!");
 					});
 		}
 	}

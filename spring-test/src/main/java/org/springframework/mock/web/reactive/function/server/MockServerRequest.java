@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,6 +132,7 @@ public final class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
+	@Deprecated
 	public String methodName() {
 		return this.method.name();
 	}
@@ -300,13 +301,6 @@ public final class MockServerRequest implements ServerRequest {
 
 		Builder session(WebSession session);
 
-		/**
-		 * Sets the request {@link Principal}.
-		 * @deprecated in favor of {@link #principal(Principal)}
-		 */
-		@Deprecated
-		Builder session(Principal principal);
-
 		Builder principal(Principal principal);
 
 		Builder remoteAddress(InetSocketAddress remoteAddress);
@@ -461,12 +455,6 @@ public final class MockServerRequest implements ServerRequest {
 			Assert.notNull(session, "'session' must not be null");
 			this.session = session;
 			return this;
-		}
-
-		@Override
-		@Deprecated
-		public Builder session(Principal principal) {
-			return principal(principal);
 		}
 
 		@Override

@@ -73,6 +73,7 @@ jar {
 	dependsOn cglibRepackJar
 	from(zipTree(cglibRepackJar.archivePath)) {
 		include "org/springframework/cglib/**"
+		exclude "org/springframework/cglib/beans/BeanMap*.class"
 		exclude "org/springframework/cglib/core/AbstractClassGenerator*.class"
 		exclude "org/springframework/cglib/core/AsmApi*.class"
 		exclude "org/springframework/cglib/core/KeyFactory.class"
@@ -92,4 +93,10 @@ test {
 	// Make sure the classes dir is used on the test classpath (required by ResourceTests).
 	// When test fixtures are involved, the JAR is used by default.
 	classpath = sourceSets.main.output.classesDirs + classpath - files(jar.archiveFile)
+
+	// Ensure that BlockHound tests run on JDK 13+. For details, see:
+	// https://github.com/reactor/BlockHound/issues/33
+	jvmArgs += [
+		"-XX:+AllowRedefinitionToAddDeleteMethods"
+	]
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,16 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 	@Override
 	public HttpStatus getStatusCode() {
 		return getDelegate().getStatusCode();
+	}
+
+	@Override
+	public boolean setRawStatusCode(@Nullable Integer value) {
+		return getDelegate().setRawStatusCode(value);
+	}
+
+	@Override
+	public Integer getRawStatusCode() {
+		return getDelegate().getRawStatusCode();
 	}
 
 	@Override

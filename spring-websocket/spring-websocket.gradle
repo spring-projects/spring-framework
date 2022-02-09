@@ -18,8 +18,8 @@ dependencies {
 	}
 	optional("org.eclipse.jetty.websocket:websocket-jetty-client")
 	optional("org.eclipse.jetty:jetty-client")
-	optional("io.undertow:undertow-servlet-jakartaee9")
-	optional("io.undertow:undertow-websockets-jsr-jakartaee9")
+	optional("io.undertow:undertow-servlet-jakarta")
+	optional("io.undertow:undertow-websockets-jsr-jakarta")
 	optional("com.fasterxml.jackson.core:jackson-databind")
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-web")))

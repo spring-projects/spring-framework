@@ -30,7 +30,6 @@ import jakarta.jms.Session;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.StubQueue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
@@ -182,16 +181,13 @@ public class SimpleMessageListenerContainerTests {
 
 		this.container.setConnectionFactory(connectionFactory);
 		this.container.setDestinationName(DESTINATION_NAME);
-		this.container.setMessageListener(new SessionAwareMessageListener<Message>() {
-			@Override
-			public void onMessage(Message message, @Nullable Session sess) {
-				try {
-					// Check correct Session passed into SessionAwareMessageListener.
-					assertThat(session).isSameAs(sess);
-				}
-				catch (Throwable ex) {
-					failure.add("MessageListener execution failed: " + ex);
-				}
+		this.container.setMessageListener((SessionAwareMessageListener<Message>) (Message message, @Nullable Session sess) -> {
+			try {
+				// Check correct Session passed into SessionAwareMessageListener.
+				assertThat(session).isSameAs(sess);
+			}
+			catch (Throwable ex) {
+				failure.add("MessageListener execution failed: " + ex);
 			}
 		});
 
@@ -231,14 +227,11 @@ public class SimpleMessageListenerContainerTests {
 		this.container.setConnectionFactory(connectionFactory);
 		this.container.setDestinationName(DESTINATION_NAME);
 		this.container.setMessageListener(listener);
-		this.container.setTaskExecutor(new TaskExecutor() {
-			@Override
-			public void execute(Runnable task) {
-				listener.executorInvoked = true;
-				assertThat(listener.listenerInvoked).isFalse();
-				task.run();
-				assertThat(listener.listenerInvoked).isTrue();
-			}
+		this.container.setTaskExecutor(task -> {
+			listener.executorInvoked = true;
+			assertThat(listener.listenerInvoked).isFalse();
+			task.run();
+			assertThat(listener.listenerInvoked).isTrue();
 		});
 		this.container.afterPropertiesSet();
 		this.container.start();
@@ -278,11 +271,8 @@ public class SimpleMessageListenerContainerTests {
 
 		this.container.setConnectionFactory(connectionFactory);
 		this.container.setDestinationName(DESTINATION_NAME);
-		this.container.setMessageListener(new SessionAwareMessageListener<Message>() {
-			@Override
-			public void onMessage(Message message, @Nullable Session session) throws JMSException {
-				throw theException;
-			}
+		this.container.setMessageListener((SessionAwareMessageListener<Message>) (Message message, @Nullable Session session1) -> {
+			throw theException;
 		});
 
 		ExceptionListener exceptionListener = mock(ExceptionListener.class);
@@ -328,11 +318,8 @@ public class SimpleMessageListenerContainerTests {
 
 		this.container.setConnectionFactory(connectionFactory);
 		this.container.setDestinationName(DESTINATION_NAME);
-		this.container.setMessageListener(new SessionAwareMessageListener<Message>() {
-			@Override
-			public void onMessage(Message message, @Nullable Session session) throws JMSException {
-				throw theException;
-			}
+		this.container.setMessageListener((SessionAwareMessageListener<Message>) (Message message, @Nullable Session session1) -> {
+			throw theException;
 		});
 
 		ErrorHandler errorHandler = mock(ErrorHandler.class);
@@ -374,11 +361,8 @@ public class SimpleMessageListenerContainerTests {
 
 		this.container.setConnectionFactory(connectionFactory);
 		this.container.setDestinationName(DESTINATION_NAME);
-		this.container.setMessageListener(new MessageListener() {
-			@Override
-			public void onMessage(Message message) {
-				throw new UnsupportedOperationException();
-			}
+		this.container.setMessageListener((MessageListener) message -> {
+			throw new UnsupportedOperationException();
 		});
 		this.container.afterPropertiesSet();
 		this.container.start();
@@ -418,11 +402,8 @@ public class SimpleMessageListenerContainerTests {
 
 		this.container.setConnectionFactory(connectionFactory);
 		this.container.setDestinationName(DESTINATION_NAME);
-		this.container.setMessageListener(new MessageListener() {
-			@Override
-			public void onMessage(Message message) {
-				throw new UnsupportedOperationException();
-			}
+		this.container.setMessageListener((MessageListener) message -> {
+			throw new UnsupportedOperationException();
 		});
 		this.container.afterPropertiesSet();
 		this.container.start();

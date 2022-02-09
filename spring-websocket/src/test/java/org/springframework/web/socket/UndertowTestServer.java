@@ -144,7 +144,7 @@ public class UndertowTestServer implements WebSocketTestServer {
 
 		@Override
 		public InstanceHandle<Servlet> createInstance() throws InstantiationException {
-			return new InstanceHandle<Servlet>() {
+			return new InstanceHandle<>() {
 				@Override
 				public Servlet getInstance() {
 					return new DispatcherServlet(wac);
@@ -167,7 +167,7 @@ public class UndertowTestServer implements WebSocketTestServer {
 
 		@Override
 		public InstanceHandle<Filter> createInstance() throws InstantiationException {
-			return new InstanceHandle<Filter>() {
+			return new InstanceHandle<>() {
 				@Override
 				public Filter getInstance() {
 					return filter;

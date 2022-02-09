@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public class PropertyResourceConfigurerTests {
 
 		assertThat(tb1.getAge()).isEqualTo(99);
 		assertThat(tb2.getAge()).isEqualTo(99);
-		assertThat(tb1.getName()).isEqualTo(null);
+		assertThat(tb1.getName()).isNull();
 		assertThat(tb2.getName()).isEqualTo("test");
 	}
 
@@ -310,7 +310,7 @@ public class PropertyResourceConfigurerTests {
 		TestBean tb2 = (TestBean) factory.getBean("tb2");
 		assertThat(tb1.getAge()).isEqualTo(99);
 		assertThat(tb2.getAge()).isEqualTo(99);
-		assertThat(tb1.getName()).isEqualTo(null);
+		assertThat(tb1.getName()).isNull();
 		assertThat(tb2.getName()).isEqualTo("test");
 	}
 
@@ -423,7 +423,7 @@ public class PropertyResourceConfigurerTests {
 		TestBean inner1 = (TestBean) tb2.getSomeMap().get("key3");
 		TestBean inner2 = (TestBean) tb2.getSomeMap().get("mykey4");
 		assertThat(inner1.getAge()).isEqualTo(0);
-		assertThat(inner1.getName()).isEqualTo(null);
+		assertThat(inner1.getName()).isNull();
 		assertThat(inner1.getCountry()).isEqualTo(System.getProperty("os.name"));
 		assertThat(inner2.getAge()).isEqualTo(98);
 		assertThat(inner2.getName()).isEqualTo("namemyvarmyvar${");

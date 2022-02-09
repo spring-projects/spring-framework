@@ -1,6 +1,5 @@
 description = "Spring Context"
 
-apply plugin: "groovy"
 apply plugin: "kotlin"
 
 dependencies {
@@ -17,7 +16,7 @@ dependencies {
 	optional("jakarta.validation:jakarta.validation-api")
 	optional("javax.money:money-api")
 	optional("org.aspectj:aspectjweaver")
-	optional("org.codehaus.groovy:groovy")
+	optional("org.apache.groovy:groovy")
 	optional("org.apache-extras.beanshell:bsh")
 	optional("org.hibernate:hibernate-validator")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
@@ -27,9 +26,8 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation("io.projectreactor:reactor-core")
-	testImplementation("org.codehaus.groovy:groovy-jsr223")
-	testImplementation("org.codehaus.groovy:groovy-test")
-	testImplementation("org.codehaus.groovy:groovy-xml")
+	testImplementation("org.apache.groovy:groovy-jsr223")
+	testImplementation("org.apache.groovy:groovy-xml")
 	testImplementation("org.apache.commons:commons-pool2")
 	testImplementation("org.awaitility:awaitility")
 	testImplementation("jakarta.inject:jakarta.inject-tck")

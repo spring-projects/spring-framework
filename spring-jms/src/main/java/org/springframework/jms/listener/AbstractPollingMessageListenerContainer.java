@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.ResourceTransactionManager;
@@ -248,7 +249,19 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 				rollbackOnException(this.transactionManager, status, ex);
 				throw ex;
 			}
-			this.transactionManager.commit(status);
+			try {
+				this.transactionManager.commit(status);
+			}
+			catch (TransactionException ex) {
+				// Propagate transaction system exceptions as infrastructure problems.
+				throw ex;
+			}
+			catch (RuntimeException ex) {
+				// Typically a late persistence exception from a listener-used resource
+				// -> handle it as listener exception, not as an infrastructure problem.
+				// E.g. a database locking failure should not lead to listener shutdown.
+				handleListenerException(ex);
+			}
 			return messageReceived;
 		}
 

@@ -68,16 +68,6 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 		this.headers = headers;
 	}
 
-	/**
-	 * Returns {@code WebSocketHttpHeaders} object that can only be read, not written to.
-	 * @deprecated as of 5.1.16, in favor of calling {@link #WebSocketHttpHeaders(HttpHeaders)}
-	 * with a read-only wrapper from {@link HttpHeaders#readOnlyHttpHeaders(HttpHeaders)}
-	 */
-	@Deprecated
-	public static WebSocketHttpHeaders readOnlyWebSocketHttpHeaders(WebSocketHttpHeaders headers) {
-		return new WebSocketHttpHeaders(HttpHeaders.readOnlyHttpHeaders(headers));
-	}
-
 
 	/**
 	 * Sets the (new) value of the {@code Sec-WebSocket-Accept} header.

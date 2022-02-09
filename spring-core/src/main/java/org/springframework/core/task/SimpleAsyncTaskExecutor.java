@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,6 +173,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * if configured (through the superclass's settings).
 	 * @see #doExecute(Runnable)
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public void execute(Runnable task) {
 		execute(task, TIMEOUT_INDEFINITE);
@@ -187,6 +188,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * @see #TIMEOUT_IMMEDIATE
 	 * @see #doExecute(Runnable)
 	 */
+	@Deprecated
 	@Override
 	public void execute(Runnable task, long startTimeout) {
 		Assert.notNull(task, "Runnable must not be null");
@@ -200,6 +202,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public Future<?> submit(Runnable task) {
 		FutureTask<Object> future = new FutureTask<>(task, null);
@@ -207,6 +210,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		return future;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<>(task);
@@ -214,6 +218,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		return future;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public ListenableFuture<?> submitListenable(Runnable task) {
 		ListenableFutureTask<Object> future = new ListenableFutureTask<>(task, null);
@@ -221,6 +226,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		return future;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
 		ListenableFutureTask<T> future = new ListenableFutureTask<>(task);

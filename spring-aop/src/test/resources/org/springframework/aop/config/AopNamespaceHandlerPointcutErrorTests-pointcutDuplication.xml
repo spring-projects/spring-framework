@@ -12,10 +12,6 @@
 		</aop:aspect>
 	</aop:config>
 
-	<bean id="getAgeCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
-
-	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
-
 	<bean id="countingAdvice" class="org.springframework.aop.config.CountingAspectJAdvice"/>
 
 </beans>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -299,7 +299,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 		Object target = methodInvocation.getThis();
 		Assert.state(target != null, "Target must not be null");
 
-		StringBuffer output = new StringBuffer();
+		StringBuilder output = new StringBuilder();
 		while (matcher.find()) {
 			String match = matcher.group();
 			if (PLACEHOLDER_METHOD_NAME.equals(match)) {
@@ -341,15 +341,15 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 
 	/**
 	 * Adds the {@code String} representation of the method return value
-	 * to the supplied {@code StringBuffer}. Correctly handles
+	 * to the supplied {@code StringBuilder}. Correctly handles
 	 * {@code null} and {@code void} results.
 	 * @param methodInvocation the {@code MethodInvocation} that returned the value
 	 * @param matcher the {@code Matcher} containing the matched placeholder
-	 * @param output the {@code StringBuffer} to write output to
+	 * @param output the {@code StringBuilder} to write output to
 	 * @param returnValue the value returned by the method invocation.
 	 */
 	private void appendReturnValue(
-			MethodInvocation methodInvocation, Matcher matcher, StringBuffer output, @Nullable Object returnValue) {
+			MethodInvocation methodInvocation, Matcher matcher, StringBuilder output, @Nullable Object returnValue) {
 
 		if (methodInvocation.getMethod().getReturnType() == void.class) {
 			matcher.appendReplacement(output, "void");
@@ -370,9 +370,9 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @param methodInvocation the {@code MethodInvocation} being logged.
 	 * Arguments will be retrieved from the corresponding {@code Method}.
 	 * @param matcher the {@code Matcher} containing the state of the output
-	 * @param output the {@code StringBuffer} containing the output
+	 * @param output the {@code StringBuilder} containing the output
 	 */
-	private void appendArgumentTypes(MethodInvocation methodInvocation, Matcher matcher, StringBuffer output) {
+	private void appendArgumentTypes(MethodInvocation methodInvocation, Matcher matcher, StringBuilder output) {
 		Class<?>[] argumentTypes = methodInvocation.getMethod().getParameterTypes();
 		String[] argumentTypeShortNames = new String[argumentTypes.length];
 		for (int i = 0; i < argumentTypeShortNames.length; i++) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,21 +69,6 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	/** Empty condition that does not match to any RSocket frames (e.g. for type-level mappings) */
 	public static final RSocketFrameTypeMessageCondition EMPTY_CONDITION = new RSocketFrameTypeMessageCondition();
 
-
-	/**
-	 * Condition to match "REQUEST_FNF", "REQUEST_RESPONSE", "REQUEST_STREAM",
-	 * and "REQUEST_CHANNEL".
-	 * @deprecated as of 5.2.2 because matching to all interaction types is too
-	 * flexible. Please use one of the other constants in this class that match
-	 * to specific frames.
-	 */
-	@Deprecated
-	public static final RSocketFrameTypeMessageCondition REQUEST_CONDITION =
-			new RSocketFrameTypeMessageCondition(
-					FrameType.REQUEST_FNF,
-					FrameType.REQUEST_RESPONSE,
-					FrameType.REQUEST_STREAM,
-					FrameType.REQUEST_CHANNEL);
 
 	/** Per FrameType cache to return ready instances from getMatchingCondition. */
 	private static final Map<String, RSocketFrameTypeMessageCondition> frameTypeConditionCache;

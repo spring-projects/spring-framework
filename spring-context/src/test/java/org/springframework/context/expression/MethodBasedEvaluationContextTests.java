@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
 
 /**
  * Unit tests for {@link MethodBasedEvaluationContext}.
@@ -47,9 +48,9 @@ public class MethodBasedEvaluationContextTests {
 		assertThat(context.lookupVariable("p0")).isEqualTo("test");
 		assertThat(context.lookupVariable("foo")).isEqualTo("test");
 
-		assertThat(context.lookupVariable("a1")).isEqualTo(true);
-		assertThat(context.lookupVariable("p1")).isEqualTo(true);
-		assertThat(context.lookupVariable("flag")).isEqualTo(true);
+		assertThat(context.lookupVariable("a1")).asInstanceOf(BOOLEAN).isTrue();
+		assertThat(context.lookupVariable("p1")).asInstanceOf(BOOLEAN).isTrue();
+		assertThat(context.lookupVariable("flag")).asInstanceOf(BOOLEAN).isTrue();
 
 		assertThat(context.lookupVariable("a2")).isNull();
 		assertThat(context.lookupVariable("p2")).isNull();

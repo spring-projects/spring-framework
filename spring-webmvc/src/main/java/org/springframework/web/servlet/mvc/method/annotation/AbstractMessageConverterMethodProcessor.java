@@ -53,6 +53,7 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -251,7 +252,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				return;
 			}
 
-			MediaType.sortBySpecificityAndQuality(mediaTypesToUse);
+			MimeTypeUtils.sortBySpecificity(mediaTypesToUse);
 
 			for (MediaType mediaType : mediaTypesToUse) {
 				if (mediaType.isConcrete()) {
@@ -400,7 +401,12 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 */
 	private MediaType getMostSpecificMediaType(MediaType acceptType, MediaType produceType) {
 		MediaType produceTypeToUse = produceType.copyQualityValue(acceptType);
-		return (MediaType.SPECIFICITY_COMPARATOR.compare(acceptType, produceTypeToUse) <= 0 ? acceptType : produceTypeToUse);
+		if (acceptType.isLessSpecific(produceTypeToUse)) {
+			return produceTypeToUse;
+		}
+		else {
+			return acceptType;
+		}
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@ class PropertySourceTests {
 	@Test
 	@SuppressWarnings("serial")
 	void equals() {
-		Map<String, Object> map1 = new HashMap<String, Object>() {{
+		Map<String, Object> map1 = new HashMap<>() {{
 			put("a", "b");
 		}};
-		Map<String, Object> map2 = new HashMap<String, Object>() {{
+		Map<String, Object> map2 = new HashMap<>() {{
 			put("c", "d");
 		}};
 		Properties props1 = new Properties() {{
@@ -69,17 +69,17 @@ class PropertySourceTests {
 	@Test
 	@SuppressWarnings("serial")
 	void collectionsOperations() {
-		Map<String, Object> map1 = new HashMap<String, Object>() {{
+		Map<String, Object> map1 = new HashMap<>() {{
 			put("a", "b");
 		}};
-		Map<String, Object> map2 = new HashMap<String, Object>() {{
+		Map<String, Object> map2 = new HashMap<>() {{
 			put("c", "d");
 		}};
 
 		PropertySource<?> ps1 = new MapPropertySource("ps1", map1);
 		ps1.getSource();
 		List<PropertySource<?>> propertySources = new ArrayList<>();
-		assertThat(propertySources.add(ps1)).isEqualTo(true);
+		assertThat(propertySources.add(ps1)).isTrue();
 		assertThat(propertySources.contains(ps1)).isTrue();
 		assertThat(propertySources.contains(PropertySource.named("ps1"))).isTrue();
 

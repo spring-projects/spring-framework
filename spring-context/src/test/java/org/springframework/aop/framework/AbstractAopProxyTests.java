@@ -372,17 +372,14 @@ public abstract class AbstractAopProxyTests {
 	private void testContext(final boolean context) throws Throwable {
 		final String s = "foo";
 		// Test return value
-		MethodInterceptor mi = new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				if (!context) {
-					assertNoInvocationContext();
-				}
-				else {
-					assertThat(ExposeInvocationInterceptor.currentInvocation()).as("have context").isNotNull();
-				}
-				return s;
+		MethodInterceptor mi = invocation -> {
+			if (!context) {
+				assertNoInvocationContext();
 			}
+			else {
+				assertThat(ExposeInvocationInterceptor.currentInvocation()).as("have context").isNotNull();
+			}
+			return s;
 		};
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		if (context) {
@@ -422,11 +419,8 @@ public abstract class AbstractAopProxyTests {
 	public void testDeclaredException() throws Throwable {
 		final Exception expectedException = new Exception();
 		// Test return value
-		MethodInterceptor mi = new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				throw expectedException;
-			}
+		MethodInterceptor mi = invocation -> {
+			throw expectedException;
 		};
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
@@ -453,11 +447,8 @@ public abstract class AbstractAopProxyTests {
 	public void testUndeclaredCheckedException() throws Throwable {
 		final Exception unexpectedException = new Exception();
 		// Test return value
-		MethodInterceptor mi = new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				throw unexpectedException;
-			}
+		MethodInterceptor mi = invocation -> {
+			throw unexpectedException;
 		};
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
@@ -477,11 +468,8 @@ public abstract class AbstractAopProxyTests {
 	public void testUndeclaredUncheckedException() throws Throwable {
 		final RuntimeException unexpectedException = new RuntimeException();
 		// Test return value
-		MethodInterceptor mi = new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				throw unexpectedException;
-			}
+		MethodInterceptor mi = invocation -> {
+			throw unexpectedException;
 		};
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
@@ -660,12 +648,7 @@ public abstract class AbstractAopProxyTests {
 		NopInterceptor di = new NopInterceptor();
 		pc.addAdvice(di);
 		final long ts = 37;
-		pc.addAdvice(new DelegatingIntroductionInterceptor(new TimeStamped() {
-			@Override
-			public long getTimeStamp() {
-				return ts;
-			}
-		}));
+		pc.addAdvice(new DelegatingIntroductionInterceptor((TimeStamped) () -> ts));
 
 		ITestBean proxied = (ITestBean) createProxy(pc);
 		assertThat(proxied.getName()).isEqualTo(name);
@@ -1039,17 +1022,14 @@ public abstract class AbstractAopProxyTests {
 		ProxyFactory pc = new ProxyFactory(tb);
 		pc.addInterface(ITestBean.class);
 
-		MethodInterceptor twoBirthdayInterceptor = new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation mi) throws Throwable {
-				// Clone the invocation to proceed three times
-				// "The Moor's Last Sigh": this technology can cause premature aging
-				MethodInvocation clone1 = ((ReflectiveMethodInvocation) mi).invocableClone();
-				MethodInvocation clone2 = ((ReflectiveMethodInvocation) mi).invocableClone();
-				clone1.proceed();
-				clone2.proceed();
-				return mi.proceed();
-			}
+		MethodInterceptor twoBirthdayInterceptor = mi -> {
+			// Clone the invocation to proceed three times
+			// "The Moor's Last Sigh": this technology can cause premature aging
+			MethodInvocation clone1 = ((ReflectiveMethodInvocation) mi).invocableClone();
+			MethodInvocation clone2 = ((ReflectiveMethodInvocation) mi).invocableClone();
+			clone1.proceed();
+			clone2.proceed();
+			return mi.proceed();
 		};
 		@SuppressWarnings("serial")
 		StaticMethodMatcherPointcutAdvisor advisor = new StaticMethodMatcherPointcutAdvisor(twoBirthdayInterceptor) {
@@ -1082,16 +1062,13 @@ public abstract class AbstractAopProxyTests {
 		/**
 		 * Changes the name, then changes it back.
 		 */
-		MethodInterceptor nameReverter = new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation mi) throws Throwable {
-				MethodInvocation clone = ((ReflectiveMethodInvocation) mi).invocableClone();
-				String oldName = ((ITestBean) mi.getThis()).getName();
-				clone.getArguments()[0] = oldName;
-				// Original method invocation should be unaffected by changes to argument list of clone
-				mi.proceed();
-				return clone.proceed();
-			}
+		MethodInterceptor nameReverter = mi -> {
+			MethodInvocation clone = ((ReflectiveMethodInvocation) mi).invocableClone();
+			String oldName = ((ITestBean) mi.getThis()).getName();
+			clone.getArguments()[0] = oldName;
+			// Original method invocation should be unaffected by changes to argument list of clone
+			mi.proceed();
+			return clone.proceed();
 		};
 
 		class NameSaver implements MethodInterceptor {
@@ -1347,8 +1324,9 @@ public abstract class AbstractAopProxyTests {
 			@Override
 			public void before(Method m, Object[] args, Object target) throws Throwable {
 				super.before(m, args, target);
-				if (m.getName().startsWith("set"))
+				if (m.getName().startsWith("set")) {
 					throw rex;
+				}
 			}
 		};
 
@@ -1563,13 +1541,10 @@ public abstract class AbstractAopProxyTests {
 	@SuppressWarnings("serial")
 	protected static class StringSetterNullReplacementAdvice extends DefaultPointcutAdvisor {
 
-		private static MethodInterceptor cleaner = new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation mi) throws Throwable {
-				// We know it can only be invoked if there's a single parameter of type string
-				mi.getArguments()[0] = "";
-				return mi.proceed();
-			}
+		private static MethodInterceptor cleaner = mi -> {
+			// We know it can only be invoked if there's a single parameter of type string
+			mi.getArguments()[0] = "";
+			return mi.proceed();
 		};
 
 		public StringSetterNullReplacementAdvice() {
@@ -1601,7 +1576,9 @@ public abstract class AbstractAopProxyTests {
 				@Override
 				public boolean matches(Method m, @Nullable Class<?> targetClass, Object... args) {
 					boolean run = m.getName().contains(pattern);
-					if (run) ++count;
+					if (run) {
+						++count;
+					}
 					return run;
 				}
 			});
@@ -1620,7 +1597,9 @@ public abstract class AbstractAopProxyTests {
 				@Override
 				public boolean matches(Method m, @Nullable Class<?> targetClass, Object... args) {
 					boolean run = m.getName().contains(pattern);
-					if (run) ++count;
+					if (run) {
+						++count;
+					}
 					return run;
 				}
 				@Override
@@ -1924,8 +1903,9 @@ public abstract class AbstractAopProxyTests {
 		 */
 		@Override
 		public void releaseTarget(Object pTarget) throws Exception {
-			if (pTarget != this.target)
+			if (pTarget != this.target) {
 				throw new RuntimeException("Released wrong target");
+			}
 			++releases;
 		}
 
@@ -1934,8 +1914,9 @@ public abstract class AbstractAopProxyTests {
 		 *
 		 */
 		public void verify() {
-			if (gets != releases)
+			if (gets != releases) {
 				throw new RuntimeException("Expectation failed: " + gets + " gets and " + releases + " releases");
+			}
 		}
 
 		/**

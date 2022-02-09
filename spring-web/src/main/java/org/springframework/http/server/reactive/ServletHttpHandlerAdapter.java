@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
 
 /**
  * Adapt {@link HttpHandler} to an {@link HttpServlet} using Servlet Async support
- * and Servlet 3.1 non-blocking I/O.
+ * and Servlet non-blocking I/O.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev

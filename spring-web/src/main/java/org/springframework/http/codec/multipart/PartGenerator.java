@@ -674,19 +674,10 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		@Override
 		public void partComplete(boolean finalPart) {
 			MultipartUtils.closeChannel(this.channel);
-			Flux<DataBuffer> content = partContent();
-			emitPart(DefaultParts.part(this.headers, content));
+			emitPart(DefaultParts.part(this.headers, this.file, PartGenerator.this.blockingOperationScheduler));
 			if (finalPart) {
 				emitComplete();
 			}
-		}
-
-		private Flux<DataBuffer> partContent() {
-			return DataBufferUtils
-					.readByteChannel(
-							() -> Files.newByteChannel(this.file, StandardOpenOption.READ),
-							DefaultDataBufferFactory.sharedInstance, 1024)
-					.subscribeOn(PartGenerator.this.blockingOperationScheduler);
 		}
 
 		@Override

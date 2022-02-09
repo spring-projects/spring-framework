@@ -279,8 +279,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @see #setContentType(String)
 	 */
 	public String getContentAsString(Charset fallbackCharset) throws UnsupportedEncodingException {
-		String charsetName = (this.characterEncodingSet ? getCharacterEncoding() : fallbackCharset.name());
-		return this.content.toString(charsetName);
+		if (this.characterEncodingSet) {
+			return this.content.toString(getCharacterEncoding());
+		}
+
+		return this.content.toString(fallbackCharset);
 	}
 
 	@Override
@@ -444,8 +447,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		if (cookie.isHttpOnly()) {
 			buf.append("; HttpOnly");
 		}
-		if (cookie instanceof MockCookie) {
-			MockCookie mockCookie = (MockCookie) cookie;
+		if (cookie instanceof MockCookie mockCookie) {
 			if (StringUtils.hasText(mockCookie.getSameSite())) {
 				buf.append("; SameSite=").append(mockCookie.getSameSite());
 			}

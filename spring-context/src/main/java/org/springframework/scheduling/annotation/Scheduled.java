@@ -40,6 +40,9 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * done manually or, more conveniently, through the {@code <task:annotation-driven/>}
  * XML element or {@link EnableScheduling @EnableScheduling} annotation.
  *
+ * <p>This annotation can be used as a <em>{@linkplain Repeatable repeatable}</em>
+ * annotation.
+ *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.
  *

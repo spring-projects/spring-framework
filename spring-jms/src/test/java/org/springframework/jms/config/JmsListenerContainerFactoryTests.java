@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,14 +178,14 @@ public class JmsListenerContainerFactoryTests {
 		assertThat(container.getConnectionFactory()).isEqualTo(this.connectionFactory);
 		assertThat(container.getDestinationResolver()).isEqualTo(this.destinationResolver);
 		assertThat(container.getMessageConverter()).isEqualTo(this.messageConverter);
-		assertThat(container.isSessionTransacted()).isEqualTo(true);
+		assertThat(container.isSessionTransacted()).isTrue();
 		assertThat(container.getSessionAcknowledgeMode()).isEqualTo(Session.DUPS_OK_ACKNOWLEDGE);
-		assertThat(container.isPubSubDomain()).isEqualTo(true);
-		assertThat(container.isReplyPubSubDomain()).isEqualTo(true);
+		assertThat(container.isPubSubDomain()).isTrue();
+		assertThat(container.isReplyPubSubDomain()).isTrue();
 		assertThat(container.getReplyQosSettings()).isEqualTo(new QosSettings(1, 7, 5000));
-		assertThat(container.isSubscriptionDurable()).isEqualTo(true);
+		assertThat(container.isSubscriptionDurable()).isTrue();
 		assertThat(container.getClientId()).isEqualTo("client-1234");
-		assertThat(container.isAutoStartup()).isEqualTo(false);
+		assertThat(container.isAutoStartup()).isFalse();
 	}
 
 	private void setDefaultJcaConfig(DefaultJcaListenerContainerFactory factory) {
@@ -205,9 +205,9 @@ public class JmsListenerContainerFactoryTests {
 		JmsActivationSpecConfig config = container.getActivationSpecConfig();
 		assertThat(config).isNotNull();
 		assertThat(config.getAcknowledgeMode()).isEqualTo(Session.DUPS_OK_ACKNOWLEDGE);
-		assertThat(config.isPubSubDomain()).isEqualTo(true);
+		assertThat(config.isPubSubDomain()).isTrue();
 		assertThat(container.getReplyQosSettings()).isEqualTo(new QosSettings(1, 7, 5000));
-		assertThat(config.isSubscriptionDurable()).isEqualTo(true);
+		assertThat(config.isSubscriptionDurable()).isTrue();
 		assertThat(config.getClientId()).isEqualTo("client-1234");
 	}
 

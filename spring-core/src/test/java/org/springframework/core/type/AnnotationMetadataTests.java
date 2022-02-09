@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ class AnnotationMetadataTests {
 		assertThat(metadata.getAnnotationAttributes(MetaAnnotation.class.getName(), false)).isNull();
 		assertThat(metadata.getAnnotationAttributes(MetaAnnotation.class.getName(), true)).isNull();
 		assertThat(metadata.getAnnotatedMethods(DirectAnnotation.class.getName()).size()).isEqualTo(0);
-		assertThat(metadata.isAnnotated(IsAnnotatedAnnotation.class.getName())).isEqualTo(false);
+		assertThat(metadata.isAnnotated(IsAnnotatedAnnotation.class.getName())).isFalse();
 		assertThat(metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName())).isNull();
 	}
 
@@ -397,6 +397,7 @@ class AnnotationMetadataTests {
 	}
 
 	private void doTestMethodAnnotationInfo(AnnotationMetadata classMetadata) {
+		assertThat(classMetadata.getDeclaredMethods()).hasSize(3);
 		Set<MethodMetadata> methods = classMetadata.getAnnotatedMethods(TestAutowired.class.getName());
 		assertThat(methods).hasSize(1);
 		for (MethodMetadata methodMetadata : methods) {
@@ -502,6 +503,9 @@ class AnnotationMetadataTests {
 	@EnumSubclasses({SubclassEnum.FOO, SubclassEnum.BAR})
 	@NamedComposedAnnotation
 	private static class AnnotatedComponent implements Serializable {
+
+		public AnnotatedComponent() {
+		}
 
 		@TestAutowired
 		public void doWork(@TestQualifier("myColor") java.awt.Color color) {

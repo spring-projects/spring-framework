@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Alef Arendsen
  */
 @SuppressWarnings("serial")
-public class HtmlEscapeTagTests extends AbstractTagTests {
+class HtmlEscapeTagTests extends AbstractTagTests {
 
 	@Test
-	public void htmlEscapeTag() throws JspException {
+	void htmlEscapeTag() throws JspException {
 		PageContext pc = createPageContext();
 		HtmlEscapeTag tag = new HtmlEscapeTag();
 		tag.setPageContext(pc);
@@ -87,7 +87,7 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void htmlEscapeTagWithContextParamTrue() throws JspException {
+	void htmlEscapeTagWithContextParamTrue() throws JspException {
 		PageContext pc = createPageContext();
 		MockServletContext sc = (MockServletContext) pc.getServletContext();
 		sc.addInitParameter(WebUtils.HTML_ESCAPE_CONTEXT_PARAM, "true");
@@ -108,7 +108,7 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void htmlEscapeTagWithContextParamFalse() throws JspException {
+	void htmlEscapeTagWithContextParamFalse() throws JspException {
 		PageContext pc = createPageContext();
 		MockServletContext sc = (MockServletContext) pc.getServletContext();
 		HtmlEscapeTag tag = new HtmlEscapeTag();
@@ -128,9 +128,9 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void escapeBody() throws JspException {
+	void escapeBody() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer result = new StringBuffer();
+		final StringBuilder result = new StringBuilder();
 		EscapeBodyTag tag = new EscapeBodyTag() {
 			@Override
 			protected String readBodyContent() {
@@ -148,9 +148,9 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void escapeBodyWithHtmlEscape() throws JspException {
+	void escapeBodyWithHtmlEscape() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer result = new StringBuffer();
+		final StringBuilder result = new StringBuilder();
 		EscapeBodyTag tag = new EscapeBodyTag() {
 			@Override
 			protected String readBodyContent() {
@@ -169,9 +169,9 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void escapeBodyWithJavaScriptEscape() throws JspException {
+	void escapeBodyWithJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer result = new StringBuffer();
+		final StringBuilder result = new StringBuilder();
 		EscapeBodyTag tag = new EscapeBodyTag() {
 			@Override
 			protected String readBodyContent() {
@@ -190,9 +190,9 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void escapeBodyWithHtmlEscapeAndJavaScriptEscape() throws JspException {
+	void escapeBodyWithHtmlEscapeAndJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer result = new StringBuffer();
+		final StringBuilder result = new StringBuilder();
 		EscapeBodyTag tag = new EscapeBodyTag() {
 			@Override
 			protected String readBodyContent() {

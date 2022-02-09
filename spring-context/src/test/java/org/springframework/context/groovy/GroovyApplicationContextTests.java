@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,20 +28,22 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Jeff Brown
  * @author Juergen Hoeller
  */
-public class GroovyApplicationContextTests {
+class GroovyApplicationContextTests {
 
 	@Test
-	public void testLoadingConfigFile() {
+	void loadingConfigFile() {
 		GenericGroovyApplicationContext ctx = new GenericGroovyApplicationContext(
 				"org/springframework/context/groovy/applicationContext.groovy");
 
 		Object framework = ctx.getBean("framework");
 		assertThat(framework).as("could not find framework bean").isNotNull();
 		assertThat(framework).isEqualTo("Grails");
+
+		ctx.close();
 	}
 
 	@Test
-	public void testLoadingMultipleConfigFiles() {
+	void loadingMultipleConfigFiles() {
 		GenericGroovyApplicationContext ctx = new GenericGroovyApplicationContext(
 				"org/springframework/context/groovy/applicationContext2.groovy",
 				"org/springframework/context/groovy/applicationContext.groovy");
@@ -53,10 +55,12 @@ public class GroovyApplicationContextTests {
 		Object company = ctx.getBean("company");
 		assertThat(company).as("could not find company bean").isNotNull();
 		assertThat(company).isEqualTo("SpringSource");
+
+		ctx.close();
 	}
 
 	@Test
-	public void testLoadingMultipleConfigFilesWithRelativeClass() {
+	void loadingMultipleConfigFilesWithRelativeClass() {
 		GenericGroovyApplicationContext ctx = new GenericGroovyApplicationContext();
 		ctx.load(GroovyApplicationContextTests.class, "applicationContext2.groovy", "applicationContext.groovy");
 		ctx.refresh();
@@ -68,10 +72,12 @@ public class GroovyApplicationContextTests {
 		Object company = ctx.getBean("company");
 		assertThat(company).as("could not find company bean").isNotNull();
 		assertThat(company).isEqualTo("SpringSource");
+
+		ctx.close();
 	}
 
 	@Test
-	public void testConfigFileParsingError() {
+	void configFileParsingError() {
 		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
 				new GenericGroovyApplicationContext("org/springframework/context/groovy/applicationContext-error.groovy"));
 	}

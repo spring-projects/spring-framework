@@ -404,16 +404,18 @@ public class UrlPathHelper {
 	 * </ul>
 	 */
 	private static String getSanitizedPath(final String path) {
-		int index = path.indexOf("//");
-		if (index >= 0) {
-			StringBuilder sanitized = new StringBuilder(path);
-			while (index != -1) {
-				sanitized.deleteCharAt(index);
-				index = sanitized.indexOf("//", index);
-			}
-			return sanitized.toString();
+		int start = path.indexOf("//");
+		if (start == -1) {
+			return path;
 		}
-		return path;
+		char[] content = path.toCharArray();
+		int slowIndex = start;
+		for (int fastIndex = start + 1; fastIndex < content.length; fastIndex++) {
+			if (content[fastIndex] != '/' || content[slowIndex] != '/') {
+				content[++slowIndex] = content[fastIndex];
+			}
+		}
+		return new String(content, 0, slowIndex + 1);
 	}
 
 	/**
@@ -531,7 +533,7 @@ public class UrlPathHelper {
 	 */
 	public String getOriginatingQueryString(HttpServletRequest request) {
 		if ((request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE) != null) ||
-			(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) != null)) {
+				(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) != null)) {
 			return (String) request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE);
 		}
 		else {
@@ -575,8 +577,8 @@ public class UrlPathHelper {
 			return UriUtils.decode(source, enc);
 		}
 		catch (UnsupportedCharsetException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Could not decode request string [" + source + "] with encoding '" + enc +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not decode request string [" + source + "] with encoding '" + enc +
 						"': falling back to platform default encoding; exception message: " + ex.getMessage());
 			}
 			return URLDecoder.decode(source);
