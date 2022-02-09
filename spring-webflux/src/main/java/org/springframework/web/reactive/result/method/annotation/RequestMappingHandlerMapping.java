@@ -314,10 +314,16 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			return;
 		}
 		for (String origin : annotation.origins()) {
-			config.addAllowedOrigin(resolveCorsAnnotationValue(origin));
+			String[] origins = resolveCorsAnnotationValue(origin).split(",");
+			for (String org : origins) {
+				config.addAllowedOrigin(org);
+			}
 		}
-		for (String patterns : annotation.originPatterns()) {
-			config.addAllowedOriginPattern(resolveCorsAnnotationValue(patterns));
+		for (String pattern : annotation.originPatterns()) {
+			String[] patterns = resolveCorsAnnotationValue(pattern).split(",");
+			for (String pat : patterns) {
+				config.addAllowedOriginPattern(resolveCorsAnnotationValue(pat));
+			}
 		}
 		for (RequestMethod method : annotation.methods()) {
 			config.addAllowedMethod(method.name());

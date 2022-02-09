@@ -68,7 +68,7 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		context.register(WebConfig.class);
 		Properties props = new Properties();
 		props.setProperty("myOrigin", "https://site1.com,https://site2.com");
-		props.setProperty("myOriginPattern", "https://*.com");
+		props.setProperty("myOriginPattern", "https://*.com,https://*.cn");
 		context.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("ps", props));
 		context.register(PropertySourcesPlaceholderConfigurer.class);
 		context.refresh();
@@ -206,7 +206,6 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isEqualTo("https://site1.com");
 		assertThat(entity.getBody()).isEqualTo("placeholder");
 		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.addAll(this.headers);
 		httpHeaders.setOrigin("https://site2.com");
 		ResponseEntity<String> entity2 = performGet("/origin-placeholder", httpHeaders, String.class);
 		assertThat(entity2.getStatusCode()).isEqualTo(HttpStatus.OK);
