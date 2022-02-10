@@ -57,7 +57,7 @@ public interface EmbeddedValueResolverAware extends Aware {
 			if (bracketIndex < commaIndex) {
 				int index = origin.indexOf("]");
 				origins.add(origin.substring(0, ++index));
-				origin = origin.substring(origin.indexOf("]") + 2);
+				origin = origin.substring(++index);
 			}
 			else {
 				int index = origin.indexOf(",");
