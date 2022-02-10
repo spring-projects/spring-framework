@@ -2302,9 +2302,7 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	void prototypeWithArrayConversionForConstructor() {
-		List<String> list = new ManagedList<>();
-		list.add("myName");
-		list.add("myBeanName");
+		List<String> list = ManagedList.of("myName", "myBeanName");
 		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bd.getConstructorArgumentValues().addGenericArgumentValue(list);
@@ -2320,9 +2318,7 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	void prototypeWithArrayConversionForFactoryMethod() {
-		List<String> list = new ManagedList<>();
-		list.add("myName");
-		list.add("myBeanName");
+		List<String> list = ManagedList.of("myName", "myBeanName");
 		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bd.setFactoryMethodName("create");
