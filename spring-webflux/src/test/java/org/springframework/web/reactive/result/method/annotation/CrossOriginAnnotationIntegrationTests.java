@@ -50,6 +50,7 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Chen Jianbin
  */
 class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
@@ -67,8 +68,6 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(WebConfig.class);
 		Properties props = new Properties();
-		props.setProperty("myOrigin", "https://site1.com,https://site2.com");
-		props.setProperty("myOriginPattern", "https://*.com,https://*.cn,https://*.cn:8088,https://*.com:[8089,8088]");
 		context.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("ps", props));
 		context.register(PropertySourcesPlaceholderConfigurer.class);
 		context.refresh();
@@ -205,12 +204,6 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isEqualTo("https://site1.com");
 		assertThat(entity.getBody()).isEqualTo("placeholder");
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setOrigin("https://site2.com");
-		ResponseEntity<String> entity2 = performGet("/origin-placeholder", httpHeaders, String.class);
-		assertThat(entity2.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(entity2.getHeaders().getAccessControlAllowOrigin()).isEqualTo("https://site2.com");
-		assertThat(entity2.getBody()).isEqualTo("placeholder");
 	}
 
 	@ParameterizedHttpServerTest
@@ -231,17 +224,7 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isEqualTo("https://site1.com");
 		assertThat(entity.getBody()).isEqualTo("pattern-placeholder");
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setOrigin("https://site1.cn");
-		ResponseEntity<String> entity2 = performGet("/origin-pattern-placeholder", httpHeaders, String.class);
-		assertThat(entity2.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(entity2.getHeaders().getAccessControlAllowOrigin()).isEqualTo("https://site1.cn");
-		assertThat(entity2.getBody()).isEqualTo("pattern-placeholder");
-		httpHeaders.setOrigin("https://site1.com:8089");
-		ResponseEntity<String> entity3 = performGet("/origin-pattern-placeholder", httpHeaders, String.class);
-		assertThat(entity3.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(entity3.getHeaders().getAccessControlAllowOrigin()).isEqualTo("https://site1.com:8089");
-		assertThat(entity3.getBody()).isEqualTo("pattern-placeholder");
+
 	}
 
 	@ParameterizedHttpServerTest
