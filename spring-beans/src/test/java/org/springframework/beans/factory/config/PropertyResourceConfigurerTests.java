@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -357,22 +358,18 @@ public class PropertyResourceConfigurerTests {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("stringArray", new String[] {"${os.name}", "${age}"});
 
-		List<Object> friends = new ManagedList<>();
-		friends.add("na${age}me");
-		friends.add(new RuntimeBeanReference("${ref}"));
+		List<Object> friends = ManagedList.of("na${age}me", new RuntimeBeanReference("${ref}"));
 		pvs.add("friends", friends);
 
-		Set<Object> someSet = new ManagedSet<>();
-		someSet.add("na${age}me");
-		someSet.add(new RuntimeBeanReference("${ref}"));
-		someSet.add(new TypedStringValue("${age}", Integer.class));
+		Set<Object> someSet = ManagedSet.of("na${age}me",
+				new RuntimeBeanReference("${ref}"), new TypedStringValue("${age}", Integer.class));
 		pvs.add("someSet", someSet);
 
-		Map<Object, Object> someMap = new ManagedMap<>();
-		someMap.put(new TypedStringValue("key${age}"), new TypedStringValue("${age}"));
-		someMap.put(new TypedStringValue("key${age}ref"), new RuntimeBeanReference("${ref}"));
-		someMap.put("key1", new RuntimeBeanReference("${ref}"));
-		someMap.put("key2", "${age}name");
+		Map<Object, Object> someMap = ManagedMap.ofEntries(
+				new SimpleEntry<>(new TypedStringValue("key${age}"), new TypedStringValue("${age}")),
+				new SimpleEntry<>(new TypedStringValue("key${age}ref"), new RuntimeBeanReference("${ref}")),
+				new SimpleEntry<>("key1", new RuntimeBeanReference("${ref}")),
+				new SimpleEntry<>("key2", "${age}name"));
 		MutablePropertyValues innerPvs = new MutablePropertyValues();
 		innerPvs.add("country", "${os.name}");
 		RootBeanDefinition innerBd = new RootBeanDefinition(TestBean.class);

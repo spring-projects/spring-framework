@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,8 @@ public class ManagedSetTests {
 
 	@Test
 	public void mergeSunnyDay() {
-		ManagedSet parent = new ManagedSet();
-		parent.add("one");
-		parent.add("two");
-		ManagedSet child = new ManagedSet();
+		ManagedSet parent = ManagedSet.of("one", "two");
+		ManagedSet child = ManagedSet.of("three");
 		child.add("three");
 		child.setMergeEnabled(true);
 		Set mergedSet = child.merge(parent);
@@ -46,8 +44,7 @@ public class ManagedSetTests {
 
 	@Test
 	public void mergeWithNullParent() {
-		ManagedSet child = new ManagedSet();
-		child.add("one");
+		ManagedSet child = ManagedSet.of("one");
 		child.setMergeEnabled(true);
 		assertThat(child.merge(null)).isSameAs(child);
 	}
@@ -60,8 +57,7 @@ public class ManagedSetTests {
 
 	@Test
 	public void mergeWithNonCompatibleParentType() {
-		ManagedSet child = new ManagedSet();
-		child.add("one");
+		ManagedSet child = ManagedSet.of("one");
 		child.setMergeEnabled(true);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				child.merge("hello"));
@@ -69,9 +65,7 @@ public class ManagedSetTests {
 
 	@Test
 	public void mergeEmptyChild() {
-		ManagedSet parent = new ManagedSet();
-		parent.add("one");
-		parent.add("two");
+		ManagedSet parent = ManagedSet.of("one", "two");
 		ManagedSet child = new ManagedSet();
 		child.setMergeEnabled(true);
 		Set mergedSet = child.merge(parent);
@@ -81,11 +75,8 @@ public class ManagedSetTests {
 	@Test
 	public void mergeChildValuesOverrideTheParents() {
 		// asserts that the set contract is not violated during a merge() operation...
-		ManagedSet parent = new ManagedSet();
-		parent.add("one");
-		parent.add("two");
-		ManagedSet child = new ManagedSet();
-		child.add("one");
+		ManagedSet parent = ManagedSet.of("one", "two");
+		ManagedSet child = ManagedSet.of("one");
 		child.setMergeEnabled(true);
 		Set mergedSet = child.merge(parent);
 		assertThat(mergedSet.size()).as("merge() obviously did not work.").isEqualTo(2);

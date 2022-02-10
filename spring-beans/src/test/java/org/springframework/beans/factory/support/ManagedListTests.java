@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,8 @@ public class ManagedListTests {
 
 	@Test
 	public void mergeSunnyDay() {
-		ManagedList parent = new ManagedList();
-		parent.add("one");
-		parent.add("two");
-		ManagedList child = new ManagedList();
-		child.add("three");
+		ManagedList parent = ManagedList.of("one", "two");
+		ManagedList child = ManagedList.of("three");
 		child.setMergeEnabled(true);
 		List mergedList = child.merge(parent);
 		assertThat(mergedList.size()).as("merge() obviously did not work.").isEqualTo(3);
@@ -46,8 +43,7 @@ public class ManagedListTests {
 
 	@Test
 	public void mergeWithNullParent() {
-		ManagedList child = new ManagedList();
-		child.add("one");
+		ManagedList child = ManagedList.of("one");
 		child.setMergeEnabled(true);
 		assertThat(child.merge(null)).isSameAs(child);
 	}
@@ -61,8 +57,7 @@ public class ManagedListTests {
 
 	@Test
 	public void mergeWithNonCompatibleParentType() {
-		ManagedList child = new ManagedList();
-		child.add("one");
+		ManagedList child = ManagedList.of("one");
 		child.setMergeEnabled(true);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				child.merge("hello"));
@@ -70,9 +65,7 @@ public class ManagedListTests {
 
 	@Test
 	public void mergeEmptyChild() {
-		ManagedList parent = new ManagedList();
-		parent.add("one");
-		parent.add("two");
+		ManagedList parent = ManagedList.of("one", "two");
 		ManagedList child = new ManagedList();
 		child.setMergeEnabled(true);
 		List mergedList = child.merge(parent);
@@ -82,11 +75,8 @@ public class ManagedListTests {
 	@Test
 	public void mergeChildValuesOverrideTheParents() {
 		// doesn't make much sense in the context of a list...
-		ManagedList parent = new ManagedList();
-		parent.add("one");
-		parent.add("two");
-		ManagedList child = new ManagedList();
-		child.add("one");
+		ManagedList parent = ManagedList.of("one", "two");
+		ManagedList child = ManagedList.of("one");
 		child.setMergeEnabled(true);
 		List mergedList = child.merge(parent);
 		assertThat(mergedList.size()).as("merge() obviously did not work.").isEqualTo(3);
