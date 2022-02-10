@@ -45,7 +45,7 @@ public interface EmbeddedValueResolverAware extends Aware {
 	void setEmbeddedValueResolver(StringValueResolver resolver);
 
 	/**
-	 * resolve Origin Or Pattern Value
+	 * resolve Origin Or Pattern Value.
 	 * @param origin origin
 	 * @param origins origins
 	 */
