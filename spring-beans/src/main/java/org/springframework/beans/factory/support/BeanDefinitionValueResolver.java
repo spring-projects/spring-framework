@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
@@ -59,7 +60,7 @@ import org.springframework.util.StringUtils;
  * @since 1.2
  * @see AbstractAutowireCapableBeanFactory
  */
-class BeanDefinitionValueResolver {
+public class BeanDefinitionValueResolver {
 
 	private final AbstractAutowireCapableBeanFactory beanFactory;
 
@@ -71,7 +72,8 @@ class BeanDefinitionValueResolver {
 
 
 	/**
-	 * Create a BeanDefinitionValueResolver for the given BeanFactory and BeanDefinition.
+	 * Create a BeanDefinitionValueResolver for the given BeanFactory and BeanDefinition,
+	 * using the given {@link TypeConverter}.
 	 * @param beanFactory the BeanFactory to resolve against
 	 * @param beanName the name of the bean that we work on
 	 * @param beanDefinition the BeanDefinition of the bean that we work on
@@ -84,6 +86,24 @@ class BeanDefinitionValueResolver {
 		this.beanName = beanName;
 		this.beanDefinition = beanDefinition;
 		this.typeConverter = typeConverter;
+	}
+
+	/**
+	 * Create a BeanDefinitionValueResolver for the given BeanFactory and BeanDefinition
+	 * using a default {@link TypeConverter}.
+	 * @param beanFactory the BeanFactory to resolve against
+	 * @param beanName the name of the bean that we work on
+	 * @param beanDefinition the BeanDefinition of the bean that we work on
+	 */
+	public BeanDefinitionValueResolver(AbstractAutowireCapableBeanFactory beanFactory, String beanName,
+			BeanDefinition beanDefinition) {
+
+		this.beanFactory = beanFactory;
+		this.beanName = beanName;
+		this.beanDefinition = beanDefinition;
+		BeanWrapper beanWrapper = new BeanWrapperImpl();
+		beanFactory.initBeanWrapper(beanWrapper);
+		this.typeConverter = beanWrapper;
 	}
 
 
