@@ -1887,15 +1887,22 @@ class MergedAnnotationsTests {
 
 		// Formatting common to Spring and JDK 9+
 		assertThat(string)
-			.startsWith("@" + RequestMapping.class.getName() + "(")
-			.contains("value={\"/test\"}", "path={\"/test\"}", "name=\"bar\"", "clazz=java.lang.Object.class")
+			.contains("value={\"/test\"}", "path={\"/test\"}", "name=\"bar\"")
 			.endsWith(")");
 
 		if (webMapping instanceof SynthesizedAnnotation) {
-			assertThat(string).as("Spring uses Enum#name()").contains("method={GET, POST}");
+			assertThat(string).as("Spring formatting")
+				.startsWith("@org.springframework.core.annotation.MergedAnnotationsTests.RequestMapping(")
+				.contains("method={GET, POST}",
+						"clazz=org.springframework.core.annotation.MergedAnnotationsTests.RequestMethod.class",
+						"classes={org.springframework.core.annotation.MergedAnnotationsTests.RequestMethod.class}");
 		}
 		else {
-			assertThat(string).as("JDK uses Enum#toString()").contains("method={method: get, method: post}");
+			assertThat(string).as("JDK 9-18 formatting")
+				.startsWith("@org.springframework.core.annotation.MergedAnnotationsTests$RequestMapping(")
+				.contains("method={method: get, method: post}",
+						"clazz=org.springframework.core.annotation.MergedAnnotationsTests$RequestMethod.class",
+						"classes={org.springframework.core.annotation.MergedAnnotationsTests$RequestMethod.class}");
 		}
 	}
 
@@ -2989,8 +2996,9 @@ class MergedAnnotationsTests {
 
 		RequestMethod[] method() default {};
 
-		// clazz is only used for testing annotation toString() implementations
-		Class<?> clazz() default Object.class;
+		Class<?> clazz() default RequestMethod.class;
+
+		Class<?>[] classes() default {RequestMethod.class};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

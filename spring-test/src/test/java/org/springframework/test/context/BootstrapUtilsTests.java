@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,8 +72,8 @@ class BootstrapUtilsTests {
 		assertThatIllegalStateException().isThrownBy(() ->
 				resolveTestContextBootstrapper(bootstrapContext))
 			.withMessageContaining("Configuration error: found multiple declarations of @BootstrapWith")
-			.withMessageContaining(FooBootstrapper.class.getName())
-			.withMessageContaining(BarBootstrapper.class.getName());
+			.withMessageContaining(FooBootstrapper.class.getCanonicalName())
+			.withMessageContaining(BarBootstrapper.class.getCanonicalName());
 	}
 
 	@Test

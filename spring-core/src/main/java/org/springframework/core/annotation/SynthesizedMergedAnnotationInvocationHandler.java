@@ -177,7 +177,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	private String annotationToString() {
 		String string = this.string;
 		if (string == null) {
-			StringBuilder builder = new StringBuilder("@").append(this.type.getName()).append('(');
+			StringBuilder builder = new StringBuilder("@").append(getName(this.type)).append('(');
 			for (int i = 0; i < this.attributes.size(); i++) {
 				Method attribute = this.attributes.get(i);
 				if (i > 0) {
@@ -202,7 +202,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 			return ((Enum<?>) value).name();
 		}
 		if (value instanceof Class) {
-			return ((Class<?>) value).getName() + ".class";
+			return getName((Class<?>) value) + ".class";
 		}
 		if (value.getClass().isArray()) {
 			StringBuilder builder = new StringBuilder("{");
@@ -275,6 +275,11 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		Class<?>[] interfaces = isVisible(classLoader, SynthesizedAnnotation.class) ?
 				new Class<?>[] {type, SynthesizedAnnotation.class} : new Class<?>[] {type};
 		return (A) Proxy.newProxyInstance(classLoader, interfaces, handler);
+	}
+
+	private static String getName(Class<?> clazz) {
+		String canonicalName = clazz.getCanonicalName();
+		return (canonicalName != null ? canonicalName : clazz.getName());
 	}
 
 
