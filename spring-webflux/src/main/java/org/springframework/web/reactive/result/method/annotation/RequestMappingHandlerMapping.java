@@ -56,6 +56,7 @@ import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerM
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Chen Jianbin
  * @since 5.0
  */
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
@@ -314,20 +315,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		if (annotation == null) {
 			return;
 		}
-		for (String origin : annotation.origins()) {
-			Set<String> origins = new HashSet<>();
-			resolveOriginOrPatternValue(resolveCorsAnnotationValue(origin), origins);
-			for (String org : origins) {
-				config.addAllowedOrigin(org);
-			}
-		}
-		for (String pattern : annotation.originPatterns()) {
-			Set<String> patterns = new HashSet<>();
-			resolveOriginOrPatternValue(resolveCorsAnnotationValue(pattern), patterns);
-			for (String pat : patterns) {
-				config.addAllowedOriginPattern(pat);
-			}
-		}
+
 		for (RequestMethod method : annotation.methods()) {
 			config.addAllowedMethod(method.name());
 		}

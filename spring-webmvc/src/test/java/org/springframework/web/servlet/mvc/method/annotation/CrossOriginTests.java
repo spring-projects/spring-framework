@@ -66,6 +66,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Sam Brannen
  * @author Nicolas Labrot
  * @author Rossen Stoyanchev
+ * @author Chen Jianbin
  */
 class CrossOriginTests {
 
@@ -196,9 +197,9 @@ class CrossOriginTests {
 		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
+		assertThat(config.getAllowCredentials()).isNull();
 		Assertions.assertEquals(2, Objects.requireNonNull(config.getAllowedOrigins()).size());
 		Assertions.assertTrue(config.getAllowedOrigins().contains("https://example.com"));
-		assertThat(config.getAllowCredentials()).isNull();
 	}
 
 	@PathPatternsParameterizedTest
@@ -214,19 +215,6 @@ class CrossOriginTests {
 	}
 
 	@PathPatternsParameterizedTest
-	public void customOriginPatternViaPlaceholder(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
-		mapping.registerHandler(new MethodLevelController());
-		this.request.setRequestURI("/customOriginPatternPlaceholder");
-		HandlerExecutionChain chain = mapping.getHandler(request);
-		CorsConfiguration config = getCorsConfiguration(chain, false);
-		assertThat(config).isNotNull();
-		assertThat(config.getAllowedOrigins()).isNull();
-		Assertions.assertEquals(2, Objects.requireNonNull(config.getAllowedOriginPatterns()).size());
-		Assertions.assertTrue(config.getAllowedOriginPatterns().contains("http://*.example.com"));
-		assertThat(config.getAllowCredentials()).isNull();
-	}
-
-	@PathPatternsParameterizedTest
 	public void customMultiOriginPatternViaPlaceholder(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
 		mapping.registerHandler(new MethodLevelController());
 		this.request.setRequestURI("/customMultiOriginPatternPlaceholder");
@@ -235,6 +223,19 @@ class CrossOriginTests {
 		assertThat(config).isNotNull();
 		assertThat(config.getAllowedOrigins()).isNull();
 		Assertions.assertEquals(4, config.getAllowedOriginPatterns().size());
+		assertThat(config.getAllowCredentials()).isNull();
+	}
+
+	@PathPatternsParameterizedTest
+	public void customOriginPatternViaPlaceholder(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
+		this.request.setRequestURI("/customOriginPatternPlaceholder");
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertThat(config).isNotNull();
+		Assertions.assertEquals(2, Objects.requireNonNull(config.getAllowedOriginPatterns()).size());
+		Assertions.assertTrue(config.getAllowedOriginPatterns().contains("http://*.example.com"));
+		assertThat(config.getAllowedOrigins()).isNull();
 		assertThat(config.getAllowCredentials()).isNull();
 	}
 
@@ -489,18 +490,20 @@ class CrossOriginTests {
 		public void customOriginPatternDefinedViaValueAttribute() {
 		}
 
+
+		@CrossOrigin(
+			originPatterns = {
+				"http://*.example.net,http://*.example.com:[8088,8089]",
+				"#{'${myDomainPattern}'.split(',')}"
+			})
+		@RequestMapping("/customMultiOriginPatternPlaceholder")
+		public void customMultiOriginPatternDefinedViaPlaceholder() {
+		}
+
 		@CrossOrigin(originPatterns = "${myDomainPattern}")
 		@RequestMapping("/customOriginPatternPlaceholder")
 		public void customOriginPatternDefinedViaPlaceholder() {
 		}
-
-		@CrossOrigin(
-				originPatterns = {
-					"http://*.example.net,http://*.example.com:[8088,8089]",
-					"#{'${myDomainPattern}'.split(',')}"
-				})
-		@RequestMapping("/customMultiOriginPatternPlaceholder")
-		public void customMultiOriginPatternDefinedViaPlaceholder() {}
 	}
 
 	@Controller
