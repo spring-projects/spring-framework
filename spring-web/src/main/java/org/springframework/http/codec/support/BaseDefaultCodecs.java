@@ -58,6 +58,7 @@ import org.springframework.http.codec.json.KotlinSerializationJsonEncoder;
 import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
+import org.springframework.http.codec.multipart.PartEventHttpMessageReader;
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
 import org.springframework.http.codec.protobuf.ProtobufEncoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
@@ -416,6 +417,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			if (codec instanceof DefaultPartHttpMessageReader) {
 				((DefaultPartHttpMessageReader) codec).setMaxInMemorySize(size);
 			}
+			if (codec instanceof PartEventHttpMessageReader) {
+				((PartEventHttpMessageReader) codec).setMaxInMemorySize(size);
+			}
 		}
 
 		Boolean enable = this.enableLoggingRequestDetails;
@@ -428,6 +432,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			}
 			if (codec instanceof DefaultPartHttpMessageReader) {
 				((DefaultPartHttpMessageReader) codec).setEnableLoggingRequestDetails(enable);
+			}
+			if (codec instanceof PartEventHttpMessageReader) {
+				((PartEventHttpMessageReader) codec).setEnableLoggingRequestDetails(enable);
 			}
 			if (codec instanceof FormHttpMessageWriter) {
 				((FormHttpMessageWriter) codec).setEnableLoggingRequestDetails(enable);

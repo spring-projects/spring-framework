@@ -32,7 +32,6 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBufferLimitException;
-import org.springframework.http.HttpMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
@@ -218,7 +217,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	@Override
 	public Flux<Part> read(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 		return Flux.defer(() -> {
-			byte[] boundary = boundary(message);
+			byte[] boundary = MultipartUtils.boundary(message, this.headersCharset);
 			if (boundary == null) {
 				return Flux.error(new DecodingException("No multipart boundary found in Content-Type: \"" +
 						message.getHeaders().getContentType() + "\""));
@@ -229,22 +228,6 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 			return PartGenerator.createParts(tokens, this.maxParts, this.maxInMemorySize, this.maxDiskUsagePerPart,
 					this.streaming, this.fileStorage.directory(), this.blockingOperationScheduler);
 		});
-	}
-
-	@Nullable
-	private byte[] boundary(HttpMessage message) {
-		MediaType contentType = message.getHeaders().getContentType();
-		if (contentType != null) {
-			String boundary = contentType.getParameter("boundary");
-			if (boundary != null) {
-				int len = boundary.length();
-				if (len > 2 && boundary.charAt(0) == '"' && boundary.charAt(len - 1) == '"') {
-					boundary = boundary.substring(1, len - 1);
-				}
-				return boundary.getBytes(this.headersCharset);
-			}
-		}
-		return null;
 	}
 
 }

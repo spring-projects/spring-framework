@@ -151,7 +151,7 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(adapter).isNotNull();
 
 		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
-		assertThat(readers.size()).isEqualTo(14);
+		assertThat(readers.size()).isEqualTo(15);
 
 		ResolvableType multiValueMapType = forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
