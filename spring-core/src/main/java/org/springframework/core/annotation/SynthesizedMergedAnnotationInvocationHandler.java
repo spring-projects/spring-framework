@@ -194,9 +194,37 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		return string;
 	}
 
+	/**
+	 * This method currently does not address the following issues which we may
+	 * choose to address at a later point in time.
+	 *
+	 * <ul>
+	 * <li>non-ASCII, non-visible, and non-printable characters within a character
+	 * or String literal are not escaped.</li>
+	 * <li>formatting for float and double values does not take into account whether
+	 * a value is not a number (NaN) or infinite.</li>
+	 * </ul>
+	 * @param value the attribute value to format
+	 * @return the formatted string representation
+	 */
 	private String toString(Object value) {
 		if (value instanceof String) {
 			return '"' + value.toString() + '"';
+		}
+		if (value instanceof Character) {
+			return '\'' + value.toString() + '\'';
+		}
+		if (value instanceof Byte) {
+			return String.format("(byte) 0x%02X", value);
+		}
+		if (value instanceof Long) {
+			return Long.toString(((Long) value)) + 'L';
+		}
+		if (value instanceof Float) {
+			return Float.toString(((Float) value)) + 'f';
+		}
+		if (value instanceof Double) {
+			return Double.toString(((Double) value)) + 'd';
 		}
 		if (value instanceof Enum) {
 			return ((Enum<?>) value).name();
