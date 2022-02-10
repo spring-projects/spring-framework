@@ -27,7 +27,6 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -197,8 +196,8 @@ class CrossOriginTests {
 		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
-		Assertions.assertEquals(2, Objects.requireNonNull(config.getAllowedOrigins()).size());
-		Assertions.assertTrue(config.getAllowedOrigins().contains("https://example.com"));
+		assertThat(Objects.requireNonNull(config.getAllowedOrigins()).size()).isEqualTo(2);
+		assertThat(config.getAllowedOrigins().contains("https://example.com"));
 		assertThat(config.getAllowCredentials()).isNull();
 	}
 
@@ -222,8 +221,8 @@ class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
 		assertThat(config.getAllowedOrigins()).isNull();
-		Assertions.assertEquals(2, Objects.requireNonNull(config.getAllowedOriginPatterns()).size());
-		Assertions.assertTrue(config.getAllowedOriginPatterns().contains("http://*.example.com"));
+		assertThat(config.getAllowedOriginPatterns().size()).isEqualTo(2);
+		assertThat(config.getAllowedOriginPatterns().contains("http://*.example.com")).isTrue();
 		assertThat(config.getAllowCredentials()).isNull();
 	}
 
@@ -235,7 +234,7 @@ class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
 		assertThat(config.getAllowedOrigins()).isNull();
-		Assertions.assertEquals(4, config.getAllowedOriginPatterns().size());
+		assertThat(config.getAllowedOriginPatterns().size()).isEqualTo(4);
 		assertThat(config.getAllowCredentials()).isNull();
 	}
 
