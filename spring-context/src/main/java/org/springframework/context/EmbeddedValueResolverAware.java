@@ -18,6 +18,7 @@ package org.springframework.context;
 
 import java.util.Arrays;
 import java.util.Set;
+
 import org.springframework.beans.factory.Aware;
 import org.springframework.util.StringValueResolver;
 
@@ -45,9 +46,8 @@ public interface EmbeddedValueResolverAware extends Aware {
 
 	/**
 	 * resolve Origin Or Pattern Value
-	 *
-	 * @param origin
-	 * @param origins
+	 * @param origin origin
+	 * @param origins origins
 	 */
 	default void resolveOriginOrPatternValue(String origin, Set<String> origins) {
 		int bracketIndex = origin.indexOf("[");
@@ -58,17 +58,20 @@ public interface EmbeddedValueResolverAware extends Aware {
 				int index = origin.indexOf("]");
 				origins.add(origin.substring(0, ++index));
 				origin = origin.substring(origin.indexOf("]") + 2);
-			} else {
+			}
+			else {
 				int index = origin.indexOf(",");
 				String value = origin.substring(0, ++index);
 				origins.add(value.substring(0, value.length() - 1));
 				origin = origin.substring(origin.indexOf(",") + 1);
 			}
 			resolveOriginOrPatternValue(origin, origins);
-		} else {
+		}
+		else {
 			if (bracketIndex == -1) {
 				origins.addAll(Arrays.asList(origin.split(",")));
-			} else {
+			}
+			else {
 				origins.add(origin);
 			}
 		}
