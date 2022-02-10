@@ -197,9 +197,9 @@ class CrossOriginTests {
 		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
+		assertThat(config.getAllowCredentials()).isNull();
 		Assertions.assertEquals(2, Objects.requireNonNull(config.getAllowedOrigins()).size());
 		Assertions.assertTrue(config.getAllowedOrigins().contains("https://example.com"));
-		assertThat(config.getAllowCredentials()).isNull();
 	}
 
 	@PathPatternsParameterizedTest
