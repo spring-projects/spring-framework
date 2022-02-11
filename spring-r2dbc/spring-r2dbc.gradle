@@ -12,6 +12,9 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	optional("io.r2dbc:r2dbc-proxy")
+	optional("io.micrometer:micrometer-api")
+	optional("io.micrometer:micrometer-tracing")
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-context")))
@@ -20,4 +23,7 @@ dependencies {
 	testImplementation("io.r2dbc:r2dbc-spi-test:0.9.1.RELEASE") {
 		exclude group: "org.springframework", module: "spring-jdbc"
 	}
+	testImplementation("io.micrometer:micrometer-test")
+	testImplementation("io.micrometer:micrometer-tracing-test")
+	testImplementation("io.micrometer:micrometer-tracing-integration-test")
 }

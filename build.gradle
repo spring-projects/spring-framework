@@ -37,6 +37,10 @@ configure(allprojects) { project ->
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.0"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.3.2"
 			mavenBom "org.junit:junit-bom:5.8.2"
+
+			// observability
+			mavenBom "io.micrometer:micrometer-bom:2.0.0-SNAPSHOT"
+			mavenBom "io.micrometer:micrometer-tracing-bom:1.0.0-SNAPSHOT"
 		}
 		dependencies {
 			dependencySet(group: 'org.apache.logging.log4j', version: '2.17.1') {
@@ -249,7 +253,7 @@ configure(allprojects) { project ->
 		repositories {
 			mavenCentral()
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
-			maven { url "https://repo.spring.io/snapshot" } // reactor
+			maven { url "https://repo.spring.io/snapshot" } // reactor, observability
 		}
 	}
 	configurations.all {
