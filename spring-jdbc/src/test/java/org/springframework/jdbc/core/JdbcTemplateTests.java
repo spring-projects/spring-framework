@@ -47,6 +47,8 @@ import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.support.AbstractInterruptibleBatchPreparedStatementSetter;
 import org.springframework.jdbc.datasource.ConnectionProxy;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -1104,6 +1106,83 @@ public class JdbcTemplateTests {
 		assertThat(map.get("x")).isEqualTo("first value");
 	}
 
+	@Test
+	void testBatchUpdateReturnsGeneratedKeys_whenDatabaseSupportsBatchUpdates() throws SQLException {
+		final int[] rowsAffected = new int[] {1, 2};
+		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
+		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+		given(databaseMetaData.supportsBatchUpdates()).willReturn(true);
+		given(this.connection.getMetaData()).willReturn(databaseMetaData);
+		ResultSet generatedKeysResultSet = mock(ResultSet.class);
+		ResultSetMetaData rsmd = mock(ResultSetMetaData.class);
+		given(rsmd.getColumnCount()).willReturn(1);
+		given(rsmd.getColumnLabel(1)).willReturn("someId");
+		given(generatedKeysResultSet.getMetaData()).willReturn(rsmd);
+		given(generatedKeysResultSet.getObject(1)).willReturn(123, 456);
+		given(generatedKeysResultSet.next()).willReturn(true, true, false);
+		given(this.preparedStatement.getGeneratedKeys()).willReturn(generatedKeysResultSet);
+
+		int[] values = new int[]{100, 200};
+		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+				ps.setObject(i, values[i]);
+			}
+
+			@Override
+			public int getBatchSize() {
+				return 2;
+			}
+		};
+
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		this.template.batchUpdate(con -> con.prepareStatement(""), bpss, keyHolder);
+
+		assertThat(keyHolder.getKeyList()).containsExactly(
+				Collections.singletonMap("someId", 123),
+				Collections.singletonMap("someId", 456));
+	}
+
+	@Test
+	void testBatchUpdateReturnsGeneratedKeys_whenDatabaseDoesNotSupportBatchUpdates() throws SQLException {
+		final int[] rowsAffected = new int[] {1, 2};
+		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
+		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+		given(databaseMetaData.supportsBatchUpdates()).willReturn(false);
+		given(this.connection.getMetaData()).willReturn(databaseMetaData);
+		ResultSetMetaData rsmd = mock(ResultSetMetaData.class);
+		given(rsmd.getColumnCount()).willReturn(1);
+		given(rsmd.getColumnLabel(1)).willReturn("someId");
+		ResultSet generatedKeysResultSet1 = mock(ResultSet.class);
+		given(generatedKeysResultSet1.getMetaData()).willReturn(rsmd);
+		given(generatedKeysResultSet1.getObject(1)).willReturn(123);
+		given(generatedKeysResultSet1.next()).willReturn(true, false);
+		ResultSet generatedKeysResultSet2 = mock(ResultSet.class);
+		given(generatedKeysResultSet2.getMetaData()).willReturn(rsmd);
+		given(generatedKeysResultSet2.getObject(1)).willReturn(456);
+		given(generatedKeysResultSet2.next()).willReturn(true, false);
+		given(this.preparedStatement.getGeneratedKeys()).willReturn(generatedKeysResultSet1, generatedKeysResultSet2);
+
+		int[] values = new int[]{100, 200};
+		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+				ps.setObject(i, values[i]);
+			}
+
+			@Override
+			public int getBatchSize() {
+				return 2;
+			}
+		};
+
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		this.template.batchUpdate(con -> con.prepareStatement(""), bpss, keyHolder);
+
+		assertThat(keyHolder.getKeyList()).containsExactly(
+				Collections.singletonMap("someId", 123),
+				Collections.singletonMap("someId", 456));
+	}
 
 	private void mockDatabaseMetaData(boolean supportsBatchUpdates) throws SQLException {
 		DatabaseMetaData databaseMetaData = mock();

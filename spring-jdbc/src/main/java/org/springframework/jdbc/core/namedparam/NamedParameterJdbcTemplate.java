@@ -394,6 +394,44 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 				});
 	}
 
+	@Override
+	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder) {
+		return batchUpdate(sql, batchArgs, generatedKeyHolder, null);
+	}
+
+	@Override
+	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder, String[] keyColumnNames) {
+		if (batchArgs.length == 0) {
+			return new int[0];
+		}
+
+		ParsedSql parsedSql = getParsedSql(sql);
+		SqlParameterSource paramSource = batchArgs[0];
+		PreparedStatementCreatorFactory pscf = getPreparedStatementCreatorFactory(parsedSql, paramSource);
+		if (keyColumnNames != null) {
+			pscf.setGeneratedKeysColumnNames(keyColumnNames);
+		}
+		else {
+			pscf.setReturnGeneratedKeys(true);
+		}
+		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
+		PreparedStatementCreator psc = pscf.newPreparedStatementCreator(params);
+		return getJdbcOperations().batchUpdate(
+				psc,
+				new BatchPreparedStatementSetter() {
+					@Override
+					public void setValues(PreparedStatement ps, int i) throws SQLException {
+						Object[] values = NamedParameterUtils.buildValueArray(parsedSql, batchArgs[i], null);
+						pscf.newPreparedStatementSetter(values).setValues(ps);
+					}
+					@Override
+					public int getBatchSize() {
+						return batchArgs.length;
+					}
+				},
+				generatedKeyHolder);
+	}
+
 
 	/**
 	 * Build a {@link PreparedStatementCreator} based on the given SQL and named parameters.

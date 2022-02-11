@@ -996,21 +996,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 		return updateCount(execute(psc, ps -> {
 			int rows = ps.executeUpdate();
-			List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
-			generatedKeys.clear();
-			ResultSet keys = ps.getGeneratedKeys();
-			if (keys != null) {
-				try {
-					RowMapperResultSetExtractor<Map<String, Object>> rse =
-							new RowMapperResultSetExtractor<>(getColumnMapRowMapper(), 1);
-					generatedKeys.addAll(result(rse.extractData(keys)));
-				}
-				finally {
-					JdbcUtils.closeResultSet(keys);
-				}
-			}
+			generatedKeyHolder.getKeyList().clear();
+			storeGeneratedKeys(generatedKeyHolder, ps, 1);
 			if (logger.isTraceEnabled()) {
-				logger.trace("SQL update affected " + rows + " rows and returned " + generatedKeys.size() + " keys");
+				logger.trace("SQL update affected " + rows + " rows and returned " + generatedKeyHolder.getKeyList().size() + " keys");
 			}
 			return rows;
 		}, true));
@@ -1032,6 +1021,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
+	public int[] batchUpdate(final PreparedStatementCreator psc, final BatchPreparedStatementSetter pss, final KeyHolder generatedKeyHolder) throws DataAccessException {
+		int[] result = execute(psc, getPreparedStatementCallback(pss, generatedKeyHolder));
+
+		Assert.state(result != null, "No result array");
+		return result;
+	}
+
+	@Override
 	public int[] batchUpdate(String sql, final BatchPreparedStatementSetter pss) throws DataAccessException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update [" + sql + "]");
@@ -1041,43 +1038,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			return new int[0];
 		}
 
-		int[] result = execute(sql, (PreparedStatementCallback<int[]>) ps -> {
-			try {
-				InterruptibleBatchPreparedStatementSetter ipss =
-						(pss instanceof InterruptibleBatchPreparedStatementSetter ibpss ? ibpss : null);
-				if (JdbcUtils.supportsBatchUpdates(ps.getConnection())) {
-					for (int i = 0; i < batchSize; i++) {
-						pss.setValues(ps, i);
-						if (ipss != null && ipss.isBatchExhausted(i)) {
-							break;
-						}
-						ps.addBatch();
-					}
-					return ps.executeBatch();
-				}
-				else {
-					List<Integer> rowsAffected = new ArrayList<>();
-					for (int i = 0; i < batchSize; i++) {
-						pss.setValues(ps, i);
-						if (ipss != null && ipss.isBatchExhausted(i)) {
-							break;
-						}
-						rowsAffected.add(ps.executeUpdate());
-					}
-					int[] rowsAffectedArray = new int[rowsAffected.size()];
-					for (int i = 0; i < rowsAffectedArray.length; i++) {
-						rowsAffectedArray[i] = rowsAffected.get(i);
-					}
-					return rowsAffectedArray;
-				}
-			}
-			finally {
-				if (pss instanceof ParameterDisposer parameterDisposer) {
-					parameterDisposer.cleanupParameters();
-				}
-			}
-		});
-
+		int[] result = execute(sql, getPreparedStatementCallback(pss, null));
 		Assert.state(result != null, "No result array");
 		return result;
 	}
@@ -1602,6 +1563,71 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	private static int updateCount(@Nullable Integer result) {
 		Assert.state(result != null, "No update count");
 		return result;
+	}
+
+	private void storeGeneratedKeys(KeyHolder generatedKeyHolder, PreparedStatement ps, int rowsExpected) throws SQLException {
+		List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
+		ResultSet keys = ps.getGeneratedKeys();
+		if (keys != null) {
+			try {
+				RowMapperResultSetExtractor<Map<String, Object>> rse =
+						new RowMapperResultSetExtractor<>(getColumnMapRowMapper(), rowsExpected);
+				generatedKeys.addAll(result(rse.extractData(keys)));
+			}
+			finally {
+				JdbcUtils.closeResultSet(keys);
+			}
+		}
+	}
+
+	private PreparedStatementCallback<int[]> getPreparedStatementCallback(BatchPreparedStatementSetter pss, @Nullable KeyHolder generatedKeyHolder) {
+		return ps -> {
+			try {
+				int batchSize = pss.getBatchSize();
+				InterruptibleBatchPreparedStatementSetter ipss =
+						(pss instanceof InterruptibleBatchPreparedStatementSetter ibpss ? ibpss : null);
+				if (generatedKeyHolder != null) {
+					generatedKeyHolder.getKeyList().clear();
+				}
+				if (JdbcUtils.supportsBatchUpdates(ps.getConnection())) {
+					for (int i = 0; i < batchSize; i++) {
+						pss.setValues(ps, i);
+						if (ipss != null && ipss.isBatchExhausted(i)) {
+							break;
+						}
+						ps.addBatch();
+					}
+					int[] results = ps.executeBatch();
+					if (generatedKeyHolder != null) {
+						storeGeneratedKeys(generatedKeyHolder, ps, batchSize);
+					}
+					return results;
+				}
+				else {
+					List<Integer> rowsAffected = new ArrayList<>();
+					for (int i = 0; i < batchSize; i++) {
+						pss.setValues(ps, i);
+						if (ipss != null && ipss.isBatchExhausted(i)) {
+							break;
+						}
+						rowsAffected.add(ps.executeUpdate());
+						if (generatedKeyHolder != null) {
+							storeGeneratedKeys(generatedKeyHolder, ps, 1);
+						}
+					}
+					int[] rowsAffectedArray = new int[rowsAffected.size()];
+					for (int i = 0; i < rowsAffectedArray.length; i++) {
+						rowsAffectedArray[i] = rowsAffected.get(i);
+					}
+					return rowsAffectedArray;
+				}
+			}
+			finally {
+				if (pss instanceof ParameterDisposer parameterDisposer) {
+					parameterDisposer.cleanupParameters();
+				}
+			}
+		};
 	}
 
 
