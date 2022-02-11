@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.util.ReflectionUtils;
  * with consistent ordering as well as a few useful utility methods.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.2
  */
 final class AttributeMethods {
@@ -71,10 +72,10 @@ final class AttributeMethods {
 		for (int i = 0; i < attributeMethods.length; i++) {
 			Method method = this.attributeMethods[i];
 			Class<?> type = method.getReturnType();
-			if (method.getDefaultValue() != null) {
+			if (!foundDefaultValueMethod && (method.getDefaultValue() != null)) {
 				foundDefaultValueMethod = true;
 			}
-			if (type.isAnnotation() || (type.isArray() && type.getComponentType().isAnnotation())) {
+			if (!foundNestedAnnotation && (type.isAnnotation() || (type.isArray() && type.getComponentType().isAnnotation()))) {
 				foundNestedAnnotation = true;
 			}
 			ReflectionUtils.makeAccessible(method);
