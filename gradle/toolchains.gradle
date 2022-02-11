@@ -5,10 +5,10 @@
  * One can choose the toolchain to use for compiling the MAIN sources and/or compiling
  * and running the TEST sources. These options apply to Java, Kotlin and Groovy sources
  * when available.
- * {@code "./gradlew check -PmainToolchain=8 -PtestToolchain=11"} will use:
+ * {@code "./gradlew check -PmainToolchain=17 -PtestToolchain=18"} will use:
  * <ul>
- *     <li>a JDK8 toolchain for compiling the main SourceSet
- *     <li>a JDK11 toolchain for compiling and running the test SourceSet
+ *     <li>a JDK17 toolchain for compiling the main SourceSet
+ *     <li>a JDK18 toolchain for compiling and running the test SourceSet
  * </ul>
  *
  * By default, the build will fall back to using the current JDK and 17 language level for all sourceSets.
@@ -21,11 +21,11 @@
  *
  * We can also configure ENV variables and let Gradle know about them:
  * {@code
- * $ echo JDK11
- * /opt/openjdk/java11
- * $ echo JDK15
- * /opt/openjdk/java15
- * $ ./gradlew -Porg.gradle.java.installations.fromEnv=JDK11,JDK15 check
+ * $ echo JDK17
+ * /opt/openjdk/java17
+ * $ echo JDK18
+ * /opt/openjdk/java18
+ * $ ./gradlew -Porg.gradle.java.installations.fromEnv=JDK17,JDK18 check
  * }
  *
  * @author Brian Clozel
@@ -121,12 +121,12 @@ pluginManager.withPlugin("kotlin") {
 		// Fallback to JDK17
 		compileKotlin {
 			kotlinOptions {
-				jvmTarget = '1.8'
+				jvmTarget = '17'
 			}
 		}
 		compileTestKotlin {
 			kotlinOptions {
-				jvmTarget = '1.8'
+				jvmTarget = '17'
 			}
 		}
 	}
@@ -137,10 +137,9 @@ pluginManager.withPlugin("kotlin") {
 			languageVersion = testLanguageVersion
 		}
 		// See https://kotlinlang.org/docs/gradle.html#attributes-specific-for-jvm
-		def javaVersion = testLanguageVersion.toString() == '8' ? '1.8' : testLanguageVersion.toString()
 		compileTestKotlin {
 			kotlinOptions {
-				jvmTarget = javaVersion
+				jvmTarget = testLanguageVersion.toString()
 				jdkHome = compiler.get().metadata.installationPath.asFile.absolutePath
 			}
 		}
