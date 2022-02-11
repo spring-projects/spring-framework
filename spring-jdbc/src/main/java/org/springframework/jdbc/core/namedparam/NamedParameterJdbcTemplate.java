@@ -409,7 +409,8 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 					public int getBatchSize() {
 						return batchArgs.length;
 					}
-				});
+				},
+				keyHolder);
 	}
 
 
