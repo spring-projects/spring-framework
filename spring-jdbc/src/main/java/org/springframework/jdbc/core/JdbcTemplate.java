@@ -1573,6 +1573,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						rowsAffected.add(ps.executeUpdate());
 					}
 					int[] rowsAffectedArray = new int[rowsAffected.size()];
+					afterUpdateCallback.doInPreparedStatement(ps);
 					for (int i = 0; i < rowsAffectedArray.length; i++) {
 						rowsAffectedArray[i] = rowsAffected.get(i);
 					}

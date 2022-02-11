@@ -1088,11 +1088,48 @@ public class JdbcTemplateTests {
 	}
 
 	@Test
-	void testBatchUpdateReturnsGeneratedKeys() throws SQLException {
+	void testBatchUpdateReturnsGeneratedKeys_whenDatabaseSupportsBatchUpdates() throws SQLException {
 		final int[] rowsAffected = new int[] {1, 2};
 		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
 		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
 		given(databaseMetaData.supportsBatchUpdates()).willReturn(true);
+		given(this.connection.getMetaData()).willReturn(databaseMetaData);
+		ResultSet generatedKeysResultSet = mock(ResultSet.class);
+		ResultSetMetaData rsmd = mock(ResultSetMetaData.class);
+		given(rsmd.getColumnCount()).willReturn(1);
+		given(rsmd.getColumnLabel(1)).willReturn("someId");
+		given(generatedKeysResultSet.getMetaData()).willReturn(rsmd);
+		given(generatedKeysResultSet.getObject(1)).willReturn(123, 456);
+		given(generatedKeysResultSet.next()).willReturn(true, true, false);
+		given(this.preparedStatement.getGeneratedKeys()).willReturn(generatedKeysResultSet);
+
+		int[] values = new int[]{100, 200};
+		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+				ps.setObject(i, values[i]);
+			}
+
+			@Override
+			public int getBatchSize() {
+				return 2;
+			}
+		};
+
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		this.template.batchUpdate(con -> con.prepareStatement(""), bpss, keyHolder);
+
+		assertThat(keyHolder.getKeyList()).containsExactly(
+				Collections.singletonMap("someId", 123),
+				Collections.singletonMap("someId", 456));
+	}
+
+	@Test
+	void testBatchUpdateReturnsGeneratedKeys_whenDatabaseDoesNotSupportBatchUpdates() throws SQLException {
+		final int[] rowsAffected = new int[] {1, 2};
+		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
+		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+		given(databaseMetaData.supportsBatchUpdates()).willReturn(false);
 		given(this.connection.getMetaData()).willReturn(databaseMetaData);
 		ResultSet generatedKeysResultSet = mock(ResultSet.class);
 		ResultSetMetaData rsmd = mock(ResultSetMetaData.class);

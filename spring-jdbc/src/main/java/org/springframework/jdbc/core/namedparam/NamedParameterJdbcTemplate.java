@@ -386,7 +386,12 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder keyHolder) {
+	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder) {
+		return batchUpdate(sql, batchArgs, generatedKeyHolder, null);
+	}
+
+	@Override
+	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder, String[] keyColumnNames) {
 		if (batchArgs.length == 0) {
 			return new int[0];
 		}
@@ -394,7 +399,11 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		ParsedSql parsedSql = getParsedSql(sql);
 		SqlParameterSource paramSource = batchArgs[0];
 		PreparedStatementCreatorFactory pscf = getPreparedStatementCreatorFactory(parsedSql, paramSource);
-		pscf.setReturnGeneratedKeys(true);
+		if (keyColumnNames != null) {
+			pscf.setGeneratedKeysColumnNames(keyColumnNames);
+		} else {
+			pscf.setReturnGeneratedKeys(true);
+		}
 		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
 		PreparedStatementCreator psc = pscf.newPreparedStatementCreator(params);
 		return getJdbcOperations().batchUpdate(
@@ -410,7 +419,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 						return batchArgs.length;
 					}
 				},
-				keyHolder);
+				generatedKeyHolder);
 	}
 
 
