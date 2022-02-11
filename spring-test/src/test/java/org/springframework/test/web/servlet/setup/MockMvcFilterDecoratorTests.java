@@ -95,7 +95,7 @@ public class MockMvcFilterDecoratorTests {
 
 	@Test
 	public void matchPathMappingAll() throws Exception {
-		assertFilterInvoked("/test", "/*");
+		assertFilterInvoked("/test", "*");
 	}
 
 	@Test
