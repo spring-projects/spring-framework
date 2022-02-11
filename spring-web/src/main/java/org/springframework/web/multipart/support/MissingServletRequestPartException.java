@@ -20,16 +20,13 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.multipart.MultipartResolver;
 
 /**
- * Raised when the part of a "multipart/form-data" request identified by its
- * name cannot be found.
- *
- * <p>This may be because the request is not a multipart/form-data request,
- * because the part is not present in the request, or because the web
- * application is not configured correctly for processing multipart requests,
- * e.g. no {@link MultipartResolver}.
+ * Signals the part of a "multipart/form-data" request, identified by name
+ * could not be found. This may be because the request is not a multipart
+ * request, or a part with that name is not present, or because the application
+ * is not configured correctly for processing multipart requests, e.g. there
+ * is no {@link MultipartResolver}.
  *
  * @author Rossen Stoyanchev
- * @author Wonchul Heo
  * @since 3.1
  */
 @SuppressWarnings("serial")

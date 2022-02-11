@@ -73,7 +73,6 @@ import org.springframework.web.util.WebUtils;
  * detected, {@link ExceptionHandlerExceptionResolver} must be configured.
  *
  * @author Rossen Stoyanchev
- * @author Wonchul Heo
  * @since 3.2
  * @see #handleException(Exception, WebRequest)
  * @see org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver
