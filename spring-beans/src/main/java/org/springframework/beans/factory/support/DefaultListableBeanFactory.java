@@ -953,7 +953,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		Assert.hasText(beanName, "Bean name must not be empty");
 		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
-
+		beanName = resolveEmbeddedValue(beanName);
 		if (beanDefinition instanceof AbstractBeanDefinition abd) {
 			try {
 				abd.validate();
