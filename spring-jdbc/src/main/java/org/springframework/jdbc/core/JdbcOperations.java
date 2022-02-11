@@ -991,6 +991,21 @@ public interface JdbcOperations {
 	int[] batchUpdate(String sql, BatchPreparedStatementSetter pss) throws DataAccessException;
 
 	/**
+	 * Issue multiple update statements on a single PreparedStatement,
+	 * using batch updates and a BatchPreparedStatementSetter to set values.
+	 * <p>Will fall back to separate updates on a single PreparedStatement
+	 * if the JDBC driver does not support batch updates.
+	 * @param psc a callback that creates a PreparedStatement given a Connection
+	 * @param pss object to set parameters on the PreparedStatement
+	 * created by this method
+	 * @return an array of the number of rows affected by each statement
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
+	 * @throws DataAccessException if there is any problem issuing the update
+	 */
+	int[] batchUpdate(PreparedStatementCreator psc, BatchPreparedStatementSetter pss) throws DataAccessException;
+
+	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
 	 * @param sql the SQL statement to execute
 	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
