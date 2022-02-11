@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.JRE;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
@@ -1883,15 +1884,44 @@ class MergedAnnotationsTests {
 
 		// Formatting common to Spring and JDK 9+
 		assertThat(string)
-			.startsWith("@" + RequestMapping.class.getName() + "(")
-			.contains("value={\"/test\"}", "path={\"/test\"}", "name=\"bar\"", "clazz=java.lang.Object.class")
+			.contains("value={\"/test\"}", "path={\"/test\"}", "name=\"bar\"", "ch='X'", "chars={'X'}")
 			.endsWith(")");
 
 		if (webMapping instanceof SynthesizedAnnotation) {
-			assertThat(string).as("Spring uses Enum#name()").contains("method={GET, POST}");
+			assertThat(string).as("Spring formatting")
+				.startsWith("@org.springframework.core.annotation.MergedAnnotationsTests.RequestMapping(")
+				.contains("method={GET, POST}",
+						"clazz=org.springframework.core.annotation.MergedAnnotationsTests.RequestMethod.class",
+						"classes={int[][].class, org.springframework.core.annotation.MergedAnnotationsTests.RequestMethod[].class}",
+						"byteValue=(byte) 0xFF", "bytes={(byte) 0xFF}",
+						"shortValue=9876", "shorts={9876}",
+						"longValue=42L", "longs={42L}",
+						"floatValue=3.14f", "floats={3.14f}",
+						"doubleValue=99.999d", "doubles={99.999d}"
+					);
 		}
 		else {
-			assertThat(string).as("JDK uses Enum#toString()").contains("method={method: get, method: post}");
+			assertThat(string).as("JDK 9-18 formatting")
+				.startsWith("@org.springframework.core.annotation.MergedAnnotationsTests$RequestMapping(")
+				.contains("method={method: get, method: post}",
+						"clazz=org.springframework.core.annotation.MergedAnnotationsTests$RequestMethod.class",
+						"classes={int[][].class, org.springframework.core.annotation.MergedAnnotationsTests$RequestMethod[].class}",
+						"shortValue=9876", "shorts={9876}",
+						"floatValue=3.14f", "floats={3.14f}",
+						"doubleValue=99.999", "doubles={99.999}"
+					);
+			if (JRE.currentVersion().ordinal() < JRE.JAVA_14.ordinal()) {
+				assertThat(string).as("JDK 9-13 formatting")
+					.contains("longValue=42", "longs={42}",
+							"byteValue=-1", "bytes={-1}"
+						);
+			}
+			else {
+				assertThat(string).as("JDK 14+ formatting")
+					.contains("longValue=42L", "longs={42L}",
+							"byteValue=(byte)0xff", "bytes={(byte)0xff}"
+						);
+			}
 		}
 	}
 
@@ -2985,8 +3015,29 @@ class MergedAnnotationsTests {
 
 		RequestMethod[] method() default {};
 
-		// clazz is only used for testing annotation toString() implementations
-		Class<?> clazz() default Object.class;
+		// ---------------------------------------------------------------------
+		// All remaining attributes declare default values that are used solely
+		// for the purpose of testing the toString() implementations for annotations.
+		Class<?> clazz() default RequestMethod.class;
+		Class<?>[] classes() default {int[][].class, RequestMethod[].class};
+
+		char ch() default 'X';
+		char[] chars() default {'X'};
+
+		byte byteValue() default (byte) 0xFF;
+		byte[] bytes() default {(byte) 0xFF};
+
+		short shortValue() default 9876;
+		short[] shorts() default {9876};
+
+		long longValue() default 42L;
+		long[] longs() default {42L};
+
+		float floatValue() default 3.14F;
+		float[] floats() default {3.14F};
+
+		double doubleValue() default 99.999D;
+		double[] doubles() default {99.999D};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

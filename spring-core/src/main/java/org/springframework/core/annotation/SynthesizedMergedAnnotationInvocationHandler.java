@@ -177,7 +177,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	private String annotationToString() {
 		String string = this.string;
 		if (string == null) {
-			StringBuilder builder = new StringBuilder("@").append(this.type.getName()).append('(');
+			StringBuilder builder = new StringBuilder("@").append(getName(this.type)).append('(');
 			for (int i = 0; i < this.attributes.size(); i++) {
 				Method attribute = this.attributes.get(i);
 				if (i > 0) {
@@ -194,15 +194,43 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		return string;
 	}
 
+	/**
+	 * This method currently does not address the following issues which we may
+	 * choose to address at a later point in time.
+	 *
+	 * <ul>
+	 * <li>non-ASCII, non-visible, and non-printable characters within a character
+	 * or String literal are not escaped.</li>
+	 * <li>formatting for float and double values does not take into account whether
+	 * a value is not a number (NaN) or infinite.</li>
+	 * </ul>
+	 * @param value the attribute value to format
+	 * @return the formatted string representation
+	 */
 	private String toString(Object value) {
 		if (value instanceof String str) {
 			return '"' + str + '"';
+		}
+		if (value instanceof Character) {
+			return '\'' + value.toString() + '\'';
+		}
+		if (value instanceof Byte) {
+			return String.format("(byte) 0x%02X", value);
+		}
+		if (value instanceof Long longValue) {
+			return Long.toString(longValue) + 'L';
+		}
+		if (value instanceof Float floatValue) {
+			return Float.toString(floatValue) + 'f';
+		}
+		if (value instanceof Double doubleValue) {
+			return Double.toString(doubleValue) + 'd';
 		}
 		if (value instanceof Enum<?> e) {
 			return e.name();
 		}
 		if (value instanceof Class<?> clazz) {
-			return clazz.getName() + ".class";
+			return getName(clazz) + ".class";
 		}
 		if (value.getClass().isArray()) {
 			StringBuilder builder = new StringBuilder("{");
@@ -275,6 +303,11 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		Class<?>[] interfaces = isVisible(classLoader, SynthesizedAnnotation.class) ?
 				new Class<?>[] {type, SynthesizedAnnotation.class} : new Class<?>[] {type};
 		return (A) Proxy.newProxyInstance(classLoader, interfaces, handler);
+	}
+
+	private static String getName(Class<?> clazz) {
+		String canonicalName = clazz.getCanonicalName();
+		return (canonicalName != null ? canonicalName : clazz.getName());
 	}
 
 
