@@ -118,7 +118,7 @@ pluginManager.withPlugin("kotlin") {
 		}
 	}
 	else {
-		// Fallback to JDK11
+		// Fallback to JDK17
 		compileKotlin {
 			kotlinOptions {
 				jvmTarget = '1.8'
