@@ -93,7 +93,7 @@ public class ConditionalDelegatingFilterProxyTests {
 
 	@Test
 	public void matchPathMappingAll() throws Exception {
-		assertFilterInvoked("/test", "/*");
+		assertFilterInvoked("/test", "*");
 	}
 
 	@Test
