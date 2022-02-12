@@ -260,7 +260,7 @@ abstract class CronField {
 		 * Roll forward the give temporal until it reaches the next higher
 		 * order field. Calling this method is equivalent to calling
 		 * {@link #elapseUntil(Temporal, int)} with goal set to the
-		 * minimum value of this field's range.
+		 * minimum value of this field's range, except for daylight saving.
 		 * @param temporal the temporal to roll forward
 		 * @param <T> the type of temporal
 		 * @return the rolled forward temporal
@@ -269,7 +269,12 @@ abstract class CronField {
 			int current = get(temporal);
 			ValueRange range = temporal.range(this.field);
 			long amount = range.getMaximum() - current + 1;
-			return this.field.getBaseUnit().addTo(temporal, amount);
+			T result =  this.field.getBaseUnit().addTo(temporal, amount);
+			//adjust daylight saving
+			if (get(result) != range.getMinimum()) {
+				result = this.field.adjustInto(result,result.range(this.field).getMinimum());
+			}
+			return result;
 		}
 
 		/**
