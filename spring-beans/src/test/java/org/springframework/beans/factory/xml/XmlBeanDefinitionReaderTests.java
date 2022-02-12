@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
@@ -108,14 +109,17 @@ public class XmlBeanDefinitionReaderTests {
 	}
 
 	private void testBeanDefinitions(BeanDefinitionRegistry registry) {
-		assertThat(registry.getBeanDefinitionCount()).isEqualTo(24);
-		assertThat(registry.getBeanDefinitionNames().length).isEqualTo(24);
+		assertThat(registry.getBeanDefinitionCount()).isEqualTo(25);
+		assertThat(registry.getBeanDefinitionNames().length).isEqualTo(25);
 		assertThat(Arrays.asList(registry.getBeanDefinitionNames()).contains("rod")).isTrue();
 		assertThat(Arrays.asList(registry.getBeanDefinitionNames()).contains("aliased")).isTrue();
+		assertThat(Arrays.asList(registry.getBeanDefinitionNames()).contains("testList")).isTrue();
 		assertThat(registry.containsBeanDefinition("rod")).isTrue();
 		assertThat(registry.containsBeanDefinition("aliased")).isTrue();
+		assertThat(registry.containsBeanDefinition("testList")).isTrue();
 		assertThat(registry.getBeanDefinition("rod").getBeanClassName()).isEqualTo(TestBean.class.getName());
 		assertThat(registry.getBeanDefinition("aliased").getBeanClassName()).isEqualTo(TestBean.class.getName());
+		assertThat(registry.getBeanDefinition("testList").getBeanClassName()).isEqualTo(ArrayList.class.getName());
 		assertThat(registry.isAlias("youralias")).isTrue();
 		String[] aliases = registry.getAliases("aliased");
 		assertThat(aliases.length).isEqualTo(2);

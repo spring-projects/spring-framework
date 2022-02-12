@@ -16,6 +16,8 @@
 		<property name="name"><value>aliased</value></property>
 	</bean>
 
+	<bean class="java.util.ArrayList" name="${listName:testList}"/>
+
 	<alias name="aliased" alias="youralias"/>
 
 	<alias name="multiAliased" alias="alias3"/>
