@@ -98,22 +98,22 @@ pluginManager.withPlugin("kotlin") {
 	// Configure the Kotlin compiler if the 'mainToolchain' property is defined
 	if (mainToolchainConfigured()) {
 		def mainLanguageVersion = mainToolchainLanguageVersion()
-		def compiler = javaToolchains.compilerFor {
-			languageVersion = mainLanguageVersion
-		}
 		// See https://kotlinlang.org/docs/gradle.html#attributes-specific-for-jvm
 		def javaVersion = mainLanguageVersion.toString()
+		kotlin {
+			jvmToolchain {
+				languageVersion.set(mainLanguageVersion)
+			}
+		}
 		compileKotlin {
 			kotlinOptions {
 				jvmTarget = javaVersion
-				jdkHome = compiler.get().metadata.installationPath.asFile.absolutePath
 			}
 		}
 		// Compile the test classes with the same version, 'testToolchain' will override if defined
 		compileTestKotlin {
 			kotlinOptions {
 				jvmTarget = javaVersion
-				jdkHome = compiler.get().metadata.installationPath.asFile.absolutePath
 			}
 		}
 	}
@@ -136,11 +136,15 @@ pluginManager.withPlugin("kotlin") {
 		def compiler = javaToolchains.compilerFor {
 			languageVersion = testLanguageVersion
 		}
+		kotlin {
+			jvmToolchain {
+				languageVersion.set(testLanguageVersion)
+			}
+		}
 		// See https://kotlinlang.org/docs/gradle.html#attributes-specific-for-jvm
 		compileTestKotlin {
 			kotlinOptions {
 				jvmTarget = testLanguageVersion.toString()
-				jdkHome = compiler.get().metadata.installationPath.asFile.absolutePath
 			}
 		}
 	}
