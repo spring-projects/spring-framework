@@ -95,57 +95,15 @@ plugins.withType(GroovyPlugin) {
 }
 
 pluginManager.withPlugin("kotlin") {
-	// Configure the Kotlin compiler if the 'mainToolchain' property is defined
-	if (mainToolchainConfigured()) {
-		def mainLanguageVersion = mainToolchainLanguageVersion()
-		// See https://kotlinlang.org/docs/gradle.html#attributes-specific-for-jvm
-		def javaVersion = mainLanguageVersion.toString()
-		kotlin {
-			jvmToolchain {
-				languageVersion.set(mainLanguageVersion)
-			}
-		}
-		compileKotlin {
-			kotlinOptions {
-				jvmTarget = javaVersion
-			}
-		}
-		// Compile the test classes with the same version, 'testToolchain' will override if defined
-		compileTestKotlin {
-			kotlinOptions {
-				jvmTarget = javaVersion
-			}
+	// Fallback to JDK17
+	compileKotlin {
+		kotlinOptions {
+			jvmTarget = '17'
 		}
 	}
-	else {
-		// Fallback to JDK17
-		compileKotlin {
-			kotlinOptions {
-				jvmTarget = '17'
-			}
-		}
-		compileTestKotlin {
-			kotlinOptions {
-				jvmTarget = '17'
-			}
-		}
-	}
-
-	if (testToolchainConfigured()) {
-		def testLanguageVersion = testToolchainLanguageVersion()
-		def compiler = javaToolchains.compilerFor {
-			languageVersion = testLanguageVersion
-		}
-		kotlin {
-			jvmToolchain {
-				languageVersion.set(testLanguageVersion)
-			}
-		}
-		// See https://kotlinlang.org/docs/gradle.html#attributes-specific-for-jvm
-		compileTestKotlin {
-			kotlinOptions {
-				jvmTarget = testLanguageVersion.toString()
-			}
+	compileTestKotlin {
+		kotlinOptions {
+			jvmTarget = '17'
 		}
 	}
 }
