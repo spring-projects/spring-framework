@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class SimpleUrlHandlerMappingTests {
 		assertThat(request.getAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).isEqualTo("/welcome.html");
 		assertThat(request.getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(bean);
 
-		request = PathPatternsTestUtils.initRequest("GET", "/welcome.x", usePathPatterns);
+		request = PathPatternsTestUtils.initRequest("GET", "/welcome.x;jsessionid=123", usePathPatterns);
 		chain = getHandler(hm, request);
 		assertThat(chain.getHandler()).isSameAs(otherBean);
 		assertThat(request.getAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).isEqualTo("welcome.x");
