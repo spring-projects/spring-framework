@@ -6,6 +6,6 @@ RUN ./setup.sh java8
 
 ENV JAVA_HOME /opt/openjdk/java8
 ENV JDK11 /opt/openjdk/java11
-ENV JDK16 /opt/openjdk/java16
+ENV JDK17 /opt/openjdk/java17
 
 ENV PATH $JAVA_HOME/bin:$PATH
