@@ -87,7 +87,7 @@ resources:
     branch: ((branch))
     paths: ["ci/images/*"]
 - name: ci-image
-  type: registry-image
+  type: docker-image
   icon: docker
   source:
     <<: *docker-resource-source
