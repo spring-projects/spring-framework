@@ -80,11 +80,11 @@ resources:
     branch: ((branch))
     paths: ["ci/images/*"]
 - name: ci-image
-  type: docker-image
+  type: registry-image
   icon: docker
   source:
     <<: *docker-resource-source
-    repository: ((docker-hub-organization))/spring-framework-ci-jdk17
+    repository: ((docker-hub-organization))/spring-framework-ci
 - name: every-morning
   type: time
   icon: alarm
