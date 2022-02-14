@@ -25,13 +25,14 @@ import io.micrometer.api.instrument.observation.Observation;
 import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 import io.micrometer.tracing.test.SampleTestRunner;
+import io.micrometer.tracing.test.reporter.BuildingBlocks;
+import io.micrometer.tracing.test.simple.SpanAssert;
+import io.micrometer.tracing.test.simple.SpansAssert;
 import io.r2dbc.h2.H2ConnectionFactory;
 import io.r2dbc.proxy.ProxyConnectionFactory;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.Result;
-import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -41,7 +42,6 @@ import org.springframework.r2dbc.core.DatabaseClient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
 
-@Disabled("run this manually to visually test spans in Zipkin & Wavefront")
 class ObservationProxyExecutionListenerIntegrationTests extends SampleTestRunner {
 
 	public static String CREATE_TABLE_LEGOSET = "CREATE TABLE legoset (\n" //
@@ -104,14 +104,13 @@ class ObservationProxyExecutionListenerIntegrationTests extends SampleTestRunner
 	}
 
 	@Override
-	public BiConsumer<Tracer, MeterRegistry> yourCode() throws Exception {
-		return (tracer, meterRegistry) -> {
-			Span rootSpan = tracer.currentSpan();
-			executeInsert(tracer, rootSpan);
-		};
+	public SampleTestRunnerConsumer yourCode() throws Exception {
+		return (bb, meterRegistry) -> executeInsert(bb);
 	}
 
-	private void executeInsert(Tracer tracer, Span rootSpan) {
+	private void executeInsert(BuildingBlocks bb) {
+		Tracer tracer = bb.getTracer();
+		Span rootSpan = tracer.currentSpan();
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
 		databaseClient.sql("INSERT INTO legoset (id, name, manual) VALUES(:id, :name, :manual)")
@@ -137,5 +136,8 @@ class ObservationProxyExecutionListenerIntegrationTests extends SampleTestRunner
 
 		span = tracer.currentSpan();
 		then(span.context().spanId()).isEqualTo(rootSpan.context().spanId());
+
+		SpansAssert.assertThat(bb.getFinishedSpans())
+				.haveSameTraceId();
 	}
 }
