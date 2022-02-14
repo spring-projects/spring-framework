@@ -47,41 +47,48 @@ public final class MultiStatement {
 	/**
 	 * Add the specified {@link CodeBlock codeblock} rendered as-is.
 	 * @param codeBlock the code block to add
+	 * @return {@code this}, to facilitate method chaining
 	 * @see #addStatement(CodeBlock) to add a code block that represents
 	 * a statement
 	 */
-	public void add(CodeBlock codeBlock) {
+	public MultiStatement add(CodeBlock codeBlock) {
 		this.statements.add(Statement.of(codeBlock));
+		return this;
 	}
 
 	/**
 	 * Add a {@link CodeBlock} rendered as-is using the specified callback.
 	 * @param code the callback to use
+	 * @return {@code this}, to facilitate method chaining
 	 * @see #addStatement(CodeBlock) to add a code block that represents
 	 * a statement
 	 */
-	public void add(Consumer<Builder> code) {
+	public MultiStatement add(Consumer<Builder> code) {
 		CodeBlock.Builder builder = CodeBlock.builder();
 		code.accept(builder);
 		add(builder.build());
+		return this;
 	}
 
 	/**
 	 * Add a statement.
 	 * @param statement the statement to add
+	 * @return {@code this}, to facilitate method chaining
 	 */
-	public void addStatement(CodeBlock statement) {
+	public MultiStatement addStatement(CodeBlock statement) {
 		this.statements.add(Statement.ofStatement(statement));
+		return this;
 	}
 
 	/**
 	 * Add a statement using the specified callback.
 	 * @param code the callback to use
+	 * @return {@code this}, to facilitate method chaining
 	 */
-	public void addStatement(Consumer<Builder> code) {
+	public MultiStatement addStatement(Consumer<Builder> code) {
 		CodeBlock.Builder builder = CodeBlock.builder();
 		code.accept(builder);
-		addStatement(builder.build());
+		return addStatement(builder.build());
 	}
 
 	/**
@@ -89,10 +96,11 @@ public final class MultiStatement {
 	 * arguments.
 	 * @param code the code of the statement
 	 * @param args the arguments for placeholders
+	 * @return {@code this}, to facilitate method chaining
 	 * @see CodeBlock#of(String, Object...)
 	 */
-	public void addStatement(String code, Object... args) {
-		addStatement(CodeBlock.of(code, args));
+	public MultiStatement addStatement(String code, Object... args) {
+		return addStatement(CodeBlock.of(code, args));
 	}
 
 	/**
@@ -101,9 +109,11 @@ public final class MultiStatement {
 	 * @param items the items to handle, each item is represented as a statement
 	 * @param itemGenerator the item generator
 	 * @param <T> the type of the item
+	 * @return {@code this}, to facilitate method chaining
 	 */
-	public <T> void addAll(Iterable<T> items, Function<T, CodeBlock> itemGenerator) {
+	public <T> MultiStatement addAll(Iterable<T> items, Function<T, CodeBlock> itemGenerator) {
 		items.forEach(element -> addStatement(itemGenerator.apply(element)));
+		return this;
 	}
 
 	/**

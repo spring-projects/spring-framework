@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.aot.hint.TypeHint.Builder;
+import org.springframework.lang.Nullable;
 
 /**
  * Gather the need for reflection at runtime.
@@ -47,6 +48,28 @@ public class ReflectionHints {
 	 */
 	public Stream<TypeHint> typeHints() {
 		return this.types.values().stream().map(TypeHint.Builder::build);
+	}
+
+	/**
+	 * Return the reflection hints for the type defined by the specified
+	 * {@link TypeReference}.
+	 * @param type the type to inspect
+	 * @return the reflection hints for this type, or {@code null}
+	 */
+	@Nullable
+	public TypeHint getTypeHint(TypeReference type) {
+		Builder typeHintBuilder = this.types.get(type);
+		return (typeHintBuilder != null ? typeHintBuilder.build() : null);
+	}
+
+	/**
+	 * Return the reflection hints for the specified type.
+	 * @param type the type to inspect
+	 * @return the reflection hints for this type, or {@code null}
+	 */
+	@Nullable
+	public TypeHint getTypeHint(Class<?> type) {
+		return getTypeHint(TypeReference.of(type));
 	}
 
 	/**

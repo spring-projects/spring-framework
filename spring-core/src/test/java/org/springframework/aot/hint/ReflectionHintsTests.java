@@ -16,10 +16,13 @@
 
 package org.springframework.aot.hint;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,10 +45,33 @@ class ReflectionHintsTests {
 	}
 
 	@Test
+	void getTypeUsingType() {
+		this.reflectionHints.registerType(TypeReference.of(String.class),
+				hint -> hint.withMembers(MemberCategory.DECLARED_FIELDS));
+		assertThat(this.reflectionHints.getTypeHint(String.class)).satisfies(
+				typeWithMemberCategories(String.class, MemberCategory.DECLARED_FIELDS));
+	}
+
+	@Test
+	void getTypeUsingTypeReference() {
+		this.reflectionHints.registerType(String.class,
+				hint -> hint.withMembers(MemberCategory.DECLARED_FIELDS));
+		assertThat(this.reflectionHints.getTypeHint(TypeReference.of(String.class))).satisfies(
+				typeWithMemberCategories(String.class, MemberCategory.DECLARED_FIELDS));
+	}
+
+	@Test
+	void getTypeForNonExistingType() {
+		assertThat(this.reflectionHints.getTypeHint(String.class)).isNull();
+	}
+
+	@Test
 	void registerTypeReuseBuilder() {
 		this.reflectionHints.registerType(TypeReference.of(String.class),
 				typeHint -> typeHint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
-		this.reflectionHints.registerField(ReflectionUtils.findField(String.class, "value"));
+		Field field = ReflectionUtils.findField(String.class, "value");
+		assertThat(field).isNotNull();
+		this.reflectionHints.registerField(field);
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getType().getCanonicalName()).isEqualTo(String.class.getCanonicalName());
 			assertThat(typeHint.fields()).singleElement().satisfies(fieldHint -> assertThat(fieldHint.getName()).isEqualTo("value"));
@@ -63,7 +89,9 @@ class ReflectionHintsTests {
 
 	@Test
 	void registerField() {
-		this.reflectionHints.registerField(ReflectionUtils.findField(TestType.class, "field"));
+		Field field = ReflectionUtils.findField(TestType.class, "field");
+		assertThat(field).isNotNull();
+		this.reflectionHints.registerField(field);
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getType().getCanonicalName()).isEqualTo(TestType.class.getCanonicalName());
 			assertThat(typeHint.fields()).singleElement().satisfies(fieldHint ->
@@ -92,7 +120,9 @@ class ReflectionHintsTests {
 
 	@Test
 	void registerMethod() {
-		this.reflectionHints.registerMethod(ReflectionUtils.findMethod(TestType.class, "setName", String.class));
+		Method method = ReflectionUtils.findMethod(TestType.class, "setName", String.class);
+		assertThat(method).isNotNull();
+		this.reflectionHints.registerMethod(method);
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getType().getCanonicalName()).isEqualTo(TestType.class.getCanonicalName());
 			assertThat(typeHint.fields()).isEmpty();
@@ -119,6 +149,7 @@ class ReflectionHintsTests {
 	@SuppressWarnings("unused")
 	static class TestType {
 
+		@Nullable
 		private String field;
 
 		void setName(String name) {
