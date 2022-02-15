@@ -1259,10 +1259,13 @@ class WebClientIntegrationTests {
 				is.read(new byte[4096]);
 
 				OutputStream os = socket.getOutputStream();
-				os.write("HTTP/1.1 200 OK\r\n".getBytes(StandardCharsets.UTF_8));
-				os.write("Transfer-Encoding: chunked\r\n".getBytes(StandardCharsets.UTF_8));
-				os.write("\r\n".getBytes(StandardCharsets.UTF_8));
-				os.write("lskdu018973t09sylgasjkfg1][]'./.sdlv".getBytes(StandardCharsets.UTF_8));
+				os.write("""
+						HTTP/1.1 200 OK
+						Transfer-Encoding: chunked
+
+						lskdu018973t09sylgasjkfg1][]'./.sdlv"""
+						.replace("\n", "\r\n").getBytes(StandardCharsets.UTF_8));
+
 				socket.close();
 			}
 			catch (IOException ex) {
@@ -1322,4 +1325,5 @@ class WebClientIntegrationTests {
 			this.containerValue = containerValue;
 		}
 	}
+
 }
