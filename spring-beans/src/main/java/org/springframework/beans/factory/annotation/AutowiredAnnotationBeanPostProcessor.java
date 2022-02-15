@@ -22,10 +22,12 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -37,6 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.generator.CodeContribution;
+import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
@@ -48,9 +52,13 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.annotation.InjectionMetadata.InjectedElement;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.generator.BeanInstanceAotPostProcessor;
+import org.springframework.beans.factory.generator.BeanInstanceContributor;
+import org.springframework.beans.factory.generator.InjectionGenerator;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -65,6 +73,7 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -131,7 +140,7 @@ import org.springframework.util.StringUtils;
  * @see Value
  */
 public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
-		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
+		MergedBeanDefinitionPostProcessor, BeanInstanceAotPostProcessor, PriorityOrdered, BeanFactoryAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -255,8 +264,22 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		findInjectionMetadata(beanName, beanType, beanDefinition);
+	}
+
+	@Override
+	public BeanInstanceContributor buildAotContributor(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		InjectionMetadata metadata = findInjectionMetadata(beanName, beanType, beanDefinition);
+		Collection<InjectedElement> injectedElements = metadata.getInjectedElements();
+		return (!ObjectUtils.isEmpty(injectedElements)
+				? new AutowiredAnnotationBeanInstanceContributor(injectedElements)
+				: BeanInstanceContributor.NO_OP);
+	}
+
+	private InjectionMetadata findInjectionMetadata(String beanName, Class<?> beanType, RootBeanDefinition beanDefinition) {
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
 		metadata.checkConfigMembers(beanDefinition);
+		return metadata;
 	}
 
 	@Override
@@ -798,6 +821,52 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 	}
 
+	private static final class AutowiredAnnotationBeanInstanceContributor implements BeanInstanceContributor {
+
+		private final Collection<InjectedElement> injectedElements;
+
+		private final InjectionGenerator generator;
+
+		AutowiredAnnotationBeanInstanceContributor(Collection<InjectedElement> injectedElements) {
+			this.injectedElements = injectedElements;
+			this.generator = new InjectionGenerator();
+		}
+
+		@Override
+		public void contribute(CodeContribution contribution) {
+			this.injectedElements.forEach(element -> {
+				boolean isRequired = isRequired(element);
+				Member member = element.getMember();
+				analyzeMember(contribution, member);
+				contribution.statements().addStatement(this.generator.writeInjection(member, isRequired));
+			});
+		}
+
+		private boolean isRequired(InjectedElement element) {
+			if (element instanceof AutowiredMethodElement injectedMethod) {
+				return injectedMethod.required;
+			}
+			else if (element instanceof AutowiredFieldElement injectedField) {
+				return injectedField.required;
+			}
+			return true;
+		}
+
+		private void analyzeMember(CodeContribution contribution, Member member) {
+			if (member instanceof Method method) {
+				contribution.runtimeHints().reflection().registerMethod(method,
+						hint -> hint.setModes(ExecutableMode.INTROSPECT));
+				contribution.protectedAccess().analyze(member,
+						this.generator.getProtectedAccessInjectionOptions(member));
+			}
+			else if (member instanceof Field field) {
+				contribution.runtimeHints().reflection().registerField(field);
+				contribution.protectedAccess().analyze(member,
+						this.generator.getProtectedAccessInjectionOptions(member));
+			}
+		}
+
+	}
 
 	/**
 	 * DependencyDescriptor variant with a pre-resolved target bean name.
