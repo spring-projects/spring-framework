@@ -1,0 +1,2 @@
+org.springframework.core.io.support.DummyFactory=\
+org.springframework.core.io.support.MultipleConstructorArgsDummyFactory
