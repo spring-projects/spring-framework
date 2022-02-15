@@ -49,7 +49,7 @@ public class R2dbcObservationTracingHandler implements TracingObservationHandler
 
 	@Override
 	public void onStart(Observation.Context context) {
-		Span.Builder builder = tracer.spanBuilder()
+		Span.Builder builder = this.tracer.spanBuilder()
 				.name(context.getContextualName())
 				.kind(Span.Kind.CLIENT);
 		getTracingContext(context).setSpan(builder.start());
@@ -75,7 +75,7 @@ public class R2dbcObservationTracingHandler implements TracingObservationHandler
 				URI uri = URI.create(url);
 				span.remoteIpAndPort(uri.getHost(), uri.getPort());
 			}
-			catch (Exception e) {
+			catch (Exception ex) {
 				if (log.isDebugEnabled()) {
 					log.debug("Failed to parse the url [" + url + "]. Won't set this value on the span");
 				}

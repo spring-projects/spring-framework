@@ -122,21 +122,22 @@ class ObservationProxyExecutionListenerMetricsUnitTests {
 	}
 
 	private ObservationProxyExecutionListener listener(MeterRegistry registry, SingleConnectionFactory factory) {
-		return new ObservationProxyExecutionListener(registry, factory, "hello",
-				new Observation.TagsProvider<>() {
-					@Override
-					public boolean supportsContext(Observation.Context context) {
-						return true;
-					}
-
-					@Override
-					public Tags getLowCardinalityTags(Observation.Context context) {
-						return Tags.of(Tag.of("additional.tag", "bar"), R2dbcObservation.LowCardinalityTags.URL.of("http://localhost:6543"));
-					}
-				});
+		return new ObservationProxyExecutionListener(registry, factory, "hello");
 	}
 
 	MeterRegistry registry() {
-		return new SimpleMeterRegistry().withTimerObservationHandler();
+		MeterRegistry meterRegistry = new SimpleMeterRegistry().withTimerObservationHandler();
+		meterRegistry.observationConfig().tagsProvider(new Observation.TagsProvider<>() {
+			@Override
+			public boolean supportsContext(Observation.Context context) {
+				return true;
+			}
+
+			@Override
+			public Tags getLowCardinalityTags(Observation.Context context) {
+				return Tags.of(Tag.of("additional.tag", "bar"), R2dbcObservation.LowCardinalityTags.URL.of("http://localhost:6543"));
+			}
+		});
+		return meterRegistry;
 	}
 }

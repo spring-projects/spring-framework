@@ -16,17 +16,15 @@
 
 package org.springframework.r2dbc.connection.observability;
 
-import java.util.function.BiConsumer;
-
 import io.micrometer.api.instrument.MeterRegistry;
 import io.micrometer.api.instrument.Tag;
 import io.micrometer.api.instrument.Tags;
 import io.micrometer.api.instrument.observation.Observation;
+import io.micrometer.api.instrument.simple.SimpleMeterRegistry;
 import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 import io.micrometer.tracing.test.SampleTestRunner;
 import io.micrometer.tracing.test.reporter.BuildingBlocks;
-import io.micrometer.tracing.test.simple.SpanAssert;
 import io.micrometer.tracing.test.simple.SpansAssert;
 import io.r2dbc.h2.H2ConnectionFactory;
 import io.r2dbc.proxy.ProxyConnectionFactory;
@@ -58,10 +56,31 @@ class ObservationProxyExecutionListenerIntegrationTests extends SampleTestRunner
 				// TODO: Add these to test against Wavefront. Remember not to commit it!
 				.wavefrontToken("")
 				.wavefrontUrl("")
-				.build());
+				.build(), meterRegistry());
 	}
 
 	private ConnectionFactory connectionFactory;
+
+	private static MeterRegistry meterRegistry() {
+		MeterRegistry meterRegistry = new SimpleMeterRegistry().withTimerObservationHandler();
+		meterRegistry.observationConfig().tagsProvider(new Observation.TagsProvider<>() {
+			@Override
+			public boolean supportsContext(Observation.Context context) {
+				return context.getName().equals(R2dbcObservation.R2DBC_QUERY_OBSERVATION.getName());
+			}
+
+			@Override
+			public Tags getLowCardinalityTags(Observation.Context context) {
+				return Tags.of(R2dbcObservation.LowCardinalityTags.URL.of("http://localhost:6543"));
+			}
+
+			@Override
+			public Tags getHighCardinalityTags(Observation.Context context) {
+				return Tags.of(Tag.of("my-high-cardinality-tag", "foo"));
+			}
+		});
+		return meterRegistry;
+	}
 
 	@BeforeEach
 	public void before() {
@@ -80,22 +99,7 @@ class ObservationProxyExecutionListenerIntegrationTests extends SampleTestRunner
 	private ConnectionFactory createConnectionFactory() {
 		ConnectionFactory connectionFactory = H2ConnectionFactory.inMemory("r2dbc-observability-test");
 		ProxyConnectionFactory.Builder builder = ProxyConnectionFactory.builder(connectionFactory);
-		builder.listener(new ObservationProxyExecutionListener(getMeterRegistry(), connectionFactory, "my-name", new Observation.TagsProvider<>() {
-			@Override
-			public boolean supportsContext(Observation.Context context) {
-				return context.getName().equals(R2dbcObservation.R2DBC_QUERY_OBSERVATION.getName());
-			}
-
-			@Override
-			public Tags getLowCardinalityTags(Observation.Context context) {
-				return Tags.of(R2dbcObservation.LowCardinalityTags.URL.of("http://localhost:6543"));
-			}
-
-			@Override
-			public Tags getHighCardinalityTags(Observation.Context context) {
-				return Tags.of(Tag.of("my-high-cardinality-tag", "foo"));
-			}
-		}));
+		builder.listener(new ObservationProxyExecutionListener(getMeterRegistry(), connectionFactory, "my-name"));
 		return builder.build();
 	}
 

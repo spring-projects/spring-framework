@@ -40,23 +40,6 @@ public class ObservationProxyExecutionListener implements ProxyExecutionListener
 
 	private final String connectionFactoryName;
 
-	private final Observation.TagsProvider<Observation.Context> tagsProvider;
-
-	/**
-	 * Creates an instance of {@link ObservationProxyExecutionListener}.
-	 *
-	 * @param observationRegistry observation registry
-	 * @param connectionFactory connection factory
-	 * @param connectionFactoryName connection factory name
-	 * @param tagsProvider tags provider
-	 */
-	public ObservationProxyExecutionListener(ObservationRegistry observationRegistry, ConnectionFactory connectionFactory, String connectionFactoryName, Observation.TagsProvider<Observation.Context> tagsProvider) {
-		this.observationRegistry = observationRegistry;
-		this.connectionFactory = connectionFactory;
-		this.connectionFactoryName = connectionFactoryName;
-		this.tagsProvider = tagsProvider;
-	}
-
 	/**
 	 * Creates an instance of {@link ObservationProxyExecutionListener}.
 	 *
@@ -68,7 +51,6 @@ public class ObservationProxyExecutionListener implements ProxyExecutionListener
 		this.observationRegistry = observationRegistry;
 		this.connectionFactory = connectionFactory;
 		this.connectionFactoryName = connectionFactoryName;
-		this.tagsProvider = Observation.TagsProvider.EMPTY;
 	}
 
 	@Override
@@ -100,7 +82,6 @@ public class ObservationProxyExecutionListener implements ProxyExecutionListener
 	private Observation childObservation(QueryExecutionInfo executionInfo, String name) {
 		return Observation.createNotStarted(R2dbcObservation.R2DBC_QUERY_OBSERVATION.getName(), this.observationRegistry)
 				.contextualName(R2dbcObservation.R2DBC_QUERY_OBSERVATION.getContextualName())
-				.tagsProvider(this.tagsProvider)
 				.lowCardinalityTag(R2dbcObservation.LowCardinalityTags.BEAN_NAME.of(this.connectionFactoryName))
 				.lowCardinalityTag(R2dbcObservation.LowCardinalityTags.CONNECTION.of(name))
 				.lowCardinalityTag(R2dbcObservation.LowCardinalityTags.THREAD.of(executionInfo.getThreadName()))
