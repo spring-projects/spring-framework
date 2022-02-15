@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import javax.management.remote.JMXServiceURL;
 
 import org.junit.jupiter.api.AfterEach;
 
-import org.springframework.util.SocketUtils;
-
 /**
  * @author Rob Harrop
  * @author Chris Beams
@@ -37,7 +35,8 @@ import org.springframework.util.SocketUtils;
  */
 class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTests {
 
-	private final int servicePort = SocketUtils.findAvailableTcpPort();
+	@SuppressWarnings("deprecation")
+	private final int servicePort = org.springframework.util.SocketUtils.findAvailableTcpPort();
 
 	private final String serviceUrl = "service:jmx:jmxmp://localhost:" + servicePort;
 

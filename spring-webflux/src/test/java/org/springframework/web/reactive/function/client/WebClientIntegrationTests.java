@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,6 @@ import org.springframework.http.client.reactive.HttpComponentsClientHttpConnecto
 import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.util.SocketUtils;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.testfixture.xml.Pojo;
@@ -1247,7 +1246,8 @@ class WebClientIntegrationTests {
 	private <T> Mono<T> doMalformedChunkedResponseTest(
 			ClientHttpConnector connector, Function<ResponseSpec, Mono<T>> handler) {
 
-		int port = SocketUtils.findAvailableTcpPort();
+		@SuppressWarnings("deprecation")
+		int port = org.springframework.util.SocketUtils.findAvailableTcpPort();
 
 		Thread serverThread = new Thread(() -> {
 			// No way to simulate a malformed chunked response through MockWebServer.

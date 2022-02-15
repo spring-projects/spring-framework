@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,25 @@ import javax.net.ServerSocketFactory;
  * <p>Within this class, a TCP port refers to a port for a {@link ServerSocket};
  * whereas, a UDP port refers to a port for a {@link DatagramSocket}.
  *
+ * <p>{@code SocketUtils} was introduced in Spring Framework 4.0, primarily to
+ * assist in writing integration tests which start an external server on an
+ * available random port. However, these utilities make no guarantee about the
+ * subsequent availability of a given port and are therefore unreliable. Instead
+ * of using {@code SocketUtils} to find an available local port for a server, it
+ * is recommended that you rely on a server's ability to start on a random port
+ * that it selects or is assigned by the operating system. To interact with that
+ * server, you should query the server for the port it is currently using.
+ *
  * @author Sam Brannen
  * @author Ben Hale
  * @author Arjen Poutsma
  * @author Gunnar Hillert
  * @author Gary Russell
  * @since 4.0
+ * @deprecated as of Spring Framework 5.3.16, to be removed in 6.0; see
+ * {@link SocketUtils class-level Javadoc} for details.
  */
+@Deprecated
 public class SocketUtils {
 
 	/**

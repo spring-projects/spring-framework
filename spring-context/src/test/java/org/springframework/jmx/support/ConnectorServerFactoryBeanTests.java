@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import javax.management.remote.JMXServiceURL;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.jmx.AbstractMBeanServerTests;
-import org.springframework.util.SocketUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -47,7 +46,8 @@ class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
 
-	private final String serviceUrl = "service:jmx:jmxmp://localhost:" + SocketUtils.findAvailableTcpPort();
+	@SuppressWarnings("deprecation")
+	private final String serviceUrl = "service:jmx:jmxmp://localhost:" + org.springframework.util.SocketUtils.findAvailableTcpPort();
 
 
 	@Test
