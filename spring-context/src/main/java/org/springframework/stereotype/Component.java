@@ -39,7 +39,7 @@ import java.lang.annotation.Target;
  * @see Controller
  * @see org.springframework.context.annotation.ClassPathBeanDefinitionScanner
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Indexed
