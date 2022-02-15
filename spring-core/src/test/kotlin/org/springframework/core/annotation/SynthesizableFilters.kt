@@ -22,10 +22,8 @@ package org.springframework.core.annotation
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-public annotation class Person(
+public annotation class SynthesizableFilters(
 
-	val name: String = "",
-
-	vararg val friends: Person = []
+	vararg val value: SynthesizableFilter
 
 )
