@@ -24,6 +24,8 @@ import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.generator.ProtectedAccess;
+import org.springframework.aot.generator.ProtectedAccess.Options;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.generator.InjectionGeneratorTests.SimpleConstructorBean.InnerClass;
 import org.springframework.javapoet.support.CodeSnippet;
@@ -39,6 +41,8 @@ import static org.mockito.Mockito.mock;
  * @author Stephane Nicoll
  */
 class InjectionGeneratorTests {
+
+	private final ProtectedAccess protectedAccess = new ProtectedAccess();
 
 	@Test
 	void writeInstantiationForConstructorWithNoArgUseShortcut() {
@@ -162,6 +166,42 @@ class InjectionGeneratorTests {
 						})""");
 	}
 
+	@Test
+	void getProtectedAccessInjectionOptionsForUnsupportedMember() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				getProtectedAccessInjectionOptions(mock(Member.class)));
+	}
+
+	@Test
+	void getProtectedAccessInjectionOptionsForPackagePublicField() {
+		analyzeProtectedAccess(field(SampleBean.class, "enabled"));
+		assertThat(this.protectedAccess.isAccessible("com.example")).isTrue();
+	}
+
+	@Test
+	void getProtectedAccessInjectionOptionsForPackageProtectedField() {
+		analyzeProtectedAccess(field(SampleBean.class, "counter"));
+		assertPrivilegedAccess(SampleBean.class);
+	}
+
+	@Test
+	void getProtectedAccessInjectionOptionsForPrivateField() {
+		analyzeProtectedAccess(field(SampleBean.class, "source"));
+		assertThat(this.protectedAccess.isAccessible("com.example")).isTrue();
+	}
+
+	@Test
+	void getProtectedAccessInjectionOptionsForPublicMethod() {
+		analyzeProtectedAccess(method(SampleBean.class, "setEnabled", Boolean.class));
+		assertThat(this.protectedAccess.isAccessible("com.example")).isTrue();
+	}
+
+	@Test
+	void getProtectedAccessInjectionOptionsForPackageProtectedMethod() {
+		analyzeProtectedAccess(method(SampleBean.class, "sourceAndCounter", String.class, Integer.class));
+		assertPrivilegedAccess(SampleBean.class);
+	}
+
 
 	private Method method(Class<?> type, String name, Class<?>... parameterTypes) {
 		Method method = ReflectionUtils.findMethod(type, name, parameterTypes);
@@ -183,13 +223,33 @@ class InjectionGeneratorTests {
 		return CodeSnippet.process(code -> code.add(new InjectionGenerator().writeInjection(member, required)));
 	}
 
+	private void analyzeProtectedAccess(Member member) {
+		this.protectedAccess.analyze(member, getProtectedAccessInjectionOptions(member));
+	}
+
+	private Options getProtectedAccessInjectionOptions(Member member) {
+		return new InjectionGenerator().getProtectedAccessInjectionOptions(member);
+	}
+
+	private void assertPrivilegedAccess(Class<?> target) {
+		assertThat(this.protectedAccess.isAccessible("com.example")).isFalse();
+		assertThat(this.protectedAccess.getPrivilegedPackageName("com.example")).isEqualTo(target.getPackageName());
+		assertThat(this.protectedAccess.isAccessible(target.getPackageName())).isTrue();
+	}
+
 	@SuppressWarnings("unused")
-	static class SampleBean {
+	public static class SampleBean {
+
+		public Boolean enabled;
 
 		private String source;
 
 		Integer counter;
 
+
+		public void setEnabled(Boolean enabled) {
+
+		}
 
 		void sourceAndCounter(String source, Integer counter) {
 

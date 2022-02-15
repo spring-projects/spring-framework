@@ -39,19 +39,21 @@ import org.springframework.util.ClassUtils;
  */
 class DefaultBeanInstanceGenerator {
 
-	private static final Options BEAN_INSTANCE_OPTIONS = new Options(false, true);
-
 	private final Executable instanceCreator;
 
 	private final List<BeanInstanceContributor> contributors;
 
 	private final InjectionGenerator injectionGenerator;
 
+	private final Options beanInstanceOptions;
+
 
 	DefaultBeanInstanceGenerator(Executable instanceCreator, List<BeanInstanceContributor> contributors) {
 		this.instanceCreator = instanceCreator;
 		this.contributors = List.copyOf(contributors);
 		this.injectionGenerator = new InjectionGenerator();
+		this.beanInstanceOptions = Options.defaults().useReflection(member -> false)
+				.assignReturnType(member -> !this.contributors.isEmpty()).build();
 	}
 
 	/**
@@ -62,7 +64,7 @@ class DefaultBeanInstanceGenerator {
 	 */
 	public CodeContribution generateBeanInstance(RuntimeHints runtimeHints) {
 		DefaultCodeContribution contribution = new DefaultCodeContribution(runtimeHints);
-		contribution.protectedAccess().analyze(this.instanceCreator, BEAN_INSTANCE_OPTIONS);
+		contribution.protectedAccess().analyze(this.instanceCreator, this.beanInstanceOptions);
 		if (this.instanceCreator instanceof Constructor<?> constructor) {
 			writeBeanInstantiation(contribution, constructor);
 		}

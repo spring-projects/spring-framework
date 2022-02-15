@@ -28,6 +28,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.springframework.aot.generator.ProtectedAccess;
+import org.springframework.aot.generator.ProtectedAccess.Options;
 import org.springframework.beans.factory.generator.config.BeanDefinitionRegistrar.BeanInstanceContext;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.CodeBlock.Builder;
@@ -50,6 +52,12 @@ import org.springframework.util.ReflectionUtils;
  * @author Brian Clozel
  */
 public class InjectionGenerator {
+
+	private static final Options FIELD_INJECTION_OPTIONS = Options.defaults()
+			.useReflection(member -> Modifier.isPrivate(member.getModifiers())).build();
+
+	private static final Options METHOD_INJECTION_OPTIONS = Options.defaults()
+			.useReflection(member -> false).build();
 
 	private final BeanParameterGenerator parameterGenerator = new BeanParameterGenerator();
 
@@ -77,7 +85,8 @@ public class InjectionGenerator {
 	 * in the specified {@link Member}.
 	 * @param member the field or method to inject
 	 * @param required whether the value is required
-	 * @return a statement that injects a value to the specified membmer
+	 * @return a statement that injects a value to the specified member
+	 * @see #getProtectedAccessInjectionOptions(Member)
 	 */
 	public CodeBlock writeInjection(Member member, boolean required) {
 		if (member instanceof Method method) {
@@ -85,6 +94,23 @@ public class InjectionGenerator {
 		}
 		if (member instanceof Field field) {
 			return writeFieldInjection(field, required);
+		}
+		throw new IllegalArgumentException("Could not handle member " + member);
+	}
+
+	/**
+	 * Return the {@link Options} to use if protected access analysis is
+	 * required for the specified {@link Member}.
+	 * @param member the field or method to handle
+	 * @return the options to use to analyse protected access
+	 * @see ProtectedAccess
+	 */
+	public Options getProtectedAccessInjectionOptions(Member member) {
+		if (member instanceof Method) {
+			return METHOD_INJECTION_OPTIONS;
+		}
+		if (member instanceof Field) {
+			return FIELD_INJECTION_OPTIONS;
 		}
 		throw new IllegalArgumentException("Could not handle member " + member);
 	}

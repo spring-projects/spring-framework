@@ -16,8 +16,10 @@
 
 package org.springframework.aot.generator;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.junit.jupiter.api.Test;
 
@@ -37,128 +39,126 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class ProtectedAccessTests {
 
+	public static final Options DEFAULT_OPTIONS = Options.defaults().build();
+
 	private final ProtectedAccess protectedAccess = new ProtectedAccess();
 
 	@Test
 	void analyzeWithPublicConstructor() throws NoSuchMethodException {
-		this.protectedAccess.analyze(PublicClass.class.getConstructor());
+		this.protectedAccess.analyze(PublicClass.class.getConstructor(), DEFAULT_OPTIONS);
 		assertThat(this.protectedAccess.isAccessible("com.example")).isTrue();
 	}
 
 	@Test
-	void analyzeWithPackagePrivateConstructorAndDefaultOptions() {
-		this.protectedAccess.analyze(ProtectedAccessor.class.getDeclaredConstructors()[0]);
-		assertThat(this.protectedAccess.isAccessible("com.example")).isTrue();
-		assertThat(this.protectedAccess.getPrivilegedPackageName("com.example")).isNull();
-	}
-
-	@Test
-	void analyzeWithPackagePrivateConstructorAndReflectionDisabled() {
+	void analyzeWithPackagePrivateConstructor() {
 		this.protectedAccess.analyze(ProtectedAccessor.class.getDeclaredConstructors()[0],
-				new Options(false, true));
-		assertThat(this.protectedAccess.isAccessible("com.example")).isFalse();
-		assertThat(this.protectedAccess.getPrivilegedPackageName("com.example"))
-				.isEqualTo(ProtectedAccessor.class.getPackageName());
-		assertThat(this.protectedAccess.isAccessible(ProtectedAccessor.class.getPackageName())).isTrue();
+				DEFAULT_OPTIONS);
+		assertPrivilegedAccess(ProtectedAccessor.class);
+	}
+
+	@Test
+	void analyzeWithPackagePrivateConstructorAndReflectionEnabled() {
+		Constructor<?> constructor = ProtectedAccessor.class.getDeclaredConstructors()[0];
+		this.protectedAccess.analyze(constructor,
+				Options.defaults().useReflection(member -> member.equals(constructor)).build());
+		assertThat(this.protectedAccess.isAccessible("com.example")).isTrue();
 	}
 
 	@Test
 	void analyzeWithPackagePrivateClass() {
-		this.protectedAccess.analyze(ProtectedClass.class.getDeclaredConstructors()[0]);
-		assertThat(this.protectedAccess.isAccessible("com.example")).isFalse();
-		assertThat(this.protectedAccess.getPrivilegedPackageName("com.example"))
-				.isEqualTo(ProtectedClass.class.getPackageName());
-		assertThat(this.protectedAccess.isAccessible(ProtectedClass.class.getPackageName())).isTrue();
+		this.protectedAccess.analyze(ProtectedClass.class.getDeclaredConstructors()[0], DEFAULT_OPTIONS);
+		assertPrivilegedAccess(ProtectedClass.class);
 	}
 
 	@Test
 	void analyzeWithPackagePrivateDeclaringType() {
-		this.protectedAccess.analyze(method(ProtectedClass.class, "stringBean"));
-		assertThat(this.protectedAccess.isAccessible("com.example")).isFalse();
-		assertThat(this.protectedAccess.getPrivilegedPackageName("com.example"))
-				.isEqualTo(ProtectedClass.class.getPackageName());
-		assertThat(this.protectedAccess.isAccessible(ProtectedClass.class.getPackageName())).isTrue();
+		this.protectedAccess.analyze(method(ProtectedClass.class, "stringBean"), DEFAULT_OPTIONS);
+		assertPrivilegedAccess(ProtectedClass.class);
 	}
 
 	@Test
 	void analyzeWithPackagePrivateConstructorParameter() {
-		this.protectedAccess.analyze(ProtectedParameter.class.getConstructors()[0]);
-		assertThat(this.protectedAccess.isAccessible("com.example")).isFalse();
-		assertThat(this.protectedAccess.getPrivilegedPackageName("com.example"))
-				.isEqualTo(ProtectedParameter.class.getPackageName());
-		assertThat(this.protectedAccess.isAccessible(ProtectedParameter.class.getPackageName())).isTrue();
+		this.protectedAccess.analyze(ProtectedParameter.class.getConstructors()[0], DEFAULT_OPTIONS);
+		assertPrivilegedAccess(ProtectedParameter.class);
 	}
 
 	@Test
 	void analyzeWithPackagePrivateMethod() {
-		this.protectedAccess.analyze(method(PublicClass.class, "getProtectedMethod"));
+		this.protectedAccess.analyze(method(PublicClass.class, "getProtectedMethod"), DEFAULT_OPTIONS);
+		assertPrivilegedAccess(PublicClass.class);
+	}
+
+	@Test
+	void analyzeWithPackagePrivateMethodAndReflectionEnabled() {
+		this.protectedAccess.analyze(method(PublicClass.class, "getProtectedMethod"),
+				Options.defaults().useReflection(member -> !Modifier.isPublic(member.getModifiers())).build());
 		assertThat(this.protectedAccess.isAccessible("com.example")).isTrue();
 	}
 
 	@Test
-	void analyzeWithPackagePrivateMethodAndReflectionDisabled() {
-		this.protectedAccess.analyze(method(PublicClass.class, "getProtectedMethod"),
-				new Options(false, false));
-		assertThat(this.protectedAccess.isAccessible("com.example")).isFalse();
+	void analyzeWithPackagePrivateMethodReturnType() {
+		this.protectedAccess.analyze(method(ProtectedAccessor.class, "methodWithProtectedReturnType"), DEFAULT_OPTIONS);
+		assertThat(this.protectedAccess.isAccessible("com.example")).isTrue();
 	}
 
 	@Test
-	void analyzeWithPackagePrivateMethodReturnType() {
-		this.protectedAccess.analyze(method(ProtectedAccessor.class, "methodWithProtectedReturnType"));
-		assertThat(this.protectedAccess.isAccessible("com.example")).isFalse();
-		assertThat(this.protectedAccess.getPrivilegedPackageName("com.example"))
-				.isEqualTo(ProtectedAccessor.class.getPackageName());
-		assertThat(this.protectedAccess.isAccessible(ProtectedAccessor.class.getPackageName())).isTrue();
+	void analyzeWithPackagePrivateMethodReturnTypeAndAssignReturnTypeFunction() {
+		this.protectedAccess.analyze(method(ProtectedAccessor.class, "methodWithProtectedReturnType"),
+				Options.defaults().assignReturnType(member -> false).build());
+		assertThat(this.protectedAccess.isAccessible("com.example")).isTrue();
+	}
+
+	@Test
+	void analyzeWithPackagePrivateMethodReturnTypeAndAssignReturnType() {
+		this.protectedAccess.analyze(method(ProtectedAccessor.class, "methodWithProtectedReturnType"),
+				Options.defaults().assignReturnType(true).build());
+		assertPrivilegedAccess(ProtectedAccessor.class);
 	}
 
 	@Test
 	void analyzeWithPackagePrivateMethodParameter() {
 		this.protectedAccess.analyze(method(ProtectedAccessor.class, "methodWithProtectedParameter",
-				ProtectedClass.class));
-		assertThat(this.protectedAccess.isAccessible("com.example")).isFalse();
-		assertThat(this.protectedAccess.getPrivilegedPackageName("com.example"))
-				.isEqualTo(ProtectedClass.class.getPackageName());
-		assertThat(this.protectedAccess.isAccessible(ProtectedClass.class.getPackageName())).isTrue();
+				ProtectedClass.class), DEFAULT_OPTIONS);
+		assertPrivilegedAccess(ProtectedAccessor.class);
 	}
 
 	@Test
 	void analyzeWithPackagePrivateField() {
-		this.protectedAccess.analyze(field(PublicClass.class, "protectedField"));
+		this.protectedAccess.analyze(field(PublicClass.class, "protectedField"), DEFAULT_OPTIONS);
+		assertPrivilegedAccess(PublicClass.class);
+	}
+
+	@Test
+	void analyzeWithPackagePrivateFieldAndReflectionEnabled() {
+		this.protectedAccess.analyze(field(PublicClass.class, "protectedField"),
+				Options.defaults().useReflection(member -> true).build());
 		assertThat(this.protectedAccess.isAccessible("com.example")).isTrue();
 	}
 
 	@Test
-	void analyzeWithPackagePrivateFieldAndReflectionDisabled() {
-		this.protectedAccess.analyze(field(PublicClass.class, "protectedField"),
-				new Options(false, true));
-		assertThat(this.protectedAccess.isAccessible("com.example")).isFalse();
-		assertThat(this.protectedAccess.getPrivilegedPackageName("com.example"))
-				.isEqualTo(PublicClass.class.getPackageName());
-		assertThat(this.protectedAccess.isAccessible(PublicClass.class.getPackageName())).isTrue();
+	void analyzeWithPublicFieldAndProtectedType() {
+		this.protectedAccess.analyze(field(PublicClass.class, "protectedClassField"), DEFAULT_OPTIONS);
+		assertThat(this.protectedAccess.isAccessible("com.example")).isTrue();
 	}
 
 	@Test
-	void analyzeWithPublicFieldAndProtectedType() {
+	void analyzeWithPublicFieldAndProtectedTypeAssigned() {
 		this.protectedAccess.analyze(field(PublicClass.class, "protectedClassField"),
-				new Options(false, true));
-		assertThat(this.protectedAccess.isAccessible("com.example")).isFalse();
-		assertThat(this.protectedAccess.getPrivilegedPackageName("com.example"))
-				.isEqualTo(ProtectedClass.class.getPackageName());
-		assertThat(this.protectedAccess.isAccessible(ProtectedClass.class.getPackageName())).isTrue();
+				Options.defaults().assignReturnType(true).build());
+		assertPrivilegedAccess(ProtectedClass.class);
 	}
 
 	@Test
 	void analyzeWithPackagePrivateGenericArgument() {
-		this.protectedAccess.analyze(method(PublicFactoryBean.class, "protectedTypeFactoryBean"));
-		assertThat(this.protectedAccess.isAccessible("com.example")).isFalse();
-		assertThat(this.protectedAccess.isAccessible(PublicFactoryBean.class.getPackageName())).isTrue();
+		this.protectedAccess.analyze(method(PublicFactoryBean.class, "protectedTypeFactoryBean"),
+				Options.defaults().assignReturnType(true).build());
+		assertPrivilegedAccess(PublicFactoryBean.class);
 	}
 
 	@Test
 	void analyzeTypeWithProtectedGenericArgument() {
 		this.protectedAccess.analyze(PublicFactoryBean.resolveToProtectedGenericParameter());
-		assertThat(this.protectedAccess.isAccessible("com.example")).isFalse();
-		assertThat(this.protectedAccess.isAccessible(PublicFactoryBean.class.getPackageName())).isTrue();
+		assertPrivilegedAccess(PublicFactoryBean.class);
 	}
 
 	@Test
@@ -169,13 +169,14 @@ class ProtectedAccessTests {
 
 	@Test
 	void getProtectedPackageWithPublicAccess() throws NoSuchMethodException {
-		this.protectedAccess.analyze(PublicClass.class.getConstructor());
+		this.protectedAccess.analyze(PublicClass.class.getConstructor(), DEFAULT_OPTIONS);
 		assertThat(this.protectedAccess.getPrivilegedPackageName("com.example")).isNull();
 	}
 
 	@Test
 	void getProtectedPackageWithProtectedAccessInOnePackage() {
-		this.protectedAccess.analyze(method(PublicFactoryBean.class, "protectedTypeFactoryBean"));
+		this.protectedAccess.analyze(method(PublicFactoryBean.class, "protectedTypeFactoryBean"),
+				Options.defaults().assignReturnType(true).build());
 		assertThat(this.protectedAccess.getPrivilegedPackageName("com.example"))
 				.isEqualTo(PublicFactoryBean.class.getPackageName());
 	}
@@ -185,12 +186,19 @@ class ProtectedAccessTests {
 		Method protectedMethodFirstPackage = method(PublicFactoryBean.class, "protectedTypeFactoryBean");
 		Method protectedMethodSecondPackage = method(ProtectedAccessor.class, "methodWithProtectedParameter",
 				ProtectedClass.class);
-		this.protectedAccess.analyze(protectedMethodFirstPackage);
-		this.protectedAccess.analyze(protectedMethodSecondPackage);
+		this.protectedAccess.analyze(protectedMethodFirstPackage,
+				Options.defaults().assignReturnType(true).build());
+		this.protectedAccess.analyze(protectedMethodSecondPackage, DEFAULT_OPTIONS);
 		assertThatThrownBy(() -> this.protectedAccess.getPrivilegedPackageName("com.example"))
 				.isInstanceOfSatisfying(ProtectedAccessException.class, ex ->
 						assertThat(ex.getProtectedElements().stream().map(ProtectedElement::getMember))
 								.containsOnly(protectedMethodFirstPackage, protectedMethodSecondPackage));
+	}
+
+	private void assertPrivilegedAccess(Class<?> target) {
+		assertThat(this.protectedAccess.isAccessible("com.example")).isFalse();
+		assertThat(this.protectedAccess.getPrivilegedPackageName("com.example")).isEqualTo(target.getPackageName());
+		assertThat(this.protectedAccess.isAccessible(target.getPackageName())).isTrue();
 	}
 
 	private static Method method(Class<?> type, String name, Class<?>... parameterTypes) {

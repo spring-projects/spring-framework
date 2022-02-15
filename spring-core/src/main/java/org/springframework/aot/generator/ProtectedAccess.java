@@ -33,7 +33,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * Gather the need of non-public access and determine the priviledged package
+ * Gather the need of non-public access and determine the privileged package
  * to use, if necessary.
  *
  * @author Stephane Nicoll
@@ -105,15 +105,6 @@ public class ProtectedAccess {
 	}
 
 	/**
-	 * Analyze accessing the specified {@link Member} using the default
-	 * {@linkplain Options#DEFAULTS options}.
-	 * @param member the member to analyze
-	 */
-	public void analyze(Member member) {
-		analyze(member, Options.DEFAULTS);
-	}
-
-	/**
 	 * Analyze accessing the specified {@link Member} using the specified
 	 * {@link Options options}.
 	 * @param member the member to analyze
@@ -123,12 +114,12 @@ public class ProtectedAccess {
 		if (isProtected(member.getDeclaringClass())) {
 			registerProtectedType(member.getDeclaringClass(), member);
 		}
-		if (!options.useReflection && isProtected(member.getModifiers())) {
+		if (isProtected(member.getModifiers()) && !options.useReflection.apply(member)) {
 			registerProtectedType(member.getDeclaringClass(), member);
 		}
 		if (member instanceof Field field) {
 			ResolvableType fieldType = ResolvableType.forField(field);
-			if (options.assignReturnType && isProtected(fieldType)) {
+			if (isProtected(fieldType) && options.assignReturnType.apply(field)) {
 				registerProtectedType(fieldType, field);
 			}
 		}
@@ -138,7 +129,7 @@ public class ProtectedAccess {
 		}
 		else if (member instanceof Method method) {
 			ResolvableType returnType = ResolvableType.forMethodReturnType(method);
-			if (!options.assignReturnType && isProtected(returnType)) {
+			if (isProtected(returnType) && options.assignReturnType.apply(method)) {
 				registerProtectedType(returnType, method);
 			}
 			analyzeParameterTypes(method, i -> ResolvableType.forMethodParameter(method, i));
@@ -204,32 +195,82 @@ public class ProtectedAccess {
 	 * Options to use to analyze if invoking a {@link Member} requires
 	 * privileged access.
 	 */
-	public static class Options {
+	public static final class Options {
 
-		/**
-		 * Default options that does fallback to reflection and does not
-		 * assign the default type.
-		 */
-		public static final Options DEFAULTS = new Options();
+		private final Function<Member, Boolean> assignReturnType;
 
-		private final boolean useReflection;
+		private final Function<Member, Boolean> useReflection;
 
-		private final boolean assignReturnType;
 
-		/**
-		 * Create a new instance with the specified options.
-		 * @param useReflection whether the writer can automatically use
-		 * reflection to invoke a protected member if it is not public
-		 * @param assignReturnType whether the writer needs to assign the
-		 * return type, or if it is irrelevant
-		 */
-		public Options(boolean useReflection, boolean assignReturnType) {
-			this.useReflection = useReflection;
-			this.assignReturnType = assignReturnType;
+		private Options(Builder builder) {
+			this.assignReturnType = builder.assignReturnType;
+			this.useReflection = builder.useReflection;
 		}
 
-		private Options() {
-			this(true, false);
+		/**
+		 * Initialize a {@link Builder} with default options, that is use
+		 * reflection if the member is private and does not assign the
+		 * return type.
+		 * @return an options builder
+		 */
+		public static Builder defaults() {
+			return new Builder(member -> false,
+					member -> Modifier.isPrivate(member.getModifiers()));
+		}
+
+		public static final class Builder {
+
+			private Function<Member, Boolean> assignReturnType;
+
+			private Function<Member, Boolean> useReflection;
+
+			private Builder(Function<Member, Boolean> assignReturnType,
+					Function<Member, Boolean> useReflection) {
+				this.assignReturnType = assignReturnType;
+				this.useReflection = useReflection;
+			}
+
+			/**
+			 * Specify if the return type is assigned so that its type can be
+			 * analyzed if necessary.
+			 * @param assignReturnType whether the return type is assigned
+			 * @return {@code this}, to facilitate method chaining
+			 */
+			public Builder assignReturnType(boolean assignReturnType) {
+				return assignReturnType(member -> assignReturnType);
+			}
+
+			/**
+			 * Specify a function that determines whether the return type is
+			 * assigned so that its type can be analyzed.
+			 * @param assignReturnType whether the return type is assigned
+			 * @return {@code this}, to facilitate method chaining
+			 */
+			public Builder assignReturnType(Function<Member, Boolean> assignReturnType) {
+				this.assignReturnType = assignReturnType;
+				return this;
+			}
+
+			/**
+			 * Specify a function that determines whether reflection can be
+			 * used for a given {@link Member}.
+			 * @param useReflection whether reflection can be used
+			 * @return {@code this}, to facilitate method chaining
+			 */
+			public Builder useReflection(Function<Member, Boolean> useReflection) {
+				this.useReflection = useReflection;
+				return this;
+			}
+
+			/**
+			 * Build an {@link Options} instance based on the state of this
+			 * builder.
+			 * @return a new options instance
+			 */
+			public Options build() {
+				return new Options(this);
+			}
+
 		}
 
 	}
