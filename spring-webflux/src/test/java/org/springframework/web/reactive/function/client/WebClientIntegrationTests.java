@@ -34,6 +34,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -1246,12 +1247,12 @@ class WebClientIntegrationTests {
 	private <T> Mono<T> doMalformedChunkedResponseTest(
 			ClientHttpConnector connector, Function<ResponseSpec, Mono<T>> handler) {
 
-		@SuppressWarnings("deprecation")
-		int port = org.springframework.util.SocketUtils.findAvailableTcpPort();
+		AtomicInteger port = new AtomicInteger();
 
 		Thread serverThread = new Thread(() -> {
 			// No way to simulate a malformed chunked response through MockWebServer.
-			try (ServerSocket serverSocket = new ServerSocket(port)) {
+			try (ServerSocket serverSocket = new ServerSocket(0)) {
+				port.set(serverSocket.getLocalPort());
 				Socket socket = serverSocket.accept();
 				InputStream is = socket.getInputStream();
 
