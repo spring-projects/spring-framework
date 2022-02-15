@@ -34,6 +34,7 @@ import javax.management.remote.JMXServiceURL;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.core.testfixture.net.TestSocketUtils;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
@@ -177,7 +178,7 @@ class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assumeTrue(runTests);
 
 		@SuppressWarnings("deprecation")
-		final int port = org.springframework.util.SocketUtils.findAvailableTcpPort();
+		final int port = TestSocketUtils.findAvailableTcpPort();
 
 		JMXServiceURL url = new JMXServiceURL("service:jmx:jmxmp://localhost:" + port);
 		JMXConnectorServer connector = JMXConnectorServerFactory.newJMXConnectorServer(url, null, getServer());

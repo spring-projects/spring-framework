@@ -28,6 +28,8 @@ import javax.management.remote.JMXServiceURL;
 
 import org.junit.jupiter.api.AfterEach;
 
+import org.springframework.core.testfixture.net.TestSocketUtils;
+
 /**
  * @author Rob Harrop
  * @author Chris Beams
@@ -36,7 +38,7 @@ import org.junit.jupiter.api.AfterEach;
 class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTests {
 
 	@SuppressWarnings("deprecation")
-	private final int servicePort = org.springframework.util.SocketUtils.findAvailableTcpPort();
+	private final int servicePort = TestSocketUtils.findAvailableTcpPort();
 
 	private final String serviceUrl = "service:jmx:jmxmp://localhost:" + servicePort;
 
