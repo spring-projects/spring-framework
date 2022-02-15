@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.springframework.util.SocketUtils.PORT_RANGE_MAX;
-import static org.springframework.util.SocketUtils.PORT_RANGE_MIN;
 
 /**
  * Unit tests for {@link SocketUtils}.
@@ -37,6 +35,7 @@ import static org.springframework.util.SocketUtils.PORT_RANGE_MIN;
  * @author Sam Brannen
  * @author Gary Russell
  */
+@SuppressWarnings("deprecation")
 class SocketUtilsTests {
 
 	@Test
@@ -44,7 +43,7 @@ class SocketUtilsTests {
 		// Just making sure somebody doesn't try to make SocketUtils abstract,
 		// since that would be a breaking change due to the intentional public
 		// constructor.
-		new SocketUtils();
+		new org.springframework.util.SocketUtils();
 	}
 
 	// TCP
@@ -52,36 +51,37 @@ class SocketUtilsTests {
 	@Test
 	void findAvailableTcpPortWithZeroMinPort() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				SocketUtils.findAvailableTcpPort(0));
+				org.springframework.util.SocketUtils.findAvailableTcpPort(0));
 	}
 
 	@Test
 	void findAvailableTcpPortWithNegativeMinPort() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				SocketUtils.findAvailableTcpPort(-500));
+				org.springframework.util.SocketUtils.findAvailableTcpPort(-500));
 	}
 
 	@Test
 	void findAvailableTcpPort() {
-		int port = SocketUtils.findAvailableTcpPort();
-		assertPortInRange(port, PORT_RANGE_MIN, PORT_RANGE_MAX);
+		int port = org.springframework.util.SocketUtils.findAvailableTcpPort();
+		assertPortInRange(port, org.springframework.util.SocketUtils.PORT_RANGE_MIN,
+				org.springframework.util.SocketUtils.PORT_RANGE_MAX);
 	}
 
 	@Test
 	void findAvailableTcpPortWithMinPortEqualToMaxPort() {
-		int minMaxPort = SocketUtils.findAvailableTcpPort();
-		int port = SocketUtils.findAvailableTcpPort(minMaxPort, minMaxPort);
+		int minMaxPort = org.springframework.util.SocketUtils.findAvailableTcpPort();
+		int port = org.springframework.util.SocketUtils.findAvailableTcpPort(minMaxPort, minMaxPort);
 		assertThat(port).isEqualTo(minMaxPort);
 	}
 
 	@Test
 	void findAvailableTcpPortWhenPortOnLoopbackInterfaceIsNotAvailable() throws Exception {
-		int port = SocketUtils.findAvailableTcpPort();
+		int port = org.springframework.util.SocketUtils.findAvailableTcpPort();
 		try (ServerSocket socket = ServerSocketFactory.getDefault().createServerSocket(port, 1, InetAddress.getByName("localhost"))) {
 			assertThat(socket).isNotNull();
 			// will only look for the exact port
 			assertThatIllegalStateException().isThrownBy(() ->
-					SocketUtils.findAvailableTcpPort(port, port))
+					org.springframework.util.SocketUtils.findAvailableTcpPort(port, port))
 				.withMessageStartingWith("Could not find an available TCP port")
 				.withMessageEndingWith("after 1 attempts");
 		}
@@ -89,15 +89,15 @@ class SocketUtilsTests {
 
 	@Test
 	void findAvailableTcpPortWithMin() {
-		int port = SocketUtils.findAvailableTcpPort(50000);
-		assertPortInRange(port, 50000, PORT_RANGE_MAX);
+		int port = org.springframework.util.SocketUtils.findAvailableTcpPort(50000);
+		assertPortInRange(port, 50000, org.springframework.util.SocketUtils.PORT_RANGE_MAX);
 	}
 
 	@Test
 	void findAvailableTcpPortInRange() {
 		int minPort = 20000;
 		int maxPort = minPort + 1000;
-		int port = SocketUtils.findAvailableTcpPort(minPort, maxPort);
+		int port = org.springframework.util.SocketUtils.findAvailableTcpPort(minPort, maxPort);
 		assertPortInRange(port, minPort, maxPort);
 	}
 
@@ -133,29 +133,30 @@ class SocketUtilsTests {
 	@Test
 	void findAvailableUdpPortWithZeroMinPort() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				SocketUtils.findAvailableUdpPort(0));
+				org.springframework.util.SocketUtils.findAvailableUdpPort(0));
 	}
 
 	@Test
 	void findAvailableUdpPortWithNegativeMinPort() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				SocketUtils.findAvailableUdpPort(-500));
+				org.springframework.util.SocketUtils.findAvailableUdpPort(-500));
 	}
 
 	@Test
 	void findAvailableUdpPort() {
-		int port = SocketUtils.findAvailableUdpPort();
-		assertPortInRange(port, PORT_RANGE_MIN, PORT_RANGE_MAX);
+		int port = org.springframework.util.SocketUtils.findAvailableUdpPort();
+		assertPortInRange(port, org.springframework.util.SocketUtils.PORT_RANGE_MIN,
+				org.springframework.util.SocketUtils.PORT_RANGE_MAX);
 	}
 
 	@Test
 	void findAvailableUdpPortWhenPortOnLoopbackInterfaceIsNotAvailable() throws Exception {
-		int port = SocketUtils.findAvailableUdpPort();
+		int port = org.springframework.util.SocketUtils.findAvailableUdpPort();
 		try (DatagramSocket socket = new DatagramSocket(port, InetAddress.getByName("localhost"))) {
 			assertThat(socket).isNotNull();
 			// will only look for the exact port
 			assertThatIllegalStateException().isThrownBy(() ->
-					SocketUtils.findAvailableUdpPort(port, port))
+					org.springframework.util.SocketUtils.findAvailableUdpPort(port, port))
 				.withMessageStartingWith("Could not find an available UDP port")
 				.withMessageEndingWith("after 1 attempts");
 		}
@@ -163,15 +164,15 @@ class SocketUtilsTests {
 
 	@Test
 	void findAvailableUdpPortWithMin() {
-		int port = SocketUtils.findAvailableUdpPort(50000);
-		assertPortInRange(port, 50000, PORT_RANGE_MAX);
+		int port = org.springframework.util.SocketUtils.findAvailableUdpPort(50000);
+		assertPortInRange(port, 50000, org.springframework.util.SocketUtils.PORT_RANGE_MAX);
 	}
 
 	@Test
 	void findAvailableUdpPortInRange() {
 		int minPort = 20000;
 		int maxPort = minPort + 1000;
-		int port = SocketUtils.findAvailableUdpPort(minPort, maxPort);
+		int port = org.springframework.util.SocketUtils.findAvailableUdpPort(minPort, maxPort);
 		assertPortInRange(port, minPort, maxPort);
 	}
 
@@ -205,22 +206,24 @@ class SocketUtilsTests {
 	// Helpers
 
 	private void findAvailableTcpPorts(int numRequested) {
-		SortedSet<Integer> ports = SocketUtils.findAvailableTcpPorts(numRequested);
-		assertAvailablePorts(ports, numRequested, PORT_RANGE_MIN, PORT_RANGE_MAX);
+		SortedSet<Integer> ports = org.springframework.util.SocketUtils.findAvailableTcpPorts(numRequested);
+		assertAvailablePorts(ports, numRequested, org.springframework.util.SocketUtils.PORT_RANGE_MIN,
+				org.springframework.util.SocketUtils.PORT_RANGE_MAX);
 	}
 
 	private void findAvailableTcpPorts(int numRequested, int minPort, int maxPort) {
-		SortedSet<Integer> ports = SocketUtils.findAvailableTcpPorts(numRequested, minPort, maxPort);
+		SortedSet<Integer> ports = org.springframework.util.SocketUtils.findAvailableTcpPorts(numRequested, minPort, maxPort);
 		assertAvailablePorts(ports, numRequested, minPort, maxPort);
 	}
 
 	private void findAvailableUdpPorts(int numRequested) {
-		SortedSet<Integer> ports = SocketUtils.findAvailableUdpPorts(numRequested);
-		assertAvailablePorts(ports, numRequested, PORT_RANGE_MIN, PORT_RANGE_MAX);
+		SortedSet<Integer> ports = org.springframework.util.SocketUtils.findAvailableUdpPorts(numRequested);
+		assertAvailablePorts(ports, numRequested, org.springframework.util.SocketUtils.PORT_RANGE_MIN,
+				org.springframework.util.SocketUtils.PORT_RANGE_MAX);
 	}
 
 	private void findAvailableUdpPorts(int numRequested, int minPort, int maxPort) {
-		SortedSet<Integer> ports = SocketUtils.findAvailableUdpPorts(numRequested, minPort, maxPort);
+		SortedSet<Integer> ports = org.springframework.util.SocketUtils.findAvailableUdpPorts(numRequested, minPort, maxPort);
 		assertAvailablePorts(ports, numRequested, minPort, maxPort);
 	}
 	private void assertPortInRange(int port, int minPort, int maxPort) {
