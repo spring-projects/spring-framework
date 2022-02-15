@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.activemq.broker.BrokerService;
+import org.apache.activemq.broker.TransportConnector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -60,11 +62,9 @@ public class ReactorNettyTcpStompClientTests {
 	public void setup(TestInfo testInfo) throws Exception {
 		logger.debug("Setting up before '" + testInfo.getTestMethod().get().getName() + "'");
 
-		@SuppressWarnings("deprecation")
-		int port = org.springframework.util.SocketUtils.findAvailableTcpPort(61613);
-
+		TransportConnector stompConnector = createStompConnector();
 		this.activeMQBroker = new BrokerService();
-		this.activeMQBroker.addConnector("stomp://127.0.0.1:" + port);
+		this.activeMQBroker.addConnector(stompConnector);
 		this.activeMQBroker.setStartAsync(false);
 		this.activeMQBroker.setPersistent(false);
 		this.activeMQBroker.setUseJmx(false);
@@ -75,9 +75,15 @@ public class ReactorNettyTcpStompClientTests {
 		ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 		taskScheduler.afterPropertiesSet();
 
-		this.client = new ReactorNettyTcpStompClient("127.0.0.1", port);
+		this.client = new ReactorNettyTcpStompClient("127.0.0.1", stompConnector.getServer().getSocketAddress().getPort());
 		this.client.setMessageConverter(new StringMessageConverter());
 		this.client.setTaskScheduler(taskScheduler);
+	}
+
+	private TransportConnector createStompConnector() throws Exception {
+		TransportConnector connector = new TransportConnector();
+		connector.setUri(new URI("stomp://127.0.0.1:0"));
+		return connector;
 	}
 
 	@AfterEach
