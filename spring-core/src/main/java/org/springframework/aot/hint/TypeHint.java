@@ -23,10 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -39,6 +41,7 @@ public final class TypeHint {
 
 	private final TypeReference type;
 
+	@Nullable
 	private final TypeReference reachableType;
 
 	private final Set<FieldHint> fields;
@@ -83,6 +86,7 @@ public final class TypeHint {
 	 * {@code null} if this hint should always been applied.
 	 * @return the reachable type, if any
 	 */
+	@Nullable
 	public TypeReference getReachableType() {
 		return this.reachableType;
 	}
@@ -119,6 +123,12 @@ public final class TypeHint {
 		return this.memberCategories;
 	}
 
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", TypeHint.class.getSimpleName() + "[", "]")
+				.add("type=" + this.type)
+				.toString();
+	}
 
 	/**
 	 * Builder for {@link TypeHint}.
@@ -127,6 +137,7 @@ public final class TypeHint {
 
 		private final TypeReference type;
 
+		@Nullable
 		private TypeReference reachableType;
 
 		private final Map<String, FieldHint.Builder> fields = new HashMap<>();
