@@ -21,8 +21,10 @@ import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -30,10 +32,16 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.support.SpringFactoriesLoader.ArgumentResolver;
 import org.springframework.core.io.support.SpringFactoriesLoader.FactoryInstantiator;
+import org.springframework.core.io.support.SpringFactoriesLoader.FailureHandler;
+import org.springframework.core.log.LogMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link SpringFactoriesLoader}.
@@ -96,6 +104,14 @@ class SpringFactoriesLoaderTests {
 	}
 
 	@Test
+	void attemptToLoadFactoryOfIncompatibleTypeWithLoggingFailureHandler() {
+		Log logger = mock(Log.class);
+		FailureHandler failureHandler = FailureHandler.logging(logger);
+		List<String> factories = SpringFactoriesLoader.loadFactories(String.class, null, failureHandler);
+		assertThat(factories.isEmpty());
+	}
+
+	@Test
 	void loadFactoryWithNonDefaultConstructor() {
 		ArgumentResolver resolver = ArgumentResolver.of(String.class, "injected");
 		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(DummyFactory.class, LimitedClassLoader.constructorArgumentFactories, resolver);
@@ -114,6 +130,64 @@ class SpringFactoriesLoaderTests {
 				.withMessageContaining("Unable to instantiate factory class "
 						+ "[org.springframework.core.io.support.MultipleConstructorArgsDummyFactory] for factory type [org.springframework.core.io.support.DummyFactory]")
 				.havingRootCause().withMessageContaining("Class [org.springframework.core.io.support.MultipleConstructorArgsDummyFactory] has no suitable constructor");
+	}
+
+	@Test
+	void loadFactoryWithMissingArgumentUsingLoggingFailureHandler() {
+		Log logger = mock(Log.class);
+		FailureHandler failureHandler = FailureHandler.logging(logger);
+		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(DummyFactory.class, LimitedClassLoader.multipleArgumentFactories, failureHandler);
+		assertThat(factories).hasSize(2);
+		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
+		assertThat(factories.get(1)).isInstanceOf(MyDummyFactory2.class);
+	}
+
+
+	@Nested
+	class FailureHandlerTests {
+
+		@Test
+		void throwingReturnsHandlerThatThrowsIllegalArgumentException() {
+			FailureHandler handler = FailureHandler.throwing();
+			RuntimeException cause = new RuntimeException();
+			assertThatIllegalArgumentException().isThrownBy(() -> handler.handleFailure(
+					DummyFactory.class, MyDummyFactory1.class.getName(),
+					cause)).withMessageStartingWith("Unable to instantiate factory class").withCause(cause);
+		}
+
+		@Test
+		void throwingWithFactoryReturnsHandlerThatThrows() {
+			FailureHandler handler = FailureHandler.throwing(IllegalStateException::new);
+			RuntimeException cause = new RuntimeException();
+			assertThatIllegalStateException().isThrownBy(() -> handler.handleFailure(
+					DummyFactory.class, MyDummyFactory1.class.getName(),
+					cause)).withMessageStartingWith("Unable to instantiate factory class").withCause(cause);
+		}
+
+		@Test
+		void loggingReturnsHandlerThatLogs() {
+			Log logger = mock(Log.class);
+			FailureHandler handler = FailureHandler.logging(logger);
+			RuntimeException cause = new RuntimeException();
+			handler.handleFailure(DummyFactory.class, MyDummyFactory1.class.getName(), cause);
+			verify(logger).trace(isA(LogMessage.class), eq(cause));
+		}
+
+		@Test
+		void handleMessageReturnsHandlerThatAcceptsMessage() {
+			List<Throwable> failures = new ArrayList<>();
+			List<String> messages = new ArrayList<>();
+			FailureHandler handler = FailureHandler.handleMessage((message, failure) -> {
+				failures.add(failure);
+				messages.add(message.get());
+			});
+			RuntimeException cause = new RuntimeException();
+			handler.handleFailure(DummyFactory.class, MyDummyFactory1.class.getName(), cause);
+			assertThat(failures).containsExactly(cause);
+			assertThat(messages).hasSize(1);
+			assertThat(messages.get(0)).startsWith("Unable to instantiate factory class");
+		}
+
 	}
 
 
