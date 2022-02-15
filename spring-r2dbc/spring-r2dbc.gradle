@@ -27,3 +27,31 @@ dependencies {
 	testImplementation("io.micrometer:micrometer-tracing-test")
 	testImplementation("io.micrometer:micrometer-tracing-integration-test")
 }
+
+ext {
+	micrometerDocsVersion = "1.0.0-M1"
+}
+
+configurations {
+	adoc
+}
+
+dependencies {
+	adoc "io.micrometer:micrometer-docs-generator-spans:$micrometerDocsVersion"
+	adoc "io.micrometer:micrometer-docs-generator-metrics:$micrometerDocsVersion"
+}
+
+task generateObservabilityDocs(dependsOn: ["generateObservabilityMetricsDocs", "generateObservabilitySpansDocs"]) {
+}
+
+task generateObservabilityMetricsDocs(type: JavaExec) {
+	mainClass = "io.micrometer.docs.metrics.DocsFromSources"
+	classpath configurations.adoc
+	args project.projectDir.getAbsolutePath(), ".*", project.buildDir.getAbsolutePath()
+}
+
+task generateObservabilitySpansDocs(type: JavaExec) {
+	mainClass = "io.micrometer.docs.spans.DocsFromSources"
+	classpath configurations.adoc
+	args project.projectDir.getAbsolutePath(), ".*", project.buildDir.getAbsolutePath()
+}

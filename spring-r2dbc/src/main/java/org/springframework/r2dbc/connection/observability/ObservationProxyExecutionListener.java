@@ -40,6 +40,8 @@ public class ObservationProxyExecutionListener implements ProxyExecutionListener
 
 	private final String connectionFactoryName;
 
+	private R2dbcTagsProvider r2dbcTagsProvider = new DefaultR2dbcTagsProvider();
+
 	/**
 	 * Creates an instance of {@link ObservationProxyExecutionListener}.
 	 *
@@ -80,12 +82,15 @@ public class ObservationProxyExecutionListener implements ProxyExecutionListener
 	}
 
 	private Observation childObservation(QueryExecutionInfo executionInfo, String name) {
-		return Observation.createNotStarted(R2dbcObservation.R2DBC_QUERY_OBSERVATION.getName(), this.observationRegistry)
+		R2dbcContext context = new R2dbcContext(name, this.connectionFactoryName, executionInfo.getThreadName());
+		return Observation.createNotStarted(R2dbcObservation.R2DBC_QUERY_OBSERVATION.getName(), context, this.observationRegistry)
 				.contextualName(R2dbcObservation.R2DBC_QUERY_OBSERVATION.getContextualName())
-				.lowCardinalityTag(R2dbcObservation.LowCardinalityTags.BEAN_NAME.of(this.connectionFactoryName))
-				.lowCardinalityTag(R2dbcObservation.LowCardinalityTags.CONNECTION.of(name))
-				.lowCardinalityTag(R2dbcObservation.LowCardinalityTags.THREAD.of(executionInfo.getThreadName()))
+				.tagsProvider(this.r2dbcTagsProvider)
 				.start();
+	}
+
+	public void setTagsProvider(R2dbcTagsProvider r2dbcTagsProvider) {
+		this.r2dbcTagsProvider = r2dbcTagsProvider;
 	}
 
 	private void tagQueries(QueryExecutionInfo executionInfo, Observation observation) {

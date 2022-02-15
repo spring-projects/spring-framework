@@ -47,7 +47,7 @@ enum R2dbcObservation implements DocumentedObservation {
 
 		@Override
 		public String getPrefix() {
-			return "r2dbc.";
+			return "r2dbc";
 		}
 	};
 

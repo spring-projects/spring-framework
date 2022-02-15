@@ -39,8 +39,8 @@ configure(allprojects) { project ->
 			mavenBom "org.junit:junit-bom:5.8.2"
 
 			// observability
-			mavenBom "io.micrometer:micrometer-bom:2.0.0-M2"
-			mavenBom "io.micrometer:micrometer-tracing-bom:1.0.0-M2"
+			mavenBom "io.micrometer:micrometer-bom:2.0.0-SNAPSHOT"
+			mavenBom "io.micrometer:micrometer-tracing-bom:1.0.0-SNAPSHOT"
 		}
 		dependencies {
 			dependencySet(group: 'org.apache.logging.log4j', version: '2.17.1') {

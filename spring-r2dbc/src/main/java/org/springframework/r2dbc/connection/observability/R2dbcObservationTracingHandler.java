@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Marcin Grzejszczak
  * @since 6.0.0
  */
-public class R2dbcObservationTracingHandler implements TracingObservationHandler<Observation.Context> {
+public class R2dbcObservationTracingHandler implements TracingObservationHandler<R2dbcContext> {
 
 	private static final Log log = LogFactory.getLog(R2dbcObservationTracingHandler.class);
 
@@ -48,7 +48,7 @@ public class R2dbcObservationTracingHandler implements TracingObservationHandler
 	}
 
 	@Override
-	public void onStart(Observation.Context context) {
+	public void onStart(R2dbcContext context) {
 		Span.Builder builder = this.tracer.spanBuilder()
 				.name(context.getContextualName())
 				.kind(Span.Kind.CLIENT);
@@ -56,20 +56,16 @@ public class R2dbcObservationTracingHandler implements TracingObservationHandler
 	}
 
 	@Override
-	public void onStop(Observation.Context context) {
+	public void onStop(R2dbcContext context) {
 		Span span = getRequiredSpan(context);
 		tagSpan(context, span);
-		String connectionName = "r2dbc";
 		String url = null;
 		for (Tag tag : context.getLowCardinalityTags()) {
-			if (tag.getKey().equals(R2dbcObservation.LowCardinalityTags.CONNECTION.getKey())) {
-				connectionName = tag.getValue();
-			}
-			else if (tag.getKey().equals(R2dbcObservation.LowCardinalityTags.URL.getKey())) {
+			if (tag.getKey().equals(R2dbcObservation.LowCardinalityTags.URL.getKey())) {
 				url = tag.getValue();
 			}
 		}
-		span.remoteServiceName(connectionName);
+		span.remoteServiceName(context.getConnectionName());
 		if (url != null) {
 			try {
 				URI uri = URI.create(url);
@@ -86,7 +82,7 @@ public class R2dbcObservationTracingHandler implements TracingObservationHandler
 
 	@Override
 	public boolean supportsContext(Observation.Context context) {
-		return R2dbcObservation.R2DBC_QUERY_OBSERVATION.getName().equals(context.getName());
+		return context instanceof R2dbcContext;
 	}
 
 	@Override

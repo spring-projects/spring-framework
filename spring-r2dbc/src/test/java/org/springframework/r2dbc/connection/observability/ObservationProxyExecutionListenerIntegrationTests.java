@@ -21,6 +21,7 @@ import io.micrometer.api.instrument.Tag;
 import io.micrometer.api.instrument.Tags;
 import io.micrometer.api.instrument.observation.Observation;
 import io.micrometer.api.instrument.simple.SimpleMeterRegistry;
+import io.micrometer.core.tck.MeterRegistryAssert;
 import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 import io.micrometer.tracing.test.SampleTestRunner;
@@ -63,15 +64,16 @@ class ObservationProxyExecutionListenerIntegrationTests extends SampleTestRunner
 
 	private static MeterRegistry meterRegistry() {
 		MeterRegistry meterRegistry = new SimpleMeterRegistry().withTimerObservationHandler();
+		// Global TagsProvider that should be always appended
 		meterRegistry.observationConfig().tagsProvider(new Observation.TagsProvider<>() {
 			@Override
 			public boolean supportsContext(Observation.Context context) {
-				return context.getName().equals(R2dbcObservation.R2DBC_QUERY_OBSERVATION.getName());
+				return true;
 			}
 
 			@Override
 			public Tags getLowCardinalityTags(Observation.Context context) {
-				return Tags.of(R2dbcObservation.LowCardinalityTags.URL.of("http://localhost:6543"));
+				return Tags.of("user", "12345");
 			}
 
 			@Override
@@ -99,7 +101,15 @@ class ObservationProxyExecutionListenerIntegrationTests extends SampleTestRunner
 	private ConnectionFactory createConnectionFactory() {
 		ConnectionFactory connectionFactory = H2ConnectionFactory.inMemory("r2dbc-observability-test");
 		ProxyConnectionFactory.Builder builder = ProxyConnectionFactory.builder(connectionFactory);
-		builder.listener(new ObservationProxyExecutionListener(getMeterRegistry(), connectionFactory, "my-name"));
+		ObservationProxyExecutionListener listener = new ObservationProxyExecutionListener(getMeterRegistry(), connectionFactory, "my-name");
+		// Local tags provider
+		listener.setTagsProvider(new DefaultR2dbcTagsProvider() {
+			@Override
+			public Tags getLowCardinalityTags(R2dbcContext context) {
+				return super.getLowCardinalityTags(context).and(R2dbcObservation.LowCardinalityTags.URL.of("http://localhost:6543"));
+			}
+		});
+		builder.listener(listener);
 		return builder.build();
 	}
 
@@ -109,10 +119,10 @@ class ObservationProxyExecutionListenerIntegrationTests extends SampleTestRunner
 
 	@Override
 	public SampleTestRunnerConsumer yourCode() throws Exception {
-		return (bb, meterRegistry) -> executeInsert(bb);
+		return (bb, meterRegistry) -> executeInsert(bb, meterRegistry);
 	}
 
-	private void executeInsert(BuildingBlocks bb) {
+	private void executeInsert(BuildingBlocks bb, MeterRegistry meterRegistry) {
 		Tracer tracer = bb.getTracer();
 		Span rootSpan = tracer.currentSpan();
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
@@ -141,7 +151,9 @@ class ObservationProxyExecutionListenerIntegrationTests extends SampleTestRunner
 		span = tracer.currentSpan();
 		then(span.context().spanId()).isEqualTo(rootSpan.context().spanId());
 
-		SpansAssert.assertThat(bb.getFinishedSpans())
+		SpansAssert.then(bb.getFinishedSpans())
 				.haveSameTraceId();
+
+		MeterRegistryAssert.then(meterRegistry).hasTimerWithName("r2dbc.query");
 	}
 }
