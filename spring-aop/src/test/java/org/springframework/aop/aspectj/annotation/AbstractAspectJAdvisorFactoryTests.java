@@ -98,7 +98,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 	@Test
-	void perTargetAspect() throws SecurityException, NoSuchMethodException {
+	void perTargetAspect() throws Exception {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
@@ -130,7 +130,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 	@Test
-	void multiplePerTargetAspects() throws SecurityException, NoSuchMethodException {
+	void multiplePerTargetAspects() throws Exception {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
@@ -158,7 +158,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 	@Test
-	void multiplePerTargetAspectsWithOrderAnnotation() throws SecurityException, NoSuchMethodException {
+	void multiplePerTargetAspectsWithOrderAnnotation() throws Exception {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
@@ -184,7 +184,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 	@Test
-	void perThisAspect() throws SecurityException, NoSuchMethodException {
+	void perThisAspect() throws Exception {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
@@ -220,7 +220,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 	@Test
-	void perTypeWithinAspect() throws SecurityException, NoSuchMethodException {
+	void perTypeWithinAspect() throws Exception {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
