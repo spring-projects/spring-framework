@@ -104,7 +104,7 @@ configure(allprojects) { project ->
 				entry 'derby'
 				entry 'derbyclient'
 			}
-			dependency "org.apache.poi:poi-ooxml:5.1.0"
+			dependency "org.apache.poi:poi-ooxml:5.2.0"
 			dependency "org.apache-extras.beanshell:bsh:2.0b6"
 			dependency "org.freemarker:freemarker:2.3.31"
 			dependency "org.hsqldb:hsqldb:2.5.2"
