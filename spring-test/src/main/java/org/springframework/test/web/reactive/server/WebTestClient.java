@@ -526,14 +526,19 @@ public interface WebTestClient {
 	interface UriSpec<S extends RequestHeadersSpec<?>> {
 
 		/**
-		 * Specify the URI using an absolute, fully constructed {@link URI}.
+		 * Specify the URI using an absolute, fully constructed {@link java.net.URI}.
+		 * <p>If a {@link UriBuilderFactory} was configured for the client with
+		 * a base URI, that base URI will <strong>not</strong> be applied to the
+		 * supplied {@code java.net.URI}. If you wish to have a base URI applied to a
+		 * {@code java.net.URI} you must invoke either {@link #uri(String, Object...)}
+		 * or {@link #uri(String, Map)} &mdash; for example, {@code uri(myUri.toString())}.
 		 * @return spec to add headers or perform the exchange
 		 */
 		S uri(URI uri);
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
-		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
+		 * <p>If a {@link UriBuilderFactory} was configured for the client (e.g.
 		 * with a base URI) it will be used to expand the URI template.
 		 * @return spec to add headers or perform the exchange
 		 */
@@ -541,7 +546,7 @@ public interface WebTestClient {
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
-		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
+		 * <p>If a {@link UriBuilderFactory} was configured for the client (e.g.
 		 * with a base URI) it will be used to expand the URI template.
 		 * @return spec to add headers or perform the exchange
 		 */
