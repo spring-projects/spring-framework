@@ -269,7 +269,14 @@ abstract class CronField {
 			int current = get(temporal);
 			ValueRange range = temporal.range(this.field);
 			long amount = range.getMaximum() - current + 1;
-			return this.field.getBaseUnit().addTo(temporal, amount);
+			T result = this.field.getBaseUnit().addTo(temporal, amount);
+			current = get(result);
+			range = result.range(this.field);
+			// adjust for daylight savings
+			if (current != range.getMinimum()) {
+				result = this.field.adjustInto(result, range.getMinimum());
+			}
+			return result;
 		}
 
 		/**
