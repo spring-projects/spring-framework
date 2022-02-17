@@ -40,7 +40,9 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.log.LogMessage;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -66,8 +68,6 @@ public final class BeanDefinitionRegistrar {
 	@Nullable
 	private final ResolvableType beanType;
 
-	private final BeanDefinitionBuilder builder;
-
 	private final List<Consumer<RootBeanDefinition>> customizers;
 
 	@Nullable
@@ -81,10 +81,8 @@ public final class BeanDefinitionRegistrar {
 		this.beanName = beanName;
 		this.beanClass = beanClass;
 		this.beanType = beanType;
-		this.builder = BeanDefinitionBuilder.rootBeanDefinition(beanClass);
 		this.customizers = new ArrayList<>();
 	}
-
 
 	/**
 	 * Initialize the registration of a bean with the specified name and type.
@@ -122,16 +120,6 @@ public final class BeanDefinitionRegistrar {
 	 */
 	public static BeanDefinitionRegistrar inner(Class<?> beanType) {
 		return new BeanDefinitionRegistrar(null, beanType, null);
-	}
-
-	/**
-	 * Customize the {@link RootBeanDefinition} using the specified consumer.
-	 * @param bd a consumer for the bean definition
-	 * @return {@code this}, to facilitate method chaining
-	 */
-	public BeanDefinitionRegistrar customize(ThrowableConsumer<RootBeanDefinition> bd) {
-		this.customizers.add(bd);
-		return this;
 	}
 
 	/**
@@ -178,18 +166,24 @@ public final class BeanDefinitionRegistrar {
 	}
 
 	/**
+	 * Customize the {@link RootBeanDefinition} using the specified consumer.
+	 * @param bd a consumer for the bean definition
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public BeanDefinitionRegistrar customize(ThrowableConsumer<RootBeanDefinition> bd) {
+		this.customizers.add(bd);
+		return this;
+	}
+
+	/**
 	 * Register the {@link RootBeanDefinition} defined by this instance to
 	 * the specified bean factory.
 	 * @param beanFactory the bean factory to use
 	 */
 	public void register(DefaultListableBeanFactory beanFactory) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Register bean definition with name '" + this.beanName + "'");
-		}
 		BeanDefinition beanDefinition = toBeanDefinition();
-		if (this.beanName == null) {
-			throw new IllegalStateException("Bean name not set. Could not register " + beanDefinition);
-		}
+		Assert.state(this.beanName != null, () -> "Bean name not set. Could not register " + beanDefinition);
+		logger.debug(LogMessage.format("Register bean definition with name '%s'", this.beanName));
 		beanFactory.registerBeanDefinition(this.beanName, beanDefinition);
 	}
 
@@ -208,7 +202,8 @@ public final class BeanDefinitionRegistrar {
 	}
 
 	private RootBeanDefinition createBeanDefinition() {
-		RootBeanDefinition bd = (RootBeanDefinition) this.builder.getBeanDefinition();
+		RootBeanDefinition bd = (RootBeanDefinition) BeanDefinitionBuilder
+				.rootBeanDefinition(this.beanClass).getBeanDefinition();
 		if (this.beanType != null) {
 			bd.setTargetType(this.beanType);
 		}
@@ -259,6 +254,7 @@ public final class BeanDefinitionRegistrar {
 		return Arrays.stream(parameterTypes).map(Class::getName).collect(Collectors.joining(", "));
 	}
 
+
 	/**
 	 * Callback interface used by instance suppliers that need to resolve
 	 * dependencies for the {@link Executable} used to create the instance
@@ -276,9 +272,9 @@ public final class BeanDefinitionRegistrar {
 		}
 
 		/**
-		 * Return a bean instance using the specified {@code factory}.
+		 * Return the bean instance using the {@code factory}.
 		 * @param beanFactory the bean factory to use
-		 * @param factory a function that returns a bean instance based on
+		 * @param factory a function that returns the bean instance based on
 		 * the resolved attributes required by its instance creator
 		 * @param <T> the type of the bean
 		 * @return the bean instance
@@ -321,9 +317,7 @@ public final class BeanDefinitionRegistrar {
 
 		private Field getField(String fieldName, Class<?> fieldType) {
 			Field field = ReflectionUtils.findField(this.beanType, fieldName, fieldType);
-			if (field == null) {
-				throw new IllegalArgumentException("No field '" + fieldName + "' with type " + fieldType.getName() + " found on " + this.beanType);
-			}
+			Assert.notNull(field, () -> "No field '" + fieldName + "' with type " + fieldType.getName() + " found on " + this.beanType);
 			return field;
 		}
 
