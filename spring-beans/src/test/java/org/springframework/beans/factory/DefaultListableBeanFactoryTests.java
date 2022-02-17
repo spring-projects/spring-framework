@@ -22,6 +22,7 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -2334,6 +2335,19 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	void multipleInitAndDestroyMethods() {
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithInitAndDestroyMethods.class);
+		bd.setInitMethodNames("init1", "init2");
+		bd.setDestroyMethodNames("destroy2", "destroy1");
+		lbf.registerBeanDefinition("test", bd);
+		BeanWithInitAndDestroyMethods bean = lbf.getBean("test", BeanWithInitAndDestroyMethods.class);
+		assertThat(bean.initMethods).containsExactly("init", "init1", "init2");
+		assertThat(bean.destroyMethods).isEmpty();
+		lbf.destroySingletons();
+		assertThat(bean.destroyMethods).containsExactly("destroy", "destroy2", "destroy1");
+	}
+
+	@Test
 	void beanPostProcessorWithWrappedObjectAndDisposableBean() {
 		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDisposableBean.class);
 		lbf.registerBeanDefinition("test", bd);
@@ -2758,9 +2772,42 @@ class DefaultListableBeanFactoryTests {
 	}
 
 
+	static class BeanWithInitAndDestroyMethods implements InitializingBean, DisposableBean {
+
+		final List<String> initMethods = new ArrayList<>();
+		final List<String> destroyMethods = new ArrayList<>();
+
+		@Override
+		public void afterPropertiesSet() {
+			initMethods.add("init");
+		}
+
+		void init1() {
+			initMethods.add("init1");
+		}
+
+		void init2() {
+			initMethods.add("init2");
+		}
+
+		@Override
+		public void destroy() {
+			destroyMethods.add("destroy");
+		}
+
+		void destroy1() {
+			destroyMethods.add("destroy1");
+		}
+
+		void destroy2() {
+			destroyMethods.add("destroy2");
+		}
+	}
+
+
 	public static class BeanWithDisposableBean implements DisposableBean {
 
-		private static boolean closed;
+		static boolean closed;
 
 		@Override
 		public void destroy() {
@@ -2771,7 +2818,7 @@ class DefaultListableBeanFactoryTests {
 
 	public static class BeanWithCloseable implements Closeable {
 
-		private static boolean closed;
+		static boolean closed;
 
 		@Override
 		public void close() {
@@ -2788,7 +2835,7 @@ class DefaultListableBeanFactoryTests {
 
 	public static class BeanWithDestroyMethod extends BaseClassWithDestroyMethod {
 
-		private static int closeCount = 0;
+		static int closeCount = 0;
 
 		@SuppressWarnings("unused")
 		private BeanWithDestroyMethod inner;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,6 @@ import java.util.List;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -35,15 +33,12 @@ import org.springframework.util.ObjectUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * <p>
- * JUnit-3.8-based unit test which verifies expected <em>init</em> and
- * <em>destroy</em> bean lifecycle behavior as requested in <a
- * href="https://opensource.atlassian.com/projects/spring/browse/SPR-3775"
+ * Unit test which verifies expected <em>init</em> and <em>destroy</em>
+ * bean lifecycle behavior as requested in
+ * <a href="https://opensource.atlassian.com/projects/spring/browse/SPR-3775"
  * target="_blank">SPR-3775</a>.
- * </p>
- * <p>
- * Specifically, combinations of the following are tested:
- * </p>
+ *
+ * <p>Specifically, combinations of the following are tested:
  * <ul>
  * <li>{@link InitializingBean} &amp; {@link DisposableBean} interfaces</li>
  * <li>Custom {@link RootBeanDefinition#getInitMethodName() init} &amp;
@@ -57,26 +52,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class Spr3775InitDestroyLifecycleTests {
 
-	private static final Log logger = LogFactory.getLog(Spr3775InitDestroyLifecycleTests.class);
-
-	/** LIFECYCLE_TEST_BEAN. */
 	private static final String LIFECYCLE_TEST_BEAN = "lifecycleTestBean";
 
 
-	private void debugMethods(Class<?> clazz, String category, List<String> methodNames) {
-		if (logger.isDebugEnabled()) {
-			logger.debug(clazz.getSimpleName() + ": " + category + ": " + methodNames);
-		}
+	private void assertMethodOrdering(String category, List<String> expectedMethods, List<String> actualMethods) {
+		assertThat(ObjectUtils.nullSafeEquals(expectedMethods, actualMethods)).
+				as("Verifying " + category + ": expected<" + expectedMethods + "> but got<" + actualMethods + ">.").isTrue();
 	}
 
-	private void assertMethodOrdering(Class<?> clazz, String category, List<String> expectedMethods,
-			List<String> actualMethods) {
-		debugMethods(clazz, category, actualMethods);
-		assertThat(ObjectUtils.nullSafeEquals(expectedMethods, actualMethods)).as("Verifying " + category + ": expected<" + expectedMethods + "> but got<" + actualMethods + ">.").isTrue();
-	}
+	private DefaultListableBeanFactory createBeanFactoryAndRegisterBean(
+			Class<?> beanClass, String initMethodName, String destroyMethodName) {
 
-	private DefaultListableBeanFactory createBeanFactoryAndRegisterBean(final Class<?> beanClass,
-			final String initMethodName, final String destroyMethodName) {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(beanClass);
 		beanDefinition.setInitMethodName(initMethodName);
@@ -88,75 +74,77 @@ public class Spr3775InitDestroyLifecycleTests {
 
 	@Test
 	public void testInitDestroyMethods() {
-		final Class<?> beanClass = InitDestroyBean.class;
-		final DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass,
+		Class<?> beanClass = InitDestroyBean.class;
+		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass,
 				"afterPropertiesSet", "destroy");
-		final InitDestroyBean bean = (InitDestroyBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
-		assertMethodOrdering(beanClass, "init-methods", Arrays.asList("afterPropertiesSet"), bean.initMethods);
+		InitDestroyBean bean = (InitDestroyBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
+		assertMethodOrdering("init-methods", Arrays.asList("afterPropertiesSet"), bean.initMethods);
 		beanFactory.destroySingletons();
-		assertMethodOrdering(beanClass, "destroy-methods", Arrays.asList("destroy"), bean.destroyMethods);
+		assertMethodOrdering("destroy-methods", Arrays.asList("destroy"), bean.destroyMethods);
 	}
 
 	@Test
 	public void testInitializingDisposableInterfaces() {
-		final Class<?> beanClass = CustomInitializingDisposableBean.class;
-		final DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit",
+		Class<?> beanClass = CustomInitializingDisposableBean.class;
+		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit",
 				"customDestroy");
-		final CustomInitializingDisposableBean bean = (CustomInitializingDisposableBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
-		assertMethodOrdering(beanClass, "init-methods", Arrays.asList("afterPropertiesSet", "customInit"),
+		CustomInitializingDisposableBean bean = (CustomInitializingDisposableBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
+		assertMethodOrdering("init-methods", Arrays.asList("afterPropertiesSet", "customInit"),
 				bean.initMethods);
 		beanFactory.destroySingletons();
-		assertMethodOrdering(beanClass, "destroy-methods", Arrays.asList("destroy", "customDestroy"),
+		assertMethodOrdering("destroy-methods", Arrays.asList("destroy", "customDestroy"),
 				bean.destroyMethods);
 	}
 
 	@Test
 	public void testInitializingDisposableInterfacesWithShadowedMethods() {
-		final Class<?> beanClass = InitializingDisposableWithShadowedMethodsBean.class;
-		final DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass,
+		Class<?> beanClass = InitializingDisposableWithShadowedMethodsBean.class;
+		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass,
 				"afterPropertiesSet", "destroy");
-		final InitializingDisposableWithShadowedMethodsBean bean = (InitializingDisposableWithShadowedMethodsBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
-		assertMethodOrdering(beanClass, "init-methods", Arrays.asList("InitializingBean.afterPropertiesSet"),
+		InitializingDisposableWithShadowedMethodsBean bean =
+				(InitializingDisposableWithShadowedMethodsBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
+		assertMethodOrdering("init-methods", Arrays.asList("InitializingBean.afterPropertiesSet"),
 				bean.initMethods);
 		beanFactory.destroySingletons();
-		assertMethodOrdering(beanClass, "destroy-methods", Arrays.asList("DisposableBean.destroy"), bean.destroyMethods);
+		assertMethodOrdering("destroy-methods", Arrays.asList("DisposableBean.destroy"), bean.destroyMethods);
 	}
 
 	@Test
 	public void testJsr250Annotations() {
-		final Class<?> beanClass = CustomAnnotatedInitDestroyBean.class;
-		final DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit",
+		Class<?> beanClass = CustomAnnotatedInitDestroyBean.class;
+		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit",
 				"customDestroy");
-		final CustomAnnotatedInitDestroyBean bean = (CustomAnnotatedInitDestroyBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
-		assertMethodOrdering(beanClass, "init-methods", Arrays.asList("postConstruct", "afterPropertiesSet",
+		CustomAnnotatedInitDestroyBean bean = (CustomAnnotatedInitDestroyBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
+		assertMethodOrdering("init-methods", Arrays.asList("postConstruct", "afterPropertiesSet",
 				"customInit"), bean.initMethods);
 		beanFactory.destroySingletons();
-		assertMethodOrdering(beanClass, "destroy-methods", Arrays.asList("preDestroy", "destroy", "customDestroy"),
+		assertMethodOrdering("destroy-methods", Arrays.asList("preDestroy", "destroy", "customDestroy"),
 				bean.destroyMethods);
 	}
 
 	@Test
 	public void testJsr250AnnotationsWithShadowedMethods() {
-		final Class<?> beanClass = CustomAnnotatedInitDestroyWithShadowedMethodsBean.class;
-		final DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit",
+		Class<?> beanClass = CustomAnnotatedInitDestroyWithShadowedMethodsBean.class;
+		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit",
 				"customDestroy");
-		final CustomAnnotatedInitDestroyWithShadowedMethodsBean bean = (CustomAnnotatedInitDestroyWithShadowedMethodsBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
-		assertMethodOrdering(beanClass, "init-methods",
+		CustomAnnotatedInitDestroyWithShadowedMethodsBean bean =
+				(CustomAnnotatedInitDestroyWithShadowedMethodsBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
+		assertMethodOrdering("init-methods",
 				Arrays.asList("@PostConstruct.afterPropertiesSet", "customInit"), bean.initMethods);
 		beanFactory.destroySingletons();
-		assertMethodOrdering(beanClass, "destroy-methods", Arrays.asList("@PreDestroy.destroy", "customDestroy"),
+		assertMethodOrdering("destroy-methods", Arrays.asList("@PreDestroy.destroy", "customDestroy"),
 				bean.destroyMethods);
 	}
 
 	@Test
 	public void testAllLifecycleMechanismsAtOnce() {
-		final Class<?> beanClass = AllInOneBean.class;
-		final DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass,
+		Class<?> beanClass = AllInOneBean.class;
+		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass,
 				"afterPropertiesSet", "destroy");
-		final AllInOneBean bean = (AllInOneBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
-		assertMethodOrdering(beanClass, "init-methods", Arrays.asList("afterPropertiesSet"), bean.initMethods);
+		AllInOneBean bean = (AllInOneBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
+		assertMethodOrdering("init-methods", Arrays.asList("afterPropertiesSet"), bean.initMethods);
 		beanFactory.destroySingletons();
-		assertMethodOrdering(beanClass, "destroy-methods", Arrays.asList("destroy"), bean.destroyMethods);
+		assertMethodOrdering("destroy-methods", Arrays.asList("destroy"), bean.destroyMethods);
 	}
 
 
@@ -164,7 +152,6 @@ public class Spr3775InitDestroyLifecycleTests {
 
 		final List<String> initMethods = new ArrayList<>();
 		final List<String> destroyMethods = new ArrayList<>();
-
 
 		public void afterPropertiesSet() throws Exception {
 			this.initMethods.add("afterPropertiesSet");
@@ -175,8 +162,9 @@ public class Spr3775InitDestroyLifecycleTests {
 		}
 	}
 
-	public static class InitializingDisposableWithShadowedMethodsBean extends InitDestroyBean implements
-			InitializingBean, DisposableBean {
+
+	public static class InitializingDisposableWithShadowedMethodsBean extends InitDestroyBean
+			implements InitializingBean, DisposableBean {
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
@@ -255,14 +243,14 @@ public class Spr3775InitDestroyLifecycleTests {
 		final List<String> initMethods = new ArrayList<>();
 		final List<String> destroyMethods = new ArrayList<>();
 
-		@Override
 		@PostConstruct
+		@Override
 		public void afterPropertiesSet() throws Exception {
 			this.initMethods.add("afterPropertiesSet");
 		}
 
-		@Override
 		@PreDestroy
+		@Override
 		public void destroy() throws Exception {
 			this.destroyMethods.add("destroy");
 		}
