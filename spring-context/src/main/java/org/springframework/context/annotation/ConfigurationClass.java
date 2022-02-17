@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -210,14 +211,27 @@ final class ConfigurationClass {
 	}
 
 	void validate(ProblemReporter problemReporter) {
-		// A configuration class may not be final (CGLIB limitation) unless it declares proxyBeanMethods=false
 		Map<String, Object> attributes = this.metadata.getAnnotationAttributes(Configuration.class.getName());
+
+		// A configuration class may not be final (CGLIB limitation) unless it declares proxyBeanMethods=false
 		if (attributes != null && (Boolean) attributes.get("proxyBeanMethods")) {
 			if (this.metadata.isFinal()) {
 				problemReporter.error(new FinalConfigurationProblem());
 			}
 			for (BeanMethod beanMethod : this.beanMethods) {
 				beanMethod.validate(problemReporter);
+			}
+		}
+
+		// A configuration class may not contain overloaded bean methods unless it declares enforceUniqueMethods=false
+		if (attributes != null && (Boolean) attributes.get("enforceUniqueMethods")) {
+			Map<String, MethodMetadata> beanMethodsByName = new LinkedHashMap<>();
+			for (BeanMethod beanMethod : this.beanMethods) {
+				MethodMetadata current = beanMethod.getMetadata();
+				MethodMetadata existing = beanMethodsByName.put(current.getMethodName(), current);
+				if (existing != null && existing.getDeclaringClassName().equals(current.getDeclaringClassName())) {
+					problemReporter.error(new BeanMethodOverloadingProblem(existing.getMethodName()));
+				}
 			}
 		}
 	}
@@ -247,6 +261,21 @@ final class ConfigurationClass {
 		FinalConfigurationProblem() {
 			super(String.format("@Configuration class '%s' may not be final. Remove the final modifier to continue.",
 					getSimpleName()), new Location(getResource(), getMetadata()));
+		}
+	}
+
+
+	/**
+	 * Configuration classes are not allowed to contain overloaded bean methods
+	 * by default (as of 6.0).
+	 */
+	private class BeanMethodOverloadingProblem extends Problem {
+
+		BeanMethodOverloadingProblem(String methodName) {
+			super(String.format("@Configuration class '%s' contains overloaded @Bean methods with name '%s'. Use " +
+							"unique method names for separate bean definitions (with individual conditions etc) " +
+							"or switch '@Configuration.enforceUniqueMethods' to 'false'.",
+					getSimpleName(), methodName), new Location(getResource(), getMetadata()));
 		}
 	}
 

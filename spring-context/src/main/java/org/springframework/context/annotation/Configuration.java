@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -459,5 +459,17 @@ public @interface Configuration {
 	 * @since 5.2
 	 */
 	boolean proxyBeanMethods() default true;
+
+	/**
+	 * Specify whether {@code @Bean} methods need to have unique method names,
+	 * raising an exception otherwise in order to prevent accidental overloading.
+	 * <p>The default is {@code true}, preventing accidental method overloads which
+	 * get interpreted as overloaded factory methods for the same bean definition
+	 * (as opposed to separate bean definitions with individual conditions etc).
+	 * Switch this flag to {@code false} in order to allow for method overloading
+	 * according to those semantics, accepting the risk for accidental overlaps.
+	 * @since 6.0
+	 */
+	boolean enforceUniqueMethods() default true;
 
 }
