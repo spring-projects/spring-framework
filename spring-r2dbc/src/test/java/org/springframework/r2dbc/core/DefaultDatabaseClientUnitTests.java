@@ -249,9 +249,10 @@ class DefaultDatabaseClientUnitTests {
 		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
 				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 
-		MockResult.Builder resultBuilder = MockResult.builder().rowMetadata(metadata);
-		MockResult result = resultBuilder.row(MockRow.builder().identified(0, Object.class, "Walter").build())
-				.row(MockRow.builder().identified(0, Object.class, "White").build()).build();
+		MockResult result = MockResult.builder().row(
+					MockRow.builder().identified(0, Object.class, "Walter").metadata(metadata).build(),
+					MockRow.builder().identified(0, Object.class, "White").metadata(metadata).build()
+				).build();
 
 		mockStatementFor("SELECT * FROM person", result);
 
@@ -269,9 +270,10 @@ class DefaultDatabaseClientUnitTests {
 		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
 				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 
-		MockResult.Builder resultBuilder = MockResult.builder().rowMetadata(metadata);
-		MockResult result = resultBuilder.row(MockRow.builder().identified(0, Object.class, "Walter").build())
-				.row(MockRow.builder().identified(0, Object.class, "White").build()).build();
+		MockResult result = MockResult.builder().row(
+					MockRow.builder().identified(0, Object.class, "Walter").metadata(metadata).build(),
+					MockRow.builder().identified(0, Object.class, "White").metadata(metadata).build()
+				).build();
 
 		mockStatementFor("SELECT * FROM person", result);
 
@@ -287,13 +289,13 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void selectOneShouldFailWithException() {
-
 		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
 				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 
-		MockResult.Builder resultBuilder = MockResult.builder().rowMetadata(metadata);
-		MockResult result = resultBuilder.row(MockRow.builder().identified(0, Object.class, "Walter").build())
-				.row(MockRow.builder().identified(0, Object.class, "White").build()).build();
+		MockResult result = MockResult.builder().row(
+					MockRow.builder().identified(0, Object.class, "Walter").metadata(metadata).build(),
+					MockRow.builder().identified(0, Object.class, "White").metadata(metadata).build()
+				).build();
 
 		mockStatementFor("SELECT * FROM person", result);
 
@@ -307,7 +309,6 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void shouldApplyExecuteFunction() {
-
 		Statement statement = mockStatement();
 		MockResult result = mockSingleColumnResult(
 				MockRow.builder().identified(0, Object.class, "Walter"));
@@ -323,7 +324,6 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void shouldApplyPreparedOperation() {
-
 		MockResult result = mockSingleColumnResult(
 				MockRow.builder().identified(0, Object.class, "Walter"));
 		Statement statement = mockStatementFor("SELECT * FROM person", result);
@@ -354,10 +354,7 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void shouldApplyStatementFilterFunctions() {
-
-		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
-				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
-		MockResult result = MockResult.builder().rowMetadata(metadata).build();
+		MockResult result = MockResult.builder().build();
 
 		Statement statement = mockStatement(result);
 
@@ -378,7 +375,6 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void shouldApplySimpleStatementFilterFunctions() {
-
 		MockResult result = mockSingleColumnEmptyResult();
 
 		Statement statement = mockStatement(result);
@@ -410,7 +406,6 @@ class DefaultDatabaseClientUnitTests {
 	}
 
 	private Statement mockStatementFor(@Nullable String sql, @Nullable Result result) {
-
 		Statement statement = mock(Statement.class);
 		when(connection.createStatement(sql == null ? anyString() : eq(sql))).thenReturn(
 				statement);
@@ -432,13 +427,11 @@ class DefaultDatabaseClientUnitTests {
 	 * row is provided.
 	 */
 	private MockResult mockSingleColumnResult(@Nullable MockRow.Builder row) {
-
-		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
-				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
-
-		MockResult.Builder resultBuilder = MockResult.builder().rowMetadata(metadata);
+		MockResult.Builder resultBuilder = MockResult.builder();
 		if (row != null) {
-			resultBuilder = resultBuilder.row(row.build());
+			MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
+					MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
+			resultBuilder = resultBuilder.row(row.metadata(metadata).build());
 		}
 		return resultBuilder.build();
 	}
