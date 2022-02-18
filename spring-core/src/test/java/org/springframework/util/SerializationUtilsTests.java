@@ -67,4 +67,9 @@ class SerializationUtilsTests {
 		assertThat(SerializationUtils.deserialize(null)).isNull();
 	}
 
+	@Test
+	void cloneException() {
+		IllegalArgumentException ex = new IllegalArgumentException("foo");
+		assertThat(SerializationUtils.clone(ex)).hasMessage("foo").isNotSameAs(ex);
+	}
 }
