@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 import org.springframework.lang.Nullable;
 
@@ -57,8 +58,13 @@ public abstract class SerializationUtils {
 	 * Deserialize the byte array into an object.
 	 * @param bytes a serialized object
 	 * @return the result of deserializing the bytes
+	 * @deprecated This utility uses Java's reflection, which allows arbitrary code to be
+	 * run and is known for being the source of many Remote Code Execution vulnerabilities.
+	 * <p>Prefer the use of an external tool (that serializes to JSON, XML or any other format)
+	 * which is regularly checked and updated for not allowing RCE.
 	 */
 	@Nullable
+	@Deprecated
 	public static Object deserialize(@Nullable byte[] bytes) {
 		if (bytes == null) {
 			return null;
@@ -74,4 +80,15 @@ public abstract class SerializationUtils {
 		}
 	}
 
+	/**
+	 * Clone the given object using Java's serialization.
+	 * @param object the object to clone
+	 * @param <T> the type of the object to clone
+	 * @return a clone (deep-copy) of the given object
+	 * @since 6.0.0
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Serializable> T clone(T object) {
+		return (T) SerializationUtils.deserialize(SerializationUtils.serialize(object));
+	}
 }
