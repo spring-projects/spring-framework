@@ -64,6 +64,7 @@ public class XmlBeanFactory extends DefaultListableBeanFactory {
 	 * @throws BeansException in case of loading or parsing errors
 	 */
 	public XmlBeanFactory(Resource resource) throws BeansException {
+		// 调用XmlBeanFactory(Resource,BeanFactory)构造方法
 		this(resource, null);
 	}
 

@@ -75,6 +75,11 @@ import org.springframework.util.xml.XmlValidationModeDetector;
  * @see BeanDefinitionRegistry
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
  * @see org.springframework.context.support.GenericApplicationContext
+ *
+ * 1.通过继承自AbstractBeanDefinitionReader中的方法，来使用ResourceLoader将资源文件路径转换为对应的Resource文件
+ * 2.通过DocumentLoader对Resource文件进行转换，将Resource文件转换为Document文件
+ * 3.通过实现接口BeanDefinitionDocumentReader的DefaultBeanDefinitionDocumentReader类对Document进行解析，并
+ * 使用BeanDefinitionParserDelegate对Element进行解析。
  */
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
@@ -317,7 +322,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Loading XML bean definitions from " + encodedResource);
 		}
-
+        //通过属性来记录已经加载的资源
 		Set<EncodedResource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
 		if (currentResources == null) {
 			currentResources = new HashSet<>(4);
@@ -328,15 +333,19 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");
 		}
 		try {
+			//从encodedResource中获取已经封装的Resource对象并再次从Resource中获取其中的inputStream
 			InputStream inputStream = encodedResource.getResource().getInputStream();
 			try {
+				//InputSource这个类并不来自于Spring，它的全路径是org.xml.sax.InputSource
 				InputSource inputSource = new InputSource(inputStream);
 				if (encodedResource.getEncoding() != null) {
 					inputSource.setEncoding(encodedResource.getEncoding());
 				}
+				//真正进入了逻辑核心部分
 				return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
 			}
 			finally {
+				//关闭输入流
 				inputStream.close();
 			}
 		}
@@ -446,9 +455,11 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	protected int getValidationModeForResource(Resource resource) {
 		int validationModeToUse = getValidationMode();
+		//如果手动指定了验证模式则使用指定的验证模式
 		if (validationModeToUse != VALIDATION_AUTO) {
 			return validationModeToUse;
 		}
+		//如果未指定则使用自动检测
 		int detectedMode = detectValidationMode(resource);
 		if (detectedMode != VALIDATION_AUTO) {
 			return detectedMode;
