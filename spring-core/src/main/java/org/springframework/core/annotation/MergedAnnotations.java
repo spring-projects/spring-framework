@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -472,20 +472,8 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		 * superclasses and implemented interfaces. Superclass annotations do
 		 * not need to be meta-annotated with {@link Inherited @Inherited}.
 		 */
-		TYPE_HIERARCHY,
+		TYPE_HIERARCHY
 
-		/**
-		 * Perform a full search of the entire type hierarchy on the source
-		 * <em>and</em> any enclosing classes. This strategy is similar to
-		 * {@link #TYPE_HIERARCHY} except that {@linkplain Class#getEnclosingClass()
-		 * enclosing classes} are also searched. Superclass annotations do not
-		 * need to be meta-annotated with {@link Inherited @Inherited}. When
-		 * searching a {@link Method} source, this strategy is identical to
-		 * {@link #TYPE_HIERARCHY}.
-		 * @deprecated as of Spring Framework 5.3.17; to be removed in Spring Framework 6.0
-		 */
-		@Deprecated
-		TYPE_HIERARCHY_AND_ENCLOSING_CLASSES
 	}
 
 }
