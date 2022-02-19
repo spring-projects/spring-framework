@@ -21,7 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -42,13 +41,13 @@ import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
@@ -133,26 +132,25 @@ public class EnableAsyncTests {
 	}
 
 	@Test
-	public void withAsyncBeanWithExecutorQualifiedByExpression() throws ExecutionException, InterruptedException {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		System.getProperties().put("myExecutor", "myExecutor1");
-		PropertySourcesPlaceholderConfigurer placeholderConfigurer = new PropertySourcesPlaceholderConfigurer();
-		placeholderConfigurer.setProperties(new Properties() {{
-			put("my.app.myExecutor", "myExecutor2");
-		}});
-		placeholderConfigurer.postProcessBeanFactory(context.getBeanFactory());
+	public void withAsyncBeanWithExecutorQualifiedByExpressionOrPlaceholder() throws Exception {
+		System.setProperty("myExecutor", "myExecutor1");
+		System.setProperty("my.app.myExecutor", "myExecutor2");
 
-		context.register(AsyncWithExecutorQualifiedByExpressionConfig.class);
-		context.refresh();
+		Class<?> configClass = AsyncWithExecutorQualifiedByExpressionConfig.class;
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(configClass)) {
+			AsyncBeanWithExecutorQualifiedByExpressionOrPlaceholder asyncBean =
+					context.getBean(AsyncBeanWithExecutorQualifiedByExpressionOrPlaceholder.class);
 
-		AsyncBeanWithExecutorQualifiedByExpression asyncBean = context.getBean(AsyncBeanWithExecutorQualifiedByExpression.class);
-		Future<Thread> workerThread1 = asyncBean.myWork1();
-		assertThat(workerThread1.get().getName()).doesNotStartWith("myExecutor2-").startsWith("myExecutor1-");
+			Future<Thread> workerThread1 = asyncBean.myWork1();
+			assertThat(workerThread1.get().getName()).startsWith("myExecutor1-");
 
-		Future<Thread> workerThread2 = asyncBean.myWork2();
-		assertThat(workerThread2.get().getName()).startsWith("myExecutor2-");
-
-		context.close();
+			Future<Thread> workerThread2 = asyncBean.myWork2();
+			assertThat(workerThread2.get().getName()).startsWith("myExecutor2-");
+		}
+		finally {
+			System.clearProperty("myExecutor");
+			System.clearProperty("my.app.myExecutor");
+		}
 	}
 
 	@Test
@@ -371,9 +369,9 @@ public class EnableAsyncTests {
 		}
 	}
 
-	static class AsyncBeanWithExecutorQualifiedByExpression {
+	static class AsyncBeanWithExecutorQualifiedByExpressionOrPlaceholder {
 
-		@Async("#{systemProperties.myExecutor}")
+		@Async("#{environment['myExecutor']}")
 		public Future<Thread> myWork1() {
 			return new AsyncResult<>(Thread.currentThread());
 		}
@@ -518,8 +516,8 @@ public class EnableAsyncTests {
 	static class AsyncWithExecutorQualifiedByExpressionConfig {
 
 		@Bean
-		public AsyncBeanWithExecutorQualifiedByExpression asyncBean() {
-			return new AsyncBeanWithExecutorQualifiedByExpression();
+		public AsyncBeanWithExecutorQualifiedByExpressionOrPlaceholder asyncBean() {
+			return new AsyncBeanWithExecutorQualifiedByExpressionOrPlaceholder();
 		}
 
 		@Bean
