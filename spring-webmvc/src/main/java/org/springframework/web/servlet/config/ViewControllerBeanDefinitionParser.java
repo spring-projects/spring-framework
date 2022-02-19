@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,15 +90,15 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 					controller.getPropertyValues().add("statusCode", statusCode);
 				}
 			}
-			case "redirect-view-controller" -> controller.getPropertyValues()
-					.add("view", getRedirectView(element, statusCode, source));
+			case "redirect-view-controller" ->
+				controller.getPropertyValues().add("view", getRedirectView(element, statusCode, source));
 			case "status-controller" -> {
 				controller.getPropertyValues().add("statusCode", statusCode);
 				controller.getPropertyValues().add("statusOnly", true);
 			}
 			default ->
-					// Should never happen...
-					throw new IllegalStateException("Unexpected tag name: " + name);
+				// Should never happen...
+				throw new IllegalStateException("Unexpected tag name: " + name);
 		}
 
 		Map<String, BeanDefinition> urlMap = (Map<String, BeanDefinition>) hm.getPropertyValues().get("urlMap");

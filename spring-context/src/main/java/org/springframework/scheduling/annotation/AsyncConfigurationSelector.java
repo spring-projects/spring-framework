@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,8 @@ public class AsyncConfigurationSelector extends AdviceModeImportSelector<EnableA
 	@NonNull
 	public String[] selectImports(AdviceMode adviceMode) {
 		return switch (adviceMode) {
-			case PROXY -> new String[]{ProxyAsyncConfiguration.class.getName()};
-			case ASPECTJ -> new String[]{ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME};
+			case PROXY -> new String[] {ProxyAsyncConfiguration.class.getName()};
+			case ASPECTJ -> new String[] {ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME};
 		};
 	}
 

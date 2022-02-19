@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,8 +93,8 @@ public abstract class TypeFilterUtils {
 							environment, resourceLoader, registry);
 					typeFilters.add(filter);
 				}
-				default -> throw new IllegalArgumentException(
-						"Filter type not supported with Class value: " + filterType);
+				default ->
+					throw new IllegalArgumentException("Filter type not supported with Class value: " + filterType);
 			}
 		}
 
@@ -102,8 +102,8 @@ public abstract class TypeFilterUtils {
 			switch (filterType) {
 				case ASPECTJ -> typeFilters.add(new AspectJTypeFilter(expression, resourceLoader.getClassLoader()));
 				case REGEX -> typeFilters.add(new RegexPatternTypeFilter(Pattern.compile(expression)));
-				default -> throw new IllegalArgumentException(
-						"Filter type not supported with String pattern: " + filterType);
+				default ->
+					throw new IllegalArgumentException("Filter type not supported with String pattern: " + filterType);
 			}
 		}
 

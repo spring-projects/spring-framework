@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,10 +197,10 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 				case 0 -> REQUEST_FNF_OR_RESPONSE_CONDITION;
 				case 1 -> REQUEST_RESPONSE_CONDITION;
 				case 2 -> REQUEST_STREAM_CONDITION;
-				default -> throw new IllegalStateException("Invalid cardinality: " + cardinalityOut);
+				default -> throw new IllegalStateException("Invalid response cardinality: " + cardinalityOut);
 			};
 			case 2 -> REQUEST_CHANNEL_CONDITION;
-			default -> throw new IllegalStateException("Invalid cardinality: " + cardinalityIn);
+			default -> throw new IllegalStateException("Invalid request cardinality: " + cardinalityIn);
 		};
 	}
 

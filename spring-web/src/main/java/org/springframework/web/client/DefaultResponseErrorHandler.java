@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,9 +164,12 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 		String message = getErrorMessage(statusCode.value(), statusText, body, charset);
 
 		switch (statusCode.series()) {
-			case CLIENT_ERROR -> throw HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
-			case SERVER_ERROR -> throw HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);
-			default -> throw new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
+			case CLIENT_ERROR ->
+				throw HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
+			case SERVER_ERROR ->
+				throw HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);
+			default ->
+				throw new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
 		}
 	}
 

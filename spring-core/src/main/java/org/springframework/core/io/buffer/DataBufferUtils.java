@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -607,8 +607,10 @@ public abstract class DataBufferUtils {
 	}
 
 	private static NestedMatcher createMatcher(byte[] delimiter) {
-		Assert.isTrue(delimiter.length > 0, "Delimiter must not be empty");
-		return switch (delimiter.length) {
+		// extract length due to Eclipse IDE compiler error in switch expression
+		int length = delimiter.length;
+		Assert.isTrue(length > 0, "Delimiter must not be empty");
+		return switch (length) {
 			case 1 -> (delimiter[0] == 10 ? SingleByteMatcher.NEWLINE_MATCHER : new SingleByteMatcher(delimiter));
 			case 2 -> new TwoByteMatcher(delimiter);
 			default -> new KnuthMorrisPrattMatcher(delimiter);
