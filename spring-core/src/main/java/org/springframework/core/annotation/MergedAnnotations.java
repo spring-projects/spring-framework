@@ -482,7 +482,9 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		 * need to be meta-annotated with {@link Inherited @Inherited}. When
 		 * searching a {@link Method} source, this strategy is identical to
 		 * {@link #TYPE_HIERARCHY}.
+		 * @deprecated as of Spring Framework 5.3.17; to be removed in Spring Framework 6.0
 		 */
+		@Deprecated
 		TYPE_HIERARCHY_AND_ENCLOSING_CLASSES
 	}
 
