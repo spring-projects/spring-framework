@@ -20,10 +20,7 @@ import org.springframework.core.ResolvableType;
 
 public class PublicFactoryBean<T> {
 
-	private final Class<T> type;
-
-	public PublicFactoryBean(Class<T> type) {
-		this.type = type;
+	PublicFactoryBean(Class<T> type) {
 	}
 
 	public static PublicFactoryBean<ProtectedType> protectedTypeFactoryBean() {
