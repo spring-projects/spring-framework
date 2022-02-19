@@ -92,6 +92,7 @@ abstract class AnnotationsScanner {
 	}
 
 	@Nullable
+	@SuppressWarnings("deprecation")
 	private static <C, R> R processClass(C context, Class<?> source,
 			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor) {
 
@@ -229,6 +230,7 @@ abstract class AnnotationsScanner {
 	}
 
 	@Nullable
+	@SuppressWarnings("deprecation")
 	private static <C, R> R processMethod(C context, Method source,
 			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor) {
 
@@ -499,6 +501,7 @@ abstract class AnnotationsScanner {
 		return (type.getName().startsWith("java.") || type == Ordered.class);
 	}
 
+	@SuppressWarnings("deprecation")
 	private static boolean isWithoutHierarchy(AnnotatedElement source, SearchStrategy searchStrategy) {
 		if (source == Object.class) {
 			return true;

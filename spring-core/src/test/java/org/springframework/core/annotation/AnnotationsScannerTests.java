@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -421,6 +421,7 @@ class AnnotationsScannerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void typeHierarchyWithEnclosedStrategyOnEnclosedStaticClassScansAnnotations() {
 		Class<?> source = AnnotationEnclosingClassSample.EnclosedStatic.EnclosedStaticStatic.class;
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES))
@@ -428,6 +429,7 @@ class AnnotationsScannerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void typeHierarchyWithEnclosedStrategyOnEnclosedInnerClassScansAnnotations() {
 		Class<?> source = AnnotationEnclosingClassSample.EnclosedInner.EnclosedInnerInner.class;
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES))
@@ -435,6 +437,7 @@ class AnnotationsScannerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void typeHierarchyWithEnclosedStrategyOnMethodHierarchyUsesTypeHierarchyScan() {
 		Method source = methodFrom(WithHierarchy.class);
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES)).containsExactly(
