@@ -26,6 +26,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,6 +58,7 @@ import org.springframework.beans.propertyeditors.CustomBooleanEditor;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.beans.propertyeditors.CustomMapEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.beans.propertyeditors.DurationEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputSourceEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
@@ -216,6 +218,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(Class.class, new ClassEditor());
 		this.defaultEditors.put(Class[].class, new ClassArrayEditor());
 		this.defaultEditors.put(Currency.class, new CurrencyEditor());
+		this.defaultEditors.put(Duration.class, new DurationEditor());
 		this.defaultEditors.put(File.class, new FileEditor());
 		this.defaultEditors.put(InputStream.class, new InputStreamEditor());
 		if (!shouldIgnoreXml) {

@@ -18,6 +18,8 @@ package org.springframework.util;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
+import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +38,7 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 
 import org.springframework.lang.Nullable;
+
 
 /**
  * Miscellaneous {@link String} utility methods.
@@ -891,6 +894,25 @@ public abstract class StringUtils {
 		return timeZone;
 	}
 
+	/**
+	 * Parse the given {@code durationString} value into a {@link Duration}.
+	 * @param durationString the duration {@code String}, following ISO 8601 format starting with "PT". It is
+	 * also possible to skip PT prefix (i.e. both "PT10s" and "10s" are accepted).
+	 * @return a corresponding {@link Duration} instance or null if @{code durationString} is null.
+	 * @throws DateTimeParseException in case of an invalid duration
+	 */
+	@Nullable
+	public static Duration parseDuration(@Nullable String durationString) {
+		if (durationString == null) {
+			return null;
+		}
+		else if (durationString.startsWith("PT")) {
+			return Duration.parse(durationString);
+		}
+		else {
+			return Duration.parse("PT" + durationString);
+		}
+	}
 
 	//---------------------------------------------------------------------
 	// Convenience methods for working with String arrays

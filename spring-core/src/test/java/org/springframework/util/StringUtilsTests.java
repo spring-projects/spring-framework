@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Locale;
@@ -771,6 +772,13 @@ class StringUtilsTests {
 	@Test
 	void collectionToDelimitedStringWithNullValuesShouldNotFail() {
 		assertThat(StringUtils.collectionToCommaDelimitedString(Collections.singletonList(null))).isEqualTo("null");
+	}
+
+	@Test
+	void parseDuration() {
+		assertThat(StringUtils.parseDuration(null)).isNull();
+		assertThat(StringUtils.parseDuration("PT1s")).isEqualTo(Duration.ofSeconds(1));
+		assertThat(StringUtils.parseDuration("1s")).isEqualTo(Duration.ofSeconds(1));
 	}
 
 }
