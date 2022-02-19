@@ -156,7 +156,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
 	/**
 	 * Determine the specific executor to use when executing the given method.
-	 * Should preferably return an {@link AsyncListenableTaskExecutor} implementation.
+	 * <p>Should preferably return an {@link AsyncListenableTaskExecutor} implementation.
 	 * @return the executor to use (or {@code null}, but just if no default executor is available)
 	 */
 	@Nullable
@@ -184,7 +184,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	/**
 	 * Return the qualifier or bean name of the executor to be used when executing the
 	 * given async method, typically specified in the form of an annotation attribute.
-	 * Returning an empty string or {@code null} indicates that no specific executor has
+	 * <p>Returning an empty string or {@code null} indicates that no specific executor has
 	 * been specified and that the {@linkplain #setExecutor(Executor) default executor}
 	 * should be used.
 	 * @param method the method to inspect for executor qualifier metadata
@@ -213,7 +213,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
 	/**
 	 * Retrieve or build a default executor for this advice instance.
-	 * An executor returned from here will be cached for further use.
+	 * <p>An executor returned from here will be cached for further use.
 	 * <p>The default implementation searches for a unique {@link TaskExecutor} bean
 	 * in the context, or for an {@link Executor} bean named "taskExecutor" otherwise.
 	 * If neither of the two is resolvable, this implementation will return {@code null}.
