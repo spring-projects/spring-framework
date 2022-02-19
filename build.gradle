@@ -4,6 +4,7 @@ buildscript {
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
 	dependencies {
+		classpath('org.projectlombok:lombok:1.18.6')
 		classpath("io.spring.gradle:propdeps-plugin:0.0.9.RELEASE")
 		classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16")
 	}
@@ -149,7 +150,8 @@ configure(allprojects) { project ->
 
 	repositories {
 		mavenLocal() // 新增
-		mavenCentral()
+		//mavenCentral()
+        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
 		maven { url "https://repo.spring.io/libs-spring-framework-build" }
 	}
 

@@ -48,6 +48,9 @@ import org.springframework.lang.Nullable;
  * @see ClassPathResource
  * @see ByteArrayResource
  * @see InputStreamResource
+ *
+ * 对不同来源的资源文件都有相应的Resource实现：文件(FileSystemResource),Classpath资源(ClassPathResource),
+ * URL资源(URlResource),InputStream资源(InputStreamResource),Byte数组(ByteArrayResource)
  */
 public interface Resource extends InputStreamSource {
 
