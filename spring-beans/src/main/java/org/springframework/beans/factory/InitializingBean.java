@@ -30,6 +30,10 @@ package org.springframework.beans.factory;
  * @see DisposableBean
  * @see org.springframework.beans.factory.config.BeanDefinition#getPropertyValues()
  * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getInitMethodName()
+ *
+ * 在spring初始化bean的时候，如果bean实现了 InitializingBean 接口，在对象的所有属性被初始化后之后才会调用afterPropertiesSet()方法
+ * spring初始化bean肯定会在 ApplicationRunner和CommandLineRunner接口调用之前
+ *
  */
 public interface InitializingBean {
 

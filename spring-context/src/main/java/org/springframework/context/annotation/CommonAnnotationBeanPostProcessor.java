@@ -139,6 +139,13 @@ import org.springframework.util.StringValueResolver;
  * @see #setResourceFactory
  * @see org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor
  * @see org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
+ *
+ * 在构造器中设置了一个属性为PostConstruct.class，再次观察CommonAnnotationBeanPostProcessor这个类，
+ * 它继承自InitDestroyAnnotationBeanPostProcessor。
+ * InitDestroyAnnotationBeanPostProcessor顾名思义，就是在Bean初始化和销毁的时候所作的一个前置/后置处理器
+ *
+ * @PostConstruct会在实现 InitializingBean 接口的afterPropertiesSet()方法之前执行
+ *
  */
 @SuppressWarnings("serial")
 public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBeanPostProcessor
@@ -200,6 +207,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 */
 	public CommonAnnotationBeanPostProcessor() {
 		setOrder(Ordered.LOWEST_PRECEDENCE - 3);
+		//设置初始化参数为PostConstruct.class
 		setInitAnnotationType(PostConstruct.class);
 		setDestroyAnnotationType(PreDestroy.class);
 		ignoreResourceType("javax.xml.ws.WebServiceContext");

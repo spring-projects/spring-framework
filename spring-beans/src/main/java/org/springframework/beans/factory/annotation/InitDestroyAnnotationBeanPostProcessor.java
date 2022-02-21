@@ -72,6 +72,8 @@ import org.springframework.util.ReflectionUtils;
  * @since 2.5
  * @see #setInitAnnotationType
  * @see #setDestroyAnnotationType
+ *
+ *
  */
 @SuppressWarnings("serial")
 public class InitDestroyAnnotationBeanPostProcessor
@@ -206,13 +208,16 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
 				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
+					//判断clazz中的methon是否有initAnnotationType注解，也就是PostConstruct.class注解
 					LifecycleElement element = new LifecycleElement(method);
+					//如果有就将方法添加进LifecycleMetadata中
 					currInitMethods.add(element);
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found init method on class [" + clazz.getName() + "]: " + method);
 					}
 				}
 				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
+					//判断clazz中的methon是否有destroyAnnotationType注解
 					currDestroyMethods.add(new LifecycleElement(method));
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found destroy method on class [" + clazz.getName() + "]: " + method);
@@ -296,6 +301,8 @@ public class InitDestroyAnnotationBeanPostProcessor
 		}
 
 		public void invokeInitMethods(Object target, String beanName) throws Throwable {
+			// 是否实现 InitializingBean
+			// 如果实现了 InitializingBean 接口，则只掉调用bean的 afterPropertiesSet()
 			Collection<LifecycleElement> checkedInitMethods = this.checkedInitMethods;
 			Collection<LifecycleElement> initMethodsToIterate =
 					(checkedInitMethods != null ? checkedInitMethods : this.initMethods);
