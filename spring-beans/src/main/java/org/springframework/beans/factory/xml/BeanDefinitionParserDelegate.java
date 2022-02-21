@@ -1449,6 +1449,14 @@ public class BeanDefinitionParserDelegate {
 	 * @param ele the element to parse
 	 * @param containingBd the containing bean definition (if any)
 	 * @return the resulting bean definition
+	 *
+	 * 扩展 Spring 自定义标签配置一般需要以下几个步骤：
+	 *
+	 * 创建一个需要扩展的组件
+	 * 定义一个 XSD 文件，用于描述组件内容
+	 * 创建一个实现 AbstractSingleBeanDefinitionParser 接口的类，用来解析 XSD 文件中的定义和组件定义
+	 * 创建一个 Handler，继承 NamespaceHandlerSupport ，用于将组件注册到 Spring 容器
+	 * 编写 Spring.handlers 和 Spring.schemas 文件
 	 */
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele, @Nullable BeanDefinition containingBd) {
@@ -1511,14 +1519,20 @@ public class BeanDefinitionParserDelegate {
 	 * @param originalDef the current bean definition
 	 * @param containingBd the containing bean definition (if any)
 	 * @return the decorated bean definition
+	 *
+	 * 首先获取自定义标签的命名空间，如果不是默认的命名空间则根据该命名空间获取相应的处理器，
+	 * 最后调用处理器的 decorate() 进行装饰处理。
 	 */
 	public BeanDefinitionHolder decorateIfRequired(
 			Node node, BeanDefinitionHolder originalDef, @Nullable BeanDefinition containingBd) {
-
+		//获取自定义标签的命名空间
 		String namespaceUri = getNamespaceURI(node);
+		//过滤掉默认命名标签
 		if (namespaceUri != null && !isDefaultNamespace(namespaceUri)) {
+			//获取相应的处理器
 			NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 			if (handler != null) {
+				//进行装饰处理
 				BeanDefinitionHolder decorated =
 						handler.decorate(node, originalDef, new ParserContext(this.readerContext, this, containingBd));
 				if (decorated != null) {

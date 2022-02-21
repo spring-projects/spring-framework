@@ -197,8 +197,15 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 	}
 
+	/**
+	 * 对应bean标签的解析是最核心的功能，对于alias、import、beans标签的解析都是基于bean标签解析的
+	 */
 	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
 		if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
+			/**
+			 * applicationContext.xml文件中使用import方式导入有模块配置文件，以后若有新模块的加入，那就可以简单修改这个文件了。
+			 * 这样大大简化了配置后期维护的复杂度，并使配置模块化，易于管理。
+			 */
 			importBeanDefinitionResource(ele);
 		}
 		else if (delegate.nodeNameEquals(ele, ALIAS_ELEMENT)) {
@@ -216,19 +223,30 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	/**
 	 * Parse an "import" element and load the bean definitions
 	 * from the given resource into the bean factory.
+	 *
+	 * 获取 source 属性的值，该值表示资源的路径
+	 * 解析路径中的系统属性，如”${user.dir}”
+	 * 判断资源路径 location 是绝对路径还是相对路径
+	 * 如果是绝对路径，则调递归调用 Bean 的解析过程，进行另一次的解析
+	 * 如果是相对路径，则先计算出绝对路径得到 Resource，然后进行解析
+	 * 通知监听器，完成解析
 	 */
 	protected void importBeanDefinitionResource(Element ele) {
+		//获取resource的属性值
 		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
+		//为空，直接退出
 		if (!StringUtils.hasText(location)) {
 			getReaderContext().error("Resource location must not be empty", ele);
 			return;
 		}
 
+		// 解析系统属性，格式如 ："${user.dir}"
 		// Resolve system properties: e.g. "${user.dir}"
 		location = getReaderContext().getEnvironment().resolveRequiredPlaceholders(location);
 
 		Set<Resource> actualResources = new LinkedHashSet<>(4);
 
+		// 判断 location 是相对路径还是绝对路径
 		// Discover whether the location is an absolute or relative URI
 		boolean absoluteLocation = false;
 		try {
@@ -239,9 +257,11 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			// unless it is the well-known Spring prefix "classpath*:"
 		}
 
+        // 绝对路径
 		// Absolute or relative?
 		if (absoluteLocation) {
 			try {
+				// 直接根据地址加载相应的配置文件
 				int importCount = getReaderContext().getReader().loadBeanDefinitions(location, actualResources);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Imported " + importCount + " bean definitions from URL location [" + location + "]");
@@ -253,6 +273,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			}
 		}
 		else {
+			// 相对路径则根据相应的地址计算出绝对路径地址
 			// No URL -> considering resource location as relative to the current file.
 			try {
 				int importCount;
@@ -278,6 +299,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 						"Failed to import bean definitions from relative location [" + location + "]", ele, ex);
 			}
 		}
+		// 解析成功后，进行监听器激活处理
 		Resource[] actResArray = actualResources.toArray(new Resource[0]);
 		getReaderContext().fireImportProcessed(location, actResArray, extractSource(ele));
 	}
@@ -286,7 +308,9 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * Process the given alias element, registering the alias with the registry.
 	 */
 	protected void processAliasRegistration(Element ele) {
+		//获取beanName
 		String name = ele.getAttribute(NAME_ATTRIBUTE);
+		//获取alias
 		String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
 		boolean valid = true;
 		if (!StringUtils.hasText(name)) {
@@ -299,6 +323,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 		if (valid) {
 			try {
+				//注册alias
 				getReaderContext().getRegistry().registerAlias(name, alias);
 			}
 			catch (Exception ex) {
@@ -322,6 +347,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		if (bdHolder != null) {
 			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 			try {
+				/**
+				 * 对于配置文件，解析和装饰完成之后，对于得到的beanDefinition已经可以满足后续的使用要求了，还剩下注册，
+				 * 也就是processBeanDefinition函数中的BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder,getReaderContext().getRegistry())代码的解析了
+				 */
 				// Register the final decorated instance.
 				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
 			}

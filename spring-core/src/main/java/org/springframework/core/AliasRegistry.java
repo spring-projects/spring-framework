@@ -34,6 +34,8 @@ public interface AliasRegistry {
 	 * @param alias the alias to be registered
 	 * @throws IllegalStateException if the alias is already in use
 	 * and may not be overridden
+	 *
+	 * 通过别名注册BeanDefinition最终是在SimpleAliasRegistry中实现的
 	 */
 	void registerAlias(String name, String alias);
 

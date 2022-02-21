@@ -46,6 +46,11 @@ import org.springframework.core.AliasRegistry;
  * @see PropertiesBeanDefinitionReader
  *
  * 定义对BeanFactory的各种增删查改操作
+ *
+ * BeanDefinitionRegistry是一个接口，他有三个实现类，
+ * DefaultListableBeanFactory、SimpleBeanDefinitionRegistry、GenericApplicationContext，
+ * 其中SimpleBeanDefinitionRegistry非常简单，
+ * 而GenericApplicationContext最终也是使用的DefaultListableBeanFactory中的实现方法
  */
 public interface BeanDefinitionRegistry extends AliasRegistry {
 
