@@ -1,5 +1,5 @@
 create function insert_emp_view() returns trigger as $$
-    insert into emp_audit values('D', user, old.*);
+    insert into emp_audit values('I', user, new.*);
 $$ LANGUAGE plpgsql;
 
 create function update_emp_view() returns trigger as $$

@@ -488,18 +488,19 @@ public abstract class ScriptUtils {
 			else if (!inSingleQuote && (c == '"')) {
 				inDoubleQuote = !inDoubleQuote;
 			}
-			else if ((c == '$') && (nc != null) && (nc == '$')) {
+			else if (matchOnDollarQuote(c, nc)) {
 				inDollarQuote = !inDollarQuote;
 			}
 			else if (c == '(') {
-				brackets.push(i);
+				brackets.push(i); // open bracket
 			}
 			else if (c == ')') {
-				brackets.pop();
+				brackets.pop(); // close bracket
 			}
 
 			if (!inSingleQuote && !inDoubleQuote) {
-				if (script.startsWith(separator, i) && !inDollarQuote && brackets.isEmpty()) {
+				var notInBrackets = brackets.isEmpty();
+				if (script.startsWith(separator, i) && !inDollarQuote && notInBrackets) {
 					// We've reached the end of the current statement
 					if (sb.length() > 0) {
 						statements.add(sb.toString());
@@ -563,7 +564,12 @@ public abstract class ScriptUtils {
 
 	@Nullable
 	private static Character nextCharAt(String script, int i) {
-		return script.length() != (i + 1) ? script.charAt(i + 1) : null;
+		var nextIdx = i + 1;
+		return script.length() > nextIdx ? script.charAt(nextIdx) : null;
+	}
+
+	private static boolean matchOnDollarQuote(char current, @Nullable Character next) {
+		return current == '$' && next != null && next == '$';
 	}
 
 	private static Publisher<? extends Void> runStatement(String statement, Connection connection,
