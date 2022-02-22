@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -460,13 +461,16 @@ public abstract class ScriptUtils {
 		Assert.hasText(blockCommentEndDelimiter, "'blockCommentEndDelimiter' must not be null or empty");
 
 		List<String> statements = new ArrayList<>();
+		Stack<Integer> brackets = new Stack<>();
 		StringBuilder sb = new StringBuilder();
 		boolean inSingleQuote = false;
 		boolean inDoubleQuote = false;
+		boolean inDollarQuote = false;
 		boolean inEscape = false;
 
 		for (int i = 0; i < script.length(); i++) {
 			char c = script.charAt(i);
+			Character nc =  nextCharAt(script, i);
 			if (inEscape) {
 				inEscape = false;
 				sb.append(c);
@@ -484,8 +488,18 @@ public abstract class ScriptUtils {
 			else if (!inSingleQuote && (c == '"')) {
 				inDoubleQuote = !inDoubleQuote;
 			}
+			else if ((c == '$') && (nc != null) && (nc == '$')) {
+				inDollarQuote = !inDollarQuote;
+			}
+			else if (c == '(') {
+				brackets.push(i);
+			}
+			else if (c == ')') {
+				brackets.pop();
+			}
+
 			if (!inSingleQuote && !inDoubleQuote) {
-				if (script.startsWith(separator, i)) {
+				if (script.startsWith(separator, i) && !inDollarQuote && brackets.isEmpty()) {
 					// We've reached the end of the current statement
 					if (sb.length() > 0) {
 						statements.add(sb.toString());
@@ -545,6 +559,11 @@ public abstract class ScriptUtils {
 			}
 		}
 		return false;
+	}
+
+	@Nullable
+	private static Character nextCharAt(String script, int i) {
+		return script.length() != (i + 1) ? script.charAt(i + 1) : null;
 	}
 
 	private static Publisher<? extends Void> runStatement(String statement, Connection connection,

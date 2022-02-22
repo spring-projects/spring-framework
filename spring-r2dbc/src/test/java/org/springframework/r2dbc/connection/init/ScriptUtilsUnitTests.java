@@ -179,6 +179,28 @@ public class ScriptUtilsUnitTests {
 		assertThat(statements).containsExactly(statement1, statement2);
 	}
 
+	@Test
+	public void readAndSplitScriptWithDollarQuoting() throws Exception {
+		String script = readScript("test-data-with-dollar-quoting.sql");
+		List<String> statements = splitSqlScript(script, ";");
+
+		String statement1 = "create function insert_emp_view() returns trigger as $$ insert into emp_audit values('D', user, old.*); $$ LANGUAGE plpgsql";
+		String statement2 = "create function update_emp_view() returns trigger as $$ update emp_audit set operation = 'U', stamp = now(), salary = new.salary where empname = old.empname; $$ LANGUAGE plpgsql";
+
+		assertThat(statements).containsExactly(statement1, statement2);
+	}
+
+	@Test
+	public void readAndSplitScriptWithRoundBrackets() throws Exception {
+		String script = readScript("test-data-with-round-brackets.sql");
+		List<String> statements = splitSqlScript(script, ";");
+
+		String statement1 = "create rule insert_emp_view as on insert to emp_view do instead ( insert into emp values(new.empname, new.salary); insert into emp_audit values('I', now(), user, new.*) )";
+		String statement2 = "create rule update_emp_view as on insert to emp_view do instead ( UPDATE emp set salary = new.salary where empname = old.empname; UPDATE emp_audit set operation = 'U', stamp = now(), salary = new.salary where empname = old.empname )";
+
+		assertThat(statements).containsExactly(statement1, statement2);
+	}
+
 	@ParameterizedTest
 	@CsvSource(delimiter = '|', quoteCharacter = '~', textBlock = """
 		# semicolon
