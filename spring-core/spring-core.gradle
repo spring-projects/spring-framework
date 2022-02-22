@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.springframework.build.shadow.ShadowSource
 
 description = "Spring Core"
 
@@ -27,6 +28,13 @@ task cglibRepackJar(type: ShadowJar) {
 	relocate 'org.objectweb.asm', 'org.springframework.asm'
 }
 
+task cglibSource(type: ShadowSource) {
+	configurations = [project.configurations.cglib]
+	relocate 'net.sf.cglib', 'org.springframework.cglib'
+	relocate 'org.objectweb.asm', 'org.springframework.asm'
+	outputDirectory = file("build/shadow-source/cglib")
+}
+
 task javapoetRepackJar(type: ShadowJar) {
 	archiveBaseName.set('spring-javapoet-repack')
 	archiveVersion.set(javapoetVersion)
@@ -34,11 +42,23 @@ task javapoetRepackJar(type: ShadowJar) {
 	relocate 'com.squareup.javapoet', 'org.springframework.javapoet'
 }
 
+task javapoetSource(type: ShadowSource) {
+	configurations = [project.configurations.javapoet]
+	relocate 'com.squareup.javapoet', 'org.springframework.javapoet'
+	outputDirectory = file("build/shadow-source/javapoet")
+}
+
 task objenesisRepackJar(type: ShadowJar) {
 	archiveBaseName.set('spring-objenesis-repack')
 	archiveVersion.set(objenesisVersion)
 	configurations = [project.configurations.objenesis]
 	relocate 'org.objenesis', 'org.springframework.objenesis'
+}
+
+task objenesisSource(type: ShadowSource) {
+	configurations = [project.configurations.objenesis]
+	relocate 'org.objenesis', 'org.springframework.objenesis'
+	outputDirectory = file("build/shadow-source/objenesis")
 }
 
 dependencies {
@@ -121,4 +141,10 @@ test {
 	jvmArgs += [
 		"-XX:+AllowRedefinitionToAddDeleteMethods"
 	]
+}
+
+sourcesJar {
+	from cglibSource
+	from javapoetSource
+	from objenesisSource
 }
