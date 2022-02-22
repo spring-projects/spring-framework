@@ -48,11 +48,11 @@ import org.springframework.util.ReflectionUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link DefaultBeanInstanceGenerator}.
+ * Tests for {@link DefaultBeanInstantiationGenerator}.
  *
  * @author Stephane Nicoll
  */
-class DefaultBeanInstanceGeneratorTests {
+class DefaultBeanInstantiationGeneratorTests {
 
 	@Test
 	void generateUsingDefaultConstructorUsesMethodReference() {
@@ -109,7 +109,7 @@ class DefaultBeanInstanceGeneratorTests {
 	void generateUsingNoArgConstructorAndContributorsDoesNotUseMethodReference() {
 		CodeContribution contribution = generate(SimpleConfiguration.class.getDeclaredConstructors()[0],
 				contrib -> contrib.statements().add(CodeBlock.of("// hello\n")),
-				BeanInstanceContributor.NO_OP);
+				BeanInstantiationContributor.NO_OP);
 		assertThat(code(contribution)).isEqualTo("""
 				(instanceContext) -> {
 					SimpleConfiguration bean = new SimpleConfiguration();
@@ -240,10 +240,10 @@ class DefaultBeanInstanceGeneratorTests {
 	}
 
 	private CodeContribution generate(Executable executable,
-			BeanInstanceContributor... beanInstanceContributors) {
-		DefaultBeanInstanceGenerator generator = new DefaultBeanInstanceGenerator(executable,
-				Arrays.asList(beanInstanceContributors));
-		return generator.generateBeanInstance(new RuntimeHints());
+			BeanInstantiationContributor... beanInstantiationContributors) {
+		DefaultBeanInstantiationGenerator generator = new DefaultBeanInstantiationGenerator(executable,
+				Arrays.asList(beanInstantiationContributors));
+		return generator.generateBeanInstantiation(new RuntimeHints());
 	}
 
 	private static Method method(Class<?> type, String methodName, Class<?>... parameterTypes) {

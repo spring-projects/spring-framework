@@ -24,7 +24,7 @@ import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessorTests.ResourceInjectionBean;
-import org.springframework.beans.factory.generator.BeanInstanceContributor;
+import org.springframework.beans.factory.generator.BeanInstantiationContributor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.env.Environment;
@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Stephane Nicoll
  */
-class AutowiredAnnotationBeanInstanceContributorTests {
+class AutowiredAnnotationBeanInstantiationContributorTests {
 
 	@Test
 	void buildAotContributorWithPackageProtectedFieldInjection() {
@@ -63,7 +63,7 @@ class AutowiredAnnotationBeanInstanceContributorTests {
 		assertThat(CodeSnippet.process(contribution.statements().toCodeBlock())).isEqualTo("""
 				instanceContext.field("environment", Environment.class)
 						.invoke(beanFactory, (attributes) -> {
-							Field environmentField = ReflectionUtils.findField(AutowiredAnnotationBeanInstanceContributorTests.PrivateFieldInjectionSample.class, "environment", Environment.class);
+							Field environmentField = ReflectionUtils.findField(AutowiredAnnotationBeanInstantiationContributorTests.PrivateFieldInjectionSample.class, "environment", Environment.class);
 							ReflectionUtils.makeAccessible(environmentField);
 							ReflectionUtils.setField(environmentField, bean, attributes.get(0));
 						})""");
@@ -117,19 +117,19 @@ class AutowiredAnnotationBeanInstanceContributorTests {
 
 	@Test
 	void buildAotContributorWithoutInjectionPoints() {
-		BeanInstanceContributor contributor = createAotContributor(String.class);
-		assertThat(contributor).isNotNull().isSameAs(BeanInstanceContributor.NO_OP);
+		BeanInstantiationContributor contributor = createAotContributor(String.class);
+		assertThat(contributor).isNotNull().isSameAs(BeanInstantiationContributor.NO_OP);
 	}
 
 	private DefaultCodeContribution contribute(Class<?> type) {
-		BeanInstanceContributor contributor = createAotContributor(type);
+		BeanInstantiationContributor contributor = createAotContributor(type);
 		assertThat(contributor).isNotNull();
 		DefaultCodeContribution contribution = new DefaultCodeContribution(new RuntimeHints());
 		contributor.contribute(contribution);
 		return contribution;
 	}
 
-	private BeanInstanceContributor createAotContributor(Class<?> type) {
+	private BeanInstantiationContributor createAotContributor(Class<?> type) {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(type);
 		return bpp.buildAotContributor(beanDefinition, type, "test");

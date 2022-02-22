@@ -36,19 +36,20 @@ import org.springframework.util.ClassUtils;
  * Write the necessary statements to instantiate a bean.
  *
  * @author Stephane Nicoll
+ * @see BeanInstantiationContributor
  */
-class DefaultBeanInstanceGenerator {
+class DefaultBeanInstantiationGenerator {
 
 	private final Executable instanceCreator;
 
-	private final List<BeanInstanceContributor> contributors;
+	private final List<BeanInstantiationContributor> contributors;
 
 	private final InjectionGenerator injectionGenerator;
 
 	private final Options beanInstanceOptions;
 
 
-	DefaultBeanInstanceGenerator(Executable instanceCreator, List<BeanInstanceContributor> contributors) {
+	DefaultBeanInstantiationGenerator(Executable instanceCreator, List<BeanInstantiationContributor> contributors) {
 		this.instanceCreator = instanceCreator;
 		this.contributors = List.copyOf(contributors);
 		this.injectionGenerator = new InjectionGenerator();
@@ -62,7 +63,7 @@ class DefaultBeanInstanceGenerator {
 	 * @param runtimeHints the runtime hints instance to use
 	 * @return a code contribution that provides an initialized bean instance
 	 */
-	public CodeContribution generateBeanInstance(RuntimeHints runtimeHints) {
+	public CodeContribution generateBeanInstantiation(RuntimeHints runtimeHints) {
 		DefaultCodeContribution contribution = new DefaultCodeContribution(runtimeHints);
 		contribution.protectedAccess().analyze(this.instanceCreator, this.beanInstanceOptions);
 		if (this.instanceCreator instanceof Constructor<?> constructor) {
@@ -109,7 +110,7 @@ class DefaultBeanInstanceGenerator {
 		contribution.statements().addStatement(code.build());
 
 		if (multiStatements) {
-			for (BeanInstanceContributor contributor : this.contributors) {
+			for (BeanInstantiationContributor contributor : this.contributors) {
 				contributor.contribute(contribution);
 			}
 			contribution.statements().addStatement("return bean")
@@ -147,7 +148,7 @@ class DefaultBeanInstanceGenerator {
 		code.add(this.injectionGenerator.writeInstantiation(method));
 		contribution.statements().addStatement(code.build());
 		if (multiStatements) {
-			for (BeanInstanceContributor contributor : this.contributors) {
+			for (BeanInstantiationContributor contributor : this.contributors) {
 				contributor.contribute(contribution);
 			}
 			contribution.statements().addStatement("return bean")

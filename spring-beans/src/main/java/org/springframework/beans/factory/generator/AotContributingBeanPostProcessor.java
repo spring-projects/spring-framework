@@ -20,9 +20,9 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
- * Strategy interface to be implemented by a {@link BeanPostProcessor} that
- * participates in a bean instance setup and can provide an equivalent setup
- * using generated code.
+ * Specialization of {@link BeanPostProcessor} that contributes to bean
+ * instantiation ahead of time, providing generated code that is equivalent to
+ * its runtime behavior.
  *
  * <p>Contrary to other bean post processors, implementations of this interface
  * are instantiated at build-time and should not rely on other beans in the
@@ -32,15 +32,15 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  * @since 6.0
  */
 @FunctionalInterface
-public interface BeanInstanceAotPostProcessor extends BeanPostProcessor {
+public interface AotContributingBeanPostProcessor extends BeanPostProcessor {
 
 	/**
-	 * Build a {@link BeanInstanceContributor} for the given bean definition.
+	 * Build a {@link BeanInstantiationContributor} for the given bean definition.
 	 * @param beanDefinition the merged bean definition for the bean
-	 * @param beanType the actual type of the managed bean instance
+	 * @param beanType the inferred type of the bean
 	 * @param beanName the name of the bean
 	 * @return the contributor to use
 	 */
-	BeanInstanceContributor buildAotContributor(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName);
+	BeanInstantiationContributor buildAotContributor(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName);
 
 }

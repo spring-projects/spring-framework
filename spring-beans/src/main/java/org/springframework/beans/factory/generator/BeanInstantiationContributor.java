@@ -19,21 +19,20 @@ package org.springframework.beans.factory.generator;
 import org.springframework.aot.generator.CodeContribution;
 
 /**
- * Strategy interface to be implemented by components that participates in a
- * bean instance setup so that the generated code provides an equivalent
- * setup.
+ * Contributor to the code that instantiates a bean following ahead of time
+ * processing.
  *
  * @author Stephane Nicoll
  * @since 6.0
  */
 @FunctionalInterface
-public interface BeanInstanceContributor {
+public interface BeanInstantiationContributor {
 
 	/**
-	 * A {@link BeanInstanceContributor} that does not contribute anything
+	 * A {@link BeanInstantiationContributor} that does not contribute anything
 	 * to the {@link CodeContribution}.
 	 */
-	BeanInstanceContributor NO_OP = contribution -> { };
+	BeanInstantiationContributor NO_OP = contribution -> { };
 
 	/**
 	 * Contribute to the specified {@link CodeContribution}.

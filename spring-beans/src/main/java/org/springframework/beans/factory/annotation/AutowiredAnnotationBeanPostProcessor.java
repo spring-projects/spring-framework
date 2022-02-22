@@ -56,8 +56,8 @@ import org.springframework.beans.factory.annotation.InjectionMetadata.InjectedEl
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
-import org.springframework.beans.factory.generator.BeanInstanceAotPostProcessor;
-import org.springframework.beans.factory.generator.BeanInstanceContributor;
+import org.springframework.beans.factory.generator.AotContributingBeanPostProcessor;
+import org.springframework.beans.factory.generator.BeanInstantiationContributor;
 import org.springframework.beans.factory.generator.InjectionGenerator;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
@@ -140,7 +140,7 @@ import org.springframework.util.StringUtils;
  * @see Value
  */
 public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
-		MergedBeanDefinitionPostProcessor, BeanInstanceAotPostProcessor, PriorityOrdered, BeanFactoryAware {
+		MergedBeanDefinitionPostProcessor, AotContributingBeanPostProcessor, PriorityOrdered, BeanFactoryAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -268,12 +268,12 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	}
 
 	@Override
-	public BeanInstanceContributor buildAotContributor(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+	public BeanInstantiationContributor buildAotContributor(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		InjectionMetadata metadata = findInjectionMetadata(beanName, beanType, beanDefinition);
 		Collection<InjectedElement> injectedElements = metadata.getInjectedElements();
 		return (!ObjectUtils.isEmpty(injectedElements)
-				? new AutowiredAnnotationBeanInstanceContributor(injectedElements)
-				: BeanInstanceContributor.NO_OP);
+				? new AutowiredAnnotationBeanInstantiationContributor(injectedElements)
+				: BeanInstantiationContributor.NO_OP);
 	}
 
 	private InjectionMetadata findInjectionMetadata(String beanName, Class<?> beanType, RootBeanDefinition beanDefinition) {
@@ -821,13 +821,13 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 	}
 
-	private static final class AutowiredAnnotationBeanInstanceContributor implements BeanInstanceContributor {
+	private static final class AutowiredAnnotationBeanInstantiationContributor implements BeanInstantiationContributor {
 
 		private final Collection<InjectedElement> injectedElements;
 
 		private final InjectionGenerator generator;
 
-		AutowiredAnnotationBeanInstanceContributor(Collection<InjectedElement> injectedElements) {
+		AutowiredAnnotationBeanInstantiationContributor(Collection<InjectedElement> injectedElements) {
 			this.injectedElements = injectedElements;
 			this.generator = new InjectionGenerator();
 		}
