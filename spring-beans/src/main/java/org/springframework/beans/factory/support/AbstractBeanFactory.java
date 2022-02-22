@@ -1674,6 +1674,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName the canonical bean name
 	 * @param mbd the merged bean definition
 	 * @return the object to expose for the bean
+	 *
+	 * 从bean的实例中获取对象
+	 * 获取到bean以后就要获取实例对象了，这里用到的是getObjectForBeanInstance方法。
+	 * getObjectForBeanInstance是个频繁使用的方法，无论是从缓存中获得bean还是根据不同的scope策略加载bean.
+	 * 总之，我们得到bean的实例后，要做的第一步就是调用这个方法来检测一下正确性，
+	 * 其实就是检测获得Bean是不是FactoryBean类型的bean,
+	 * 如果是，那么需要调用该bean对应的FactoryBean实例中的getObject()作为返回值
 	 */
 	protected Object getObjectForBeanInstance(
 			Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
