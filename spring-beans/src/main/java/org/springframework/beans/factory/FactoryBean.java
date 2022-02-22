@@ -61,6 +61,27 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see org.springframework.jndi.JndiObjectFactoryBean
+ *
+ * 一般情况下，Spring通过反射机制利用<bean>的class属性指定实现类实例化Bean，
+ * 在某些情况下，实例化Bean过程比较复杂，如果按照传统的方式，则需要在<bean>中提供大量的配置信息。
+ * 配置方式的灵活性是受限的，这时采用编码的方式可能会得到一个简单的方案。
+ * Spring为此提供了一个org.springframework.bean.factory.FactoryBean的工厂类接口，用户可以通过实现该接口定制实例化Bean的逻辑。
+ * FactoryBean接口对于Spring框架来说占用重要的地位，Spring自身就提供了70多个FactoryBean的实现。它们隐藏了实例化一些复杂Bean的细节，
+ * 给上层应用带来了便利。从Spring3.0开始，FactoryBean开始支持泛型，即接口声明改为FactoryBean<T>的形式。
+ *
+ * 以Bean结尾，表示它是一个Bean，不同于普通Bean的是：它是实现了FactoryBean<T>接口的Bean，
+ * 根据该Bean的ID从BeanFactory中获取的实际上是FactoryBean的getObject()返回的对象，
+ * 而不是FactoryBean本身，如果要获取FactoryBean对象，请在id前面加一个&符号来获取。
+ *
+ *
+ * 在该接口中还定义了以下3个方法：
+ *
+ * T getObject()：返回由FactoryBean创建的Bean实例，如果isSingleton()返回true，则该实例会放到Spring容器中单实例缓存池中；
+ * boolean isSingleton()：返回由FactoryBean创建的Bean实例的作用域是singleton还是prototype；
+ * Class<T> getObjectType()：返回FactoryBean创建的Bean类型。
+ * 当配置文件中<bean>的class属性配置的实现类是FactoryBean时，通过getBean()方法返回的不是FactoryBean本身，
+ * 而是FactoryBean#getObject()方法所返回的对象，相当于FactoryBean#getObject()代理了getBean()方法。
+ *
  */
 public interface FactoryBean<T> {
 

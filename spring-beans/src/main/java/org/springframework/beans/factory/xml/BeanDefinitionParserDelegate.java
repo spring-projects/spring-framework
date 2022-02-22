@@ -1438,6 +1438,15 @@ public class BeanDefinitionParserDelegate {
 	 * Parse a custom element (outside of the default namespace).
 	 * @param ele the element to parse
 	 * @return the resulting bean definition
+	 *
+	 * 首先会加载 handlers 文件，将其中内容进行一个解析，形成 <namespaceUri,类路径> 这样的一个映射，
+	 * 然后根据获取的 namespaceUri 就可以得到相应的类路径，对其进行初始化等到相应的 Handler 对象，
+	 * 调用 parse() 方法，在该方法中根据标签的 localName 得到相应的 BeanDefinitionParser 实例对象，
+	 * 调用 parse() ，该方法定义在 AbstractBeanDefinitionParser 抽象类中，核心逻辑封装在其 parseInternal() 中，
+	 * 该方法返回一个 AbstractBeanDefinition 实例对象，其主要是在 AbstractSingleBeanDefinitionParser 中实现，
+	 * 对于自定义的 Parser 类，其需要实现 getBeanClass() 或者 getBeanClassName() 和 doParse()。
+	 * 最后将 AbstractBeanDefinition 转换为 BeanDefinitionHolder 并注册 。
+	 *
 	 */
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele) {
