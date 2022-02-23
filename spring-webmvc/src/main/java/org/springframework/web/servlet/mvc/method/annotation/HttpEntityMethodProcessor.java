@@ -44,6 +44,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -56,7 +57,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 /**
  * Resolves {@link HttpEntity} and {@link RequestEntity} method argument values,
  * as well as return values of type {@link HttpEntity}, {@link ResponseEntity},
- * and {@link ProblemDetail}.
+ * {@link ErrorResponse} and {@link ProblemDetail}.
  *
  * <p>An {@link HttpEntity} return type has a specific purpose. Therefore, this
  * handler should be configured ahead of handlers that support any return
@@ -122,7 +123,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> type = returnType.getParameterType();
 		return ((HttpEntity.class.isAssignableFrom(type) && !RequestEntity.class.isAssignableFrom(type)) ||
-				ProblemDetail.class.isAssignableFrom(type));
+				ErrorResponse.class.isAssignableFrom(type) || ProblemDetail.class.isAssignableFrom(type));
 	}
 
 	@Override
@@ -180,7 +181,10 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
 
 		HttpEntity<?> httpEntity;
-		if (returnValue instanceof ProblemDetail detail) {
+		if (returnValue instanceof ErrorResponse response) {
+			httpEntity = new ResponseEntity<>(response.getBody(), response.getHeaders(), response.getRawStatusCode());
+		}
+		else if (returnValue instanceof ProblemDetail detail) {
 			httpEntity = new ResponseEntity<>(returnValue, HttpHeaders.EMPTY, detail.getStatus());
 		}
 		else {

@@ -52,6 +52,8 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.web.ErrorResponse;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -129,6 +131,8 @@ public class HttpEntityMethodProcessorMockTests {
 
 	private MethodParameter returnTypeInt;
 
+	private MethodParameter returnTypeErrorResponse;
+
 	private MethodParameter returnTypeProblemDetail;
 
 	private ModelAndViewContainer mavContainer;
@@ -175,7 +179,8 @@ public class HttpEntityMethodProcessorMockTests {
 		returnTypeHttpEntitySubclass = new MethodParameter(getClass().getMethod("handle2x", HttpEntity.class), -1);
 		returnTypeInt = new MethodParameter(getClass().getMethod("handle3"), -1);
 		returnTypeResponseEntityResource = new MethodParameter(getClass().getMethod("handle5"), -1);
-		returnTypeProblemDetail = new MethodParameter(getClass().getMethod("handle6"), -1);
+		returnTypeErrorResponse = new MethodParameter(getClass().getMethod("handle6"), -1);
+		returnTypeProblemDetail = new MethodParameter(getClass().getMethod("handle7"), -1);
 
 		mavContainer = new ModelAndViewContainer();
 		servletRequest = new MockHttpServletRequest("GET", "/foo");
@@ -197,6 +202,7 @@ public class HttpEntityMethodProcessorMockTests {
 		assertThat(processor.supportsReturnType(returnTypeResponseEntity)).as("ResponseEntity return type not supported").isTrue();
 		assertThat(processor.supportsReturnType(returnTypeHttpEntity)).as("HttpEntity return type not supported").isTrue();
 		assertThat(processor.supportsReturnType(returnTypeHttpEntitySubclass)).as("Custom HttpEntity subclass not supported").isTrue();
+		assertThat(processor.supportsReturnType(returnTypeErrorResponse)).isTrue();
 		assertThat(processor.supportsReturnType(returnTypeProblemDetail)).isTrue();
 		assertThat(processor.supportsReturnType(paramRequestEntity)).as("RequestEntity parameter supported").isFalse();
 		assertThat(processor.supportsReturnType(returnTypeInt)).as("non-ResponseBody return type supported").isFalse();
@@ -283,6 +289,37 @@ public class HttpEntityMethodProcessorMockTests {
 	}
 
 	@Test
+	public void shouldHandleErrorResponse() throws Exception {
+		ErrorResponseException ex = new ErrorResponseException(HttpStatus.BAD_REQUEST);
+		ex.getHeaders().add("foo", "bar");
+		servletRequest.addHeader("Accept", APPLICATION_PROBLEM_JSON_VALUE);
+		given(jsonMessageConverter.canWrite(ProblemDetail.class, APPLICATION_PROBLEM_JSON)).willReturn(true);
+
+		processor.handleReturnValue(ex, returnTypeProblemDetail, mavContainer, webRequest);
+
+		assertThat(mavContainer.isRequestHandled()).isTrue();
+		assertThat(webRequest.getNativeResponse(HttpServletResponse.class).getStatus()).isEqualTo(400);
+		verify(jsonMessageConverter).write(eq(ex.getBody()), eq(APPLICATION_PROBLEM_JSON), isA(HttpOutputMessage.class));
+
+		assertThat(ex.getBody()).isNotNull()
+				.extracting(ProblemDetail::getInstance).isNotNull()
+				.extracting(URI::toString)
+				.as("Instance was not set to the request path")
+				.isEqualTo(servletRequest.getRequestURI());
+
+
+		// But if instance is set, it should be respected
+		ex.getBody().setInstance(URI.create("/something/else"));
+		processor.handleReturnValue(ex, returnTypeProblemDetail, mavContainer, webRequest);
+
+		assertThat(ex.getBody()).isNotNull()
+				.extracting(ProblemDetail::getInstance).isNotNull()
+				.extracting(URI::toString)
+				.as("Instance was not set to the request path")
+				.isEqualTo("/something/else");
+	}
+
+	@Test
 	public void shouldHandleProblemDetail() throws Exception {
 		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
 		servletRequest.addHeader("Accept", APPLICATION_PROBLEM_JSON_VALUE);
@@ -294,7 +331,7 @@ public class HttpEntityMethodProcessorMockTests {
 		assertThat(webRequest.getNativeResponse(HttpServletResponse.class).getStatus()).isEqualTo(400);
 		verify(jsonMessageConverter).write(eq(problemDetail), eq(APPLICATION_PROBLEM_JSON), isA(HttpOutputMessage.class));
 
-		assertThat(problemDetail).isNotNull()
+		assertThat(problemDetail)
 				.extracting(ProblemDetail::getInstance).isNotNull()
 				.extracting(URI::toString)
 				.as("Instance was not set to the request path")
@@ -842,7 +879,12 @@ public class HttpEntityMethodProcessorMockTests {
 	}
 
 	@SuppressWarnings("unused")
-	public ProblemDetail handle6() {
+	public ErrorResponse handle6() {
+		return null;
+	}
+
+	@SuppressWarnings("unused")
+	public ProblemDetail handle7() {
 		return null;
 	}
 

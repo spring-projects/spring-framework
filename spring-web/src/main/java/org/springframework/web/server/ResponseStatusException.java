@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,21 @@
 package org.springframework.web.server;
 
 import org.springframework.core.NestedExceptionUtils;
-import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
+import org.springframework.web.ErrorResponseException;
 
 /**
- * Base class for exceptions associated with specific HTTP response status codes.
+ * Subclass of {@link ErrorResponseException} that accepts a "reason" and maps
+ * it to the "detail" property of {@link org.springframework.http.ProblemDetail}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 5.0
  */
 @SuppressWarnings("serial")
-public class ResponseStatusException extends NestedRuntimeException {
-
-	private final int status;
+public class ResponseStatusException extends ErrorResponseException {
 
 	@Nullable
 	private final String reason;
@@ -54,10 +52,7 @@ public class ResponseStatusException extends NestedRuntimeException {
 	 * @param reason the associated reason (optional)
 	 */
 	public ResponseStatusException(HttpStatus status, @Nullable String reason) {
-		super("");
-		Assert.notNull(status, "HttpStatus is required");
-		this.status = status.value();
-		this.reason = reason;
+		this(status, reason, null);
 	}
 
 	/**
@@ -68,10 +63,7 @@ public class ResponseStatusException extends NestedRuntimeException {
 	 * @param cause a nested exception (optional)
 	 */
 	public ResponseStatusException(HttpStatus status, @Nullable String reason, @Nullable Throwable cause) {
-		super(null, cause);
-		Assert.notNull(status, "HttpStatus is required");
-		this.status = status.value();
-		this.reason = reason;
+		this(status.value(), reason, cause);
 	}
 
 	/**
@@ -83,43 +75,11 @@ public class ResponseStatusException extends NestedRuntimeException {
 	 * @since 5.3
 	 */
 	public ResponseStatusException(int rawStatusCode, @Nullable String reason, @Nullable Throwable cause) {
-		super(null, cause);
-		this.status = rawStatusCode;
+		super(rawStatusCode, cause);
 		this.reason = reason;
+		setDetail(reason);
 	}
 
-
-	/**
-	 * Return the HTTP status associated with this exception.
-	 * @throws IllegalArgumentException in case of an unknown HTTP status code
-	 * @since #getRawStatusCode()
-	 * @see HttpStatus#valueOf(int)
-	 */
-	public HttpStatus getStatus() {
-		return HttpStatus.valueOf(this.status);
-	}
-
-	/**
-	 * Return the HTTP status code (potentially non-standard and not resolvable
-	 * through the {@link HttpStatus} enum) as an integer.
-	 * @return the HTTP status as an integer value
-	 * @since 5.3
-	 * @see #getStatus()
-	 * @see HttpStatus#resolve(int)
-	 */
-	public int getRawStatusCode() {
-		return this.status;
-	}
-
-	/**
-	 * Return headers associated with the exception that should be added to the
-	 * error response, e.g. "Allow", "Accept", etc.
-	 * <p>The default implementation in this class returns empty headers.
-	 * @since 5.1.13
-	 */
-	public HttpHeaders getResponseHeaders() {
-		return HttpHeaders.EMPTY;
-	}
 
 	/**
 	 * The reason explaining the exception (potentially {@code null} or empty).
@@ -129,11 +89,32 @@ public class ResponseStatusException extends NestedRuntimeException {
 		return this.reason;
 	}
 
+	/**
+	 * Return headers to add to the error response, e.g. "Allow", "Accept", etc.
+	 * <p>By default, delegates to {@link #getResponseHeaders()} for backwards
+	 * compatibility.
+	 */
+	@Override
+	public HttpHeaders getHeaders() {
+		return getResponseHeaders();
+	}
+
+	/**
+	 * Return headers associated with the exception that should be added to the
+	 * error response, e.g. "Allow", "Accept", etc.
+	 * <p>The default implementation in this class returns empty headers.
+	 * @since 5.1.13
+	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}
+	 */
+	@Deprecated
+	public HttpHeaders getResponseHeaders() {
+		return HttpHeaders.EMPTY;
+	}
 
 	@Override
 	public String getMessage() {
-		HttpStatus code = HttpStatus.resolve(this.status);
-		String msg = (code != null ? code : this.status) + (this.reason != null ? " \"" + this.reason + "\"" : "");
+		HttpStatus code = HttpStatus.resolve(getRawStatusCode());
+		String msg = (code != null ? code : getRawStatusCode()) + (this.reason != null ? " \"" + this.reason + "\"" : "");
 		return NestedExceptionUtils.buildMessage(msg, getCause());
 	}
 

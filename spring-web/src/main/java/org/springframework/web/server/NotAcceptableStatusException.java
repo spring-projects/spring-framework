@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,17 +54,28 @@ public class NotAcceptableStatusException extends ResponseStatusException {
 
 
 	/**
-	 * Return HttpHeaders with an "Accept" header, or an empty instance.
-	 * @since 5.1.13
+	 * Return HttpHeaders with an "Accept" header that documents the supported
+	 * media types, if available, or an empty instance otherwise.
 	 */
 	@Override
-	public HttpHeaders getResponseHeaders() {
+	public HttpHeaders getHeaders() {
 		if (CollectionUtils.isEmpty(this.supportedMediaTypes)) {
 			return HttpHeaders.EMPTY;
 		}
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(this.supportedMediaTypes);
 		return headers;
+	}
+
+	/**
+	 * Delegates to {@link #getHeaders()}.
+	 * @since 5.1.13
+	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}
+	 */
+	@Deprecated
+	@Override
+	public HttpHeaders getResponseHeaders() {
+		return getHeaders();
 	}
 
 	/**

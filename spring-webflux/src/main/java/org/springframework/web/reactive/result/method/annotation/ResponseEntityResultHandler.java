@@ -37,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -44,7 +45,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Handles return values of type {@link HttpEntity}, {@link ResponseEntity},
- * {@link HttpHeaders}, and {@link ProblemDetail}.
+ * {@link HttpHeaders}, {@link ErrorResponse}, and {@link ProblemDetail}.
  *
  * <p>By default the order for this result handler is set to 0. It is generally
  * safe to place it early in the order as it looks for a concrete return type.
@@ -108,7 +109,8 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			return false;
 		}
 		return ((HttpEntity.class.isAssignableFrom(type) && !RequestEntity.class.isAssignableFrom(type)) ||
-				HttpHeaders.class.isAssignableFrom(type) || ProblemDetail.class.isAssignableFrom(type));
+				ErrorResponse.class.isAssignableFrom(type) || ProblemDetail.class.isAssignableFrom(type) ||
+				HttpHeaders.class.isAssignableFrom(type));
 	}
 
 
@@ -138,11 +140,14 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			if (returnValue instanceof HttpEntity) {
 				httpEntity = (HttpEntity<?>) returnValue;
 			}
-			else if (returnValue instanceof HttpHeaders) {
-				httpEntity = new ResponseEntity<>((HttpHeaders) returnValue, HttpStatus.OK);
+			else if (returnValue instanceof ErrorResponse response) {
+				httpEntity = new ResponseEntity<>(response.getBody(), response.getHeaders(), response.getRawStatusCode());
 			}
 			else if (returnValue instanceof ProblemDetail detail) {
 				httpEntity = new ResponseEntity<>(returnValue, HttpHeaders.EMPTY, detail.getStatus());
+			}
+			else if (returnValue instanceof HttpHeaders) {
+				httpEntity = new ResponseEntity<>((HttpHeaders) returnValue, HttpStatus.OK);
 			}
 			else {
 				throw new IllegalArgumentException(
