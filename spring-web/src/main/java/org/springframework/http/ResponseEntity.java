@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,6 +258,27 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	public static <T> ResponseEntity<T> of(Optional<T> body) {
 		Assert.notNull(body, "Body must not be null");
 		return body.map(ResponseEntity::ok).orElseGet(() -> notFound().build());
+	}
+
+	/**
+	 * Create a builder for a {@code ResponseEntity} with the given
+	 * {@link ProblemDetail} as the body, also matching to its
+	 * {@link ProblemDetail#getStatus() status}. An {@code @ExceptionHandler}
+	 * method can use to add response headers, or otherwise it can return
+	 * {@code ProblemDetail}.
+	 * @param body the details for an HTTP error response
+	 * @return the created builder
+	 * @since 6.0
+	 */
+	public static HeadersBuilder<?> of(ProblemDetail body) {
+		return new DefaultBuilder(body.getStatus()) {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public <T> ResponseEntity<T> build() {
+				return (ResponseEntity<T>) body(body);
+			}
+		};
 	}
 
 	/**

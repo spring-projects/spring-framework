@@ -46,6 +46,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -127,6 +128,9 @@ public class ResponseEntityResultHandlerTests {
 		assertThat(this.resultHandler.supports(handlerResult(value, returnType))).isTrue();
 
 		returnType = on(TestController.class).resolveReturnType(HttpHeaders.class);
+		assertThat(this.resultHandler.supports(handlerResult(value, returnType))).isTrue();
+
+		returnType = on(TestController.class).resolveReturnType(ProblemDetail.class);
 		assertThat(this.resultHandler.supports(handlerResult(value, returnType))).isTrue();
 
 		// SPR-15785
@@ -230,6 +234,26 @@ public class ResponseEntityResultHandlerTests {
 		returnValue = Mono.just(ResponseEntity.ok("abc"));
 		returnType = on(TestController.class).resolveReturnType(CompletableFuture.class, entity(String.class));
 		testHandle(returnValue, returnType);
+	}
+
+	@Test
+	public void handleProblemDetail() {
+		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+		MethodParameter returnType = on(TestController.class).resolveReturnType(ProblemDetail.class);
+		HandlerResult result = handlerResult(problemDetail, returnType);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
+		exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_PROBLEM_JSON);
+		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
+
+		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		assertThat(exchange.getResponse().getHeaders().size()).isEqualTo(2);
+		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON);
+		assertResponseBody(exchange,
+				"{\"type\":\"about:blank\"," +
+						"\"title\":\"Bad Request\"," +
+						"\"status\":400," +
+						"\"detail\":null," +
+						"\"instance\":\"/path\"}");
 	}
 
 	@Test
@@ -504,6 +528,8 @@ public class ResponseEntityResultHandlerTests {
 		ResponseEntity<Void> responseEntityVoid() { return null; }
 
 		ResponseEntity<Person> responseEntityPerson() { return null; }
+
+		ProblemDetail problemDetail() { return null; }
 
 		HttpHeaders httpHeaders() { return null; }
 

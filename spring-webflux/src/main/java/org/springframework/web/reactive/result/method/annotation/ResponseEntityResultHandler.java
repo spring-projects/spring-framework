@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +31,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -41,7 +43,8 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Handles {@link HttpEntity} and {@link ResponseEntity} return values.
+ * Handles return values of type {@link HttpEntity}, {@link ResponseEntity},
+ * {@link HttpHeaders}, and {@link ProblemDetail}.
  *
  * <p>By default the order for this result handler is set to 0. It is generally
  * safe to place it early in the order as it looks for a concrete return type.
@@ -100,10 +103,12 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 		return valueType;
 	}
 
-	private boolean isSupportedType(@Nullable Class<?> clazz) {
-		return (clazz != null && ((HttpEntity.class.isAssignableFrom(clazz) &&
-				!RequestEntity.class.isAssignableFrom(clazz)) ||
-				HttpHeaders.class.isAssignableFrom(clazz)));
+	private boolean isSupportedType(@Nullable Class<?> type) {
+		if (type == null) {
+			return false;
+		}
+		return ((HttpEntity.class.isAssignableFrom(type) && !RequestEntity.class.isAssignableFrom(type)) ||
+				HttpHeaders.class.isAssignableFrom(type) || ProblemDetail.class.isAssignableFrom(type));
 	}
 
 
@@ -136,9 +141,19 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			else if (returnValue instanceof HttpHeaders) {
 				httpEntity = new ResponseEntity<>((HttpHeaders) returnValue, HttpStatus.OK);
 			}
+			else if (returnValue instanceof ProblemDetail detail) {
+				httpEntity = new ResponseEntity<>(returnValue, HttpHeaders.EMPTY, detail.getStatus());
+			}
 			else {
 				throw new IllegalArgumentException(
 						"HttpEntity or HttpHeaders expected but got: " + returnValue.getClass());
+			}
+
+			if (httpEntity.getBody() instanceof ProblemDetail detail) {
+				if (detail.getInstance() == null) {
+					URI path = URI.create(exchange.getRequest().getPath().value());
+					detail.setInstance(path);
+				}
 			}
 
 			if (httpEntity instanceof ResponseEntity) {
