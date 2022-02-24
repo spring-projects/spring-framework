@@ -18,6 +18,7 @@ package org.springframework.scheduling.support;
 
 import java.time.DateTimeException;
 import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.ValueRange;
 import java.util.function.BiFunction;
@@ -168,22 +169,25 @@ abstract class CronField {
 	 * day-of-month, month, day-of-week.
 	 */
 	protected enum Type {
-		NANO(ChronoField.NANO_OF_SECOND),
-		SECOND(ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
-		MINUTE(ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
-		HOUR(ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
-		DAY_OF_MONTH(ChronoField.DAY_OF_MONTH, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
-		MONTH(ChronoField.MONTH_OF_YEAR, ChronoField.DAY_OF_MONTH, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
-		DAY_OF_WEEK(ChronoField.DAY_OF_WEEK, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND);
+		NANO(ChronoField.NANO_OF_SECOND, ChronoUnit.SECONDS),
+		SECOND(ChronoField.SECOND_OF_MINUTE, ChronoUnit.MINUTES, ChronoField.NANO_OF_SECOND),
+		MINUTE(ChronoField.MINUTE_OF_HOUR, ChronoUnit.HOURS, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
+		HOUR(ChronoField.HOUR_OF_DAY, ChronoUnit.DAYS, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
+		DAY_OF_MONTH(ChronoField.DAY_OF_MONTH, ChronoUnit.MONTHS, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
+		MONTH(ChronoField.MONTH_OF_YEAR, ChronoUnit.YEARS, ChronoField.DAY_OF_MONTH, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
+		DAY_OF_WEEK(ChronoField.DAY_OF_WEEK, ChronoUnit.WEEKS, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND);
 
 
 		private final ChronoField field;
 
+		private final ChronoUnit higherOrder;
+
 		private final ChronoField[] lowerOrders;
 
 
-		Type(ChronoField field, ChronoField... lowerOrders) {
+		Type(ChronoField field, ChronoUnit higherOrder, ChronoField... lowerOrders) {
 			this.field = field;
+			this.higherOrder = higherOrder;
 			this.lowerOrders = lowerOrders;
 		}
 
@@ -266,17 +270,9 @@ abstract class CronField {
 		 * @return the rolled forward temporal
 		 */
 		public <T extends Temporal & Comparable<? super T>> T rollForward(T temporal) {
-			int current = get(temporal);
-			ValueRange range = temporal.range(this.field);
-			long amount = range.getMaximum() - current + 1;
-			T result = this.field.getBaseUnit().addTo(temporal, amount);
-			current = get(result);
-			range = result.range(this.field);
-			// adjust for daylight savings
-			if (current != range.getMinimum()) {
-				result = this.field.adjustInto(result, range.getMinimum());
-			}
-			return result;
+			T result = this.higherOrder.addTo(temporal, 1);
+			ValueRange range = result.range(this.field);
+			return this.field.adjustInto(result, range.getMinimum());
 		}
 
 		/**
