@@ -129,6 +129,15 @@ class ResponseCreatorsTests {
 	}
 
 	@Test
+	void withCustomStatus() throws Exception {
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withStatus(454);
+		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
+
+		assertThat(response.getRawStatusCode()).isEqualTo(454);
+		assertThat(response.getStatusText()).isEqualTo("Custom http status");
+	}
+
+	@Test
 	void withException() {
 		ResponseCreator responseCreator = MockRestResponseCreators.withException(new SocketTimeoutException());
 		assertThatExceptionOfType(SocketTimeoutException.class)
