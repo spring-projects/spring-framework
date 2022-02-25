@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory.aspectj;
 
-import java.io.Serializable;
-
 import org.aspectj.lang.annotation.control.CodeGenerationHint;
 
 import org.springframework.beans.factory.BeanFactory;
