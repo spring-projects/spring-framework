@@ -1,0 +1,13 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+description = "Spring Core Test"
+
+dependencies {
+	api(project(":spring-core"))
+	api("org.assertj:assertj-core")
+	api("com.thoughtworks.qdox:qdox")
+}
+
+tasks.withType(PublishToMavenRepository).configureEach {
+	it.enabled = false
+}
