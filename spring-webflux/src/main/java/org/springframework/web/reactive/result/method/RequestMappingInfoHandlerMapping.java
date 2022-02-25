@@ -200,8 +200,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		if (helper.hasParamsMismatch()) {
 			throw new ServerWebInputException(
-					"Unsatisfied query parameter conditions: " + helper.getParamConditions() +
-							", actual parameters: " + request.getQueryParams());
+					"Expected parameters: " + helper.getParamConditions() +
+							", actual query parameters: " + request.getQueryParams());
 		}
 
 		return null;

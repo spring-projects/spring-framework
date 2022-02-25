@@ -42,6 +42,7 @@ public class MissingServletRequestPartException extends ServletRequestBindingExc
 	public MissingServletRequestPartException(String requestPartName) {
 		super("Required request part '" + requestPartName + "' is not present");
 		this.requestPartName = requestPartName;
+		getBody().setDetail(getMessage());
 	}
 
 

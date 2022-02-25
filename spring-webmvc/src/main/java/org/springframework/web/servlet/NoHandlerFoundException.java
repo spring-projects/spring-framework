@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.web.ErrorResponse;
 
 /**
- * By default when the DispatcherServlet can't find a handler for a request it
- * sends a 404 response. However if its property "throwExceptionIfNoHandlerFound"
+ * By default, when the DispatcherServlet can't find a handler for a request it
+ * sends a 404 response. However, if its property "throwExceptionIfNoHandlerFound"
  * is set to {@code true} this exception is raised and may be handled with
  * a configured HandlerExceptionResolver.
  *
@@ -34,13 +37,15 @@ import org.springframework.http.HttpHeaders;
  * @see DispatcherServlet#noHandlerFound(HttpServletRequest, HttpServletResponse)
  */
 @SuppressWarnings("serial")
-public class NoHandlerFoundException extends ServletException {
+public class NoHandlerFoundException extends ServletException implements ErrorResponse {
 
 	private final String httpMethod;
 
 	private final String requestURL;
 
 	private final HttpHeaders headers;
+
+	private final ProblemDetail detail = ProblemDetail.forRawStatusCode(getRawStatusCode());
 
 
 	/**
@@ -57,6 +62,11 @@ public class NoHandlerFoundException extends ServletException {
 	}
 
 
+	@Override
+	public int getRawStatusCode() {
+		return HttpStatus.NOT_FOUND.value();
+	}
+
 	public String getHttpMethod() {
 		return this.httpMethod;
 	}
@@ -67,6 +77,11 @@ public class NoHandlerFoundException extends ServletException {
 
 	public HttpHeaders getHeaders() {
 		return this.headers;
+	}
+
+	@Override
+	public ProblemDetail getBody() {
+		return this.detail;
 	}
 
 }

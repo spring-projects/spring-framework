@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.bind;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpStatus;
 
 /**
  * {@link ServletRequestBindingException} subclass that indicates that a path
@@ -59,6 +60,7 @@ public class MissingPathVariableException extends MissingRequestValueException {
 		super("", missingAfterConversion);
 		this.variableName = variableName;
 		this.parameter = parameter;
+		getBody().setDetail("Required URI variable '" + this.variableName + "' is not present");
 	}
 
 
@@ -81,6 +83,12 @@ public class MissingPathVariableException extends MissingRequestValueException {
 	 */
 	public final MethodParameter getParameter() {
 		return this.parameter;
+	}
+
+
+	@Override
+	public int getRawStatusCode() {
+		return HttpStatus.INTERNAL_SERVER_ERROR.value();
 	}
 
 }

@@ -206,7 +206,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 				return null;
 			}
 			throw new HttpMediaTypeNotSupportedException(contentType,
-					getSupportedMediaTypes(targetClass != null ? targetClass : Object.class));
+					getSupportedMediaTypes(targetClass != null ? targetClass : Object.class), httpMethod);
 		}
 
 		MediaType selectedContentType = contentType;

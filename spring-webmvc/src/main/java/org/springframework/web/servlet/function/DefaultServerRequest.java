@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,7 +206,7 @@ class DefaultServerRequest implements ServerRequest {
 				return theConverter.read(clazz, this.serverHttpRequest);
 			}
 		}
-		throw new HttpMediaTypeNotSupportedException(contentType, getSupportedMediaTypes(bodyClass));
+		throw new HttpMediaTypeNotSupportedException(contentType, getSupportedMediaTypes(bodyClass), method());
 	}
 
 	private List<MediaType> getSupportedMediaTypes(Class<?> bodyClass) {
