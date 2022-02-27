@@ -91,6 +91,12 @@ class RollbackRuleTests {
 		assertThat(rr.getDepth(new EnclosingException.EnclosedException())).isEqualTo(0);
 	}
 
+	@Test
+	public void useEqualsCompareExceptionName(){
+		RollbackRuleAttribute rr = new RollbackRuleAttribute(MyRuntimeException.class);
+		assertThat(rr.getDepth(new MyRuntimeExceptionX())).isEqualTo(-1);
+	}
+
 	@SuppressWarnings("serial")
 	static class EnclosingException extends RuntimeException {
 
