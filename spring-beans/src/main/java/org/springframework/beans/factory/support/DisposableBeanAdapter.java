@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,9 +114,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 					(bean instanceof AutoCloseable && CLOSE_METHOD_NAME.equals(destroyMethodNames[0]));
 			if (!this.invokeAutoCloseable) {
 				this.destroyMethodNames = destroyMethodNames;
-				Method[] destroyMethods = new Method[destroyMethodNames.length];
-				for (int i = 0; i < destroyMethodNames.length; i++) {
-					String destroyMethodName = destroyMethodNames[i];
+				List<Method> destroyMethods = new ArrayList<>();
+				for (String destroyMethodName : destroyMethodNames) {
 					Method destroyMethod = determineDestroyMethod(destroyMethodName);
 					if (destroyMethod == null) {
 						if (beanDefinition.isEnforceDestroyMethod()) {
@@ -137,9 +137,14 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 						}
 						destroyMethod = ClassUtils.getInterfaceMethodIfPossible(destroyMethod, bean.getClass());
 					}
-					destroyMethods[i] = destroyMethod;
+					if (destroyMethod != null && Modifier.isPrivate(destroyMethod.getModifiers())) {
+						if (beanDefinition.isExternallyManagedDestroyMethod(ClassUtils.getQualifiedMethodName(destroyMethod))) {
+							continue;
+						}
+					}
+					destroyMethods.add(destroyMethod);
 				}
-				this.destroyMethods = destroyMethods;
+				this.destroyMethods = destroyMethods.toArray(new Method[destroyMethods.size()]);
 			}
 		}
 

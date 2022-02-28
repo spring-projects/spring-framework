@@ -1830,6 +1830,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 
+		if (Modifier.isPrivate(initMethod.getModifiers())) {
+			if (mbd.isExternallyManagedInitMethod(ClassUtils.getQualifiedMethodName(initMethod))) {
+				return;
+			}
+		}
+
 		if (logger.isTraceEnabled()) {
 			logger.trace("Invoking init method  '" + initMethodName + "' on bean with name '" + beanName + "'");
 		}
