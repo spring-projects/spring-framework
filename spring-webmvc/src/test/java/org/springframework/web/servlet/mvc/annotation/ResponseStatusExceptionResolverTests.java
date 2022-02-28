@@ -139,7 +139,7 @@ public class ResponseStatusExceptionResolverTests {
 
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 
-		assertResolved(mav, 405, "Request method 'GET' not supported");
+		assertResolved(mav, 405, "Request method 'GET' is not supported.");
 		assertThat(response.getHeader(HttpHeaders.ALLOW)).isEqualTo("POST,PUT");
 	}
 

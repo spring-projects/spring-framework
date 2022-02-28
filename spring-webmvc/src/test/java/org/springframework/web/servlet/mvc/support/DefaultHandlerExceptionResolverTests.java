@@ -113,7 +113,7 @@ public class DefaultHandlerExceptionResolverTests {
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(500);
-		assertThat(response.getErrorMessage()).isEqualTo("Required URI variable 'foo' is not present");
+		assertThat(response.getErrorMessage()).isEqualTo("Required path variable 'foo' is not present.");
 	}
 
 	@Test
@@ -123,7 +123,7 @@ public class DefaultHandlerExceptionResolverTests {
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(400);
-		assertThat(response.getErrorMessage()).isEqualTo("Required parameter 'foo' is not present");
+		assertThat(response.getErrorMessage()).isEqualTo("Required parameter 'foo' is not present.");
 	}
 
 	@Test
@@ -183,7 +183,7 @@ public class DefaultHandlerExceptionResolverTests {
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(400);
-		assertThat(response.getErrorMessage().contains("request part")).isTrue();
+		assertThat(response.getErrorMessage().contains("part")).isTrue();
 		assertThat(response.getErrorMessage().contains("name")).isTrue();
 		assertThat(response.getErrorMessage().contains("not present")).isTrue();
 	}
