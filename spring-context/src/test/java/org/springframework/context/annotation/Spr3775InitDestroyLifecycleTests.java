@@ -150,6 +150,30 @@ public class Spr3775InitDestroyLifecycleTests {
 	}
 
 	@Test
+	public void testJsr250AnnotationsWithCustomPrivateInitDestroyMethods() {
+		Class<?> beanClass = CustomAnnotatedPrivateInitDestroyBean.class;
+		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit1", "customDestroy1");
+		CustomAnnotatedPrivateInitDestroyBean bean =
+				(CustomAnnotatedPrivateInitDestroyBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
+		assertMethodOrdering("init-methods", Arrays.asList("privateCustomInit1","afterPropertiesSet"), bean.initMethods);
+		beanFactory.destroySingletons();
+		assertMethodOrdering("destroy-methods", Arrays.asList("privateCustomDestroy1","destroy"), bean.destroyMethods);
+	}
+
+	@Test
+	public void testJsr250AnnotationsWithCustomSameMethodNames() {
+		Class<?> beanClass = CustomAnnotatedPrivateSameNameInitDestroyBean.class;
+		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit1", "customDestroy1");
+		CustomAnnotatedPrivateSameNameInitDestroyBean bean =
+				(CustomAnnotatedPrivateSameNameInitDestroyBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
+		assertMethodOrdering("init-methods",
+				Arrays.asList("privateCustomInit1","afterPropertiesSet","sameNameCustomInit1"), bean.initMethods);
+		beanFactory.destroySingletons();
+		assertMethodOrdering("destroy-methods",
+				Arrays.asList("privateCustomDestroy1","destroy","sameNameCustomDestroy1"), bean.destroyMethods);
+	}
+
+	@Test
 	public void testAllLifecycleMechanismsAtOnce() {
 		final Class<?> beanClass = AllInOneBean.class;
 		final DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass,
@@ -205,6 +229,31 @@ public class Spr3775InitDestroyLifecycleTests {
 		}
 	}
 
+	public static class CustomAnnotatedPrivateInitDestroyBean extends CustomInitializingDisposableBean{
+
+		@PostConstruct
+		private void customInit1() throws Exception {
+			this.initMethods.add("privateCustomInit1");
+		}
+
+		@PreDestroy
+		private void customDestroy1() throws Exception {
+			this.destroyMethods.add("privateCustomDestroy1");
+		}
+
+	}
+
+	public static class CustomAnnotatedPrivateSameNameInitDestroyBean extends CustomAnnotatedPrivateInitDestroyBean {
+
+		private void customInit1() throws Exception {
+			this.initMethods.add("sameNameCustomInit1");
+		}
+
+		private void customDestroy1() throws Exception {
+			this.destroyMethods.add("sameNameCustomDestroy1");
+		}
+
+	}
 
 	public static class CustomInitializingDisposableBean extends CustomInitDestroyBean
 			implements InitializingBean, DisposableBean {
