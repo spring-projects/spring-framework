@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -420,7 +420,11 @@ public class EvaluationTests extends AbstractExpressionTests {
 
 	@Test
 	public void testStaticRef02() {
-		evaluate("T(java.awt.Color).green.getRGB()!=0", "true", Boolean.class);
+		evaluate("T(java.awt.Color).green.getRGB() != 0", true, Boolean.class);
+		evaluate("(T(java.lang.Math).random() * 100.0 ) > 0", true, Boolean.class);
+		evaluate("(T(Math).random() * 100.0) > 0", true, Boolean.class);
+		evaluate("T(Character).isUpperCase('Test'.charAt(0)) ? 'uppercase' : 'lowercase'", "uppercase", String.class);
+		evaluate("T(Character).isUpperCase('Test'.charAt(1)) ? 'uppercase' : 'lowercase'", "lowercase", String.class);
 	}
 
 	// variables and functions
