@@ -30,7 +30,7 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
  * <li>The root context object is an Inventor instance {@link Inventor}
  * </ul>
  */
-public class TestScenarioCreator {
+class TestScenarioCreator {
 
 	public static StandardEvaluationContext getTestEvaluationContext() {
 		StandardEvaluationContext testContext = new StandardEvaluationContext();
