@@ -93,8 +93,9 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 		super(msg);
 		this.method = method;
 		this.supportedMethods = supportedMethods;
-		this.body = ProblemDetail.forRawStatusCode(getRawStatusCode())
-				.withDetail("Method '" + method + "' is not supported");
+
+		String detail = "Method '" + method + "' is not supported.";
+		this.body = ProblemDetail.forRawStatusCode(getRawStatusCode()).withDetail(detail);
 	}
 
 

@@ -52,7 +52,7 @@ public class MissingServletRequestParameterException extends MissingRequestValue
 		super("", missingAfterConversion);
 		this.parameterName = parameterName;
 		this.parameterType = parameterType;
-		getBody().setDetail("Required parameter '" + this.parameterName + "' is not present");
+		getBody().setDetail("Required parameter '" + this.parameterName + "' is not present.");
 	}
 
 

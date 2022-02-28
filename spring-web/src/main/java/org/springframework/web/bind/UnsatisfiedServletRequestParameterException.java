@@ -16,7 +16,6 @@
 
 package org.springframework.web.bind;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -48,9 +47,7 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 	 * @param actualParams the actual parameter Map associated with the ServletRequest
 	 */
 	public UnsatisfiedServletRequestParameterException(String[] paramConditions, Map<String, String[]> actualParams) {
-		super("");
-		this.paramConditions = Arrays.<String[]>asList(paramConditions);
-		this.actualParams = actualParams;
+		this(List.<String[]>of(paramConditions), actualParams);
 	}
 
 	/**
@@ -66,6 +63,7 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 		Assert.notEmpty(paramConditions, "Parameter conditions must not be empty");
 		this.paramConditions = paramConditions;
 		this.actualParams = actualParams;
+		getBody().setDetail("Invalid request parameters.");
 	}
 
 

@@ -77,7 +77,6 @@ public class ResponseStatusException extends ErrorResponseException {
 	public ResponseStatusException(int rawStatusCode, @Nullable String reason, @Nullable Throwable cause) {
 		super(rawStatusCode, cause);
 		this.reason = reason;
-		setDetail(reason);
 	}
 
 

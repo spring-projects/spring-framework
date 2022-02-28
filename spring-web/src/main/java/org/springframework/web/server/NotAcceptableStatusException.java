@@ -18,6 +18,7 @@ package org.springframework.web.server;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -42,14 +43,17 @@ public class NotAcceptableStatusException extends ResponseStatusException {
 	public NotAcceptableStatusException(String reason) {
 		super(HttpStatus.NOT_ACCEPTABLE, reason);
 		this.supportedMediaTypes = Collections.emptyList();
+		getBody().setDetail("Could not parse Accept header.");
 	}
 
 	/**
 	 * Constructor for when the requested Content-Type is not supported.
 	 */
-	public NotAcceptableStatusException(List<MediaType> supportedMediaTypes) {
+	public NotAcceptableStatusException(List<MediaType> mediaTypes) {
 		super(HttpStatus.NOT_ACCEPTABLE, "Could not find acceptable representation");
-		this.supportedMediaTypes = Collections.unmodifiableList(supportedMediaTypes);
+		this.supportedMediaTypes = Collections.unmodifiableList(mediaTypes);
+		getBody().setDetail("Acceptable representations: " +
+				mediaTypes.stream().map(MediaType::toString).collect(Collectors.joining(", ", "'", "'")) + ".");
 	}
 
 

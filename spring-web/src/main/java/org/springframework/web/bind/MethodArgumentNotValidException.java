@@ -48,7 +48,7 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	public MethodArgumentNotValidException(MethodParameter parameter, BindingResult bindingResult) {
 		super(bindingResult);
 		this.parameter = parameter;
-		this.body = ProblemDetail.forRawStatusCode(getRawStatusCode()).withDetail(initMessage(parameter));
+		this.body = ProblemDetail.forRawStatusCode(getRawStatusCode()).withDetail("Invalid request content.");
 	}
 
 
@@ -71,13 +71,9 @@ public class MethodArgumentNotValidException extends BindException implements Er
 
 	@Override
 	public String getMessage() {
-		return initMessage(this.parameter);
-	}
-
-	private String initMessage(MethodParameter parameter) {
 		StringBuilder sb = new StringBuilder("Validation failed for argument [")
-				.append(parameter.getParameterIndex()).append("] in ")
-				.append(parameter.getExecutable().toGenericString());
+				.append(this.parameter.getParameterIndex()).append("] in ")
+				.append(this.parameter.getExecutable().toGenericString());
 		BindingResult bindingResult = getBindingResult();
 		if (bindingResult.getErrorCount() > 1) {
 			sb.append(" with ").append(bindingResult.getErrorCount()).append(" errors");

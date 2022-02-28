@@ -17,6 +17,7 @@
 package org.springframework.web;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -39,15 +40,17 @@ public class HttpMediaTypeNotAcceptableException extends HttpMediaTypeException 
 	 */
 	public HttpMediaTypeNotAcceptableException(String message) {
 		super(message);
-		getBody().setDetail("Could not parse Accept header");
+		getBody().setDetail("Could not parse Accept header.");
 	}
 
 	/**
 	 * Create a new HttpMediaTypeNotSupportedException.
-	 * @param supportedMediaTypes the list of supported media types
+	 * @param mediaTypes the list of supported media types
 	 */
-	public HttpMediaTypeNotAcceptableException(List<MediaType> supportedMediaTypes) {
-		super("No acceptable representation", supportedMediaTypes);
+	public HttpMediaTypeNotAcceptableException(List<MediaType> mediaTypes) {
+		super("No acceptable representation", mediaTypes);
+		getBody().setDetail("Acceptable representations: " +
+				mediaTypes.stream().map(MediaType::toString).collect(Collectors.joining(", ", "'", "'")) + ".");
 	}
 
 

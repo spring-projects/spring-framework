@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -47,13 +48,17 @@ public class MethodNotAllowedException extends ResponseStatusException {
 	}
 
 	public MethodNotAllowedException(String method, @Nullable Collection<HttpMethod> supportedMethods) {
-		super(HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + method + "' not supported");
+		super(HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + method + "' is not supported.");
 		Assert.notNull(method, "'method' is required");
 		if (supportedMethods == null) {
 			supportedMethods = Collections.emptySet();
 		}
 		this.method = method;
 		this.httpMethods = Collections.unmodifiableSet(new LinkedHashSet<>(supportedMethods));
+
+		getBody().setDetail(this.httpMethods.isEmpty() ? getReason() :
+				"Supported methods: " + this.httpMethods.stream()
+						.map(HttpMethod::toString).collect(Collectors.joining("', '", "'", "'")));
 	}
 
 

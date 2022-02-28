@@ -61,7 +61,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	 * Constructor with a well-known {@link HttpStatus} and an optional cause.
 	 */
 	public ErrorResponseException(HttpStatus status, @Nullable Throwable cause) {
-		this(status.value(), null);
+		this(status.value(), cause);
 	}
 
 	/**

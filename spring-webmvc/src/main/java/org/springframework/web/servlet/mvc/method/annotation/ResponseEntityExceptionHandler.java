@@ -154,6 +154,7 @@ public abstract class ResponseEntityExceptionHandler {
 				return handleAsyncRequestTimeoutException(subEx, subEx.getHeaders(), subEx.getStatus(), request);
 			}
 			else {
+				// Another ErrorResponseException
 				return handleExceptionInternal(ex, null, errorEx.getHeaders(), errorEx.getStatus(), request);
 			}
 		}

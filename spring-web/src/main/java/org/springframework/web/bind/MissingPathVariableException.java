@@ -60,7 +60,7 @@ public class MissingPathVariableException extends MissingRequestValueException {
 		super("", missingAfterConversion);
 		this.variableName = variableName;
 		this.parameter = parameter;
-		getBody().setDetail("Required URI variable '" + this.variableName + "' is not present");
+		getBody().setDetail("Required path variable '" + this.variableName + "' is not present.");
 	}
 
 

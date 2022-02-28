@@ -51,29 +51,29 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 		super(message);
 		this.contentType = null;
 		this.httpMethod = null;
-		getBody().setDetail("Could not parse Content-Type");
+		getBody().setDetail("Could not parse Content-Type.");
 	}
 
 	/**
 	 * Create a new HttpMediaTypeNotSupportedException.
 	 * @param contentType the unsupported content type
-	 * @param supportedMediaTypes the list of supported media types
+	 * @param mediaTypes the list of supported media types
 	 */
-	public HttpMediaTypeNotSupportedException(@Nullable MediaType contentType, List<MediaType> supportedMediaTypes) {
-		this(contentType, supportedMediaTypes, null);
+	public HttpMediaTypeNotSupportedException(@Nullable MediaType contentType, List<MediaType> mediaTypes) {
+		this(contentType, mediaTypes, null);
 	}
 
 	/**
 	 * Create a new HttpMediaTypeNotSupportedException.
 	 * @param contentType the unsupported content type
-	 * @param supportedMediaTypes the list of supported media types
+	 * @param mediaTypes the list of supported media types
 	 * @param httpMethod the HTTP method of the request
 	 * @since 6.0
 	 */
-	public HttpMediaTypeNotSupportedException(@Nullable MediaType contentType,
-			List<MediaType> supportedMediaTypes, @Nullable HttpMethod httpMethod) {
+	public HttpMediaTypeNotSupportedException(
+			@Nullable MediaType contentType, List<MediaType> mediaTypes, @Nullable HttpMethod httpMethod) {
 
-		this(contentType, supportedMediaTypes, httpMethod,
+		this(contentType, mediaTypes, httpMethod,
 				"Content-Type " + (contentType != null ? "'" + contentType + "' " : "") + "is not supported");
 	}
 
@@ -91,7 +91,7 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 		super(message, supportedMediaTypes);
 		this.contentType = contentType;
 		this.httpMethod = httpMethod;
-		getBody().setDetail("Content-Type " + this.contentType + " is not supported");
+		getBody().setDetail("Content-Type '" + this.contentType + "' is not supported.");
 	}
 
 

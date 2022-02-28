@@ -45,7 +45,7 @@ public class NoHandlerFoundException extends ServletException implements ErrorRe
 
 	private final HttpHeaders headers;
 
-	private final ProblemDetail detail = ProblemDetail.forRawStatusCode(getRawStatusCode());
+	private final ProblemDetail body;
 
 
 	/**
@@ -55,10 +55,11 @@ public class NoHandlerFoundException extends ServletException implements ErrorRe
 	 * @param headers the HTTP request headers
 	 */
 	public NoHandlerFoundException(String httpMethod, String requestURL, HttpHeaders headers) {
-		super("No handler found for " + httpMethod + " " + requestURL);
+		super("No endpoint " + httpMethod + " " + requestURL + ".");
 		this.httpMethod = httpMethod;
 		this.requestURL = requestURL;
 		this.headers = headers;
+		this.body = ProblemDetail.forRawStatusCode(getRawStatusCode()).withDetail(getMessage());
 	}
 
 
@@ -81,7 +82,7 @@ public class NoHandlerFoundException extends ServletException implements ErrorRe
 
 	@Override
 	public ProblemDetail getBody() {
-		return this.detail;
+		return this.body;
 	}
 
 }
