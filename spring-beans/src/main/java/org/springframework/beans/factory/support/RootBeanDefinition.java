@@ -461,7 +461,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Register an externally managed configuration initialization method &mdash;
 	 * for example, a method annotated with JSR-250's
-	 * {@link javax.annotation.PostConstruct} annotation.
+	 * {@link jakarta.annotation.PostConstruct} annotation.
 	 * <p>The supplied {@code initMethod} may be the
 	 * {@linkplain Method#getName() simple method name} for non-private methods or the
 	 * {@linkplain org.springframework.util.ClassUtils#getQualifiedMethodName(Method)
@@ -538,7 +538,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Register an externally managed configuration destruction method &mdash;
 	 * for example, a method annotated with JSR-250's
-	 * {@link javax.annotation.PreDestroy} annotation.
+	 * {@link jakarta.annotation.PreDestroy} annotation.
 	 * <p>The supplied {@code destroyMethod} may be the
 	 * {@linkplain Method#getName() simple method name} for non-private methods or the
 	 * {@linkplain org.springframework.util.ClassUtils#getQualifiedMethodName(Method)
