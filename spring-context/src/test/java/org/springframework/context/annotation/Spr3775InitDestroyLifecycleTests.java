@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,9 +155,9 @@ public class Spr3775InitDestroyLifecycleTests {
 		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit1", "customDestroy1");
 		CustomAnnotatedPrivateInitDestroyBean bean =
 				(CustomAnnotatedPrivateInitDestroyBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
-		assertMethodOrdering("init-methods", Arrays.asList("privateCustomInit1","afterPropertiesSet"), bean.initMethods);
+		assertMethodOrdering(beanClass, "init-methods", Arrays.asList("@PostConstruct.privateCustomInit1", "afterPropertiesSet"), bean.initMethods);
 		beanFactory.destroySingletons();
-		assertMethodOrdering("destroy-methods", Arrays.asList("privateCustomDestroy1","destroy"), bean.destroyMethods);
+		assertMethodOrdering(beanClass, "destroy-methods", Arrays.asList("@PreDestroy.privateCustomDestroy1", "destroy"), bean.destroyMethods);
 	}
 
 	@Test
@@ -166,11 +166,11 @@ public class Spr3775InitDestroyLifecycleTests {
 		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit1", "customDestroy1");
 		CustomAnnotatedPrivateSameNameInitDestroyBean bean =
 				(CustomAnnotatedPrivateSameNameInitDestroyBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
-		assertMethodOrdering("init-methods",
-				Arrays.asList("privateCustomInit1","afterPropertiesSet","sameNameCustomInit1"), bean.initMethods);
+		assertMethodOrdering(beanClass, "init-methods",
+				Arrays.asList("@PostConstruct.privateCustomInit1", "@PostConstruct.sameNameCustomInit1", "afterPropertiesSet"), bean.initMethods);
 		beanFactory.destroySingletons();
-		assertMethodOrdering("destroy-methods",
-				Arrays.asList("privateCustomDestroy1","destroy","sameNameCustomDestroy1"), bean.destroyMethods);
+		assertMethodOrdering(beanClass, "destroy-methods",
+				Arrays.asList("@PreDestroy.sameNameCustomDestroy1", "@PreDestroy.privateCustomDestroy1", "destroy"), bean.destroyMethods);
 	}
 
 	@Test
@@ -229,28 +229,32 @@ public class Spr3775InitDestroyLifecycleTests {
 		}
 	}
 
-	public static class CustomAnnotatedPrivateInitDestroyBean extends CustomInitializingDisposableBean{
+	public static class CustomAnnotatedPrivateInitDestroyBean extends CustomInitializingDisposableBean {
 
 		@PostConstruct
 		private void customInit1() throws Exception {
-			this.initMethods.add("privateCustomInit1");
+			this.initMethods.add("@PostConstruct.privateCustomInit1");
 		}
 
 		@PreDestroy
 		private void customDestroy1() throws Exception {
-			this.destroyMethods.add("privateCustomDestroy1");
+			this.destroyMethods.add("@PreDestroy.privateCustomDestroy1");
 		}
 
 	}
 
 	public static class CustomAnnotatedPrivateSameNameInitDestroyBean extends CustomAnnotatedPrivateInitDestroyBean {
 
+		@PostConstruct
+		@SuppressWarnings("unused")
 		private void customInit1() throws Exception {
-			this.initMethods.add("sameNameCustomInit1");
+			this.initMethods.add("@PostConstruct.sameNameCustomInit1");
 		}
 
+		@PreDestroy
+		@SuppressWarnings("unused")
 		private void customDestroy1() throws Exception {
-			this.destroyMethods.add("sameNameCustomDestroy1");
+			this.destroyMethods.add("@PreDestroy.sameNameCustomDestroy1");
 		}
 
 	}
