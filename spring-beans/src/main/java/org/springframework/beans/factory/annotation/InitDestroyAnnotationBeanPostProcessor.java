@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -302,7 +302,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 					beanDefinition.registerExternallyManagedInitMethod(methodIdentifier);
 					checkedInitMethods.add(element);
 					if (logger.isTraceEnabled()) {
-						logger.trace("Registered init method on class [" + this.targetClass.getName() + "]: " + element);
+						logger.trace("Registered init method on class [" + this.targetClass.getName() + "]: " + methodIdentifier);
 					}
 				}
 			}
@@ -313,7 +313,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 					beanDefinition.registerExternallyManagedDestroyMethod(methodIdentifier);
 					checkedDestroyMethods.add(element);
 					if (logger.isTraceEnabled()) {
-						logger.trace("Registered destroy method on class [" + this.targetClass.getName() + "]: " + element);
+						logger.trace("Registered destroy method on class [" + this.targetClass.getName() + "]: " + methodIdentifier);
 					}
 				}
 			}
