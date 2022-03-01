@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.util.Assert;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @see GenericBeanDefinition
  * @see ChildBeanDefinition
  */
@@ -480,6 +481,36 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * Determine if the given method name indicates an externally managed
+	 * initialization method, regardless of method visibility.
+	 * <p>In contrast to {@link #isExternallyManagedInitMethod(String)}, this
+	 * method also returns {@code true} if there is a {@code private} external
+	 * init method that has been
+	 * {@linkplain #registerExternallyManagedInitMethod(String) registered}
+	 * using a fully qualified method name instead of a simple method name.
+	 * @since 5.3.17
+	 */
+	boolean hasAnyExternallyManagedInitMethod(String initMethod) {
+		synchronized (this.postProcessingLock) {
+			if (isExternallyManagedInitMethod(initMethod)) {
+				return true;
+			}
+			if (this.externallyManagedInitMethods != null) {
+				for (String candidate : this.externallyManagedInitMethods) {
+					int indexOfDot = candidate.lastIndexOf(".");
+					if (indexOfDot >= 0) {
+						String methodName = candidate.substring(indexOfDot + 1);
+						if (methodName.equals(initMethod)) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+	}
+
+	/**
 	 * Return all externally managed initialization methods (as an immutable Set).
 	 * @since 5.3.11
 	 */
@@ -510,6 +541,36 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		synchronized (this.postProcessingLock) {
 			return (this.externallyManagedDestroyMethods != null &&
 					this.externallyManagedDestroyMethods.contains(destroyMethod));
+		}
+	}
+
+	/**
+	 * Determine if the given method name indicates an externally managed
+	 * destruction method, regardless of method visibility.
+	 * <p>In contrast to {@link #isExternallyManagedDestroyMethod(String)}, this
+	 * method also returns {@code true} if there is a {@code private} external
+	 * destroy method that has been
+	 * {@linkplain #registerExternallyManagedDestroyMethod(String) registered}
+	 * using a fully qualified method name instead of a simple method name.
+	 * @since 5.3.17
+	 */
+	boolean hasAnyExternallyManagedDestroyMethod(String destroyMethod) {
+		synchronized (this.postProcessingLock) {
+			if (isExternallyManagedDestroyMethod(destroyMethod)) {
+				return true;
+			}
+			if (this.externallyManagedDestroyMethods != null) {
+				for (String candidate : this.externallyManagedDestroyMethods) {
+					int indexOfDot = candidate.lastIndexOf(".");
+					if (indexOfDot >= 0) {
+						String methodName = candidate.substring(indexOfDot + 1);
+						if (methodName.equals(destroyMethod)) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
 		}
 	}
 

@@ -52,6 +52,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Costin Leau
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 2.0
  * @see AbstractBeanFactory
  * @see org.springframework.beans.factory.DisposableBean
@@ -109,12 +110,12 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		this.beanName = beanName;
 		this.nonPublicAccessAllowed = beanDefinition.isNonPublicAccessAllowed();
 		this.invokeDisposableBean = (bean instanceof DisposableBean &&
-				!beanDefinition.isExternallyManagedDestroyMethod(DESTROY_METHOD_NAME));
+				!beanDefinition.hasAnyExternallyManagedDestroyMethod(DESTROY_METHOD_NAME));
 
 		String destroyMethodName = inferDestroyMethodIfNecessary(bean, beanDefinition);
 		if (destroyMethodName != null &&
 				!(this.invokeDisposableBean && DESTROY_METHOD_NAME.equals(destroyMethodName)) &&
-				!beanDefinition.isExternallyManagedDestroyMethod(destroyMethodName)) {
+				!beanDefinition.hasAnyExternallyManagedDestroyMethod(destroyMethodName)) {
 
 			this.invokeAutoCloseable = (bean instanceof AutoCloseable && CLOSE_METHOD_NAME.equals(destroyMethodName));
 			if (!this.invokeAutoCloseable) {
