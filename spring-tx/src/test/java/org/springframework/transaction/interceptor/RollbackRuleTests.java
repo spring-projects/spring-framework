@@ -37,6 +37,27 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class RollbackRuleTests {
 
 	@Test
+	void constructorArgumentMustBeThrowableClassWithNonThrowableType() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new RollbackRuleAttribute(Object.class));
+	}
+
+	@Test
+	void constructorArgumentMustBeThrowableClassWithNullThrowableType() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new RollbackRuleAttribute((Class<?>) null));
+	}
+
+	@Test
+	void constructorArgumentMustBeStringWithNull() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new RollbackRuleAttribute((String) null));
+	}
+
+	@Test
+	void notFound() {
+		RollbackRuleAttribute rr = new RollbackRuleAttribute(IOException.class);
+		assertThat(rr.getDepth(new MyRuntimeException(""))).isEqualTo(-1);
+	}
+
+	@Test
 	void foundImmediatelyWithString() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(Exception.class.getName());
 		assertThat(rr.getDepth(new Exception())).isEqualTo(0);
@@ -49,21 +70,15 @@ class RollbackRuleTests {
 	}
 
 	@Test
-	void notFound() {
-		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.io.IOException.class.getName());
-		assertThat(rr.getDepth(new MyRuntimeException(""))).isEqualTo(-1);
-	}
-
-	@Test
-	void ancestry() {
-		RollbackRuleAttribute rr = new RollbackRuleAttribute(Exception.class.getName());
-		// Exception -> Runtime -> NestedRuntime -> MyRuntimeException
+	void foundInSuperclassHierarchy() {
+		RollbackRuleAttribute rr = new RollbackRuleAttribute(Exception.class);
+		// Exception -> RuntimeException -> NestedRuntimeException -> MyRuntimeException
 		assertThat(rr.getDepth(new MyRuntimeException(""))).isEqualTo(3);
 	}
 
 	@Test
-	void alwaysTrueForThrowable() {
-		RollbackRuleAttribute rr = new RollbackRuleAttribute(Throwable.class.getName());
+	void alwaysFoundForThrowable() {
+		RollbackRuleAttribute rr = new RollbackRuleAttribute(Throwable.class);
 		assertThat(rr.getDepth(new MyRuntimeException(""))).isGreaterThan(0);
 		assertThat(rr.getDepth(new IOException())).isGreaterThan(0);
 		assertThat(rr.getDepth(new FatalBeanException(null, null))).isGreaterThan(0);
@@ -71,33 +86,32 @@ class RollbackRuleTests {
 	}
 
 	@Test
-	void ctorArgMustBeAThrowableClassWithNonThrowableType() {
-		assertThatIllegalArgumentException().isThrownBy(() -> new RollbackRuleAttribute(Object.class));
-	}
-
-	@Test
-	void ctorArgMustBeAThrowableClassWithNullThrowableType() {
-		assertThatIllegalArgumentException().isThrownBy(() -> new RollbackRuleAttribute((Class<?>) null));
-	}
-
-	@Test
-	void ctorArgExceptionStringNameVersionWithNull() {
-		assertThatIllegalArgumentException().isThrownBy(() -> new RollbackRuleAttribute((String) null));
-	}
-
-	@Test
-	void foundEnclosedExceptionWithEnclosingException() {
+	void foundNestedExceptionInEnclosingException() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(EnclosingException.class);
-		assertThat(rr.getDepth(new EnclosingException.EnclosedException())).isEqualTo(0);
+		assertThat(rr.getDepth(new EnclosingException.NestedException())).isEqualTo(0);
 	}
+
+	@Test
+	void foundWhenNameOfExceptionThrownStartsWithTheNameOfTheRegisteredExceptionType() {
+		RollbackRuleAttribute rr = new RollbackRuleAttribute(MyException.class);
+		assertThat(rr.getDepth(new MyException2())).isEqualTo(0);
+	}
+
 
 	@SuppressWarnings("serial")
 	static class EnclosingException extends RuntimeException {
 
 		@SuppressWarnings("serial")
-		static class EnclosedException extends RuntimeException {
-
+		static class NestedException extends RuntimeException {
 		}
+	}
+
+	static class MyException extends RuntimeException {
+	}
+
+	// Name intentionally starts with MyException (including package) but does
+	// NOT extend MyException.
+	static class MyException2 extends RuntimeException {
 	}
 
 }
