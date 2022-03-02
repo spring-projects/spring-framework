@@ -57,6 +57,14 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.context.MessageSourceAware
  * @see org.springframework.context.ApplicationContextAware
  * @see org.springframework.context.support.AbstractApplicationContext#refresh()
+ *
+ *
+ * 可以看到ApplicationContextAwareProcessor也实现了BeanPostProcessor接口，
+ * 重写了postProcessBeforeInitialization方法，
+ * 方法里面并调用了invokeAwareInterfaces方法，
+ * 而invokeAwareInterfaces方法也写着如果实现了众多的Aware接口，则会依次执行相应的方法，
+ * 值得注意的是ApplicationContextAware接口的setApplicationContext方法
+ *
  */
 class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
