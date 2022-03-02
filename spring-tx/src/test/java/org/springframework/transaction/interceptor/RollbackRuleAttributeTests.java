@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sam Brannen
  * @since 09.04.2003
  */
-class RollbackRuleTests {
+class RollbackRuleAttributeTests {
 
 	@Test
 	void constructorArgumentMustBeThrowableClassWithNonThrowableType() {
@@ -106,11 +106,13 @@ class RollbackRuleTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	static class MyException extends RuntimeException {
 	}
 
 	// Name intentionally starts with MyException (including package) but does
 	// NOT extend MyException.
+	@SuppressWarnings("serial")
 	static class MyException2 extends RuntimeException {
 	}
 
