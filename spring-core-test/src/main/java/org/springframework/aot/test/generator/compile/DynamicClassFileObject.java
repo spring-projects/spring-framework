@@ -17,7 +17,6 @@
 package org.springframework.aot.test.generator.compile;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 
@@ -32,7 +31,7 @@ import javax.tools.SimpleJavaFileObject;
  */
 class DynamicClassFileObject extends SimpleJavaFileObject {
 
-	private volatile byte[] bytes;
+	private volatile byte[] bytes = new byte[0];
 
 
 	DynamicClassFileObject(String className) {
@@ -42,7 +41,7 @@ class DynamicClassFileObject extends SimpleJavaFileObject {
 
 
 	@Override
-	public OutputStream openOutputStream() throws IOException {
+	public OutputStream openOutputStream() {
 		return new JavaClassOutputStream();
 	}
 
@@ -54,7 +53,7 @@ class DynamicClassFileObject extends SimpleJavaFileObject {
 	class JavaClassOutputStream extends ByteArrayOutputStream {
 
 		@Override
-		public void close() throws IOException {
+		public void close() {
 			DynamicClassFileObject.this.bytes = toByteArray();
 		}
 

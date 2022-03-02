@@ -18,6 +18,8 @@ package org.springframework.aot.test.generator.file;
 
 import org.assertj.core.api.AbstractAssert;
 
+import org.springframework.lang.Nullable;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -42,7 +44,7 @@ public class DynamicFileAssert<A extends DynamicFileAssert<A, F>, F extends Dyna
 		return this.myself;
 	}
 
-	public A isEqualTo(Object expected) {
+	public A isEqualTo(@Nullable Object expected) {
 		if (expected instanceof DynamicFile) {
 			return super.isEqualTo(expected);
 		}

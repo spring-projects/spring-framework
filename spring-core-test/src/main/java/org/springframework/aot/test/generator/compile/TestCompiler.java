@@ -33,6 +33,7 @@ import org.springframework.aot.test.generator.file.ResourceFiles;
 import org.springframework.aot.test.generator.file.SourceFile;
 import org.springframework.aot.test.generator.file.SourceFiles;
 import org.springframework.aot.test.generator.file.WritableContent;
+import org.springframework.lang.Nullable;
 
 /**
  * Utility that can be used to dynamically compile and test Java source code.
@@ -43,6 +44,7 @@ import org.springframework.aot.test.generator.file.WritableContent;
  */
 public final class TestCompiler {
 
+	@Nullable
 	private final ClassLoader classLoader;
 
 	private final JavaCompiler compiler;
@@ -52,7 +54,7 @@ public final class TestCompiler {
 	private final ResourceFiles resourceFiles;
 
 
-	private TestCompiler(ClassLoader classLoader, JavaCompiler compiler,
+	private TestCompiler(@Nullable ClassLoader classLoader, JavaCompiler compiler,
 			SourceFiles sourceFiles, ResourceFiles resourceFiles) {
 		this.classLoader = classLoader;
 		this.compiler = compiler;
@@ -186,14 +188,14 @@ public final class TestCompiler {
 	}
 
 	private DynamicClassLoader compile() {
-		ClassLoader classLoader = (this.classLoader != null) ? this.classLoader
+		ClassLoader classLoaderToUse = (this.classLoader != null) ? this.classLoader
 				: Thread.currentThread().getContextClassLoader();
 		List<DynamicJavaFileObject> compilationUnits = this.sourceFiles.stream().map(
 				DynamicJavaFileObject::new).toList();
 		StandardJavaFileManager standardFileManager = this.compiler.getStandardFileManager(
 				null, null, null);
 		DynamicJavaFileManager fileManager = new DynamicJavaFileManager(
-				standardFileManager, classLoader);
+				standardFileManager, classLoaderToUse);
 		if (!this.sourceFiles.isEmpty()) {
 			Errors errors = new Errors();
 			CompilationTask task = this.compiler.getTask(null, fileManager, errors, null,
@@ -203,7 +205,7 @@ public final class TestCompiler {
 				throw new CompilationException("Unable to compile source" + errors);
 			}
 		}
-		return new DynamicClassLoader(this.classLoader, this.sourceFiles,
+		return new DynamicClassLoader(classLoaderToUse, this.sourceFiles,
 				this.resourceFiles, fileManager.getClassFiles());
 	}
 
@@ -223,8 +225,8 @@ public final class TestCompiler {
 				this.message.append(" ");
 				this.message.append(diagnostic.getSource().getName());
 				this.message.append(" ");
-				this.message.append(
-						diagnostic.getLineNumber() + ":" + diagnostic.getColumnNumber());
+				this.message.append(diagnostic.getLineNumber()).append(":")
+						.append(diagnostic.getColumnNumber());
 			}
 		}
 

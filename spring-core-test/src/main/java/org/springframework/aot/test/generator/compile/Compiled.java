@@ -25,6 +25,7 @@ import org.springframework.aot.test.generator.file.ResourceFile;
 import org.springframework.aot.test.generator.file.ResourceFiles;
 import org.springframework.aot.test.generator.file.SourceFile;
 import org.springframework.aot.test.generator.file.SourceFiles;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,6 +43,7 @@ public class Compiled {
 
 	private final ResourceFiles resourceFiles;
 
+	@Nullable
 	private List<Class<?>> compiledClasses;
 
 
@@ -107,8 +109,7 @@ public class Compiled {
 	 * @throws IllegalStateException if no instance can be found or instantiated
 	 */
 	public <T> T getInstance(Class<T> type) {
-		List<Class<?>> matching = getAllCompiledClasses().stream().filter(
-				candidate -> type.isAssignableFrom(candidate)).toList();
+		List<Class<?>> matching = getAllCompiledClasses().stream().filter(type::isAssignableFrom).toList();
 		Assert.state(!matching.isEmpty(), () -> "No instance found of type " + type.getName());
 		Assert.state(matching.size() == 1, () -> "Multiple instances found of type " + type.getName());
 		return newInstance(matching.get(0));

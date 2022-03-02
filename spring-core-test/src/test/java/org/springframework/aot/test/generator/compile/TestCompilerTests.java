@@ -18,6 +18,7 @@ package org.springframework.aot.test.generator.compile;
 
 import java.util.function.Supplier;
 
+import com.example.PublicInterface;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.test.generator.file.ResourceFile;
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Tests for {@link TestCompiler}.
  *
  * @author Phillip Webb
+ * @author Andy Wilkinson
  */
 class TestCompilerTests {
 
@@ -106,7 +108,7 @@ class TestCompilerTests {
 		assertThatExceptionOfType(CompilationException.class).isThrownBy(
 				() -> TestCompiler.forSystem().withSources(
 						SourceFile.of(HELLO_BAD)).compile(compiled -> {
-						}));
+				}));
 	}
 
 	@Test
@@ -165,6 +167,24 @@ class TestCompilerTests {
 			assertSuppliesHelloWorld(compiled);
 			assertHasResource(compiled);
 		});
+	}
+
+	@Test
+	void compiledCodeCanAccessExistingPackagePrivateClass() {
+		SourceFiles sourceFiles = SourceFiles.of(SourceFile.of("""
+				package com.example;
+
+				public class Test implements PublicInterface {
+
+					public String perform() {
+						return new PackagePrivate().perform();
+					}
+
+				}
+				"""));
+		TestCompiler.forSystem().compile(sourceFiles, compiled -> assertThat(
+				compiled.getInstance(PublicInterface.class, "com.example.Test").perform())
+				.isEqualTo("Hello from PackagePrivate"));
 	}
 
 	private void assertSuppliesHelloWorld(Compiled compiled) {

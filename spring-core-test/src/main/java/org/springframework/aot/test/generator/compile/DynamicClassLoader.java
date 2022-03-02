@@ -23,6 +23,7 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -35,17 +36,18 @@ import org.springframework.aot.test.generator.file.ResourceFile;
 import org.springframework.aot.test.generator.file.ResourceFiles;
 import org.springframework.aot.test.generator.file.SourceFile;
 import org.springframework.aot.test.generator.file.SourceFiles;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link ClassLoader} used to expose dynamically generated content.
  *
  * @author Phillip Webb
+ * @author Andy Wilkinson
  * @since 6.0
  */
 public class DynamicClassLoader extends ClassLoader {
 
-	private static final Logger logger = System.getLogger(
-			DynamicClassLoader.class.getName());
+	private static final Logger logger = System.getLogger(DynamicClassLoader.class.getName());
 
 
 	private final SourceFiles sourceFiles;
@@ -54,10 +56,13 @@ public class DynamicClassLoader extends ClassLoader {
 
 	private final Map<String, DynamicClassFileObject> classFiles;
 
+	private final ClassLoader sourceLoader;
 
-	public DynamicClassLoader(ClassLoader parent, SourceFiles sourceFiles,
+
+	public DynamicClassLoader(ClassLoader sourceLoader, SourceFiles sourceFiles,
 			ResourceFiles resourceFiles, Map<String, DynamicClassFileObject> classFiles) {
-		super(parent);
+		super(sourceLoader.getParent());
+		this.sourceLoader = sourceLoader;
 		this.sourceFiles = sourceFiles;
 		this.resourceFiles = resourceFiles;
 		this.classFiles = classFiles;
@@ -70,7 +75,22 @@ public class DynamicClassLoader extends ClassLoader {
 		if (classFile != null) {
 			return defineClass(name, classFile);
 		}
-		return super.findClass(name);
+		try {
+			Class<?> fromSourceLoader = this.sourceLoader.loadClass(name);
+			if (Modifier.isPublic(fromSourceLoader.getModifiers())) {
+				return fromSourceLoader;
+			}
+		}
+		catch (Exception ex) {
+			// Continue
+		}
+		try (InputStream classStream = this.sourceLoader.getResourceAsStream(name.replace(".", "/") + ".class")) {
+			byte[] bytes = classStream.readAllBytes();
+			return defineClass(name, bytes, 0, bytes.length, null);
+		}
+		catch (IOException ex) {
+			throw new ClassNotFoundException(name);
+		}
 	}
 
 	private Class<?> defineClass(String name, DynamicClassFileObject classFile) {
@@ -101,6 +121,7 @@ public class DynamicClassLoader extends ClassLoader {
 	}
 
 	@Override
+	@Nullable
 	protected URL findResource(String name) {
 		ResourceFile file = this.resourceFiles.get(name);
 		if (file != null) {
@@ -118,10 +139,11 @@ public class DynamicClassLoader extends ClassLoader {
 
 	private static class SingletonEnumeration<E> implements Enumeration<E> {
 
+		@Nullable
 		private E element;
 
 
-		SingletonEnumeration(E element) {
+		SingletonEnumeration(@Nullable E element) {
 			this.element = element;
 		}
 
@@ -132,6 +154,7 @@ public class DynamicClassLoader extends ClassLoader {
 		}
 
 		@Override
+		@Nullable
 		public E nextElement() {
 			E next = this.element;
 			this.element = null;

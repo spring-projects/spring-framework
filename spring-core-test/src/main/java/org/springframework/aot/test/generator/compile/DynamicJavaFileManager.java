@@ -42,7 +42,6 @@ class DynamicJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> 
 			new LinkedHashMap<>());
 
 
-
 	DynamicJavaFileManager(JavaFileManager fileManager, ClassLoader classLoader) {
 		super(fileManager);
 		this.classLoader = classLoader;

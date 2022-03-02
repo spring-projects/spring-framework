@@ -27,6 +27,8 @@ import com.thoughtworks.qdox.model.JavaType;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
 
+import org.springframework.lang.Nullable;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -43,11 +45,11 @@ public class SourceFileAssert extends DynamicFileAssert<SourceFileAssert, Source
 	}
 
 
-	public SourceFileAssert implementsInterface(Class<?> type) {
-		return implementsInterface((type != null) ? type.getName() : (String) null);
+	public SourceFileAssert implementsInterface(@Nullable Class<?> type) {
+		return implementsInterface((type != null ? type.getName() : null));
 	}
 
-	public SourceFileAssert implementsInterface(String name) {
+	public SourceFileAssert implementsInterface(@Nullable String name) {
 		JavaClass javaClass = getJavaClass();
 		assertThat(javaClass.getImplements()).as("implements").map(
 				JavaType::getFullyQualifiedName).contains(name);

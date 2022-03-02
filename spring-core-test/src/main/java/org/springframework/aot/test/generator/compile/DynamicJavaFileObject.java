@@ -16,7 +16,6 @@
 
 package org.springframework.aot.test.generator.compile;
 
-import java.io.IOException;
 import java.net.URI;
 
 import javax.tools.JavaFileObject;
@@ -43,7 +42,7 @@ class DynamicJavaFileObject extends SimpleJavaFileObject {
 
 
 	@Override
-	public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
+	public CharSequence getCharContent(boolean ignoreEncodingErrors) {
 		return this.sourceFile.getContent();
 	}
 

@@ -22,7 +22,6 @@ import com.thoughtworks.qdox.model.JavaSource;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
@@ -41,13 +40,6 @@ class SourceFileTests {
 				}
 			}
 			""";
-
-	@Test
-	void ofWhenContentIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> SourceFile.of((WritableContent) null)).withMessage(
-						"'writableContent' must not to be empty");
-	}
 
 	@Test
 	void ofWhenContentIsEmptyThrowsException() {

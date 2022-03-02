@@ -19,7 +19,7 @@ package org.springframework.aot.test.generator.file;
 import java.io.IOException;
 import java.util.Objects;
 
-import org.assertj.core.util.Strings;
+import org.springframework.util.Assert;
 
 /**
  * Abstract base class for dynamically generated files.
@@ -29,7 +29,7 @@ import org.assertj.core.util.Strings;
  * @see SourceFile
  * @see ResourceFile
  */
-public abstract sealed class DynamicFile permits SourceFile,ResourceFile {
+public abstract sealed class DynamicFile permits SourceFile, ResourceFile {
 
 
 	private final String path;
@@ -38,21 +38,14 @@ public abstract sealed class DynamicFile permits SourceFile,ResourceFile {
 
 
 	protected DynamicFile(String path, String content) {
-		if (Strings.isNullOrEmpty(content)) {
-			throw new IllegalArgumentException("'path' must not to be empty");
-		}
-		if (Strings.isNullOrEmpty(content)) {
-			throw new IllegalArgumentException("'content' must not to be empty");
-		}
+		Assert.hasText(path, "Path must not be empty");
+		Assert.hasText(content, "Content must not be empty");
 		this.path = path;
 		this.content = content;
 	}
 
 
 	protected static String toString(WritableContent writableContent) {
-		if (writableContent == null) {
-			throw new IllegalArgumentException("'writableContent' must not to be empty");
-		}
 		try {
 			StringBuilder stringBuilder = new StringBuilder();
 			writableContent.writeTo(stringBuilder);
