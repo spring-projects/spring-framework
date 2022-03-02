@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -94,7 +95,8 @@ public class PathVariableMapMethodArgumentResolverTests {
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramMap, new BindingContext(), this.exchange);
 		Object result = mono.block();
 
-		assertThat(result).isEqualTo(Collections.emptyMap());
+		assertThat(result).isOfAnyClassIn(LinkedHashMap.class);
+		assertThat(result).isEqualTo(new LinkedHashMap<>());
 	}
 
 

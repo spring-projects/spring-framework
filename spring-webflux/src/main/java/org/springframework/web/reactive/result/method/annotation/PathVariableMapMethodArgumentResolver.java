@@ -16,7 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
@@ -62,7 +62,7 @@ public class PathVariableMapMethodArgumentResolver extends HandlerMethodArgument
 			MethodParameter methodParameter, BindingContext context, ServerWebExchange exchange) {
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		return exchange.getAttributeOrDefault(name, Collections.emptyMap());
+		return exchange.getAttributeOrDefault(name, new LinkedHashMap<>());
 	}
 
 }

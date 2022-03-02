@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -66,7 +65,7 @@ public class PathVariableMapMethodArgumentResolver implements HandlerMethodArgum
 			return new LinkedHashMap<>(uriTemplateVars);
 		}
 		else {
-			return Collections.emptyMap();
+			return new LinkedHashMap<>();
 		}
 	}
 

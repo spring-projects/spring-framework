@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -92,7 +93,8 @@ public class PathVariableMapMethodArgumentResolverTests {
 	public void resolveArgumentNoUriVars() throws Exception {
 		Map<String, String> map = (Map<String, String>) resolver.resolveArgument(paramMap, mavContainer, webRequest, null);
 
-		assertThat(map).isEqualTo(Collections.emptyMap());
+		assertThat(map).isOfAnyClassIn(LinkedHashMap.class);
+		assertThat(map).isEqualTo(new LinkedHashMap<>());
 	}
 
 
