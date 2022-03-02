@@ -106,11 +106,13 @@ class RollbackRuleAttributeTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	static class MyException extends RuntimeException {
 	}
 
 	// Name intentionally starts with MyException (including package) but does
 	// NOT extend MyException.
+	@SuppressWarnings("serial")
 	static class MyException2 extends RuntimeException {
 	}
 
