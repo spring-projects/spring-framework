@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sam Brannen
  * @since 09.04.2003
  */
-class RollbackRuleTests {
+class RollbackRuleAttributeTests {
 
 	@Test
 	void constructorArgumentMustBeThrowableClassWithNonThrowableType() {
