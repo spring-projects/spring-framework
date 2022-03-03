@@ -575,6 +575,34 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #autowireConstructor
 	 *
 	 * 创建bean的开始
+	 *
+	 * bean初始化步骤
+	 * 1.首先实例化bean
+	 *  1).调用AbstractAutowireCapableBeanFactory类的createBeanInstance方法实例化bean
+	 *  2).注意此时的bean只实例化，并未进行@Autowired的属性填充
+	 * 2.填充bean属性
+	 *   1).如果bean的属性有@Autowired要注入的属性，则会进行属性填充
+	 *   2).进行属性填充的前提是要保证属性实例已经存在spring容器中，如果不存在则会先去加载属性
+	 *
+	 * 3.初始化bean
+	 *    1).调用invokeAwareMethods方法
+	 *      a).实现BeanNameAware接口(调用setBeanName方法)
+	 *      b).实现BeanClassLoaderAware接口(调用setBeanClassLoader方法)
+	 *      c).实现BeanFactoryAware接口(调用setBeanFactory方法)
+	 *    2).调用applyBeanPostProcessorBeforeInitialization方法
+	 *       a).循环调用实现了BeanPostProcessor接口的postProcessBeforeInitialization方法，由于
+	 *       Spring自带ApplicationContextAwareProcessor类重写了postProcessorBeforeInitilization方法，
+	 *       则会优先循环到ApplicationContextAwareProcessor的postProcessBeforeInitialization方法。
+	 *       b).执行到APplicationContextAwareProcessor的postProcessBeforeInitialization方法，会检查是否实现Aware
+	 *       接口，这里重点关注Aware接口的ApplicationContextAware,如果实现ApplicationContextAware接口，
+	 *       则会调用setApplicationContext方法
+	 *       c).再循环调用我们自定义实现的BeanPostProcessor接口(调用postProcessBeforeInitialization方法)
+	 *    3).调用invokeInitMethods方法
+	 *      a).实现InitializingBean接口(调用afterPropertySet方法)
+	 *      b).指定init-method方法(调用init-method方法)
+	 *    4).调用applyBeanPostProcessorsAfterInitialization方法
+	 *      a).循环调用实现了BeanPostProcessor接口的postProcessAfterInitialization方法。
+	 * 4.销毁bean
 	 */
 	protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
 			throws BeanCreationException {
