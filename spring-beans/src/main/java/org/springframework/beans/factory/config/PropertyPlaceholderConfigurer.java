@@ -55,6 +55,15 @@ import org.springframework.util.StringValueResolver;
  * @see PlaceholderConfigurerSupport
  * @see PropertyOverrideConfigurer
  * @see org.springframework.context.support.PropertySourcesPlaceholderConfigurer
+ *
+ * 可以看到PropertyPlaceholderConfigurer间接的继承了BeanFactoryPostProcessor接口，这是一个很特别的接口，
+ * 当spring加载任何实现了这个接口的bean的配置时，都会在bean工厂载入所有bean的配置之后执行postProcessBeanFactory方法。
+ * 在PropertyResourceConfigurer类中实现了postProcessBeanFactory方法，
+ * 在方法中先后调用了mergeProperties、convertProperties、processProperties这三个方法，分别得到配置，将得到的配置转换为合适的类型，
+ * 最后将配置内容告知BeanFactory。
+ * 正是通过实现BeanFactoryPostProcessor接口，BeanFactory会在实例化任何bean之前获得配置信息，
+ * 从而能够正确的解析bean描述文件中的变量引用。
+ *
  */
 public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport {
 
