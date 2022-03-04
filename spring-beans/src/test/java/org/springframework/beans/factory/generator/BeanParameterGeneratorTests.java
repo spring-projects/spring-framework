@@ -41,6 +41,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.javapoet.support.CodeSnippet;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,21 +60,21 @@ class BeanParameterGeneratorTests {
 	private final BeanParameterGenerator generator = new BeanParameterGenerator();
 
 	@Test
-	void writeCharArray() {
+	void generateCharArray() {
 		char[] value = new char[] { 'v', 'a', 'l', 'u', 'e' };
-		assertThat(write(value, ResolvableType.forArrayComponent(ResolvableType.forClass(char.class))))
+		assertThat(generate(value, ResolvableType.forArrayComponent(ResolvableType.forClass(char.class))))
 				.isEqualTo("new char[] { 'v', 'a', 'l', 'u', 'e' }");
 	}
 
 	@Test
-	void writeStringArray() {
+	void generateStringArray() {
 		String[] value = new String[] { "a", "test" };
-		assertThat(write(value, ResolvableType.forArrayComponent(ResolvableType.forClass(String.class))))
+		assertThat(generate(value, ResolvableType.forArrayComponent(ResolvableType.forClass(String.class))))
 				.isEqualTo("new String[] { \"a\", \"test\" }");
 	}
 
 	@Test
-	void writeStringList() {
+	void generateStringList() {
 		List<String> value = List.of("a", "test");
 		CodeSnippet code = codeSnippet(value, ResolvableType.forClassWithGenerics(List.class, String.class));
 		assertThat(code.getSnippet()).isEqualTo(
@@ -82,7 +83,7 @@ class BeanParameterGeneratorTests {
 	}
 
 	@Test
-	void writeStringManagedList() {
+	void generateStringManagedList() {
 		ManagedList<String> value = ManagedList.of("a", "test");
 		CodeSnippet code = codeSnippet(value, ResolvableType.forClassWithGenerics(List.class, String.class));
 		assertThat(code.getSnippet()).isEqualTo(
@@ -91,7 +92,7 @@ class BeanParameterGeneratorTests {
 	}
 
 	@Test
-	void writeEmptyList() {
+	void generateEmptyList() {
 		List<String> value = List.of();
 		CodeSnippet code = codeSnippet(value, ResolvableType.forClassWithGenerics(List.class, String.class));
 		assertThat(code.getSnippet()).isEqualTo("Collections.emptyList()");
@@ -99,7 +100,7 @@ class BeanParameterGeneratorTests {
 	}
 
 	@Test
-	void writeStringSet() {
+	void generateStringSet() {
 		Set<String> value = Set.of("a", "test");
 		CodeSnippet code = codeSnippet(value, ResolvableType.forClassWithGenerics(Set.class, String.class));
 		assertThat(code.getSnippet()).startsWith("Set.of(").contains("a").contains("test");
@@ -107,7 +108,7 @@ class BeanParameterGeneratorTests {
 	}
 
 	@Test
-	void writeStringManagedSet() {
+	void generateStringManagedSet() {
 		Set<String> value = ManagedSet.of("a", "test");
 		CodeSnippet code = codeSnippet(value, ResolvableType.forClassWithGenerics(Set.class, String.class));
 		assertThat(code.getSnippet()).isEqualTo(
@@ -116,7 +117,7 @@ class BeanParameterGeneratorTests {
 	}
 
 	@Test
-	void writeEmptySet() {
+	void generateEmptySet() {
 		Set<String> value = Set.of();
 		CodeSnippet code = codeSnippet(value, ResolvableType.forClassWithGenerics(Set.class, String.class));
 		assertThat(code.getSnippet()).isEqualTo("Collections.emptySet()");
@@ -124,39 +125,39 @@ class BeanParameterGeneratorTests {
 	}
 
 	@Test
-	void writeMap() {
+	void generateMap() {
 		Map<String, Object> value = new LinkedHashMap<>();
 		value.put("name", "Hello");
 		value.put("counter", 42);
-		assertThat(write(value)).isEqualTo("Map.of(\"name\", \"Hello\", \"counter\", 42)");
+		assertThat(generate(value)).isEqualTo("Map.of(\"name\", \"Hello\", \"counter\", 42)");
 	}
 
 	@Test
-	void writeMapWithEnum() {
+	void generateMapWithEnum() {
 		Map<String, Object> value = new HashMap<>();
 		value.put("unit", ChronoUnit.DAYS);
-		assertThat(write(value)).isEqualTo("Map.of(\"unit\", ChronoUnit.DAYS)");
+		assertThat(generate(value)).isEqualTo("Map.of(\"unit\", ChronoUnit.DAYS)");
 	}
 
 	@Test
-	void writeEmptyMap() {
-		assertThat(write(Map.of())).isEqualTo("Map.of()");
+	void generateEmptyMap() {
+		assertThat(generate(Map.of())).isEqualTo("Map.of()");
 	}
 
 	@Test
-	void writeString() {
-		assertThat(write("test", ResolvableType.forClass(String.class))).isEqualTo("\"test\"");
+	void generateString() {
+		assertThat(generate("test", ResolvableType.forClass(String.class))).isEqualTo("\"test\"");
 	}
 
 	@Test
-	void writeCharEscapeBackslash() {
-		assertThat(write('\\', ResolvableType.forType(char.class))).isEqualTo("'\\\\'");
+	void generateCharEscapeBackslash() {
+		assertThat(generate('\\', ResolvableType.forType(char.class))).isEqualTo("'\\\\'");
 	}
 
 	@ParameterizedTest
 	@MethodSource("primitiveValues")
-	void writePrimitiveValue(Object value, String parameter) {
-		assertThat(write(value, ResolvableType.forClass(value.getClass()))).isEqualTo(parameter);
+	void generatePrimitiveValue(Object value, String parameter) {
+		assertThat(generate(value, ResolvableType.forClass(value.getClass()))).isEqualTo(parameter);
 	}
 
 	private static Stream<Arguments> primitiveValues() {
@@ -166,87 +167,88 @@ class BeanParameterGeneratorTests {
 	}
 
 	@Test
-	void writeEnum() {
-		assertThat(write(ChronoUnit.DAYS, ResolvableType.forClass(ChronoUnit.class)))
+	void generateEnum() {
+		assertThat(generate(ChronoUnit.DAYS, ResolvableType.forClass(ChronoUnit.class)))
 				.isEqualTo("ChronoUnit.DAYS");
 	}
 
 	@Test
-	void writeClass() {
-		assertThat(write(Integer.class, ResolvableType.forClass(Class.class)))
+	void generateClass() {
+		assertThat(generate(Integer.class, ResolvableType.forClass(Class.class)))
 				.isEqualTo("Integer.class");
 	}
 
 	@Test
-	void writeResolvableType() {
+	void generateResolvableType() {
 		ResolvableType type = ResolvableType.forClassWithGenerics(Consumer.class, Integer.class);
-		assertThat(write(type, type))
+		assertThat(generate(type, type))
 				.isEqualTo("ResolvableType.forClassWithGenerics(Consumer.class, Integer.class)");
 	}
 
 	@Test
-	void writeExecutableParameterTypesWithConstructor() {
+	void generateExecutableParameterTypesWithConstructor() {
 		Constructor<?> constructor = TestSample.class.getDeclaredConstructors()[0];
-		assertThat(CodeSnippet.process(this.generator.writeExecutableParameterTypes(constructor)))
+		assertThat(CodeSnippet.process(this.generator.generateExecutableParameterTypes(constructor)))
 				.isEqualTo("String.class, ResourceLoader.class");
 	}
 
 	@Test
-	void writeExecutableParameterTypesWithNoArgConstructor() {
+	void generateExecutableParameterTypesWithNoArgConstructor() {
 		Constructor<?> constructor = BeanParameterGeneratorTests.class.getDeclaredConstructors()[0];
-		assertThat(CodeSnippet.process(this.generator.writeExecutableParameterTypes(constructor)))
+		assertThat(CodeSnippet.process(this.generator.generateExecutableParameterTypes(constructor)))
 				.isEmpty();
 	}
 
 	@Test
-	void writeExecutableParameterTypesWithMethod() {
+	void generateExecutableParameterTypesWithMethod() {
 		Method method = ReflectionUtils.findMethod(TestSample.class, "createBean", String.class, Integer.class);
-		assertThat(CodeSnippet.process(this.generator.writeExecutableParameterTypes(method)))
+		assertThat(CodeSnippet.process(this.generator.generateExecutableParameterTypes(method)))
 				.isEqualTo("String.class, Integer.class");
 	}
 
 	@Test
-	void writeNull() {
-		assertThat(write(null)).isEqualTo("null");
+	void generateNull() {
+		assertThat(generate(null)).isEqualTo("null");
 	}
 
 	@Test
-	void writeBeanReference() {
+	void generateBeanReference() {
 		BeanReference beanReference = mock(BeanReference.class);
 		given(beanReference.getBeanName()).willReturn("testBean");
-		assertThat(write(beanReference)).isEqualTo("new RuntimeBeanReference(\"testBean\")");
+		assertThat(generate(beanReference)).isEqualTo("new RuntimeBeanReference(\"testBean\")");
 	}
 
 	@Test
-	void writeBeanDefinitionCallsConsumer() {
+	void generateBeanDefinitionCallsConsumer() {
 		BeanParameterGenerator customGenerator = new BeanParameterGenerator(
 				((beanDefinition, builder) -> builder.add("test")));
-		assertThat(CodeSnippet.process(customGenerator.writeParameterValue(new RootBeanDefinition()))).isEqualTo("test");
+		assertThat(CodeSnippet.process(customGenerator.generateParameterValue(
+				new RootBeanDefinition()))).isEqualTo("test");
 	}
 
 	@Test
-	void writeBeanDefinitionWithoutConsumerFails() {
+	void generateBeanDefinitionWithoutConsumerFails() {
 		BeanParameterGenerator customGenerator = new BeanParameterGenerator();
 		assertThatIllegalStateException().isThrownBy(() -> customGenerator
-				.writeParameterValue(new RootBeanDefinition()));
+				.generateParameterValue(new RootBeanDefinition()));
 	}
 
 	@Test
-	void writeUnsupportedParameter() {
-		assertThatIllegalArgumentException().isThrownBy(() -> write(new StringWriter()))
+	void generateUnsupportedParameter() {
+		assertThatIllegalArgumentException().isThrownBy(() -> generate(new StringWriter()))
 				.withMessageContaining(StringWriter.class.getName());
 	}
 
-	private String write(Object value) {
-		return CodeSnippet.process(this.generator.writeParameterValue(value));
+	private String generate(@Nullable Object value) {
+		return CodeSnippet.process(this.generator.generateParameterValue(value));
 	}
 
-	private String write(Object value, ResolvableType resolvableType) {
+	private String generate(Object value, ResolvableType resolvableType) {
 		return codeSnippet(value, resolvableType).getSnippet();
 	}
 
 	private CodeSnippet codeSnippet(Object value, ResolvableType resolvableType) {
-		return CodeSnippet.of(this.generator.writeParameterValue(value, () -> resolvableType));
+		return CodeSnippet.of(this.generator.generateParameterValue(value, () -> resolvableType));
 	}
 
 

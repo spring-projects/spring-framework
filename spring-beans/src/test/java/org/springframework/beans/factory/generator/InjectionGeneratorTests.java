@@ -45,119 +45,119 @@ class InjectionGeneratorTests {
 	private final ProtectedAccess protectedAccess = new ProtectedAccess();
 
 	@Test
-	void writeInstantiationForConstructorWithNoArgUseShortcut() {
+	void generateInstantiationForConstructorWithNoArgUseShortcut() {
 		Constructor<?> constructor = SimpleBean.class.getDeclaredConstructors()[0];
-		assertThat(writeInstantiation(constructor).lines())
+		assertThat(generateInstantiation(constructor).lines())
 				.containsExactly("new InjectionGeneratorTests.SimpleBean()");
 	}
 
 	@Test
-	void writeInstantiationForConstructorWithNonGenericParameter() {
+	void generateInstantiationForConstructorWithNonGenericParameter() {
 		Constructor<?> constructor = SimpleConstructorBean.class.getDeclaredConstructors()[0];
-		assertThat(writeInstantiation(constructor).lines()).containsExactly(
+		assertThat(generateInstantiation(constructor).lines()).containsExactly(
 				"instanceContext.create(beanFactory, (attributes) -> new InjectionGeneratorTests.SimpleConstructorBean(attributes.get(0), attributes.get(1)))");
 	}
 
 	@Test
-	void writeInstantiationForConstructorWithGenericParameter() {
+	void generateInstantiationForConstructorWithGenericParameter() {
 		Constructor<?> constructor = GenericConstructorBean.class.getDeclaredConstructors()[0];
-		assertThat(writeInstantiation(constructor).lines()).containsExactly(
+		assertThat(generateInstantiation(constructor).lines()).containsExactly(
 				"instanceContext.create(beanFactory, (attributes) -> new InjectionGeneratorTests.GenericConstructorBean(attributes.get(0)))");
 	}
 
 	@Test
-	void writeInstantiationForAmbiguousConstructor() throws Exception {
+	void generateInstantiationForAmbiguousConstructor() throws Exception {
 		Constructor<?> constructor = AmbiguousConstructorBean.class.getDeclaredConstructor(String.class, Number.class);
-		assertThat(writeInstantiation(constructor).lines()).containsExactly(
+		assertThat(generateInstantiation(constructor).lines()).containsExactly(
 				"instanceContext.create(beanFactory, (attributes) -> new InjectionGeneratorTests.AmbiguousConstructorBean(attributes.get(0, String.class), attributes.get(1, Number.class)))");
 	}
 
 	@Test
-	void writeInstantiationForConstructorInInnerClass() {
+	void generateInstantiationForConstructorInInnerClass() {
 		Constructor<?> constructor = InnerClass.class.getDeclaredConstructors()[0];
-		assertThat(writeInstantiation(constructor).lines()).containsExactly(
+		assertThat(generateInstantiation(constructor).lines()).containsExactly(
 				"beanFactory.getBean(InjectionGeneratorTests.SimpleConstructorBean.class).new InnerClass()");
 	}
 
 	@Test
-	void writeInstantiationForMethodWithNoArgUseShortcut() {
-		assertThat(writeInstantiation(method(SimpleBean.class, "name")).lines()).containsExactly(
+	void generateInstantiationForMethodWithNoArgUseShortcut() {
+		assertThat(generateInstantiation(method(SimpleBean.class, "name")).lines()).containsExactly(
 				"beanFactory.getBean(InjectionGeneratorTests.SimpleBean.class).name()");
 	}
 
 	@Test
-	void writeInstantiationForStaticMethodWithNoArgUseShortcut() {
-		assertThat(writeInstantiation(method(SimpleBean.class, "number")).lines()).containsExactly(
+	void generateInstantiationForStaticMethodWithNoArgUseShortcut() {
+		assertThat(generateInstantiation(method(SimpleBean.class, "number")).lines()).containsExactly(
 				"InjectionGeneratorTests.SimpleBean.number()");
 	}
 
 	@Test
-	void writeInstantiationForMethodWithNonGenericParameter() {
-		assertThat(writeInstantiation(method(SampleBean.class, "source", Integer.class)).lines()).containsExactly(
+	void generateInstantiationForMethodWithNonGenericParameter() {
+		assertThat(generateInstantiation(method(SampleBean.class, "source", Integer.class)).lines()).containsExactly(
 				"instanceContext.create(beanFactory, (attributes) -> beanFactory.getBean(InjectionGeneratorTests.SampleBean.class).source(attributes.get(0)))");
 	}
 
 	@Test
-	void writeInstantiationForStaticMethodWithNonGenericParameter() {
-		assertThat(writeInstantiation(method(SampleBean.class, "staticSource", Integer.class)).lines()).containsExactly(
+	void generateInstantiationForStaticMethodWithNonGenericParameter() {
+		assertThat(generateInstantiation(method(SampleBean.class, "staticSource", Integer.class)).lines()).containsExactly(
 				"instanceContext.create(beanFactory, (attributes) -> InjectionGeneratorTests.SampleBean.staticSource(attributes.get(0)))");
 	}
 
 	@Test
-	void writeInstantiationForMethodWithGenericParameters() {
-		assertThat(writeInstantiation(method(SampleBean.class, "source", ObjectProvider.class)).lines()).containsExactly(
+	void generateInstantiationForMethodWithGenericParameters() {
+		assertThat(generateInstantiation(method(SampleBean.class, "source", ObjectProvider.class)).lines()).containsExactly(
 				"instanceContext.create(beanFactory, (attributes) -> beanFactory.getBean(InjectionGeneratorTests.SampleBean.class).source(attributes.get(0)))");
 	}
 
 	@Test
-	void writeInjectionForUnsupportedMember() {
-		assertThatIllegalArgumentException().isThrownBy(() -> writeInjection(mock(Member.class), false));
+	void generateInjectionForUnsupportedMember() {
+		assertThatIllegalArgumentException().isThrownBy(() -> generateInjection(mock(Member.class), false));
 	}
 
 	@Test
-	void writeInjectionForNonRequiredMethodWithNonGenericParameters() {
+	void generateInjectionForNonRequiredMethodWithNonGenericParameters() {
 		Method method = method(SampleBean.class, "sourceAndCounter", String.class, Integer.class);
-		assertThat(writeInjection(method, false)).isEqualTo("""
+		assertThat(generateInjection(method, false)).isEqualTo("""
 				instanceContext.method("sourceAndCounter", String.class, Integer.class)
 						.resolve(beanFactory, false).ifResolved((attributes) -> bean.sourceAndCounter(attributes.get(0), attributes.get(1)))""");
 	}
 
 	@Test
-	void writeInjectionForRequiredMethodWithGenericParameter() {
+	void generateInjectionForRequiredMethodWithGenericParameter() {
 		Method method = method(SampleBean.class, "nameAndCounter", String.class, ObjectProvider.class);
-		assertThat(writeInjection(method, true)).isEqualTo("""
+		assertThat(generateInjection(method, true)).isEqualTo("""
 				instanceContext.method("nameAndCounter", String.class, ObjectProvider.class)
 						.invoke(beanFactory, (attributes) -> bean.nameAndCounter(attributes.get(0), attributes.get(1)))""");
 	}
 
 	@Test
-	void writeInjectionForNonRequiredMethodWithGenericParameter() {
+	void generateInjectionForNonRequiredMethodWithGenericParameter() {
 		Method method = method(SampleBean.class, "nameAndCounter", String.class, ObjectProvider.class);
-		assertThat(writeInjection(method, false)).isEqualTo("""
+		assertThat(generateInjection(method, false)).isEqualTo("""
 				instanceContext.method("nameAndCounter", String.class, ObjectProvider.class)
 						.resolve(beanFactory, false).ifResolved((attributes) -> bean.nameAndCounter(attributes.get(0), attributes.get(1)))""");
 	}
 
 	@Test
-	void writeInjectionForRequiredField() {
+	void generateInjectionForRequiredField() {
 		Field field = field(SampleBean.class, "counter");
-		assertThat(writeInjection(field, true)).isEqualTo("""
+		assertThat(generateInjection(field, true)).isEqualTo("""
 				instanceContext.field("counter", Integer.class)
 						.invoke(beanFactory, (attributes) -> bean.counter = attributes.get(0))""");
 	}
 
 	@Test
-	void writeInjectionForNonRequiredField() {
+	void generateInjectionForNonRequiredField() {
 		Field field = field(SampleBean.class, "counter");
-		assertThat(writeInjection(field, false)).isEqualTo("""
+		assertThat(generateInjection(field, false)).isEqualTo("""
 				instanceContext.field("counter", Integer.class)
 						.resolve(beanFactory, false).ifResolved((attributes) -> bean.counter = attributes.get(0))""");
 	}
 
 	@Test
-	void writeInjectionForRequiredPrivateField() {
+	void generateInjectionForRequiredPrivateField() {
 		Field field = field(SampleBean.class, "source");
-		assertThat(writeInjection(field, true)).isEqualTo("""
+		assertThat(generateInjection(field, true)).isEqualTo("""
 				instanceContext.field("source", String.class)
 						.invoke(beanFactory, (attributes) -> {
 							Field sourceField = ReflectionUtils.findField(InjectionGeneratorTests.SampleBean.class, "source", String.class);
@@ -215,12 +215,12 @@ class InjectionGeneratorTests {
 		return field;
 	}
 
-	private String writeInstantiation(Executable creator) {
-		return CodeSnippet.process(code -> code.add(new InjectionGenerator().writeInstantiation(creator)));
+	private String generateInstantiation(Executable creator) {
+		return CodeSnippet.process(code -> code.add(new InjectionGenerator().generateInstantiation(creator)));
 	}
 
-	private String writeInjection(Member member, boolean required) {
-		return CodeSnippet.process(code -> code.add(new InjectionGenerator().writeInjection(member, required)));
+	private String generateInjection(Member member, boolean required) {
+		return CodeSnippet.process(code -> code.add(new InjectionGenerator().generateInjection(member, required)));
 	}
 
 	private void analyzeProtectedAccess(Member member) {

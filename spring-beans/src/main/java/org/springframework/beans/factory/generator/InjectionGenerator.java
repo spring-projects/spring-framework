@@ -37,8 +37,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Generate the necessary code to {@link #writeInstantiation(Executable)
- * create a bean instance} or {@link #writeInjection(Member, boolean)
+ * Generate the necessary code to {@link #generateInstantiation(Executable)
+ * create a bean instance} or {@link #generateInjection(Member, boolean)
  * inject dependencies}.
  * <p/>
  * The generator assumes a number of variables to be accessible:
@@ -63,37 +63,37 @@ public class InjectionGenerator {
 
 
 	/**
-	 * Write the necessary code to instantiate an object using the specified
+	 * Generate the necessary code to instantiate an object using the specified
 	 * {@link Executable}. The code is suitable to be assigned to a variable
 	 * or used as a {@literal return} statement.
 	 * @param creator the executable to invoke to create an instance of the
 	 * requested object
 	 * @return the code to instantiate an object using the specified executable
 	 */
-	public CodeBlock writeInstantiation(Executable creator) {
+	public CodeBlock generateInstantiation(Executable creator) {
 		if (creator instanceof Constructor<?> constructor) {
-			return write(constructor);
+			return generateConstructorInstantiation(constructor);
 		}
 		if (creator instanceof Method method) {
-			return writeMethodInstantiation(method);
+			return generateMethodInstantiation(method);
 		}
 		throw new IllegalArgumentException("Could not handle creator " + creator);
 	}
 
 	/**
-	 * Write the code to inject a value resolved by {@link BeanInstanceContext}
+	 * Generate the code to inject a value resolved by {@link BeanInstanceContext}
 	 * in the specified {@link Member}.
 	 * @param member the field or method to inject
 	 * @param required whether the value is required
 	 * @return a statement that injects a value to the specified member
 	 * @see #getProtectedAccessInjectionOptions(Member)
 	 */
-	public CodeBlock writeInjection(Member member, boolean required) {
+	public CodeBlock generateInjection(Member member, boolean required) {
 		if (member instanceof Method method) {
-			return writeMethodInjection(method, required);
+			return generateMethodInjection(method, required);
 		}
 		if (member instanceof Field field) {
-			return writeFieldInjection(field, required);
+			return generateFieldInjection(field, required);
 		}
 		throw new IllegalArgumentException("Could not handle member " + member);
 	}
@@ -115,7 +115,7 @@ public class InjectionGenerator {
 		throw new IllegalArgumentException("Could not handle member " + member);
 	}
 
-	private CodeBlock write(Constructor<?> creator) {
+	private CodeBlock generateConstructorInstantiation(Constructor<?> creator) {
 		Builder code = CodeBlock.builder();
 		Class<?> declaringType = ClassUtils.getUserClass(creator.getDeclaringClass());
 		boolean innerClass = isInnerClass(declaringType);
@@ -162,7 +162,7 @@ public class InjectionGenerator {
 		return type.isMemberClass() && !Modifier.isStatic(type.getModifiers());
 	}
 
-	private CodeBlock writeMethodInstantiation(Method injectionPoint) {
+	private CodeBlock generateMethodInstantiation(Method injectionPoint) {
 		if (injectionPoint.getParameterCount() == 0) {
 			Builder code = CodeBlock.builder();
 			Class<?> declaringType = injectionPoint.getDeclaringClass();
@@ -175,10 +175,10 @@ public class InjectionGenerator {
 			code.add(".$L()", injectionPoint.getName());
 			return code.build();
 		}
-		return write(injectionPoint, code -> code.add(".create(beanFactory, (attributes) ->"), true);
+		return generateMethodInvocation(injectionPoint, code -> code.add(".create(beanFactory, (attributes) ->"), true);
 	}
 
-	private CodeBlock writeMethodInjection(Method injectionPoint, boolean required) {
+	private CodeBlock generateMethodInjection(Method injectionPoint, boolean required) {
 		Consumer<Builder> attributesResolver = code -> {
 			if (required) {
 				code.add(".invoke(beanFactory, (attributes) ->");
@@ -187,15 +187,15 @@ public class InjectionGenerator {
 				code.add(".resolve(beanFactory, false).ifResolved((attributes) ->");
 			}
 		};
-		return write(injectionPoint, attributesResolver, false);
+		return generateMethodInvocation(injectionPoint, attributesResolver, false);
 	}
 
-	private CodeBlock write(Method injectionPoint, Consumer<Builder> attributesResolver, boolean instantiation) {
+	private CodeBlock generateMethodInvocation(Method injectionPoint, Consumer<Builder> attributesResolver, boolean instantiation) {
 		Builder code = CodeBlock.builder();
 		code.add("instanceContext");
 		if (!instantiation) {
 			code.add(".method($S, ", injectionPoint.getName());
-			code.add(this.parameterGenerator.writeExecutableParameterTypes(injectionPoint));
+			code.add(this.parameterGenerator.generateExecutableParameterTypes(injectionPoint));
 			code.add(")\n").indent().indent();
 		}
 		attributesResolver.accept(code);
@@ -222,7 +222,7 @@ public class InjectionGenerator {
 		return code.build();
 	}
 
-	CodeBlock writeFieldInjection(Field injectionPoint, boolean required) {
+	CodeBlock generateFieldInjection(Field injectionPoint, boolean required) {
 		Builder code = CodeBlock.builder();
 		code.add("instanceContext.field($S, $T.class", injectionPoint.getName(), injectionPoint.getType());
 		code.add(")\n").indent().indent();

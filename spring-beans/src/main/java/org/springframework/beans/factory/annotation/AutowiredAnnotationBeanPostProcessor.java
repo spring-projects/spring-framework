@@ -838,7 +838,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 				boolean isRequired = isRequired(element);
 				Member member = element.getMember();
 				analyzeMember(contribution, member);
-				contribution.statements().addStatement(this.generator.writeInjection(member, isRequired));
+				contribution.statements().addStatement(this.generator.generateInjection(member, isRequired));
 			});
 		}
 

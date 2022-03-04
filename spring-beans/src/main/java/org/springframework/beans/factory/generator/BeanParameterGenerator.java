@@ -43,7 +43,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Support for writing parameters.
+ * Support for generating parameters.
  *
  * @author Stephane Nicoll
  * @since 6.0
@@ -52,16 +52,16 @@ public final class BeanParameterGenerator {
 
 	private final ResolvableTypeGenerator typeGenerator = new ResolvableTypeGenerator();
 
-	private final BiConsumer<BeanDefinition, Builder> innerBeanDefinitionWriter;
+	private final BiConsumer<BeanDefinition, Builder> innerBeanDefinitionGenerator;
 
 
 	/**
-	 * Create an instance with the callback to use to write an inner bean
+	 * Create an instance with the callback to use to generate an inner bean
 	 * definition.
-	 * @param innerBeanDefinitionWriter the inner bean definition writer
+	 * @param innerBeanDefinitionGenerator the inner bean definition generator
 	 */
-	public BeanParameterGenerator(BiConsumer<BeanDefinition, Builder> innerBeanDefinitionWriter) {
-		this.innerBeanDefinitionWriter = innerBeanDefinitionWriter;
+	public BeanParameterGenerator(BiConsumer<BeanDefinition, Builder> innerBeanDefinitionGenerator) {
+		this.innerBeanDefinitionGenerator = innerBeanDefinitionGenerator;
 	}
 
 	/**
@@ -75,39 +75,39 @@ public final class BeanParameterGenerator {
 
 
 	/**
-	 * Write the specified parameter {@code value}.
+	 * Generate the specified parameter {@code value}.
 	 * @param value the value of the parameter
 	 * @return the value of the parameter
 	 */
-	public CodeBlock writeParameterValue(@Nullable Object value) {
-		return writeParameterValue(value, () -> ResolvableType.forInstance(value));
+	public CodeBlock generateParameterValue(@Nullable Object value) {
+		return generateParameterValue(value, () -> ResolvableType.forInstance(value));
 	}
 
 	/**
-	 * Write the specified parameter {@code value}.
+	 * Generate the specified parameter {@code value}.
 	 * @param value the value of the parameter
 	 * @param parameterType the type of the parameter
 	 * @return the value of the parameter
 	 */
-	public CodeBlock writeParameterValue(@Nullable Object value, Supplier<ResolvableType> parameterType) {
+	public CodeBlock generateParameterValue(@Nullable Object value, Supplier<ResolvableType> parameterType) {
 		Builder code = CodeBlock.builder();
-		writeParameterValue(code, value, parameterType);
+		generateParameterValue(code, value, parameterType);
 		return code.build();
 	}
 
 	/**
-	 * Write the parameter types of the specified {@link Executable}.
+	 * Generate the parameter types of the specified {@link Executable}.
 	 * @param executable the executable
 	 * @return the parameter types of the executable as a comma separated list
 	 */
-	public CodeBlock writeExecutableParameterTypes(Executable executable) {
+	public CodeBlock generateExecutableParameterTypes(Executable executable) {
 		Class<?>[] parameterTypes = Arrays.stream(executable.getParameters())
 				.map(Parameter::getType).toArray(Class<?>[]::new);
 		return CodeBlock.of(Arrays.stream(parameterTypes).map(d -> "$T.class")
 				.collect(Collectors.joining(", ")), (Object[]) parameterTypes);
 	}
 
-	private void writeParameterValue(Builder code, @Nullable Object value, Supplier<ResolvableType> parameterTypeSupplier) {
+	private void generateParameterValue(Builder code, @Nullable Object value, Supplier<ResolvableType> parameterTypeSupplier) {
 		if (value == null) {
 			code.add("null");
 			return;
@@ -115,7 +115,7 @@ public final class BeanParameterGenerator {
 		ResolvableType parameterType = parameterTypeSupplier.get();
 		if (parameterType.isArray()) {
 			code.add("new $T { ", parameterType.toClass());
-			code.add(writeAll(Arrays.asList(ObjectUtils.toObjectArray(value)),
+			code.add(generateAll(Arrays.asList(ObjectUtils.toObjectArray(value)),
 					item -> parameterType.getComponentType()));
 			code.add(" }");
 		}
@@ -127,7 +127,7 @@ public final class BeanParameterGenerator {
 				Class<?> listType = (value instanceof ManagedList ? ManagedList.class : List.class);
 				code.add("$T.of(", listType);
 				ResolvableType collectionType = parameterType.as(List.class).getGenerics()[0];
-				code.add(writeAll(list, item -> collectionType));
+				code.add(generateAll(list, item -> collectionType));
 				code.add(")");
 			}
 		}
@@ -139,7 +139,7 @@ public final class BeanParameterGenerator {
 				Class<?> setType = (value instanceof ManagedSet ? ManagedSet.class : Set.class);
 				code.add("$T.of(", setType);
 				ResolvableType collectionType = parameterType.as(Set.class).getGenerics()[0];
-				code.add(writeAll(set, item -> collectionType));
+				code.add(generateAll(set, item -> collectionType));
 				code.add(")");
 			}
 		}
@@ -151,7 +151,7 @@ public final class BeanParameterGenerator {
 					parameters.add(mapKey);
 					parameters.add(mapValue);
 				});
-				code.add(writeAll(parameters, ResolvableType::forInstance));
+				code.add(generateAll(parameters, ResolvableType::forInstance));
 				code.add(")");
 			}
 		}
@@ -175,7 +175,7 @@ public final class BeanParameterGenerator {
 			code.add(this.typeGenerator.generateTypeFor((ResolvableType) value));
 		}
 		else if (value instanceof BeanDefinition) {
-			this.innerBeanDefinitionWriter.accept((BeanDefinition) value, code);
+			this.innerBeanDefinitionGenerator.accept((BeanDefinition) value, code);
 		}
 		else if (value instanceof BeanReference) {
 			code.add("new $T($S)", RuntimeBeanReference.class, ((BeanReference) value).getBeanName());
@@ -185,10 +185,10 @@ public final class BeanParameterGenerator {
 		}
 	}
 
-	private <T> CodeBlock writeAll(Iterable<T> items, Function<T, ResolvableType> elementType) {
+	private <T> CodeBlock generateAll(Iterable<T> items, Function<T, ResolvableType> elementType) {
 		MultiCodeBlock multi = new MultiCodeBlock();
 		items.forEach(item -> multi.add(code ->
-				writeParameterValue(code, item, () -> elementType.apply(item))));
+				generateParameterValue(code, item, () -> elementType.apply(item))));
 		return multi.join(", ");
 	}
 
