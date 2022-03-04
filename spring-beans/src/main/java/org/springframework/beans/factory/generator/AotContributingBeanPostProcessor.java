@@ -18,6 +18,7 @@ package org.springframework.beans.factory.generator;
 
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.lang.Nullable;
 
 /**
  * Specialization of {@link BeanPostProcessor} that contributes to bean
@@ -35,12 +36,14 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 public interface AotContributingBeanPostProcessor extends BeanPostProcessor {
 
 	/**
-	 * Build a {@link BeanInstantiationContributor} for the given bean definition.
+	 * Contribute a {@link BeanInstantiationContribution} for the given bean definition,
+	 * if applicable.
 	 * @param beanDefinition the merged bean definition for the bean
 	 * @param beanType the inferred type of the bean
 	 * @param beanName the name of the bean
-	 * @return the contributor to use
+	 * @return the contribution to use or {@code null} if the bean should not be processed
 	 */
-	BeanInstantiationContributor buildAotContributor(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName);
+	@Nullable
+	BeanInstantiationContribution contribute(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName);
 
 }

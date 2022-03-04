@@ -106,10 +106,10 @@ class DefaultBeanInstantiationGeneratorTests {
 	}
 
 	@Test
-	void generateUsingNoArgConstructorAndContributorsDoesNotUseMethodReference() {
+	void generateUsingNoArgConstructorAndContributionsDoesNotUseMethodReference() {
 		CodeContribution contribution = generate(SimpleConfiguration.class.getDeclaredConstructors()[0],
 				contrib -> contrib.statements().add(CodeBlock.of("// hello\n")),
-				BeanInstantiationContributor.NO_OP);
+				contrib -> {});
 		assertThat(code(contribution)).isEqualTo("""
 				(instanceContext) -> {
 					SimpleConfiguration bean = new SimpleConfiguration();
@@ -119,7 +119,7 @@ class DefaultBeanInstantiationGeneratorTests {
 	}
 
 	@Test
-	void generateUsingContributorsRegisterHints() {
+	void generateUsingContributionsRegisterHints() {
 		CodeContribution contribution = generate(SimpleConfiguration.class.getDeclaredConstructors()[0],
 				contrib -> {
 					contrib.statements().add(CodeBlock.of("// hello\n"));
@@ -170,7 +170,7 @@ class DefaultBeanInstantiationGeneratorTests {
 	}
 
 	@Test
-	void generateUsingMethodAndContributors() {
+	void generateUsingMethodAndContributions() {
 		CodeContribution contribution = generate(method(SimpleConfiguration.class, "stringBean"),
 				contrib -> {
 					contrib.statements().add(CodeBlock.of("// hello\n"));
@@ -240,9 +240,9 @@ class DefaultBeanInstantiationGeneratorTests {
 	}
 
 	private CodeContribution generate(Executable executable,
-			BeanInstantiationContributor... beanInstantiationContributors) {
+			BeanInstantiationContribution... beanInstantiationContributions) {
 		DefaultBeanInstantiationGenerator generator = new DefaultBeanInstantiationGenerator(executable,
-				Arrays.asList(beanInstantiationContributors));
+				Arrays.asList(beanInstantiationContributions));
 		return generator.generateBeanInstantiation(new RuntimeHints());
 	}
 

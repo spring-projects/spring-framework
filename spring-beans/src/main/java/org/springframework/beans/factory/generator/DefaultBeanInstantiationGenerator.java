@@ -36,25 +36,25 @@ import org.springframework.util.ClassUtils;
  * Write the necessary statements to instantiate a bean.
  *
  * @author Stephane Nicoll
- * @see BeanInstantiationContributor
+ * @see BeanInstantiationContribution
  */
 class DefaultBeanInstantiationGenerator {
 
 	private final Executable instanceCreator;
 
-	private final List<BeanInstantiationContributor> contributors;
+	private final List<BeanInstantiationContribution> contributions;
 
 	private final InjectionGenerator injectionGenerator;
 
 	private final Options beanInstanceOptions;
 
 
-	DefaultBeanInstantiationGenerator(Executable instanceCreator, List<BeanInstantiationContributor> contributors) {
+	DefaultBeanInstantiationGenerator(Executable instanceCreator, List<BeanInstantiationContribution> contributions) {
 		this.instanceCreator = instanceCreator;
-		this.contributors = List.copyOf(contributors);
+		this.contributions = List.copyOf(contributions);
 		this.injectionGenerator = new InjectionGenerator();
 		this.beanInstanceOptions = Options.defaults().useReflection(member -> false)
-				.assignReturnType(member -> !this.contributors.isEmpty()).build();
+				.assignReturnType(member -> !this.contributions.isEmpty()).build();
 	}
 
 	/**
@@ -78,7 +78,7 @@ class DefaultBeanInstantiationGenerator {
 	private void writeBeanInstantiation(CodeContribution contribution, Constructor<?> constructor) {
 		Class<?> declaringType = ClassUtils.getUserClass(constructor.getDeclaringClass());
 		boolean innerClass = isInnerClass(declaringType);
-		boolean multiStatements = !this.contributors.isEmpty();
+		boolean multiStatements = !this.contributions.isEmpty();
 		int minArgs = isInnerClass(declaringType) ? 2 : 1;
 		CodeBlock.Builder code = CodeBlock.builder();
 		// Shortcut for common case
@@ -110,8 +110,8 @@ class DefaultBeanInstantiationGenerator {
 		contribution.statements().addStatement(code.build());
 
 		if (multiStatements) {
-			for (BeanInstantiationContributor contributor : this.contributors) {
-				contributor.contribute(contribution);
+			for (BeanInstantiationContribution contributor : this.contributions) {
+				contributor.applyTo(contribution);
 			}
 			contribution.statements().addStatement("return bean")
 					.add(codeBlock -> codeBlock.unindent().add("}"));
@@ -127,7 +127,7 @@ class DefaultBeanInstantiationGenerator {
 		contribution.runtimeHints().reflection().registerMethod(method,
 				hint -> hint.withMode(ExecutableMode.INTROSPECT));
 		List<Class<?>> parameterTypes = new ArrayList<>(Arrays.asList(method.getParameterTypes()));
-		boolean multiStatements = !this.contributors.isEmpty();
+		boolean multiStatements = !this.contributions.isEmpty();
 		Class<?> declaringType = method.getDeclaringClass();
 		CodeBlock.Builder code = CodeBlock.builder();
 		// Shortcut for common case
@@ -148,8 +148,8 @@ class DefaultBeanInstantiationGenerator {
 		code.add(this.injectionGenerator.writeInstantiation(method));
 		contribution.statements().addStatement(code.build());
 		if (multiStatements) {
-			for (BeanInstantiationContributor contributor : this.contributors) {
-				contributor.contribute(contribution);
+			for (BeanInstantiationContribution contributor : this.contributions) {
+				contributor.applyTo(contribution);
 			}
 			contribution.statements().addStatement("return bean")
 					.add(codeBlock -> codeBlock.unindent().add("}"));

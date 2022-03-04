@@ -57,7 +57,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.generator.AotContributingBeanPostProcessor;
-import org.springframework.beans.factory.generator.BeanInstantiationContributor;
+import org.springframework.beans.factory.generator.BeanInstantiationContribution;
 import org.springframework.beans.factory.generator.InjectionGenerator;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
@@ -268,12 +268,12 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	}
 
 	@Override
-	public BeanInstantiationContributor buildAotContributor(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+	public BeanInstantiationContribution contribute(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		InjectionMetadata metadata = findInjectionMetadata(beanName, beanType, beanDefinition);
 		Collection<InjectedElement> injectedElements = metadata.getInjectedElements();
 		return (!ObjectUtils.isEmpty(injectedElements)
-				? new AutowiredAnnotationBeanInstantiationContributor(injectedElements)
-				: BeanInstantiationContributor.NO_OP);
+				? new AutowiredAnnotationBeanInstantiationContribution(injectedElements)
+				: null);
 	}
 
 	private InjectionMetadata findInjectionMetadata(String beanName, Class<?> beanType, RootBeanDefinition beanDefinition) {
@@ -821,19 +821,19 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 	}
 
-	private static final class AutowiredAnnotationBeanInstantiationContributor implements BeanInstantiationContributor {
+	private static final class AutowiredAnnotationBeanInstantiationContribution implements BeanInstantiationContribution {
 
 		private final Collection<InjectedElement> injectedElements;
 
 		private final InjectionGenerator generator;
 
-		AutowiredAnnotationBeanInstantiationContributor(Collection<InjectedElement> injectedElements) {
+		AutowiredAnnotationBeanInstantiationContribution(Collection<InjectedElement> injectedElements) {
 			this.injectedElements = injectedElements;
 			this.generator = new InjectionGenerator();
 		}
 
 		@Override
-		public void contribute(CodeContribution contribution) {
+		public void applyTo(CodeContribution contribution) {
 			this.injectedElements.forEach(element -> {
 				boolean isRequired = isRequired(element);
 				Member member = element.getMember();
