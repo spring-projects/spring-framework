@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -52,7 +51,7 @@ public final class BeanParameterGenerator {
 
 	private final ResolvableTypeGenerator typeGenerator = new ResolvableTypeGenerator();
 
-	private final BiConsumer<BeanDefinition, Builder> innerBeanDefinitionGenerator;
+	private final Function<BeanDefinition, CodeBlock> innerBeanDefinitionGenerator;
 
 
 	/**
@@ -60,7 +59,7 @@ public final class BeanParameterGenerator {
 	 * definition.
 	 * @param innerBeanDefinitionGenerator the inner bean definition generator
 	 */
-	public BeanParameterGenerator(BiConsumer<BeanDefinition, Builder> innerBeanDefinitionGenerator) {
+	public BeanParameterGenerator(Function<BeanDefinition, CodeBlock> innerBeanDefinitionGenerator) {
 		this.innerBeanDefinitionGenerator = innerBeanDefinitionGenerator;
 	}
 
@@ -68,7 +67,7 @@ public final class BeanParameterGenerator {
 	 * Create an instance with no support for inner bean definitions.
 	 */
 	public BeanParameterGenerator() {
-		this((beanDefinition, builder) -> {
+		this(beanDefinition -> {
 			throw new IllegalStateException("Inner bean definition is not supported by this instance");
 		});
 	}
@@ -174,8 +173,8 @@ public final class BeanParameterGenerator {
 		else if (value instanceof ResolvableType) {
 			code.add(this.typeGenerator.generateTypeFor((ResolvableType) value));
 		}
-		else if (value instanceof BeanDefinition) {
-			this.innerBeanDefinitionGenerator.accept((BeanDefinition) value, code);
+		else if (value instanceof BeanDefinition bd) {
+			code.add(this.innerBeanDefinitionGenerator.apply(bd));
 		}
 		else if (value instanceof BeanReference) {
 			code.add("new $T($S)", RuntimeBeanReference.class, ((BeanReference) value).getBeanName());

@@ -40,6 +40,7 @@ import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.support.CodeSnippet;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
@@ -221,7 +222,7 @@ class BeanParameterGeneratorTests {
 	@Test
 	void generateBeanDefinitionCallsConsumer() {
 		BeanParameterGenerator customGenerator = new BeanParameterGenerator(
-				((beanDefinition, builder) -> builder.add("test")));
+				beanDefinition -> CodeBlock.of("test"));
 		assertThat(CodeSnippet.process(customGenerator.generateParameterValue(
 				new RootBeanDefinition()))).isEqualTo("test");
 	}
