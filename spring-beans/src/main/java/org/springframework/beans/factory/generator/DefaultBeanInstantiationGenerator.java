@@ -33,12 +33,12 @@ import org.springframework.javapoet.CodeBlock;
 import org.springframework.util.ClassUtils;
 
 /**
- * Generate the necessary statements to instantiate a bean.
+ * Default {@link BeanInstantiationGenerator} implementation.
  *
  * @author Stephane Nicoll
  * @see BeanInstantiationContribution
  */
-class DefaultBeanInstantiationGenerator {
+class DefaultBeanInstantiationGenerator implements BeanInstantiationGenerator {
 
 	private final Executable instanceCreator;
 
@@ -57,12 +57,12 @@ class DefaultBeanInstantiationGenerator {
 				.assignReturnType(member -> !this.contributions.isEmpty()).build();
 	}
 
-	/**
-	 * Return the necessary code to instantiate and post-process the bean
-	 * handled by this instance.
-	 * @param runtimeHints the runtime hints instance to use
-	 * @return a code contribution that provides an initialized bean instance
-	 */
+	@Override
+	public Executable getInstanceCreator() {
+		return this.instanceCreator;
+	}
+
+	@Override
 	public CodeContribution generateBeanInstantiation(RuntimeHints runtimeHints) {
 		DefaultCodeContribution codeContribution = new DefaultCodeContribution(runtimeHints);
 		codeContribution.protectedAccess().analyze(this.instanceCreator, this.beanInstanceOptions);

@@ -49,6 +49,11 @@ import org.springframework.util.ObjectUtils;
  */
 public final class BeanParameterGenerator {
 
+	/**
+	 * A default instance that does not handle inner bean definitions.
+	 */
+	public static final BeanParameterGenerator INSTANCE = new BeanParameterGenerator();
+
 	private final ResolvableTypeGenerator typeGenerator = new ResolvableTypeGenerator();
 
 	private final Function<BeanDefinition, CodeBlock> innerBeanDefinitionGenerator;
