@@ -1042,40 +1042,45 @@ including checked exceptions by specifying _rollback rules_.
 [NOTE]
 ====
 Rollback rules determine if a transaction should be rolled back when a given exception is
-thrown, and the rules are based on patterns. A pattern can be a fully qualified class
-name or a substring of a fully qualified class name for an exception type (which must be
-a subclass of `Throwable`), with no wildcard support at present. For example, a value of
-`"jakarta.servlet.ServletException"` or `"ServletException"` will match
-`jakarta.servlet.ServletException` and its subclasses.
+thrown, and the rules are based on exception types or exception patterns.
 
 Rollback rules may be configured in XML via the `rollback-for` and `no-rollback-for`
-attributes, which allow patterns to be specified as strings. When using
+attributes, which allow rules to be defined as patterns. When using
 <<transaction-declarative-attransactional-settings,`@Transactional`>>, rollback rules may
 be configured via the `rollbackFor`/`noRollbackFor` and
-`rollbackForClassName`/`noRollbackForClassName` attributes, which allow patterns to be
-specified as `Class` references or strings, respectively. When an exception type is
-specified as a class reference its fully qualified name will be used as the pattern.
-Consequently, `@Transactional(rollbackFor = example.CustomException.class)` is equivalent
-to `@Transactional(rollbackForClassName = "example.CustomException")`.
+`rollbackForClassName`/`noRollbackForClassName` attributes, which allow rules to be
+defined based on exception types or patterns, respectively.
+
+When a rollback rule is defined with an exception type, that type will be used to match
+against the type of a thrown exception and its super types, providing type safety and
+avoiding any unintentional matches that may occur when using a pattern. For example, a
+value of `jakarta.servlet.ServletException.class` will only match thrown exceptions of
+type `jakarta.servlet.ServletException` and its subclasses.
+
+When a rollback rule is defined with an exception pattern, the pattern can be a fully
+qualified class name or a substring of a fully qualified class name for an exception type
+(which must be a subclass of `Throwable`), with no wildcard support at present. For
+example, a value of `"jakarta.servlet.ServletException"` or `"ServletException"` will
+match `jakarta.servlet.ServletException` and its subclasses.
 
 [WARNING]
 =====
-You must carefully consider how specific the pattern is and whether to include package
+You must carefully consider how specific a pattern is and whether to include package
 information (which isn't mandatory). For example, `"Exception"` will match nearly
 anything and will probably hide other rules. `"java.lang.Exception"` would be correct if
 `"Exception"` were meant to define a rule for all checked exceptions. With more unique
 exception names such as `"BaseBusinessException"` there is likely no need to use the
 fully qualified class name for the exception pattern.
 
-Furthermore, rollback rules may result in unintentional matches for similarly named
-exceptions and nested classes. This is due to the fact that a thrown exception is
-considered to be a match for a given rollback rule if the name of thrown exception
-contains the exception pattern configured for the rollback rule. For example, given a
-rule configured to match on `com.example.CustomException`, that rule would match against
-an exception named `com.example.CustomExceptionV2` (an exception in the same package as
-`CustomException` but with an additional suffix) or an exception named
-`com.example.CustomException$AnotherException` (an exception declared as a nested class
-in `CustomException`).
+Furthermore, pattern-based rollback rules may result in unintentional matches for
+similarly named exceptions and nested classes. This is due to the fact that a thrown
+exception is considered to be a match for a given pattern-based rollback rule if the name
+of the thrown exception contains the exception pattern configured for the rollback rule.
+For example, given a rule configured to match on `"com.example.CustomException"`, that
+rule will match against an exception named `com.example.CustomExceptionV2` (an exception
+in the same package as `CustomException` but with an additional suffix) or an exception
+named `com.example.CustomException$AnotherException` (an exception declared as a nested
+class in `CustomException`).
 =====
 ====
 
@@ -1770,7 +1775,7 @@ properties of the `@Transactional` annotation:
 
 TIP: See <<transaction-declarative-rollback-rules, Rollback rules>> for further details
 on rollback rule semantics, patterns, and warnings regarding possible unintentional
-matches.
+matches for pattern-based rollback rules.
 
 Currently, you cannot have explicit control over the name of a transaction, where 'name'
 means the transaction name that appears in a transaction monitor, if applicable
