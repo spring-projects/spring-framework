@@ -27,6 +27,22 @@ import org.springframework.util.Assert;
  * <p>Multiple such rules can be applied to determine whether a transaction
  * should commit or rollback after an exception has been thrown.
  *
+ * <p>Each rule is based on an exception pattern which can be a fully qualified
+ * class name or a substring of a fully qualified class name for an exception
+ * type (which must be a subclass of {@code Throwable}), with no wildcard support
+ * at present. For example, a value of {@code "javax.servlet.ServletException"}
+ * or {@code "ServletException"} would match {@code javax.servlet.ServletException}
+ * and its subclasses.
+ *
+ * <p>An exception pattern can be specified as a {@link Class} reference or a
+ * {@link String} in {@link #RollbackRuleAttribute(Class)} and
+ * {@link #RollbackRuleAttribute(String)}, respectively. When an exception type
+ * is specified as a class reference its fully qualified name will be used as the
+ * pattern. See the javadocs for
+ * {@link org.springframework.transaction.annotation.Transactional @Transactional}
+ * for further details on rollback rule semantics, patterns, and warnings regarding
+ * possible unintentional matches.
+ *
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 09.04.2003
@@ -56,6 +72,10 @@ public class RollbackRuleAttribute implements Serializable{
 	 * for the given {@code exceptionType}.
 	 * <p>This is the preferred way to construct a rollback rule that matches
 	 * the supplied exception type, its subclasses, and its nested classes.
+	 * <p>See the javadocs for
+	 * {@link org.springframework.transaction.annotation.Transactional @Transactional}
+	 * for further details on rollback rule semantics, patterns, and warnings regarding
+	 * possible unintentional matches.
 	 * @param exceptionType exception type; must be {@link Throwable} or a subclass
 	 * of {@code Throwable}
 	 * @throws IllegalArgumentException if the supplied {@code exceptionType} is
@@ -73,16 +93,10 @@ public class RollbackRuleAttribute implements Serializable{
 	/**
 	 * Create a new instance of the {@code RollbackRuleAttribute} class
 	 * for the given {@code exceptionPattern}.
-	 * <p>This can be a substring, with no wildcard support at present. A value
-	 * of "ServletException" would match
-	 * {@code javax.servlet.ServletException} and subclasses, for example.
-	 * <p><b>NB:</b> Consider carefully how specific the pattern is, and
-	 * whether to include package information (which is not mandatory). For
-	 * example, "Exception" will match nearly anything, and will probably hide
-	 * other rules. "java.lang.Exception" would be correct if "Exception" was
-	 * meant to define a rule for all checked exceptions. With more unique
-	 * exception names such as "BaseBusinessException" there's no need to use a
-	 * fully package-qualified name.
+	 * <p>See the javadocs for
+	 * {@link org.springframework.transaction.annotation.Transactional @Transactional}
+	 * for further details on rollback rule semantics, patterns, and warnings regarding
+	 * possible unintentional matches.
 	 * @param exceptionPattern the exception name pattern; can also be a fully
 	 * package-qualified class name
 	 * @throws IllegalArgumentException if the supplied {@code exceptionPattern}
@@ -106,7 +120,7 @@ public class RollbackRuleAttribute implements Serializable{
 	 * Return the depth of the superclass matching, with the following semantics.
 	 * <ul>
 	 * <li>{@code -1} means this rule does not match the supplied {@code exception}.</li>
-	 * <li>{@code 0} means this rule matches the supplied {@code exception} exactly.</li>
+	 * <li>{@code 0} means this rule matches the supplied {@code exception} directly.</li>
 	 * <li>Any other positive value means this rule matches the supplied {@code exception}
 	 * within the superclass hierarchy, where the value is the number of levels in the
 	 * class hierarchy between the supplied {@code exception} and the exception against
@@ -115,22 +129,25 @@ public class RollbackRuleAttribute implements Serializable{
 	 * <p>When comparing roll back rules that match against a given exception, a rule
 	 * with a lower matching depth wins. For example, a direct match ({@code depth == 0})
 	 * wins over a match in the superclass hierarchy ({@code depth > 0}).
+	 * <p>A match against a nested exception type or similarly named exception type
+	 * will return a depth signifying a match at the corresponding level in the
+	 * class hierarchy as if there had been a direct match.
 	 */
 	public int getDepth(Throwable exception) {
 		return getDepth(exception.getClass(), 0);
 	}
 
 
-	private int getDepth(Class<?> exceptionClass, int depth) {
-		if (exceptionClass.getName().contains(this.exceptionPattern)) {
+	private int getDepth(Class<?> exceptionType, int depth) {
+		if (exceptionType.getName().contains(this.exceptionPattern)) {
 			// Found it!
 			return depth;
 		}
 		// If we've gone as far as we can go and haven't found it...
-		if (exceptionClass == Throwable.class) {
+		if (exceptionType == Throwable.class) {
 			return -1;
 		}
-		return getDepth(exceptionClass.getSuperclass(), depth + 1);
+		return getDepth(exceptionType.getSuperclass(), depth + 1);
 	}
 
 
