@@ -1,6 +1,6 @@
 [[mvc]]
 = Spring Web MVC
-:doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
+:doc-spring-security: {doc-root}/spring-security/reference
 
 Spring Web MVC is the original web framework built on the Servlet API and has been included
 in the Spring Framework from the very beginning. The formal name, "`Spring Web MVC,`"
@@ -4829,14 +4829,14 @@ include::webmvc-cors.adoc[leveloffset=+1]
 == Web Security
 [.small]#<<web-reactive.adoc#webflux-web-security, WebFlux>>#
 
-The https://projects.spring.io/spring-security/[Spring Security] project provides support
+The https://spring.io/projects/spring-security[Spring Security] project provides support
 for protecting web applications from malicious exploits. See the Spring Security
 reference documentation, including:
 
-* {doc-spring-security}/html5/#mvc[Spring MVC Security]
-* {doc-spring-security}/html5/#test-mockmvc[Spring MVC Test Support]
-* {doc-spring-security}/html5/#csrf[CSRF protection]
-* {doc-spring-security}/html5/#headers[Security Response Headers]
+* {doc-spring-security}/servlet/integrations/mvc.html[Spring MVC Security]
+* {doc-spring-security}/servlet/test/mockmvc/setup.html[Spring MVC Test Support]
+* {doc-spring-security}/features/exploits/csrf.html#csrf-protection[CSRF protection]
+* {doc-spring-security}/features/exploits/headers.html[Security Response Headers]
 
 https://hdiv.org/[HDIV] is another web security framework that integrates with Spring MVC.
 
