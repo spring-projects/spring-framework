@@ -676,8 +676,7 @@ Spring WebFlux provides fine-grained support for CORS configuration through anno
 controllers. However, when you use it with Spring Security, we advise relying on the built-in
 `CorsFilter`, which must be ordered ahead of Spring Security's chain of filters.
 
-See the section on <<webflux-cors>> and the <<webflux-cors.adoc#webflux-cors-webfilter>> for more details.
-
+See the section on <<webflux-cors>> and the <<webflux-cors-webfilter>> for more details.
 
 
 [[webflux-exception-handler]]
