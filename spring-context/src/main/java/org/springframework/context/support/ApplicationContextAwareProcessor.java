@@ -73,7 +73,13 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		this.embeddedValueResolver = new EmbeddedValueResolver(applicationContext.getBeanFactory());
 	}
 
-
+	/**
+	 * 接口BeanPostProcessor规定的方法，会在Bean创建时实例化后，初始化前，对Bean对象应用该Before方法
+	 * @param bean the new bean instance
+	 * @param beanName the name of the bean
+	 * @return
+	 * @throws BeansException
+	 */
 	@Override
 	@Nullable
 	public Object postProcessBeforeInitialization(final Object bean, String beanName) throws BeansException {
@@ -88,6 +94,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 		if (acc != null) {
 			AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+				// 检测Bean是否实现了某个Aware接口，有的话进行相关的调用
 				invokeAwareInterfaces(bean);
 				return null;
 			}, acc);
@@ -99,24 +106,41 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		return bean;
 	}
 
+	/**
+	 * 对实现Aware接口的实现进行方法的调用
+	 * @param bean 实现Aware接口的实现类
+	 */
 	private void invokeAwareInterfaces(Object bean) {
+		// 判断bean类型是否为Aware
 		if (bean instanceof Aware) {
+			// 判断bean类型是否为EnvironmentAware
 			if (bean instanceof EnvironmentAware) {
+				// 回调EnvironmentAware的setEnvironment方法
 				((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());
 			}
+			// 判断bean类型是否为EmbeddedValueResolverAware
 			if (bean instanceof EmbeddedValueResolverAware) {
+				// 回调EmbeddedValueResolverAware的setEmbeddedValueResolver方法
 				((EmbeddedValueResolverAware) bean).setEmbeddedValueResolver(this.embeddedValueResolver);
 			}
+			// 判断bean类型是否为ResourceLoaderAware
 			if (bean instanceof ResourceLoaderAware) {
+				// 回调ResourceLoaderAware的setResourceLoader方法
 				((ResourceLoaderAware) bean).setResourceLoader(this.applicationContext);
 			}
+			// 判断bean类型是否为ApplicationEventPublisherAware方法
 			if (bean instanceof ApplicationEventPublisherAware) {
+				// 回调ApplicationEventPublisherAware的setApplicationEventPublisher
 				((ApplicationEventPublisherAware) bean).setApplicationEventPublisher(this.applicationContext);
 			}
+			// 判断bean类型是否为MessageSourceAware
 			if (bean instanceof MessageSourceAware) {
+				// 回调MessageSourceAware的setMessageSource方法
 				((MessageSourceAware) bean).setMessageSource(this.applicationContext);
 			}
+			// 判断bean类型是否ApplicationContextAware
 			if (bean instanceof ApplicationContextAware) {
+				// 回调ApplicationContextAware的setApplicationContext方法
 				((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
 			}
 		}

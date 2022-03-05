@@ -60,23 +60,33 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	@Override
 	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
 		// Don't override the class with CGLIB if no overrides.
+		// 判断RootBeanDefinition定义信息中是否包含MethodOverrides列表，Spring中有两个标签参数会产生MethodOverrides，分别是lookup-method、replaced-method
 		if (!bd.hasMethodOverrides()) {
+			// 实例化对象的构造方法
 			Constructor<?> constructorToUse;
+			// 对当前对象加锁，使获得实例化构造方法线程安全
 			synchronized (bd.constructorArgumentLock) {
+				// 查看RootBeanDefinition对象中是否含有构造方法
 				constructorToUse = (Constructor<?>) bd.resolvedConstructorOrFactoryMethod;
+				// 如果没有
 				if (constructorToUse == null) {
+					// 从RootBeanDefinition中获取BeanClass
 					final Class<?> clazz = bd.getBeanClass();
+					// 判断当前clazz是否是接口，如果是接口，则直接抛出异常
 					if (clazz.isInterface()) {
 						throw new BeanInstantiationException(clazz, "Specified class is an interface");
 					}
 					try {
+						// 判断当前系统安全管理器是否不为空
 						if (System.getSecurityManager() != null) {
 							constructorToUse = AccessController.doPrivileged(
 									(PrivilegedExceptionAction<Constructor<?>>) clazz::getDeclaredConstructor);
 						}
 						else {
+							// 反射获取构造函数（使用默认的无参构造器）
 							constructorToUse = clazz.getDeclaredConstructor();
 						}
+						// 获取到构造器之后将构造器赋值给RootBeanDefinition中的属性
 						bd.resolvedConstructorOrFactoryMethod = constructorToUse;
 					}
 					catch (Throwable ex) {
@@ -84,10 +94,12 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					}
 				}
 			}
+			// 实例化Bean（通过反射获取具体的实例化对象）
 			return BeanUtils.instantiateClass(constructorToUse);
 		}
 		else {
 			// Must generate CGLIB subclass.
+			// 必须生成cglib子类
 			return instantiateWithMethodInjection(bd, beanName, owner);
 		}
 	}

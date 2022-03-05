@@ -119,14 +119,21 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 */
 	@Override
 	protected final void refreshBeanFactory() throws BeansException {
+		// 判断是否存在，若存在，则销毁后并关闭
 		if (hasBeanFactory()) {
+			// 销毁BeanFactory工厂
 			destroyBeans();
+			// 关闭BeanFactory工厂
 			closeBeanFactory();
 		}
 		try {
+			// 创建BeanFactory工厂（DefaultListableBeanFactory）
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
+			// 序列化指定id，可以从id反序列化BeanFactory对象
 			beanFactory.setSerializationId(getId());
+			// 定制BeanFactory，设置相关属性，包括是否允许覆盖同名称的不同定义的对象以及循环依赖
 			customizeBeanFactory(beanFactory);
+			// 初始化BeanDefinitionReader读取器，加载BeanDefinitions(Bean定义信息)
 			loadBeanDefinitions(beanFactory);
 			this.beanFactory = beanFactory;
 		}
@@ -135,6 +142,10 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		}
 	}
 
+	/**
+	 * 取消刷新BeanFactory
+	 * @param ex the exception that led to the cancellation
+	 */
 	@Override
 	protected void cancelRefresh(BeansException ex) {
 		DefaultListableBeanFactory beanFactory = this.beanFactory;
@@ -144,6 +155,9 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		super.cancelRefresh(ex);
 	}
 
+	/**
+	 * 关闭BeanFactory工厂
+	 */
 	@Override
 	protected final void closeBeanFactory() {
 		DefaultListableBeanFactory beanFactory = this.beanFactory;
@@ -157,10 +171,18 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * Determine whether this context currently holds a bean factory,
 	 * i.e. has been refreshed at least once and not been closed yet.
 	 */
+	/**
+	 * 判断上下文环境中是否已存在BeanFactory工厂(即：至少刷新一次且尚未关闭)
+	 * @return
+	 */
 	protected final boolean hasBeanFactory() {
 		return (this.beanFactory != null);
 	}
 
+	/**
+	 * 获取BeanFactory
+	 * @return
+	 */
 	@Override
 	public final ConfigurableListableBeanFactory getBeanFactory() {
 		DefaultListableBeanFactory beanFactory = this.beanFactory;
@@ -193,6 +215,10 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
 	 */
+	/**
+	 * 创建BeanFactory工厂(DefaultListableBeanFactory)
+	 * @return
+	 */
 	protected DefaultListableBeanFactory createBeanFactory() {
 		return new DefaultListableBeanFactory(getInternalParentBeanFactory());
 	}
@@ -211,6 +237,10 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * @see DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
 	 * @see DefaultListableBeanFactory#setAllowEagerClassLoading
 	 */
+	/**
+	 * 自定义BeanFactory工厂信息
+	 * @param beanFactory
+	 */
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
 		if (this.allowBeanDefinitionOverriding != null) {
 			beanFactory.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
@@ -228,6 +258,12 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * @throws IOException if loading of bean definition files failed
 	 * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
+	 */
+	/**
+	 * 加载BeanDefinitions(Bean定义信息)
+	 * @param beanFactory
+	 * @throws BeansException
+	 * @throws IOException
 	 */
 	protected abstract void loadBeanDefinitions(DefaultListableBeanFactory beanFactory)
 			throws BeansException, IOException;

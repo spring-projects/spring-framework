@@ -135,17 +135,29 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/** Map from serialized id to factory instance. */
+	/**
+	 * 从序列化id映射到工厂实例
+	 */
 	private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories =
 			new ConcurrentHashMap<>(8);
 
 	/** Optional id for this factory, for serialization purposes. */
+	/**
+	 * 此工厂的可选id，用于序列化
+	 */
 	@Nullable
 	private String serializationId;
 
 	/** Whether to allow re-registration of a different definition with the same name. */
+	/**
+	 * 是否允许重新注册具有相同名称的Bean定义信息
+	 */
 	private boolean allowBeanDefinitionOverriding = true;
 
 	/** Whether to allow eager class loading even for lazy-init beans. */
+	/**
+	 * 是否允许对懒加载初始化Bean进行类加载
+	 */
 	private boolean allowEagerClassLoading = true;
 
 	/** Optional OrderComparator for dependency Lists and arrays. */
@@ -837,15 +849,25 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		// Iterate over a copy to allow for init methods which in turn register new bean definitions.
 		// While this may not be part of the regular factory bootstrap, it does otherwise work fine.
+		// 获取容器中所有bean定义的名称并用集合存放
 		List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);
 
 		// Trigger initialization of all non-lazy singleton beans...
+		// 循环所有的非懒加载单实例bean，循环集合
 		for (String beanName : beanNames) {
+			// 合并父类BeanDefinitions的定义信息
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+			/**
+			 * 根据bean定义信息判断是不是抽象类、&& 是单例的 && 不是懒加载的
+			 */
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+				// 判断当前bean是不是实现了FactoryBean接口
 				if (isFactoryBean(beanName)) {
+					// 若当前类为工厂bean，则给beanName + & 前缀符号
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
+					// 若bean 为FactoryBean类型的bean
 					if (bean instanceof FactoryBean) {
+						// 类型转换
 						FactoryBean<?> factory = (FactoryBean<?>) bean;
 						boolean isEagerInit;
 						if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
@@ -862,6 +884,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						}
 					}
 				}
+				// 如果当前Bean没有实现FactoryBean接口，则获取实例
 				else {
 					getBean(beanName);
 				}
@@ -869,12 +892,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		// Trigger post-initialization callback for all applicable beans...
+		// 遍历beanNames定义信息，触发所有SmartInitializingSingleton的后初始化回调方法(afterSingletonsInstantiated)
 		for (String beanName : beanNames) {
+			// 获取beanName对应的bean实例
 			Object singletonInstance = getSingleton(beanName);
+			// 判断singletonInstance 是否实现了SmartInitializingSingleton接口
 			if (singletonInstance instanceof SmartInitializingSingleton) {
+				// 类型转换
 				SmartInitializingSingleton smartSingleton = (SmartInitializingSingleton) singletonInstance;
 				if (System.getSecurityManager() != null) {
 					AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+						// 调用SmartInitializingSingleton接口的afterSingletonsInstantiated方法
 						smartSingleton.afterSingletonsInstantiated();
 						return null;
 					}, getAccessControlContext());
@@ -1049,6 +1077,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		clearByTypeCache();
 	}
 
+	/**
+	 * 销毁单实例Bean 并清空缓存
+	 */
 	@Override
 	public void destroySingletons() {
 		super.destroySingletons();
@@ -1094,6 +1125,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/**
 	 * Remove any assumptions about by-type mappings.
+	 */
+	/**
+	 * 移除关于按类型映射的任何Bean
 	 */
 	private void clearByTypeCache() {
 		this.allBeanNamesByType.clear();

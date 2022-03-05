@@ -51,6 +51,10 @@ import org.springframework.core.io.ResourceLoader;
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.ResourceLoaderAware
  */
+
+/**
+ * 用于将Resource Pattern 解析为ResourcePatternResolver对象的策略接口
+ */
 public interface ResourcePatternResolver extends ResourceLoader {
 
 	/**

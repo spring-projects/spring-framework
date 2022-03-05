@@ -33,6 +33,10 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 1.1
  */
+
+/**
+ * 实例化策略接口：反射、工厂方法
+ */
 public interface InstantiationStrategy {
 
 	/**

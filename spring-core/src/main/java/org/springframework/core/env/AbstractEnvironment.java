@@ -386,6 +386,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public Map<String, Object> getSystemProperties() {
 		try {
+			// 获取系统属性
 			return (Map) System.getProperties();
 		}
 		catch (AccessControlException ex) {
@@ -415,6 +416,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 			return Collections.emptyMap();
 		}
 		try {
+			// 获取系统环境
 			return (Map) System.getenv();
 		}
 		catch (AccessControlException ex) {

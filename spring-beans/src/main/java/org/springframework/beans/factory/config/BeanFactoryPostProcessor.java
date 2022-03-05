@@ -42,6 +42,10 @@ import org.springframework.beans.BeansException;
  * @see BeanPostProcessor
  * @see PropertyResourceConfigurer
  */
+
+/**
+ * BeanFactoryPostProcessor 用于修改 BeanDefinition 定义信息的
+ */
 @FunctionalInterface
 public interface BeanFactoryPostProcessor {
 

@@ -105,13 +105,26 @@ class BeanDefinitionValueResolver {
 	public Object resolveValueIfNecessary(Object argName, @Nullable Object value) {
 		// We must check each value to see whether it requires a runtime reference
 		// to another bean to be resolved.
+		// 必须检查每个值，以查看它是否需要对另一个Bean的运行时引用才能解决
+		// RuntimeBeanReference：当属性值对象是工厂中另一个Bean的引用时，使用不可变的占位符类，在运行时进行解析
+		// 如果value是RuntimeBeanReference的实例
 		if (value instanceof RuntimeBeanReference) {
+			// 将value转换为RuntimeBeanReference
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
+			// 解析出对应ref所封装Bean元信息（即Bean名称、Bean类型）的Bean对象
 			return resolveReference(argName, ref);
 		}
+		// RuntimeBeanNameReference：对应于标签 <idref bean='a' />
+		// idref注入的是目标Bean的id，而不是目标Bean的实例，同时使用idref容器在部署的时候还会验证这个Bean
+		// 是否真实存在，其实idref就跟value一样，只是将某个字符串注入到属性或者构造函数中，只不过注入的是某个Bean定义的id属性值
+		// 即：<idref bean='a' /> 等同于 <value>a</value>
+		// 如果value是RuntimeBeanNameReference实例
 		else if (value instanceof RuntimeBeanNameReference) {
+			// 从value中获取引用的BeanName
 			String refName = ((RuntimeBeanNameReference) value).getBeanName();
+			// 对refName进行解析，然后重新赋值给refName
 			refName = String.valueOf(doEvaluate(refName));
+			// 如果BeanFactory不包含具有refName的BeanDefinition或外部注册的singleton实例
 			if (!this.beanFactory.containsBean(refName)) {
 				throw new BeanDefinitionStoreException(
 						"Invalid bean name '" + refName + "' in bean reference for " + argName);
@@ -284,25 +297,42 @@ class BeanDefinitionValueResolver {
 	/**
 	 * Resolve a reference to another bean in the factory.
 	 */
+	/**
+	 * 解析对工厂中另一个Bean的引用
+	 * @param argName
+	 * @param ref
+	 * @return
+	 */
 	@Nullable
 	private Object resolveReference(Object argName, RuntimeBeanReference ref) {
 		try {
+			// 定义用于存储Bean对象的变量
 			Object bean;
+			// 获取另一个Bean引用的BeanName
 			String refName = ref.getBeanName();
+			//
 			refName = String.valueOf(doEvaluate(refName));
+			// 如果引用来自父工厂
 			if (ref.isToParent()) {
+				// 如果父工厂为空
 				if (this.beanFactory.getParentBeanFactory() == null) {
+					// 抛出Bean创建异常，无法解析对Bean的应用 ref 在父工厂中没有可以解析的父工厂
 					throw new BeanCreationException(
 							this.beanDefinition.getResourceDescription(), this.beanName,
 							"Can't resolve reference to bean '" + refName +
 									"' in parent factory: no parent factory available");
 				}
+				// 如果父工厂不为空，则从父工厂获取引用BeanName对应的Bean对象
 				bean = this.beanFactory.getParentBeanFactory().getBean(refName);
 			}
+			// 如果对引用的Bean不是来自父工厂的，则直接在该工厂获取
 			else {
+				// 根据引用名称获取Bean实例
 				bean = this.beanFactory.getBean(refName);
+				// 注册beanName于DependentBeanName的依赖关系到BeanFactory
 				this.beanFactory.registerDependentBean(refName, this.beanName);
 			}
+			// 如果Bean为NullBean类型，则直接返回null
 			if (bean instanceof NullBean) {
 				bean = null;
 			}
