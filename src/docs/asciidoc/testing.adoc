@@ -2672,14 +2672,34 @@ test's `ApplicationContext` can listen to the following events published by the
 * `AfterTestMethodEvent`
 * `AfterTestClassEvent`
 
-NOTE: These events are only published if the `ApplicationContext` has already been loaded.
-
 These events may be consumed for various reasons, such as resetting mock beans or tracing
 test execution. One advantage of consuming test execution events rather than implementing
 a custom `TestExecutionListener` is that test execution events may be consumed by any
 Spring bean registered in the test `ApplicationContext`, and such beans may benefit
 directly from dependency injection and other features of the `ApplicationContext`. In
 contrast, a `TestExecutionListener` is not a bean in the `ApplicationContext`.
+
+[NOTE]
+====
+The `EventPublishingTestExecutionListener` is registered by default; however, it only
+publishes events if the `ApplicationContext` has _already been loaded_. This prevents the
+`ApplicationContext` from being loaded unnecessarily or too early.
+
+Consequently, a `BeforeTestClassEvent` will not be published until after the
+`ApplicationContext` has been loaded by another `TestExecutionListener`. For example, with
+the default set of `TestExecutionListener` implementations registered, a
+`BeforeTestClassEvent` will not be published for the first test class that uses a
+particular test `ApplicationContext`, but a `BeforeTestClassEvent` _will_ be published for
+any subsequent test class in the same test suite that uses the same test
+`ApplicationContext` since the context will already have been loaded when subsequent test
+classes run (as long as the context has not been removed from the `ContextCache` via
+`@DirtiesContext` or the max-size eviction policy).
+
+If you wish to ensure that a `BeforeTestClassEvent` is always published for every test
+class, you need to register a `TestExecutionListener` that loads the `ApplicationContext`
+in the `beforeTestClass` callback, and that `TestExecutionListener` must be registered
+_before_ the `EventPublishingTestExecutionListener`.
+====
 
 In order to listen to test execution events, a Spring bean may choose to implement the
 `org.springframework.context.ApplicationListener` interface. Alternatively, listener
