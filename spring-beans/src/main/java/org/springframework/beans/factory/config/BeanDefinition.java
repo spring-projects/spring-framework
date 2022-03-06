@@ -37,18 +37,10 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.beans.factory.support.RootBeanDefinition
  * @see org.springframework.beans.factory.support.ChildBeanDefinition
  *
- * ´´½¨ÓÃÓÚ³ĞÔØÊôĞÔµÄBeanDefinition
- * BeanDefinitionÊÇÒ»¸ö½Ó¿Ú£¬ÔÚspringÖĞ´Ë½Ó¿ÚÓĞÈıÖÖÊµÏÖ£ºRootBeanDefinition¡¢ChildBeanDefinitionºÍGenericBeanDefinition¡£
- * ¶øÈıÖÖÊµÏÖ¶¼¼Ì³ĞÁËAbstractBeanDefinition£¬ÆäÖĞBeanDefinitionÊÇÅäÖÃÎÄ¼şÔªËØ±êÇ©ÔÚÈİÆ÷ÖĞµÄÄÚ²¿±íÊ¾ĞÎÊ½¡£ÔªËØ±êÇ©ÓµÓĞclass¡¢scope¡¢lazy-initµÈÊôĞÔ£¬
- * BeanDefinitionÔòÌá¹©ÁËÏàÓ¦µÄbeanClass¡¢scope¡¢lazyInitÊôĞÔ£¬BeanDefinitionºÍ<bean>ÖĞµÄÊôĞÔÒ»Ò»¶ÔÓ¦¡£
- * ÆäÖĞRootBeanDefinitionÊÇ×î³£ÓÃµÄÊµÏÖÀà£¬Ëû¶ÔÓ¦Ò»°ãĞÔµÄÔªËØ±êÇ©£¬
- * GenericBeanDefinitionÊÇ×Ô2.5°æ±¾ÒÔºóĞÂ¼ÓÈëµÄbeanÎÄ¼şÅäÖÃÊôĞÔ¶¨ÒåÀà£¬ÊÇÒ»Õ¾Ê½·şÎñµÄ¡£
- * ÔÚÅäÖÃÎÄ¼şÖĞ¿ÉÒÔ¶¨Òå¸¸ºÍ×Ö£¬¸¸ÓÃRootBeanDefinition±íÊ¾£¬¶ø×ÓÓÃChildBeanDefinition±íÊ¾£¬
- * ¶øÃ»ÓĞ¸¸µÄ¾ÍÊ¹ÓÃRootBeanDefinition±íÊ¾¡£AbstractBeanDefinition¶ÔÁ½Õß¹²Í¬µÄÀàĞÅÏ¢½øĞĞ³éÏó¡£
- *
- * SpringÍ¨¹ıBeanDefinition½«ÅäÖÃÎÄ¼şÖĞµÄÅäÖÃĞÅÏ¢×ª»»ÎªÈİÆ÷µÄÄÚ²¿±íÊ¾£¬²¢½«ÕâĞ©BeanDefinition×¢²áµ½BeanDefinitionRegistryÖĞ¡£
- * SpringÈİÆ÷µÄBeanDefinitionRegistry¾ÍÏñÊÇSpringÅäÖÃĞÅÏ¢µÄÄÚ´æÊı¾İ¿â£¬Ö÷ÒªÊÇÒÔmapµÄĞÎÊ½±£´æ£¬
- * ºóĞø²Ù×÷Ö±½Ó´ÓBeanDefinitionResistryÖĞ¶ÁÈ¡ÅäÖÃĞÅÏ¢¡£
+ * Springé€šè¿‡BeanDefinitionå°†é…ç½®æ–‡ä»¶ä¸­çš„<bean></bean>é…ç½®ä¿¡æ¯è½¬æ¢ä¸ºå®¹å™¨çš„å†…éƒ¨è¡¨ç¤º
+ * å¹¶å°†è¿™äº›BeanDefinitionæ³¨å†Œåˆ°BeanDefinitionRegistryä¸­ã€‚
+ * Springå®¹å™¨çš„BeanDefinitionRegistryå°±åƒæ˜¯Springé…ç½®ä¿¡æ¯çš„å†…å­˜æ•°æ®åº“ï¼Œä¸»è¦æ˜¯ä»¥mapçš„å½¢å¼ä¿å­˜ã€‚
+ * åç»­æ“ä½œç›´æ¥ä»BeanDefinitionRegistryä¸­è¯»å–é…ç½®ä¿¡æ¯ã€‚
  */
 public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 

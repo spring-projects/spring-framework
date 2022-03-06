@@ -16,25 +16,24 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.lang.Nullable;
+import org.w3c.dom.Element;
 
 /**
- * Interface used by the {@link DefaultBeanDefinitionDocumentReader} to handle custom,
+ * interface used by the {@link defaultbeandefinitiondocumentreader} to handle custom,
  * top-level (directly under {@code <beans/>}) tags.
  *
- * <p>Implementations are free to turn the metadata in the custom tag into as many
- * {@link BeanDefinition BeanDefinitions} as required.
+ * <p>implementations are free to turn the metadata in the custom tag into as many
+ * {@link beandefinition beandefinitions} as required.
  *
- * <p>The parser locates a {@link BeanDefinitionParser} from the associated
- * {@link NamespaceHandler} for the namespace in which the custom tag resides.
+ * <p>the parser locates a {@link beandefinitionparser} from the associated
+ * {@link namespacehandler} for the namespace in which the custom tag resides.
  *
- * @author Rob Harrop
+ * @author rob harrop
  * @since 2.0
- * @see NamespaceHandler
- * @see AbstractBeanDefinitionParser
+ * @see namespacehandler
+ * @see abstractbeandefinitionparser
  */
 public interface BeanDefinitionParser {
 

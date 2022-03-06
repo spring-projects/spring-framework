@@ -58,9 +58,11 @@ public abstract class BeanDefinitionReaderUtils {
 			@Nullable String parentName, @Nullable String className, @Nullable ClassLoader classLoader) throws ClassNotFoundException {
 
 		GenericBeanDefinition bd = new GenericBeanDefinition();
+		//parentName鍙兘涓虹┖
 		bd.setParentName(parentName);
 		if (className != null) {
 			if (classLoader != null) {
+				//濡傛灉classLoader涓嶄负绌猴紝鍒欎娇鐢ㄤ互浼犲叆鐨刢lassLoader鍚屼竴铏氭嫙鏈哄姞杞界被瀵硅薄锛屽惁鍒欏彧鏄褰昪lassName
 				bd.setBeanClass(ClassUtils.forName(className, classLoader));
 			}
 			else {
@@ -161,17 +163,13 @@ public abstract class BeanDefinitionReaderUtils {
 			BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry)
 			throws BeanDefinitionStoreException {
 
-		//使用beanName做唯一标识注册
+		//使锟斤拷beanName锟斤拷唯一锟斤拷识注锟斤拷
 		// Register bean definition under primary name.
 		String beanName = definitionHolder.getBeanName();
 		registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
 
 		// Register aliases for bean name, if any.
-		//注册所有的别名
-		/**
-		 * 用了beanName作为唯一标示进行注册的，然后注册了所有的别名aliase。
-		 * 而beanDefinition最终都是注册到BeanDefinitionRegistry中
-		 */
+
 		String[] aliases = definitionHolder.getAliases();
 		if (aliases != null) {
 			for (String alias : aliases) {
