@@ -35,6 +35,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePropertiesPersister;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
 
@@ -108,8 +109,50 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	// Cache to hold already loaded properties per filename
 	private final ConcurrentMap<String, PropertiesHolder> cachedProperties = new ConcurrentHashMap<>();
 
-	// Cache to hold already loaded properties per filename
+	// Cache to hold already loaded properties per locale
 	private final ConcurrentMap<Locale, PropertiesHolder> cachedMergedProperties = new ConcurrentHashMap<>();
+
+	/**
+	 * Set an array of basenames, each following the basic ResourceBundle convention
+	 * of not specifying file extension or language codes.
+	 * <p>Regular and XMl properties files are supported: e.g. "messages" will find
+	 * a "messages.properties", "messages_en.properties" etc arrangement as well
+	 * as "messages.xml", "messages_en.xml" etc.
+	 * <p>The associated resource bundles will be checked sequentially when resolving
+	 * a message code. Note that message definitions in a <i>previous</i> resource
+	 * bundle will override ones in a later bundle, due to the sequential lookup.
+	 * <p>This methode also clears cache since it has been invalidated due to new
+	 * basename configuration.
+	 * <p>Note: In contrast to {@link #addBasenames}, this replaces existing entries
+	 * with the given names and can therefore also be used to reset the configuration.
+	 * @param basenames an array of basenames
+	 * @see #setBasename
+	 * @see java.util.ResourceBundle
+	 */
+	@Override
+	public void setBasenames(String... basenames) {
+		this.clearCache();
+		super.setBasenames(basenames);
+	}
+
+	/**
+	 * Add the specified basenames to the existing basename configuration.
+	 * <p>If the provided list is not empty, this methode also clears cache
+	 * since it is considered invalidated by the new basename configuration.
+	 * <p>Note: If a given basename already exists, the position of its entry
+	 * will remain as in the original set. New entries will be added at the
+	 * end of the list, to be searched after existing basenames.
+	 * @since 4.3
+	 * @see #setBasenames
+	 * @see java.util.ResourceBundle
+	 */
+	@Override
+	public void addBasenames(String... basenames) {
+		if (!ObjectUtils.isEmpty(basenames)) {
+			this.clearCache();
+		}
+		super.addBasenames(basenames);
+	}
 
 
 	/**

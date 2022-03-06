@@ -418,6 +418,15 @@ class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
+	void reloadableResourceBundleMessageSourceWithLateSetBasename() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		ms.getMessage("code1", null, "", Locale.ENGLISH);
+		ms.addBasenames("org/springframework/context/support/messages");
+		String message = ms.getMessage("code1", null, "", Locale.ENGLISH);
+		assertThat(message).isEqualTo("message1");
+	}
+
+	@Test
 	void messageSourceResourceBundle() {
 		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
