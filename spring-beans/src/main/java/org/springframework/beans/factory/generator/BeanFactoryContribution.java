@@ -16,6 +16,10 @@
 
 package org.springframework.beans.factory.generator;
 
+import java.util.function.BiPredicate;
+
+import org.springframework.beans.factory.config.BeanDefinition;
+
 /**
  * Contribute optimizations ahead of time to initialize a bean factory.
  *
@@ -30,5 +34,15 @@ public interface BeanFactoryContribution {
 	 * @param initialization {@link BeanFactoryInitialization} to contribute to
 	 */
 	void applyTo(BeanFactoryInitialization initialization);
+
+	/**
+	 * Return a predicate that determines if a particular bean definition
+	 * should be excluded from processing. Can be used to exclude infrastructure
+	 * that has been optimized using generated code.
+	 * @return the predicate to use
+	 */
+	default BiPredicate<String, BeanDefinition> getBeanDefinitionExcludeFilter() {
+		return (beanName, beanDefinition) -> false;
+	}
 
 }

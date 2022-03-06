@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.generator;
 
 import java.util.List;
+import java.util.function.BiPredicate;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -26,6 +27,7 @@ import org.mockito.Mockito;
 import org.springframework.aot.generator.DefaultGeneratedTypeContext;
 import org.springframework.aot.generator.GeneratedType;
 import org.springframework.aot.generator.GeneratedTypeContext;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -90,6 +92,37 @@ class BeanDefinitionsContributionTests {
 				""");
 	}
 
+	@Test
+	void getBeanDefinitionWithNoUnderlyingContributorReturnFalseByDefault() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		BiPredicate<String, BeanDefinition> excludeFilter = new BeanDefinitionsContribution(beanFactory)
+				.getBeanDefinitionExcludeFilter();
+		assertThat(excludeFilter.test("foo", new RootBeanDefinition())).isFalse();
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void getBeanDefinitionExcludeFilterWrapsUnderlyingFilter() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("bean1", new RootBeanDefinition());
+		beanFactory.registerBeanDefinition("bean2", new RootBeanDefinition());
+		BiPredicate<String, BeanDefinition> excludeFilter1 = Mockito.mock(BiPredicate.class);
+		BDDMockito.given(excludeFilter1.test(ArgumentMatchers.eq("bean1"), ArgumentMatchers.any(BeanDefinition.class))).willReturn(Boolean.TRUE);
+		BDDMockito.given(excludeFilter1.test(ArgumentMatchers.eq("bean2"), ArgumentMatchers.any(BeanDefinition.class))).willReturn(Boolean.FALSE);
+		BiPredicate<String, BeanDefinition> excludeFilter2 = Mockito.mock(BiPredicate.class);
+		BDDMockito.given(excludeFilter2.test(ArgumentMatchers.eq("bean2"), ArgumentMatchers.any(BeanDefinition.class))).willReturn(Boolean.TRUE);
+		BiPredicate<String, BeanDefinition> excludeFilter = new BeanDefinitionsContribution(beanFactory, List.of(
+				new TestBeanRegistrationContributionProvider("bean1", mockExcludeFilter(excludeFilter1)),
+				new TestBeanRegistrationContributionProvider("bean2", mockExcludeFilter(excludeFilter2)))
+		).getBeanDefinitionExcludeFilter();
+		assertThat(excludeFilter.test("bean2", new RootBeanDefinition())).isTrue();
+		Mockito.verify(excludeFilter1).test(ArgumentMatchers.eq("bean2"), ArgumentMatchers.any(BeanDefinition.class));
+		Mockito.verify(excludeFilter2).test(ArgumentMatchers.eq("bean2"), ArgumentMatchers.any(BeanDefinition.class));
+		assertThat(excludeFilter.test("bean1", new RootBeanDefinition())).isTrue();
+		Mockito.verify(excludeFilter1).test(ArgumentMatchers.eq("bean1"), ArgumentMatchers.any(BeanDefinition.class));
+		Mockito.verifyNoMoreInteractions(excludeFilter2);
+	}
+
 	private CodeSnippet contribute(DefaultListableBeanFactory beanFactory, GeneratedTypeContext generationContext) {
 		BeanDefinitionsContribution contribution = new BeanDefinitionsContribution(beanFactory);
 		BeanFactoryInitialization initialization = new BeanFactoryInitialization(generationContext);
@@ -100,6 +133,12 @@ class BeanDefinitionsContributionTests {
 	private GeneratedTypeContext createGenerationContext() {
 		return new DefaultGeneratedTypeContext("com.example", packageName ->
 				GeneratedType.of(ClassName.get(packageName, "Test")));
+	}
+
+	private BeanFactoryContribution mockExcludeFilter(BiPredicate<String, BeanDefinition> excludeFilter) {
+		BeanFactoryContribution contribution = Mockito.mock(BeanFactoryContribution.class);
+		BDDMockito.given(contribution.getBeanDefinitionExcludeFilter()).willReturn(excludeFilter);
+		return contribution;
 	}
 
 	static class TestBeanRegistrationContributionProvider implements BeanRegistrationContributionProvider {

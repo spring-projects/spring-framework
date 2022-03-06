@@ -20,8 +20,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.support.SpringFactoriesLoader;
@@ -67,6 +70,16 @@ public class BeanDefinitionsContribution implements BeanFactoryContribution {
 	@Override
 	public void applyTo(BeanFactoryInitialization initialization) {
 		writeBeanDefinitions(initialization);
+	}
+
+	@Override
+	public BiPredicate<String, BeanDefinition> getBeanDefinitionExcludeFilter() {
+		List<BiPredicate<String, BeanDefinition>> predicates = new ArrayList<>();
+		for (String beanName : this.beanFactory.getBeanDefinitionNames()) {
+			handleMergedBeanDefinition(beanName, beanDefinition -> predicates.add(
+					getBeanRegistrationContribution(beanName, beanDefinition).getBeanDefinitionExcludeFilter()));
+		}
+		return predicates.stream().filter(Objects::nonNull).reduce((n, d) -> false, BiPredicate::or);
 	}
 
 	private void writeBeanDefinitions(BeanFactoryInitialization initialization) {

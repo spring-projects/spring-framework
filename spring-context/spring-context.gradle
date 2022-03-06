@@ -25,6 +25,7 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-aop")))
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(project(":spring-core-test"))
 	testImplementation("io.projectreactor:reactor-core")
 	testImplementation("org.apache.groovy:groovy-jsr223")
 	testImplementation("org.apache.groovy:groovy-xml")
