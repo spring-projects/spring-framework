@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -124,26 +125,40 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 			return (NamespaceHandler) handlerOrClassName;
 		}
 		else {
-			String className = (String) handlerOrClassName;
-			try {
-				Class<?> handlerClass = ClassUtils.forName(className, this.classLoader);
-				if (!NamespaceHandler.class.isAssignableFrom(handlerClass)) {
-					throw new FatalBeanException("Class [" + className + "] for namespace [" + namespaceUri +
-							"] does not implement the [" + NamespaceHandler.class.getName() + "] interface");
-				}
-				NamespaceHandler namespaceHandler = (NamespaceHandler) BeanUtils.instantiateClass(handlerClass);
-				namespaceHandler.init();
-				handlerMappings.put(namespaceUri, namespaceHandler);
-				return namespaceHandler;
+			return createNamespaceHandler(namespaceUri, handlerMappings, (String) handlerOrClassName);
+		}
+	}
+
+	/**
+	 * Creating a namespacehandler in singleton mode
+	 * @param namespaceUri the relevant namespace URI
+	 * @param handlerMappings Stores the mappings from namespace URI to NamespaceHandler class name / instance
+	 * @param className
+	 * @return the located {@link NamespaceHandler}
+	 */
+	private synchronized NamespaceHandler  createNamespaceHandler(String namespaceUri, Map<String, Object> handlerMappings, String className) {
+		Object handlerOrClassName = handlerMappings.get(namespaceUri);
+		if (handlerOrClassName instanceof NamespaceHandler) { // Double verification
+			return (NamespaceHandler) handlerOrClassName;
+		}
+		try {
+			Class<?> handlerClass = ClassUtils.forName(className, this.classLoader);
+			if (!NamespaceHandler.class.isAssignableFrom(handlerClass)) {
+				throw new FatalBeanException("Class [" + className + "] for namespace [" + namespaceUri +
+						"] does not implement the [" + NamespaceHandler.class.getName() + "] interface");
 			}
-			catch (ClassNotFoundException ex) {
-				throw new FatalBeanException("Could not find NamespaceHandler class [" + className +
-						"] for namespace [" + namespaceUri + "]", ex);
-			}
-			catch (LinkageError err) {
-				throw new FatalBeanException("Unresolvable class definition for NamespaceHandler class [" +
-						className + "] for namespace [" + namespaceUri + "]", err);
-			}
+			NamespaceHandler namespaceHandler = (NamespaceHandler) BeanUtils.instantiateClass(handlerClass);
+			namespaceHandler.init();
+			handlerMappings.put(namespaceUri, namespaceHandler);
+			return namespaceHandler;
+		}
+		catch (ClassNotFoundException ex) {
+			throw new FatalBeanException("Could not find NamespaceHandler class [" + className +
+					"] for namespace [" + namespaceUri + "]", ex);
+		}
+		catch (LinkageError err) {
+			throw new FatalBeanException("Unresolvable class definition for NamespaceHandler class [" +
+					className + "] for namespace [" + namespaceUri + "]", err);
 		}
 	}
 
