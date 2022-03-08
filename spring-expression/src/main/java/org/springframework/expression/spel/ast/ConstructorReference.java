@@ -51,9 +51,17 @@ import org.springframework.expression.spel.support.ReflectiveConstructorExecutor
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class ConstructorReference extends SpelNodeImpl {
+
+	/**
+	 * Maximum number of elements permitted in an array declaration, applying
+	 * to one-dimensional as well as multi-dimensional arrays.
+	 * @since 5.3.17
+	 */
+	private static final int MAX_ARRAY_ELEMENTS = 256 * 1024; // 256K
 
 	private boolean isArrayConstructor = false;
 
@@ -256,14 +264,19 @@ public class ConstructorReference extends SpelNodeImpl {
 			if (this.dimensions.length == 1) {
 				TypedValue o = this.dimensions[0].getTypedValue(state);
 				int arraySize = ExpressionUtils.toInt(typeConverter, o);
+				checkNumElements(arraySize);
 				newArray = Array.newInstance(componentType, arraySize);
 			}
 			else {
 				// Multi-dimensional - hold onto your hat!
 				int[] dims = new int[this.dimensions.length];
+				long numElements = 1;
 				for (int d = 0; d < this.dimensions.length; d++) {
 					TypedValue o = this.dimensions[d].getTypedValue(state);
-					dims[d] = ExpressionUtils.toInt(typeConverter, o);
+					int arraySize = ExpressionUtils.toInt(typeConverter, o);
+					dims[d] = arraySize;
+					numElements *= arraySize;
+					checkNumElements(numElements);
 				}
 				newArray = Array.newInstance(componentType, dims);
 			}
@@ -321,6 +334,13 @@ public class ConstructorReference extends SpelNodeImpl {
 			}
 		}
 		return new TypedValue(newArray);
+	}
+
+	private void checkNumElements(long numElements) {
+		if (numElements >= MAX_ARRAY_ELEMENTS) {
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED, MAX_ARRAY_ELEMENTS);
+		}
 	}
 
 	private void populateReferenceTypeArray(ExpressionState state, Object newArray, TypeConverter typeConverter,

@@ -255,7 +255,11 @@ public enum SpelMessage {
 
 	/** @since 4.3.17 */
 	FLAWED_PATTERN(Kind.ERROR, 1073,
-			"Failed to efficiently evaluate pattern ''{0}'': consider redesigning it");
+			"Failed to efficiently evaluate pattern ''{0}'': consider redesigning it"),
+
+	/** @since 5.3.17 */
+	MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED(Kind.ERROR, 1075,
+			"Array declares too many elements, exceeding the threshold of ''{0}''");
 
 
 	private final Kind kind;
