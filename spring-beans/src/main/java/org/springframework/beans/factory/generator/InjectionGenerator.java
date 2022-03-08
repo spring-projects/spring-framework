@@ -224,7 +224,7 @@ public class InjectionGenerator {
 
 	CodeBlock generateFieldInjection(Field injectionPoint, boolean required) {
 		Builder code = CodeBlock.builder();
-		code.add("instanceContext.field($S, $T.class", injectionPoint.getName(), injectionPoint.getType());
+		code.add("instanceContext.field($S", injectionPoint.getName());
 		code.add(")\n").indent().indent();
 		if (required) {
 			code.add(".invoke(beanFactory, (attributes) ->");
@@ -236,8 +236,8 @@ public class InjectionGenerator {
 		if (hasAssignment) {
 			code.beginControlFlow("");
 			String fieldName = String.format("%sField", injectionPoint.getName());
-			code.addStatement("$T $L = $T.findField($T.class, $S, $T.class)", Field.class, fieldName, ReflectionUtils.class,
-					injectionPoint.getDeclaringClass(), injectionPoint.getName(), injectionPoint.getType());
+			code.addStatement("$T $L = $T.findField($T.class, $S)", Field.class, fieldName, ReflectionUtils.class,
+					injectionPoint.getDeclaringClass(), injectionPoint.getName());
 			code.addStatement("$T.makeAccessible($L)", ReflectionUtils.class, fieldName);
 			code.addStatement("$T.setField($L, bean, attributes.get(0))", ReflectionUtils.class, fieldName);
 			code.unindent().add("}");

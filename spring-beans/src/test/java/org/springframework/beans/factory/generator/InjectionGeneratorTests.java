@@ -142,7 +142,7 @@ class InjectionGeneratorTests {
 	void generateInjectionForRequiredField() {
 		Field field = field(SampleBean.class, "counter");
 		assertThat(generateInjection(field, true)).isEqualTo("""
-				instanceContext.field("counter", Integer.class)
+				instanceContext.field("counter")
 						.invoke(beanFactory, (attributes) -> bean.counter = attributes.get(0))""");
 	}
 
@@ -150,7 +150,7 @@ class InjectionGeneratorTests {
 	void generateInjectionForNonRequiredField() {
 		Field field = field(SampleBean.class, "counter");
 		assertThat(generateInjection(field, false)).isEqualTo("""
-				instanceContext.field("counter", Integer.class)
+				instanceContext.field("counter")
 						.resolve(beanFactory, false).ifResolved((attributes) -> bean.counter = attributes.get(0))""");
 	}
 
@@ -158,9 +158,9 @@ class InjectionGeneratorTests {
 	void generateInjectionForRequiredPrivateField() {
 		Field field = field(SampleBean.class, "source");
 		assertThat(generateInjection(field, true)).isEqualTo("""
-				instanceContext.field("source", String.class)
+				instanceContext.field("source")
 						.invoke(beanFactory, (attributes) -> {
-							Field sourceField = ReflectionUtils.findField(InjectionGeneratorTests.SampleBean.class, "source", String.class);
+							Field sourceField = ReflectionUtils.findField(InjectionGeneratorTests.SampleBean.class, "source");
 							ReflectionUtils.makeAccessible(sourceField);
 							ReflectionUtils.setField(sourceField, bean, attributes.get(0));
 						})""");

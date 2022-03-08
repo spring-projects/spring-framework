@@ -44,7 +44,7 @@ class AutowiredAnnotationBeanInstantiationContributionTests {
 	void contributeWithPackageProtectedFieldInjection() {
 		CodeContribution contribution = contribute(PackageProtectedFieldInjectionSample.class);
 		assertThat(CodeSnippet.process(contribution.statements().toCodeBlock())).isEqualTo("""
-				instanceContext.field("environment", Environment.class)
+				instanceContext.field("environment")
 						.invoke(beanFactory, (attributes) -> bean.environment = attributes.get(0))""");
 		assertThat(contribution.runtimeHints().reflection().typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(PackageProtectedFieldInjectionSample.class));
@@ -62,9 +62,9 @@ class AutowiredAnnotationBeanInstantiationContributionTests {
 	void contributeWithPrivateFieldInjection() {
 		CodeContribution contribution = contribute(PrivateFieldInjectionSample.class);
 		assertThat(CodeSnippet.process(contribution.statements().toCodeBlock())).isEqualTo("""
-				instanceContext.field("environment", Environment.class)
+				instanceContext.field("environment")
 						.invoke(beanFactory, (attributes) -> {
-							Field environmentField = ReflectionUtils.findField(AutowiredAnnotationBeanInstantiationContributionTests.PrivateFieldInjectionSample.class, "environment", Environment.class);
+							Field environmentField = ReflectionUtils.findField(AutowiredAnnotationBeanInstantiationContributionTests.PrivateFieldInjectionSample.class, "environment");
 							ReflectionUtils.makeAccessible(environmentField);
 							ReflectionUtils.setField(environmentField, bean, attributes.get(0));
 						})""");
@@ -99,9 +99,9 @@ class AutowiredAnnotationBeanInstantiationContributionTests {
 	void contributeWithInjectionPoints() {
 		CodeContribution contribution = contribute(ResourceInjectionBean.class);
 		assertThat(CodeSnippet.process(contribution.statements().toCodeBlock())).isEqualTo("""
-				instanceContext.field("testBean", TestBean.class)
+				instanceContext.field("testBean")
 						.resolve(beanFactory, false).ifResolved((attributes) -> {
-							Field testBeanField = ReflectionUtils.findField(AutowiredAnnotationBeanPostProcessorTests.ResourceInjectionBean.class, "testBean", TestBean.class);
+							Field testBeanField = ReflectionUtils.findField(AutowiredAnnotationBeanPostProcessorTests.ResourceInjectionBean.class, "testBean");
 							ReflectionUtils.makeAccessible(testBeanField);
 							ReflectionUtils.setField(testBeanField, bean, attributes.get(0));
 						});

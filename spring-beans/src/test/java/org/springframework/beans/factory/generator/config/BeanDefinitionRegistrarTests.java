@@ -257,8 +257,8 @@ class BeanDefinitionRegistrarTests {
 		beanFactory.registerSingleton("environment", environment);
 		BeanDefinitionRegistrar.of("test", InjectionSample.class).instanceSupplier(instanceContext -> {
 			InjectionSample bean = new InjectionSample();
-			instanceContext.field("environment", Environment.class).invoke(beanFactory,
-					attributes -> bean.environment = (attributes.get(0)));
+			instanceContext.field("environment").invoke(beanFactory, attributes ->
+					bean.environment = (attributes.get(0)));
 			return bean;
 		}).register(beanFactory);
 		assertBeanFactory(beanFactory, () -> {
@@ -271,11 +271,10 @@ class BeanDefinitionRegistrarTests {
 	void registerWithInvalidField() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		BeanDefinitionRegistrar.of("test", InjectionSample.class).instanceSupplier(instanceContext ->
-				instanceContext.field("doesNotExist", Object.class).resolve(beanFactory)).register(beanFactory);
+				instanceContext.field("doesNotExist").resolve(beanFactory)).register(beanFactory);
 		assertThatThrownBy(() -> beanFactory.getBean(InjectionSample.class)
-		).isInstanceOf(BeanCreationException.class)
-				.hasMessageContaining("No field '%s' with type %s found", "doesNotExist", Object.class.getName())
-				.hasMessageContaining(InjectionSample.class.getName());
+		).isInstanceOf(BeanCreationException.class).hasMessageContaining(
+				"No field 'doesNotExist' found on " + InjectionSample.class.getName());
 	}
 
 	@Test
