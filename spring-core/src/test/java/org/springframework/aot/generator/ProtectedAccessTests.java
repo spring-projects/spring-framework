@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generator.ProtectedAccess.Options;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.testfixture.aot.generator.visibility.ProtectedGenericParameter;
 import org.springframework.core.testfixture.aot.generator.visibility.ProtectedParameter;
 import org.springframework.core.testfixture.aot.generator.visibility.PublicFactoryBean;
 import org.springframework.util.ReflectionUtils;
@@ -79,6 +80,12 @@ class ProtectedAccessTests {
 	@Test
 	void analyzeWithPackagePrivateConstructorParameter() {
 		this.protectedAccess.analyze(ProtectedParameter.class.getConstructors()[0], DEFAULT_OPTIONS);
+		assertPrivilegedAccess(ProtectedParameter.class);
+	}
+
+	@Test
+	void analyzeWithPackagePrivateConstructorGenericParameter() {
+		this.protectedAccess.analyze(ProtectedGenericParameter.class.getConstructors()[0], DEFAULT_OPTIONS);
 		assertPrivilegedAccess(ProtectedParameter.class);
 	}
 
@@ -164,7 +171,7 @@ class ProtectedAccessTests {
 	@Test
 	void analyzeWithRecursiveType() {
 		assertThat(this.protectedAccess.isProtected(ResolvableType.forClassWithGenerics(
-				SelfReference.class, SelfReference.class))).isTrue();
+				SelfReference.class, SelfReference.class))).isEqualTo(SelfReference.class);
 	}
 
 	@Test

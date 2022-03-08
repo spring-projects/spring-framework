@@ -18,7 +18,6 @@ package org.springframework.aot.generator;
 
 import java.lang.reflect.Member;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
@@ -29,25 +28,27 @@ import org.springframework.lang.Nullable;
  */
 public final class ProtectedElement {
 
-	private final ResolvableType type;
+	private final Class<?> type;
 
 	@Nullable
 	private final Member target;
 
 
-	private ProtectedElement(ResolvableType type, @Nullable Member member) {
+	private ProtectedElement(Class<?> type, @Nullable Member member) {
 		this.type = type;
 		this.target = member;
 	}
 
 	/**
-	 * Return the {@link ResolvableType type} that is non-public. For a plain
+	 * Return the {@link Class type} that is non-public. For a plain
 	 * protected {@link Member member} access, the type of the declaring class
 	 * is used. Otherwise, the type in the member signature, such as a parameter
-	 * type for an executable, or the return type of a field is used.
+	 * type for an executable, or the return type of a field is used. If the
+	 * type is generic, the type that is protected in the generic signature is
+	 * used.
 	 * @return the type that is not public
 	 */
-	public ResolvableType getType() {
+	public Class<?> getType() {
 		return this.type;
 	}
 
@@ -60,7 +61,7 @@ public final class ProtectedElement {
 		return this.target;
 	}
 
-	static ProtectedElement of(ResolvableType type, @Nullable Member member) {
+	static ProtectedElement of(Class<?> type, @Nullable Member member) {
 		return new ProtectedElement(type, member);
 	}
 
