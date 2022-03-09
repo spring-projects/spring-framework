@@ -33,52 +33,52 @@ import org.springframework.javapoet.CodeBlock;
 import org.springframework.util.ClassUtils;
 
 /**
- * Write the necessary statements to instantiate a bean.
+ * Default {@link BeanInstantiationGenerator} implementation.
  *
  * @author Stephane Nicoll
- * @see BeanInstantiationContributor
+ * @see BeanInstantiationContribution
  */
-class DefaultBeanInstantiationGenerator {
+class DefaultBeanInstantiationGenerator implements BeanInstantiationGenerator {
 
 	private final Executable instanceCreator;
 
-	private final List<BeanInstantiationContributor> contributors;
+	private final List<BeanInstantiationContribution> contributions;
 
 	private final InjectionGenerator injectionGenerator;
 
 	private final Options beanInstanceOptions;
 
 
-	DefaultBeanInstantiationGenerator(Executable instanceCreator, List<BeanInstantiationContributor> contributors) {
+	DefaultBeanInstantiationGenerator(Executable instanceCreator, List<BeanInstantiationContribution> contributions) {
 		this.instanceCreator = instanceCreator;
-		this.contributors = List.copyOf(contributors);
+		this.contributions = List.copyOf(contributions);
 		this.injectionGenerator = new InjectionGenerator();
 		this.beanInstanceOptions = Options.defaults().useReflection(member -> false)
-				.assignReturnType(member -> !this.contributors.isEmpty()).build();
+				.assignReturnType(member -> !this.contributions.isEmpty()).build();
 	}
 
-	/**
-	 * Return the necessary code to instantiate and post-process the bean
-	 * handled by this instance.
-	 * @param runtimeHints the runtime hints instance to use
-	 * @return a code contribution that provides an initialized bean instance
-	 */
+	@Override
+	public Executable getInstanceCreator() {
+		return this.instanceCreator;
+	}
+
+	@Override
 	public CodeContribution generateBeanInstantiation(RuntimeHints runtimeHints) {
-		DefaultCodeContribution contribution = new DefaultCodeContribution(runtimeHints);
-		contribution.protectedAccess().analyze(this.instanceCreator, this.beanInstanceOptions);
+		DefaultCodeContribution codeContribution = new DefaultCodeContribution(runtimeHints);
+		codeContribution.protectedAccess().analyze(this.instanceCreator, this.beanInstanceOptions);
 		if (this.instanceCreator instanceof Constructor<?> constructor) {
-			writeBeanInstantiation(contribution, constructor);
+			generateBeanInstantiation(codeContribution, constructor);
 		}
 		else if (this.instanceCreator instanceof Method method) {
-			writeBeanInstantiation(contribution, method);
+			generateBeanInstantiation(codeContribution, method);
 		}
-		return contribution;
+		return codeContribution;
 	}
 
-	private void writeBeanInstantiation(CodeContribution contribution, Constructor<?> constructor) {
+	private void generateBeanInstantiation(CodeContribution codeContribution, Constructor<?> constructor) {
 		Class<?> declaringType = ClassUtils.getUserClass(constructor.getDeclaringClass());
 		boolean innerClass = isInnerClass(declaringType);
-		boolean multiStatements = !this.contributors.isEmpty();
+		boolean multiStatements = !this.contributions.isEmpty();
 		int minArgs = isInnerClass(declaringType) ? 2 : 1;
 		CodeBlock.Builder code = CodeBlock.builder();
 		// Shortcut for common case
@@ -96,24 +96,24 @@ class DefaultBeanInstantiationGenerator {
 					code.add("$T::new", declaringType);
 				}
 			}
-			contribution.statements().addStatement(code.build());
+			codeContribution.statements().addStatement(code.build());
 			return;
 		}
-		contribution.runtimeHints().reflection().registerConstructor(constructor,
+		codeContribution.runtimeHints().reflection().registerConstructor(constructor,
 				hint -> hint.withMode(ExecutableMode.INTROSPECT));
 		code.add("(instanceContext) ->");
 		branch(multiStatements, () -> code.beginControlFlow(""), () -> code.add(" "));
 		if (multiStatements) {
 			code.add("$T bean = ", declaringType);
 		}
-		code.add(this.injectionGenerator.writeInstantiation(constructor));
-		contribution.statements().addStatement(code.build());
+		code.add(this.injectionGenerator.generateInstantiation(constructor));
+		codeContribution.statements().addStatement(code.build());
 
 		if (multiStatements) {
-			for (BeanInstantiationContributor contributor : this.contributors) {
-				contributor.contribute(contribution);
+			for (BeanInstantiationContribution contribution : this.contributions) {
+				contribution.applyTo(codeContribution);
 			}
-			contribution.statements().addStatement("return bean")
+			codeContribution.statements().addStatement("return bean")
 					.add(codeBlock -> codeBlock.unindent().add("}"));
 		}
 	}
@@ -122,12 +122,12 @@ class DefaultBeanInstantiationGenerator {
 		return type.isMemberClass() && !Modifier.isStatic(type.getModifiers());
 	}
 
-	private void writeBeanInstantiation(CodeContribution contribution, Method method) {
+	private void generateBeanInstantiation(CodeContribution codeContribution, Method method) {
 		// Factory method can be introspected
-		contribution.runtimeHints().reflection().registerMethod(method,
+		codeContribution.runtimeHints().reflection().registerMethod(method,
 				hint -> hint.withMode(ExecutableMode.INTROSPECT));
 		List<Class<?>> parameterTypes = new ArrayList<>(Arrays.asList(method.getParameterTypes()));
-		boolean multiStatements = !this.contributors.isEmpty();
+		boolean multiStatements = !this.contributions.isEmpty();
 		Class<?> declaringType = method.getDeclaringClass();
 		CodeBlock.Builder code = CodeBlock.builder();
 		// Shortcut for common case
@@ -137,7 +137,7 @@ class DefaultBeanInstantiationGenerator {
 					() -> code.add("$T", declaringType),
 					() -> code.add("beanFactory.getBean($T.class)", declaringType));
 			code.add(".$L()", method.getName());
-			contribution.statements().addStatement(code.build());
+			codeContribution.statements().addStatement(code.build());
 			return;
 		}
 		code.add("(instanceContext) ->");
@@ -145,13 +145,13 @@ class DefaultBeanInstantiationGenerator {
 		if (multiStatements) {
 			code.add("$T bean = ", method.getReturnType());
 		}
-		code.add(this.injectionGenerator.writeInstantiation(method));
-		contribution.statements().addStatement(code.build());
+		code.add(this.injectionGenerator.generateInstantiation(method));
+		codeContribution.statements().addStatement(code.build());
 		if (multiStatements) {
-			for (BeanInstantiationContributor contributor : this.contributors) {
-				contributor.contribute(contribution);
+			for (BeanInstantiationContribution contribution : this.contributions) {
+				contribution.applyTo(codeContribution);
 			}
-			contribution.statements().addStatement("return bean")
+			codeContribution.statements().addStatement("return bean")
 					.add(codeBlock -> codeBlock.unindent().add("}"));
 		}
 	}

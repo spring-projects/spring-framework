@@ -19,24 +19,18 @@ package org.springframework.beans.factory.generator;
 import org.springframework.aot.generator.CodeContribution;
 
 /**
- * Contributor to the code that instantiates a bean following ahead of time
+ * A contribution to the instantiation of a bean following ahead of time
  * processing.
  *
  * @author Stephane Nicoll
  * @since 6.0
  */
 @FunctionalInterface
-public interface BeanInstantiationContributor {
+public interface BeanInstantiationContribution {
 
 	/**
-	 * A {@link BeanInstantiationContributor} that does not contribute anything
-	 * to the {@link CodeContribution}.
-	 */
-	BeanInstantiationContributor NO_OP = contribution -> { };
-
-	/**
-	 * Contribute to the specified {@link CodeContribution}.
-	 * <p>Implementation of this interface can assume the following variables
+	 * Contribute bean instantiation to the specified {@link CodeContribution}.
+	 * <p>Implementations of this interface can assume the following variables
 	 * to be accessible:
 	 * <ul>
 	 * <li>{@code beanFactory}: the general {@code DefaultListableBeanFactory}</li>
@@ -45,6 +39,6 @@ public interface BeanInstantiationContributor {
 	 * </ul>
 	 * @param contribution the {@link CodeContribution} to use
 	 */
-	void contribute(CodeContribution contribution);
+	void applyTo(CodeContribution contribution);
 
 }

@@ -298,11 +298,10 @@ public final class BeanDefinitionRegistrar {
 		/**
 		 * Create an {@link InjectedElementResolver} for the specified field.
 		 * @param name the name of the field
-		 * @param type the type of the field
 		 * @return a resolved for the specified field
 		 */
-		public InjectedElementResolver field(String name, Class<?> type) {
-			return new InjectedFieldResolver(getField(name, type), this.beanName);
+		public InjectedElementResolver field(String name) {
+			return new InjectedFieldResolver(getField(name), this.beanName);
 		}
 
 		/**
@@ -315,9 +314,9 @@ public final class BeanDefinitionRegistrar {
 			return new InjectedMethodResolver(getMethod(this.beanType, name, parameterTypes), this.beanType, this.beanName);
 		}
 
-		private Field getField(String fieldName, Class<?> fieldType) {
-			Field field = ReflectionUtils.findField(this.beanType, fieldName, fieldType);
-			Assert.notNull(field, () -> "No field '" + fieldName + "' with type " + fieldType.getName() + " found on " + this.beanType);
+		private Field getField(String fieldName) {
+			Field field = ReflectionUtils.findField(this.beanType, fieldName);
+			Assert.notNull(field, () -> "No field '" + fieldName + "' found on " + this.beanType.getName());
 			return field;
 		}
 

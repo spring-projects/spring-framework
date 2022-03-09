@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -57,6 +58,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Stephane Nicoll
  * @since 1.2
  * @see AbstractAutowireCapableBeanFactory
  */
@@ -143,13 +145,12 @@ public class BeanDefinitionValueResolver {
 		}
 		else if (value instanceof BeanDefinitionHolder bdHolder) {
 			// Resolve BeanDefinitionHolder: contains BeanDefinition with name and aliases.
-			return resolveInnerBean(argName, bdHolder.getBeanName(), bdHolder.getBeanDefinition());
+			return resolveInnerBean(bdHolder.getBeanName(), bdHolder.getBeanDefinition(),
+					(name, mbd) -> resolveInnerBeanValue(argName, name, mbd));
 		}
 		else if (value instanceof BeanDefinition bd) {
-			// Resolve plain BeanDefinition, without contained name: use dummy name.
-			String innerBeanName = "(inner bean)" + BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR +
-					ObjectUtils.getIdentityHexString(bd);
-			return resolveInnerBean(argName, innerBeanName, bd);
+			return resolveInnerBean(null, bd,
+					(name, mbd) -> resolveInnerBeanValue(argName, name, mbd));
 		}
 		else if (value instanceof DependencyDescriptor dependencyDescriptor) {
 			Set<String> autowiredBeanNames = new LinkedHashSet<>(4);
@@ -241,6 +242,23 @@ public class BeanDefinitionValueResolver {
 		else {
 			return evaluate(value);
 		}
+	}
+
+	/**
+	 * Resolve an inner bean definition and invoke the specified {@code resolver}
+	 * on its merged bean definition.
+	 * @param innerBeanName the inner bean name (or {@code null} to assign one)
+	 * @param innerBd the inner raw bean definition
+	 * @param resolver the function to invoke to resolve
+	 * @param <T> the type of the resolution
+	 * @return a resolved inner bean, as a result of applying the {@code resolver}
+	 */
+	public <T> T resolveInnerBean(@Nullable String innerBeanName, BeanDefinition innerBd,
+			BiFunction<String, RootBeanDefinition, T> resolver) {
+		String nameToUse = (innerBeanName != null ? innerBeanName : "(inner bean)"
+				+ BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(innerBd));
+		return resolver.apply(nameToUse, this.beanFactory.getMergedBeanDefinition(
+				nameToUse, innerBd, this.beanDefinition));
 	}
 
 	/**
@@ -362,14 +380,12 @@ public class BeanDefinitionValueResolver {
 	 * Resolve an inner bean definition.
 	 * @param argName the name of the argument that the inner bean is defined for
 	 * @param innerBeanName the name of the inner bean
-	 * @param innerBd the bean definition for the inner bean
+	 * @param mbd the merged bean definition for the inner bean
 	 * @return the resolved inner bean instance
 	 */
 	@Nullable
-	private Object resolveInnerBean(Object argName, String innerBeanName, BeanDefinition innerBd) {
-		RootBeanDefinition mbd = null;
+	private Object resolveInnerBeanValue(Object argName, String innerBeanName, RootBeanDefinition mbd) {
 		try {
-			mbd = this.beanFactory.getMergedBeanDefinition(innerBeanName, innerBd, this.beanDefinition);
 			// Check given bean name whether it is unique. If not already unique,
 			// add counter - increasing the counter until the name is unique.
 			String actualInnerBeanName = innerBeanName;
@@ -400,7 +416,7 @@ public class BeanDefinitionValueResolver {
 			throw new BeanCreationException(
 					this.beanDefinition.getResourceDescription(), this.beanName,
 					"Cannot create inner bean '" + innerBeanName + "' " +
-					(mbd != null && mbd.getBeanClassName() != null ? "of type [" + mbd.getBeanClassName() + "] " : "") +
+					(mbd.getBeanClassName() != null ? "of type [" + mbd.getBeanClassName() + "] " : "") +
 					"while setting " + argName, ex);
 		}
 	}

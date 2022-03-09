@@ -19,7 +19,6 @@ package org.springframework.test.web.reactive.server
 import kotlinx.coroutines.flow.Flow
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.test.util.AssertionErrors.assertEquals
 import org.springframework.test.web.reactive.server.WebTestClient.*
 
 /**
@@ -59,53 +58,17 @@ inline fun <reified T : Any> RequestBodySpec.body(flow: Flow<T>): RequestHeaders
 		body(flow, object : ParameterizedTypeReference<T>() {})
 
 /**
- * Extension for [ResponseSpec.expectBody] providing an `expectBody<Foo>()` variant and
- * a workaround for [KT-5464](https://youtrack.jetbrains.com/issue/KT-5464) which
- * prevents to use `WebTestClient.BodySpec` in Kotlin.
+ * Extension for [ResponseSpec.expectBody] providing an `expectBody<Foo>()` variant
+ * leveraging Kotlin reified type parameters. This extension is not subject ot type
+ * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
+ * @author Arjen Poutsma
  * @since 5.0
  */
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-inline fun <reified B : Any> ResponseSpec.expectBody(): KotlinBodySpec<B> =
-		expectBody(object : ParameterizedTypeReference<B>() {}).returnResult().let {
-			object : KotlinBodySpec<B> {
-
-				override fun isEqualTo(expected: B): KotlinBodySpec<B> = it
-						.assertWithDiagnostics { assertEquals("Response body", expected, it.responseBody) }
-						.let { this }
-
-				override fun consumeWith(consumer: (EntityExchangeResult<B>) -> Unit): KotlinBodySpec<B> =
-					it.assertWithDiagnostics { consumer.invoke(it) }.let { this }
-
-				override fun returnResult(): EntityExchangeResult<B> = it
-			}
-		}
-
-/**
- * Kotlin compliant `WebTestClient.BodySpec` for expectations on the response body decoded
- * to a single Object, see [KT-5464](https://youtrack.jetbrains.com/issue/KT-5464) for
- * more details.
- * @since 5.0.6
- */
-interface KotlinBodySpec<B> {
-
-	/**
-	 * Assert the extracted body is equal to the given value.
-	 */
-	fun isEqualTo(expected: B): KotlinBodySpec<B>
-
-	/**
-	 * Assert the exchange result with the given consumer.
-	 */
-	fun consumeWith(consumer: (EntityExchangeResult<B>) -> Unit): KotlinBodySpec<B>
-
-	/**
-	 * Exit the chained API and return an `ExchangeResult` with the
-	 * decoded response content.
-	 */
-	fun returnResult(): EntityExchangeResult<B>
-}
+inline fun <reified B : Any> ResponseSpec.expectBody(): BodySpec<B, *> =
+		expectBody(object : ParameterizedTypeReference<B>() {})
 
 /**
  * Extension for [ResponseSpec.expectBodyList] providing a `expectBodyList<Foo>()` variant.

@@ -74,7 +74,7 @@ public class ProtectedAccess {
 			return null;
 		}
 		List<String> packageNames = protectedElements.stream()
-				.map(element -> element.getType().toClass().getPackageName())
+				.map(element -> element.getType().getPackageName())
 				.distinct().toList();
 		if (packageNames.size() == 1) {
 			return packageNames.get(0);
@@ -86,7 +86,7 @@ public class ProtectedAccess {
 	private List<ProtectedElement> getProtectedElements(String packageName) {
 		List<ProtectedElement> matches = new ArrayList<>();
 		for (ProtectedElement element : this.elements) {
-			if (!element.getType().toClass().getPackage().getName().equals(packageName)) {
+			if (!element.getType().getPackage().getName().equals(packageName)) {
 				matches.add(element);
 			}
 		}
@@ -99,8 +99,9 @@ public class ProtectedAccess {
 	 * @param type the type to analyze
 	 */
 	public void analyze(ResolvableType type) {
-		if (isProtected(type)) {
-			registerProtectedType(type, null);
+		Class<?> protectedType = isProtected(type);
+		if (protectedType != null) {
+			registerProtectedType(protectedType, null);
 		}
 	}
 
@@ -119,8 +120,9 @@ public class ProtectedAccess {
 		}
 		if (member instanceof Field field) {
 			ResolvableType fieldType = ResolvableType.forField(field);
-			if (isProtected(fieldType) && options.assignReturnType.apply(field)) {
-				registerProtectedType(fieldType, field);
+			Class<?> protectedType = isProtected(fieldType);
+			if (protectedType != null && options.assignReturnType.apply(field)) {
+				registerProtectedType(protectedType, field);
 			}
 		}
 		else if (member instanceof Constructor<?> constructor) {
@@ -129,8 +131,9 @@ public class ProtectedAccess {
 		}
 		else if (member instanceof Method method) {
 			ResolvableType returnType = ResolvableType.forMethodReturnType(method);
-			if (isProtected(returnType) && options.assignReturnType.apply(method)) {
-				registerProtectedType(returnType, method);
+			Class<?> protectedType = isProtected(returnType);
+			if (protectedType != null && options.assignReturnType.apply(method)) {
+				registerProtectedType(protectedType, method);
 			}
 			analyzeParameterTypes(method, i -> ResolvableType.forMethodParameter(method, i));
 		}
@@ -141,29 +144,33 @@ public class ProtectedAccess {
 
 		for (int i = 0; i < executable.getParameters().length; i++) {
 			ResolvableType parameterType = parameterTypeFactory.apply(i);
-			if (isProtected(parameterType)) {
-				registerProtectedType(parameterType, executable);
+			Class<?> protectedType = isProtected(parameterType);
+			if (protectedType != null) {
+				registerProtectedType(protectedType, executable);
 			}
 		}
 	}
 
-	boolean isProtected(ResolvableType resolvableType) {
+	@Nullable
+	Class<?> isProtected(ResolvableType resolvableType) {
 		return isProtected(new HashSet<>(), resolvableType);
 	}
 
-	private boolean isProtected(Set<ResolvableType> seen, ResolvableType target) {
+	@Nullable
+	private Class<?> isProtected(Set<ResolvableType> seen, ResolvableType target) {
 		if (seen.contains(target)) {
-			return false;
+			return null;
 		}
 		seen.add(target);
 		ResolvableType nonProxyTarget = target.as(ClassUtils.getUserClass(target.toClass()));
-		if (isProtected(nonProxyTarget.toClass())) {
-			return true;
+		Class<?> rawClass = nonProxyTarget.toClass();
+		if (isProtected(rawClass)) {
+			return rawClass;
 		}
-		Class<?> declaringClass = nonProxyTarget.toClass().getDeclaringClass();
+		Class<?> declaringClass = rawClass.getDeclaringClass();
 		if (declaringClass != null) {
 			if (isProtected(declaringClass)) {
-				return true;
+				return declaringClass;
 			}
 		}
 		if (nonProxyTarget.hasGenerics()) {
@@ -171,7 +178,7 @@ public class ProtectedAccess {
 				return isProtected(seen, generic);
 			}
 		}
-		return false;
+		return null;
 	}
 
 	private boolean isProtected(Class<?> type) {
@@ -183,12 +190,8 @@ public class ProtectedAccess {
 		return !Modifier.isPublic(modifiers);
 	}
 
-	private void registerProtectedType(ResolvableType type, @Nullable Member member) {
+	private void registerProtectedType(Class<?> type, @Nullable Member member) {
 		this.elements.add(ProtectedElement.of(type, member));
-	}
-
-	private void registerProtectedType(Class<?> type, Member member) {
-		registerProtectedType(ResolvableType.forClass(type), member);
 	}
 
 	/**
