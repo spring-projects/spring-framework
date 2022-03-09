@@ -260,7 +260,11 @@ public enum SpelMessage {
 
 	/** @since 5.3.17 */
 	EXCEPTION_COMPILING_EXPRESSION(Kind.ERROR, 1074,
-			"An exception occurred while compiling an expression");
+			"An exception occurred while compiling an expression"),
+
+	/** @since 5.3.17 */
+	MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED(Kind.ERROR, 1075,
+			"Array declares too many elements, exceeding the threshold of ''{0}''");
 
 
 	private final Kind kind;
