@@ -25,7 +25,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import javax.lang.model.element.Modifier;
 
 import org.junit.jupiter.api.Test;
 
@@ -36,16 +39,18 @@ import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.beans.MutablePropertyValues;
+import org.springframework.aot.test.generator.compile.TestCompiler;
+import org.springframework.aot.test.generator.file.SourceFile;
+import org.springframework.aot.test.generator.file.SourceFiles;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.factory.generator.BeanFactoryInitializer;
 import org.springframework.beans.testfixture.beans.factory.generator.InnerComponentConfiguration.EnvironmentAwareComponent;
 import org.springframework.beans.testfixture.beans.factory.generator.InnerComponentConfiguration.NoDependencyComponent;
 import org.springframework.beans.testfixture.beans.factory.generator.SimpleConfiguration;
@@ -59,6 +64,8 @@ import org.springframework.core.testfixture.aot.generator.visibility.PublicFacto
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.CodeBlock.Builder;
+import org.springframework.javapoet.JavaFile;
+import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.support.CodeSnippet;
 import org.springframework.javapoet.support.MultiStatement;
 import org.springframework.util.ReflectionUtils;
@@ -143,7 +150,7 @@ class BeanRegistrationBeanFactoryContributionTests {
 	@Test
 	void generateUsingPublicAccessDoesNotAccessAnotherPackage() {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(SimpleConfiguration.class).getBeanDefinition();
-		getContribution(beanDefinition, singleConstructor(SimpleConfiguration.class)).applyTo(this.initialization);
+		getContributionFor(beanDefinition, singleConstructor(SimpleConfiguration.class)).applyTo(this.initialization);
 		assertThat(this.generatedTypeContext.toJavaFiles()).hasSize(1);
 		assertThat(CodeSnippet.of(this.initialization.toCodeBlock()).getSnippet()).isEqualTo("""
 				BeanDefinitionRegistrar.of("test", SimpleConfiguration.class)
@@ -154,7 +161,7 @@ class BeanRegistrationBeanFactoryContributionTests {
 	@Test
 	void generateUsingProtectedConstructorWritesToBlessedPackage() {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(ProtectedConstructorComponent.class).getBeanDefinition();
-		getContribution(beanDefinition, singleConstructor(ProtectedConstructorComponent.class)).applyTo(this.initialization);
+		getContributionFor(beanDefinition, singleConstructor(ProtectedConstructorComponent.class)).applyTo(this.initialization);
 		assertThat(this.generatedTypeContext.hasGeneratedType(ProtectedConstructorComponent.class.getPackageName())).isTrue();
 		GeneratedType generatedType = this.generatedTypeContext.getGeneratedType(ProtectedConstructorComponent.class.getPackageName());
 		assertThat(removeIndent(codeOf(generatedType), 1)).containsSequence("""
@@ -169,7 +176,7 @@ class BeanRegistrationBeanFactoryContributionTests {
 	@Test
 	void generateUsingProtectedFactoryMethodWritesToBlessedPackage() {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(String.class).getBeanDefinition();
-		getContribution(beanDefinition, method(ProtectedFactoryMethod.class, "testBean", Integer.class))
+		getContributionFor(beanDefinition, method(ProtectedFactoryMethod.class, "testBean", Integer.class))
 				.applyTo(this.initialization);
 		assertThat(this.generatedTypeContext.hasGeneratedType(ProtectedFactoryMethod.class.getPackageName())).isTrue();
 		GeneratedType generatedType = this.generatedTypeContext.getGeneratedType(ProtectedConstructorComponent.class.getPackageName());
@@ -189,7 +196,7 @@ class BeanRegistrationBeanFactoryContributionTests {
 		beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, String.class);
 		// This resolve the generic parameter to a protected type
 		beanDefinition.setTargetType(PublicFactoryBean.resolveToProtectedGenericParameter());
-		getContribution(beanDefinition, singleConstructor(PublicFactoryBean.class)).applyTo(this.initialization);
+		getContributionFor(beanDefinition, singleConstructor(PublicFactoryBean.class)).applyTo(this.initialization);
 		assertThat(this.generatedTypeContext.hasGeneratedType(PublicFactoryBean.class.getPackageName())).isTrue();
 		GeneratedType generatedType = this.generatedTypeContext.getGeneratedType(PublicFactoryBean.class.getPackageName());
 		assertThat(removeIndent(codeOf(generatedType), 1)).containsSequence("""
@@ -203,106 +210,96 @@ class BeanRegistrationBeanFactoryContributionTests {
 
 	@Test
 	void generateWithBeanDefinitionHavingSyntheticFlag() {
-		assertThat(simpleConfigurationRegistration(bd -> bd.setSynthetic(true)).getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", SimpleConfiguration.class)
-						.instanceSupplier(() -> SimpleConfiguration::new).customize((bd) -> bd.setSynthetic(true)).register(beanFactory);
-				""");
+		compile(simpleConfigurationRegistration(bd -> bd.setSynthetic(true)),
+				hasBeanDefinition(generatedBd -> assertThat(generatedBd.isSynthetic()).isTrue()));
 	}
 
 	@Test
 	void generateWithBeanDefinitionHavingDependsOn() {
-		assertThat(simpleConfigurationRegistration(bd -> bd.setDependsOn("test")).getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", SimpleConfiguration.class)
-						.instanceSupplier(() -> SimpleConfiguration::new).customize((bd) -> bd.setDependsOn(new String[] { "test" })).register(beanFactory);
-				""");
+		compile(simpleConfigurationRegistration(bd -> bd.setDependsOn("test")),
+				hasBeanDefinition(generatedBd -> assertThat(generatedBd.getDependsOn()).containsExactly("test")));
 	}
 
 	@Test
 	void generateWithBeanDefinitionHavingLazyInit() {
-		assertThat(simpleConfigurationRegistration(bd -> bd.setLazyInit(true)).getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", SimpleConfiguration.class)
-						.instanceSupplier(() -> SimpleConfiguration::new).customize((bd) -> bd.setLazyInit(true)).register(beanFactory);
-				""");
+		compile(simpleConfigurationRegistration(bd -> bd.setLazyInit(true)),
+				hasBeanDefinition(generatedBd -> assertThat(generatedBd.isLazyInit()).isTrue()));
 	}
 
 	@Test
 	void generateWithBeanDefinitionHavingRole() {
-		assertThat(simpleConfigurationRegistration(bd -> bd.setRole(BeanDefinition.ROLE_INFRASTRUCTURE)).getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", SimpleConfiguration.class)
-						.instanceSupplier(() -> SimpleConfiguration::new).customize((bd) -> bd.setRole(2)).register(beanFactory);
-				""");
+		compile(simpleConfigurationRegistration(bd -> bd.setRole(BeanDefinition.ROLE_INFRASTRUCTURE)),
+				hasBeanDefinition(generatedBd -> assertThat(generatedBd.getRole())
+						.isEqualTo(BeanDefinition.ROLE_INFRASTRUCTURE)));
 	}
 
 	@Test
 	void generateWithBeanDefinitionHavingScope() {
-		assertThat(simpleConfigurationRegistration(bd -> bd.setScope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)).getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", SimpleConfiguration.class)
-						.instanceSupplier(() -> SimpleConfiguration::new).customize((bd) -> bd.setScope("prototype")).register(beanFactory);
-				""");
+		compile(simpleConfigurationRegistration(bd -> bd.setScope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)),
+				hasBeanDefinition(generatedBd -> assertThat(generatedBd.getScope())
+						.isEqualTo(ConfigurableBeanFactory.SCOPE_PROTOTYPE)));
 	}
 
 	@Test
 	void generateWithBeanDefinitionHavingAutowiredCandidate() {
-		assertThat(simpleConfigurationRegistration(bd -> bd.setAutowireCandidate(false)).getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", SimpleConfiguration.class)
-						.instanceSupplier(() -> SimpleConfiguration::new).customize((bd) -> bd.setAutowireCandidate(false)).register(beanFactory);
-				""");
+		compile(simpleConfigurationRegistration(bd -> bd.setAutowireCandidate(false)),
+				hasBeanDefinition(generatedBd -> assertThat(generatedBd.isAutowireCandidate()).isFalse()));
 	}
 
 	@Test
-	void generateWithBeanDefinitionHavingDefaultAutowiredCandidateDoesNotConfigureIt() {
-		assertThat(simpleConfigurationRegistration(bd -> bd.setAutowireCandidate(true)).getSnippet())
-				.doesNotContain("bd.setAutowireCandidate(");
+	void generateWithBeanDefinitionHavingDefaultKeepsThem() {
+		compile(simpleConfigurationRegistration(bd -> {}), hasBeanDefinition(generatedBd -> {
+			assertThat(generatedBd.isSynthetic()).isFalse();
+			assertThat(generatedBd.getDependsOn()).isNull();
+			assertThat(generatedBd.isLazyInit()).isFalse();
+			assertThat(generatedBd.getRole()).isEqualTo(BeanDefinition.ROLE_APPLICATION);
+			assertThat(generatedBd.getScope()).isEqualTo(ConfigurableBeanFactory.SCOPE_SINGLETON);
+			assertThat(generatedBd.isAutowireCandidate()).isTrue();
+		}));
 	}
 
 	@Test
 	void generateWithBeanDefinitionHavingMultipleAttributes() {
-		assertThat(simpleConfigurationRegistration(bd -> {
+		compile(simpleConfigurationRegistration(bd -> {
 			bd.setSynthetic(true);
 			bd.setPrimary(true);
-		}).getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", SimpleConfiguration.class)
-						.instanceSupplier(() -> SimpleConfiguration::new).customize((bd) -> {
-					bd.setPrimary(true);
-					bd.setSynthetic(true);
-				}).register(beanFactory);
-				""");
+		}), hasBeanDefinition(generatedBd -> {
+			assertThat(generatedBd.isSynthetic()).isTrue();
+			assertThat(generatedBd.isPrimary()).isTrue();
+		}));
 	}
 
 	@Test
 	void generateWithBeanDefinitionHavingProperty() {
-		assertThat(simpleConfigurationRegistration(bd -> bd.getPropertyValues().addPropertyValue("test", "Hello")).getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", SimpleConfiguration.class)
-						.instanceSupplier(() -> SimpleConfiguration::new).customize((bd) -> bd.getPropertyValues().addPropertyValue("test", "Hello")).register(beanFactory);
-				""");
+		compile(simpleConfigurationRegistration(bd -> bd.getPropertyValues().addPropertyValue("test", "Hello")),
+				hasBeanDefinition(generatedBd -> {
+					assertThat(generatedBd.getPropertyValues().contains("test")).isTrue();
+					assertThat(generatedBd.getPropertyValues().get("test")).isEqualTo("Hello");
+				}));
 	}
 
 	@Test
 	void generateWithBeanDefinitionHavingSeveralProperties() {
-		CodeSnippet registration = simpleConfigurationRegistration(bd -> {
+		compile(simpleConfigurationRegistration(bd -> {
 			bd.getPropertyValues().addPropertyValue("test", "Hello");
 			bd.getPropertyValues().addPropertyValue("counter", 42);
-		});
-		assertThat(registration.getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", SimpleConfiguration.class)
-						.instanceSupplier(() -> SimpleConfiguration::new).customize((bd) -> {
-					MutablePropertyValues propertyValues = bd.getPropertyValues();
-					propertyValues.addPropertyValue("test", "Hello");
-					propertyValues.addPropertyValue("counter", 42);
-				}).register(beanFactory);
-				""");
-		assertThat(registration.hasImport(MutablePropertyValues.class)).isTrue();
+		}), hasBeanDefinition(generatedBd -> {
+			assertThat(generatedBd.getPropertyValues().contains("test")).isTrue();
+			assertThat(generatedBd.getPropertyValues().get("test")).isEqualTo("Hello");
+			assertThat(generatedBd.getPropertyValues().contains("counter")).isTrue();
+			assertThat(generatedBd.getPropertyValues().get("counter")).isEqualTo(42);
+		}));
 	}
 
 	@Test
 	void generateWithBeanDefinitionHavingPropertyReference() {
-		CodeSnippet registration = simpleConfigurationRegistration(bd -> bd.getPropertyValues()
-				.addPropertyValue("myService", new RuntimeBeanReference("test")));
-		assertThat(registration.getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", SimpleConfiguration.class)
-						.instanceSupplier(() -> SimpleConfiguration::new).customize((bd) -> bd.getPropertyValues().addPropertyValue("myService", new RuntimeBeanReference("test"))).register(beanFactory);
-				""");
-		assertThat(registration.hasImport(RuntimeBeanReference.class)).isTrue();
+		compile(simpleConfigurationRegistration(bd -> bd.getPropertyValues().addPropertyValue(
+				"myService", new RuntimeBeanReference("test"))), hasBeanDefinition(generatedBd -> {
+			assertThat(generatedBd.getPropertyValues().contains("myService")).isTrue();
+			assertThat(generatedBd.getPropertyValues().get("myService"))
+					.isInstanceOfSatisfying(RuntimeBeanReference.class, ref ->
+							assertThat(ref.getBeanName()).isEqualTo("test"));
+		}));
 	}
 
 	@Test
@@ -312,14 +309,11 @@ class BeanRegistrationBeanFactoryContributionTests {
 				.getBeanDefinition();
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(ConfigurableBean.class)
 				.addPropertyValue("name", innerBeanDefinition).getBeanDefinition();
-		getContribution(beanFactory, beanDefinition).applyTo(this.initialization);
-		CodeSnippet registration = CodeSnippet.of(this.initialization.toCodeBlock());
-		assertThat(registration.getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", ConfigurableBean.class)
-						.instanceSupplier(ConfigurableBean::new).customize((bd) -> bd.getPropertyValues().addPropertyValue("name", BeanDefinitionRegistrar.inner(SimpleConfiguration.class).withFactoryMethod(SimpleConfiguration.class, "stringBean")
-						.instanceSupplier(() -> beanFactory.getBean(SimpleConfiguration.class).stringBean()).toBeanDefinition())).register(beanFactory);
-				""");
-		assertThat(registration.hasImport(SimpleConfiguration.class)).isTrue();
+		compile(getDefaultContribution(beanFactory, beanDefinition), hasBeanDefinition(generatedBd -> {
+			assertThat(generatedBd.getPropertyValues().contains("name")).isTrue();
+			assertThat(generatedBd.getPropertyValues().get("name")).isInstanceOfSatisfying(RootBeanDefinition.class, innerGeneratedBd ->
+					assertThat(innerGeneratedBd.getResolvedFactoryMethod()).isEqualTo(method(SimpleConfiguration.class, "stringBean")));
+		}));
 	}
 
 	@Test
@@ -329,15 +323,10 @@ class BeanRegistrationBeanFactoryContributionTests {
 				.getBeanDefinition();
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(ConfigurableBean.class)
 				.addPropertyValue("names", List.of(innerBeanDefinition, innerBeanDefinition)).getBeanDefinition();
-		getContribution(beanFactory, beanDefinition).applyTo(this.initialization);
-		CodeSnippet registration = CodeSnippet.of(this.initialization.toCodeBlock());
-		assertThat(registration.getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", ConfigurableBean.class)
-						.instanceSupplier(ConfigurableBean::new).customize((bd) -> bd.getPropertyValues().addPropertyValue("names", List.of(BeanDefinitionRegistrar.inner(SimpleConfiguration.class).withFactoryMethod(SimpleConfiguration.class, "stringBean")
-						.instanceSupplier(() -> beanFactory.getBean(SimpleConfiguration.class).stringBean()).toBeanDefinition(), BeanDefinitionRegistrar.inner(SimpleConfiguration.class).withFactoryMethod(SimpleConfiguration.class, "stringBean")
-						.instanceSupplier(() -> beanFactory.getBean(SimpleConfiguration.class).stringBean()).toBeanDefinition()))).register(beanFactory);
-				""");
-		assertThat(registration.hasImport(SimpleConfiguration.class)).isTrue();
+		compile(getDefaultContribution(beanFactory, beanDefinition), hasBeanDefinition(generatedBd -> {
+			assertThat(generatedBd.getPropertyValues().contains("names")).isTrue();
+			assertThat(generatedBd.getPropertyValues().get("names")).asList().hasSize(2);
+		}));
 	}
 
 	@Test
@@ -347,7 +336,7 @@ class BeanRegistrationBeanFactoryContributionTests {
 				.setRole(2).getBeanDefinition();
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(ConfigurableBean.class)
 				.addPropertyValue("name", innerBeanDefinition).getBeanDefinition();
-		getContribution(beanFactory, beanDefinition).applyTo(this.initialization);
+		getDefaultContribution(beanFactory, beanDefinition).applyTo(this.initialization);
 		CodeSnippet registration = CodeSnippet.of(this.initialization.toCodeBlock());
 		assertThat(registration.getSnippet()).isEqualTo("""
 				BeanDefinitionRegistrar.of("test", ConfigurableBean.class)
@@ -361,37 +350,53 @@ class BeanRegistrationBeanFactoryContributionTests {
 	void generateUsingSingleConstructorArgument() {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(String.class).getBeanDefinition();
 		beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, "hello");
-		CodeSnippet registration = beanRegistration(beanDefinition, method(SampleFactory.class, "create", String.class),
-				code -> code.add("() -> test"));
-		assertThat(registration.getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", String.class).withFactoryMethod(SampleFactory.class, "create", String.class)
-						.instanceSupplier(() -> test).customize((bd) -> bd.getConstructorArgumentValues().addIndexedArgumentValue(0, "hello")).register(beanFactory);
-				""");
+		compile(getContributionFor(beanDefinition, method(SampleFactory.class, "create", String.class)), beanFactory ->
+				assertThat(beanFactory.getBean(String.class)).isEqualTo("hello"));
 	}
 
 	@Test
 	void generateUsingSeveralConstructorArguments() {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(String.class)
-				.addConstructorArgValue(42).addConstructorArgReference("testBean")
+				.addConstructorArgValue(42).addConstructorArgValue("testBean")
 				.getBeanDefinition();
-		CodeSnippet registration = beanRegistration(beanDefinition, method(SampleFactory.class, "create", Number.class, String.class),
-				code -> code.add("() -> test"));
-		assertThat(registration.getSnippet()).isEqualTo("""
-				BeanDefinitionRegistrar.of("test", String.class).withFactoryMethod(SampleFactory.class, "create", Number.class, String.class)
-						.instanceSupplier(() -> test).customize((bd) -> {
-					ConstructorArgumentValues argumentValues = bd.getConstructorArgumentValues();
-					argumentValues.addIndexedArgumentValue(0, 42);
-					argumentValues.addIndexedArgumentValue(1, new RuntimeBeanReference("testBean"));
-				}).register(beanFactory);
-				""");
-		assertThat(registration.hasImport(ConstructorArgumentValues.class)).isTrue();
+		compile(getContributionFor(beanDefinition, method(SampleFactory.class, "create", Number.class, String.class)), beanFactory ->
+				assertThat(beanFactory.getBean(String.class)).isEqualTo("42testBean"));
+	}
+
+	@Test
+	void generateWithBeanDefinitionHavingAttributesDoesNotWriteThemByDefault() {
+		compile(simpleConfigurationRegistration(bd -> {
+			bd.setAttribute("test", "value");
+			bd.setAttribute("counter", 42);
+		}), hasBeanDefinition(generatedBd -> {
+			assertThat(generatedBd.getAttribute("test")).isNull();
+			assertThat(generatedBd.getAttribute("counter")).isNull();
+		}));
+	}
+
+	@Test
+	void generateWithBeanDefinitionHavingAttributesUseCustomFilter() {
+		RootBeanDefinition bd = new RootBeanDefinition(SimpleConfiguration.class);
+		bd.setAttribute("test", "value");
+		bd.setAttribute("counter", 42);
+		DefaultBeanInstantiationGenerator beanInstantiationGenerator = new DefaultBeanInstantiationGenerator(
+				singleConstructor(SimpleConfiguration.class), Collections.emptyList());
+		compile(new BeanRegistrationBeanFactoryContribution("test", bd, beanInstantiationGenerator) {
+			@Override
+			protected Predicate<String> getAttributeFilter() {
+				return candidate -> candidate.equals("counter");
+			}
+		}, hasBeanDefinition(generatedBd -> {
+			assertThat(generatedBd.getAttribute("test")).isNull();
+			assertThat(generatedBd.getAttribute("counter")).isNotNull().isEqualTo(42);
+		}));
 	}
 
 	@Test
 	void registerRuntimeHintsWithNoPropertyValuesDoesNotAccessRuntimeHints() {
 		RootBeanDefinition bd = new RootBeanDefinition(String.class);
 		RuntimeHints runtimeHints = mock(RuntimeHints.class);
-		getContribution(new DefaultListableBeanFactory(), bd).registerRuntimeHints(runtimeHints);
+		getDefaultContribution(new DefaultListableBeanFactory(), bd).registerRuntimeHints(runtimeHints);
 		verifyNoInteractions(runtimeHints);
 	}
 
@@ -401,7 +406,7 @@ class BeanRegistrationBeanFactoryContributionTests {
 				.addPropertyValue("notAProperty", "invalid").addPropertyValue("name", "hello")
 				.getBeanDefinition();
 		RuntimeHints runtimeHints = new RuntimeHints();
-		getContribution(new DefaultListableBeanFactory(), bd).registerRuntimeHints(runtimeHints);
+		getDefaultContribution(new DefaultListableBeanFactory(), bd).registerRuntimeHints(runtimeHints);
 		assertThat(runtimeHints.reflection().getTypeHint(ConfigurableBean.class)).satisfies(hint -> {
 			assertThat(hint.fields()).isEmpty();
 			assertThat(hint.constructors()).isEmpty();
@@ -421,7 +426,7 @@ class BeanRegistrationBeanFactoryContributionTests {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(IntegerFactoryBean.class)
 				.addConstructorArgReference("environment")
 				.addPropertyValue("name", "Hello").getBeanDefinition();
-		getContribution(beanFactory, beanDefinition).applyTo(this.initialization);
+		getDefaultContribution(beanFactory, beanDefinition).applyTo(this.initialization);
 		ReflectionHints reflectionHints = this.initialization.generatedTypeContext().runtimeHints().reflection();
 		assertThat(reflectionHints.typeHints()).anySatisfy(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(BaseFactoryBean.class));
@@ -443,7 +448,7 @@ class BeanRegistrationBeanFactoryContributionTests {
 	void registerRuntimeHintsForProperties() {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(NameAndCountersComponent.class)
 				.addPropertyValue("name", "Hello").addPropertyValue("counter", 42).getBeanDefinition();
-		getContribution(new DefaultListableBeanFactory(), beanDefinition).applyTo(this.initialization);
+		getDefaultContribution(new DefaultListableBeanFactory(), beanDefinition).applyTo(this.initialization);
 		ReflectionHints reflectionHints = this.initialization.generatedTypeContext().runtimeHints().reflection();
 		assertThat(reflectionHints.typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(NameAndCountersComponent.class));
@@ -463,7 +468,7 @@ class BeanRegistrationBeanFactoryContributionTests {
 				.addPropertyValue("counter", innerBd).getBeanDefinition();
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerSingleton("environment", Environment.class);
-		getContribution(beanFactory, beanDefinition).applyTo(this.initialization);
+		getDefaultContribution(beanFactory, beanDefinition).applyTo(this.initialization);
 		ReflectionHints reflectionHints = this.initialization.generatedTypeContext().runtimeHints().reflection();
 		assertThat(reflectionHints.typeHints()).anySatisfy(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(NameAndCountersComponent.class));
@@ -489,7 +494,7 @@ class BeanRegistrationBeanFactoryContributionTests {
 				.addPropertyValue("counters", List.of(innerBd1, innerBd2)).getBeanDefinition();
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerSingleton("environment", Environment.class);
-		getContribution(beanFactory, beanDefinition).applyTo(this.initialization);
+		getDefaultContribution(beanFactory, beanDefinition).applyTo(this.initialization);
 		ReflectionHints reflectionHints = this.initialization.generatedTypeContext().runtimeHints().reflection();
 		assertThat(reflectionHints.typeHints()).anySatisfy(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(NameAndCountersComponent.class));
@@ -520,23 +525,29 @@ class BeanRegistrationBeanFactoryContributionTests {
 		return methodHint("<init>", parameterTypes);
 	}
 
+	private Consumer<DefaultListableBeanFactory> hasBeanDefinition(Consumer<RootBeanDefinition> bd) {
+		return beanFactory -> {
+			assertThat(beanFactory.getBeanDefinitionNames()).contains("test");
+			RootBeanDefinition beanDefinition = (RootBeanDefinition) beanFactory.getMergedBeanDefinition("test");
+			bd.accept(beanDefinition);
+		};
+	}
 
-	private CodeSnippet simpleConfigurationRegistration(Consumer<RootBeanDefinition> bd) {
+	private BeanFactoryContribution simpleConfigurationRegistration(Consumer<RootBeanDefinition> bd) {
 		RootBeanDefinition beanDefinition = (RootBeanDefinition) BeanDefinitionBuilder
 				.rootBeanDefinition(SimpleConfiguration.class).getBeanDefinition();
 		bd.accept(beanDefinition);
-		return beanRegistration(beanDefinition, singleConstructor(SimpleConfiguration.class),
-				code -> code.add("() -> SimpleConfiguration::new"));
+		return getDefaultContribution(new DefaultListableBeanFactory(), beanDefinition);
 	}
 
-	private BeanRegistrationBeanFactoryContribution getContribution(DefaultListableBeanFactory beanFactory, BeanDefinition beanDefinition) {
+	private BeanRegistrationBeanFactoryContribution getDefaultContribution(DefaultListableBeanFactory beanFactory, BeanDefinition beanDefinition) {
 		BeanRegistrationBeanFactoryContribution contribution = new DefaultBeanRegistrationContributionProvider(beanFactory)
 				.getContributionFor("test", (RootBeanDefinition) beanDefinition);
 		assertThat(contribution).isNotNull();
 		return contribution;
 	}
 
-	private BeanFactoryContribution getContribution(BeanDefinition beanDefinition, Executable instanceCreator) {
+	private BeanRegistrationBeanFactoryContribution getContributionFor(BeanDefinition beanDefinition, Executable instanceCreator) {
 		return new BeanRegistrationBeanFactoryContribution("test", (RootBeanDefinition) beanDefinition,
 				new DefaultBeanInstantiationGenerator(instanceCreator, Collections.emptyList()));
 	}
@@ -587,6 +598,30 @@ class BeanRegistrationBeanFactoryContributionTests {
 			}
 			return line;
 		}).collect(Collectors.joining("\n"));
+	}
+
+	private void compile(BeanFactoryContribution contribution, Consumer<DefaultListableBeanFactory> beanFactory) {
+		contribution.applyTo(this.initialization);
+		GeneratedType generatedType = this.generatedTypeContext.getMainGeneratedType();
+		generatedType.customizeType(type -> {
+			type.addModifiers(Modifier.PUBLIC);
+			type.addSuperinterface(BeanFactoryInitializer.class);
+		});
+		generatedType.addMethod(MethodSpec.methodBuilder("initializeBeanFactory")
+				.addModifiers(Modifier.PUBLIC).addAnnotation(Override.class)
+				.addParameter(DefaultListableBeanFactory.class, "beanFactory")
+				.addCode(this.initialization.toCodeBlock()));
+		SourceFiles sourceFiles = SourceFiles.none();
+		for (JavaFile javaFile : this.generatedTypeContext.toJavaFiles()) {
+			sourceFiles = sourceFiles.and(SourceFile.of((javaFile::writeTo)));
+		}
+		TestCompiler.forSystem().withSources(sourceFiles).compile(compiled -> {
+			BeanFactoryInitializer initializer = compiled.getInstance(BeanFactoryInitializer.class,
+					generatedType.getClassName().canonicalName());
+			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
+			initializer.initializeBeanFactory(freshBeanFactory);
+			beanFactory.accept(freshBeanFactory);
+		});
 	}
 
 	static abstract class BaseFactoryBean {

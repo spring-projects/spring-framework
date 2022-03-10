@@ -10,6 +10,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(project(":spring-core-test"))
 	testImplementation("jakarta.annotation:jakarta.annotation-api")
 	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
 	testFixturesImplementation("org.assertj:assertj-core")
