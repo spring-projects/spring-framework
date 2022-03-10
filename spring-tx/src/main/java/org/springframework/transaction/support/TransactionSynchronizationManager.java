@@ -73,22 +73,22 @@ import org.springframework.util.Assert;
  */
 public abstract class TransactionSynchronizationManager {
 
-	private static final ThreadLocal<Map<Object, Object>> resources =
+	static final ThreadLocal<Map<Object, Object>> resources =
 			new NamedThreadLocal<>("Transactional resources");
 
-	private static final ThreadLocal<Set<TransactionSynchronization>> synchronizations =
+	static final ThreadLocal<Set<TransactionSynchronization>> synchronizations =
 			new NamedThreadLocal<>("Transaction synchronizations");
 
-	private static final ThreadLocal<String> currentTransactionName =
+	static final ThreadLocal<String> currentTransactionName =
 			new NamedThreadLocal<>("Current transaction name");
 
-	private static final ThreadLocal<Boolean> currentTransactionReadOnly =
+	static final ThreadLocal<Boolean> currentTransactionReadOnly =
 			new NamedThreadLocal<>("Current transaction read-only status");
 
-	private static final ThreadLocal<Integer> currentTransactionIsolationLevel =
+	static final ThreadLocal<Integer> currentTransactionIsolationLevel =
 			new NamedThreadLocal<>("Current transaction isolation level");
 
-	private static final ThreadLocal<Boolean> actualTransactionActive =
+	static final ThreadLocal<Boolean> actualTransactionActive =
 			new NamedThreadLocal<>("Actual transaction active");
 
 

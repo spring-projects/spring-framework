@@ -20,6 +20,8 @@ import java.lang.reflect.Method;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
 
+import io.micrometer.core.instrument.observation.Observation;
+import io.micrometer.core.instrument.observation.ObservationRegistry;
 import io.vavr.control.Try;
 import kotlin.coroutines.Continuation;
 import kotlinx.coroutines.reactive.AwaitKt;
@@ -50,6 +52,10 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.reactive.TransactionContextManager;
 import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionTagsProvider;
+import org.springframework.transaction.support.ObservationPlatformTransactionManager;
+import org.springframework.transaction.support.TransactionObservationContext;
+import org.springframework.transaction.support.TransactionTagsProvider;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -89,7 +95,7 @@ import org.springframework.util.StringUtils;
  * @see #setTransactionAttributes
  * @see #setTransactionAttributeSource
  */
-public abstract class TransactionAspectSupport implements BeanFactoryAware, InitializingBean {
+public abstract class TransactionAspectSupport implements BeanFactoryAware, InitializingBean, Observation.TagsProviderAware<TransactionTagsProvider> {
 
 	// NOTE: This class must not implement Serializable because it serves as base
 	// class for AspectJ aspects (which are not allowed to implement Serializable)!
@@ -178,6 +184,10 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	@Nullable
 	private BeanFactory beanFactory;
+
+	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
+
+	private TransactionTagsProvider tagsProvider = new DefaultTransactionTagsProvider();
 
 	private final ConcurrentMap<Object, TransactionManager> transactionManagerCache =
 			new ConcurrentReferenceHashMap<>(4);
@@ -301,6 +311,15 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	@Nullable
 	protected final BeanFactory getBeanFactory() {
 		return this.beanFactory;
+	}
+
+	public void setObservationRegistry(ObservationRegistry observationRegistry) {
+		this.observationRegistry = observationRegistry;
+	}
+
+	@Override
+	public void setTagsProvider(TransactionTagsProvider tagsProvider) {
+		this.tagsProvider = tagsProvider;
 	}
 
 	/**
@@ -592,6 +611,10 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		TransactionStatus status = null;
 		if (txAttr != null) {
 			if (tm != null) {
+				if (this.transactionManager instanceof PlatformTransactionManager) {
+					TransactionObservationContext context = new TransactionObservationContext(txAttr, this.transactionManager);
+					tm = new ObservationPlatformTransactionManager((PlatformTransactionManager) this.transactionManager, this.observationRegistry, context, this.tagsProvider);
+				}
 				status = tm.getTransaction(txAttr);
 			}
 			else {

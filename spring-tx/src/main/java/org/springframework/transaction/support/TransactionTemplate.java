@@ -18,6 +18,8 @@ package org.springframework.transaction.support;
 
 import java.lang.reflect.UndeclaredThrowableException;
 
+import io.micrometer.core.instrument.observation.Observation;
+import io.micrometer.core.instrument.observation.ObservationRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -63,7 +65,7 @@ import org.springframework.util.Assert;
  */
 @SuppressWarnings("serial")
 public class TransactionTemplate extends DefaultTransactionDefinition
-		implements TransactionOperations, InitializingBean {
+		implements TransactionOperations, InitializingBean, Observation.TagsProviderAware<TransactionTagsProvider> {
 
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -71,6 +73,9 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	@Nullable
 	private PlatformTransactionManager transactionManager;
 
+	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
+
+	private TransactionTagsProvider tagsProvider = new DefaultTransactionTagsProvider();
 
 	/**
 	 * Construct a new TransactionTemplate for bean usage.
@@ -106,6 +111,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	 * Set the transaction management strategy to be used.
 	 */
 	public void setTransactionManager(@Nullable PlatformTransactionManager transactionManager) {
+		// TODO: Maybe wrap this in the Observation version here?
 		this.transactionManager = transactionManager;
 	}
 
@@ -115,6 +121,15 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	@Nullable
 	public PlatformTransactionManager getTransactionManager() {
 		return this.transactionManager;
+	}
+
+	public void setObservationRegistry(ObservationRegistry observationRegistry) {
+		this.observationRegistry = observationRegistry;
+	}
+
+	@Override
+	public void setTagsProvider(TransactionTagsProvider tagsProvider) {
+		this.tagsProvider = tagsProvider;
 	}
 
 	@Override
@@ -131,41 +146,46 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
 		if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager) {
+			// TODO: Should we do context propagation here for the action?
 			return ((CallbackPreferringPlatformTransactionManager) this.transactionManager).execute(this, action);
 		}
 		else {
-			TransactionStatus status = this.transactionManager.getTransaction(this);
+			TransactionObservationContext context = new TransactionObservationContext(this, this.transactionManager);
+			ObservationPlatformTransactionManager observationPlatformTransactionManager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.tagsProvider);
+			TransactionStatus status = observationPlatformTransactionManager.getTransaction(this);
 			T result;
 			try {
+				// TODO: Should we do context propagation here for the action?
 				result = action.doInTransaction(status);
 			}
 			catch (RuntimeException | Error ex) {
 				// Transactional code threw application exception -> rollback
-				rollbackOnException(status, ex);
+				rollbackOnException(observationPlatformTransactionManager, status, ex);
 				throw ex;
 			}
 			catch (Throwable ex) {
 				// Transactional code threw unexpected exception -> rollback
-				rollbackOnException(status, ex);
+				rollbackOnException(observationPlatformTransactionManager, status, ex);
 				throw new UndeclaredThrowableException(ex, "TransactionCallback threw undeclared checked exception");
 			}
-			this.transactionManager.commit(status);
+			observationPlatformTransactionManager.commit(status);
 			return result;
 		}
 	}
 
 	/**
 	 * Perform a rollback, handling rollback exceptions properly.
+	 * @param observationPlatformTransactionManager observation platform manager
 	 * @param status object representing the transaction
 	 * @param ex the thrown application exception or error
 	 * @throws TransactionException in case of a rollback error
 	 */
-	private void rollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
+	private void rollbackOnException(ObservationPlatformTransactionManager observationPlatformTransactionManager, TransactionStatus status, Throwable ex) throws TransactionException {
 		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
 		logger.debug("Initiating transaction rollback on application exception", ex);
 		try {
-			this.transactionManager.rollback(status);
+			observationPlatformTransactionManager.rollback(status);
 		}
 		catch (TransactionSystemException ex2) {
 			logger.error("Application exception overridden by rollback exception", ex);

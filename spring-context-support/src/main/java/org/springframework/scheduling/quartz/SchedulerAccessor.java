@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import io.micrometer.core.instrument.observation.Observation;
+import io.micrometer.core.instrument.observation.ObservationRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.Calendar;
@@ -43,6 +45,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionTagsProvider;
+import org.springframework.transaction.support.ObservationPlatformTransactionManager;
+import org.springframework.transaction.support.TransactionObservationContext;
+import org.springframework.transaction.support.TransactionTagsProvider;
 
 /**
  * Common base class for accessing a Quartz Scheduler, i.e. for registering jobs,
@@ -57,7 +63,7 @@ import org.springframework.transaction.TransactionStatus;
  * @author Stephane Nicoll
  * @since 2.5.6
  */
-public abstract class SchedulerAccessor implements ResourceLoaderAware {
+public abstract class SchedulerAccessor implements ResourceLoaderAware, Observation.TagsProviderAware<TransactionTagsProvider> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -89,6 +95,10 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
 	@Nullable
 	protected ResourceLoader resourceLoader;
+
+	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
+
+	private TransactionTagsProvider tagsProvider = new DefaultTransactionTagsProvider();
 
 
 	/**
@@ -199,14 +209,25 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		this.resourceLoader = resourceLoader;
 	}
 
+	public void setObservationRegistry(ObservationRegistry observationRegistry) {
+		this.observationRegistry = observationRegistry;
+	}
+
+	@Override
+	public void setTagsProvider(TransactionTagsProvider tagsProvider) {
+		this.tagsProvider = tagsProvider;
+	}
 
 	/**
 	 * Register jobs and triggers (within a transaction, if possible).
 	 */
 	protected void registerJobsAndTriggers() throws SchedulerException {
 		TransactionStatus transactionStatus = null;
+		TransactionDefinition definition = TransactionDefinition.withDefaults();
+		TransactionObservationContext context = new TransactionObservationContext(definition, this.transactionManager);
+		ObservationPlatformTransactionManager observationPlatformTransactionManager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.tagsProvider);
 		if (this.transactionManager != null) {
-			transactionStatus = this.transactionManager.getTransaction(TransactionDefinition.withDefaults());
+			transactionStatus = observationPlatformTransactionManager.getTransaction(definition);
 		}
 
 		try {
@@ -249,7 +270,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		catch (Throwable ex) {
 			if (transactionStatus != null) {
 				try {
-					this.transactionManager.rollback(transactionStatus);
+					observationPlatformTransactionManager.rollback(transactionStatus);
 				}
 				catch (TransactionException tex) {
 					logger.error("Job registration exception overridden by rollback exception", ex);
@@ -266,7 +287,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		}
 
 		if (transactionStatus != null) {
-			this.transactionManager.commit(transactionStatus);
+			observationPlatformTransactionManager.commit(transactionStatus);
 		}
 	}
 

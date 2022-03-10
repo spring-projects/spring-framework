@@ -5,6 +5,7 @@ apply plugin: "kotlin"
 dependencies {
 	api(project(":spring-beans"))
 	api(project(":spring-core"))
+	api("io.micrometer:micrometer-core")
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))  // for JCA, @EnableTransactionManagement
 	optional("jakarta.ejb:jakarta.ejb-api")
@@ -17,6 +18,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	optional("io.micrometer:context-propagation")
 	testImplementation(project(":spring-core-test"))
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-context")))

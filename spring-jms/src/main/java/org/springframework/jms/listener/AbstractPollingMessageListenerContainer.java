@@ -16,6 +16,8 @@
 
 package org.springframework.jms.listener;
 
+import io.micrometer.core.instrument.observation.Observation;
+import io.micrometer.core.instrument.observation.ObservationRegistry;
 import jakarta.jms.Connection;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
@@ -32,9 +34,13 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.DefaultTransactionTagsProvider;
+import org.springframework.transaction.support.ObservationPlatformTransactionManager;
 import org.springframework.transaction.support.ResourceTransactionManager;
+import org.springframework.transaction.support.TransactionObservationContext;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionSynchronizationUtils;
+import org.springframework.transaction.support.TransactionTagsProvider;
 import org.springframework.util.Assert;
 
 /**
@@ -75,7 +81,7 @@ import org.springframework.util.Assert;
  * @see #receiveAndExecute
  * @see #setTransactionManager
  */
-public abstract class AbstractPollingMessageListenerContainer extends AbstractMessageListenerContainer {
+public abstract class AbstractPollingMessageListenerContainer extends AbstractMessageListenerContainer implements Observation.TagsProviderAware<TransactionTagsProvider> {
 
 	/**
 	 * The default receive timeout: 1000 ms = 1 second.
@@ -94,6 +100,10 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	private final DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
+
+	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
+
+	private TransactionTagsProvider tagsProvider = new DefaultTransactionTagsProvider();
 
 
 	@Override
@@ -183,6 +193,14 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 		return this.receiveTimeout;
 	}
 
+	public void setObservationRegistry(ObservationRegistry observationRegistry) {
+		this.observationRegistry = observationRegistry;
+	}
+
+	@Override
+	public void setTagsProvider(TransactionTagsProvider tagsProvider) {
+		this.tagsProvider = tagsProvider;
+	}
 
 	@Override
 	public void initialize() {
@@ -238,18 +256,20 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			throws JMSException {
 
 		if (this.transactionManager != null) {
+			TransactionObservationContext context = new TransactionObservationContext(this.transactionDefinition, this.transactionManager);
+			ObservationPlatformTransactionManager observationPlatformTransactionManager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.tagsProvider);
 			// Execute receive within transaction.
-			TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
+			TransactionStatus status = observationPlatformTransactionManager.getTransaction(this.transactionDefinition);
 			boolean messageReceived;
 			try {
 				messageReceived = doReceiveAndExecute(invoker, session, consumer, status);
 			}
 			catch (JMSException | RuntimeException | Error ex) {
-				rollbackOnException(this.transactionManager, status, ex);
+				rollbackOnException(observationPlatformTransactionManager, status, ex);
 				throw ex;
 			}
 			try {
-				this.transactionManager.commit(status);
+				observationPlatformTransactionManager.commit(status);
 			}
 			catch (TransactionException ex) {
 				// Propagate transaction system exceptions as infrastructure problems.
