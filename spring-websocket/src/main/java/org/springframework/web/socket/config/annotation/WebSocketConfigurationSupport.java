@@ -95,7 +95,7 @@ public class WebSocketConfigurationSupport {
 	}
 
 
-	private static class DefaultSockJsSchedulerContainer implements InitializingBean, DisposableBean {
+	static class DefaultSockJsSchedulerContainer implements InitializingBean, DisposableBean {
 
 		@Nullable
 		private final ThreadPoolTaskScheduler scheduler;
