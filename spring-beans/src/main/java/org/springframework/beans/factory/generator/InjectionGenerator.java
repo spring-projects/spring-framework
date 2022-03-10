@@ -199,7 +199,10 @@ public class InjectionGenerator {
 			code.add(")\n").indent().indent();
 		}
 		attributesResolver.accept(code);
-		List<CodeBlock> parameters = resolveParameters(injectionPoint.getParameters(), false);
+		Parameter[] methodParameters = injectionPoint.getParameters();
+		boolean isAmbiguous = Arrays.stream(injectionPoint.getDeclaringClass().getDeclaredMethods())
+				.filter(method -> method.getName().equals(injectionPoint.getName()) && method.getParameterCount() == methodParameters.length).count() > 1;
+		List<CodeBlock> parameters = resolveParameters(methodParameters, isAmbiguous);
 		code.add(" ");
 		if (instantiation) {
 			if (Modifier.isStatic(injectionPoint.getModifiers())) {

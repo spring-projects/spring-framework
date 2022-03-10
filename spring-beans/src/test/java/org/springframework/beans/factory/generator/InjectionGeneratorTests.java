@@ -28,6 +28,7 @@ import org.springframework.aot.generator.ProtectedAccess;
 import org.springframework.aot.generator.ProtectedAccess.Options;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.generator.InjectionGeneratorTests.SimpleConstructorBean.InnerClass;
+import org.springframework.beans.testfixture.beans.factory.generator.factory.SampleFactory;
 import org.springframework.javapoet.support.CodeSnippet;
 import org.springframework.util.ReflectionUtils;
 
@@ -105,8 +106,14 @@ class InjectionGeneratorTests {
 
 	@Test
 	void generateInstantiationForMethodWithGenericParameters() {
-		assertThat(generateInstantiation(method(SampleBean.class, "source", ObjectProvider.class)).lines()).containsExactly(
-				"instanceContext.create(beanFactory, (attributes) -> beanFactory.getBean(InjectionGeneratorTests.SampleBean.class).source(attributes.get(0)))");
+		assertThat(generateInstantiation(method(SampleBean.class, "sourceWithProvider", ObjectProvider.class)).lines()).containsExactly(
+				"instanceContext.create(beanFactory, (attributes) -> beanFactory.getBean(InjectionGeneratorTests.SampleBean.class).sourceWithProvider(attributes.get(0)))");
+	}
+
+	@Test
+	void generateInstantiationForAmbiguousMethod() {
+		assertThat(generateInstantiation(method(SampleFactory.class, "create", String.class)).lines()).containsExactly(
+				"instanceContext.create(beanFactory, (attributes) -> SampleFactory.create(attributes.get(0, String.class)))");
 	}
 
 	@Test
@@ -263,7 +270,7 @@ class InjectionGeneratorTests {
 			return "source" + counter;
 		}
 
-		String source(ObjectProvider<Integer> counter) {
+		String sourceWithProvider(ObjectProvider<Integer> counter) {
 			return "source" + counter.getIfAvailable(() -> 0);
 		}
 

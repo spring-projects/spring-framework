@@ -86,7 +86,7 @@ class BeanDefinitionsContributionTests {
 		CodeSnippet code = contribute(beanFactory, createGenerationContext());
 		assertThat(code.getSnippet()).isEqualTo("""
 				BeanDefinitionRegistrar.of("counter", Integer.class).withFactoryMethod(Integer.class, "valueOf", int.class)
-						.instanceSupplier((instanceContext) -> instanceContext.create(beanFactory, (attributes) -> Integer.valueOf(attributes.get(0)))).customize((bd) -> bd.getConstructorArgumentValues().addIndexedArgumentValue(0, 42)).register(beanFactory);
+						.instanceSupplier((instanceContext) -> instanceContext.create(beanFactory, (attributes) -> Integer.valueOf(attributes.get(0, int.class)))).customize((bd) -> bd.getConstructorArgumentValues().addIndexedArgumentValue(0, 42)).register(beanFactory);
 				BeanDefinitionRegistrar.of("name", String.class).withConstructor(String.class)
 						.instanceSupplier((instanceContext) -> instanceContext.create(beanFactory, (attributes) -> new String(attributes.get(0, String.class)))).customize((bd) -> bd.getConstructorArgumentValues().addIndexedArgumentValue(0, "Hello")).register(beanFactory);
 				""");
