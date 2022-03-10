@@ -537,12 +537,13 @@ class BeanRegistrationBeanFactoryContributionTests {
 	}
 
 	private BeanFactoryContribution getContribution(BeanDefinition beanDefinition, Executable instanceCreator) {
-		return new BeanRegistrationBeanFactoryContribution("test", beanDefinition,
+		return new BeanRegistrationBeanFactoryContribution("test", (RootBeanDefinition) beanDefinition,
 				new DefaultBeanInstantiationGenerator(instanceCreator, Collections.emptyList()));
 	}
 
 	private CodeSnippet beanRegistration(BeanDefinition beanDefinition, Executable instanceCreator, Consumer<Builder> instanceSupplier) {
-		BeanRegistrationBeanFactoryContribution generator = new BeanRegistrationBeanFactoryContribution("test", beanDefinition,
+		BeanRegistrationBeanFactoryContribution generator = new BeanRegistrationBeanFactoryContribution(
+				"test", (RootBeanDefinition) beanDefinition,
 				new DefaultBeanInstantiationGenerator(instanceCreator, Collections.emptyList()));
 		return CodeSnippet.of(generator.generateBeanRegistration(new RuntimeHints(),
 				toMultiStatements(instanceSupplier)));

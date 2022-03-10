@@ -46,7 +46,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.generator.config.BeanDefinitionRegistrar;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.AttributeAccessor;
 import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.CodeBlock;
@@ -72,7 +72,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 
 	private final String beanName;
 
-	private final BeanDefinition beanDefinition;
+	private final RootBeanDefinition beanDefinition;
 
 	private final BeanInstantiationGenerator beanInstantiationGenerator;
 
@@ -81,7 +81,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 
 	private int nesting = 0;
 
-	BeanRegistrationBeanFactoryContribution(String beanName, BeanDefinition beanDefinition,
+	BeanRegistrationBeanFactoryContribution(String beanName, RootBeanDefinition beanDefinition,
 			BeanInstantiationGenerator beanInstantiationGenerator,
 			@Nullable DefaultBeanRegistrationContributionProvider innerBeanRegistrationContributionProvider) {
 		this.beanName = beanName;
@@ -90,7 +90,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 		this.innerBeanRegistrationContributionProvider = innerBeanRegistrationContributionProvider;
 	}
 
-	public BeanRegistrationBeanFactoryContribution(String beanName, BeanDefinition beanDefinition,
+	public BeanRegistrationBeanFactoryContribution(String beanName, RootBeanDefinition beanDefinition,
 			BeanInstantiationGenerator beanInstantiationGenerator) {
 		this(beanName, beanDefinition, beanInstantiationGenerator, null);
 	}
@@ -99,7 +99,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 		return this.beanName;
 	}
 
-	BeanDefinition getBeanDefinition() {
+	RootBeanDefinition getBeanDefinition() {
 		return this.beanDefinition;
 	}
 
@@ -295,7 +295,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 
 		private final BeanParameterGenerator parameterGenerator;
 
-		private final BeanDefinition beanDefinition;
+		private final RootBeanDefinition beanDefinition;
 
 		Generator(BeanParameterGenerator parameterGenerator) {
 			this.parameterGenerator = parameterGenerator;
@@ -375,8 +375,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 			if (!this.beanDefinition.isAutowireCandidate()) {
 				statements.addStatement("$L.setAutowireCandidate(false)", bdVariable);
 			}
-			if (this.beanDefinition instanceof AbstractBeanDefinition
-					&& ((AbstractBeanDefinition) this.beanDefinition).isSynthetic()) {
+			if (this.beanDefinition.isSynthetic()) {
 				statements.addStatement("$L.setSynthetic(true)", bdVariable);
 			}
 			if (this.beanDefinition.getRole() != BeanDefinition.ROLE_APPLICATION) {
