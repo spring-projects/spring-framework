@@ -56,6 +56,7 @@ import org.springframework.beans.testfixture.beans.factory.generator.InnerCompon
 import org.springframework.beans.testfixture.beans.factory.generator.SimpleConfiguration;
 import org.springframework.beans.testfixture.beans.factory.generator.factory.SampleFactory;
 import org.springframework.beans.testfixture.beans.factory.generator.injection.InjectionComponent;
+import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.InitDestroyBean;
 import org.springframework.beans.testfixture.beans.factory.generator.property.ConfigurableBean;
 import org.springframework.beans.testfixture.beans.factory.generator.visibility.ProtectedConstructorComponent;
 import org.springframework.beans.testfixture.beans.factory.generator.visibility.ProtectedFactoryMethod;
@@ -206,6 +207,30 @@ class BeanRegistrationBeanFactoryContributionTests {
 				}""");
 		assertThat(CodeSnippet.of(this.initialization.toCodeBlock()).getSnippet()).isEqualTo(
 				PublicFactoryBean.class.getPackageName() + ".Test.registerTest(beanFactory);\n");
+	}
+
+	@Test
+	void generateWithBeanDefinitionHavingInitMethodName() {
+		compile(simpleConfigurationRegistration(bd -> bd.setInitMethodName("someMethod")),
+				hasBeanDefinition(generatedBd -> assertThat(generatedBd.getInitMethodNames()).containsExactly("someMethod")));
+	}
+
+	@Test
+	void generateWithBeanDefinitionHavingInitMethodNames() {
+		compile(simpleConfigurationRegistration(bd -> bd.setInitMethodNames("i1", "i2")),
+				hasBeanDefinition(generatedBd -> assertThat(generatedBd.getInitMethodNames()).containsExactly("i1", "i2")));
+	}
+
+	@Test
+	void generateWithBeanDefinitionHavingDestroyMethodName() {
+		compile(simpleConfigurationRegistration(bd -> bd.setDestroyMethodName("someMethod")),
+				hasBeanDefinition(generatedBd -> assertThat(generatedBd.getDestroyMethodNames()).containsExactly("someMethod")));
+	}
+
+	@Test
+	void generateWithBeanDefinitionHavingDestroyMethodNames() {
+		compile(simpleConfigurationRegistration(bd -> bd.setDestroyMethodNames("d1", "d2")),
+				hasBeanDefinition(generatedBd -> assertThat(generatedBd.getDestroyMethodNames()).containsExactly("d1", "d2")));
 	}
 
 	@Test
@@ -393,6 +418,28 @@ class BeanRegistrationBeanFactoryContributionTests {
 	}
 
 	@Test
+	void registerRuntimeHintsWithInitMethodNames() {
+		RootBeanDefinition bd = new RootBeanDefinition(InitDestroyBean.class);
+		bd.setInitMethodNames("customInitMethod", "initMethod");
+		RuntimeHints runtimeHints = new RuntimeHints();
+		getDefaultContribution(new DefaultListableBeanFactory(), bd).registerRuntimeHints(runtimeHints);
+		assertThat(runtimeHints.reflection().getTypeHint(InitDestroyBean.class)).satisfies(hint ->
+				assertThat(hint.methods()).anySatisfy(invokeMethodHint("customInitMethod"))
+						.anySatisfy(invokeMethodHint("initMethod")).hasSize(2));
+	}
+
+	@Test
+	void registerRuntimeHintsWithDestroyMethodNames() {
+		RootBeanDefinition bd = new RootBeanDefinition(InitDestroyBean.class);
+		bd.setDestroyMethodNames("customDestroyMethod", "destroyMethod");
+		RuntimeHints runtimeHints = new RuntimeHints();
+		getDefaultContribution(new DefaultListableBeanFactory(), bd).registerRuntimeHints(runtimeHints);
+		assertThat(runtimeHints.reflection().getTypeHint(InitDestroyBean.class)).satisfies(hint ->
+				assertThat(hint.methods()).anySatisfy(invokeMethodHint("customDestroyMethod"))
+						.anySatisfy(invokeMethodHint("destroyMethod")).hasSize(2));
+	}
+
+	@Test
 	void registerRuntimeHintsWithNoPropertyValuesDoesNotAccessRuntimeHints() {
 		RootBeanDefinition bd = new RootBeanDefinition(String.class);
 		RuntimeHints runtimeHints = mock(RuntimeHints.class);
@@ -432,12 +479,12 @@ class BeanRegistrationBeanFactoryContributionTests {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(BaseFactoryBean.class));
 			assertThat(typeHint.constructors()).isEmpty();
 			assertThat(typeHint.methods()).singleElement()
-					.satisfies(methodHint("setName", String.class));
+					.satisfies(invokeMethodHint("setName", String.class));
 			assertThat(typeHint.fields()).isEmpty();
 		}).anySatisfy(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(IntegerFactoryBean.class));
 			assertThat(typeHint.constructors()).singleElement()
-					.satisfies(constructorHint(Environment.class));
+					.satisfies(introspectConstructorHint(Environment.class));
 			assertThat(typeHint.methods()).isEmpty();
 			assertThat(typeHint.fields()).isEmpty();
 		}).hasSize(2);
@@ -453,8 +500,8 @@ class BeanRegistrationBeanFactoryContributionTests {
 		assertThat(reflectionHints.typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(NameAndCountersComponent.class));
 			assertThat(typeHint.constructors()).isEmpty();
-			assertThat(typeHint.methods()).anySatisfy(methodHint("setName", String.class))
-					.anySatisfy(methodHint("setCounter", Integer.class)).hasSize(2);
+			assertThat(typeHint.methods()).anySatisfy(invokeMethodHint("setName", String.class))
+					.anySatisfy(invokeMethodHint("setCounter", Integer.class)).hasSize(2);
 			assertThat(typeHint.fields()).isEmpty();
 		});
 	}
@@ -473,14 +520,14 @@ class BeanRegistrationBeanFactoryContributionTests {
 		assertThat(reflectionHints.typeHints()).anySatisfy(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(NameAndCountersComponent.class));
 			assertThat(typeHint.constructors()).isEmpty();
-			assertThat(typeHint.methods()).singleElement().satisfies(methodHint("setCounter", Integer.class));
+			assertThat(typeHint.methods()).singleElement().satisfies(invokeMethodHint("setCounter", Integer.class));
 			assertThat(typeHint.fields()).isEmpty();
 		}).anySatisfy(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(BaseFactoryBean.class));
-			assertThat(typeHint.methods()).singleElement().satisfies(methodHint("setName", String.class));
+			assertThat(typeHint.methods()).singleElement().satisfies(invokeMethodHint("setName", String.class));
 		}).anySatisfy(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(IntegerFactoryBean.class));
-			assertThat(typeHint.constructors()).singleElement().satisfies(constructorHint(Environment.class));
+			assertThat(typeHint.constructors()).singleElement().satisfies(introspectConstructorHint(Environment.class));
 		}).hasSize(3);
 	}
 
@@ -499,30 +546,35 @@ class BeanRegistrationBeanFactoryContributionTests {
 		assertThat(reflectionHints.typeHints()).anySatisfy(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(NameAndCountersComponent.class));
 			assertThat(typeHint.constructors()).isEmpty();
-			assertThat(typeHint.methods()).singleElement().satisfies(methodHint("setCounters", List.class));
+			assertThat(typeHint.methods()).singleElement().satisfies(invokeMethodHint("setCounters", List.class));
 			assertThat(typeHint.fields()).isEmpty();
 		}).anySatisfy(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(BaseFactoryBean.class));
-			assertThat(typeHint.methods()).singleElement().satisfies(methodHint("setName", String.class));
+			assertThat(typeHint.methods()).singleElement().satisfies(invokeMethodHint("setName", String.class));
 		}).anySatisfy(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(IntegerFactoryBean.class));
-			assertThat(typeHint.constructors()).singleElement().satisfies(constructorHint(Environment.class));
+			assertThat(typeHint.constructors()).singleElement().satisfies(introspectConstructorHint(Environment.class));
 		}).anySatisfy(typeHint -> {
 			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(AnotherIntegerFactoryBean.class));
-			assertThat(typeHint.constructors()).singleElement().satisfies(constructorHint(Environment.class));
+			assertThat(typeHint.constructors()).singleElement().satisfies(introspectConstructorHint(Environment.class));
 		}).hasSize(4);
 	}
 
-	private Consumer<ExecutableHint> methodHint(String name, Class<?>... parameterTypes) {
+	private Consumer<ExecutableHint> invokeMethodHint(String name, Class<?>... parameterTypes) {
+		return executableHint(ExecutableMode.INVOKE, name, parameterTypes);
+	}
+
+	private Consumer<ExecutableHint> introspectConstructorHint(Class<?>... parameterTypes) {
+		return executableHint(ExecutableMode.INTROSPECT, "<init>", parameterTypes);
+	}
+
+	private Consumer<ExecutableHint> executableHint(ExecutableMode mode, String name, Class<?>... parameterTypes) {
 		return executableHint -> {
 			assertThat(executableHint.getName()).isEqualTo(name);
 			assertThat(executableHint.getParameterTypes()).containsExactly(Arrays.stream(parameterTypes)
 					.map(TypeReference::of).toArray(TypeReference[]::new));
+			assertThat(executableHint.getModes()).containsExactly(mode);
 		};
-	}
-
-	private Consumer<ExecutableHint> constructorHint(Class<?>... parameterTypes) {
-		return methodHint("<init>", parameterTypes);
 	}
 
 	private Consumer<DefaultListableBeanFactory> hasBeanDefinition(Consumer<RootBeanDefinition> bd) {

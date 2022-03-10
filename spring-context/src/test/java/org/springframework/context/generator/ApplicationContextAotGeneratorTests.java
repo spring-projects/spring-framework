@@ -43,9 +43,11 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.AnnotationConfigUtils;
+import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.testfixture.context.generator.SimpleComponent;
 import org.springframework.context.testfixture.context.generator.annotation.AutowiredComponent;
+import org.springframework.context.testfixture.context.generator.annotation.InitDestroyComponent;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.JavaFile;
@@ -91,6 +93,41 @@ class ApplicationContextAotGeneratorTests {
 			AutowiredComponent bean = aotContext.getBean(AutowiredComponent.class);
 			assertThat(bean.getEnvironment()).isSameAs(aotContext.getEnvironment());
 			assertThat(bean.getCounter()).isEqualTo(42L);
+		}));
+	}
+
+	@Test
+	void generateApplicationContextWithInitDestroyMethods() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBeanDefinition(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME,
+				BeanDefinitionBuilder.rootBeanDefinition(CommonAnnotationBeanPostProcessor.class)
+						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+		context.registerBeanDefinition("initDestroyComponent", new RootBeanDefinition(InitDestroyComponent.class));
+		compile(context, toFreshApplicationContext(GenericApplicationContext::new, aotContext -> {
+			assertThat(aotContext.getBeanDefinitionNames()).containsOnly("initDestroyComponent");
+			InitDestroyComponent bean = aotContext.getBean(InitDestroyComponent.class);
+			assertThat(bean.events).containsExactly("init");
+			aotContext.close();
+			assertThat(bean.events).containsExactly("init", "destroy");
+		}));
+	}
+
+	@Test
+	void generateApplicationContextWithMultipleInitDestroyMethods() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBeanDefinition(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME,
+				BeanDefinitionBuilder.rootBeanDefinition(CommonAnnotationBeanPostProcessor.class)
+						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(InitDestroyComponent.class);
+		beanDefinition.setInitMethodName("customInit");
+		beanDefinition.setDestroyMethodName("customDestroy");
+		context.registerBeanDefinition("initDestroyComponent", beanDefinition);
+		compile(context, toFreshApplicationContext(GenericApplicationContext::new, aotContext -> {
+			assertThat(aotContext.getBeanDefinitionNames()).containsOnly("initDestroyComponent");
+			InitDestroyComponent bean = aotContext.getBean(InitDestroyComponent.class);
+			assertThat(bean.events).containsExactly("customInit", "init");
+			aotContext.close();
+			assertThat(bean.events).containsExactly("customInit", "init", "customDestroy", "destroy");
 		}));
 	}
 

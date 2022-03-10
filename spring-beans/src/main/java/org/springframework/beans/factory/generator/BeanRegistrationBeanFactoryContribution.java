@@ -55,6 +55,7 @@ import org.springframework.javapoet.support.MultiStatement;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -121,6 +122,14 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 	 * @param runtimeHints the runtime hints to use
 	 */
 	void registerRuntimeHints(RuntimeHints runtimeHints) {
+		String[] initMethodNames = this.beanDefinition.getInitMethodNames();
+		if (!ObjectUtils.isEmpty(initMethodNames)) {
+			registerInitDestroyMethodsRuntimeHints(initMethodNames, runtimeHints);
+		}
+		String[] destroyMethodNames = this.beanDefinition.getDestroyMethodNames();
+		if (!ObjectUtils.isEmpty(destroyMethodNames)) {
+			registerInitDestroyMethodsRuntimeHints(destroyMethodNames, runtimeHints);
+		}
 		registerPropertyValuesRuntimeHints(runtimeHints);
 	}
 
@@ -189,6 +198,15 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 	 */
 	protected CodeContribution generateBeanInstance(RuntimeHints runtimeHints) {
 		return this.beanInstantiationGenerator.generateBeanInstantiation(runtimeHints);
+	}
+
+	private void registerInitDestroyMethodsRuntimeHints(String[] methodNames, RuntimeHints runtimeHints) {
+		for (String methodName : methodNames) {
+			Method method = ReflectionUtils.findMethod(getUserBeanClass(), methodName);
+			if (method != null) {
+				runtimeHints.reflection().registerMethod(method, hint -> hint.withMode(ExecutableMode.INVOKE));
+			}
+		}
 	}
 
 	private void registerPropertyValuesRuntimeHints(RuntimeHints runtimeHints) {
@@ -357,6 +375,14 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 		private void handleBeanDefinitionMetadata(Builder code) {
 			String bdVariable = determineVariableName("bd");
 			MultiStatement statements = new MultiStatement();
+			String[] initMethodNames = this.beanDefinition.getInitMethodNames();
+			if (!ObjectUtils.isEmpty(initMethodNames)) {
+				handleInitMethodNames(statements, bdVariable, initMethodNames);
+			}
+			String[] destroyMethodNames = this.beanDefinition.getDestroyMethodNames();
+			if (!ObjectUtils.isEmpty(destroyMethodNames)) {
+				handleDestroyMethodNames(statements, bdVariable, destroyMethodNames);
+			}
 			if (this.beanDefinition.isPrimary()) {
 				statements.addStatement("$L.setPrimary(true)", bdVariable);
 			}
@@ -397,6 +423,26 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 			}
 			code.add(statements.toCodeBlock(".customize((" + bdVariable + ") ->"));
 			code.add(")");
+		}
+
+		private void handleInitMethodNames(MultiStatement statements, String bdVariable, String[] initMethodNames) {
+			if (initMethodNames.length == 1) {
+				statements.addStatement("$L.setInitMethodName($S)", bdVariable, initMethodNames[0]);
+			}
+			else {
+				statements.addStatement("$L.setInitMethodNames($L)", bdVariable,
+						this.parameterGenerator.generateParameterValue(initMethodNames));
+			}
+		}
+
+		private void handleDestroyMethodNames(MultiStatement statements, String bdVariable, String[] destroyMethodNames) {
+			if (destroyMethodNames.length == 1) {
+				statements.addStatement("$L.setDestroyMethodName($S)", bdVariable, destroyMethodNames[0]);
+			}
+			else {
+				statements.addStatement("$L.setDestroyMethodNames($L)", bdVariable,
+						this.parameterGenerator.generateParameterValue(destroyMethodNames));
+			}
 		}
 
 		private void handleArgumentValues(MultiStatement statements, String bdVariable,
