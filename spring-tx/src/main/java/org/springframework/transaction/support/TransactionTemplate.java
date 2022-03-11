@@ -111,7 +111,6 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	 * Set the transaction management strategy to be used.
 	 */
 	public void setTransactionManager(@Nullable PlatformTransactionManager transactionManager) {
-		// TODO: Maybe wrap this in the Observation version here?
 		this.transactionManager = transactionManager;
 	}
 

@@ -27,4 +27,5 @@ dependencies {
 	testImplementation("org.apache.groovy:groovy")
 	testImplementation("jakarta.persistence:jakarta.persistence-api")
 	testImplementation("io.projectreactor:reactor-test")
+	testImplementation("io.micrometer:micrometer-tracing-integration-test")
 }
