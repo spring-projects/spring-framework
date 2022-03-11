@@ -16,7 +16,6 @@
 
 package org.springframework.transaction.support;
 
-import io.micrometer.core.instrument.observation.NoopObservation;
 import io.micrometer.core.instrument.observation.Observation;
 
 import org.springframework.lang.Nullable;
@@ -38,9 +37,9 @@ public class TransactionObservationContext extends Observation.Context {
 
 	private TransactionStatus transactionStatus;
 
-	private Observation observation = NoopObservation.INSTANCE;
+	private Observation observation = Observation.NOOP;
 
-	private Observation.Scope scope = NoopObservation.NoOpScope.INSTANCE;
+	private Observation.Scope scope = Observation.Scope.NOOP;
 
 	public TransactionObservationContext(@Nullable TransactionDefinition transactionDefinition, TransactionManager transactionManager) {
 		this.transactionDefinition = transactionDefinition != null ? transactionDefinition : TransactionDefinition.withDefaults();

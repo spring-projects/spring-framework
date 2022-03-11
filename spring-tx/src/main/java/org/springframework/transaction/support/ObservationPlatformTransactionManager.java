@@ -16,7 +16,6 @@
 
 package org.springframework.transaction.support;
 
-import io.micrometer.core.instrument.observation.NoopObservation;
 import io.micrometer.core.instrument.observation.Observation;
 import io.micrometer.core.instrument.observation.ObservationRegistry;
 import org.apache.commons.logging.Log;
@@ -58,7 +57,7 @@ public final class ObservationPlatformTransactionManager implements PlatformTran
 			return this.delegate.getTransaction(definition);
 		}
 		Observation obs = this.observationRegistry.getCurrentObservation();
-		obs = obs != null ? obs : NoopObservation.INSTANCE;
+		obs = obs != null ? obs : Observation.NOOP;
 		try (Observation.Scope scope = obs.openScope()) {
 			obs = TransactionObservation.TX_OBSERVATION.observation(this.observationRegistry, this.context)
 					.tagsProvider(this.transactionTagsProvider)
