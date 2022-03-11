@@ -224,9 +224,10 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware, Observat
 	protected void registerJobsAndTriggers() throws SchedulerException {
 		TransactionStatus transactionStatus = null;
 		TransactionDefinition definition = TransactionDefinition.withDefaults();
-		TransactionObservationContext context = new TransactionObservationContext(definition, this.transactionManager);
-		ObservationPlatformTransactionManager observationPlatformTransactionManager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.tagsProvider);
+		ObservationPlatformTransactionManager observationPlatformTransactionManager = null;
 		if (this.transactionManager != null) {
+			TransactionObservationContext context = new TransactionObservationContext(definition, this.transactionManager);
+			observationPlatformTransactionManager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.tagsProvider);
 			transactionStatus = observationPlatformTransactionManager.getTransaction(definition);
 		}
 

@@ -44,10 +44,6 @@ public final class ObservationPlatformTransactionManager implements PlatformTran
 
 	private final TransactionTagsProvider transactionTagsProvider;
 
-	private Observation observation;
-
-	private Observation.Scope scope;
-
 	public ObservationPlatformTransactionManager(PlatformTransactionManager delegate, ObservationRegistry observationRegistry, TransactionObservationContext context, TransactionTagsProvider transactionTagsProvider) {
 		this.delegate = delegate;
 		this.observationRegistry = observationRegistry;
@@ -57,31 +53,31 @@ public final class ObservationPlatformTransactionManager implements PlatformTran
 
 	@Override
 	public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
+		if (this.observationRegistry.isNoOp()) {
+			return this.delegate.getTransaction(definition);
+		}
 		Observation obs = this.observationRegistry.getCurrentObservation();
 		if (obs == null) {
 			obs = TransactionObservation.TX_OBSERVATION.observation(this.observationRegistry, this.context)
 					.tagsProvider(this.transactionTagsProvider)
 					.start();
+			this.context.setScope(obs.openScope());
 		}
-		this.observation = obs;
-		this.scope = this.observation.openScope();
+		this.context.setObservation(obs);
 		try {
 			TransactionStatus transaction = this.delegate.getTransaction(definition);
 			this.context.setTransactionStatus(transaction);
 			return transaction;
 		}
 		catch (Exception ex) {
-			this.observation.error(ex).stop();
+			this.context.getObservation().error(ex).stop();
 			throw ex;
 		}
 	}
 
 	@Override
 	public void commit(TransactionStatus status) throws TransactionException {
-		if (this.observation == null) {
-			if (log.isDebugEnabled()) {
-				log.debug("Commit called without calling getTransaction first - this shouldn't happen, sth is wrong");
-			}
+		if (this.observationRegistry.isNoOp()) {
 			this.delegate.commit(status);
 			return;
 		}
@@ -92,21 +88,18 @@ public final class ObservationPlatformTransactionManager implements PlatformTran
 			this.delegate.commit(status);
 		}
 		catch (Exception ex) {
-			this.observation.error(ex);
+			this.context.getObservation().error(ex);
 			throw ex;
 		}
 		finally {
-			this.scope.close();
-			this.observation.stop();
+			this.context.getScope().close();
+			this.context.getObservation().stop();
 		}
 	}
 
 	@Override
 	public void rollback(TransactionStatus status) throws TransactionException {
-		if (this.observation == null) {
-			if (log.isDebugEnabled()) {
-				log.debug("No observation found - this shouldn't happen, sth is wrong");
-			}
+		if (this.observationRegistry.isNoOp()) {
 			this.delegate.rollback(status);
 			return;
 		}
@@ -117,12 +110,12 @@ public final class ObservationPlatformTransactionManager implements PlatformTran
 			this.delegate.rollback(status);
 		}
 		catch (Exception ex) {
-			this.observation.error(ex);
+			this.context.getObservation().error(ex);
 			throw ex;
 		}
 		finally {
-			this.scope.close();
-			this.observation.stop();
+			this.context.getScope().close();
+			this.context.getObservation().stop();
 		}
 	}
 

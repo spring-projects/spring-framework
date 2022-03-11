@@ -138,7 +138,11 @@ public class TransactionalEventListenerTests {
 	@Test
 	public void afterCommit() {
 		load(AfterCompletionExplicitTestListener.class);
+		// Nie robic context propagation
+		// jezeli tu byl span
 		this.transactionTemplate.execute(status -> {
+			// jezeli jest ixNewTransaction
+			// TSM -> getTransaction (zalozmy, ze new) TX 2 ?
 			getContext().publishEvent("test");
 			getEventCollector().assertNoEventReceived();
 			return null;

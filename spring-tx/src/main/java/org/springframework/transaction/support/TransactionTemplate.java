@@ -146,7 +146,6 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
 		if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager) {
-			// TODO: Should we do context propagation here for the action?
 			return ((CallbackPreferringPlatformTransactionManager) this.transactionManager).execute(this, action);
 		}
 		else {
@@ -155,7 +154,6 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 			TransactionStatus status = observationPlatformTransactionManager.getTransaction(this);
 			T result;
 			try {
-				// TODO: Should we do context propagation here for the action?
 				result = action.doInTransaction(status);
 			}
 			catch (RuntimeException | Error ex) {

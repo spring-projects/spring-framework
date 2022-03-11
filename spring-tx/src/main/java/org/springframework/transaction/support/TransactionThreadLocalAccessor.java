@@ -21,8 +21,11 @@ import java.util.Set;
 
 import io.micrometer.contextpropagation.ContextContainer;
 import io.micrometer.contextpropagation.ThreadLocalAccessor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * A {@link ThreadLocalAccessor} to put and restore current transactions via {@link TransactionSynchronizationManager}.
@@ -32,7 +35,11 @@ import org.springframework.lang.Nullable;
  */
 public final class TransactionThreadLocalAccessor implements ThreadLocalAccessor {
 
+	private static final Log log = LogFactory.getLog(TransactionThreadLocalAccessor.class);
+
 	private static final String KEY = TransactionSynchronizationManagerHolder.class.getName();
+
+	private static final String PREVIOUS_TRANSACTION_KEY = TransactionSynchronizationManagerHolder.class.getName() + "_PREVIOUS_TRANSACTION_PRESENT";
 
 	@Override
 	public void captureValues(ContextContainer container) {
@@ -42,6 +49,14 @@ public final class TransactionThreadLocalAccessor implements ThreadLocalAccessor
 
 	@Override
 	public void restoreValues(ContextContainer container) {
+		String transactionName = TransactionSynchronizationManager.getCurrentTransactionName();
+		if (StringUtils.hasText(transactionName)) {
+			container.put(PREVIOUS_TRANSACTION_KEY, true);
+			if (log.isDebugEnabled()) {
+				log.debug("A transaction with name [" + transactionName + "] has already been set in this thread. We don't want to override it. Will not update the synchronization manager with entries from the container");
+			}
+			return;
+		}
 		if (container.containsKey(KEY)) {
 			TransactionSynchronizationManagerHolder holder = container.get(KEY);
 			holder.putInScope();
@@ -50,6 +65,12 @@ public final class TransactionThreadLocalAccessor implements ThreadLocalAccessor
 
 	@Override
 	public void resetValues(ContextContainer container) {
+		if (Boolean.parseBoolean(String.valueOf(container.get(PREVIOUS_TRANSACTION_KEY)))) {
+			if (log.isDebugEnabled()) {
+				log.debug("There was a transaction when context propagation happened. Will not reset the synchronization manager.");
+			}
+			return;
+		}
 		TransactionSynchronizationManager.clear();
 	}
 

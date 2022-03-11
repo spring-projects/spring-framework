@@ -42,6 +42,11 @@ enum TransactionObservation implements DocumentedObservation {
 		}
 
 		@Override
+		public TagKey[] getHighCardinalityTagKeys() {
+			return HighCardinalityTags.values();
+		}
+
+		@Override
 		public String getPrefix() {
 			return "spring.tx";
 		}
@@ -97,7 +102,11 @@ enum TransactionObservation implements DocumentedObservation {
 			public String getKey() {
 				return "spring.tx.timeout";
 			}
-		},
+		}
+
+	}
+
+	enum HighCardinalityTags implements TagKey {
 
 		/**
 		 * Transaction name.
@@ -107,8 +116,6 @@ enum TransactionObservation implements DocumentedObservation {
 			public String getKey() {
 				return "spring.tx.name";
 			}
-		},
-
+		}
 	}
-
 }

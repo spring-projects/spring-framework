@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.support;
 
+import io.micrometer.core.instrument.observation.NoopObservation;
 import io.micrometer.core.instrument.observation.Observation;
 
 import org.springframework.lang.Nullable;
@@ -33,31 +34,23 @@ public class TransactionObservationContext extends Observation.Context {
 
 	private final TransactionDefinition transactionDefinition;
 
-	@Nullable
 	private final Class<?> transactionManagerClass;
-
-	private TransactionStatus status;
 
 	private TransactionStatus transactionStatus;
 
+	private Observation observation = NoopObservation.INSTANCE;
+
+	private Observation.Scope scope = NoopObservation.NoOpScope.INSTANCE;
+
 	public TransactionObservationContext(@Nullable TransactionDefinition transactionDefinition, TransactionManager transactionManager) {
 		this.transactionDefinition = transactionDefinition != null ? transactionDefinition : TransactionDefinition.withDefaults();
-		this.transactionManagerClass = transactionManager != null ? transactionManager.getClass() : null;
-	}
-
-	public void setStatus(TransactionStatus status) {
-		this.status = status;
-	}
-
-	public TransactionStatus getStatus() {
-		return this.status;
+		this.transactionManagerClass = transactionManager.getClass();
 	}
 
 	public TransactionDefinition getTransactionDefinition() {
 		return this.transactionDefinition;
 	}
 
-	@Nullable
 	public Class<?> getTransactionManagerClass() {
 		return this.transactionManagerClass;
 	}
@@ -68,5 +61,21 @@ public class TransactionObservationContext extends Observation.Context {
 
 	public void setTransactionStatus(TransactionStatus transactionStatus) {
 		this.transactionStatus = transactionStatus;
+	}
+
+	public Observation getObservation() {
+		return this.observation;
+	}
+
+	public void setObservation(Observation observation) {
+		this.observation = observation;
+	}
+
+	public Observation.Scope getScope() {
+		return this.scope;
+	}
+
+	public void setScope(Observation.Scope scope) {
+		this.scope = scope;
 	}
 }
