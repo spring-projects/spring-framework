@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -320,7 +320,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			TcpConnection<P> connection = new ReactorNettyTcpConnection<>(inbound, outbound,  codec, completionSink);
 			scheduler.schedule(() -> this.connectionHandler.afterConnected(connection));
 
-			inbound.withConnection(conn -> conn.addHandler(new StompMessageDecoder<>(codec)));
+			inbound.withConnection(conn -> conn.addHandlerFirst(new StompMessageDecoder<>(codec)));
 
 			inbound.receiveObject()
 					.cast(Message.class)
