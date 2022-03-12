@@ -2725,6 +2725,10 @@ If you wish to ensure that a `BeforeTestClassEvent` is always published for ever
 class, you need to register a `TestExecutionListener` that loads the `ApplicationContext`
 in the `beforeTestClass` callback, and that `TestExecutionListener` must be registered
 _before_ the `EventPublishingTestExecutionListener`.
+
+Similarly, if `@DirtiesContext` is used to remove the `ApplicationContext` from the
+context cache after the last test method in a given test class, the `AfterTestClassEvent`
+will not be published for that test class.
 ====
 
 In order to listen to test execution events, a Spring bean may choose to implement the

@@ -63,7 +63,10 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  * register a {@code TestExecutionListener} that loads the {@code ApplicationContext}
  * in the {@link org.springframework.test.context.TestExecutionListener#beforeTestClass
  * beforeTestClass} callback, and that {@code TestExecutionListener} must be registered
- * before the {@code EventPublishingTestExecutionListener}.
+ * before the {@code EventPublishingTestExecutionListener}. Similarly, if
+ * {@code @DirtiesContext} is used to remove the {@code ApplicationContext} from
+ * the context cache after the last test method in a given test class, the
+ * {@code AfterTestClassEvent} will not be published for that test class.
  *
  * <h3>Exception Handling</h3>
  * <p>By default, if a test event listener throws an exception while consuming
