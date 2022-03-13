@@ -49,7 +49,7 @@ import org.springframework.util.Assert;
  * @author Gary Russell
  * @since 4.0
  */
-public class TestSocketUtils {
+public abstract class TestSocketUtils {
 
 	/**
 	 * The default minimum value for port ranges used when finding an available
