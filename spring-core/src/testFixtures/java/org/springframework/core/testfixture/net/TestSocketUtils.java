@@ -16,7 +16,6 @@
 
 package org.springframework.core.testfixture.net;
 
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.Random;
@@ -26,21 +25,20 @@ import javax.net.ServerSocketFactory;
 import org.springframework.util.Assert;
 
 /**
- * Removed from spring-core and introduced as an internal test utility in
- * spring-context in Spring Framework 6.0.
+ * Simple utility methods for finding available ports on {@code localhost} for
+ * use in integration testing scenarios.
  *
- * <p>Simple utility methods for working with network sockets &mdash; for example,
- * for finding available ports on {@code localhost}.
- *
- * <p>Within this class, a TCP port refers to a port for a {@link ServerSocket};
- * whereas, a UDP port refers to a port for a {@link DatagramSocket}.
+ * <p>{@code SocketUtils} was removed from the public API in {@code spring-core}
+ * in Spring Framework 6.0 and reintroduced as {@code TestSocketUtils}, which is
+ * made available to all tests in Spring Framework's test suite as a Gradle
+ * <em>test fixture</em>.
  *
  * <p>{@code SocketUtils} was introduced in Spring Framework 4.0, primarily to
  * assist in writing integration tests which start an external server on an
  * available random port. However, these utilities make no guarantee about the
  * subsequent availability of a given port and are therefore unreliable. Instead
- * of using {@code SocketUtils} to find an available local port for a server, it
- * is recommended that you rely on a server's ability to start on a random port
+ * of using {@code TestSocketUtils} to find an available local port for a server,
+ * it is recommended that you rely on a server's ability to start on a random port
  * that it selects or is assigned by the operating system. To interact with that
  * server, you should query the server for the port it is currently using.
  *
