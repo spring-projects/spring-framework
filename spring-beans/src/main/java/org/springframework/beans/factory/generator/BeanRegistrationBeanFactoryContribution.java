@@ -46,7 +46,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.generator.config.BeanDefinitionRegistrar;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.AttributeAccessor;
 import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.CodeBlock;
@@ -55,6 +55,7 @@ import org.springframework.javapoet.support.MultiStatement;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -72,7 +73,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 
 	private final String beanName;
 
-	private final BeanDefinition beanDefinition;
+	private final RootBeanDefinition beanDefinition;
 
 	private final BeanInstantiationGenerator beanInstantiationGenerator;
 
@@ -81,7 +82,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 
 	private int nesting = 0;
 
-	BeanRegistrationBeanFactoryContribution(String beanName, BeanDefinition beanDefinition,
+	BeanRegistrationBeanFactoryContribution(String beanName, RootBeanDefinition beanDefinition,
 			BeanInstantiationGenerator beanInstantiationGenerator,
 			@Nullable DefaultBeanRegistrationContributionProvider innerBeanRegistrationContributionProvider) {
 		this.beanName = beanName;
@@ -90,7 +91,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 		this.innerBeanRegistrationContributionProvider = innerBeanRegistrationContributionProvider;
 	}
 
-	public BeanRegistrationBeanFactoryContribution(String beanName, BeanDefinition beanDefinition,
+	public BeanRegistrationBeanFactoryContribution(String beanName, RootBeanDefinition beanDefinition,
 			BeanInstantiationGenerator beanInstantiationGenerator) {
 		this(beanName, beanDefinition, beanInstantiationGenerator, null);
 	}
@@ -99,7 +100,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 		return this.beanName;
 	}
 
-	BeanDefinition getBeanDefinition() {
+	RootBeanDefinition getBeanDefinition() {
 		return this.beanDefinition;
 	}
 
@@ -121,6 +122,14 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 	 * @param runtimeHints the runtime hints to use
 	 */
 	void registerRuntimeHints(RuntimeHints runtimeHints) {
+		String[] initMethodNames = this.beanDefinition.getInitMethodNames();
+		if (!ObjectUtils.isEmpty(initMethodNames)) {
+			registerInitDestroyMethodsRuntimeHints(initMethodNames, runtimeHints);
+		}
+		String[] destroyMethodNames = this.beanDefinition.getDestroyMethodNames();
+		if (!ObjectUtils.isEmpty(destroyMethodNames)) {
+			registerInitDestroyMethodsRuntimeHints(destroyMethodNames, runtimeHints);
+		}
 		registerPropertyValuesRuntimeHints(runtimeHints);
 	}
 
@@ -189,6 +198,15 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 	 */
 	protected CodeContribution generateBeanInstance(RuntimeHints runtimeHints) {
 		return this.beanInstantiationGenerator.generateBeanInstantiation(runtimeHints);
+	}
+
+	private void registerInitDestroyMethodsRuntimeHints(String[] methodNames, RuntimeHints runtimeHints) {
+		for (String methodName : methodNames) {
+			Method method = ReflectionUtils.findMethod(getUserBeanClass(), methodName);
+			if (method != null) {
+				runtimeHints.reflection().registerMethod(method, hint -> hint.withMode(ExecutableMode.INVOKE));
+			}
+		}
 	}
 
 	private void registerPropertyValuesRuntimeHints(RuntimeHints runtimeHints) {
@@ -295,7 +313,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 
 		private final BeanParameterGenerator parameterGenerator;
 
-		private final BeanDefinition beanDefinition;
+		private final RootBeanDefinition beanDefinition;
 
 		Generator(BeanParameterGenerator parameterGenerator) {
 			this.parameterGenerator = parameterGenerator;
@@ -357,6 +375,14 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 		private void handleBeanDefinitionMetadata(Builder code) {
 			String bdVariable = determineVariableName("bd");
 			MultiStatement statements = new MultiStatement();
+			String[] initMethodNames = this.beanDefinition.getInitMethodNames();
+			if (!ObjectUtils.isEmpty(initMethodNames)) {
+				handleInitMethodNames(statements, bdVariable, initMethodNames);
+			}
+			String[] destroyMethodNames = this.beanDefinition.getDestroyMethodNames();
+			if (!ObjectUtils.isEmpty(destroyMethodNames)) {
+				handleDestroyMethodNames(statements, bdVariable, destroyMethodNames);
+			}
 			if (this.beanDefinition.isPrimary()) {
 				statements.addStatement("$L.setPrimary(true)", bdVariable);
 			}
@@ -375,8 +401,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 			if (!this.beanDefinition.isAutowireCandidate()) {
 				statements.addStatement("$L.setAutowireCandidate(false)", bdVariable);
 			}
-			if (this.beanDefinition instanceof AbstractBeanDefinition
-					&& ((AbstractBeanDefinition) this.beanDefinition).isSynthetic()) {
+			if (this.beanDefinition.isSynthetic()) {
 				statements.addStatement("$L.setSynthetic(true)", bdVariable);
 			}
 			if (this.beanDefinition.getRole() != BeanDefinition.ROLE_APPLICATION) {
@@ -398,6 +423,26 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 			}
 			code.add(statements.toCodeBlock(".customize((" + bdVariable + ") ->"));
 			code.add(")");
+		}
+
+		private void handleInitMethodNames(MultiStatement statements, String bdVariable, String[] initMethodNames) {
+			if (initMethodNames.length == 1) {
+				statements.addStatement("$L.setInitMethodName($S)", bdVariable, initMethodNames[0]);
+			}
+			else {
+				statements.addStatement("$L.setInitMethodNames($L)", bdVariable,
+						this.parameterGenerator.generateParameterValue(initMethodNames));
+			}
+		}
+
+		private void handleDestroyMethodNames(MultiStatement statements, String bdVariable, String[] destroyMethodNames) {
+			if (destroyMethodNames.length == 1) {
+				statements.addStatement("$L.setDestroyMethodName($S)", bdVariable, destroyMethodNames[0]);
+			}
+			else {
+				statements.addStatement("$L.setDestroyMethodNames($L)", bdVariable,
+						this.parameterGenerator.generateParameterValue(destroyMethodNames));
+			}
 		}
 
 		private void handleArgumentValues(MultiStatement statements, String bdVariable,

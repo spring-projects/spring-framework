@@ -16,8 +16,8 @@
 
 package org.springframework.beans.factory.generator;
 
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.generator.config.BeanDefinitionRegistrar;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.javapoet.CodeBlock;
 
 /**
@@ -28,7 +28,7 @@ import org.springframework.javapoet.CodeBlock;
  */
 class InnerBeanRegistrationBeanFactoryContribution extends BeanRegistrationBeanFactoryContribution {
 
-	InnerBeanRegistrationBeanFactoryContribution(String beanName, BeanDefinition beanDefinition,
+	InnerBeanRegistrationBeanFactoryContribution(String beanName, RootBeanDefinition beanDefinition,
 			BeanInstantiationGenerator beanInstantiationGenerator,
 			DefaultBeanRegistrationContributionProvider innerBeanRegistrationContributionProvider) {
 		super(beanName, beanDefinition, beanInstantiationGenerator, innerBeanRegistrationContributionProvider);

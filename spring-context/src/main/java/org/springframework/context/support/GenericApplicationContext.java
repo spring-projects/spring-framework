@@ -383,6 +383,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @throws BeansException if the bean factory could not be initialized
 	 * @throws IllegalStateException if already initialized and multiple refresh
 	 * attempts are not supported
+	 * @since 6.0
 	 */
 	public void refreshForAotProcessing() {
 		if (logger.isDebugEnabled()) {

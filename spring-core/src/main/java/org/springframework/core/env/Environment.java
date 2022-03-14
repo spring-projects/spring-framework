@@ -34,9 +34,9 @@ package org.springframework.core.env;
  * <p><em>Properties</em> play an important role in almost all applications, and may
  * originate from a variety of sources: properties files, JVM system properties, system
  * environment variables, JNDI, servlet context parameters, ad-hoc Properties objects,
- * Maps, and so on. The role of the environment object with relation to properties is to
- * provide the user with a convenient service interface for configuring property sources
- * and resolving properties from them.
+ * Maps, and so on. The role of the {@code Environment} object with relation to properties
+ * is to provide the user with a convenient service interface for configuring property
+ * sources and resolving properties from them.
  *
  * <p>Beans managed within an {@code ApplicationContext} may register to be {@link
  * org.springframework.context.EnvironmentAware EnvironmentAware} or {@code @Inject} the
@@ -50,7 +50,7 @@ package org.springframework.core.env;
  * as of Spring 3.1 is registered by default when using
  * {@code <context:property-placeholder/>}.
  *
- * <p>Configuration of the environment object must be done through the
+ * <p>Configuration of the {@code Environment} object must be done through the
  * {@code ConfigurableEnvironment} interface, returned from all
  * {@code AbstractApplicationContext} subclass {@code getEnvironment()} methods. See
  * {@link ConfigurableEnvironment} Javadoc for usage examples demonstrating manipulation
