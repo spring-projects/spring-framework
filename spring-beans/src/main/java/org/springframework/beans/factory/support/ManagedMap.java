@@ -67,6 +67,7 @@ public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, 
 	 * @return a {@code Map} containing the specified mappings
 	 * @since 5.3.16
 	 */
+	@SafeVarargs
 	@SuppressWarnings("unchecked")
 	public static <K,V> ManagedMap<K,V> ofEntries(Entry<? extends K, ? extends V>... entries) {
 		ManagedMap<K,V > map = new ManagedMap<>();
