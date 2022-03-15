@@ -137,6 +137,7 @@ public @interface Cacheable {
 	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
 	 * can also be accessed by name if that information is available.</li>
 	 * </ul>
+	 * If condition is evaluated to {@code true}, result is cached.
 	 */
 	String condition() default "";
 
