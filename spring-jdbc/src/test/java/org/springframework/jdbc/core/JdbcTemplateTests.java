@@ -1131,14 +1131,18 @@ public class JdbcTemplateTests {
 		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
 		given(databaseMetaData.supportsBatchUpdates()).willReturn(false);
 		given(this.connection.getMetaData()).willReturn(databaseMetaData);
-		ResultSet generatedKeysResultSet = mock(ResultSet.class);
 		ResultSetMetaData rsmd = mock(ResultSetMetaData.class);
 		given(rsmd.getColumnCount()).willReturn(1);
 		given(rsmd.getColumnLabel(1)).willReturn("someId");
-		given(generatedKeysResultSet.getMetaData()).willReturn(rsmd);
-		given(generatedKeysResultSet.getObject(1)).willReturn(123, 456);
-		given(generatedKeysResultSet.next()).willReturn(true, true, false);
-		given(this.preparedStatement.getGeneratedKeys()).willReturn(generatedKeysResultSet);
+		ResultSet generatedKeysResultSet1 = mock(ResultSet.class);
+		given(generatedKeysResultSet1.getMetaData()).willReturn(rsmd);
+		given(generatedKeysResultSet1.getObject(1)).willReturn(123);
+		given(generatedKeysResultSet1.next()).willReturn(true, false);
+		ResultSet generatedKeysResultSet2 = mock(ResultSet.class);
+		given(generatedKeysResultSet2.getMetaData()).willReturn(rsmd);
+		given(generatedKeysResultSet2.getObject(1)).willReturn(456);
+		given(generatedKeysResultSet2.next()).willReturn(true, false);
+		given(this.preparedStatement.getGeneratedKeys()).willReturn(generatedKeysResultSet1, generatedKeysResultSet2);
 
 		int[] values = new int[]{100, 200};
 		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {

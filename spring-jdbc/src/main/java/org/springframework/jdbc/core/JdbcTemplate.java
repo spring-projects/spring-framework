@@ -990,7 +990,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 		return updateCount(execute(psc, ps -> {
 			int rows = ps.executeUpdate();
-			storeGeneratedKeys(generatedKeyHolder).doInPreparedStatement(ps);
+			generatedKeyHolder.getKeyList().clear();
+			storeGeneratedKeys(generatedKeyHolder, ps);
 			if (logger.isTraceEnabled()) {
 				logger.trace("SQL update affected " + rows + " rows and returned " + generatedKeyHolder.getKeyList().size() + " keys");
 			}
@@ -1015,7 +1016,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public int[] batchUpdate(final PreparedStatementCreator psc, final BatchPreparedStatementSetter pss, final KeyHolder generatedKeyHolder) throws DataAccessException {
-		int[] result = execute(psc, getPreparedStatementCallback(pss, storeGeneratedKeys(generatedKeyHolder)));
+		int[] result = execute(psc, getPreparedStatementCallback(pss, generatedKeyHolder));
 
 		Assert.state(result != null, "No result array");
 		return result;
@@ -1027,7 +1028,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			logger.debug("Executing SQL batch update [" + sql + "]");
 		}
 
-		int[] result = execute(sql, getPreparedStatementCallback(pss, ps -> null));
+		int[] result = execute(sql, getPreparedStatementCallback(pss, null));
 
 		Assert.state(result != null, "No result array");
 		return result;
@@ -1526,32 +1527,31 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return result;
 	}
 
-	private PreparedStatementCallback<Void> storeGeneratedKeys(KeyHolder generatedKeyHolder) {
-		return ps -> {
-			List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
-			generatedKeys.clear();
-			ResultSet keys = ps.getGeneratedKeys();
-			if (keys != null) {
-				try {
-					RowMapperResultSetExtractor<Map<String, Object>> rse =
-							new RowMapperResultSetExtractor<>(getColumnMapRowMapper(), 1);
-					generatedKeys.addAll(result(rse.extractData(keys)));
-				}
-				finally {
-					JdbcUtils.closeResultSet(keys);
-				}
+	private void storeGeneratedKeys(KeyHolder generatedKeyHolder, PreparedStatement ps) throws SQLException {
+		List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
+		ResultSet keys = ps.getGeneratedKeys();
+		if (keys != null) {
+			try {
+				RowMapperResultSetExtractor<Map<String, Object>> rse =
+						new RowMapperResultSetExtractor<>(getColumnMapRowMapper(), 1);
+				generatedKeys.addAll(result(rse.extractData(keys)));
 			}
-			return null;
-		};
+			finally {
+				JdbcUtils.closeResultSet(keys);
+			}
+		}
 	}
 
-	private PreparedStatementCallback<int[]> getPreparedStatementCallback(BatchPreparedStatementSetter pss, PreparedStatementCallback<Void> afterUpdateCallback) {
+	private PreparedStatementCallback<int[]> getPreparedStatementCallback(BatchPreparedStatementSetter pss, @Nullable KeyHolder generatedKeyHolder) {
 		return ps -> {
 			try {
 				int batchSize = pss.getBatchSize();
 				InterruptibleBatchPreparedStatementSetter ipss =
 						(pss instanceof InterruptibleBatchPreparedStatementSetter ?
 								(InterruptibleBatchPreparedStatementSetter) pss : null);
+				if (generatedKeyHolder != null) {
+					generatedKeyHolder.getKeyList().clear();
+				}
 				if (JdbcUtils.supportsBatchUpdates(ps.getConnection())) {
 					for (int i = 0; i < batchSize; i++) {
 						pss.setValues(ps, i);
@@ -1561,7 +1561,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						ps.addBatch();
 					}
 					int[] results = ps.executeBatch();
-					afterUpdateCallback.doInPreparedStatement(ps);
+					if (generatedKeyHolder != null) {
+						storeGeneratedKeys(generatedKeyHolder, ps);
+					}
 					return results;
 				}
 				else {
@@ -1572,9 +1574,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 							break;
 						}
 						rowsAffected.add(ps.executeUpdate());
+						if (generatedKeyHolder != null) {
+							storeGeneratedKeys(generatedKeyHolder, ps);
+						}
 					}
 					int[] rowsAffectedArray = new int[rowsAffected.size()];
-					afterUpdateCallback.doInPreparedStatement(ps);
 					for (int i = 0; i < rowsAffectedArray.length; i++) {
 						rowsAffectedArray[i] = rowsAffected.get(i);
 					}
