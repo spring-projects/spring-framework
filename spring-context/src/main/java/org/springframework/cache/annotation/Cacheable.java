@@ -123,7 +123,8 @@ public @interface Cacheable {
 
 	/**
 	 * Spring Expression Language (SpEL) expression used for making the method
-	 * caching conditional.
+	 * caching conditional. If condition is evaluated to {@code true}, result
+	 * is cached.
 	 * <p>Default is {@code ""}, meaning the method result is always cached.
 	 * <p>The SpEL expression evaluates against a dedicated context that provides the
 	 * following meta-data:
@@ -137,7 +138,6 @@ public @interface Cacheable {
 	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
 	 * can also be accessed by name if that information is available.</li>
 	 * </ul>
-	 * If condition is evaluated to {@code true}, result is cached.
 	 */
 	String condition() default "";
 
