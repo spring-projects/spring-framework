@@ -991,7 +991,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return updateCount(execute(psc, ps -> {
 			int rows = ps.executeUpdate();
 			generatedKeyHolder.getKeyList().clear();
-			storeGeneratedKeys(generatedKeyHolder, ps);
+			storeGeneratedKeys(generatedKeyHolder, ps, 1);
 			if (logger.isTraceEnabled()) {
 				logger.trace("SQL update affected " + rows + " rows and returned " + generatedKeyHolder.getKeyList().size() + " keys");
 			}
@@ -1527,13 +1527,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return result;
 	}
 
-	private void storeGeneratedKeys(KeyHolder generatedKeyHolder, PreparedStatement ps) throws SQLException {
+	private void storeGeneratedKeys(KeyHolder generatedKeyHolder, PreparedStatement ps, int rowsExpected) throws SQLException {
 		List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
 		ResultSet keys = ps.getGeneratedKeys();
 		if (keys != null) {
 			try {
 				RowMapperResultSetExtractor<Map<String, Object>> rse =
-						new RowMapperResultSetExtractor<>(getColumnMapRowMapper(), 1);
+						new RowMapperResultSetExtractor<>(getColumnMapRowMapper(), rowsExpected);
 				generatedKeys.addAll(result(rse.extractData(keys)));
 			}
 			finally {
@@ -1562,7 +1562,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					}
 					int[] results = ps.executeBatch();
 					if (generatedKeyHolder != null) {
-						storeGeneratedKeys(generatedKeyHolder, ps);
+						storeGeneratedKeys(generatedKeyHolder, ps, batchSize);
 					}
 					return results;
 				}
@@ -1575,7 +1575,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						}
 						rowsAffected.add(ps.executeUpdate());
 						if (generatedKeyHolder != null) {
-							storeGeneratedKeys(generatedKeyHolder, ps);
+							storeGeneratedKeys(generatedKeyHolder, ps, 1);
 						}
 					}
 					int[] rowsAffectedArray = new int[rowsAffected.size()];
