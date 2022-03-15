@@ -401,7 +401,8 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		PreparedStatementCreatorFactory pscf = getPreparedStatementCreatorFactory(parsedSql, paramSource);
 		if (keyColumnNames != null) {
 			pscf.setGeneratedKeysColumnNames(keyColumnNames);
-		} else {
+		}
+		else {
 			pscf.setReturnGeneratedKeys(true);
 		}
 		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);

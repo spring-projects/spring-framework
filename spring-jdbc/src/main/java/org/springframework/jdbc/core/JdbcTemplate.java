@@ -1563,7 +1563,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					int[] results = ps.executeBatch();
 					afterUpdateCallback.doInPreparedStatement(ps);
 					return results;
-				} else {
+				}
+				else {
 					List<Integer> rowsAffected = new ArrayList<>();
 					for (int i = 0; i < batchSize; i++) {
 						pss.setValues(ps, i);
@@ -1579,7 +1580,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					}
 					return rowsAffectedArray;
 				}
-			} finally {
+			}
+			finally {
 				if (pss instanceof ParameterDisposer) {
 					((ParameterDisposer) pss).cleanupParameters();
 				}
