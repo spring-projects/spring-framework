@@ -508,7 +508,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 			}
 			if (this.externallyManagedInitMethods != null) {
 				for (String candidate : this.externallyManagedInitMethods) {
-					int indexOfDot = candidate.lastIndexOf(".");
+					int indexOfDot = candidate.lastIndexOf('.');
 					if (indexOfDot >= 0) {
 						String methodName = candidate.substring(indexOfDot + 1);
 						if (methodName.equals(initMethod)) {
@@ -585,7 +585,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 			}
 			if (this.externallyManagedDestroyMethods != null) {
 				for (String candidate : this.externallyManagedDestroyMethods) {
-					int indexOfDot = candidate.lastIndexOf(".");
+					int indexOfDot = candidate.lastIndexOf('.');
 					if (indexOfDot >= 0) {
 						String methodName = candidate.substring(indexOfDot + 1);
 						if (methodName.equals(destroyMethod)) {
