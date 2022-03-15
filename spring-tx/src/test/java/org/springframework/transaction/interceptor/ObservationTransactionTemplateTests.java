@@ -16,18 +16,12 @@
 
 package org.springframework.transaction.interceptor;
 
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tag;
-import io.micrometer.core.instrument.Tags;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import io.micrometer.core.tck.MeterRegistryAssert;
-import io.micrometer.tracing.test.SampleTestRunner;
-import io.micrometer.tracing.test.reporter.BuildingBlocks;
-import io.micrometer.tracing.test.simple.SpansAssert;
+import io.micrometer.core.instrument.observation.ObservationRegistry;
 
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.transaction.testfixture.CallCountingTransactionManager;
+import org.springframework.transaction.testfixture.ObservationTransactionManagerSampleTestRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
@@ -36,44 +30,19 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Marcin Grzejszczak
  * @since 6.0.0
  */
-class ObservationTransactionTemplateTests extends SampleTestRunner {
+class ObservationTransactionTemplateTests extends ObservationTransactionManagerSampleTestRunner<TransactionTemplate> {
 
-	ObservationTransactionTemplateTests() {
-		super(SampleRunnerConfig.builder().build(), new SimpleMeterRegistry().withTimerObservationHandler());
+	@Override
+	protected TransactionTemplate given(ObservationRegistry observationRegistry) {
+		TransactionTemplate transactionTemplate = new TransactionTemplate();
+		transactionTemplate.setTransactionManager(new CallCountingTransactionManager());
+		transactionTemplate.setObservationRegistry(observationRegistry);
+		return transactionTemplate;
 	}
 
 	@Override
-	public SampleTestRunnerConsumer yourCode() throws Exception {
-		return (bb, meterRegistry) -> {
-			TransactionTemplate transactionTemplate = new TransactionTemplate();
-			transactionTemplate.setTransactionManager(new CallCountingTransactionManager());
-			transactionTemplate.setObservationRegistry(meterRegistry);
-
-			then(transactionTemplate.execute((TransactionCallback<Object>) status -> "hello")).isEqualTo("hello");
-
-			Tag isolationLevelTag = Tag.of("spring.tx.isolation-level", "-1");
-			Tag propagationLevelTag = Tag.of("spring.tx.propagation-level", "REQUIRED");
-			Tag readOnlyTag = Tag.of("spring.tx.read-only", "false");
-			Tag transactionManagerTag = Tag.of("spring.tx.transaction-manager", "org.springframework.transaction.testfixture.CallCountingTransactionManager");
-			thenMeterRegistryHasATxMetric(meterRegistry, isolationLevelTag, propagationLevelTag, readOnlyTag, transactionManagerTag);
-			thenThereIsATxSpan(bb, isolationLevelTag, propagationLevelTag, readOnlyTag, transactionManagerTag);
-		};
+	protected void when(TransactionTemplate sut) {
+		then(sut.execute((TransactionCallback<Object>) status -> "hello")).isEqualTo("hello");
 	}
 
-	private void thenMeterRegistryHasATxMetric(MeterRegistry meterRegistry, Tag isolationLevelTag, Tag propagationLevelTag, Tag readOnlyTag, Tag transactionManagerTag) {
-		MeterRegistryAssert.then(meterRegistry)
-				.hasTimerWithNameAndTags("spring.tx",
-						Tags.of(isolationLevelTag, propagationLevelTag, readOnlyTag, transactionManagerTag));
-	}
-
-	private void thenThereIsATxSpan(BuildingBlocks bb, Tag isolationLevelTag, Tag propagationLevelTag, Tag readOnlyTag, Tag transactionManagerTag) {
-		SpansAssert.then(bb.getFinishedSpans())
-					.thenASpanWithNameEqualTo("tx")
-					.hasTag(isolationLevelTag.getKey(), isolationLevelTag.getValue())
-					.hasTag(propagationLevelTag.getKey(), propagationLevelTag.getValue())
-					.hasTag(readOnlyTag.getKey(), readOnlyTag.getValue())
-					.hasTag(transactionManagerTag.getKey(), transactionManagerTag.getValue())
-				.backToSpans()
-				.hasSize(1);
-	}
 }
