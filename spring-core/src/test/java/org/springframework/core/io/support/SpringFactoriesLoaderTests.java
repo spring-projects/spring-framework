@@ -108,13 +108,14 @@ class SpringFactoriesLoaderTests {
 		Log logger = mock(Log.class);
 		FailureHandler failureHandler = FailureHandler.logging(logger);
 		List<String> factories = SpringFactoriesLoader.loadFactories(String.class, null, failureHandler);
-		assertThat(factories.isEmpty());
+		assertThat(factories).isEmpty();
 	}
 
 	@Test
 	void loadFactoryWithNonDefaultConstructor() {
 		ArgumentResolver resolver = ArgumentResolver.of(String.class, "injected");
-		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(DummyFactory.class, LimitedClassLoader.constructorArgumentFactories, resolver);
+		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(DummyFactory.class,
+				LimitedClassLoader.constructorArgumentFactories, resolver);
 		assertThat(factories).hasSize(3);
 		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
 		assertThat(factories.get(1)).isInstanceOf(MyDummyFactory2.class);
@@ -126,7 +127,8 @@ class SpringFactoriesLoaderTests {
 	void loadFactoryWithMultipleConstructors() {
 		ArgumentResolver resolver = ArgumentResolver.of(String.class, "injected");
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> SpringFactoriesLoader.loadFactories(DummyFactory.class, LimitedClassLoader.multipleArgumentFactories, resolver))
+				.isThrownBy(() -> SpringFactoriesLoader.loadFactories(DummyFactory.class,
+						LimitedClassLoader.multipleArgumentFactories, resolver))
 				.withMessageContaining("Unable to instantiate factory class "
 						+ "[org.springframework.core.io.support.MultipleConstructorArgsDummyFactory] for factory type [org.springframework.core.io.support.DummyFactory]")
 				.havingRootCause().withMessageContaining("Class [org.springframework.core.io.support.MultipleConstructorArgsDummyFactory] has no suitable constructor");
@@ -136,7 +138,8 @@ class SpringFactoriesLoaderTests {
 	void loadFactoryWithMissingArgumentUsingLoggingFailureHandler() {
 		Log logger = mock(Log.class);
 		FailureHandler failureHandler = FailureHandler.logging(logger);
-		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(DummyFactory.class, LimitedClassLoader.multipleArgumentFactories, failureHandler);
+		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(
+				DummyFactory.class, LimitedClassLoader.multipleArgumentFactories, failureHandler);
 		assertThat(factories).hasSize(2);
 		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
 		assertThat(factories.get(1)).isInstanceOf(MyDummyFactory2.class);
@@ -307,7 +310,7 @@ class SpringFactoriesLoaderTests {
 		}
 
 		@Test
-		void multiplePackagePrivateConstructorsThrowsException() throws Exception {
+		void multiplePackagePrivateConstructorsThrowsException() {
 			assertThatIllegalStateException().isThrownBy(
 					() -> FactoryInstantiator.forClass(MultiplePackagePrivateConstructors.class))
 				.withMessageContaining("has no suitable constructor");
