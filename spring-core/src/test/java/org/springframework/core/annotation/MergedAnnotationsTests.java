@@ -711,6 +711,22 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
+	void streamTypeHierarchyAndEnclosingClassesFromNonAnnotatedInnerClassWithAnnotatedEnclosingClass() {
+		Stream<Class<?>> classes = MergedAnnotations.from(AnnotatedClass.NonAnnotatedInnerClass.class,
+				SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES).stream().map(MergedAnnotation::getType);
+		assertThat(classes).containsExactly(Component.class, Indexed.class);
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	void streamTypeHierarchyAndEnclosingClassesFromNonAnnotatedStaticNestedClassWithAnnotatedEnclosingClass() {
+		Stream<Class<?>> classes = MergedAnnotations.from(AnnotatedClass.NonAnnotatedStaticNestedClass.class,
+				SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES).stream().map(MergedAnnotation::getType);
+		assertThat(classes).containsExactly(Component.class, Indexed.class);
+	}
+
+	@Test
 	void getFromMethodWithMethodAnnotationOnLeaf() throws Exception {
 		Method method = Leaf.class.getMethod("annotatedOnLeaf");
 		assertThat(method.getAnnotation(Order.class)).isNotNull();
