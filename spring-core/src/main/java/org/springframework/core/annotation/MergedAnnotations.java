@@ -492,7 +492,10 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		 * whether the source type is an <em>inner class</em>, a {@code static}
 		 * nested class, or a nested interface. Thus, it may find more annotations
 		 * than you would expect.
+		 * @deprecated as of Spring Framework 6.0 M3, for potential removal or
+		 * replacement before 6.0 GA
 		 */
+		@Deprecated
 		TYPE_HIERARCHY_AND_ENCLOSING_CLASSES
 
 	}
