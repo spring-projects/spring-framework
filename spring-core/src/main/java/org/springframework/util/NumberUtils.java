@@ -106,9 +106,9 @@ public abstract class NumberUtils {
 			return (T) Long.valueOf(value);
 		}
 		else if (BigInteger.class == targetClass) {
-			if (number instanceof BigDecimal) {
+			if (number instanceof BigDecimal bigDecimal) {
 				// do not lose precision - use BigDecimal's own conversion
-				return (T) ((BigDecimal) number).toBigInteger();
+				return (T) bigDecimal.toBigInteger();
 			}
 			else {
 				// original value is not a Big* number - use standard long conversion
@@ -143,11 +143,11 @@ public abstract class NumberUtils {
 	 */
 	private static long checkedLongValue(Number number, Class<? extends Number> targetClass) {
 		BigInteger bigInt = null;
-		if (number instanceof BigInteger) {
-			bigInt = (BigInteger) number;
+		if (number instanceof BigInteger bigInteger) {
+			bigInt = bigInteger;
 		}
-		else if (number instanceof BigDecimal) {
-			bigInt = ((BigDecimal) number).toBigInteger();
+		else if (number instanceof BigDecimal bigDecimal) {
+			bigInt = bigDecimal.toBigInteger();
 		}
 		// Effectively analogous to JDK 8's BigInteger.longValueExact()
 		if (bigInt != null && (bigInt.compareTo(LONG_MIN) < 0 || bigInt.compareTo(LONG_MAX) > 0)) {

@@ -59,8 +59,8 @@ public abstract class ResourcePatternUtils {
 	 * @see PathMatchingResourcePatternResolver
 	 */
 	public static ResourcePatternResolver getResourcePatternResolver(@Nullable ResourceLoader resourceLoader) {
-		if (resourceLoader instanceof ResourcePatternResolver) {
-			return (ResourcePatternResolver) resourceLoader;
+		if (resourceLoader instanceof ResourcePatternResolver resolver) {
+			return resolver;
 		}
 		else if (resourceLoader != null) {
 			return new PathMatchingResourcePatternResolver(resourceLoader);

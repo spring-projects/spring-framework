@@ -154,9 +154,9 @@ public final class GenericTypeResolver {
 	 */
 	public static Type resolveType(Type genericType, @Nullable Class<?> contextClass) {
 		if (contextClass != null) {
-			if (genericType instanceof TypeVariable) {
+			if (genericType instanceof TypeVariable<?> typeVariable) {
 				ResolvableType resolvedTypeVariable = resolveVariable(
-						(TypeVariable<?>) genericType, ResolvableType.forClass(contextClass));
+						typeVariable, ResolvableType.forClass(contextClass));
 				if (resolvedTypeVariable != ResolvableType.NONE) {
 					Class<?> resolved = resolvedTypeVariable.resolve();
 					if (resolved != null) {
@@ -164,10 +164,9 @@ public final class GenericTypeResolver {
 					}
 				}
 			}
-			else if (genericType instanceof ParameterizedType) {
+			else if (genericType instanceof ParameterizedType parameterizedType) {
 				ResolvableType resolvedType = ResolvableType.forType(genericType);
 				if (resolvedType.hasUnresolvableGenerics()) {
-					ParameterizedType parameterizedType = (ParameterizedType) genericType;
 					Class<?>[] generics = new Class<?>[parameterizedType.getActualTypeArguments().length];
 					Type[] typeArguments = parameterizedType.getActualTypeArguments();
 					ResolvableType contextType = ResolvableType.forClass(contextClass);

@@ -480,8 +480,8 @@ public abstract class DataBufferUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends DataBuffer> T retain(T dataBuffer) {
-		if (dataBuffer instanceof PooledDataBuffer) {
-			return (T) ((PooledDataBuffer) dataBuffer).retain();
+		if (dataBuffer instanceof PooledDataBuffer buffer) {
+			return (T) buffer.retain();
 		}
 		else {
 			return dataBuffer;
@@ -498,8 +498,8 @@ public abstract class DataBufferUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends DataBuffer> T touch(T dataBuffer, Object hint) {
-		if (dataBuffer instanceof PooledDataBuffer) {
-			return (T) ((PooledDataBuffer) dataBuffer).touch(hint);
+		if (dataBuffer instanceof PooledDataBuffer buffer) {
+			return (T) buffer.touch(hint);
 		}
 		else {
 			return dataBuffer;
@@ -572,8 +572,8 @@ public abstract class DataBufferUtils {
 	public static Mono<DataBuffer> join(Publisher<? extends DataBuffer> buffers, int maxByteCount) {
 		Assert.notNull(buffers, "'dataBuffers' must not be null");
 
-		if (buffers instanceof Mono) {
-			return (Mono<DataBuffer>) buffers;
+		if (buffers instanceof Mono mono) {
+			return mono;
 		}
 
 		return Flux.from(buffers)

@@ -118,8 +118,8 @@ public abstract class NestedCheckedException extends Exception {
 		if (cause == this) {
 			return false;
 		}
-		if (cause instanceof NestedCheckedException) {
-			return ((NestedCheckedException) cause).contains(exType);
+		if (cause instanceof NestedCheckedException exception) {
+			return exception.contains(exType);
 		}
 		else {
 			while (cause != null) {

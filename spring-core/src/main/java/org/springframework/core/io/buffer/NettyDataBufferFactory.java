@@ -122,8 +122,8 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 	 * @return the netty {@code ByteBuf}
 	 */
 	public static ByteBuf toByteBuf(DataBuffer buffer) {
-		if (buffer instanceof NettyDataBuffer) {
-			return ((NettyDataBuffer) buffer).getNativeBuffer();
+		if (buffer instanceof NettyDataBuffer nettyDataBuffer) {
+			return nettyDataBuffer.getNativeBuffer();
 		}
 		else {
 			return Unpooled.wrappedBuffer(buffer.asByteBuffer());

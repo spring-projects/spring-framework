@@ -197,11 +197,11 @@ public class OrderComparator implements Comparator<Object> {
 	 * @see java.util.Arrays#sort(Object[], java.util.Comparator)
 	 */
 	public static void sortIfNecessary(Object value) {
-		if (value instanceof Object[]) {
-			sort((Object[]) value);
+		if (value instanceof Object[] objects) {
+			sort(objects);
 		}
-		else if (value instanceof List) {
-			sort((List<?>) value);
+		else if (value instanceof List<?> list) {
+			sort(list);
 		}
 	}
 

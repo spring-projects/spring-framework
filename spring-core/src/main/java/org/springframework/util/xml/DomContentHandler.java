@@ -50,8 +50,8 @@ class DomContentHandler implements ContentHandler {
 	 */
 	DomContentHandler(Node node) {
 		this.node = node;
-		if (node instanceof Document) {
-			this.document = (Document) node;
+		if (node instanceof Document document) {
+			this.document = document;
 		}
 		else {
 			this.document = node.getOwnerDocument();

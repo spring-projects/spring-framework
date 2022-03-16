@@ -66,8 +66,8 @@ public class NettyByteBufEncoder extends AbstractEncoder<ByteBuf> {
 			String logPrefix = Hints.getLogPrefix(hints);
 			logger.debug(logPrefix + "Writing " + byteBuf.readableBytes() + " bytes");
 		}
-		if (bufferFactory instanceof NettyDataBufferFactory) {
-			return ((NettyDataBufferFactory) bufferFactory).wrap(byteBuf);
+		if (bufferFactory instanceof NettyDataBufferFactory nettyDataBufferFactory) {
+			return nettyDataBufferFactory.wrap(byteBuf);
 		}
 		byte[] bytes = new byte[byteBuf.readableBytes()];
 		byteBuf.readBytes(bytes);
