@@ -341,12 +341,6 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 							"Unable to map column '" + column + "' to property '" + pd.getName() + "'", ex);
 				}
 			}
-			else {
-				// No PropertyDescriptor found
-				if (rowNumber == 0 && logger.isDebugEnabled()) {
-					logger.debug("No property found for column '" + column + "' mapped to field '" + field + "'");
-				}
-			}
 		}
 
 		if (populatedProperties != null && !populatedProperties.equals(this.mappedProperties)) {
