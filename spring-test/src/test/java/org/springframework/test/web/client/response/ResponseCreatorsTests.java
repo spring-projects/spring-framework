@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,11 +130,11 @@ class ResponseCreatorsTests {
 
 	@Test
 	void withCustomStatus() throws Exception {
-		DefaultResponseCreator responseCreator = MockRestResponseCreators.withStatus(454);
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withRawStatus(454);
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
 		assertThat(response.getRawStatusCode()).isEqualTo(454);
-		assertThat(response.getStatusText()).isEqualTo("Custom http status");
+		assertThat(response.getStatusText()).isEmpty();
 	}
 
 	@Test
