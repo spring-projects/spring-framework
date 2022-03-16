@@ -483,12 +483,18 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		 * <p>This strategy is similar to {@link #TYPE_HIERARCHY} except that
 		 * {@linkplain Class#getEnclosingClass() enclosing classes} are also
 		 * searched.
-		 * <p>Superclass annotations do not need to be meta-annotated with
-		 * {@link Inherited @Inherited}.
+		 * <p>Superclass and enclosing class annotations do not need to be
+		 * meta-annotated with {@link Inherited @Inherited}.
 		 * <p>When searching a {@link Method} source, this strategy is identical
 		 * to {@link #TYPE_HIERARCHY}.
+		 * <p><strong>WARNING:</strong> This strategy searches recursively for
+		 * annotations on the enclosing class for any source type, regardless
+		 * whether the source type is an <em>inner class</em>, a {@code static}
+		 * nested class, or a nested interface. Thus, it may find more annotations
+		 * than you would expect.
 		 */
 		TYPE_HIERARCHY_AND_ENCLOSING_CLASSES
+
 	}
 
 }
