@@ -73,9 +73,8 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 	 */
 	public CachingMetadataReaderFactory(@Nullable ResourceLoader resourceLoader) {
 		super(resourceLoader);
-		if (resourceLoader instanceof DefaultResourceLoader) {
-			this.metadataReaderCache =
-					((DefaultResourceLoader) resourceLoader).getResourceCache(MetadataReader.class);
+		if (resourceLoader instanceof DefaultResourceLoader loader) {
+			this.metadataReaderCache = loader.getResourceCache(MetadataReader.class);
 		}
 		else {
 			setCacheLimit(DEFAULT_CACHE_LIMIT);
@@ -93,8 +92,8 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 		if (cacheLimit <= 0) {
 			this.metadataReaderCache = null;
 		}
-		else if (this.metadataReaderCache instanceof LocalResourceCache) {
-			((LocalResourceCache) this.metadataReaderCache).setCacheLimit(cacheLimit);
+		else if (this.metadataReaderCache instanceof LocalResourceCache cache) {
+			cache.setCacheLimit(cacheLimit);
 		}
 		else {
 			this.metadataReaderCache = new LocalResourceCache(cacheLimit);
@@ -105,8 +104,8 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 	 * Return the maximum number of entries for the MetadataReader cache.
 	 */
 	public int getCacheLimit() {
-		if (this.metadataReaderCache instanceof LocalResourceCache) {
-			return ((LocalResourceCache) this.metadataReaderCache).getCacheLimit();
+		if (this.metadataReaderCache instanceof LocalResourceCache cache) {
+			return cache.getCacheLimit();
 		}
 		else {
 			return (this.metadataReaderCache != null ? Integer.MAX_VALUE : 0);

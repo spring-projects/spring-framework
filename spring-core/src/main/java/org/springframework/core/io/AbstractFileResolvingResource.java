@@ -288,8 +288,8 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	 */
 	protected void customizeConnection(URLConnection con) throws IOException {
 		ResourceUtils.useCachesIfNecessary(con);
-		if (con instanceof HttpURLConnection) {
-			customizeConnection((HttpURLConnection) con);
+		if (con instanceof HttpURLConnection httpConn) {
+			customizeConnection(httpConn);
 		}
 	}
 

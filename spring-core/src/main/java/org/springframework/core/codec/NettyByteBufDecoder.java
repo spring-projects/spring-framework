@@ -55,8 +55,8 @@ public class NettyByteBufDecoder extends AbstractDataBufferDecoder<ByteBuf> {
 		if (logger.isDebugEnabled()) {
 			logger.debug(Hints.getLogPrefix(hints) + "Read " + dataBuffer.readableByteCount() + " bytes");
 		}
-		if (dataBuffer instanceof NettyDataBuffer) {
-			return ((NettyDataBuffer) dataBuffer).getNativeBuffer();
+		if (dataBuffer instanceof NettyDataBuffer nettyDataBuffer) {
+			return nettyDataBuffer.getNativeBuffer();
 		}
 		ByteBuf byteBuf;
 		byte[] bytes = new byte[dataBuffer.readableByteCount()];

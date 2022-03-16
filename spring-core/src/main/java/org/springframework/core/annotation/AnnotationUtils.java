@@ -1074,8 +1074,8 @@ public abstract class AnnotationUtils {
 	 * @param ex the throwable to inspect
 	 */
 	static void rethrowAnnotationConfigurationException(Throwable ex) {
-		if (ex instanceof AnnotationConfigurationException) {
-			throw (AnnotationConfigurationException) ex;
+		if (ex instanceof AnnotationConfigurationException exception) {
+			throw exception;
 		}
 	}
 

@@ -68,8 +68,8 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 	@Override
 	public void visit(String name, Object value) {
-		if (value instanceof Type) {
-			value = ((Type) value).getClassName();
+		if (value instanceof Type typeObject) {
+			value = typeObject.getClassName();
 		}
 		this.attributes.put(name, value);
 	}
@@ -158,8 +158,8 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 		@Override
 		public void visit(String name, Object value) {
-			if (value instanceof Type) {
-				value = ((Type) value).getClassName();
+			if (value instanceof Type typeObject) {
+				value = typeObject.getClassName();
 			}
 			this.elements.add(value);
 		}
@@ -187,8 +187,8 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 				return Object.class;
 			}
 			Object firstElement = this.elements.get(0);
-			if (firstElement instanceof Enum) {
-				return ((Enum<?>) firstElement).getDeclaringClass();
+			if (firstElement instanceof Enum<?> enumObject) {
+				return enumObject.getDeclaringClass();
 			}
 			return firstElement.getClass();
 		}

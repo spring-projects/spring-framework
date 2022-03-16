@@ -232,8 +232,8 @@ public class UrlResource extends AbstractFileResolvingResource {
 		}
 		catch (IOException ex) {
 			// Close the HTTP connection (if applicable).
-			if (con instanceof HttpURLConnection) {
-				((HttpURLConnection) con).disconnect();
+			if (con instanceof HttpURLConnection httpConn) {
+				httpConn.disconnect();
 			}
 			throw ex;
 		}
@@ -337,8 +337,8 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 */
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof UrlResource &&
-				getCleanedUrl().equals(((UrlResource) other).getCleanedUrl())));
+		return (this == other || (other instanceof UrlResource resource &&
+				getCleanedUrl().equals(resource.getCleanedUrl())));
 	}
 
 	/**

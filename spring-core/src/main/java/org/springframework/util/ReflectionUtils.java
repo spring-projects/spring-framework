@@ -106,11 +106,11 @@ public abstract class ReflectionUtils {
 		if (ex instanceof IllegalAccessException) {
 			throw new IllegalStateException("Could not access method or field: " + ex.getMessage());
 		}
-		if (ex instanceof InvocationTargetException) {
-			handleInvocationTargetException((InvocationTargetException) ex);
+		if (ex instanceof InvocationTargetException exception) {
+			handleInvocationTargetException(exception);
 		}
-		if (ex instanceof RuntimeException) {
-			throw (RuntimeException) ex;
+		if (ex instanceof RuntimeException rex) {
+			throw rex;
 		}
 		throw new UndeclaredThrowableException(ex);
 	}
@@ -138,11 +138,11 @@ public abstract class ReflectionUtils {
 	 * @throws RuntimeException the rethrown exception
 	 */
 	public static void rethrowRuntimeException(Throwable ex) {
-		if (ex instanceof RuntimeException) {
-			throw (RuntimeException) ex;
+		if (ex instanceof RuntimeException rex) {
+			throw rex;
 		}
-		if (ex instanceof Error) {
-			throw (Error) ex;
+		if (ex instanceof Error error) {
+			throw error;
 		}
 		throw new UndeclaredThrowableException(ex);
 	}
@@ -159,11 +159,11 @@ public abstract class ReflectionUtils {
 	 * @throws Exception the rethrown exception (in case of a checked exception)
 	 */
 	public static void rethrowException(Throwable ex) throws Exception {
-		if (ex instanceof Exception) {
-			throw (Exception) ex;
+		if (ex instanceof Exception e) {
+			throw e;
 		}
-		if (ex instanceof Error) {
-			throw (Error) ex;
+		if (ex instanceof Error error) {
+			throw error;
 		}
 		throw new UndeclaredThrowableException(ex);
 	}

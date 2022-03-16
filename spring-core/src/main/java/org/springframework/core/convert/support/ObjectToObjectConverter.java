@@ -101,8 +101,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 					return method.invoke(null, source);
 				}
 			}
-			else if (member instanceof Constructor) {
-				Constructor<?> ctor = (Constructor<?>) member;
+			else if (member instanceof Constructor<?> ctor) {
 				ReflectionUtils.makeAccessible(ctor);
 				return ctor.newInstance(source);
 			}
@@ -156,8 +155,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 					ClassUtils.isAssignable(method.getDeclaringClass(), sourceClass) :
 					method.getParameterTypes()[0] == sourceClass);
 		}
-		else if (member instanceof Constructor) {
-			Constructor<?> ctor = (Constructor<?>) member;
+		else if (member instanceof Constructor<?> ctor) {
 			return (ctor.getParameterTypes()[0] == sourceClass);
 		}
 		else {

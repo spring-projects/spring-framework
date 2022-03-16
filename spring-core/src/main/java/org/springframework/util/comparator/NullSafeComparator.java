@@ -112,11 +112,11 @@ public class NullSafeComparator<T> implements Comparator<T> {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof NullSafeComparator)) {
+		if (!(other instanceof NullSafeComparator<?> nullSafeComparator)) {
 			return false;
 		}
-		NullSafeComparator<T> otherComp = (NullSafeComparator<T>) other;
-		return (this.nonNullComparator.equals(otherComp.nonNullComparator) && this.nullsLow == otherComp.nullsLow);
+		return this.nonNullComparator.equals(nullSafeComparator.nonNullComparator)
+				&& this.nullsLow == nullSafeComparator.nullsLow;
 	}
 
 	@Override

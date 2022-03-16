@@ -48,14 +48,14 @@ public final class ConversionServiceFactory {
 	public static void registerConverters(@Nullable Set<?> converters, ConverterRegistry registry) {
 		if (converters != null) {
 			for (Object converter : converters) {
-				if (converter instanceof GenericConverter) {
-					registry.addConverter((GenericConverter) converter);
+				if (converter instanceof GenericConverter genericConverter) {
+					registry.addConverter(genericConverter);
 				}
-				else if (converter instanceof Converter<?, ?>) {
-					registry.addConverter((Converter<?, ?>) converter);
+				else if (converter instanceof Converter<?, ?> iConverter) {
+					registry.addConverter(iConverter);
 				}
-				else if (converter instanceof ConverterFactory<?, ?>) {
-					registry.addConverterFactory((ConverterFactory<?, ?>) converter);
+				else if (converter instanceof ConverterFactory<?, ?> converterFactory) {
+					registry.addConverterFactory(converterFactory);
 				}
 				else {
 					throw new IllegalArgumentException("Each converter object must implement one of the " +
