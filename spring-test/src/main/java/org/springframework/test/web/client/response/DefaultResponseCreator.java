@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
  */
 public class DefaultResponseCreator implements ResponseCreator {
 
-	private HttpStatus statusCode;
+	private final Object statusCode;
 
 	private byte[] content = new byte[0];
 
@@ -56,6 +56,14 @@ public class DefaultResponseCreator implements ResponseCreator {
 	 */
 	protected DefaultResponseCreator(HttpStatus statusCode) {
 		Assert.notNull(statusCode, "HttpStatus must not be null");
+		this.statusCode = statusCode;
+	}
+
+	/**
+	 * Protected constructor.
+	 * Use static factory methods in {@link MockRestResponseCreators}.
+	 */
+	protected DefaultResponseCreator(int statusCode) {
 		this.statusCode = statusCode;
 	}
 
@@ -114,10 +122,20 @@ public class DefaultResponseCreator implements ResponseCreator {
 		MockClientHttpResponse response;
 		if (this.contentResource != null) {
 			InputStream stream = this.contentResource.getInputStream();
-			response = new MockClientHttpResponse(stream, this.statusCode);
+			if (this.statusCode instanceof HttpStatus) {
+				response = new MockClientHttpResponse(stream, (HttpStatus) this.statusCode);
+			}
+			else {
+				response = new MockClientHttpResponse(stream, (Integer) this.statusCode);
+			}
 		}
 		else {
-			response = new MockClientHttpResponse(this.content, this.statusCode);
+			if (this.statusCode instanceof HttpStatus) {
+				response = new MockClientHttpResponse(this.content, (HttpStatus) this.statusCode);
+			}
+			else {
+				response = new MockClientHttpResponse(this.content, (Integer) this.statusCode);
+			}
 		}
 		response.getHeaders().putAll(this.headers);
 		return response;

@@ -118,6 +118,14 @@ public abstract class MockRestResponseCreators {
 	}
 
 	/**
+	 * {@code ResponseCreator} with a specific HTTP status.
+	 * @param status the response status
+	 */
+	public static DefaultResponseCreator withStatus(int status) {
+		return new DefaultResponseCreator(status);
+	}
+
+	/**
 	 * {@code ResponseCreator} with an internal application {@code IOException}.
 	 * <p>For example, one could use this to simulate a {@code SocketTimeoutException}.
 	 * @param ex the {@code Exception} to be thrown at HTTP call time

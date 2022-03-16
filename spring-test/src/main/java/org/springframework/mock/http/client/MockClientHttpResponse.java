@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  */
 public class MockClientHttpResponse extends MockHttpInputMessage implements ClientHttpResponse {
 
-	private final HttpStatus status;
+	private final Object status;
 
 
 	/**
@@ -45,6 +45,14 @@ public class MockClientHttpResponse extends MockHttpInputMessage implements Clie
 	}
 
 	/**
+	 * Constructor with response body as a byte array.
+	 */
+	public MockClientHttpResponse(byte[] body, int statusCode) {
+		super(body);
+		this.status = statusCode;
+	}
+
+	/**
 	 * Constructor with response body as InputStream.
 	 */
 	public MockClientHttpResponse(InputStream body, HttpStatus statusCode) {
@@ -53,20 +61,43 @@ public class MockClientHttpResponse extends MockHttpInputMessage implements Clie
 		this.status = statusCode;
 	}
 
+	/**
+	 * Constructor with response body as InputStream.
+	 */
+	public MockClientHttpResponse(InputStream body, int statusCode) {
+		super(body);
+		this.status = statusCode;
+	}
+
 
 	@Override
 	public HttpStatus getStatusCode() throws IOException {
-		return this.status;
+		if (this.status instanceof HttpStatus) {
+			return (HttpStatus) this.status;
+		}
+		else {
+			return HttpStatus.valueOf((Integer) this.status);
+		}
 	}
 
 	@Override
 	public int getRawStatusCode() throws IOException {
-		return this.status.value();
+		if (this.status instanceof HttpStatus) {
+			return ((HttpStatus) this.status).value();
+		}
+		else {
+			return (Integer) this.status;
+		}
 	}
 
 	@Override
 	public String getStatusText() throws IOException {
-		return this.status.getReasonPhrase();
+		if (this.status instanceof HttpStatus) {
+			return ((HttpStatus) this.status).getReasonPhrase();
+		}
+		else {
+			return "Custom http status";
+		}
 	}
 
 	@Override
