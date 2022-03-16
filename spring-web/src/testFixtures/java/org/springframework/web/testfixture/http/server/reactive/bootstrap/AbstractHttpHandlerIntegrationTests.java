@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,6 +36,8 @@ import reactor.core.publisher.Flux;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpServerErrorException;
+
+import static org.junit.jupiter.api.Named.named;
 
 public abstract class AbstractHttpHandlerIntegrationTests {
 
@@ -121,12 +124,12 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 	public @interface ParameterizedHttpServerTest {
 	}
 
-	static Stream<HttpServer> httpServers() {
+	static Stream<Named<HttpServer>> httpServers() {
 		return Stream.of(
-				new JettyHttpServer(),
-				new ReactorHttpServer(),
-				new TomcatHttpServer(),
-				new UndertowHttpServer()
+				named("Jetty", new JettyHttpServer()),
+				named("Reactor Netty", new ReactorHttpServer()),
+				named("Tomcat", new TomcatHttpServer()),
+				named("Undertow", new UndertowHttpServer())
 		);
 	}
 
