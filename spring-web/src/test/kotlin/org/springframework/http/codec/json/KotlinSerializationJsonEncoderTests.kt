@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,25 +65,23 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 				Pojo("foofoo", "barbar"),
 				Pojo("foofoofoo", "barbarbar")
 		)
-		testEncode(input, Pojo::class.java, { step: FirstStep<DataBuffer?> ->
-			step
-					.consumeNextWith(expectString("[" +
-							"{\"foo\":\"foo\",\"bar\":\"bar\"}," +
-							"{\"foo\":\"foofoo\",\"bar\":\"barbar\"}," +
-							"{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}]")
-							.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
-					.verifyComplete()
+		testEncode(input, Pojo::class.java, { step: FirstStep<DataBuffer?> -> step
+			.consumeNextWith(expectString("[" +
+					"{\"foo\":\"foo\",\"bar\":\"bar\"}," +
+					"{\"foo\":\"foofoo\",\"bar\":\"barbar\"}," +
+					"{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}]")
+				.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
+			.verifyComplete()
 		})
 	}
 
 	@Test
 	fun encodeMono() {
 		val input = Mono.just(Pojo("foo", "bar"))
-		testEncode(input, Pojo::class.java, { step: FirstStep<DataBuffer?> ->
-			step
-					.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}")
-							.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
-					.verifyComplete()
+		testEncode(input, Pojo::class.java, { step: FirstStep<DataBuffer?> -> step
+			.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}")
+				.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
+			.verifyComplete()
 		})
 	}
 
