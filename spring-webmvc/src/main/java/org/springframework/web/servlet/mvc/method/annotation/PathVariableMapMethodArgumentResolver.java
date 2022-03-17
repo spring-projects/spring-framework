@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
@@ -63,7 +62,7 @@ public class PathVariableMapMethodArgumentResolver implements HandlerMethodArgum
 						HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 
 		if (!CollectionUtils.isEmpty(uriTemplateVars)) {
-			return new LinkedHashMap<>(uriTemplateVars);
+			return Collections.unmodifiableMap(uriTemplateVars);
 		}
 		else {
 			return Collections.emptyMap();
