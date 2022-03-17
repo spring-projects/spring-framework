@@ -38,6 +38,7 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.web.reactive.function.BodyExtractors;
@@ -73,6 +74,7 @@ public class DefaultWebClientTests {
 	@BeforeEach
 	public void setup() {
 		ClientResponse mockResponse = mock(ClientResponse.class);
+		when(mockResponse.statusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.bodyToMono(Void.class)).thenReturn(Mono.empty());
 		given(this.exchangeFunction.exchange(this.captor.capture())).willReturn(Mono.just(mockResponse));
 		this.builder = WebClient.builder().baseUrl("/base").exchangeFunction(this.exchangeFunction);
@@ -414,8 +416,8 @@ public class DefaultWebClientTests {
 		Mono<Void> result = this.builder.build().get()
 				.uri("/path")
 				.retrieve()
-				.onStatus(HttpStatus::is4xxClientError, resp -> Mono.error(new IllegalStateException("1")))
-				.onStatus(HttpStatus::is4xxClientError, resp -> Mono.error(new IllegalStateException("2")))
+				.onStatus(HttpStatusCode::is4xxClientError, resp -> Mono.error(new IllegalStateException("1")))
+				.onStatus(HttpStatusCode::is4xxClientError, resp -> Mono.error(new IllegalStateException("2")))
 				.bodyToMono(Void.class);
 
 		StepVerifier.create(result).expectErrorMessage("1").verify();
@@ -428,8 +430,8 @@ public class DefaultWebClientTests {
 		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();
 		given(exchangeFunction.exchange(any())).willReturn(Mono.just(response));
 
-		Predicate<HttpStatus> predicate1 = mock(Predicate.class);
-		Predicate<HttpStatus> predicate2 = mock(Predicate.class);
+		Predicate<HttpStatusCode> predicate1 = mock(Predicate.class);
+		Predicate<HttpStatusCode> predicate2 = mock(Predicate.class);
 
 		given(predicate1.test(HttpStatus.BAD_REQUEST)).willReturn(false);
 		given(predicate2.test(HttpStatus.BAD_REQUEST)).willReturn(false);

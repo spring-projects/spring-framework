@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.handler.PathPatternsTestUtils;
@@ -53,7 +54,7 @@ class RouterFunctionBuilderTests {
 
 		ServerRequest getFooRequest = initRequest("GET", "/foo");
 
-		Optional<HttpStatus> responseStatus = route.route(getFooRequest)
+		Optional<HttpStatusCode> responseStatus = route.route(getFooRequest)
 				.map(handlerFunction -> handle(handlerFunction, getFooRequest))
 				.map(ServerResponse::statusCode);
 		assertThat(responseStatus).contains(HttpStatus.OK);
@@ -102,7 +103,7 @@ class RouterFunctionBuilderTests {
 
 		ServerRequest resourceRequest = initRequest("GET", "/resources/response.txt");
 
-		Optional<HttpStatus> responseStatus = route.route(resourceRequest)
+		Optional<HttpStatusCode> responseStatus = route.route(resourceRequest)
 				.map(handlerFunction -> handle(handlerFunction, resourceRequest))
 				.map(ServerResponse::statusCode);
 		assertThat(responseStatus).contains(HttpStatus.OK);
@@ -127,7 +128,7 @@ class RouterFunctionBuilderTests {
 
 		ServerRequest fooRequest = initRequest("GET", "/foo/bar/baz");
 
-		Optional<HttpStatus> responseStatus = route.route(fooRequest)
+		Optional<HttpStatusCode> responseStatus = route.route(fooRequest)
 				.map(handlerFunction -> handle(handlerFunction, fooRequest))
 				.map(ServerResponse::statusCode);
 		assertThat(responseStatus).contains(HttpStatus.OK);
@@ -175,7 +176,7 @@ class RouterFunctionBuilderTests {
 
 		ServerRequest barRequest = initRequest("GET", "/bar");
 
-		Optional<HttpStatus> responseStatus = route.route(barRequest)
+		Optional<HttpStatusCode> responseStatus = route.route(barRequest)
 				.map(handlerFunction -> handle(handlerFunction, barRequest))
 				.map(ServerResponse::statusCode);
 		assertThat(responseStatus).contains(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -194,7 +195,7 @@ class RouterFunctionBuilderTests {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/error");
 		ServerRequest serverRequest = new DefaultServerRequest(servletRequest, emptyList());
 
-		Optional<HttpStatus> responseStatus = route.route(serverRequest)
+		Optional<HttpStatusCode> responseStatus = route.route(serverRequest)
 				.map(handlerFunction -> handle(handlerFunction, serverRequest))
 				.map(ServerResponse::statusCode);
 		assertThat(responseStatus).contains(HttpStatus.OK);

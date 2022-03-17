@@ -18,6 +18,7 @@ package org.springframework.web.bind;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -48,13 +49,12 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	public MethodArgumentNotValidException(MethodParameter parameter, BindingResult bindingResult) {
 		super(bindingResult);
 		this.parameter = parameter;
-		this.body = ProblemDetail.forRawStatusCode(getRawStatusCode()).withDetail("Invalid request content.");
+		this.body = ProblemDetail.forStatus(getStatusCode()).withDetail("Invalid request content.");
 	}
 
-
 	@Override
-	public int getRawStatusCode() {
-		return HttpStatus.BAD_REQUEST.value();
+	public HttpStatusCode getStatusCode() {
+		return HttpStatus.BAD_REQUEST;
 	}
 
 	@Override

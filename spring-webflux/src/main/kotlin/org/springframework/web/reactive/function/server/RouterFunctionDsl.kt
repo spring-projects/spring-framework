@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import reactor.core.publisher.Mono
 import java.net.URI
@@ -725,7 +726,7 @@ class RouterFunctionDsl internal constructor (private val init: RouterFunctionDs
 	 * @return the created builder
 	 * @since 5.1
 	 */
-	fun status(status: HttpStatus): ServerResponse.BodyBuilder =
+	fun status(status: HttpStatusCode): ServerResponse.BodyBuilder =
 			ServerResponse.status(status)
 
 	/**

@@ -25,6 +25,7 @@ import jakarta.servlet.ServletException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
@@ -95,7 +96,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 		this.supportedMethods = supportedMethods;
 
 		String detail = "Method '" + method + "' is not supported.";
-		this.body = ProblemDetail.forRawStatusCode(getRawStatusCode()).withDetail(detail);
+		this.body = ProblemDetail.forStatus(getStatusCode()).withDetail(detail);
 	}
 
 
@@ -133,8 +134,8 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 	}
 
 	@Override
-	public int getRawStatusCode() {
-		return HttpStatus.METHOD_NOT_ALLOWED.value();
+	public HttpStatusCode getStatusCode() {
+		return HttpStatus.METHOD_NOT_ALLOWED;
 	}
 
 	@Override

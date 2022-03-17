@@ -35,7 +35,7 @@ public abstract class HttpMediaTypeException extends ServletException implements
 
 	private final List<MediaType> supportedMediaTypes;
 
-	private final ProblemDetail body = ProblemDetail.forRawStatusCode(getRawStatusCode());
+	private final ProblemDetail body = ProblemDetail.forStatus(getStatusCode());
 
 
 	/**

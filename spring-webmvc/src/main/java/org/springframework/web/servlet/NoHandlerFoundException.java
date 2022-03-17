@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.ErrorResponse;
 
@@ -59,13 +60,12 @@ public class NoHandlerFoundException extends ServletException implements ErrorRe
 		this.httpMethod = httpMethod;
 		this.requestURL = requestURL;
 		this.headers = headers;
-		this.body = ProblemDetail.forRawStatusCode(getRawStatusCode()).withDetail(getMessage());
+		this.body = ProblemDetail.forStatus(getStatusCode()).withDetail(getMessage());
 	}
 
-
 	@Override
-	public int getRawStatusCode() {
-		return HttpStatus.NOT_FOUND.value();
+	public HttpStatusCode getStatusCode() {
+		return HttpStatus.NOT_FOUND;
 	}
 
 	public String getHttpMethod() {

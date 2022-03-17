@@ -182,7 +182,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		HttpEntity<?> httpEntity;
 		if (returnValue instanceof ErrorResponse response) {
-			httpEntity = new ResponseEntity<>(response.getBody(), response.getHeaders(), response.getRawStatusCode());
+			httpEntity = new ResponseEntity<>(response.getBody(), response.getHeaders(), response.getStatusCode());
 		}
 		else if (returnValue instanceof ProblemDetail detail) {
 			httpEntity = new ResponseEntity<>(returnValue, HttpHeaders.EMPTY, detail.getStatus());
@@ -216,7 +216,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 
 		if (httpEntity instanceof ResponseEntity<?> responseEntity) {
-			int returnStatus = responseEntity.getStatusCodeValue();
+			int returnStatus = responseEntity.getStatusCode().value();
 			outputMessage.getServletResponse().setStatus(returnStatus);
 			if (returnStatus == 200) {
 				HttpMethod method = inputMessage.getMethod();

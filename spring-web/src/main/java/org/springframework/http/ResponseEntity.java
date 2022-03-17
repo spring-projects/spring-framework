@@ -31,7 +31,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Extension of {@link HttpEntity} that adds an {@link HttpStatus} status code.
+ * Extension of {@link HttpEntity} that adds an {@link HttpStatusCode} status code.
  * Used in {@code RestTemplate} as well as in {@code @Controller} methods.
  *
  * <p>In {@code RestTemplate}, this class is returned by
@@ -85,7 +85,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * Create a {@code ResponseEntity} with a status code only.
 	 * @param status the status code
 	 */
-	public ResponseEntity(HttpStatus status) {
+	public ResponseEntity(HttpStatusCode status) {
 		this(null, null, status);
 	}
 
@@ -94,7 +94,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param body the entity body
 	 * @param status the status code
 	 */
-	public ResponseEntity(@Nullable T body, HttpStatus status) {
+	public ResponseEntity(@Nullable T body, HttpStatusCode status) {
 		this(body, null, status);
 	}
 
@@ -103,7 +103,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param headers the entity headers
 	 * @param status the status code
 	 */
-	public ResponseEntity(MultiValueMap<String, String> headers, HttpStatus status) {
+	public ResponseEntity(MultiValueMap<String, String> headers, HttpStatusCode status) {
 		this(null, headers, status);
 	}
 
@@ -113,7 +113,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param headers the entity headers
 	 * @param status the status code
 	 */
-	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, HttpStatus status) {
+	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, HttpStatusCode status) {
 		this(body, headers, (Object) status);
 	}
 
@@ -133,7 +133,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 */
 	private ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, Object status) {
 		super(body, headers);
-		Assert.notNull(status, "HttpStatus must not be null");
+		Assert.notNull(status, "HttpStatusCode must not be null");
 		this.status = status;
 	}
 
@@ -142,12 +142,12 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * Return the HTTP status code of the response.
 	 * @return the HTTP status as an HttpStatus enum entry
 	 */
-	public HttpStatus getStatusCode() {
-		if (this.status instanceof HttpStatus) {
-			return (HttpStatus) this.status;
+	public HttpStatusCode getStatusCode() {
+		if (this.status instanceof HttpStatusCode statusCode) {
+			return statusCode;
 		}
 		else {
-			return HttpStatus.valueOf((Integer) this.status);
+			return HttpStatusCode.valueOf((Integer) this.status);
 		}
 	}
 
@@ -155,10 +155,12 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * Return the HTTP status code of the response.
 	 * @return the HTTP status as an int value
 	 * @since 4.3
+	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
 	 */
+	@Deprecated
 	public int getStatusCodeValue() {
-		if (this.status instanceof HttpStatus) {
-			return ((HttpStatus) this.status).value();
+		if (this.status instanceof HttpStatusCode statusCode) {
+			return statusCode.value();
 		}
 		else {
 			return (Integer) this.status;
@@ -187,9 +189,9 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
 		builder.append(this.status);
-		if (this.status instanceof HttpStatus) {
+		if (this.status instanceof HttpStatus httpStatus) {
 			builder.append(' ');
-			builder.append(((HttpStatus) this.status).getReasonPhrase());
+			builder.append(httpStatus.getReasonPhrase());
 		}
 		builder.append(',');
 		T body = getBody();
@@ -212,8 +214,8 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @return the created builder
 	 * @since 4.1
 	 */
-	public static BodyBuilder status(HttpStatus status) {
-		Assert.notNull(status, "HttpStatus must not be null");
+	public static BodyBuilder status(HttpStatusCode status) {
+		Assert.notNull(status, "HttpStatusCode must not be null");
 		return new DefaultBuilder(status);
 	}
 

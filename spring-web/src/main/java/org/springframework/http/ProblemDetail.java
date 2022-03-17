@@ -55,7 +55,7 @@ public class ProblemDetail {
 	/**
 	 * Protected constructor for subclasses.
 	 * <p>To create a {@link ProblemDetail} instance, use static factory methods,
-	 * {@link #forStatus(HttpStatus)} or {@link #forRawStatusCode(int)}.
+	 * {@link #forStatus(HttpStatusCode)} or {@link #forStatus(int)}.
 	 * @param rawStatusCode the response status to use
 	 */
 	protected ProblemDetail(int rawStatusCode) {
@@ -97,12 +97,12 @@ public class ProblemDetail {
 
 	/**
 	 * Variant of {@link #setStatus(int)} for chained initialization.
-	 * @param status the response status for the problem
+	 * @param statusCode the response status for the problem
 	 * @return the same instance
 	 */
-	public ProblemDetail withStatus(HttpStatus status) {
-		Assert.notNull(status, "HttpStatus is required");
-		setStatus(status.value());
+	public ProblemDetail withStatus(HttpStatusCode statusCode) {
+		Assert.notNull(statusCode, "HttpStatus is required");
+		setStatus(statusCode.value());
 		return this;
 	}
 
@@ -111,7 +111,7 @@ public class ProblemDetail {
 	 * @param status the response status value for the problem
 	 * @return the same instance
 	 */
-	public ProblemDetail withRawStatusCode(int status) {
+	public ProblemDetail withStatus(int status) {
 		setStatus(status);
 		return this;
 	}
@@ -164,8 +164,8 @@ public class ProblemDetail {
 	/**
 	 * Setter for the {@link #getStatus() problem status}.
 	 * @param status the problem status
-	 * @see #withStatus(HttpStatus)
-	 * @see #withRawStatusCode(int)
+	 * @see #withStatus(HttpStatusCode)
+	 * @see #withStatus(int)
 	 */
 	public void setStatus(int status) {
 		this.status = status;
@@ -264,15 +264,15 @@ public class ProblemDetail {
 	/**
 	 * Create a {@code ProblemDetail} instance with the given status code.
 	 */
-	public static ProblemDetail forStatus(HttpStatus status) {
-		Assert.notNull(status, "HttpStatus is required");
-		return forRawStatusCode(status.value());
+	public static ProblemDetail forStatus(HttpStatusCode status) {
+		Assert.notNull(status, "HttpStatusCode is required");
+		return forStatus(status.value());
 	}
 
 	/**
 	 * Create a {@code ProblemDetail} instance with the given status value.
 	 */
-	public static ProblemDetail forRawStatusCode(int status) {
+	public static ProblemDetail forStatus(int status) {
 		return new ProblemDetail(status);
 	}
 

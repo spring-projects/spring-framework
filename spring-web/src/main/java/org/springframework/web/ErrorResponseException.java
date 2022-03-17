@@ -16,13 +16,12 @@
 
 package org.springframework.web;
 
-
 import java.net.URI;
 
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
 
@@ -43,7 +42,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ErrorResponseException extends NestedRuntimeException implements ErrorResponse {
 
-	private final int status;
+	private final HttpStatusCode status;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -51,40 +50,31 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 
 
 	/**
-	 * Constructor with a well-known {@link HttpStatus}.
+	 * Constructor with a {@link HttpStatusCode}.
 	 */
-	public ErrorResponseException(HttpStatus status) {
+	public ErrorResponseException(HttpStatusCode status) {
 		this(status, null);
 	}
 
 	/**
-	 * Constructor with a well-known {@link HttpStatus} and an optional cause.
+	 * Constructor with a {@link HttpStatusCode} and an optional cause.
 	 */
-	public ErrorResponseException(HttpStatus status, @Nullable Throwable cause) {
-		this(status.value(), cause);
-	}
-
-	/**
-	 * Constructor that accepts any status value, possibly not resolvable as an
-	 * {@link HttpStatus} enum, and an optional cause.
-	 */
-	public ErrorResponseException(int status, @Nullable Throwable cause) {
-		this(status, ProblemDetail.forRawStatusCode(status), cause);
+	public ErrorResponseException(HttpStatusCode status, @Nullable Throwable cause) {
+		this(status, ProblemDetail.forStatus(status), cause);
 	}
 
 	/**
 	 * Constructor with a given {@link ProblemDetail} instance, possibly a
 	 * subclass of {@code ProblemDetail} with extended fields.
 	 */
-	public ErrorResponseException(int status, ProblemDetail body, @Nullable Throwable cause) {
+	public ErrorResponseException(HttpStatusCode status, ProblemDetail body, @Nullable Throwable cause) {
 		super(null, cause);
 		this.status = status;
 		this.body = body;
 	}
 
-
 	@Override
-	public int getRawStatusCode() {
+	public HttpStatusCode getStatusCode() {
 		return this.status;
 	}
 
@@ -147,9 +137,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 
 	@Override
 	public String getMessage() {
-		HttpStatus httpStatus = HttpStatus.resolve(this.status);
-		String message = (httpStatus != null ? httpStatus : String.valueOf(this.status)) +
-				(!this.headers.isEmpty() ? ", headers=" + this.headers : "") + ", " + this.body;
+		String message = this.status + (!this.headers.isEmpty() ? ", headers=" + this.headers : "") + ", " + this.body;
 		return NestedExceptionUtils.buildMessage(message, getCause());
 	}
 

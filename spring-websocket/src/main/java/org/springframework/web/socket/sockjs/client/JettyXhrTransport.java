@@ -31,7 +31,7 @@ import org.eclipse.jetty.http.HttpMethod;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -151,7 +151,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 		catch (Exception ex) {
 			throw new SockJsTransportFailureException("Failed to execute request to " + url, ex);
 		}
-		HttpStatus status = HttpStatus.valueOf(response.getStatus());
+		HttpStatusCode status = HttpStatusCode.valueOf(response.getStatus());
 		HttpHeaders responseHeaders = toHttpHeaders(response.getHeaders());
 		return (response.getContent() != null ?
 				new ResponseEntity<>(response.getContentAsString(), responseHeaders, status) :
@@ -213,7 +213,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 		@Override
 		public void onBegin(Response response) {
 			if (response.getStatus() != 200) {
-				HttpStatus status = HttpStatus.valueOf(response.getStatus());
+				HttpStatusCode status = HttpStatusCode.valueOf(response.getStatus());
 				response.abort(new HttpServerErrorException(status, "Unexpected XHR receive status"));
 			}
 		}

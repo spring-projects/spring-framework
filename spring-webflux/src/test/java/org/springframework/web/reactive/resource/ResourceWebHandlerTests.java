@@ -329,7 +329,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
+					assertThat(((ResponseStatusException) err).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				}).verify(TIMEOUT);
 	}
 
@@ -375,7 +375,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
+					assertThat(((ResponseStatusException) err).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				})
 				.verify(TIMEOUT);
 		if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
@@ -470,7 +470,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
+					assertThat(((ResponseStatusException) err).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				}).verify(TIMEOUT);
 	}
 
@@ -481,7 +481,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
+					assertThat(((ResponseStatusException) err).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				}).verify(TIMEOUT);
 	}
 
@@ -492,7 +492,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
+					assertThat(((ResponseStatusException) err).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				}).verify(TIMEOUT);
 	}
 
@@ -527,7 +527,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(mono)
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
+					assertThat(((ResponseStatusException) err).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				}).verify(TIMEOUT);
 
 		// SPR-17475

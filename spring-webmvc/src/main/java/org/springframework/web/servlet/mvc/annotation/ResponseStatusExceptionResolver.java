@@ -131,7 +131,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws Exception {
 
 		ex.getHeaders().forEach((name, values) -> values.forEach(value -> response.addHeader(name, value)));
-		return applyStatusAndReason(ex.getRawStatusCode(), ex.getReason(), response);
+		return applyStatusAndReason(ex.getStatusCode().value(), ex.getReason(), response);
 	}
 
 	/**

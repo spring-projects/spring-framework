@@ -31,6 +31,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -330,7 +331,7 @@ public class ResponseEntityExceptionHandlerTests {
 
 		@Override
 		protected ResponseEntity<Object> handleServletRequestBindingException(
-				ServletRequestBindingException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+				ServletRequestBindingException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
 			headers = new HttpHeaders();
 			headers.set("someHeader", "someHeaderValue");

@@ -130,9 +130,8 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		Assert.state(response != null, "No HttpServletResponse");
 		ServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 
-		if (returnValue instanceof ResponseEntity) {
-			ResponseEntity<?> responseEntity = (ResponseEntity<?>) returnValue;
-			response.setStatus(responseEntity.getStatusCodeValue());
+		if (returnValue instanceof ResponseEntity<?> responseEntity) {
+			response.setStatus(responseEntity.getStatusCode().value());
 			outputMessage.getHeaders().putAll(responseEntity.getHeaders());
 			returnValue = responseEntity.getBody();
 			returnType = returnType.nested();

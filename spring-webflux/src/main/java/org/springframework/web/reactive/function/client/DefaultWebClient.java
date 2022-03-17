@@ -39,7 +39,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -491,7 +491,7 @@ class DefaultWebClient implements WebClient {
 
 	private static class DefaultResponseSpec implements ResponseSpec {
 
-		private static final IntPredicate STATUS_CODE_ERROR = (value -> value >= 400);
+		private static final Predicate<HttpStatusCode> STATUS_CODE_ERROR = HttpStatusCode::isError;
 
 		private static final StatusHandler DEFAULT_STATUS_HANDLER =
 				new StatusHandler(STATUS_CODE_ERROR, ClientResponse::createException);
@@ -511,28 +511,26 @@ class DefaultWebClient implements WebClient {
 
 
 		@Override
-		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
+		public ResponseSpec onStatus(Predicate<HttpStatusCode> statusCodePredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 
-			return onRawStatus(toIntPredicate(statusPredicate), exceptionFunction);
-		}
+			Assert.notNull(statusCodePredicate, "StatusCodePredicate must not be null");
+			Assert.notNull(exceptionFunction, "Function must not be null");
+			int index = this.statusHandlers.size() - 1;  // Default handler always last
+			this.statusHandlers.add(index, new StatusHandler(statusCodePredicate, exceptionFunction));
+			return this;
 
-		private static IntPredicate toIntPredicate(Predicate<HttpStatus> predicate) {
-			return value -> {
-				HttpStatus status = HttpStatus.resolve(value);
-				return (status != null && predicate.test(status));
-			};
 		}
 
 		@Override
 		public ResponseSpec onRawStatus(IntPredicate statusCodePredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 
-			Assert.notNull(statusCodePredicate, "IntPredicate must not be null");
-			Assert.notNull(exceptionFunction, "Function must not be null");
-			int index = this.statusHandlers.size() - 1;  // Default handler always last
-			this.statusHandlers.add(index, new StatusHandler(statusCodePredicate, exceptionFunction));
-			return this;
+			return onStatus(toStatusCodePredicate(statusCodePredicate), exceptionFunction);
+		}
+
+		private static Predicate<HttpStatusCode> toStatusCodePredicate(IntPredicate predicate) {
+			return value -> predicate.test(value.value());
 		}
 
 		@Override
@@ -635,7 +633,7 @@ class DefaultWebClient implements WebClient {
 			ResponseEntity<Flux<T>> entity = new ResponseEntity<>(
 					body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response)),
 					response.headers().asHttpHeaders(),
-					response.rawStatusCode());
+					response.statusCode());
 
 			Mono<ResponseEntity<Flux<T>>> result = applyStatusHandlers(response);
 			return (result != null ? result.defaultIfEmpty(entity) : Mono.just(entity));
@@ -647,7 +645,7 @@ class DefaultWebClient implements WebClient {
 
 		@Nullable
 		private <T> Mono<T> applyStatusHandlers(ClientResponse response) {
-			int statusCode = response.rawStatusCode();
+			HttpStatusCode statusCode = response.statusCode();
 			for (StatusHandler handler : this.statusHandlers) {
 				if (handler.test(statusCode)) {
 					Mono<? extends Throwable> exMono;
@@ -667,7 +665,7 @@ class DefaultWebClient implements WebClient {
 			return null;
 		}
 
-		private <T> Mono<T> insertCheckpoint(Mono<T> result, int statusCode, HttpRequest request) {
+		private <T> Mono<T> insertCheckpoint(Mono<T> result, HttpStatusCode statusCode, HttpRequest request) {
 			HttpMethod httpMethod = request.getMethod();
 			URI uri = request.getURI();
 			String description = statusCode + " from " + httpMethod + " " + uri + " [DefaultWebClient]";
@@ -677,18 +675,18 @@ class DefaultWebClient implements WebClient {
 
 		private static class StatusHandler {
 
-			private final IntPredicate predicate;
+			private final Predicate<HttpStatusCode> predicate;
 
 			private final Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction;
 
-			public StatusHandler(IntPredicate predicate,
+			public StatusHandler(Predicate<HttpStatusCode> predicate,
 					Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 
 				this.predicate = predicate;
 				this.exceptionFunction = exceptionFunction;
 			}
 
-			public boolean test(int status) {
+			public boolean test(HttpStatusCode status) {
 				return this.predicate.test(status);
 			}
 

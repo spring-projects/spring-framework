@@ -33,7 +33,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.SpringProperties;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -442,7 +442,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		}
 		else {
 			ModelMap model = mavContainer.getModel();
-			HttpStatus status = mavContainer.getStatus();
+			HttpStatusCode status = mavContainer.getStatus();
 			ModelAndView mav = new ModelAndView(mavContainer.getViewName(), model, status);
 			mav.setViewName(mavContainer.getViewName());
 			if (!mavContainer.isViewReference()) {

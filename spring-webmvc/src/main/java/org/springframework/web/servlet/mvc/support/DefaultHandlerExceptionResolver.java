@@ -460,7 +460,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			HttpHeaders headers = errorResponse.getHeaders();
 			headers.forEach((name, values) -> values.forEach(value -> response.addHeader(name, value)));
 
-			int status = errorResponse.getRawStatusCode();
+			int status = errorResponse.getStatusCode().value();
 			String message = errorResponse.getBody().getDetail();
 			if (message != null) {
 				response.sendError(status, message);

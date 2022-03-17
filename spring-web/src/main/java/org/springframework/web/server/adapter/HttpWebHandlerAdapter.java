@@ -29,6 +29,7 @@ import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.HttpHandler;
@@ -270,7 +271,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	private void logResponse(ServerWebExchange exchange) {
 		LogFormatUtils.traceDebug(logger, traceOn -> {
-			HttpStatus status = exchange.getResponse().getStatusCode();
+			HttpStatusCode status = exchange.getResponse().getStatusCode();
 			return exchange.getLogPrefix() + "Completed " + (status != null ? status : "200 OK") +
 					(traceOn ? ", headers=" + formatHeaders(exchange.getResponse().getHeaders()) : "");
 		});

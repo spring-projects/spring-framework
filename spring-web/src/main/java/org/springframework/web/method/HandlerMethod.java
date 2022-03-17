@@ -36,7 +36,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -85,7 +85,7 @@ public class HandlerMethod {
 	private final MethodParameter[] parameters;
 
 	@Nullable
-	private HttpStatus responseStatus;
+	private HttpStatusCode responseStatus;
 
 	@Nullable
 	private String responseStatusReason;
@@ -296,7 +296,7 @@ public class HandlerMethod {
 	 * @see ResponseStatus#code()
 	 */
 	@Nullable
-	protected HttpStatus getResponseStatus() {
+	protected HttpStatusCode getResponseStatus() {
 		return this.responseStatus;
 	}
 

@@ -35,7 +35,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -80,11 +80,12 @@ class JdkClientHttpResponse implements ClientHttpResponse {
 
 
 	@Override
-	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(this.response.statusCode());
+	public HttpStatusCode getStatusCode() {
+		return HttpStatusCode.valueOf(this.response.statusCode());
 	}
 
 	@Override
+	@Deprecated
 	public int getRawStatusCode() {
 		return this.response.statusCode();
 	}

@@ -31,7 +31,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -62,7 +62,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	private final DataBufferFactory dataBufferFactory;
 
 	@Nullable
-	private Integer statusCode;
+	private HttpStatusCode statusCode;
 
 	private final HttpHeaders headers;
 
@@ -95,37 +95,32 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public boolean setStatusCode(@Nullable HttpStatus status) {
+	public boolean setStatusCode(@Nullable HttpStatusCode status) {
 		if (this.state.get() == State.COMMITTED) {
 			return false;
 		}
 		else {
-			this.statusCode = (status != null ? status.value() : null);
+			this.statusCode = status;
 			return true;
 		}
 	}
 
 	@Override
 	@Nullable
-	public HttpStatus getStatusCode() {
-		return (this.statusCode != null ? HttpStatus.resolve(this.statusCode) : null);
+	public HttpStatusCode getStatusCode() {
+		return this.statusCode;
 	}
 
 	@Override
 	public boolean setRawStatusCode(@Nullable Integer statusCode) {
-		if (this.state.get() == State.COMMITTED) {
-			return false;
-		}
-		else {
-			this.statusCode = statusCode;
-			return true;
-		}
+		return setStatusCode(statusCode != null ? HttpStatusCode.valueOf(statusCode) : null);
 	}
 
 	@Override
 	@Nullable
+	@Deprecated
 	public Integer getRawStatusCode() {
-		return this.statusCode;
+		return this.statusCode != null ? this.statusCode.value() : null;
 	}
 
 	@Override

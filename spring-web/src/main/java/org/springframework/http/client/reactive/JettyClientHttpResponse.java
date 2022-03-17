@@ -27,7 +27,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -64,11 +64,12 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 
 
 	@Override
-	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(getRawStatusCode());
+	public HttpStatusCode getStatusCode() {
+		return HttpStatusCode.valueOf(this.reactiveResponse.getStatus());
 	}
 
 	@Override
+	@Deprecated
 	public int getRawStatusCode() {
 		return this.reactiveResponse.getStatus();
 	}

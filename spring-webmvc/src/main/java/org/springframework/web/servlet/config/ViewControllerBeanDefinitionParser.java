@@ -27,7 +27,7 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
@@ -74,10 +74,10 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition controller = new RootBeanDefinition(ParameterizableViewController.class);
 		controller.setSource(source);
 
-		HttpStatus statusCode = null;
+		HttpStatusCode statusCode = null;
 		if (element.hasAttribute("status-code")) {
 			int statusValue = Integer.parseInt(element.getAttribute("status-code"));
-			statusCode = HttpStatus.valueOf(statusValue);
+			statusCode = HttpStatusCode.valueOf(statusValue);
 		}
 
 		String name = element.getLocalName();
@@ -130,7 +130,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		return beanDef;
 	}
 
-	private RootBeanDefinition getRedirectView(Element element, @Nullable HttpStatus status, @Nullable Object source) {
+	private RootBeanDefinition getRedirectView(Element element, @Nullable HttpStatusCode status, @Nullable Object source) {
 		RootBeanDefinition redirectView = new RootBeanDefinition(RedirectView.class);
 		redirectView.setSource(source);
 		redirectView.getConstructorArgumentValues().addIndexedArgumentValue(0, element.getAttribute("redirect-url"));

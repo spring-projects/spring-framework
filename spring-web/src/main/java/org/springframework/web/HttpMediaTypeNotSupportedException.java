@@ -21,6 +21,7 @@ import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -104,8 +105,8 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 	}
 
 	@Override
-	public int getRawStatusCode() {
-		return HttpStatus.UNSUPPORTED_MEDIA_TYPE.value();
+	public HttpStatusCode getStatusCode() {
+		return HttpStatus.UNSUPPORTED_MEDIA_TYPE;
 	}
 
 	@Override

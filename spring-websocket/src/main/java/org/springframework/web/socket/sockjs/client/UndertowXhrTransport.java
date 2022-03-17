@@ -49,7 +49,7 @@ import org.xnio.channels.StreamSinkChannel;
 import org.xnio.channels.StreamSourceChannel;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -190,7 +190,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 					public void completed(ClientExchange result) {
 						ClientResponse response = result.getResponse();
 						if (response.getResponseCode() != 200) {
-							HttpStatus status = HttpStatus.valueOf(response.getResponseCode());
+							HttpStatusCode status = HttpStatusCode.valueOf(response.getResponseCode());
 							IoUtils.safeClose(result.getConnection());
 							onFailure(new HttpServerErrorException(status, "Unexpected XHR receive status"));
 						}
@@ -286,7 +286,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 
 				latch.await();
 				ClientResponse response = responses.iterator().next();
-				HttpStatus status = HttpStatus.valueOf(response.getResponseCode());
+				HttpStatusCode status = HttpStatusCode.valueOf(response.getResponseCode());
 				HttpHeaders responseHeaders = toHttpHeaders(response.getResponseHeaders());
 				String responseBody = response.getAttachment(RESPONSE_BODY);
 				return (responseBody != null ?

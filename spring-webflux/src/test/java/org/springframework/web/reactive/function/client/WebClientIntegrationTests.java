@@ -64,6 +64,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -741,7 +742,7 @@ class WebClientIntegrationTests {
 		Mono<String> result = this.webClient.get()
 				.uri("/greeting")
 				.retrieve()
-				.onStatus(HttpStatus::is5xxServerError, response -> Mono.just(new MyException("500 error!")))
+				.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.just(new MyException("500 error!")))
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
@@ -765,7 +766,7 @@ class WebClientIntegrationTests {
 		Mono<String> result = this.webClient.get()
 				.uri("/greeting")
 				.retrieve()
-				.onStatus(HttpStatus::is5xxServerError, response -> Mono.just(new MyException("500 error!")))
+				.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.just(new MyException("500 error!")))
 				.bodyToMono(new ParameterizedTypeReference<String>() {});
 
 		StepVerifier.create(result)
@@ -792,7 +793,7 @@ class WebClientIntegrationTests {
 		Mono<String> result = this.webClient.get()
 				.uri("/json")
 				.retrieve()
-				.onStatus(HttpStatus::isError,
+				.onStatus(HttpStatusCode::isError,
 						response -> response.bodyToMono(Pojo.class)
 								.flatMap(pojo -> Mono.error(new MyException(pojo.getFoo())))
 				)
@@ -841,7 +842,7 @@ class WebClientIntegrationTests {
 		Mono<String> result = this.webClient.get()
 				.uri("/greeting")
 				.retrieve()
-				.onStatus(HttpStatus::is5xxServerError, response -> Mono.empty())
+				.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.empty())
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
@@ -865,7 +866,7 @@ class WebClientIntegrationTests {
 		Flux<String> result = this.webClient.get()
 				.uri("/greeting")
 				.retrieve()
-				.onStatus(HttpStatus::is5xxServerError, response -> Mono.empty())
+				.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.empty())
 				.bodyToFlux(String.class);
 
 		StepVerifier.create(result)
@@ -890,7 +891,7 @@ class WebClientIntegrationTests {
 		Mono<ResponseEntity<String>> result = this.webClient.get()
 				.uri("/").accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.onStatus(HttpStatus::is5xxServerError, response -> Mono.empty())// use normal response
+				.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.empty())// use normal response
 				.toEntity(String.class);
 
 		StepVerifier.create(result)

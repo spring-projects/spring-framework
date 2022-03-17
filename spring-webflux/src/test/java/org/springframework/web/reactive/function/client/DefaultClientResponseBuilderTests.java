@@ -28,12 +28,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
 import org.springframework.web.testfixture.http.client.reactive.MockClientHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Arjen Poutsma
@@ -106,6 +106,6 @@ public class DefaultClientResponseBuilderTests {
 		ClientResponse result = other.mutate().build();
 
 		assertThat(result.rawStatusCode()).isEqualTo(499);
-		assertThatIllegalArgumentException().isThrownBy(result::statusCode);
+		assertThat(result.statusCode()).isEqualTo(HttpStatusCode.valueOf(499));
 	}
 }

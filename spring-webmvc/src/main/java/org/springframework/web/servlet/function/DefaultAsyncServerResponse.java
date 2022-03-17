@@ -34,7 +34,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -83,11 +83,12 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 	}
 
 	@Override
-	public HttpStatus statusCode() {
+	public HttpStatusCode statusCode() {
 		return delegate(ServerResponse::statusCode);
 	}
 
 	@Override
+	@Deprecated
 	public int rawStatusCode() {
 		return delegate(ServerResponse::rawStatusCode);
 	}

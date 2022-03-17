@@ -30,7 +30,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -52,21 +52,18 @@ import org.springframework.web.reactive.function.BodyExtractor;
 public interface ClientResponse {
 
 	/**
-	 * Return the HTTP status code as an {@link HttpStatus} enum value.
-	 * @return the HTTP status as an HttpStatus enum value (never {@code null})
-	 * @throws IllegalArgumentException in case of an unknown HTTP status code
-	 * @since #getRawStatusCode()
-	 * @see HttpStatus#valueOf(int)
+	 * Return the HTTP status code as an {@link HttpStatusCode} value.
+	 * @return the HTTP status as an HttpStatusCode value (never {@code null})
 	 */
-	HttpStatus statusCode();
+	HttpStatusCode statusCode();
 
 	/**
-	 * Return the (potentially non-standard) status code of this response.
+	 * Return the raw status code of this response.
 	 * @return the HTTP status as an integer value
 	 * @since 5.1
-	 * @see #statusCode()
-	 * @see HttpStatus#resolve(int)
+	 * @deprecated as of 6.0, in favor of {@link #statusCode()}
 	 */
+	@Deprecated
 	int rawStatusCode();
 
 	/**
@@ -238,7 +235,7 @@ public interface ClientResponse {
 	 * @param statusCode the status code
 	 * @return the created builder
 	 */
-	static Builder create(HttpStatus statusCode) {
+	static Builder create(HttpStatusCode statusCode) {
 		return create(statusCode, ExchangeStrategies.withDefaults());
 	}
 
@@ -248,7 +245,7 @@ public interface ClientResponse {
 	 * @param strategies the strategies
 	 * @return the created builder
 	 */
-	static Builder create(HttpStatus statusCode, ExchangeStrategies strategies) {
+	static Builder create(HttpStatusCode statusCode, ExchangeStrategies strategies) {
 		return new DefaultClientResponseBuilder(strategies).statusCode(statusCode);
 	}
 
@@ -269,7 +266,7 @@ public interface ClientResponse {
 	 * @param messageReaders the message readers
 	 * @return the created builder
 	 */
-	static Builder create(HttpStatus statusCode, List<HttpMessageReader<?>> messageReaders) {
+	static Builder create(HttpStatusCode statusCode, List<HttpMessageReader<?>> messageReaders) {
 		return create(statusCode, new ExchangeStrategies() {
 			@Override
 			public List<HttpMessageReader<?>> messageReaders() {
@@ -326,7 +323,7 @@ public interface ClientResponse {
 		 * @param statusCode the new status code
 		 * @return this builder
 		 */
-		Builder statusCode(HttpStatus statusCode);
+		Builder statusCode(HttpStatusCode statusCode);
 
 		/**
 		 * Set the raw status code of the response.

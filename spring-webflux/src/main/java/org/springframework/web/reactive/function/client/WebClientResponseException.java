@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 
 /**
@@ -35,7 +36,7 @@ public class WebClientResponseException extends WebClientException {
 	private static final long serialVersionUID = 4127543205414951611L;
 
 
-	private final int statusCode;
+	private final HttpStatusCode statusCode;
 
 	private final String statusText;
 
@@ -68,11 +69,21 @@ public class WebClientResponseException extends WebClientException {
 			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset charset,
 			@Nullable HttpRequest request) {
 
-		this(initMessage(status, reasonPhrase, request), status, reasonPhrase, headers, body, charset, request);
+		this(HttpStatusCode.valueOf(status), reasonPhrase, headers, body, charset, request);
 	}
 
-	private static String initMessage(int status, String reasonPhrase, @Nullable HttpRequest request) {
-		return status + " " + reasonPhrase +
+	/**
+	 * Constructor with response data only, and a default message.
+	 * @since 6.0
+	 */
+	public WebClientResponseException(HttpStatusCode statusCode, String reasonPhrase,
+			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset charset,
+			@Nullable HttpRequest request) {
+		this(initMessage(statusCode, reasonPhrase, request), statusCode, reasonPhrase, headers, body, charset, request);
+	}
+
+	private static String initMessage(HttpStatusCode status, String reasonPhrase, @Nullable HttpRequest request) {
+		return status.value() + " " + reasonPhrase +
 				(request != null ? " from " + request.getMethod() + " " + request.getURI() : "");
 	}
 
@@ -91,6 +102,17 @@ public class WebClientResponseException extends WebClientException {
 	public WebClientResponseException(String message, int statusCode, String statusText,
 			@Nullable HttpHeaders headers, @Nullable byte[] responseBody, @Nullable Charset charset,
 			@Nullable HttpRequest request) {
+		this(message, HttpStatusCode.valueOf(statusCode), statusText, headers, responseBody, charset, request);
+
+
+	}
+	/**
+	 * Constructor with a prepared message.
+	 * @since 6.0
+	 */
+	public WebClientResponseException(String message, HttpStatusCode statusCode, String statusText,
+			@Nullable HttpHeaders headers, @Nullable byte[] responseBody, @Nullable Charset charset,
+			@Nullable HttpRequest request) {
 
 		super(message);
 
@@ -107,15 +129,17 @@ public class WebClientResponseException extends WebClientException {
 	 * Return the HTTP status code value.
 	 * @throws IllegalArgumentException in case of an unknown HTTP status code
 	 */
-	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(this.statusCode);
+	public HttpStatusCode getStatusCode() {
+		return this.statusCode;
 	}
 
 	/**
 	 * Return the raw HTTP status code value.
+	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
 	 */
+	@Deprecated
 	public int getRawStatusCode() {
-		return this.statusCode;
+		return this.statusCode.value();
 	}
 
 	/**
@@ -188,9 +212,18 @@ public class WebClientResponseException extends WebClientException {
 	public static WebClientResponseException create(
 			int statusCode, String statusText, HttpHeaders headers, byte[] body,
 			@Nullable Charset charset, @Nullable HttpRequest request) {
+		return create(HttpStatusCode.valueOf(statusCode), statusText, headers, body, charset, request);
+	}
 
-		HttpStatus httpStatus = HttpStatus.resolve(statusCode);
-		if (httpStatus != null) {
+	/**
+	 * Create {@code WebClientResponseException} or an HTTP status specific subclass.
+	 * @since 6.0
+	 */
+	public static WebClientResponseException create(
+			HttpStatusCode statusCode, String statusText, HttpHeaders headers, byte[] body,
+			@Nullable Charset charset, @Nullable HttpRequest request) {
+
+		if (statusCode instanceof HttpStatus httpStatus) {
 			switch (httpStatus) {
 				case BAD_REQUEST:
 					return new WebClientResponseException.BadRequest(statusText, headers, body, charset, request);

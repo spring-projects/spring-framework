@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
@@ -71,7 +72,7 @@ public class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory
 					.andReturn()
 					.getResponse();
 
-			HttpStatus status = HttpStatus.valueOf(servletResponse.getStatus());
+			HttpStatusCode status = HttpStatusCode.valueOf(servletResponse.getStatus());
 			byte[] body = servletResponse.getContentAsByteArray();
 			MockClientHttpResponse clientResponse = new MockClientHttpResponse(body, status);
 			clientResponse.getHeaders().putAll(getResponseHeaders(servletResponse));

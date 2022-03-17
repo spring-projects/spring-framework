@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 import jakarta.servlet.http.Cookie;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
@@ -135,7 +135,7 @@ public interface RenderingResponse extends ServerResponse {
 		 * @param status the response status
 		 * @return this builder
 		 */
-		Builder status(HttpStatus status);
+		Builder status(HttpStatusCode status);
 
 		/**
 		 * Set the HTTP status.

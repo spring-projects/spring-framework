@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -62,7 +62,7 @@ public class ModelAndViewContainer {
 	private boolean redirectModelScenario = false;
 
 	@Nullable
-	private HttpStatus status;
+	private HttpStatusCode status;
 
 	private final Set<String> noBinding = new HashSet<>(4);
 
@@ -193,7 +193,7 @@ public class ModelAndViewContainer {
 	 * {@code ModelAndView} used for view rendering purposes.
 	 * @since 4.3
 	 */
-	public void setStatus(@Nullable HttpStatus status) {
+	public void setStatus(@Nullable HttpStatusCode status) {
 		this.status = status;
 	}
 
@@ -202,7 +202,7 @@ public class ModelAndViewContainer {
 	 * @since 4.3
 	 */
 	@Nullable
-	public HttpStatus getStatus() {
+	public HttpStatusCode getStatus() {
 		return this.status;
 	}
 

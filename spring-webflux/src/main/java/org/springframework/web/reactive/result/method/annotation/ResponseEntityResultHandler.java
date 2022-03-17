@@ -141,7 +141,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 				httpEntity = (HttpEntity<?>) returnValue;
 			}
 			else if (returnValue instanceof ErrorResponse response) {
-				httpEntity = new ResponseEntity<>(response.getBody(), response.getHeaders(), response.getRawStatusCode());
+				httpEntity = new ResponseEntity<>(response.getBody(), response.getHeaders(), response.getStatusCode());
 			}
 			else if (returnValue instanceof ProblemDetail detail) {
 				httpEntity = new ResponseEntity<>(returnValue, HttpHeaders.EMPTY, detail.getStatus());
@@ -161,9 +161,8 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 				}
 			}
 
-			if (httpEntity instanceof ResponseEntity) {
-				exchange.getResponse().setRawStatusCode(
-						((ResponseEntity<?>) httpEntity).getStatusCodeValue());
+			if (httpEntity instanceof ResponseEntity<?> responseEntity) {
+				exchange.getResponse().setStatusCode(responseEntity.getStatusCode());
 			}
 
 			HttpHeaders entityHeaders = httpEntity.getHeaders();

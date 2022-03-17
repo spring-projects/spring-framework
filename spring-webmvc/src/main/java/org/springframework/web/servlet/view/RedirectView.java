@@ -32,6 +32,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -98,7 +99,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	private String encodingScheme;
 
 	@Nullable
-	private HttpStatus statusCode;
+	private HttpStatusCode statusCode;
 
 	private boolean expandUriTemplateVariables = true;
 
@@ -222,7 +223,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * <p>Default is to send 302/303, depending on the value of the
 	 * {@link #setHttp10Compatible(boolean) http10Compatible} flag.
 	 */
-	public void setStatusCode(HttpStatus statusCode) {
+	public void setStatusCode(HttpStatusCode statusCode) {
 		this.statusCode = statusCode;
 	}
 
@@ -613,7 +614,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 		String encodedURL = (isRemoteHost(targetUrl) ? targetUrl : response.encodeRedirectURL(targetUrl));
 		if (http10Compatible) {
-			HttpStatus attributeStatusCode = (HttpStatus) request.getAttribute(View.RESPONSE_STATUS_ATTRIBUTE);
+			HttpStatusCode attributeStatusCode = (HttpStatusCode) request.getAttribute(View.RESPONSE_STATUS_ATTRIBUTE);
 			if (this.statusCode != null) {
 				response.setStatus(this.statusCode.value());
 				response.setHeader("Location", encodedURL);
@@ -628,7 +629,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			}
 		}
 		else {
-			HttpStatus statusCode = getHttp11StatusCode(request, response, targetUrl);
+			HttpStatusCode statusCode = getHttp11StatusCode(request, response, targetUrl);
 			response.setStatus(statusCode.value());
 			response.setHeader("Location", encodedURL);
 		}
@@ -662,7 +663,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	/**
 	 * Determines the status code to use for HTTP 1.1 compatible requests.
-	 * <p>The default implementation returns the {@link #setStatusCode(HttpStatus) statusCode}
+	 * <p>The default implementation returns the {@link #setStatusCode(HttpStatusCode) statusCode}
 	 * property if set, or the value of the {@link #RESPONSE_STATUS_ATTRIBUTE} attribute.
 	 * If neither are set, it defaults to {@link HttpStatus#SEE_OTHER} (303).
 	 * @param request the request to inspect
@@ -670,13 +671,13 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @param targetUrl the target URL
 	 * @return the response status
 	 */
-	protected HttpStatus getHttp11StatusCode(
+	protected HttpStatusCode getHttp11StatusCode(
 			HttpServletRequest request, HttpServletResponse response, String targetUrl) {
 
 		if (this.statusCode != null) {
 			return this.statusCode;
 		}
-		HttpStatus attributeStatusCode = (HttpStatus) request.getAttribute(View.RESPONSE_STATUS_ATTRIBUTE);
+		HttpStatusCode attributeStatusCode = (HttpStatusCode) request.getAttribute(View.RESPONSE_STATUS_ATTRIBUTE);
 		if (attributeStatusCode != null) {
 			return attributeStatusCode;
 		}

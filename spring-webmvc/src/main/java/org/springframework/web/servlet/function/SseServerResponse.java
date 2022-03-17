@@ -31,6 +31,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.DelegatingServerHttpResponse;
@@ -59,7 +60,7 @@ final class SseServerResponse extends AbstractServerResponse {
 
 
 	private SseServerResponse(Consumer<SseBuilder> sseConsumer, @Nullable Duration timeout) {
-		super(200, createHeaders(), emptyCookies());
+		super(HttpStatus.OK, createHeaders(), emptyCookies());
 		this.sseConsumer = sseConsumer;
 		this.timeout = timeout;
 	}

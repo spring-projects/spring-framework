@@ -17,6 +17,7 @@
 package org.springframework.web.context.request.async;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.ErrorResponse;
 
@@ -37,13 +38,13 @@ import org.springframework.web.ErrorResponse;
 public class AsyncRequestTimeoutException extends RuntimeException implements ErrorResponse {
 
 	@Override
-	public int getRawStatusCode() {
-		return HttpStatus.SERVICE_UNAVAILABLE.value();
+	public HttpStatusCode getStatusCode() {
+		return HttpStatus.SERVICE_UNAVAILABLE;
 	}
 
 	@Override
 	public ProblemDetail getBody() {
-		return ProblemDetail.forRawStatusCode(getRawStatusCode());
+		return ProblemDetail.forStatus(getStatusCode());
 	}
 
 }

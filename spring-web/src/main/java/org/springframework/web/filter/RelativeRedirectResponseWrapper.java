@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.util.Assert;
 import org.springframework.web.util.WebUtils;
 
@@ -33,10 +33,10 @@ import org.springframework.web.util.WebUtils;
  */
 final class RelativeRedirectResponseWrapper extends HttpServletResponseWrapper {
 
-	private final HttpStatus redirectStatus;
+	private final HttpStatusCode redirectStatus;
 
 
-	private RelativeRedirectResponseWrapper(HttpServletResponse response, HttpStatus redirectStatus) {
+	private RelativeRedirectResponseWrapper(HttpServletResponse response, HttpStatusCode redirectStatus) {
 		super(response);
 		Assert.notNull(redirectStatus, "'redirectStatus' is required");
 		this.redirectStatus = redirectStatus;
@@ -51,7 +51,7 @@ final class RelativeRedirectResponseWrapper extends HttpServletResponseWrapper {
 
 
 	public static HttpServletResponse wrapIfNecessary(HttpServletResponse response,
-			HttpStatus redirectStatus) {
+			HttpStatusCode redirectStatus) {
 
 		RelativeRedirectResponseWrapper wrapper =
 				WebUtils.getNativeResponse(response, RelativeRedirectResponseWrapper.class);

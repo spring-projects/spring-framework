@@ -17,7 +17,7 @@
 package org.springframework.web;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 
 
@@ -41,18 +41,9 @@ import org.springframework.http.ProblemDetail;
 public interface ErrorResponse {
 
 	/**
-	 * Return the HTTP status to use for the response.
-	 * @throws IllegalArgumentException for an unknown HTTP status code
+	 * Return the HTTP status code to use for the response.
 	 */
-	default HttpStatus getStatus() {
-		return HttpStatus.valueOf(getRawStatusCode());
-	}
-
-	/**
-	 * Return the HTTP status value for the response, potentially non-standard
-	 * and not resolvable via {@link HttpStatus}.
-	 */
-	int getRawStatusCode();
+	HttpStatusCode getStatusCode();
 
 	/**
 	 * Return headers to use for the response.

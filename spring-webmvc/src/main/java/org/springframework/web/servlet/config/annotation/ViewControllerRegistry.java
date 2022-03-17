@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -104,7 +104,7 @@ public class ViewControllerRegistry {
 	 * {@link PathPattern} more tailored for web usage and more efficient.
 	 * @since 4.1
 	 */
-	public void addStatusController(String urlPath, HttpStatus statusCode) {
+	public void addStatusController(String urlPath, HttpStatusCode statusCode) {
 		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);
 		registration.setApplicationContext(this.applicationContext);
 		registration.setStatusCode(statusCode);

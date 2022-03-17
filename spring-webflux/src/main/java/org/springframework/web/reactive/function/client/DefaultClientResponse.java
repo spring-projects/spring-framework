@@ -34,6 +34,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -106,11 +107,12 @@ class DefaultClientResponse implements ClientResponse {
 	}
 
 	@Override
-	public HttpStatus statusCode() {
+	public HttpStatusCode statusCode() {
 		return this.response.getStatusCode();
 	}
 
 	@Override
+	@Deprecated
 	public int rawStatusCode() {
 		return this.response.getRawStatusCode();
 	}
@@ -201,9 +203,8 @@ class DefaultClientResponse implements ClientResponse {
 				.map(bodyBytes -> {
 					HttpRequest request = this.requestSupplier.get();
 					Charset charset = headers().contentType().map(MimeType::getCharset).orElse(null);
-					int statusCode = rawStatusCode();
-					HttpStatus httpStatus = HttpStatus.resolve(statusCode);
-					if (httpStatus != null) {
+					HttpStatusCode statusCode = statusCode();
+					if (statusCode instanceof HttpStatus httpStatus) {
 						return WebClientResponseException.create(
 								statusCode,
 								httpStatus.getReasonPhrase(),

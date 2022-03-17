@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
@@ -35,7 +36,7 @@ import org.springframework.util.ObjectUtils;
  * <p>This error handler checks for the status code on the
  * {@link ClientHttpResponse}. Any code in the 4xx or 5xx series is considered
  * to be an error. This behavior can be changed by overriding
- * {@link #hasError(HttpStatus)}. Unknown status codes will be ignored by
+ * {@link #hasError(HttpStatusCode)}. Unknown status codes will be ignored by
  * {@link #hasError(ClientHttpResponse)}.
  *
  * <p>See {@link #handleError(ClientHttpResponse)} for more details on specific
@@ -50,28 +51,25 @@ import org.springframework.util.ObjectUtils;
 public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
 	/**
-	 * Delegates to {@link #hasError(HttpStatus)} (for a standard status enum value) or
-	 * {@link #hasError(int)} (for an unknown status code) with the response status code.
-	 * @see ClientHttpResponse#getRawStatusCode()
-	 * @see #hasError(HttpStatus)
-	 * @see #hasError(int)
+	 * Delegates to {@link #hasError(HttpStatusCode)} with the response status code.
+	 * @see ClientHttpResponse#getStatusCode()
+	 * @see #hasError(HttpStatusCode)
 	 */
 	@Override
 	public boolean hasError(ClientHttpResponse response) throws IOException {
-		int rawStatusCode = response.getRawStatusCode();
-		HttpStatus statusCode = HttpStatus.resolve(rawStatusCode);
-		return (statusCode != null ? hasError(statusCode) : hasError(rawStatusCode));
+		HttpStatusCode statusCode = response.getStatusCode();
+		return hasError(statusCode);
 	}
 
 	/**
 	 * Template method called from {@link #hasError(ClientHttpResponse)}.
-	 * <p>The default implementation checks {@link HttpStatus#isError()}.
+	 * <p>The default implementation checks {@link HttpStatusCode#isError()}.
 	 * Can be overridden in subclasses.
-	 * @param statusCode the HTTP status code as enum value
+	 * @param statusCode the HTTP status code
 	 * @return {@code true} if the response indicates an error; {@code false} otherwise
-	 * @see HttpStatus#isError()
+	 * @see HttpStatusCode#isError()
 	 */
-	protected boolean hasError(HttpStatus statusCode) {
+	protected boolean hasError(HttpStatusCode statusCode) {
 		return statusCode.isError();
 	}
 
@@ -81,14 +79,16 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
 	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
 	 * Can be overridden in subclasses.
-	 * @param unknownStatusCode the HTTP status code as raw value
+	 * @param statusCode the HTTP status code as raw value
 	 * @return {@code true} if the response indicates an error; {@code false} otherwise
 	 * @since 4.3.21
 	 * @see org.springframework.http.HttpStatus.Series#CLIENT_ERROR
 	 * @see org.springframework.http.HttpStatus.Series#SERVER_ERROR
+	 * @deprecated in favor of {@link #hasError(HttpStatusCode)}
 	 */
-	protected boolean hasError(int unknownStatusCode) {
-		HttpStatus.Series series = HttpStatus.Series.resolve(unknownStatusCode);
+	@Deprecated
+	protected boolean hasError(int statusCode) {
+		HttpStatus.Series series = HttpStatus.Series.resolve(statusCode);
 		return (series == HttpStatus.Series.CLIENT_ERROR || series == HttpStatus.Series.SERVER_ERROR);
 	}
 
@@ -106,19 +106,11 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * {@link HttpStatus} enum range.
 	 * </ul>
 	 * @throws UnknownHttpStatusCodeException in case of an unresolvable status code
-	 * @see #handleError(ClientHttpResponse, HttpStatus)
+	 * @see #handleError(ClientHttpResponse, HttpStatusCode)
 	 */
 	@Override
 	public void handleError(ClientHttpResponse response) throws IOException {
-		HttpStatus statusCode = HttpStatus.resolve(response.getRawStatusCode());
-		if (statusCode == null) {
-			byte[] body = getResponseBody(response);
-			String message = getErrorMessage(response.getRawStatusCode(),
-					response.getStatusText(), body, getCharset(response));
-			throw new UnknownHttpStatusCodeException(message,
-					response.getRawStatusCode(), response.getStatusText(),
-					response.getHeaders(), body, getCharset(response));
-		}
+		HttpStatusCode statusCode = response.getStatusCode();
 		handleError(response, statusCode);
 	}
 
@@ -156,20 +148,21 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * @see HttpClientErrorException#create
 	 * @see HttpServerErrorException#create
 	 */
-	protected void handleError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
+	protected void handleError(ClientHttpResponse response, HttpStatusCode statusCode) throws IOException {
 		String statusText = response.getStatusText();
 		HttpHeaders headers = response.getHeaders();
 		byte[] body = getResponseBody(response);
 		Charset charset = getCharset(response);
 		String message = getErrorMessage(statusCode.value(), statusText, body, charset);
 
-		switch (statusCode.series()) {
-			case CLIENT_ERROR ->
-				throw HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
-			case SERVER_ERROR ->
-				throw HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);
-			default ->
-				throw new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
+		if (statusCode.is4xxClientError()) {
+			throw HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
+		}
+		else if (statusCode.is5xxServerError()) {
+			throw HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);
+		}
+		else {
+			throw new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
 		}
 	}
 

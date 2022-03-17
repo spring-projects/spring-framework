@@ -17,6 +17,7 @@
 package org.springframework.web.bind;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.util.NestedServletException;
@@ -35,7 +36,7 @@ import org.springframework.web.util.NestedServletException;
 @SuppressWarnings("serial")
 public class ServletRequestBindingException extends NestedServletException implements ErrorResponse {
 
-	private final ProblemDetail body = ProblemDetail.forRawStatusCode(getRawStatusCode());
+	private final ProblemDetail body = ProblemDetail.forStatus(getStatusCode());
 
 
 	/**
@@ -55,10 +56,9 @@ public class ServletRequestBindingException extends NestedServletException imple
 		super(msg, cause);
 	}
 
-
 	@Override
-	public int getRawStatusCode() {
-		return HttpStatus.BAD_REQUEST.value();
+	public HttpStatusCode getStatusCode() {
+		return HttpStatus.BAD_REQUEST;
 	}
 
 	@Override

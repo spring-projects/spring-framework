@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -42,7 +43,7 @@ public class ParameterizableViewController extends AbstractController {
 	private Object view;
 
 	@Nullable
-	private HttpStatus statusCode;
+	private HttpStatusCode statusCode;
 
 	private boolean statusOnly;
 
@@ -108,7 +109,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * fully handled within the controller.
 	 * @since 4.1
 	 */
-	public void setStatusCode(@Nullable HttpStatus statusCode) {
+	public void setStatusCode(@Nullable HttpStatusCode statusCode) {
 		this.statusCode = statusCode;
 	}
 
@@ -117,7 +118,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * @since 4.1
 	 */
 	@Nullable
-	public HttpStatus getStatusCode() {
+	public HttpStatusCode getStatusCode() {
 		return this.statusCode;
 	}
 

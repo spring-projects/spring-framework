@@ -48,7 +48,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -1125,8 +1125,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			logger.debug("Exiting from \"" + dispatchType + "\" dispatch, status " + status + headers);
 		}
 		else {
-			HttpStatus httpStatus = HttpStatus.resolve(status);
-			logger.debug("Completed " + (httpStatus != null ? httpStatus : status) + headers);
+			HttpStatusCode httpStatus = HttpStatusCode.valueOf(status);
+			logger.debug("Completed " + httpStatus + headers);
 		}
 	}
 

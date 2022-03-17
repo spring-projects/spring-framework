@@ -22,6 +22,7 @@ import java.io.PushbackInputStream;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 
@@ -58,9 +59,9 @@ class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 	 * @throws IOException in case of I/O errors
 	 */
 	public boolean hasMessageBody() throws IOException {
-		HttpStatus status = HttpStatus.resolve(getRawStatusCode());
-		if (status != null && (status.is1xxInformational() || status == HttpStatus.NO_CONTENT ||
-				status == HttpStatus.NOT_MODIFIED)) {
+		HttpStatusCode statusCode = getStatusCode();
+		if (statusCode.is1xxInformational() || statusCode == HttpStatus.NO_CONTENT ||
+				statusCode == HttpStatus.NOT_MODIFIED) {
 			return false;
 		}
 		if (getHeaders().getContentLength() == 0) {
@@ -121,11 +122,12 @@ class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 	}
 
 	@Override
-	public HttpStatus getStatusCode() throws IOException {
+	public HttpStatusCode getStatusCode() throws IOException {
 		return this.response.getStatusCode();
 	}
 
 	@Override
+	@Deprecated
 	public int getRawStatusCode() throws IOException {
 		return this.response.getRawStatusCode();
 	}
