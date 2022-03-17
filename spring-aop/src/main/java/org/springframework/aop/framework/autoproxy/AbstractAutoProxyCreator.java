@@ -244,9 +244,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	@Override
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
-		Object cacheKey = getCacheKey(beanClass, beanName);
 
 		if (!StringUtils.hasLength(beanName) || !this.targetSourcedBeans.contains(beanName)) {
+			Object cacheKey = getCacheKey(beanClass, beanName);
 			if (this.advisedBeans.containsKey(cacheKey)) {
 				return null;
 			}
