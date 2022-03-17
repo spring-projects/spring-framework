@@ -33,7 +33,9 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  * @param <T> the callback result type
+ * @deprecated as of 6.0, with no concrete replacement
  */
+@Deprecated
 public class ListenableFutureCallbackRegistry<T> {
 
 	private final Queue<SuccessCallback<? super T>> successCallbacks = new ArrayDeque<>(1);

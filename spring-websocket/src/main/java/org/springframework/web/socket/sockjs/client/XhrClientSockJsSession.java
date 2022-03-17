@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -53,9 +54,26 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 
 	private int binaryMessageSizeLimit = -1;
 
-
+	/**
+	 * Create a new {@code XhrClientSockJsSession}.
+	 * @deprecated as of 6.0, in favor of {@link #XhrClientSockJsSession(TransportRequest, WebSocketHandler, XhrTransport, CompletableFuture)}
+	 */
+	@Deprecated
 	public XhrClientSockJsSession(TransportRequest request, WebSocketHandler handler,
 			XhrTransport transport, SettableListenableFuture<WebSocketSession> connectFuture) {
+
+		super(request, handler, connectFuture);
+		Assert.notNull(transport, "XhrTransport is required");
+		this.transport = transport;
+		this.headers = request.getHttpRequestHeaders();
+		this.sendHeaders = new HttpHeaders();
+		this.sendHeaders.putAll(this.headers);
+		this.sendHeaders.setContentType(MediaType.APPLICATION_JSON);
+		this.sendUrl = request.getSockJsUrlInfo().getTransportUrl(TransportType.XHR_SEND);
+	}
+
+	public XhrClientSockJsSession(TransportRequest request, WebSocketHandler handler,
+			XhrTransport transport, CompletableFuture<WebSocketSession> connectFuture) {
 
 		super(request, handler, connectFuture);
 		Assert.notNull(transport, "XhrTransport is required");

@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +39,6 @@ import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession.Subscription;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -107,10 +107,10 @@ public class ReactorNettyTcpStompClientTests {
 	public void publishSubscribe() throws Exception {
 		String destination = "/topic/foo";
 		ConsumingHandler consumingHandler1 = new ConsumingHandler(destination);
-		ListenableFuture<StompSession> consumerFuture1 = this.client.connect(consumingHandler1);
+		CompletableFuture<StompSession> consumerFuture1 = this.client.connectAsync(consumingHandler1);
 
 		ConsumingHandler consumingHandler2 = new ConsumingHandler(destination);
-		ListenableFuture<StompSession> consumerFuture2 = this.client.connect(consumingHandler2);
+		CompletableFuture<StompSession> consumerFuture2 = this.client.connectAsync(consumingHandler2);
 
 		assertThat(consumingHandler1.awaitForSubscriptions(5000)).isTrue();
 		assertThat(consumingHandler2.awaitForSubscriptions(5000)).isTrue();
@@ -118,7 +118,7 @@ public class ReactorNettyTcpStompClientTests {
 		ProducingHandler producingHandler = new ProducingHandler();
 		producingHandler.addToSend(destination, "foo1");
 		producingHandler.addToSend(destination, "foo2");
-		ListenableFuture<StompSession> producerFuture = this.client.connect(producingHandler);
+		CompletableFuture<StompSession> producerFuture = this.client.connectAsync(producingHandler);
 
 		assertThat(consumingHandler1.awaitForMessageCount(2, 5000)).isTrue();
 		assertThat(consumingHandler1.getReceived()).containsExactly("foo1", "foo2");

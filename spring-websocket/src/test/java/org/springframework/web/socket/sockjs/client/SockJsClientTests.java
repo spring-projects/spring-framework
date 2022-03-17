@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class SockJsClientTests {
 		this.sockJsClient.doHandshake(handler, URL).addCallback(this.connectCallback);
 		assertThat(this.webSocketTransport.invoked()).isTrue();
 		WebSocketSession session = mock(WebSocketSession.class);
-		this.webSocketTransport.getConnectCallback().onSuccess(session);
+		this.webSocketTransport.getConnectCallback().accept(session, null);
 		verify(this.connectCallback).onSuccess(session);
 		verifyNoMoreInteractions(this.connectCallback);
 	}

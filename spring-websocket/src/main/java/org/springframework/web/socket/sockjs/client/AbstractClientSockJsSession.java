@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -55,7 +56,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 
 	private final WebSocketHandler webSocketHandler;
 
-	private final SettableListenableFuture<WebSocketSession> connectFuture;
+	private final CompletableFuture<WebSocketSession> connectFuture;
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
@@ -65,9 +66,18 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	@Nullable
 	private volatile CloseStatus closeStatus;
 
-
+	/**
+	 * Create a new {@code AbstractClientSockJsSession}.
+	 * @deprecated as of 6.0, in favor of {@link #AbstractClientSockJsSession(TransportRequest, WebSocketHandler, CompletableFuture)}
+	 */
+	@Deprecated
 	protected AbstractClientSockJsSession(TransportRequest request, WebSocketHandler handler,
 			SettableListenableFuture<WebSocketSession> connectFuture) {
+		this(request, handler, connectFuture.completable());
+	}
+
+	protected AbstractClientSockJsSession(TransportRequest request, WebSocketHandler handler,
+			CompletableFuture<WebSocketSession> connectFuture) {
 
 		Assert.notNull(request, "'request' is required");
 		Assert.notNull(handler, "'handler' is required");
@@ -242,7 +252,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 			this.state = State.OPEN;
 			try {
 				this.webSocketHandler.afterConnectionEstablished(this);
-				this.connectFuture.set(this);
+				this.connectFuture.complete(this);
 			}
 			catch (Exception ex) {
 				if (logger.isErrorEnabled()) {

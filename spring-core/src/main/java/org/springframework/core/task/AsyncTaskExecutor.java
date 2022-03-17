@@ -17,7 +17,10 @@
 package org.springframework.core.task;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+
+import org.springframework.util.concurrent.FutureUtils;
 
 /**
  * Extended interface for asynchronous {@link TaskExecutor} implementations,
@@ -90,5 +93,30 @@ public interface AsyncTaskExecutor extends TaskExecutor {
 	 * @since 3.0
 	 */
 	<T> Future<T> submit(Callable<T> task);
+
+	/**
+	 * Submit a {@code Runnable} task for execution, receiving a {@code CompletableFuture}
+	 * representing that task. The Future will return a {@code null} result upon completion.
+	 * @param task the {@code Runnable} to execute (never {@code null})
+	 * @return a {@code CompletableFuture} representing pending completion of the task
+	 * @throws TaskRejectedException if the given task was not accepted
+	 * @since 6.0
+	 */
+	default CompletableFuture<Void> submitCompletable(Runnable task) {
+		return CompletableFuture.runAsync(task, this);
+	}
+
+	/**
+	 * Submit a {@code Callable} task for execution, receiving a {@code CompletableFuture}
+	 * representing that task. The Future will return the Callable's result upon
+	 * completion.
+	 * @param task the {@code Callable} to execute (never {@code null})
+	 * @return a {@code CompletableFuture} representing pending completion of the task
+	 * @throws TaskRejectedException if the given task was not accepted
+	 * @since 6.0
+	 */
+	default <T> CompletableFuture<T> submitCompletable(Callable<T> task) {
+		return FutureUtils.callAsync(task, this);
+	}
 
 }

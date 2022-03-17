@@ -23,7 +23,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,9 +49,8 @@ import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.concurrent.CompletableToListenableFutureAdapter;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -210,9 +211,25 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param handler the session handler
 	 * @param uriVars the URI variables to expand into the URL
 	 * @return a ListenableFuture for access to the session when ready for use
+	 * @deprecated as of 6.0, in favor of {@link #connectAsync(String, StompSessionHandler, Object...)}
 	 */
+	@Deprecated
 	public ListenableFuture<StompSession> connect(String url, StompSessionHandler handler, Object... uriVars) {
-		return connect(url, null, handler, uriVars);
+		return new CompletableToListenableFutureAdapter<>(connectAsync(url, handler, uriVars));
+	}
+
+	/**
+	 * Connect to the given WebSocket URL and notify the given
+	 * {@link org.springframework.messaging.simp.stomp.StompSessionHandler}
+	 * when connected on the STOMP level after the CONNECTED frame is received.
+	 * @param url the url to connect to
+	 * @param handler the session handler
+	 * @param uriVars the URI variables to expand into the URL
+	 * @return a CompletableFuture for access to the session when ready for use
+	 * @since 6.0
+	 */
+	public CompletableFuture<StompSession> connectAsync(String url, StompSessionHandler handler, Object... uriVars) {
+		return connectAsync(url, null, handler, uriVars);
 	}
 
 	/**
@@ -224,11 +241,31 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param handler the session handler
 	 * @param uriVariables the URI variables to expand into the URL
 	 * @return a ListenableFuture for access to the session when ready for use
+	 * @deprecated as of 6.0, in favor of {@link #connectAsync(String, WebSocketHttpHeaders, StompSessionHandler, Object...)}
 	 */
+	@Deprecated
 	public ListenableFuture<StompSession> connect(String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			StompSessionHandler handler, Object... uriVariables) {
 
-		return connect(url, handshakeHeaders, null, handler, uriVariables);
+		return new CompletableToListenableFutureAdapter<>(
+				connectAsync(url, handshakeHeaders, null, handler, uriVariables));
+	}
+
+	/**
+	 * An overloaded version of
+	 * {@link #connect(String, StompSessionHandler, Object...)} that also
+	 * accepts {@link WebSocketHttpHeaders} to use for the WebSocket handshake.
+	 * @param url the url to connect to
+	 * @param handshakeHeaders the headers for the WebSocket handshake
+	 * @param handler the session handler
+	 * @param uriVariables the URI variables to expand into the URL
+	 * @return a ListenableFuture for access to the session when ready for use
+	 * @since 6.0
+	 */
+	public CompletableFuture<StompSession> connectAsync(String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
+			StompSessionHandler handler, Object... uriVariables) {
+
+		return connectAsync(url, handshakeHeaders, null, handler, uriVariables);
 	}
 
 	/**
@@ -242,13 +279,35 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param handler the session handler
 	 * @param uriVariables the URI variables to expand into the URL
 	 * @return a ListenableFuture for access to the session when ready for use
+	 * @deprecated as of 6.0, in favor of {@link #connectAsync(String, WebSocketHttpHeaders, StompHeaders, StompSessionHandler, Object...)}
 	 */
+	@Deprecated
 	public ListenableFuture<StompSession> connect(String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
+			@Nullable StompHeaders connectHeaders, StompSessionHandler handler, Object... uriVariables) {
+
+		return new CompletableToListenableFutureAdapter<>(
+				connectAsync(url, handshakeHeaders, connectHeaders, handler, uriVariables));
+	}
+
+	/**
+	 * An overloaded version of
+	 * {@link #connect(String, StompSessionHandler, Object...)} that also accepts
+	 * {@link WebSocketHttpHeaders} to use for the WebSocket handshake and
+	 * {@link StompHeaders} for the STOMP CONNECT frame.
+	 * @param url the url to connect to
+	 * @param handshakeHeaders headers for the WebSocket handshake
+	 * @param connectHeaders headers for the STOMP CONNECT frame
+	 * @param handler the session handler
+	 * @param uriVariables the URI variables to expand into the URL
+	 * @return a CompletableFuture for access to the session when ready for use
+	 * @since 6.0
+	 */
+	public CompletableFuture<StompSession> connectAsync(String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			@Nullable StompHeaders connectHeaders, StompSessionHandler handler, Object... uriVariables) {
 
 		Assert.notNull(url, "'url' must not be null");
 		URI uri = UriComponentsBuilder.fromUriString(url).buildAndExpand(uriVariables).encode().toUri();
-		return connect(uri, handshakeHeaders, connectHeaders, handler);
+		return connectAsync(uri, handshakeHeaders, connectHeaders, handler);
 	}
 
 	/**
@@ -260,17 +319,37 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param connectHeaders headers for the STOMP CONNECT frame
 	 * @param sessionHandler the STOMP session handler
 	 * @return a ListenableFuture for access to the session when ready for use
+	 * @deprecated as of 6.0, in favor of {@link #connectAsync(URI, WebSocketHttpHeaders, StompHeaders, StompSessionHandler)}
 	 */
+	@Deprecated
 	public ListenableFuture<StompSession> connect(URI url, @Nullable WebSocketHttpHeaders handshakeHeaders,
+			@Nullable StompHeaders connectHeaders, StompSessionHandler sessionHandler) {
+
+		return new CompletableToListenableFutureAdapter<>(
+				connectAsync(url, handshakeHeaders, connectHeaders, sessionHandler));
+	}
+
+	/**
+	 * An overloaded version of
+	 * {@link #connect(String, WebSocketHttpHeaders, StompSessionHandler, Object...)}
+	 * that accepts a fully prepared {@link java.net.URI}.
+	 * @param url the url to connect to
+	 * @param handshakeHeaders the headers for the WebSocket handshake
+	 * @param connectHeaders headers for the STOMP CONNECT frame
+	 * @param sessionHandler the STOMP session handler
+	 * @return a CompletableFuture for access to the session when ready for use
+	 * @since 6.0
+	 */
+	public CompletableFuture<StompSession> connectAsync(URI url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			@Nullable StompHeaders connectHeaders, StompSessionHandler sessionHandler) {
 
 		Assert.notNull(url, "'url' must not be null");
 		ConnectionHandlingStompSession session = createSession(connectHeaders, sessionHandler);
 		WebSocketTcpConnectionHandlerAdapter adapter = new WebSocketTcpConnectionHandlerAdapter(session);
 		getWebSocketClient()
-				.doHandshake(new LoggingWebSocketHandlerDecorator(adapter), handshakeHeaders, url)
-				.addCallback(adapter);
-		return session.getSessionFuture();
+				.execute(new LoggingWebSocketHandlerDecorator(adapter), handshakeHeaders, url)
+				.whenComplete(adapter);
+		return session.getSession();
 	}
 
 	@Override
@@ -286,7 +365,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	/**
 	 * Adapt WebSocket to the TcpConnectionHandler and TcpConnection contracts.
 	 */
-	private class WebSocketTcpConnectionHandlerAdapter implements ListenableFutureCallback<WebSocketSession>,
+	private class WebSocketTcpConnectionHandlerAdapter implements BiConsumer<WebSocketSession, Throwable>,
 			WebSocketHandler, TcpConnection<byte[]> {
 
 		private final TcpConnectionHandler<byte[]> connectionHandler;
@@ -307,15 +386,13 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			this.connectionHandler = connectionHandler;
 		}
 
-		// ListenableFutureCallback implementation: handshake outcome
+		// CompletableFuture callback implementation: handshake outcome
 
 		@Override
-		public void onSuccess(@Nullable WebSocketSession webSocketSession) {
-		}
-
-		@Override
-		public void onFailure(Throwable ex) {
-			this.connectionHandler.afterConnectFailure(ex);
+		public void accept(@Nullable WebSocketSession webSocketSession, @Nullable Throwable throwable) {
+			if (throwable != null) {
+				this.connectionHandler.afterConnectFailure(throwable);
+			}
 		}
 
 		// WebSocketHandler implementation
@@ -375,17 +452,17 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		// TcpConnection implementation
 
 		@Override
-		public ListenableFuture<Void> send(Message<byte[]> message) {
+		public CompletableFuture<Void> sendAsync(Message<byte[]> message) {
 			updateLastWriteTime();
-			SettableListenableFuture<Void> future = new SettableListenableFuture<>();
+			CompletableFuture<Void> future = new CompletableFuture<>();
 			try {
 				WebSocketSession session = this.session;
 				Assert.state(session != null, "No WebSocketSession available");
 				session.sendMessage(this.codec.encode(message, session.getClass()));
-				future.set(null);
+				future.complete(null);
 			}
 			catch (Throwable ex) {
-				future.setException(ex);
+				future.completeExceptionally(ex);
 			}
 			finally {
 				updateLastWriteTime();

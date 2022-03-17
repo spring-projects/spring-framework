@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,11 @@
 package org.springframework.web.socket.client;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
@@ -137,17 +136,15 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 			logger.info("Connecting to WebSocket at " + getUri());
 		}
 
-		ListenableFuture<WebSocketSession> future =
-				this.client.doHandshake(this.webSocketHandler, this.headers, getUri());
+		CompletableFuture<WebSocketSession> future =
+				this.client.execute(this.webSocketHandler, this.headers, getUri());
 
-		future.addCallback(new ListenableFutureCallback<WebSocketSession>() {
-			@Override
-			public void onSuccess(@Nullable WebSocketSession result) {
-				webSocketSession = result;
+		future.whenComplete((result, ex) -> {
+			if (result != null) {
+				this.webSocketSession = result;
 				logger.info("Successfully connected");
 			}
-			@Override
-			public void onFailure(Throwable ex) {
+			else if (ex != null) {
 				logger.error("Failed to connect", ex);
 			}
 		});

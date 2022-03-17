@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
@@ -35,7 +36,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
@@ -150,8 +150,8 @@ public abstract class AbstractWebSocketIntegrationTests {
 		return "ws://localhost:" + this.server.getPort();
 	}
 
-	protected ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler clientHandler, String endpointPath) {
-		return this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + endpointPath);
+	protected CompletableFuture<WebSocketSession> execute(WebSocketHandler clientHandler, String endpointPath) {
+		return this.webSocketClient.execute(clientHandler, getWsBaseUrl() + endpointPath);
 	}
 
 

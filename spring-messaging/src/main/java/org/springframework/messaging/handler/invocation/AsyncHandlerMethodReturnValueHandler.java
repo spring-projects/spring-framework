@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.messaging.handler.invocation;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.concurrent.CompletableToListenableFutureAdapter;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
@@ -37,7 +40,7 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	/**
 	 * Whether the return value represents an asynchronous, Future-like type
 	 * with success and error callbacks. If this method returns {@code true},
-	 * then {@link #toListenableFuture} is invoked next. If it returns
+	 * then {@link #toCompletableFuture} is invoked next. If it returns
 	 * {@code false}, then {@link #handleReturnValue} is called.
 	 * <p><strong>Note:</strong> this method will only be invoked after
 	 * {@link #supportsReturnType(org.springframework.core.MethodParameter)}
@@ -61,8 +64,30 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	 * @param returnType the type of the return value
 	 * @return the resulting ListenableFuture, or {@code null} in which case
 	 * no further handling will be performed
+	 * @deprecated as of 6.0, in favor of
+	 * {@link #toCompletableFuture(Object, MethodParameter)}
+	 */
+	@Deprecated
+	@Nullable
+	default ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
+		CompletableFuture<?> result = toCompletableFuture(returnValue, returnType);
+		return (result != null) ? new CompletableToListenableFutureAdapter<>(result) : null;
+	}
+
+	/**
+	 * Adapt the asynchronous return value to a {@link CompletableFuture}.
+	 * Return value handling will then continue when
+	 * the CompletableFuture is completed with either success or error.
+	 * <p><strong>Note:</strong> this method will only be invoked after
+	 * {@link #supportsReturnType(org.springframework.core.MethodParameter)}
+	 * is called and it returns {@code true}.
+	 * @param returnValue the value returned from the handler method
+	 * @param returnType the type of the return value
+	 * @return the resulting CompletableFuture, or {@code null} in which case
+	 * no further handling will be performed
+	 * @since 6.0
 	 */
 	@Nullable
-	ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType);
+	CompletableFuture<?> toCompletableFuture(Object returnValue, MethodParameter returnType);
 
 }

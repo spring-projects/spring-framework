@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.socket.sockjs.client;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -42,9 +43,19 @@ public class WebSocketClientSockJsSession extends AbstractClientSockJsSession im
 	@Nullable
 	private WebSocketSession webSocketSession;
 
-
+	/**
+	 * Create a new {@code WebSocketClientSockJsSession}.
+	 * @deprecated as of 6.0, in favor of {@link #WebSocketClientSockJsSession(TransportRequest, WebSocketHandler, CompletableFuture)}
+	 */
+	@Deprecated
 	public WebSocketClientSockJsSession(TransportRequest request, WebSocketHandler handler,
 			SettableListenableFuture<WebSocketSession> connectFuture) {
+
+		super(request, handler, connectFuture);
+	}
+
+	public WebSocketClientSockJsSession(TransportRequest request, WebSocketHandler handler,
+			CompletableFuture<WebSocketSession> connectFuture) {
 
 		super(request, handler, connectFuture);
 	}

@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -158,7 +157,6 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
 	/**
 	 * Determine the specific executor to use when executing the given method.
-	 * <p>Should preferably return an {@link AsyncListenableTaskExecutor} implementation.
 	 * @return the executor to use (or {@code null}, but just if no default executor is available)
 	 */
 	@Nullable
@@ -176,8 +174,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 			if (targetExecutor == null) {
 				return null;
 			}
-			executor = (targetExecutor instanceof AsyncListenableTaskExecutor ?
-					(AsyncListenableTaskExecutor) targetExecutor : new TaskExecutorAdapter(targetExecutor));
+			executor = (targetExecutor instanceof AsyncTaskExecutor ?
+					(AsyncTaskExecutor) targetExecutor : new TaskExecutorAdapter(targetExecutor));
 			this.executors.put(method, executor);
 		}
 		return executor;
@@ -276,17 +274,11 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @param returnType the declared return type (potentially a {@link Future} variant)
 	 * @return the execution result (potentially a corresponding {@link Future} handle)
 	 */
+	@SuppressWarnings("deprecation")
 	@Nullable
 	protected Object doSubmit(Callable<Object> task, AsyncTaskExecutor executor, Class<?> returnType) {
 		if (CompletableFuture.class.isAssignableFrom(returnType)) {
-			return CompletableFuture.supplyAsync(() -> {
-				try {
-					return task.call();
-				}
-				catch (Throwable ex) {
-					throw new CompletionException(ex);
-				}
-			}, executor);
+			return executor.submitCompletable(task);
 		}
 		else if (ListenableFuture.class.isAssignableFrom(returnType)) {
 			return ((AsyncListenableTaskExecutor) executor).submitListenable(task);

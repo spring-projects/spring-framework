@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.web.socket.sockjs.client;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
+import org.springframework.util.concurrent.CompletableToListenableFutureAdapter;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
@@ -43,7 +45,20 @@ public interface Transport {
 	 * @param request the transport request.
 	 * @param webSocketHandler the application handler to delegate lifecycle events to.
 	 * @return a future to indicate success or failure to connect.
+	 * @deprecated as of 6.0, in favor of {@link #connectAsync(TransportRequest, WebSocketHandler)}
 	 */
-	ListenableFuture<WebSocketSession> connect(TransportRequest request, WebSocketHandler webSocketHandler);
+	@Deprecated
+	default ListenableFuture<WebSocketSession> connect(TransportRequest request, WebSocketHandler webSocketHandler) {
+		return new CompletableToListenableFutureAdapter<>(connectAsync(request, webSocketHandler));
+	}
+
+	/**
+	 * Connect the transport.
+	 * @param request the transport request.
+	 * @param webSocketHandler the application handler to delegate lifecycle events to.
+	 * @return a future to indicate success or failure to connect.
+	 * @since 6.0
+	 */
+	CompletableFuture<WebSocketSession> connectAsync(TransportRequest request, WebSocketHandler webSocketHandler);
 
 }

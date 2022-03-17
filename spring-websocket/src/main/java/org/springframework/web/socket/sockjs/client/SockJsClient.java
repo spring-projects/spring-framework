@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -35,8 +36,6 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
@@ -229,16 +228,16 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 
 	@Override
-	public ListenableFuture<WebSocketSession> doHandshake(
+	public CompletableFuture<WebSocketSession> execute(
 			WebSocketHandler handler, String uriTemplate, Object... uriVars) {
 
 		Assert.notNull(uriTemplate, "uriTemplate must not be null");
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode().toUri();
-		return doHandshake(handler, null, uri);
+		return execute(handler, null, uri);
 	}
 
 	@Override
-	public final ListenableFuture<WebSocketSession> doHandshake(
+	public final CompletableFuture<WebSocketSession> execute(
 			WebSocketHandler handler, @Nullable WebSocketHttpHeaders headers, URI url) {
 
 		Assert.notNull(handler, "WebSocketHandler is required");
@@ -249,7 +248,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 			throw new IllegalArgumentException("Invalid scheme: '" + scheme + "'");
 		}
 
-		SettableListenableFuture<WebSocketSession> connectFuture = new SettableListenableFuture<>();
+		CompletableFuture<WebSocketSession> connectFuture = new CompletableFuture<>();
 		try {
 			SockJsUrlInfo sockJsUrlInfo = new SockJsUrlInfo(url);
 			ServerInfo serverInfo = getServerInfo(sockJsUrlInfo, getHttpRequestHeaders(headers));
@@ -259,7 +258,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 			if (logger.isErrorEnabled()) {
 				logger.error("Initial SockJS \"Info\" request to server failed, url=" + url, exception);
 			}
-			connectFuture.setException(exception);
+			connectFuture.completeExceptionally(exception);
 		}
 		return connectFuture;
 	}

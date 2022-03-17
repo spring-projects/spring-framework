@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
@@ -47,9 +48,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.IdGenerator;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.util.concurrent.SettableListenableFuture;
 
 /**
  * Default implementation of {@link ConnectionHandlingStompSession}.
@@ -85,7 +83,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private final StompHeaders connectHeaders;
 
-	private final SettableListenableFuture<StompSession> sessionFuture = new SettableListenableFuture<>();
+	private final CompletableFuture<StompSession> sessionFuture = new CompletableFuture<>();
 
 	private MessageConverter converter = new SimpleMessageConverter();
 
@@ -149,7 +147,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	}
 
 	@Override
-	public ListenableFuture<StompSession> getSessionFuture() {
+	public CompletableFuture<StompSession> getSession() {
 		return this.sessionFuture;
 	}
 
@@ -289,7 +287,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		TcpConnection<byte[]> conn = this.connection;
 		Assert.state(conn != null, "Connection closed");
 		try {
-			conn.send(message).get();
+			conn.sendAsync(message).get();
 		}
 		catch (ExecutionException ex) {
 			throw new MessageDeliveryException(message, ex.getCause());
@@ -407,7 +405,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Failed to connect session id=" + this.sessionId, ex);
 		}
-		this.sessionFuture.setException(ex);
+		this.sessionFuture.completeExceptionally(ex);
 		this.sessionHandler.handleTransportError(this, ex);
 	}
 
@@ -450,7 +448,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 				else if (StompCommand.CONNECTED.equals(command)) {
 					initHeartbeatTasks(headers);
 					this.version = headers.getFirst("version");
-					this.sessionFuture.set(this);
+					this.sessionFuture.complete(this);
 					this.sessionHandler.afterConnected(this, headers);
 				}
 				else if (StompCommand.ERROR.equals(command)) {
@@ -506,7 +504,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	@Override
 	public void handleFailure(Throwable ex) {
 		try {
-			this.sessionFuture.setException(ex);  // no-op if already set
+			this.sessionFuture.completeExceptionally(ex);  // no-op if already set
 			this.sessionHandler.handleTransportError(this, ex);
 		}
 		catch (Throwable ex2) {
@@ -698,16 +696,11 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		public void run() {
 			TcpConnection<byte[]> conn = connection;
 			if (conn != null) {
-				conn.send(HEARTBEAT).addCallback(
-						new ListenableFutureCallback<Void>() {
-							@Override
-							public void onSuccess(@Nullable Void result) {
-							}
-							@Override
-							public void onFailure(Throwable ex) {
-								handleFailure(ex);
-							}
-						});
+				conn.sendAsync(HEARTBEAT).whenComplete((unused, throwable) -> {
+					if (throwable != null) {
+						handleFailure(throwable);
+					}
+				});
 			}
 		}
 	}
