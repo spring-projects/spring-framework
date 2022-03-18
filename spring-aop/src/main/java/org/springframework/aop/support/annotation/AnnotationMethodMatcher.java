@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Simple MethodMatcher that looks for a specific Java 5 annotation
- * being present on a method (checking both the method on the invoked
- * interface, if any, and the corresponding method on the target class).
+ * Simple {@link org.springframework.aop.MethodMatcher MethodMatcher} that looks
+ * for a specific annotation being present on a method (checking both the method
+ * on the invoked interface, if any, and the corresponding method on the target
+ * class).
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
