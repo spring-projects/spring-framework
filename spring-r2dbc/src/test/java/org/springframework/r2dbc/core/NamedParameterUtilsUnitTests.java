@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.r2dbc.spi.Parameters;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
@@ -294,7 +295,7 @@ public class NamedParameterUtilsUnitTests {
 
 		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(
 				sql, factory, new MapBindParameterSource(
-						Collections.singletonMap("id", Parameter.from("foo"))));
+						Collections.singletonMap("id", Parameters.in("foo"))));
 
 		assertThat(operation.toQuery()).isEqualTo(
 				"SELECT * FROM person where name = $0 or lastname = $0");
@@ -307,7 +308,7 @@ public class NamedParameterUtilsUnitTests {
 			@Override
 			public void bind(int index, Object value) {
 				assertThat(index).isEqualTo(0);
-				assertThat(value).isEqualTo("foo");
+				assertThat(value).isEqualTo(Parameters.in("foo"));
 			}
 			@Override
 			public void bindNull(String identifier, Class<?> type) {
@@ -330,7 +331,7 @@ public class NamedParameterUtilsUnitTests {
 
 		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(
 				sql, factory, new MapBindParameterSource(Collections.singletonMap("ids",
-						Parameter.from(Arrays.asList("foo", "bar", "baz")))));
+						Parameters.in(Arrays.asList("foo", "bar", "baz")))));
 
 		assertThat(operation.toQuery()).isEqualTo(
 				"SELECT * FROM person where name IN ($0, $1, $2) or lastname IN ($0, $1, $2)");
@@ -369,7 +370,7 @@ public class NamedParameterUtilsUnitTests {
 
 		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(
 				sql, factory, new MapBindParameterSource(
-						Collections.singletonMap("id", Parameter.from("foo"))));
+						Collections.singletonMap("id", Parameters.in("foo"))));
 
 		assertThat(operation.toQuery()).isEqualTo(
 				"SELECT * FROM person where name = ? or lastname = ?");
@@ -395,7 +396,7 @@ public class NamedParameterUtilsUnitTests {
 			}
 		});
 
-		assertThat(bindValues).hasSize(2).containsEntry(0, "foo").containsEntry(1, "foo");
+		assertThat(bindValues).hasSize(2).containsEntry(0, Parameters.in("foo")).containsEntry(1, Parameters.in("foo"));
 	}
 
 	@Test
@@ -406,7 +407,7 @@ public class NamedParameterUtilsUnitTests {
 
 		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(
 				sql, factory, new MapBindParameterSource(
-						Collections.singletonMap("id", Parameter.empty(String.class))));
+						Collections.singletonMap("id", Parameters.in(String.class))));
 
 		assertThat(operation.toQuery()).isEqualTo(
 				"SELECT * FROM person where name = $0 or lastname = $0");
@@ -418,7 +419,8 @@ public class NamedParameterUtilsUnitTests {
 			}
 			@Override
 			public void bind(int index, Object value) {
-				throw new UnsupportedOperationException();
+				assertThat(index).isEqualTo(0);
+				assertThat(value).isEqualTo(Parameters.in(String.class));
 			}
 			@Override
 			public void bindNull(String identifier, Class<?> type) {
@@ -426,8 +428,7 @@ public class NamedParameterUtilsUnitTests {
 			}
 			@Override
 			public void bindNull(int index, Class<?> type) {
-				assertThat(index).isEqualTo(0);
-				assertThat(type).isEqualTo(String.class);
+				throw new UnsupportedOperationException();
 			}
 		});
 	}

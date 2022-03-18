@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 
 
 	@ParameterizedDataBufferAllocatingTest
-	void bodyToMonoVoid(String displayName, DataBufferFactory bufferFactory) {
+	void bodyToMonoVoid(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		this.server.enqueue(new MockResponse()
@@ -114,7 +114,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest // SPR-17482
-	void bodyToMonoVoidWithoutContentType(String displayName, DataBufferFactory bufferFactory) {
+	void bodyToMonoVoidWithoutContentType(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		this.server.enqueue(new MockResponse()
@@ -131,7 +131,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void onStatusWithBodyNotConsumed(String displayName, DataBufferFactory bufferFactory) {
+	void onStatusWithBodyNotConsumed(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
@@ -139,7 +139,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void onStatusWithBodyConsumed(String displayName, DataBufferFactory bufferFactory) {
+	void onStatusWithBodyConsumed(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
@@ -147,7 +147,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest // SPR-17473
-	void onStatusWithMonoErrorAndBodyNotConsumed(String displayName, DataBufferFactory bufferFactory) {
+	void onStatusWithMonoErrorAndBodyNotConsumed(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
@@ -155,7 +155,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void onStatusWithMonoErrorAndBodyConsumed(String displayName, DataBufferFactory bufferFactory) {
+	void onStatusWithMonoErrorAndBodyConsumed(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
@@ -163,7 +163,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest // gh-23230
-	void onStatusWithImmediateErrorAndBodyNotConsumed(String displayName, DataBufferFactory bufferFactory) {
+	void onStatusWithImmediateErrorAndBodyNotConsumed(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
@@ -173,7 +173,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void releaseBody(String displayName, DataBufferFactory bufferFactory) {
+	void releaseBody(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		this.server.enqueue(new MockResponse()
@@ -190,7 +190,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void exchangeToBodilessEntity(String displayName, DataBufferFactory bufferFactory) {
+	void exchangeToBodilessEntity(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		this.server.enqueue(new MockResponse()

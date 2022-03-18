@@ -16,7 +16,7 @@
 
 package org.springframework.r2dbc.core;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -55,12 +55,12 @@ public class ColumnMapRowMapper implements BiFunction<Row, RowMetadata, Map<Stri
 	@SuppressWarnings("deprecation")  // getColumnNames() is deprecated as of R2DBC 0.9
 	@Override
 	public Map<String, Object> apply(Row row, RowMetadata rowMetadata) {
-		Collection<String> columns = rowMetadata.getColumnNames();
+		List<? extends ColumnMetadata> columns = rowMetadata.getColumnMetadatas();
 		int columnCount = columns.size();
 		Map<String, Object> mapOfColValues = createColumnMap(columnCount);
 		int index = 0;
-		for (String column : columns) {
-			String key = getColumnKey(column);
+		for (ColumnMetadata column : columns) {
+			String key = getColumnKey(column.getName());
 			Object obj = getColumnValue(row, index++);
 			mapOfColValues.put(key, obj);
 		}

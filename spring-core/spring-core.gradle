@@ -67,6 +67,7 @@ dependencies {
 	testImplementation("org.xmlunit:xmlunit-matchers")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("io.projectreactor.tools:blockhound")
+	testImplementation("org.skyscreamer:jsonassert")
 	testFixturesImplementation("com.google.code.findbugs:jsr305")
 	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
 	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
@@ -85,7 +86,8 @@ jar {
 	dependsOn cglibRepackJar
 	from(zipTree(cglibRepackJar.archivePath)) {
 		include "org/springframework/cglib/**"
-		exclude "org/springframework/cglib/beans/BeanMap*.class"
+		exclude "org/springframework/cglib/beans/BeanMap.class"
+		exclude "org/springframework/cglib/beans/BeanMap\$*.class"
 		exclude "org/springframework/cglib/core/AbstractClassGenerator*.class"
 		exclude "org/springframework/cglib/core/AsmApi*.class"
 		exclude "org/springframework/cglib/core/KeyFactory.class"

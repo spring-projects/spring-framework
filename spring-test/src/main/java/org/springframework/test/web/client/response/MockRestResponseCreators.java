@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,15 @@ public abstract class MockRestResponseCreators {
 	 * @param status the response status
 	 */
 	public static DefaultResponseCreator withStatus(HttpStatus status) {
+		return new DefaultResponseCreator(status);
+	}
+
+	/**
+	 * Variant of {@link #withStatus(HttpStatus)} for a custom HTTP status code.
+	 * @param status the response status
+	 * @since 5.3.17
+	 */
+	public static DefaultResponseCreator withRawStatus(int status) {
 		return new DefaultResponseCreator(status);
 	}
 

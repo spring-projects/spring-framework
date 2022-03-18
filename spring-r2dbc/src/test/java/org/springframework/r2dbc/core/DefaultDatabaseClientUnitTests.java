@@ -20,6 +20,7 @@ import java.util.Arrays;
 
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.Parameters;
 import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Statement;
 import io.r2dbc.spi.test.MockColumnMetadata;
@@ -137,12 +138,12 @@ class DefaultDatabaseClientUnitTests {
 		databaseClient.sql("SELECT * FROM table WHERE key = $1").bindNull(0,
 				String.class).then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bindNull(0, String.class);
+		verify(statement).bind(0, Parameters.in(String.class));
 
 		databaseClient.sql("SELECT * FROM table WHERE key = $1").bindNull("$1",
 				String.class).then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bindNull("$1", String.class);
+		verify(statement).bind("$1", Parameters.in(String.class));
 	}
 
 	@Test
@@ -155,13 +156,13 @@ class DefaultDatabaseClientUnitTests {
 				Parameter.empty(String.class)).then().as(
 						StepVerifier::create).verifyComplete();
 
-		verify(statement).bindNull(0, String.class);
+		verify(statement).bind(0, Parameters.in(String.class));
 
 		databaseClient.sql("SELECT * FROM table WHERE key = $1").bind("$1",
 				Parameter.empty(String.class)).then().as(
 						StepVerifier::create).verifyComplete();
 
-		verify(statement).bindNull("$1", String.class);
+		verify(statement).bind("$1", Parameters.in(String.class));
 	}
 
 	@Test
@@ -173,7 +174,7 @@ class DefaultDatabaseClientUnitTests {
 		databaseClient.sql("SELECT * FROM table WHERE key = :key").bindNull("key",
 				String.class).then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bindNull(0, String.class);
+		verify(statement).bind(0, Parameters.in(String.class));
 	}
 
 	@Test
@@ -204,12 +205,12 @@ class DefaultDatabaseClientUnitTests {
 		databaseClient.sql("SELECT * FROM table WHERE key = $1").bind(0,
 				Parameter.from("foo")).then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bind(0, "foo");
+		verify(statement).bind(0, Parameters.in("foo"));
 
 		databaseClient.sql("SELECT * FROM table WHERE key = $1").bind("$1",
 				"foo").then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bind("$1", "foo");
+		verify(statement).bind("$1", Parameters.in("foo"));
 	}
 
 	@Test
@@ -221,7 +222,7 @@ class DefaultDatabaseClientUnitTests {
 		databaseClient.sql("SELECT * FROM table WHERE key = :key").bind("key",
 				"foo").then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bind(0, "foo");
+		verify(statement).bind(0, Parameters.in("foo"));
 	}
 
 	@Test
