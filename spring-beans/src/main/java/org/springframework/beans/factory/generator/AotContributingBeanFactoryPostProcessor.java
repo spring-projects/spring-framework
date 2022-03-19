@@ -29,7 +29,6 @@ import org.springframework.lang.Nullable;
  * @author Stephane Nicoll
  * @since 6.0
  */
-@FunctionalInterface
 public interface AotContributingBeanFactoryPostProcessor extends BeanFactoryPostProcessor {
 
 	/**

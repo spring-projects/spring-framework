@@ -60,8 +60,8 @@ public class AspectMetadata implements Serializable {
 	private final Class<?> aspectClass;
 
 	/**
-	 * AspectJ reflection information (AspectJ 5 / Java 5 specific).
-	 * Re-resolved on deserialization since it isn't serializable itself.
+	 * AspectJ reflection information.
+	 * <p>Re-resolved on deserialization since it isn't serializable itself.
 	 */
 	private transient AjType<?> ajType;
 
