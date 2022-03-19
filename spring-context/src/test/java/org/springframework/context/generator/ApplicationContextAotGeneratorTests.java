@@ -92,7 +92,7 @@ class ApplicationContextAotGeneratorTests {
 			assertThat(aotContext.getBeanDefinitionNames()).containsOnly("autowiredComponent", "number");
 			AutowiredComponent bean = aotContext.getBean(AutowiredComponent.class);
 			assertThat(bean.getEnvironment()).isSameAs(aotContext.getEnvironment());
-			assertThat(bean.getCounter()).isEqualTo(42L);
+			assertThat(bean.getCounter()).isEqualTo(42);
 		}));
 	}
 

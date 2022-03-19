@@ -1788,7 +1788,7 @@ a parent collection definition is redundant and does not result in the desired m
 [[beans-collection-elements-strongly-typed]]
 ===== Strongly-typed collection
 
-With the introduction of generic types in Java 5, you can use strongly typed collections.
+Thanks to Java's support for generic types, you can use strongly typed collections.
 That is, it is possible to declare a `Collection` type such that it can only contain
 (for example) `String` elements. If you use Spring to dependency-inject a
 strongly-typed `Collection` into a bean, you can take advantage of Spring's
