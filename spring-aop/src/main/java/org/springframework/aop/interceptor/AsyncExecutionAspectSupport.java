@@ -30,7 +30,11 @@ import java.util.function.Supplier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.*;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
@@ -142,7 +146,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware, D
 		this.exceptionHandler = SingletonSupplier.of(exceptionHandler);
 	}
 
-	@Override public void destroy() {
+	@Override
+	public void destroy() {
 		this.beanFactory = null;
 		this.executors.clear();
 	}
@@ -155,9 +160,10 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware, D
 	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (!Objects.equals( this.beanFactory, beanFactory ))
+		if (!Objects.equals( this.beanFactory, beanFactory )) {
 			this.destroy();
-		this.beanFactory = beanFactory;
+			this.beanFactory = beanFactory;
+		}
 	}
 
 
