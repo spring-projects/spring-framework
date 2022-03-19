@@ -18,6 +18,7 @@ package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -29,10 +30,7 @@ import java.util.function.Supplier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
@@ -61,7 +59,7 @@ import org.springframework.util.function.SingletonSupplier;
  * @author Stephane Nicoll
  * @since 3.1.2
  */
-public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
+public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware, DisposableBean {
 
 	/**
 	 * The default name of the {@link TaskExecutor} bean to pick up: "taskExecutor".
@@ -144,6 +142,11 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		this.exceptionHandler = SingletonSupplier.of(exceptionHandler);
 	}
 
+	@Override public void destroy() {
+		this.beanFactory = null;
+		this.executors.clear();
+	}
+
 	/**
 	 * Set the {@link BeanFactory} to be used when looking up executors by qualifier
 	 * or when relying on the default executor lookup algorithm.
@@ -152,6 +155,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
+		if (!Objects.equals( this.beanFactory, beanFactory ))
+			this.destroy();
 		this.beanFactory = beanFactory;
 	}
 

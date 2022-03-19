@@ -144,6 +144,32 @@ public class AnnotationAsyncExecutionAspectTests {
 	}
 
 	@Test
+	public void testChangeBeanFactory() throws ExecutionException, InterruptedException {
+		DefaultListableBeanFactory beanFactory1 = new DefaultListableBeanFactory();
+		ThreadPoolTaskExecutor executor1 = new ThreadPoolTaskExecutor();
+		executor1.setThreadFactory( r -> new Thread( r, "bf1" ) );
+		executor1.initialize();
+		beanFactory1.registerSingleton( "e1", executor1 );
+		AnnotationAsyncExecutionAspect.aspectOf().setBeanFactory( beanFactory1 );
+
+		ClassWithQualifiedAsyncMethods obj = new ClassWithQualifiedAsyncMethods();
+
+		ListenableFuture<Thread> e1Thread = obj.e1Work();
+		assertThat( e1Thread.get().getName() ).isEqualTo( "bf1" );
+
+
+		DefaultListableBeanFactory beanFactory2 = new DefaultListableBeanFactory();
+		ThreadPoolTaskExecutor executor2 = new ThreadPoolTaskExecutor();
+		executor2.setThreadFactory( r -> new Thread( r, "bf2" ) );
+		executor2.initialize();
+		beanFactory2.registerSingleton( "e1", executor2 );
+		AnnotationAsyncExecutionAspect.aspectOf().setBeanFactory( beanFactory2 );
+
+		ListenableFuture<Thread> e2Thread = obj.e1Work();
+		assertThat( e2Thread.get().getName() ).startsWith( "bf2" );
+	}
+
+	@Test
 	public void exceptionHandlerCalled() {
 		Method m = ReflectionUtils.findMethod(ClassWithException.class, "failWithVoid");
 		TestableAsyncUncaughtExceptionHandler exceptionHandler = new TestableAsyncUncaughtExceptionHandler();
