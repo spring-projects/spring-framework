@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,20 +32,19 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public class SPR3064Tests {
-
-	private Service service;
-
+class SPR3064Tests {
 
 	@Test
-	public void testServiceIsAdvised() {
+	void testServiceIsAdvised() {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
-		service = (Service) ctx.getBean("service");
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(
-				this.service::serveMe)
-			.withMessageContaining("advice invoked");
+		Service service  = ctx.getBean(Service.class);
+		assertThatExceptionOfType(RuntimeException.class)
+			.isThrownBy(service::serveMe)
+			.withMessage("advice invoked");
+
+		ctx.close();
 	}
 
 }

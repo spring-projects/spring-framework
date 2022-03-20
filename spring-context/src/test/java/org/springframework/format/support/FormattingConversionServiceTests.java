@@ -36,7 +36,6 @@ import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -49,9 +48,6 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.Formatter;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.NumberFormat;
-import org.springframework.format.datetime.joda.DateTimeParser;
-import org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory;
-import org.springframework.format.datetime.joda.ReadablePartialPrinter;
 import org.springframework.format.number.NumberStyleFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -91,6 +87,7 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void formatFieldForTypeWithPrinterParserWithCoercion() {
 		formattingService.addConverter(new Converter<DateTime, LocalDate>() {
 			@Override
@@ -98,8 +95,9 @@ public class FormattingConversionServiceTests {
 				return source.toLocalDate();
 			}
 		});
-		formattingService.addFormatterForFieldType(LocalDate.class, new ReadablePartialPrinter(DateTimeFormat
-				.shortDate()), new DateTimeParser(DateTimeFormat.shortDate()));
+		formattingService.addFormatterForFieldType(LocalDate.class,
+				new org.springframework.format.datetime.joda.ReadablePartialPrinter(DateTimeFormat.shortDate()),
+					new org.springframework.format.datetime.joda.DateTimeParser(DateTimeFormat.shortDate()));
 		String formatted = formattingService.convert(new LocalDate(2009, 10, 31), String.class);
 		assertThat(formatted).isEqualTo("10/31/09");
 		LocalDate date = formattingService.convert("10/31/09", LocalDate.class);
@@ -118,14 +116,14 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
+	@SuppressWarnings({ "resource", "deprecation" })
 	public void formatFieldForValueInjectionUsingMetaAnnotations() {
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
 		RootBeanDefinition bd = new RootBeanDefinition(MetaValueBean.class);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		ac.registerBeanDefinition("valueBean", bd);
 		ac.registerBeanDefinition("conversionService", new RootBeanDefinition(FormattingConversionServiceFactoryBean.class));
-		ac.registerBeanDefinition("ppc", new RootBeanDefinition(PropertyPlaceholderConfigurer.class));
+		ac.registerBeanDefinition("ppc", new RootBeanDefinition(org.springframework.beans.factory.config.PropertyPlaceholderConfigurer.class));
 		ac.refresh();
 		System.setProperty("myDate", "10-31-09");
 		System.setProperty("myNumber", "99.99%");
@@ -141,22 +139,25 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void formatFieldForAnnotation() throws Exception {
-		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
+		formattingService.addFormatterForFieldAnnotation(new org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory());
 		doTestFormatFieldForAnnotation(Model.class, false);
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void formatFieldForAnnotationWithDirectFieldAccess() throws Exception {
-		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
+		formattingService.addFormatterForFieldAnnotation(new org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory());
 		doTestFormatFieldForAnnotation(Model.class, true);
 	}
 
 	@Test
-	@SuppressWarnings("resource")
+	@SuppressWarnings({ "resource", "deprecation" })
 	public void formatFieldForAnnotationWithPlaceholders() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
-		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer ppc =
+				new org.springframework.beans.factory.config.PropertyPlaceholderConfigurer();
 		Properties props = new Properties();
 		props.setProperty("dateStyle", "S-");
 		props.setProperty("datePattern", "M-d-yy");
@@ -164,15 +165,16 @@ public class FormattingConversionServiceTests {
 		context.getBeanFactory().registerSingleton("ppc", ppc);
 		context.refresh();
 		context.getBeanFactory().initializeBean(formattingService, "formattingService");
-		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
+		formattingService.addFormatterForFieldAnnotation(new org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory());
 		doTestFormatFieldForAnnotation(ModelWithPlaceholders.class, false);
 	}
 
 	@Test
-	@SuppressWarnings("resource")
+	@SuppressWarnings({ "resource", "deprecation" })
 	public void formatFieldForAnnotationWithPlaceholdersAndFactoryBean() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
-		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer ppc =
+				new org.springframework.beans.factory.config.PropertyPlaceholderConfigurer();
 		Properties props = new Properties();
 		props.setProperty("dateStyle", "S-");
 		props.setProperty("datePattern", "M-d-yy");
@@ -296,8 +298,9 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void formatFieldForAnnotationWithSubclassAsFieldType() throws Exception {
-		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory() {
+		formattingService.addFormatterForFieldAnnotation(new org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory() {
 			@Override
 			public Printer<?> getPrinter(org.springframework.format.annotation.DateTimeFormat annotation, Class<?> fieldType) {
 				assertThat(fieldType).isEqualTo(MyDate.class);
