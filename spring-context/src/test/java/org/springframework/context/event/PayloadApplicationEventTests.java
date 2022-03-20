@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.PayloadApplicationEvent;
@@ -72,11 +71,11 @@ class PayloadApplicationEventTests {
 	@Test
 	@SuppressWarnings("resource")
 	void testEventClassWithInterface() {
-		ApplicationContext ac = new AnnotationConfigApplicationContext(AuditableListener.class);
-
+		ConfigurableApplicationContext ac = new AnnotationConfigApplicationContext(AuditableListener.class);
 		AuditablePayloadEvent<String> event = new AuditablePayloadEvent<>(this, "xyz");
 		ac.publishEvent(event);
 		assertThat(ac.getBean(AuditableListener.class).events.contains(event)).isTrue();
+		ac.close();
 	}
 
 	@Test
@@ -94,6 +93,7 @@ class PayloadApplicationEventTests {
 		AuditablePayloadEvent<String> event = new AuditablePayloadEvent<>(this, "xyz");
 		ac.publishEvent(event);
 		assertThat(events.contains(event)).isTrue();
+		ac.close();
 	}
 
 	@Test
@@ -111,6 +111,7 @@ class PayloadApplicationEventTests {
 		AuditablePayloadEvent<String> event = new AuditablePayloadEvent<>(this, "xyz");
 		ac.publishEvent(event);
 		assertThat(events.contains(event.getPayload())).isTrue();
+		ac.close();
 	}
 
 

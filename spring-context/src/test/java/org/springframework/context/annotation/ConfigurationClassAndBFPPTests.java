@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * Tests semantics of declaring {@link BeanFactoryPostProcessor}-returning @Bean
  * methods, specifically as regards static @Bean methods and the avoidance of
@@ -33,25 +32,34 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 3.1
  */
-public class ConfigurationClassAndBFPPTests {
+class ConfigurationClassAndBFPPTests {
 
 	@Test
-	public void autowiringFailsWithBFPPAsInstanceMethod() {
+	void autowiringFailsWithBFPPAsInstanceMethod() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(TestBeanConfig.class, AutowiredConfigWithBFPPAsInstanceMethod.class);
 		ctx.refresh();
 		// instance method BFPP interferes with lifecycle -> autowiring fails!
 		// WARN-level logging should have been issued about returning BFPP from non-static @Bean method
 		assertThat(ctx.getBean(AutowiredConfigWithBFPPAsInstanceMethod.class).autowiredTestBean).isNull();
+		ctx.close();
 	}
 
 	@Test
-	public void autowiringSucceedsWithBFPPAsStaticMethod() {
+	void autowiringSucceedsWithBFPPAsStaticMethod() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(TestBeanConfig.class, AutowiredConfigWithBFPPAsStaticMethod.class);
 		ctx.refresh();
 		// static method BFPP does not interfere with lifecycle -> autowiring succeeds
 		assertThat(ctx.getBean(AutowiredConfigWithBFPPAsStaticMethod.class).autowiredTestBean).isNotNull();
+		ctx.close();
+	}
+
+	@Test
+	void staticBeanMethodsDoNotRespectScoping() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithStaticBeanMethod.class);
+		assertThat(ConfigWithStaticBeanMethod.testBean()).isNotSameAs(ConfigWithStaticBeanMethod.testBean());
+		ctx.close();
 	}
 
 
@@ -62,7 +70,6 @@ public class ConfigurationClassAndBFPPTests {
 			return new TestBean();
 		}
 	}
-
 
 	@Configuration
 	static class AutowiredConfigWithBFPPAsInstanceMethod {
@@ -76,7 +83,6 @@ public class ConfigurationClassAndBFPPTests {
 		}
 	}
 
-
 	@Configuration
 	static class AutowiredConfigWithBFPPAsStaticMethod {
 		@Autowired TestBean autowiredTestBean;
@@ -88,16 +94,6 @@ public class ConfigurationClassAndBFPPTests {
 			};
 		}
 	}
-
-
-	@Test
-	public void staticBeanMethodsDoNotRespectScoping() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ConfigWithStaticBeanMethod.class);
-		ctx.refresh();
-		assertThat(ConfigWithStaticBeanMethod.testBean()).isNotSameAs(ConfigWithStaticBeanMethod.testBean());
-	}
-
 
 	@Configuration
 	static class ConfigWithStaticBeanMethod {

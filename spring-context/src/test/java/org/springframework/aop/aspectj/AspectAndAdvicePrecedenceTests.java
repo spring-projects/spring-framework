@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.aop.aspectj;
 import java.lang.reflect.Method;
 
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +34,9 @@ import org.springframework.lang.Nullable;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public class AspectAndAdvicePrecedenceTests {
+class AspectAndAdvicePrecedenceTests {
+
+	private ClassPathXmlApplicationContext ctx;
 
 	private PrecedenceTestAspect highPrecedenceAspect;
 
@@ -47,9 +50,8 @@ public class AspectAndAdvicePrecedenceTests {
 
 
 	@BeforeEach
-	public void setup() {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+	void setup() {
+		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		highPrecedenceAspect = (PrecedenceTestAspect) ctx.getBean("highPrecedenceAspect");
 		lowPrecedenceAspect = (PrecedenceTestAspect) ctx.getBean("lowPrecedenceAspect");
 		highPrecedenceSpringAdvice = (SimpleSpringBeforeAdvice) ctx.getBean("highPrecedenceSpringAdvice");
@@ -57,9 +59,14 @@ public class AspectAndAdvicePrecedenceTests {
 		testBean = (ITestBean) ctx.getBean("testBean");
 	}
 
+	@AfterEach
+	void tearDown() {
+		this.ctx.close();
+	}
+
 
 	@Test
-	public void testAdviceOrder() {
+	void testAdviceOrder() {
 		PrecedenceTestAspect.Collaborator collaborator = new PrecedenceVerifyingCollaborator();
 		this.highPrecedenceAspect.setCollaborator(collaborator);
 		this.lowPrecedenceAspect.setCollaborator(collaborator);

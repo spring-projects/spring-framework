@@ -41,26 +41,25 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Kazuki Shimizu
  * @author Sam Brannen
  */
-public class FormattingConversionServiceTests {
+class FormattingConversionServiceTests {
 
-	private FormattingConversionService formattingService;
+	private final FormattingConversionService formattingService = new FormattingConversionService();
 
 
 	@BeforeEach
-	public void setUp() {
-		formattingService = new FormattingConversionService();
+	void setUp() {
 		DefaultConversionService.addDefaultConverters(formattingService);
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		LocaleContextHolder.setLocale(null);
 	}
 
 
 	@Test
-	public void formatFieldForTypeWithFormatter() {
+	void formatFieldForTypeWithFormatter() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		String formatted = formattingService.convert(3, String.class);
 		assertThat(formatted).isEqualTo("3");
@@ -69,119 +68,116 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
-	public void printNull() {
+	void printNull() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertThat(formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class))).isEqualTo("");
 	}
 
 	@Test
-	public void parseNull() {
+	void parseNull() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
-		assertThat(formattingService
-				.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
+		assertThat(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void parseEmptyString() {
+	void parseEmptyString() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertThat(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void parseBlankString() {
+	void parseBlankString() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertThat(formattingService.convert("     ", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void parseParserReturnsNull() {
+	void parseParserReturnsNull() {
 		formattingService.addFormatterForFieldType(Integer.class, new NullReturningFormatter());
 		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
 				formattingService.convert("1", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	@Test
-	public void parseNullPrimitiveProperty() {
+	void parseNullPrimitiveProperty() {
 		formattingService.addFormatterForFieldType(Integer.class, new NumberStyleFormatter());
-		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
-				formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class)));
+		assertThatExceptionOfType(ConversionFailedException.class)
+			.isThrownBy(() -> formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class)));
 	}
 
 	@Test
-	public void printNullDefault() {
-		assertThat(formattingService
-				.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class))).isNull();
+	void printNullDefault() {
+		assertThat(formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class))).isNull();
 	}
 
 	@Test
-	public void parseNullDefault() {
-		assertThat(formattingService
-				.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
+	void parseNullDefault() {
+		assertThat(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void parseEmptyStringDefault() {
+	void parseEmptyStringDefault() {
 		assertThat(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void introspectedFormatter() {
+	void introspectedFormatter() {
 		formattingService.addFormatter(new NumberStyleFormatter("#,#00.0#"));
 		assertThat(formattingService.convert(123, String.class)).isEqualTo("123.0");
 		assertThat(formattingService.convert("123.0", Integer.class)).isEqualTo(123);
 	}
 
 	@Test
-	public void introspectedPrinter() {
+	void introspectedPrinter() {
 		formattingService.addPrinter(new NumberStyleFormatter("#,#00.0#"));
 		assertThat(formattingService.convert(123, String.class)).isEqualTo("123.0");
-		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
-				formattingService.convert("123.0", Integer.class))
+		assertThatExceptionOfType(ConversionFailedException.class)
+			.isThrownBy(() -> formattingService.convert("123.0", Integer.class))
 			.withCauseInstanceOf(NumberFormatException.class);
 	}
 
 	@Test
-	public void introspectedParser() {
+	void introspectedParser() {
 		formattingService.addParser(new NumberStyleFormatter("#,#00.0#"));
 		assertThat(formattingService.convert("123.0", Integer.class)).isEqualTo(123);
 		assertThat(formattingService.convert(123, String.class)).isEqualTo("123");
 	}
 
 	@Test
-	public void proxiedFormatter() {
+	void proxiedFormatter() {
 		Formatter<?> formatter = new NumberStyleFormatter();
 		formattingService.addFormatter((Formatter<?>) new ProxyFactory(formatter).getProxy());
 		assertThat(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void introspectedConverter() {
+	void introspectedConverter() {
 		formattingService.addConverter(new IntegerConverter());
 		assertThat(formattingService.convert("1", Integer.class)).isEqualTo(Integer.valueOf(1));
 	}
 
 	@Test
-	public void proxiedConverter() {
+	void proxiedConverter() {
 		Converter<?, ?> converter = new IntegerConverter();
 		formattingService.addConverter((Converter<?, ?>) new ProxyFactory(converter).getProxy());
 		assertThat(formattingService.convert("1", Integer.class)).isEqualTo(Integer.valueOf(1));
 	}
 
 	@Test
-	public void introspectedConverterFactory() {
+	void introspectedConverterFactory() {
 		formattingService.addConverterFactory(new IntegerConverterFactory());
 		assertThat(formattingService.convert("1", Integer.class)).isEqualTo(Integer.valueOf(1));
 	}
 
 	@Test
-	public void proxiedConverterFactory() {
+	void proxiedConverterFactory() {
 		ConverterFactory<?, ?> converterFactory = new IntegerConverterFactory();
 		formattingService.addConverterFactory((ConverterFactory<?, ?>) new ProxyFactory(converterFactory).getProxy());
 		assertThat(formattingService.convert("1", Integer.class)).isEqualTo(Integer.valueOf(1));
 	}
 
 
-	public static class NullReturningFormatter implements Formatter<Integer> {
+	static class NullReturningFormatter implements Formatter<Integer> {
 
 		@Override
 		public String print(Integer object, Locale locale) {

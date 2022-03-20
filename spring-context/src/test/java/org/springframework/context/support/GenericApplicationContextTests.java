@@ -47,7 +47,7 @@ import static org.mockito.Mockito.verify;
  * @author Chris Beams
  * @author Stephane Nicoll
  */
-public class GenericApplicationContextTests {
+class GenericApplicationContextTests {
 
 	@Test
 	void getBeanForClass() {
@@ -61,6 +61,7 @@ public class GenericApplicationContextTests {
 
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(() ->
 				ac.getBean(Object.class));
+		ac.close();
 	}
 
 	@Test
@@ -73,6 +74,7 @@ public class GenericApplicationContextTests {
 		assertThat(ac.getBean(String.class)).isSameAs(ac.getBean("testBean"));
 		assertThat(ac.getBean(CharSequence.class)).isSameAs(ac.getBean("testBean"));
 		assertThat(ac.getBean("testBean")).isEqualTo(ac.toString());
+		ac.close();
 	}
 
 	@Test
@@ -86,6 +88,7 @@ public class GenericApplicationContextTests {
 		assertThat(ac.getBean(String.class)).isEqualTo(ac.getBean("testBean"));
 		assertThat(ac.getBean(CharSequence.class)).isEqualTo(ac.getBean("testBean"));
 		assertThat(ac.getBean("testBean")).isEqualTo(ac.toString());
+		ac.close();
 	}
 
 	@Test
@@ -106,6 +109,7 @@ public class GenericApplicationContextTests {
 				ac.getAutowireCapableBeanFactory().getBean("testBean");
 				ac.getAutowireCapableBeanFactory().getBean(String.class);
 		});
+		ac.close();
 	}
 
 	@Test
@@ -119,6 +123,7 @@ public class GenericApplicationContextTests {
 		assertThat(context.getBean(BeanA.class).b).isSameAs(context.getBean(BeanB.class));
 		assertThat(context.getBean(BeanA.class).c).isSameAs(context.getBean(BeanC.class));
 		assertThat(context.getBean(BeanB.class).applicationContext).isSameAs(context);
+		context.close();
 	}
 
 	@Test
@@ -132,6 +137,7 @@ public class GenericApplicationContextTests {
 		assertThat(context.getBean("a", BeanA.class).b).isSameAs(context.getBean("b"));
 		assertThat(context.getBean("a", BeanA.class).c).isSameAs(context.getBean("c"));
 		assertThat(context.getBean("b", BeanB.class).applicationContext).isSameAs(context);
+		context.close();
 	}
 
 	@Test
@@ -150,6 +156,7 @@ public class GenericApplicationContextTests {
 
 		assertThat(context.getDefaultListableBeanFactory().getDependentBeans(BeanB.class.getName())).isEqualTo(new String[] {BeanA.class.getName()});
 		assertThat(context.getDefaultListableBeanFactory().getDependentBeans(BeanC.class.getName())).isEqualTo(new String[] {BeanA.class.getName()});
+		context.close();
 	}
 
 	@Test
@@ -166,6 +173,7 @@ public class GenericApplicationContextTests {
 		assertThat(context.getBean(BeanA.class).b).isSameAs(context.getBean(BeanB.class));
 		assertThat(context.getBean(BeanA.class).c).isSameAs(context.getBean(BeanC.class));
 		assertThat(context.getBean(BeanB.class).applicationContext).isSameAs(context);
+		context.close();
 	}
 
 	@Test
@@ -181,6 +189,7 @@ public class GenericApplicationContextTests {
 		assertThat(context.getBean(BeanA.class).b).isSameAs(context.getBean("b", BeanB.class));
 		assertThat(context.getBean("a", BeanA.class).c).isSameAs(context.getBean("c"));
 		assertThat(context.getBean("b", BeanB.class).applicationContext).isSameAs(context);
+		context.close();
 	}
 
 	@Test
@@ -197,6 +206,7 @@ public class GenericApplicationContextTests {
 		assertThat(context.getBean(BeanA.class).b).isSameAs(context.getBean("b", BeanB.class));
 		assertThat(context.getBean("a", BeanA.class).c).isSameAs(context.getBean("c"));
 		assertThat(context.getBean("b", BeanB.class).applicationContext).isSameAs(context);
+		context.close();
 	}
 
 	@Test
@@ -213,6 +223,7 @@ public class GenericApplicationContextTests {
 		assertThat(context.getBeansOfType(BeanA.class).isEmpty()).isTrue();
 		assertThat(context.getBeansOfType(BeanB.class).values().iterator().next()).isSameAs(context.getBean(BeanB.class));
 		assertThat(context.getBeansOfType(BeanC.class).values().iterator().next()).isSameAs(context.getBean(BeanC.class));
+		context.close();
 	}
 
 	@Test
@@ -221,6 +232,7 @@ public class GenericApplicationContextTests {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.setApplicationStartup(applicationStartup);
 		assertThat(context.getBeanFactory().getApplicationStartup()).isEqualTo(applicationStartup);
+		context.close();
 	}
 
 	@Test
