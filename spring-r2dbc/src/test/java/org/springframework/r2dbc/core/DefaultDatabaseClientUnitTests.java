@@ -29,10 +29,8 @@ import io.r2dbc.spi.test.MockRow;
 import io.r2dbc.spi.test.MockRowMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.reactivestreams.Publisher;
@@ -66,12 +64,11 @@ import static org.mockito.BDDMockito.when;
  * @author Ferdinand Jacobs
  * @author Jens Schauder
  */
-@ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class DefaultDatabaseClientUnitTests {
 
 	@Mock
-	Connection connection;
+	private Connection connection;
 
 	private DatabaseClient.Builder databaseClientBuilder;
 
@@ -147,6 +144,7 @@ class DefaultDatabaseClientUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void executeShouldBindSettableValues() {
 		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
 
@@ -197,6 +195,7 @@ class DefaultDatabaseClientUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void executeShouldBindValues() {
 		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
 

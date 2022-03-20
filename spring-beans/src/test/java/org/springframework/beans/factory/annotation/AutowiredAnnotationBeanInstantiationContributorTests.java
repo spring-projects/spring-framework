@@ -148,6 +148,7 @@ class AutowiredAnnotationBeanInstantiationContributionTests {
 	public static class PrivateFieldInjectionSample {
 
 		@Autowired
+		@SuppressWarnings("unused")
 		private Environment environment;
 
 	}

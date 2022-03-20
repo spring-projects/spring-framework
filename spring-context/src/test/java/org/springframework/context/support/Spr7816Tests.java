@@ -61,7 +61,7 @@ class Spr7816Tests {
 
 	}
 
-	abstract static class DomainEntity {
+	abstract static sealed class DomainEntity permits Building, Entrance, Dwelling {
 	}
 
 	static final class Building extends DomainEntity {

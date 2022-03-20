@@ -672,14 +672,11 @@ class ConfigurationClassProcessingTests {
 
 		@Bean
 		@Scope(value = "prototype")
-		public PrototypeInterface getDemoBean( int i) {
-			switch ( i) {
-				case 1: return new PrototypeOne();
-				case 2:
-				default:
-					return new PrototypeTwo();
-
-			}
+		public PrototypeInterface getDemoBean(int i) {
+			return switch (i) {
+				case 1 -> new PrototypeOne();
+				default -> new PrototypeTwo();
+			};
 		}
 	}
 

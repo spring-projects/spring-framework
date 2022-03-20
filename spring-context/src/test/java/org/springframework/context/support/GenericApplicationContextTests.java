@@ -241,6 +241,7 @@ class GenericApplicationContextTests {
 		assertThat(context.isActive()).isFalse();
 		context.refreshForAotProcessing();
 		assertThat(context.isActive()).isTrue();
+		context.close();
 	}
 
 	@Test
@@ -250,6 +251,7 @@ class GenericApplicationContextTests {
 		context.setEnvironment(environment);
 		context.refreshForAotProcessing();
 		assertThat(context.getBean(Environment.class)).isEqualTo(environment);
+		context.close();
 	}
 
 	@Test
@@ -258,6 +260,7 @@ class GenericApplicationContextTests {
 		context.registerBeanDefinition("number", new RootBeanDefinition("java.lang.Integer"));
 		context.refreshForAotProcessing();
 		assertThat(getBeanDefinition(context, "number").getBeanClass()).isEqualTo(Integer.class);
+		context.close();
 	}
 
 	@Test
@@ -274,7 +277,7 @@ class GenericApplicationContextTests {
 				.getIndexedArgumentValue(0, GenericBeanDefinition.class).getValue();
 		assertThat(value.hasBeanClass()).isTrue();
 		assertThat(value.getBeanClass()).isEqualTo(Integer.class);
-
+		context.close();
 	}
 
 	@Test
@@ -290,6 +293,7 @@ class GenericApplicationContextTests {
 		GenericBeanDefinition value = (GenericBeanDefinition) bd.getPropertyValues().get("inner");
 		assertThat(value.hasBeanClass()).isTrue();
 		assertThat(value.getBeanClass()).isEqualTo(Integer.class);
+		context.close();
 	}
 
 	@Test
@@ -299,6 +303,7 @@ class GenericApplicationContextTests {
 		context.addBeanFactoryPostProcessor(bfpp);
 		context.refreshForAotProcessing();
 		verify(bfpp).postProcessBeanFactory(context.getBeanFactory());
+		context.close();
 	}
 
 	@Test
@@ -310,6 +315,7 @@ class GenericApplicationContextTests {
 		context.refreshForAotProcessing();
 		verify(bpp).postProcessMergedBeanDefinition(getBeanDefinition(context, "test"), String.class, "test");
 		verify(bpp).postProcessMergedBeanDefinition(getBeanDefinition(context, "number"), Integer.class, "number");
+		context.close();
 	}
 
 	@Test
@@ -326,6 +332,7 @@ class GenericApplicationContextTests {
 		verify(bpp).postProcessMergedBeanDefinition(getBeanDefinition(context, "test"), BeanD.class, "test");
 		verify(bpp).postProcessMergedBeanDefinition(any(RootBeanDefinition.class), eq(Integer.class), captor.capture());
 		assertThat(captor.getValue()).startsWith("(inner bean)");
+		context.close();
 	}
 
 	@Test
@@ -342,6 +349,7 @@ class GenericApplicationContextTests {
 		verify(bpp).postProcessMergedBeanDefinition(getBeanDefinition(context, "test"), BeanD.class, "test");
 		verify(bpp).postProcessMergedBeanDefinition(any(RootBeanDefinition.class), eq(Integer.class), captor.capture());
 		assertThat(captor.getValue()).startsWith("(inner bean)");
+		context.close();
 	}
 
 	@Test
@@ -350,6 +358,7 @@ class GenericApplicationContextTests {
 		context.refresh();
 		assertThatIllegalStateException().isThrownBy(context::refreshForAotProcessing)
 				.withMessageContaining("does not support multiple refresh attempts");
+		context.close();
 	}
 
 	@Test
@@ -358,6 +367,7 @@ class GenericApplicationContextTests {
 		context.registerBeanDefinition("genericFactoryBean",
 				new RootBeanDefinition(TestAotFactoryBean.class));
 		context.refreshForAotProcessing();
+		context.close();
 	}
 
 	@Test
@@ -367,6 +377,7 @@ class GenericApplicationContextTests {
 			throw new IllegalStateException("Should not be invoked");
 		}).getBeanDefinition());
 		context.refreshForAotProcessing();
+		context.close();
 	}
 
 	private MergedBeanDefinitionPostProcessor registerMockMergedBeanDefinitionPostProcessor(GenericApplicationContext context) {
@@ -376,7 +387,6 @@ class GenericApplicationContextTests {
 				.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
 		return bpp;
 	}
-
 
 	private RootBeanDefinition getBeanDefinition(GenericApplicationContext context, String name) {
 		return (RootBeanDefinition) context.getBeanFactory().getMergedBeanDefinition(name);
@@ -411,6 +421,7 @@ class GenericApplicationContextTests {
 
 	static class BeanD {
 
+		@SuppressWarnings("unused")
 		private Integer counter;
 
 		BeanD(Integer counter) {
