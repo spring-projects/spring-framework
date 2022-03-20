@@ -160,7 +160,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware, D
 	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (!Objects.equals( this.beanFactory, beanFactory )) {
+		if (!Objects.equals(this.beanFactory, beanFactory)) {
 			this.destroy();
 			this.beanFactory = beanFactory;
 		}
