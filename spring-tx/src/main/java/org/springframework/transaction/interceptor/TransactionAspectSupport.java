@@ -611,7 +611,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		TransactionStatus status = null;
 		if (txAttr != null) {
 			if (tm != null) {
-				if (this.transactionManager instanceof PlatformTransactionManager) {
+				if (this.transactionManager instanceof PlatformTransactionManager && !this.observationRegistry.isNoOp()) {
 					TransactionObservationContext context = new TransactionObservationContext(txAttr, this.transactionManager);
 					tm = new ObservationPlatformTransactionManager((PlatformTransactionManager) this.transactionManager, this.observationRegistry, context, this.tagsProvider);
 				}
