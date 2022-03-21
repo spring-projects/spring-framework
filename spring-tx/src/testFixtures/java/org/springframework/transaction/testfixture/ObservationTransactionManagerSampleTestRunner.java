@@ -32,7 +32,7 @@ import io.micrometer.tracing.test.simple.SpansAssert;
  */
 public abstract class ObservationTransactionManagerSampleTestRunner<T> extends SampleTestRunner {
 
-	public ObservationTransactionManagerSampleTestRunner() {
+	protected ObservationTransactionManagerSampleTestRunner() {
 		super(SampleRunnerConfig.builder().build());
 	}
 

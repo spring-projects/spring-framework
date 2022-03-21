@@ -57,21 +57,27 @@ public final class ObservationPlatformTransactionManager implements PlatformTran
 			return this.delegate.getTransaction(definition);
 		}
 		Observation obs = this.observationRegistry.getCurrentObservation();
-		obs = obs != null ? obs : Observation.NOOP;
-		try (Observation.Scope scope = obs.openScope()) {
-			obs = TransactionObservation.TX_OBSERVATION.observation(this.observationRegistry, this.context)
-					.tagsProvider(this.transactionTagsProvider)
-					.start();
-			this.context.setScope(scope);
+		if (obs == null || obs.isNoOp()) {
+			this.context.setScope(Observation.Scope.NOOP);
+			return this.delegate.getTransaction(definition);
 		}
-		this.context.setObservation(obs);
+		if (log.isDebugEnabled()) {
+			log.debug("A previous observation is in scope - will create a child one");
+		}
+		Observation childObs = TransactionObservation.TX_OBSERVATION.observation(this.observationRegistry, this.context)
+				.tagsProvider(this.transactionTagsProvider)
+				.start();
+		this.context.setScope(childObs.openScope());
+		if (log.isDebugEnabled()) {
+			log.debug("Child scope created");
+		}
 		try {
 			TransactionStatus transaction = this.delegate.getTransaction(definition);
 			this.context.setTransactionStatus(transaction);
 			return transaction;
 		}
 		catch (Exception ex) {
-			this.context.getObservation().error(ex).stop();
+			childObs.error(ex).stop();
 			throw ex;
 		}
 	}
@@ -89,12 +95,12 @@ public final class ObservationPlatformTransactionManager implements PlatformTran
 			this.delegate.commit(status);
 		}
 		catch (Exception ex) {
-			this.context.getObservation().error(ex);
+			this.context.getScope().getCurrentObservation().error(ex);
 			throw ex;
 		}
 		finally {
+			this.context.getScope().getCurrentObservation().stop();
 			this.context.getScope().close();
-			this.context.getObservation().stop();
 		}
 	}
 
@@ -111,12 +117,12 @@ public final class ObservationPlatformTransactionManager implements PlatformTran
 			this.delegate.rollback(status);
 		}
 		catch (Exception ex) {
-			this.context.getObservation().error(ex);
+			this.context.getScope().getCurrentObservation().error(ex);
 			throw ex;
 		}
 		finally {
+			this.context.getScope().getCurrentObservation().stop();
 			this.context.getScope().close();
-			this.context.getObservation().stop();
 		}
 	}
 

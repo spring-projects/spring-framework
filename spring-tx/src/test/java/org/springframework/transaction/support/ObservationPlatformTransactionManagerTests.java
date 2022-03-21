@@ -17,7 +17,9 @@
 package org.springframework.transaction.support;
 
 import io.micrometer.core.tck.TestObservationRegistry;
+import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 
@@ -41,24 +43,67 @@ class ObservationPlatformTransactionManagerTests {
 
 	};
 
+	@AfterEach
+	void noLeakingObservationRemaining() {
+		assertThat(this.observationRegistry).doesNotHaveAnyRemainingCurrentObservation();
+	}
+
 	@Test
-	void commitAfterGetTransaction() {
+	void getTransactionLeavesOpenScopeWhenPreviousObservationWasPresent() {
+		try (Observation.Scope scope = Observation.start("parent", this.observationRegistry).openScope()) {
+			ObservationPlatformTransactionManager manager = observationPlatformTransactionManager();
+
+			manager.getTransaction(new DefaultTransactionDefinition());
+
+			assertThat(this.observationRegistry).doesNotHaveRemainingCurrentObservationSameAs(scope.getCurrentObservation());
+		}
+	}
+
+	@Test
+	void getTransactionDoesNothingWhenNoPreviousObservationPresent() {
 		ObservationPlatformTransactionManager manager = observationPlatformTransactionManager();
 
-		TransactionStatus transaction = manager.getTransaction(new DefaultTransactionDefinition());
-		manager.commit(transaction);
+		manager.getTransaction(new DefaultTransactionDefinition());
 
-		assertThatRegistryHasASingleStoppedTaggedObservation();
+		assertThat(this.observationRegistry).doesNotHaveAnyRemainingCurrentObservation();
+	}
+
+	@Test
+	void commitAfterGetTransaction() {
+		try (Observation.Scope scope = Observation.start("parent", this.observationRegistry).openScope()) {
+			ObservationPlatformTransactionManager manager = observationPlatformTransactionManager();
+
+			// when
+			TransactionStatus transaction = manager.getTransaction(new DefaultTransactionDefinition());
+
+			// then
+			assertThat(this.observationRegistry).doesNotHaveRemainingCurrentObservationSameAs(scope.getCurrentObservation());
+
+			// when
+			manager.commit(transaction);
+
+			// then
+			assertThatRegistryHasAStoppedTxObservation(scope);
+		}
 	}
 
 	@Test
 	void rollbackAfterGetTransaction() {
-		ObservationPlatformTransactionManager manager = observationPlatformTransactionManager();
+		try (Observation.Scope scope = Observation.start("parent", this.observationRegistry).openScope()) {
+			ObservationPlatformTransactionManager manager = observationPlatformTransactionManager();
 
-		TransactionStatus transaction = manager.getTransaction(new DefaultTransactionDefinition());
-		manager.rollback(transaction);
+			// when
+			TransactionStatus transaction = manager.getTransaction(new DefaultTransactionDefinition());
 
-		assertThatRegistryHasASingleStoppedTaggedObservation();
+			// then
+			assertThat(this.observationRegistry).doesNotHaveRemainingCurrentObservationSameAs(scope.getCurrentObservation());
+
+			// when
+			manager.rollback(transaction);
+
+			// then
+			assertThatRegistryHasAStoppedTxObservation(scope);
+		}
 	}
 
 	@Test
@@ -93,10 +138,10 @@ class ObservationPlatformTransactionManagerTests {
 		return new ObservationPlatformTransactionManager(this.delegate, ObservationRegistry.NOOP, context, new DefaultTransactionTagsProvider());
 	}
 
-	private void assertThatRegistryHasASingleStoppedTaggedObservation() {
-		assertThat(observationRegistry)
-				.doesNotHaveAnyRemainingCurrentObservation()
-				.hasSingleObservationThat()
+	private void assertThatRegistryHasAStoppedTxObservation(Observation.Scope scope) {
+		assertThat(this.observationRegistry)
+				.hasRemainingCurrentObservationSameAs(scope.getCurrentObservation())
+				.hasObservationWithNameEqualTo("spring.tx").that()
 				.hasLowCardinalityTag("spring.tx.isolation-level", "-1")
 				.hasLowCardinalityTag("spring.tx.propagation-level", "REQUIRED")
 				.hasLowCardinalityTag("spring.tx.read-only", "false")

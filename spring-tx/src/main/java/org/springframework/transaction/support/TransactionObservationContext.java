@@ -37,8 +37,6 @@ public class TransactionObservationContext extends Observation.Context {
 
 	private TransactionStatus transactionStatus;
 
-	private Observation observation = Observation.NOOP;
-
 	private Observation.Scope scope = Observation.Scope.NOOP;
 
 	public TransactionObservationContext(@Nullable TransactionDefinition transactionDefinition, TransactionManager transactionManager) {
@@ -60,14 +58,6 @@ public class TransactionObservationContext extends Observation.Context {
 
 	public void setTransactionStatus(TransactionStatus transactionStatus) {
 		this.transactionStatus = transactionStatus;
-	}
-
-	public Observation getObservation() {
-		return this.observation;
-	}
-
-	public void setObservation(Observation observation) {
-		this.observation = observation;
 	}
 
 	public Observation.Scope getScope() {
