@@ -224,11 +224,13 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware, Observat
 	protected void registerJobsAndTriggers() throws SchedulerException {
 		TransactionStatus transactionStatus = null;
 		TransactionDefinition definition = TransactionDefinition.withDefaults();
-		ObservationPlatformTransactionManager observationPlatformTransactionManager = null;
-		if (this.transactionManager != null) {
-			TransactionObservationContext context = new TransactionObservationContext(definition, this.transactionManager);
-			observationPlatformTransactionManager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.tagsProvider);
-			transactionStatus = observationPlatformTransactionManager.getTransaction(definition);
+		PlatformTransactionManager manager = this.transactionManager;
+		if (manager != null) {
+			if (!this.observationRegistry.isNoOp()) {
+				TransactionObservationContext context = new TransactionObservationContext(definition, manager);
+				manager = new ObservationPlatformTransactionManager(manager, this.observationRegistry, context, this.tagsProvider);
+			}
+			transactionStatus = manager.getTransaction(definition);
 		}
 
 		try {
@@ -271,7 +273,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware, Observat
 		catch (Throwable ex) {
 			if (transactionStatus != null) {
 				try {
-					observationPlatformTransactionManager.rollback(transactionStatus);
+					manager.rollback(transactionStatus);
 				}
 				catch (TransactionException tex) {
 					logger.error("Job registration exception overridden by rollback exception", ex);
@@ -288,7 +290,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware, Observat
 		}
 
 		if (transactionStatus != null) {
-			observationPlatformTransactionManager.commit(transactionStatus);
+			manager.commit(transactionStatus);
 		}
 	}
 

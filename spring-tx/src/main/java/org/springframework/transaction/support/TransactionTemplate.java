@@ -148,24 +148,27 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 			return ((CallbackPreferringPlatformTransactionManager) this.transactionManager).execute(this, action);
 		}
 		else {
-			TransactionObservationContext context = new TransactionObservationContext(this, this.transactionManager);
-			ObservationPlatformTransactionManager observationPlatformTransactionManager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.tagsProvider);
-			TransactionStatus status = observationPlatformTransactionManager.getTransaction(this);
+			PlatformTransactionManager manager = this.transactionManager;
+			if (!this.observationRegistry.isNoOp()) {
+				TransactionObservationContext context = new TransactionObservationContext(this, this.transactionManager);
+				manager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.tagsProvider);
+			}
+			TransactionStatus status = manager.getTransaction(this);
 			T result;
 			try {
 				result = action.doInTransaction(status);
 			}
 			catch (RuntimeException | Error ex) {
 				// Transactional code threw application exception -> rollback
-				rollbackOnException(observationPlatformTransactionManager, status, ex);
+				rollbackOnException(manager, status, ex);
 				throw ex;
 			}
 			catch (Throwable ex) {
 				// Transactional code threw unexpected exception -> rollback
-				rollbackOnException(observationPlatformTransactionManager, status, ex);
+				rollbackOnException(manager, status, ex);
 				throw new UndeclaredThrowableException(ex, "TransactionCallback threw undeclared checked exception");
 			}
-			observationPlatformTransactionManager.commit(status);
+			manager.commit(status);
 			return result;
 		}
 	}
@@ -177,7 +180,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	 * @param ex the thrown application exception or error
 	 * @throws TransactionException in case of a rollback error
 	 */
-	private void rollbackOnException(ObservationPlatformTransactionManager observationPlatformTransactionManager, TransactionStatus status, Throwable ex) throws TransactionException {
+	private void rollbackOnException(PlatformTransactionManager observationPlatformTransactionManager, TransactionStatus status, Throwable ex) throws TransactionException {
 		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
 		logger.debug("Initiating transaction rollback on application exception", ex);

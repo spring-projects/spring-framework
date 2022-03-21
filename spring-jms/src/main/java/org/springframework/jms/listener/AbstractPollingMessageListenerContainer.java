@@ -256,20 +256,23 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			throws JMSException {
 
 		if (this.transactionManager != null) {
-			TransactionObservationContext context = new TransactionObservationContext(this.transactionDefinition, this.transactionManager);
-			ObservationPlatformTransactionManager observationPlatformTransactionManager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.tagsProvider);
+			PlatformTransactionManager manager = this.transactionManager;
+			if (!this.observationRegistry.isNoOp()) {
+				TransactionObservationContext context = new TransactionObservationContext(this.transactionDefinition, this.transactionManager);
+				manager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.tagsProvider);
+			}
 			// Execute receive within transaction.
-			TransactionStatus status = observationPlatformTransactionManager.getTransaction(this.transactionDefinition);
+			TransactionStatus status = manager.getTransaction(this.transactionDefinition);
 			boolean messageReceived;
 			try {
 				messageReceived = doReceiveAndExecute(invoker, session, consumer, status);
 			}
 			catch (JMSException | RuntimeException | Error ex) {
-				rollbackOnException(observationPlatformTransactionManager, status, ex);
+				rollbackOnException(manager, status, ex);
 				throw ex;
 			}
 			try {
-				observationPlatformTransactionManager.commit(status);
+				manager.commit(status);
 			}
 			catch (TransactionException ex) {
 				// Propagate transaction system exceptions as infrastructure problems.
