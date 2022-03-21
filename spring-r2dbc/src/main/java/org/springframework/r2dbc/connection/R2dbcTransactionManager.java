@@ -360,11 +360,6 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 				afterCleanup = afterCleanup.then(Mono.from(con.setAutoCommit(true)));
 			}
 
-			if (txObject.getPreviousIsolationLevel() != null) {
-				afterCleanup = afterCleanup
-						.then(Mono.from(con.setTransactionIsolationLevel(txObject.getPreviousIsolationLevel())));
-			}
-
 			return afterCleanup.then(Mono.defer(() -> {
 				try {
 					if (txObject.isNewConnectionHolder()) {
@@ -519,9 +514,6 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 		@Nullable
 		private ConnectionHolder connectionHolder;
 
-		@Nullable
-		private IsolationLevel previousIsolationLevel;
-
 		private boolean newConnectionHolder;
 
 		private boolean mustRestoreAutoCommit;
@@ -550,15 +542,6 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 		public boolean hasConnectionHolder() {
 			return (this.connectionHolder != null);
-		}
-
-		public void setPreviousIsolationLevel(@Nullable IsolationLevel previousIsolationLevel) {
-			this.previousIsolationLevel = previousIsolationLevel;
-		}
-
-		@Nullable
-		public IsolationLevel getPreviousIsolationLevel() {
-			return this.previousIsolationLevel;
 		}
 
 		public void setMustRestoreAutoCommit(boolean mustRestoreAutoCommit) {
