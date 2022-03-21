@@ -175,17 +175,17 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 
 	/**
 	 * Perform a rollback, handling rollback exceptions properly.
-	 * @param observationPlatformTransactionManager observation platform manager
+	 * @param platformTransactionManager platform transaction manager
 	 * @param status object representing the transaction
 	 * @param ex the thrown application exception or error
 	 * @throws TransactionException in case of a rollback error
 	 */
-	private void rollbackOnException(PlatformTransactionManager observationPlatformTransactionManager, TransactionStatus status, Throwable ex) throws TransactionException {
+	private void rollbackOnException(PlatformTransactionManager platformTransactionManager, TransactionStatus status, Throwable ex) throws TransactionException {
 		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
 		logger.debug("Initiating transaction rollback on application exception", ex);
 		try {
-			observationPlatformTransactionManager.rollback(status);
+			platformTransactionManager.rollback(status);
 		}
 		catch (TransactionSystemException ex2) {
 			logger.error("Application exception overridden by rollback exception", ex);

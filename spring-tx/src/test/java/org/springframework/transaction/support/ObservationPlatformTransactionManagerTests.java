@@ -21,13 +21,13 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
 
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.TransactionStatus;
 
 import static io.micrometer.core.tck.TestObservationRegistryAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
@@ -55,17 +55,21 @@ class ObservationPlatformTransactionManagerTests {
 
 			manager.getTransaction(new DefaultTransactionDefinition());
 
-			assertThat(this.observationRegistry).doesNotHaveRemainingCurrentObservationSameAs(scope.getCurrentObservation());
+			assertThat(this.observationRegistry)
+					.hasRemainingCurrentObservation()
+					.doesNotHaveRemainingCurrentObservationSameAs(scope.getCurrentObservation());
+			then(this.delegate).should().getTransaction(any());
 		}
 	}
 
 	@Test
-	void getTransactionDoesNothingWhenNoPreviousObservationPresent() {
+	void getTransactionJustDelegatesWhenNoPreviousObservationPresent() {
 		ObservationPlatformTransactionManager manager = observationPlatformTransactionManager();
 
 		manager.getTransaction(new DefaultTransactionDefinition());
 
 		assertThat(this.observationRegistry).doesNotHaveAnyRemainingCurrentObservation();
+		then(this.delegate).should().getTransaction(any());
 	}
 
 	@Test
@@ -77,13 +81,17 @@ class ObservationPlatformTransactionManagerTests {
 			TransactionStatus transaction = manager.getTransaction(new DefaultTransactionDefinition());
 
 			// then
-			assertThat(this.observationRegistry).doesNotHaveRemainingCurrentObservationSameAs(scope.getCurrentObservation());
+			assertThat(this.observationRegistry)
+					.hasRemainingCurrentObservation()
+					.doesNotHaveRemainingCurrentObservationSameAs(scope.getCurrentObservation());
+			then(this.delegate).should().getTransaction(any());
 
 			// when
 			manager.commit(transaction);
 
 			// then
 			assertThatRegistryHasAStoppedTxObservation(scope);
+			then(this.delegate).should().commit(any());
 		}
 	}
 
@@ -94,6 +102,7 @@ class ObservationPlatformTransactionManagerTests {
 
 			// when
 			TransactionStatus transaction = manager.getTransaction(new DefaultTransactionDefinition());
+			then(this.delegate).should().getTransaction(any());
 
 			// then
 			assertThat(this.observationRegistry).doesNotHaveRemainingCurrentObservationSameAs(scope.getCurrentObservation());
@@ -103,6 +112,7 @@ class ObservationPlatformTransactionManagerTests {
 
 			// then
 			assertThatRegistryHasAStoppedTxObservation(scope);
+			then(this.delegate).should().rollback(any());
 		}
 	}
 
@@ -130,7 +140,7 @@ class ObservationPlatformTransactionManagerTests {
 
 	private ObservationPlatformTransactionManager observationPlatformTransactionManager() {
 		TransactionObservationContext context = new TransactionObservationContext(transactionDefinition(), transactionManager);
-		given(this.delegate.getTransaction(BDDMockito.any())).willReturn(new SimpleTransactionStatus());
+		given(this.delegate.getTransaction(any())).willReturn(new SimpleTransactionStatus());
 		return new ObservationPlatformTransactionManager(this.delegate, this.observationRegistry, context, new DefaultTransactionTagsProvider());
 	}
 
