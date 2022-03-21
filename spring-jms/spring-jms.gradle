@@ -5,6 +5,7 @@ dependencies {
 	api(project(":spring-core"))
 	api(project(":spring-messaging"))
 	api(project(":spring-tx"))
+	api("io.micrometer:micrometer-observation")
 	compileOnly("jakarta.jms:jakarta.jms-api")
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))

@@ -18,8 +18,8 @@ package org.springframework.transaction.support;
 
 import java.lang.reflect.UndeclaredThrowableException;
 
-import io.micrometer.core.instrument.observation.Observation;
-import io.micrometer.core.instrument.observation.ObservationRegistry;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

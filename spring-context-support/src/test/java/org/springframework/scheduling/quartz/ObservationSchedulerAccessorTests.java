@@ -19,7 +19,7 @@ package org.springframework.scheduling.quartz;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.micrometer.core.instrument.observation.ObservationRegistry;
+import io.micrometer.observation.ObservationRegistry;
 import org.mockito.BDDMockito;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerContext;
@@ -39,12 +39,15 @@ class ObservationSchedulerAccessorTests extends ObservationTransactionManagerSam
 
 	@Override
 	protected SchedulerFactoryBean given(ObservationRegistry observationRegistry) throws Exception {
-		// given
 		TestBean tb = new TestBean("tb", 99);
 		StaticApplicationContext ac = new StaticApplicationContext();
 		final Scheduler scheduler = mock(Scheduler.class);
 		SchedulerContext schedulerContext = new SchedulerContext();
 		BDDMockito.given(scheduler.getContext()).willReturn(schedulerContext);
+		return schedulerFactoryBean(observationRegistry, tb, ac, scheduler);
+	}
+
+	private SchedulerFactoryBean schedulerFactoryBean(ObservationRegistry observationRegistry, TestBean tb, StaticApplicationContext ac, Scheduler scheduler) {
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
 			@Override
 			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {

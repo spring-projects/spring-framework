@@ -16,8 +16,8 @@
 
 package org.springframework.transaction.support;
 
-import io.micrometer.core.instrument.Tags;
-import io.micrometer.core.instrument.observation.Observation;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.Tags;
 
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;

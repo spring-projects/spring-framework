@@ -16,7 +16,7 @@
 
 package org.springframework.transaction.support;
 
-import io.micrometer.core.instrument.observation.Observation;
+import io.micrometer.observation.Observation;
 
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;

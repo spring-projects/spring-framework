@@ -16,7 +16,7 @@
 
 package org.springframework.transaction.interceptor;
 
-import io.micrometer.core.instrument.observation.ObservationRegistry;
+import io.micrometer.observation.ObservationRegistry;
 
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;

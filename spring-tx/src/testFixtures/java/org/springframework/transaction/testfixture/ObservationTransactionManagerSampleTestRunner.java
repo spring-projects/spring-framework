@@ -19,9 +19,8 @@ package org.springframework.transaction.testfixture;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
-import io.micrometer.core.instrument.observation.ObservationRegistry;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.micrometer.core.tck.MeterRegistryAssert;
+import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.tracing.test.SampleTestRunner;
 import io.micrometer.tracing.test.reporter.BuildingBlocks;
 import io.micrometer.tracing.test.simple.SpansAssert;
@@ -34,13 +33,13 @@ import io.micrometer.tracing.test.simple.SpansAssert;
 public abstract class ObservationTransactionManagerSampleTestRunner<T> extends SampleTestRunner {
 
 	public ObservationTransactionManagerSampleTestRunner() {
-		super(SampleRunnerConfig.builder().build(), new SimpleMeterRegistry().withTimerObservationHandler());
+		super(SampleRunnerConfig.builder().build());
 	}
 
 	@Override
 	public SampleTestRunnerConsumer yourCode() throws Exception {
 		return (bb, meterRegistry) -> {
-			T sut = given(meterRegistry);
+			T sut = given(getObservationRegistry());
 
 			when(sut);
 

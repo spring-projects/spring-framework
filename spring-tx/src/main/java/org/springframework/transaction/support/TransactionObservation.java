@@ -16,8 +16,8 @@
 
 package org.springframework.transaction.support;
 
-import io.micrometer.core.instrument.docs.DocumentedObservation;
-import io.micrometer.core.instrument.docs.TagKey;
+import io.micrometer.observation.docs.DocumentedObservation;
+import io.micrometer.observation.docs.TagKey;
 
 enum TransactionObservation implements DocumentedObservation {
 
