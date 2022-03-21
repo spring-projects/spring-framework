@@ -55,6 +55,9 @@ public class DefaultTransactionTagsProvider implements TransactionTagsProvider {
 
 	@Override
 	public Tags getHighCardinalityTags(TransactionObservationContext context) {
+		if (!context.getTransactionStatus().isNewTransaction()) {
+			return Tags.empty();
+		}
 		TransactionDefinition transactionDefinition = context.getTransactionDefinition();
 		if (StringUtils.hasText(transactionDefinition.getName())) {
 			return Tags.of(TransactionObservation.HighCardinalityTags.NAME.of(transactionDefinition.getName()));
