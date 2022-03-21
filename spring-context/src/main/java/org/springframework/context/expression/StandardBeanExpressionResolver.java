@@ -138,7 +138,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 	@Override
 	@Nullable
-	public Object evaluate(@Nullable String value, BeanExpressionContext evalContext) throws BeansException {
+	public Object evaluate(@Nullable String value, BeanExpressionContext beanExpressionContext) throws BeansException {
 		if (!StringUtils.hasLength(value)) {
 			return value;
 		}
@@ -148,21 +148,21 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 				expr = this.expressionParser.parseExpression(value, this.beanExpressionParserContext);
 				this.expressionCache.put(value, expr);
 			}
-			StandardEvaluationContext sec = this.evaluationCache.get(evalContext);
+			StandardEvaluationContext sec = this.evaluationCache.get(beanExpressionContext);
 			if (sec == null) {
-				sec = new StandardEvaluationContext(evalContext);
+				sec = new StandardEvaluationContext(beanExpressionContext);
 				sec.addPropertyAccessor(new BeanExpressionContextAccessor());
 				sec.addPropertyAccessor(new BeanFactoryAccessor());
 				sec.addPropertyAccessor(new MapAccessor());
 				sec.addPropertyAccessor(new EnvironmentAccessor());
-				sec.setBeanResolver(new BeanFactoryResolver(evalContext.getBeanFactory()));
-				sec.setTypeLocator(new StandardTypeLocator(evalContext.getBeanFactory().getBeanClassLoader()));
+				sec.setBeanResolver(new BeanFactoryResolver(beanExpressionContext.getBeanFactory()));
+				sec.setTypeLocator(new StandardTypeLocator(beanExpressionContext.getBeanFactory().getBeanClassLoader()));
 				sec.setTypeConverter(new StandardTypeConverter(() -> {
-					ConversionService cs = evalContext.getBeanFactory().getConversionService();
+					ConversionService cs = beanExpressionContext.getBeanFactory().getConversionService();
 					return (cs != null ? cs : DefaultConversionService.getSharedInstance());
 				}));
 				customizeEvaluationContext(sec);
-				this.evaluationCache.put(evalContext, sec);
+				this.evaluationCache.put(beanExpressionContext, sec);
 			}
 			return expr.getValue(sec);
 		}
