@@ -121,19 +121,19 @@ public class ReflectionHintsSerializerTests {
 	void queriedMethods() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
 		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt", List.of(TypeReference.of(String.class)),
-				(b) -> b.withMode(ExecutableMode.INTROSPECT)));
+				b -> b.withMode(ExecutableMode.INTROSPECT)));
 
 		assertEquals("""
 				[
-				  {
-				    "name": "java.lang.Integer",
-				    "queriedMethods": [
-				      {
-				        "name": "parseInt",
-				        "parameterTypes": ["java.lang.String"]
-				      }
-				    ]
-				  }
+					{
+						"name": "java.lang.Integer",
+						"queriedMethods": [
+							{
+								"name": "parseInt",
+								"parameterTypes": ["java.lang.String"]
+							}
+						]
+					}
 				]
 				""", hints);
 	}
@@ -142,19 +142,19 @@ public class ReflectionHintsSerializerTests {
 	void methods() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
 		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt", List.of(TypeReference.of(String.class)),
-				(b) -> b.withMode(ExecutableMode.INVOKE)));
+				b -> b.withMode(ExecutableMode.INVOKE)));
 
 		assertEquals("""
 				[
-				  {
-				    "name": "java.lang.Integer",
-				    "methods": [
-				      {
-				        "name": "parseInt",
-				        "parameterTypes": ["java.lang.String"]
-				      }
-				    ]
-				  }
+					{
+						"name": "java.lang.Integer",
+						"methods": [
+							{
+								"name": "parseInt",
+								"parameterTypes": ["java.lang.String"]
+							}
+						]
+					}
 				]
 				""", hints);
 	}
@@ -162,27 +162,27 @@ public class ReflectionHintsSerializerTests {
 	void methodAndQueriedMethods() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
 		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt", List.of(TypeReference.of(String.class)),
-				(b) -> b.withMode(ExecutableMode.INVOKE)));
+				b -> b.withMode(ExecutableMode.INVOKE)));
 		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt", List.of(TypeReference.of(String.class)),
-				(b) -> b.withMode(ExecutableMode.INTROSPECT)));
+				b -> b.withMode(ExecutableMode.INTROSPECT)));
 
 		assertEquals("""
 				[
-				  {
-				    "name": "java.lang.Integer",
-				    "queriedMethods": [
-				      {
-				        "name": "parseInt",
-				        "parameterTypes": ["java.lang.String"]
-				      }
-				    ],
-				    "methods": [
-				      {
-				        "name": "parseInt",
-				        "parameterTypes": ["java.lang.String"]
-				      }
-				    ]
-				  }
+					{
+						"name": "java.lang.Integer",
+						"queriedMethods": [
+							{
+								"name": "parseInt",
+								"parameterTypes": ["java.lang.String"]
+							}
+						],
+						"methods": [
+							{
+								"name": "parseInt",
+								"parameterTypes": ["java.lang.String"]
+							}
+						]
+					}
 				]
 				""", hints);
 	}
