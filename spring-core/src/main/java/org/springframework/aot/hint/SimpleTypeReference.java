@@ -16,6 +16,8 @@
 
 package org.springframework.aot.hint;
 
+import javax.lang.model.SourceVersion;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -26,6 +28,7 @@ import org.springframework.util.Assert;
  */
 final class SimpleTypeReference extends AbstractTypeReference {
 
+	@Nullable
 	private String canonicalName;
 
 	private final String packageName;
@@ -44,6 +47,9 @@ final class SimpleTypeReference extends AbstractTypeReference {
 
 	static SimpleTypeReference of(String className) {
 		Assert.notNull(className, "ClassName must not be null");
+		if (!isValidClassName(className)) {
+			throw new IllegalStateException("Invalid class name '" + className + "'");
+		}
 		if (!className.contains("$")) {
 			return createTypeReference(className);
 		}
@@ -55,9 +61,19 @@ final class SimpleTypeReference extends AbstractTypeReference {
 		return typeReference;
 	}
 
+	private static boolean isValidClassName(String className) {
+		for (String s : className.split("\\.", -1)) {
+			if (!SourceVersion.isIdentifier(s)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private static SimpleTypeReference createTypeReference(String className) {
 		int i = className.lastIndexOf('.');
-		return new SimpleTypeReference(className.substring(0, i), className.substring(i + 1), null);
+		return (i != -1 ? new SimpleTypeReference(className.substring(0, i), className.substring(i + 1), null)
+				: new SimpleTypeReference("", className, null));
 	}
 
 	@Override
@@ -65,12 +81,13 @@ final class SimpleTypeReference extends AbstractTypeReference {
 		if (this.canonicalName == null) {
 			StringBuilder names = new StringBuilder();
 			buildName(this, names);
-			this.canonicalName = this.packageName + "." + names;
+			this.canonicalName = (this.packageName.isEmpty()
+					? names.toString() : this.packageName + "." + names);
 		}
 		return this.canonicalName;
 	}
 
-	private static void buildName(TypeReference type, StringBuilder sb) {
+	private static void buildName(@Nullable TypeReference type, StringBuilder sb) {
 		if (type == null) {
 			return;
 		}
