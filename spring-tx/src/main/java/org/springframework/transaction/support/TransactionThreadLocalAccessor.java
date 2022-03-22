@@ -16,6 +16,8 @@
 
 package org.springframework.transaction.support;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -65,7 +67,8 @@ public final class TransactionThreadLocalAccessor implements ThreadLocalAccessor
 
 	@Override
 	public void resetValues(ContextContainer container) {
-		if (Boolean.parseBoolean(String.valueOf(container.get(PREVIOUS_TRANSACTION_KEY)))) {
+		Object previousTransaction = container.get(PREVIOUS_TRANSACTION_KEY);
+		if (previousTransaction != null && Boolean.parseBoolean(String.valueOf(previousTransaction.toString()))) {
 			if (log.isDebugEnabled()) {
 				log.debug("There was a transaction when context propagation happened. Will not reset the synchronization manager.");
 			}
@@ -105,8 +108,8 @@ public final class TransactionThreadLocalAccessor implements ThreadLocalAccessor
 		}
 
 		private void putInScope() {
-			TransactionSynchronizationManager.resources.set(this.resources);
-			TransactionSynchronizationManager.synchronizations.set(this.synchronizations);
+			TransactionSynchronizationManager.resources.set(new HashMap<>(this.resources));
+			TransactionSynchronizationManager.synchronizations.set(new HashSet<>(this.synchronizations));
 			TransactionSynchronizationManager.currentTransactionName.set(this.currentTransactionName);
 			TransactionSynchronizationManager.currentTransactionReadOnly.set(this.currentTransactionReadOnly);
 			TransactionSynchronizationManager.currentTransactionIsolationLevel.set(this.currentTransactionIsolationLevel);
