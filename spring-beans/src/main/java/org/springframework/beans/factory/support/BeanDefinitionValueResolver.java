@@ -252,6 +252,7 @@ public class BeanDefinitionValueResolver {
 	 * @param resolver the function to invoke to resolve
 	 * @param <T> the type of the resolution
 	 * @return a resolved inner bean, as a result of applying the {@code resolver}
+	 * @since 6.0
 	 */
 	public <T> T resolveInnerBean(@Nullable String innerBeanName, BeanDefinition innerBd,
 			BiFunction<String, RootBeanDefinition, T> resolver) {
