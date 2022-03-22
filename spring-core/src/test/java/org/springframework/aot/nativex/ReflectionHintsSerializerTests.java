@@ -117,6 +117,76 @@ public class ReflectionHintsSerializerTests {
 				]""", hints);
 	}
 
+	@Test
+	void queriedMethods() throws JSONException {
+		ReflectionHints hints = new ReflectionHints();
+		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt", List.of(TypeReference.of(String.class)),
+				(b) -> b.withMode(ExecutableMode.INTROSPECT)));
+
+		assertEquals("""
+				[
+				  {
+				    "name": "java.lang.Integer",
+				    "queriedMethods": [
+				      {
+				        "name": "parseInt",
+				        "parameterTypes": ["java.lang.String"]
+				      }
+				    ]
+				  }
+				]
+				""", hints);
+	}
+
+	@Test
+	void methods() throws JSONException {
+		ReflectionHints hints = new ReflectionHints();
+		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt", List.of(TypeReference.of(String.class)),
+				(b) -> b.withMode(ExecutableMode.INVOKE)));
+
+		assertEquals("""
+				[
+				  {
+				    "name": "java.lang.Integer",
+				    "methods": [
+				      {
+				        "name": "parseInt",
+				        "parameterTypes": ["java.lang.String"]
+				      }
+				    ]
+				  }
+				]
+				""", hints);
+	}
+	@Test
+	void methodAndQueriedMethods() throws JSONException {
+		ReflectionHints hints = new ReflectionHints();
+		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt", List.of(TypeReference.of(String.class)),
+				(b) -> b.withMode(ExecutableMode.INVOKE)));
+		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt", List.of(TypeReference.of(String.class)),
+				(b) -> b.withMode(ExecutableMode.INTROSPECT)));
+
+		assertEquals("""
+				[
+				  {
+				    "name": "java.lang.Integer",
+				    "queriedMethods": [
+				      {
+				        "name": "parseInt",
+				        "parameterTypes": ["java.lang.String"]
+				      }
+				    ],
+				    "methods": [
+				      {
+				        "name": "parseInt",
+				        "parameterTypes": ["java.lang.String"]
+				      }
+				    ]
+				  }
+				]
+				""", hints);
+	}
+
 	private void assertEquals(String expectedString, ReflectionHints hints) throws JSONException {
 		JSONAssert.assertEquals(expectedString, serializer.serialize(hints), JSONCompareMode.LENIENT);
 	}
