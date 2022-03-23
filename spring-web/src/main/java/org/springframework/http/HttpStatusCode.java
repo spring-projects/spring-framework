@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.springframework.util.Assert;
 
 /**
  * Represents an HTTP response status code. Implemented by {@link HttpStatus},
- * but defined as interface to allow for values not in that enumeration.
+ * but defined as an interface to allow for values not in that enumeration.
  *
  * @author Arjen Poutsma
  * @since 6.0
@@ -83,7 +83,7 @@ public sealed interface HttpStatusCode permits DefaultHttpStatusCode, HttpStatus
 	 * positive number
 	 */
 	static HttpStatusCode valueOf(int code) {
-		Assert.isTrue(code >= 100 && code <= 999, "Code '" + code + "' should be a thee-digit positive integer");
+		Assert.isTrue(code >= 100 && code <= 999, () -> "Code '" + code + "' should be a three-digit positive integer");
 		HttpStatus status = HttpStatus.resolve(code);
 		if (status != null) {
 			return status;
