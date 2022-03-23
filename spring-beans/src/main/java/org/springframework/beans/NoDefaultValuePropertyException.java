@@ -5,6 +5,7 @@ package org.springframework.beans;
  *
  * @author dillonm79
  */
+@SuppressWarnings("serial")
 public class NoDefaultValuePropertyException extends InvalidPropertyException {
 
 
