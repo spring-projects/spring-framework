@@ -25,7 +25,7 @@ import org.springframework.http.HttpStatusCode;
  *
  * @author Arjen Poutsma
  * @since 3.1.1
- * @deprecated with no direct replacement
+ * @deprecated as of 6.0, with no direct replacement
  */
 @Deprecated
 public abstract class AbstractClientHttpResponse implements ClientHttpResponse {
