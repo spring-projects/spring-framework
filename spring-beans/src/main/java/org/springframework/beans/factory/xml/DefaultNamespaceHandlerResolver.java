@@ -132,7 +132,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * Creating a namespacehandler in singleton mode.
 	 * @param namespaceUri the relevant namespace URI
 	 * @param handlerMappings stores the mappings from namespace URI to NamespaceHandler class name / instance
-	 * @param className
+	 * @param className full class name for implementation class of namespacehandler
 	 * @return the located {@link NamespaceHandler}, or {@code null} if none found
 	 */
 	private synchronized NamespaceHandler  createNamespaceHandler(String namespaceUri, Map<String, Object> handlerMappings, String className) {
