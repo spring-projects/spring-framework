@@ -98,11 +98,9 @@ class ReflectionHintsSerializer {
 		if (methodIterator.hasNext()) {
 			builder.append(",\n");
 			serializeMethods("methods", methodIterator, builder);
-			if (queriedMethodIterator.hasNext()) {
-				builder.append(",\n");
-			}
 		}
 		if (queriedMethodIterator.hasNext()) {
+			builder.append(",\n");
 			serializeMethods("queriedMethods", queriedMethodIterator, builder);
 		}
 	}

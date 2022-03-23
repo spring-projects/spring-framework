@@ -36,10 +36,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.annotation.Resource;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
+import org.springframework.core.annotation.MergedAnnotations.Search;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
 import org.springframework.core.testfixture.stereotype.Component;
@@ -72,6 +74,67 @@ import static org.assertj.core.api.Assertions.entry;
  * @see MergedAnnotationClassLoaderTests
  */
 class MergedAnnotationsTests {
+
+	/**
+	 * Subset (and duplication) of other tests in {@link MergedAnnotationsTests}
+	 * that verify behavior of the fluent {@link Search} API.
+	 * @since 6.0
+	 */
+	@Nested
+	class FluentSearchApiTests {
+
+		@Test
+		void preconditions() {
+			assertThatIllegalArgumentException()
+				.isThrownBy(() -> MergedAnnotations.search(null))
+				.withMessage("SearchStrategy must not be null");
+
+			Search search = MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY);
+			assertThatIllegalArgumentException()
+				.isThrownBy(() -> search.withAnnotationFilter(null))
+				.withMessage("AnnotationFilter must not be null");
+			assertThatIllegalArgumentException()
+				.isThrownBy(() -> search.withRepeatableContainers(null))
+				.withMessage("RepeatableContainers must not be null");
+			assertThatIllegalArgumentException()
+				.isThrownBy(() -> search.from(null))
+				.withMessage("AnnotatedElement must not be null");
+		}
+
+		@Test
+		void searchOnClassWithDefaultAnnotationFilterAndRepeatableContainers() {
+			Stream<Class<?>> classes = MergedAnnotations.search(SearchStrategy.DIRECT)
+				.from(TransactionalComponent.class)
+				.stream()
+				.map(MergedAnnotation::getType);
+			assertThat(classes).containsExactly(Transactional.class, Component.class, Indexed.class);
+		}
+
+		@Test
+		void searchOnClassWithCustomAnnotationFilter() {
+			Stream<Class<?>> classes = MergedAnnotations.search(SearchStrategy.DIRECT)
+				.withAnnotationFilter(annotationName -> annotationName.endsWith("Indexed"))
+				.from(TransactionalComponent.class)
+				.stream()
+				.map(MergedAnnotation::getType);
+			assertThat(classes).containsExactly(Transactional.class, Component.class);
+		}
+
+		@Test
+		void searchOnClassWithCustomRepeatableContainers() {
+			assertThat(MergedAnnotations.from(HierarchyClass.class).stream(TestConfiguration.class)).isEmpty();
+			RepeatableContainers containers = RepeatableContainers.of(TestConfiguration.class, Hierarchy.class);
+
+			MergedAnnotations annotations = MergedAnnotations.search(SearchStrategy.DIRECT)
+				.withRepeatableContainers(containers)
+				.from(HierarchyClass.class);
+			assertThat(annotations.stream(TestConfiguration.class).map(annotation -> annotation.getString("location")))
+				.containsExactly("A", "B");
+			assertThat(annotations.stream(TestConfiguration.class).map(annotation -> annotation.getString("value")))
+				.containsExactly("A", "B");
+		}
+
+	}
 
 	@Test
 	void fromPreconditions() {

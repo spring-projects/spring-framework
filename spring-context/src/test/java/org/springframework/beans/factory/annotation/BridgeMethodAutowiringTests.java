@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,13 @@ import org.springframework.stereotype.Component;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class BridgeMethodAutowiringTests {
+class BridgeMethodAutowiringTests {
 
 	@Test
-	public void SPR8434() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(UserServiceImpl.class, Foo.class);
-		ctx.refresh();
+	void SPR8434() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(UserServiceImpl.class, Foo.class);
 		assertThat(ctx.getBean(UserServiceImpl.class).object).isNotNull();
+		ctx.close();
 	}
 
 

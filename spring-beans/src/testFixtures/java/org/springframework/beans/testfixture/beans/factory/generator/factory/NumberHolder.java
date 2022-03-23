@@ -27,6 +27,7 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class NumberHolder<T extends Number> implements Serializable {
 
+	@SuppressWarnings("unused")
 	private final T number;
 
 	public NumberHolder(T number) {

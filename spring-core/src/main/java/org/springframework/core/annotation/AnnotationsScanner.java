@@ -82,11 +82,11 @@ abstract class AnnotationsScanner {
 	private static <C, R> R process(C context, AnnotatedElement source,
 			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor) {
 
-		if (source instanceof Class) {
-			return processClass(context, (Class<?>) source, searchStrategy, processor);
+		if (source instanceof Class<?> clazz) {
+			return processClass(context, clazz, searchStrategy, processor);
 		}
-		if (source instanceof Method) {
-			return processMethod(context, (Method) source, searchStrategy, processor);
+		if (source instanceof Method method) {
+			return processMethod(context, method, searchStrategy, processor);
 		}
 		return processElement(context, source, processor);
 	}
@@ -477,7 +477,7 @@ abstract class AnnotationsScanner {
 			return true;
 		}
 		if (searchStrategy == SearchStrategy.DIRECT || isWithoutHierarchy(source, searchStrategy)) {
-			if (source instanceof Method && ((Method) source).isBridge()) {
+			if (source instanceof Method method && method.isBridge()) {
 				return false;
 			}
 			return getDeclaredAnnotations(source, false).length == 0;
@@ -486,11 +486,11 @@ abstract class AnnotationsScanner {
 	}
 
 	static boolean hasPlainJavaAnnotationsOnly(@Nullable Object annotatedElement) {
-		if (annotatedElement instanceof Class) {
-			return hasPlainJavaAnnotationsOnly((Class<?>) annotatedElement);
+		if (annotatedElement instanceof Class<?> clazz) {
+			return hasPlainJavaAnnotationsOnly(clazz);
 		}
-		else if (annotatedElement instanceof Member) {
-			return hasPlainJavaAnnotationsOnly(((Member) annotatedElement).getDeclaringClass());
+		else if (annotatedElement instanceof Member member) {
+			return hasPlainJavaAnnotationsOnly(member.getDeclaringClass());
 		}
 		else {
 			return false;
@@ -506,8 +506,7 @@ abstract class AnnotationsScanner {
 		if (source == Object.class) {
 			return true;
 		}
-		if (source instanceof Class) {
-			Class<?> sourceClass = (Class<?>) source;
+		if (source instanceof Class<?> sourceClass) {
 			boolean noSuperTypes = (sourceClass.getSuperclass() == Object.class &&
 					sourceClass.getInterfaces().length == 0);
 			return (searchStrategy == SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES ? noSuperTypes &&

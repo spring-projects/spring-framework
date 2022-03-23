@@ -714,8 +714,10 @@ class BeanRegistrationBeanFactoryContributionTests {
 
 	static class NameAndCountersComponent {
 
+		@SuppressWarnings("unused")
 		private String name;
 
+		@SuppressWarnings("unused")
 		private List<Integer> counters;
 
 		public void setName(String name) {

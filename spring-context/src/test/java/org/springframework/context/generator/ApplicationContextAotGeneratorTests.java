@@ -92,7 +92,7 @@ class ApplicationContextAotGeneratorTests {
 			assertThat(aotContext.getBeanDefinitionNames()).containsOnly("autowiredComponent", "number");
 			AutowiredComponent bean = aotContext.getBean(AutowiredComponent.class);
 			assertThat(bean.getEnvironment()).isSameAs(aotContext.getEnvironment());
-			assertThat(bean.getCounter()).isEqualTo(42L);
+			assertThat(bean.getCounter()).isEqualTo(42);
 		}));
 	}
 
@@ -211,6 +211,7 @@ class ApplicationContextAotGeneratorTests {
 		GeneratedTypeContext generationContext = createGenerationContext();
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		DefaultListableBeanFactory beanFactory = applicationContext.getDefaultListableBeanFactory();
+		@SuppressWarnings("unchecked")
 		BiPredicate<String, BeanDefinition> excludeFilter = mock(BiPredicate.class);
 		given(excludeFilter.test(eq("bean1"), any(BeanDefinition.class))).willReturn(Boolean.FALSE);
 		given(excludeFilter.test(eq("bean2"), any(BeanDefinition.class))).willReturn(Boolean.TRUE);
@@ -328,11 +329,10 @@ class ApplicationContextAotGeneratorTests {
 	}
 
 	static class TestBeanFactoryContribution implements BeanFactoryContribution {
+
 		private final Consumer<BeanFactoryInitialization> contribution;
 
 		private final BiPredicate<String, BeanDefinition> excludeFilter;
-
-		private int order;
 
 		public TestBeanFactoryContribution(Consumer<BeanFactoryInitialization> contribution,
 				BiPredicate<String, BeanDefinition> excludeFilter) {

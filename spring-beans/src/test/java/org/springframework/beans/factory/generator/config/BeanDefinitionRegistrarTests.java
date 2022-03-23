@@ -362,8 +362,10 @@ class BeanDefinitionRegistrarTests {
 
 	static class MultiArgConstructorSample {
 
+		@SuppressWarnings("unused")
 		private final String name;
 
+		@SuppressWarnings("unused")
 		private final Integer counter;
 
 		public MultiArgConstructorSample(String name, Integer counter) {
@@ -377,8 +379,10 @@ class BeanDefinitionRegistrarTests {
 
 		private Environment environment;
 
+		@SuppressWarnings("unused")
 		private String name;
 
+		@SuppressWarnings("unused")
 		private Integer counter;
 
 		void setEnvironment(Environment environment) {
@@ -439,6 +443,7 @@ class BeanDefinitionRegistrarTests {
 
 	static class NumberHolder<N extends Number> {
 
+		@SuppressWarnings("unused")
 		private final N number;
 
 		public NumberHolder(N number) {
@@ -450,6 +455,7 @@ class BeanDefinitionRegistrarTests {
 	static class NumberHolderSample {
 
 		@Autowired
+		@SuppressWarnings("unused")
 		private NumberHolder<Integer> numberHolder;
 
 	}

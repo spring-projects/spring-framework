@@ -832,14 +832,26 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Determine if the supplied class is a static class.
+	 * @return {@code true} if the supplied class is a static class
+	 * @since 6.0
+	 * @see Modifier#isStatic(int)
+	 * @see #isInnerClass(Class)
+	 */
+	public static boolean isStaticClass(Class<?> clazz) {
+		return Modifier.isStatic(clazz.getModifiers());
+	}
+
+	/**
 	 * Determine if the supplied class is an <em>inner class</em>,
 	 * i.e. a non-static member of an enclosing class.
 	 * @return {@code true} if the supplied class is an inner class
 	 * @since 5.0.5
 	 * @see Class#isMemberClass()
+	 * @see #isStaticClass(Class)
 	 */
 	public static boolean isInnerClass(Class<?> clazz) {
-		return (clazz.isMemberClass() && !Modifier.isStatic(clazz.getModifiers()));
+		return (clazz.isMemberClass() && !isStaticClass(clazz));
 	}
 
 	/**
@@ -1244,7 +1256,7 @@ public abstract class ClassUtils {
 	 * target class may be {@code DefaultFoo}. In this case, the method may be
 	 * {@code DefaultFoo.bar()}. This enables attributes on that method to be found.
 	 * <p><b>NOTE:</b> In contrast to {@link org.springframework.aop.support.AopUtils#getMostSpecificMethod},
-	 * this method does <i>not</i> resolve Java 5 bridge methods automatically.
+	 * this method does <i>not</i> resolve bridge methods automatically.
 	 * Call {@link org.springframework.core.BridgeMethodResolver#findBridgedMethod}
 	 * if bridge method resolution is desirable (e.g. for obtaining metadata from
 	 * the original method definition).

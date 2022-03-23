@@ -47,7 +47,7 @@ import static org.mockito.Mockito.verify;
  * @author Chris Beams
  * @author Stephane Nicoll
  */
-public class GenericApplicationContextTests {
+class GenericApplicationContextTests {
 
 	@Test
 	void getBeanForClass() {
@@ -61,6 +61,7 @@ public class GenericApplicationContextTests {
 
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(() ->
 				ac.getBean(Object.class));
+		ac.close();
 	}
 
 	@Test
@@ -73,6 +74,7 @@ public class GenericApplicationContextTests {
 		assertThat(ac.getBean(String.class)).isSameAs(ac.getBean("testBean"));
 		assertThat(ac.getBean(CharSequence.class)).isSameAs(ac.getBean("testBean"));
 		assertThat(ac.getBean("testBean")).isEqualTo(ac.toString());
+		ac.close();
 	}
 
 	@Test
@@ -86,6 +88,7 @@ public class GenericApplicationContextTests {
 		assertThat(ac.getBean(String.class)).isEqualTo(ac.getBean("testBean"));
 		assertThat(ac.getBean(CharSequence.class)).isEqualTo(ac.getBean("testBean"));
 		assertThat(ac.getBean("testBean")).isEqualTo(ac.toString());
+		ac.close();
 	}
 
 	@Test
@@ -106,6 +109,7 @@ public class GenericApplicationContextTests {
 				ac.getAutowireCapableBeanFactory().getBean("testBean");
 				ac.getAutowireCapableBeanFactory().getBean(String.class);
 		});
+		ac.close();
 	}
 
 	@Test
@@ -119,6 +123,7 @@ public class GenericApplicationContextTests {
 		assertThat(context.getBean(BeanA.class).b).isSameAs(context.getBean(BeanB.class));
 		assertThat(context.getBean(BeanA.class).c).isSameAs(context.getBean(BeanC.class));
 		assertThat(context.getBean(BeanB.class).applicationContext).isSameAs(context);
+		context.close();
 	}
 
 	@Test
@@ -132,6 +137,7 @@ public class GenericApplicationContextTests {
 		assertThat(context.getBean("a", BeanA.class).b).isSameAs(context.getBean("b"));
 		assertThat(context.getBean("a", BeanA.class).c).isSameAs(context.getBean("c"));
 		assertThat(context.getBean("b", BeanB.class).applicationContext).isSameAs(context);
+		context.close();
 	}
 
 	@Test
@@ -150,6 +156,7 @@ public class GenericApplicationContextTests {
 
 		assertThat(context.getDefaultListableBeanFactory().getDependentBeans(BeanB.class.getName())).isEqualTo(new String[] {BeanA.class.getName()});
 		assertThat(context.getDefaultListableBeanFactory().getDependentBeans(BeanC.class.getName())).isEqualTo(new String[] {BeanA.class.getName()});
+		context.close();
 	}
 
 	@Test
@@ -166,6 +173,7 @@ public class GenericApplicationContextTests {
 		assertThat(context.getBean(BeanA.class).b).isSameAs(context.getBean(BeanB.class));
 		assertThat(context.getBean(BeanA.class).c).isSameAs(context.getBean(BeanC.class));
 		assertThat(context.getBean(BeanB.class).applicationContext).isSameAs(context);
+		context.close();
 	}
 
 	@Test
@@ -181,6 +189,7 @@ public class GenericApplicationContextTests {
 		assertThat(context.getBean(BeanA.class).b).isSameAs(context.getBean("b", BeanB.class));
 		assertThat(context.getBean("a", BeanA.class).c).isSameAs(context.getBean("c"));
 		assertThat(context.getBean("b", BeanB.class).applicationContext).isSameAs(context);
+		context.close();
 	}
 
 	@Test
@@ -197,6 +206,7 @@ public class GenericApplicationContextTests {
 		assertThat(context.getBean(BeanA.class).b).isSameAs(context.getBean("b", BeanB.class));
 		assertThat(context.getBean("a", BeanA.class).c).isSameAs(context.getBean("c"));
 		assertThat(context.getBean("b", BeanB.class).applicationContext).isSameAs(context);
+		context.close();
 	}
 
 	@Test
@@ -213,6 +223,7 @@ public class GenericApplicationContextTests {
 		assertThat(context.getBeansOfType(BeanA.class).isEmpty()).isTrue();
 		assertThat(context.getBeansOfType(BeanB.class).values().iterator().next()).isSameAs(context.getBean(BeanB.class));
 		assertThat(context.getBeansOfType(BeanC.class).values().iterator().next()).isSameAs(context.getBean(BeanC.class));
+		context.close();
 	}
 
 	@Test
@@ -221,6 +232,7 @@ public class GenericApplicationContextTests {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.setApplicationStartup(applicationStartup);
 		assertThat(context.getBeanFactory().getApplicationStartup()).isEqualTo(applicationStartup);
+		context.close();
 	}
 
 	@Test
@@ -229,6 +241,7 @@ public class GenericApplicationContextTests {
 		assertThat(context.isActive()).isFalse();
 		context.refreshForAotProcessing();
 		assertThat(context.isActive()).isTrue();
+		context.close();
 	}
 
 	@Test
@@ -238,6 +251,7 @@ public class GenericApplicationContextTests {
 		context.setEnvironment(environment);
 		context.refreshForAotProcessing();
 		assertThat(context.getBean(Environment.class)).isEqualTo(environment);
+		context.close();
 	}
 
 	@Test
@@ -246,6 +260,7 @@ public class GenericApplicationContextTests {
 		context.registerBeanDefinition("number", new RootBeanDefinition("java.lang.Integer"));
 		context.refreshForAotProcessing();
 		assertThat(getBeanDefinition(context, "number").getBeanClass()).isEqualTo(Integer.class);
+		context.close();
 	}
 
 	@Test
@@ -262,7 +277,7 @@ public class GenericApplicationContextTests {
 				.getIndexedArgumentValue(0, GenericBeanDefinition.class).getValue();
 		assertThat(value.hasBeanClass()).isTrue();
 		assertThat(value.getBeanClass()).isEqualTo(Integer.class);
-
+		context.close();
 	}
 
 	@Test
@@ -278,6 +293,7 @@ public class GenericApplicationContextTests {
 		GenericBeanDefinition value = (GenericBeanDefinition) bd.getPropertyValues().get("inner");
 		assertThat(value.hasBeanClass()).isTrue();
 		assertThat(value.getBeanClass()).isEqualTo(Integer.class);
+		context.close();
 	}
 
 	@Test
@@ -287,6 +303,7 @@ public class GenericApplicationContextTests {
 		context.addBeanFactoryPostProcessor(bfpp);
 		context.refreshForAotProcessing();
 		verify(bfpp).postProcessBeanFactory(context.getBeanFactory());
+		context.close();
 	}
 
 	@Test
@@ -298,6 +315,7 @@ public class GenericApplicationContextTests {
 		context.refreshForAotProcessing();
 		verify(bpp).postProcessMergedBeanDefinition(getBeanDefinition(context, "test"), String.class, "test");
 		verify(bpp).postProcessMergedBeanDefinition(getBeanDefinition(context, "number"), Integer.class, "number");
+		context.close();
 	}
 
 	@Test
@@ -314,6 +332,7 @@ public class GenericApplicationContextTests {
 		verify(bpp).postProcessMergedBeanDefinition(getBeanDefinition(context, "test"), BeanD.class, "test");
 		verify(bpp).postProcessMergedBeanDefinition(any(RootBeanDefinition.class), eq(Integer.class), captor.capture());
 		assertThat(captor.getValue()).startsWith("(inner bean)");
+		context.close();
 	}
 
 	@Test
@@ -330,6 +349,7 @@ public class GenericApplicationContextTests {
 		verify(bpp).postProcessMergedBeanDefinition(getBeanDefinition(context, "test"), BeanD.class, "test");
 		verify(bpp).postProcessMergedBeanDefinition(any(RootBeanDefinition.class), eq(Integer.class), captor.capture());
 		assertThat(captor.getValue()).startsWith("(inner bean)");
+		context.close();
 	}
 
 	@Test
@@ -338,6 +358,7 @@ public class GenericApplicationContextTests {
 		context.refresh();
 		assertThatIllegalStateException().isThrownBy(context::refreshForAotProcessing)
 				.withMessageContaining("does not support multiple refresh attempts");
+		context.close();
 	}
 
 	@Test
@@ -346,6 +367,7 @@ public class GenericApplicationContextTests {
 		context.registerBeanDefinition("genericFactoryBean",
 				new RootBeanDefinition(TestAotFactoryBean.class));
 		context.refreshForAotProcessing();
+		context.close();
 	}
 
 	@Test
@@ -355,6 +377,7 @@ public class GenericApplicationContextTests {
 			throw new IllegalStateException("Should not be invoked");
 		}).getBeanDefinition());
 		context.refreshForAotProcessing();
+		context.close();
 	}
 
 	private MergedBeanDefinitionPostProcessor registerMockMergedBeanDefinitionPostProcessor(GenericApplicationContext context) {
@@ -364,7 +387,6 @@ public class GenericApplicationContextTests {
 				.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
 		return bpp;
 	}
-
 
 	private RootBeanDefinition getBeanDefinition(GenericApplicationContext context, String name) {
 		return (RootBeanDefinition) context.getBeanFactory().getMergedBeanDefinition(name);
@@ -399,6 +421,7 @@ public class GenericApplicationContextTests {
 
 	static class BeanD {
 
+		@SuppressWarnings("unused")
 		private Integer counter;
 
 		BeanD(Integer counter) {

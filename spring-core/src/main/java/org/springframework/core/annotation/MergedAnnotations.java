@@ -91,8 +91,14 @@ import org.springframework.util.Assert;
  *
  * <p>Different {@linkplain SearchStrategy search strategies} can be used to locate
  * related source elements that contain the annotations to be aggregated. For
- * example, {@link SearchStrategy#TYPE_HIERARCHY} will search both superclasses and
- * implemented interfaces.
+ * example, the following code uses {@link SearchStrategy#TYPE_HIERARCHY} to
+ * search for annotations on {@code MyClass} as well as in superclasses and implemented
+ * interfaces.
+ *
+ * <pre class="code">
+ * MergedAnnotations mergedAnnotations =
+ *     MergedAnnotations.search(TYPE_HIERARCHY).from(MyClass.class);
+ * </pre>
  *
  * <p>From a {@code MergedAnnotations} instance you can either
  * {@linkplain #get(String) get} a single annotation, or {@linkplain #stream()
@@ -295,6 +301,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @param element the source element
 	 * @return a {@code MergedAnnotations} instance containing the element's
 	 * annotations
+	 * @see #search(SearchStrategy)
 	 */
 	static MergedAnnotations from(AnnotatedElement element) {
 		return from(element, SearchStrategy.DIRECT);
@@ -308,6 +315,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @param searchStrategy the search strategy to use
 	 * @return a {@code MergedAnnotations} instance containing the merged
 	 * element annotations
+	 * @see #search(SearchStrategy)
 	 */
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy) {
 		return from(element, searchStrategy, RepeatableContainers.standardRepeatables());
@@ -323,6 +331,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * the element annotations or the meta-annotations
 	 * @return a {@code MergedAnnotations} instance containing the merged
 	 * element annotations
+	 * @see #search(SearchStrategy)
 	 */
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers) {
@@ -342,10 +351,13 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * annotations considered
 	 * @return a {@code MergedAnnotations} instance containing the merged
 	 * annotations for the supplied element
+	 * @see #search(SearchStrategy)
 	 */
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
+		Assert.notNull(element, "AnnotatedElement must not be null");
+		Assert.notNull(searchStrategy, "SearchStrategy must not be null");
 		Assert.notNull(repeatableContainers, "RepeatableContainers must not be null");
 		Assert.notNull(annotationFilter, "AnnotationFilter must not be null");
 		return TypeMappedAnnotations.from(element, searchStrategy, repeatableContainers, annotationFilter);
@@ -432,11 +444,127 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		return MergedAnnotationsCollection.of(annotations);
 	}
 
+	/**
+	 * Find merged annotations using the supplied {@link SearchStrategy} and a
+	 * fluent API for configuring and performing the search.
+	 * <p>See {@link Search} for details.
+	 * @param searchStrategy the search strategy to use
+	 * @return a {@code Search} instance to perform the search
+	 * @since 6.0
+	 */
+	static Search search(SearchStrategy searchStrategy) {
+		Assert.notNull(searchStrategy, "SearchStrategy must not be null");
+		return new Search(searchStrategy);
+	}
+
 
 	/**
-	 * Search strategies supported by
-	 * {@link MergedAnnotations#from(AnnotatedElement, SearchStrategy)} and
-	 * variants of that method.
+	 * Fluent API for configuring the search algorithm used in the
+	 * {@link MergedAnnotations} model and performing a search.
+	 *
+	 * <ul>
+	 * <li>Configuration starts with an invocation of
+	 * {@link MergedAnnotations#search(SearchStrategy)}, specifying which
+	 * {@link SearchStrategy} to use.</li>
+	 * <li>Optional configuration can be provided via one of the {@code with*()}
+	 * methods.</li>
+	 * <li>The actual search is performed by invoking {@link #from(AnnotatedElement)}
+	 * with the source element from which the search should begin.</li>
+	 * </ul>
+	 *
+	 * <p>For example, the following performs a search on {@code MyClass} within
+	 * the entire type hierarchy of that class while ignoring repeatable annotations.
+	 *
+	 * <pre class="code">
+	 * MergedAnnotations mergedAnnotations =
+	 *     MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
+	 *         .withRepeatableContainers(RepeatableContainers.none())
+	 *         .from(MyClass.class);
+	 * </pre>
+	 *
+	 * <p>If you wish to reuse search configuration to perform the same type of search
+	 * on multiple elements, you can save the {@code Search} instance as demonstrated
+	 * in the following example.
+	 *
+	 * <pre class="code">
+	 * Search search = MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
+	 *                     .withRepeatableContainers(RepeatableContainers.none());
+	 *
+	 * MergedAnnotations mergedAnnotations = search.from(MyClass.class);
+	 * // do something with the MergedAnnotations for MyClass
+	 * mergedAnnotations = search.from(AnotherClass.class);
+	 * // do something with the MergedAnnotations for AnotherClass
+	 * </pre>
+	 *
+	 * @since 6.0
+	 */
+	static final class Search {
+
+		private final SearchStrategy searchStrategy;
+
+		private RepeatableContainers repeatableContainers = RepeatableContainers.standardRepeatables();
+
+		private AnnotationFilter annotationFilter = AnnotationFilter.PLAIN;
+
+
+		private Search(SearchStrategy searchStrategy) {
+			this.searchStrategy = searchStrategy;
+		}
+
+
+		/**
+		 * Configure the {@link RepeatableContainers} to use.
+		 * <p>Defaults to {@link RepeatableContainers#standardRepeatables()}.
+		 * @param repeatableContainers the repeatable containers that may be used
+		 * by annotations or meta-annotations
+		 * @return this {@code Search} instance for chained method invocations
+		 * @see #withAnnotationFilter(AnnotationFilter)
+		 * @see #from(AnnotatedElement)
+		 */
+		public Search withRepeatableContainers(RepeatableContainers repeatableContainers) {
+			Assert.notNull(repeatableContainers, "RepeatableContainers must not be null");
+			this.repeatableContainers = repeatableContainers;
+			return this;
+		}
+
+		/**
+		 * Configure the {@link AnnotationFilter} to use.
+		 * <p>Defaults to {@link AnnotationFilter#PLAIN}.
+		 * @param annotationFilter an annotation filter used to restrict the
+		 * annotations considered
+		 * @return this {@code Search} instance for chained method invocations
+		 * @see #withRepeatableContainers(RepeatableContainers)
+		 * @see #from(AnnotatedElement)
+		 */
+		public Search withAnnotationFilter(AnnotationFilter annotationFilter) {
+			Assert.notNull(annotationFilter, "AnnotationFilter must not be null");
+			this.annotationFilter = annotationFilter;
+			return this;
+		}
+
+		/**
+		 * Perform a search for merged annotations beginning with the supplied
+		 * {@link AnnotatedElement} (such as a {@link Class} or {@link Method}),
+		 * using the configuration in this {@code Search} instance.
+		 * @param element the source element
+		 * @return a new {@link MergedAnnotations} instance containing all
+		 * annotations and meta-annotations from the specified element and,
+		 * depending on the {@link SearchStrategy}, related inherited elements
+		 * @see #withRepeatableContainers(RepeatableContainers)
+		 * @see #withAnnotationFilter(AnnotationFilter)
+		 * @see MergedAnnotations#from(AnnotatedElement, SearchStrategy, RepeatableContainers, AnnotationFilter)
+		 */
+		public MergedAnnotations from(AnnotatedElement element) {
+			return MergedAnnotations.from(element, this.searchStrategy, this.repeatableContainers,
+					this.annotationFilter);
+		}
+
+	}
+
+	/**
+	 * Search strategies supported by {@link MergedAnnotations#search(SearchStrategy)}
+	 * as well as {@link MergedAnnotations#from(AnnotatedElement, SearchStrategy)}
+	 * and variants of that method.
 	 *
 	 * <p>Each strategy creates a different set of aggregates that will be
 	 * combined to create the final {@link MergedAnnotations}.

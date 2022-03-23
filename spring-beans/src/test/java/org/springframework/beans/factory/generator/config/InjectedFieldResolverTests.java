@@ -71,6 +71,7 @@ class InjectedFieldResolverTests {
 
 	static class TestBean {
 
+		@SuppressWarnings("unused")
 		private String string;
 
 	}

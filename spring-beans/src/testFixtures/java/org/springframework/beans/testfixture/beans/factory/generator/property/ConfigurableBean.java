@@ -18,8 +18,10 @@ package org.springframework.beans.testfixture.beans.factory.generator.property;
 
 public class ConfigurableBean {
 
+	@SuppressWarnings("unused")
 	private String name;
 
+	@SuppressWarnings("unused")
 	private Integer counter;
 
 	public void setName(String name) {
