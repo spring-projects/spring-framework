@@ -228,8 +228,10 @@ public interface PropertyAccessor {
 	 * occurred for specific properties during the batch update. This exception bundles
 	 * all individual PropertyAccessExceptions. All other properties will have been
 	 * successfully updated.
+	 * @throws NoDefaultValuePropertyException if a default value of null is attempted to
+	 * be bound to a target parameter.
 	 */
-	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
+	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid, boolean ignoreNoDefaultValue)
 			throws BeansException;
 
 }

@@ -138,6 +138,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private boolean ignoreInvalidFields = false;
 
+	private boolean ignoreNoDefaultValue = false;
+
 	private boolean autoGrowNestedPaths = true;
 
 	private int autoGrowCollectionLimit = DEFAULT_AUTO_GROW_COLLECTION_LIMIT;
@@ -415,6 +417,26 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	public boolean isIgnoreInvalidFields() {
 		return this.ignoreInvalidFields;
+	}
+
+	/**
+	 * Set whether to ignore binding a null default value to fields.
+	 * <p>Default is "false". Turn this on to not ignore attempts
+	 * to bind a default value of a parameter to the target object.
+	 * <p>Note that this setting only applies to <i>binding</i> operations
+	 * on this DataBinder, not to <i>retrieving</i> values via its
+	 * {@link #getBindingResult() BindingResult}.
+	 * @see #bind
+	 */
+	public void setIgnoreNoDefaultValue(boolean ignoreNoDefaultValue) {
+		this.ignoreNoDefaultValue = ignoreNoDefaultValue;
+	}
+
+	/**
+	 * Return whether to ignore property bindings when attempting to bind a null default value to a property.
+	 */
+	public boolean isIgnoreNoDefaultValue() {
+		return this.ignoreNoDefaultValue;
 	}
 
 	/**
@@ -853,7 +875,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected void applyPropertyValues(MutablePropertyValues mpvs) {
 		try {
 			// Bind request parameters onto target object.
-			getPropertyAccessor().setPropertyValues(mpvs, isIgnoreUnknownFields(), isIgnoreInvalidFields());
+			getPropertyAccessor().setPropertyValues(mpvs, isIgnoreUnknownFields(), isIgnoreInvalidFields(), isIgnoreNoDefaultValue());
 		}
 		catch (PropertyBatchUpdateException ex) {
 			// Use bind error processor to create FieldErrors.

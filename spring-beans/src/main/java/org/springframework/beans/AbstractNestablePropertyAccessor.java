@@ -16,25 +16,8 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyChangeEvent;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.security.PrivilegedActionException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionException;
@@ -44,6 +27,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.beans.PropertyChangeEvent;
+import java.lang.reflect.*;
+import java.security.PrivilegedActionException;
+import java.util.*;
 
 /**
  * A basic {@link ConfigurablePropertyAccessor} that provides the necessary
@@ -768,7 +756,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			}
 			setPropertyValue(name, newArray);
 			Object defaultValue = getPropertyValue(name);
-			Assert.state(defaultValue != null, "Default value must not be null");
+			if (defaultValue == null) {
+				throw new NoDefaultValuePropertyException(getRootClass(), this.nestedPath + name);
+			}
 			return defaultValue;
 		}
 		else {
@@ -874,7 +864,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		PropertyValue pv = createDefaultPropertyValue(tokens);
 		setPropertyValue(tokens, pv);
 		Object defaultValue = getPropertyValue(tokens);
-		Assert.state(defaultValue != null, "Default value must not be null");
+		if (defaultValue == null) {
+			throw new NoDefaultValuePropertyException(getRootClass(), this.nestedPath + tokens.canonicalName);
+		}
 		return defaultValue;
 	}
 

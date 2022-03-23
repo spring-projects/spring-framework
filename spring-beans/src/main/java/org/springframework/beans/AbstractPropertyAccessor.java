@@ -76,16 +76,16 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 
 	@Override
 	public void setPropertyValues(PropertyValues pvs) throws BeansException {
-		setPropertyValues(pvs, false, false);
+		setPropertyValues(pvs, false, false, false);
 	}
 
 	@Override
 	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown) throws BeansException {
-		setPropertyValues(pvs, ignoreUnknown, false);
+		setPropertyValues(pvs, ignoreUnknown, false, false);
 	}
 
 	@Override
-	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
+	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid, boolean ignoreNoDefaultValue)
 			throws BeansException {
 
 		List<PropertyAccessException> propertyAccessExceptions = null;
@@ -105,6 +105,12 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 				}
 				catch (NotWritablePropertyException ex) {
 					if (!ignoreUnknown) {
+						throw ex;
+					}
+					// Otherwise, just ignore it and continue...
+				}
+				catch (NoDefaultValuePropertyException ex) {
+					if (!ignoreNoDefaultValue) {
 						throw ex;
 					}
 					// Otherwise, just ignore it and continue...
