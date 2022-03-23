@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -130,11 +129,11 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	}
 
 	/**
-	 * Creating a namespacehandler in singleton mode
+	 * Creating a namespacehandler in singleton mode.
 	 * @param namespaceUri the relevant namespace URI
-	 * @param handlerMappings Stores the mappings from namespace URI to NamespaceHandler class name / instance
+	 * @param handlerMappings stores the mappings from namespace URI to NamespaceHandler class name / instance
 	 * @param className
-	 * @return the located {@link NamespaceHandler}
+	 * @return the located {@link NamespaceHandler}, or {@code null} if none found
 	 */
 	private synchronized NamespaceHandler  createNamespaceHandler(String namespaceUri, Map<String, Object> handlerMappings, String className) {
 		Object handlerOrClassName = handlerMappings.get(namespaceUri);
