@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.annotation.MergedAnnotations.Search;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
@@ -448,8 +449,8 @@ class AnnotationsScannerTests {
 
 	@Test
 	void scanWhenProcessorReturnsFromDoWithAggregateExitsEarly() {
-		String result = AnnotationsScanner.scan(this, WithSingleSuperclass.class,
-				SearchStrategy.TYPE_HIERARCHY, new AnnotationsProcessor<Object, String>() {
+		String result = scan(this, WithSingleSuperclass.class, SearchStrategy.TYPE_HIERARCHY,
+				new AnnotationsProcessor<Object, String>() {
 
 					@Override
 					@Nullable
@@ -471,8 +472,7 @@ class AnnotationsScannerTests {
 	@Test
 	void scanWhenProcessorReturnsFromDoWithAnnotationsExitsEarly() {
 		List<Integer> indexes = new ArrayList<>();
-		String result = AnnotationsScanner.scan(this, WithSingleSuperclass.class,
-				SearchStrategy.TYPE_HIERARCHY,
+		String result = scan(this, WithSingleSuperclass.class, SearchStrategy.TYPE_HIERARCHY,
 				(context, aggregateIndex, source, annotations) -> {
 					indexes.add(aggregateIndex);
 					return "";
@@ -483,8 +483,8 @@ class AnnotationsScannerTests {
 
 	@Test
 	void scanWhenProcessorHasFinishMethodUsesFinishResult() {
-		String result = AnnotationsScanner.scan(this, WithSingleSuperclass.class,
-				SearchStrategy.TYPE_HIERARCHY, new AnnotationsProcessor<Object, String>() {
+		String result = scan(this, WithSingleSuperclass.class, SearchStrategy.TYPE_HIERARCHY,
+				new AnnotationsProcessor<Object, String>() {
 
 					@Override
 					@Nullable
@@ -510,12 +510,18 @@ class AnnotationsScannerTests {
 
 	private Stream<String> scan(AnnotatedElement element, SearchStrategy searchStrategy) {
 		List<String> results = new ArrayList<>();
-		AnnotationsScanner.scan(this, element, searchStrategy,
+		scan(this, element, searchStrategy,
 				(criteria, aggregateIndex, source, annotations) -> {
 					trackIndexedAnnotations(aggregateIndex, annotations, results);
 					return null; // continue searching
 				});
 		return results.stream();
+	}
+
+	private static <C, R> R scan(C context, AnnotatedElement source, SearchStrategy searchStrategy,
+			AnnotationsProcessor<C, R> processor) {
+
+		return AnnotationsScanner.scan(context, source, searchStrategy, Search.never, processor);
 	}
 
 	private void trackIndexedAnnotations(int aggregateIndex, Annotation[] annotations, List<String> results) {

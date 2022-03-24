@@ -89,20 +89,30 @@ class MergedAnnotationsTests {
 				.isThrownBy(() -> MergedAnnotations.search(null))
 				.withMessage("SearchStrategy must not be null");
 
-			Search search = MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY);
+			Search search = MergedAnnotations.search(SearchStrategy.SUPERCLASS);
+
+			assertThatIllegalArgumentException()
+				.isThrownBy(() -> search.withEnclosingClasses(null))
+				.withMessage("Predicate must not be null");
+			assertThatIllegalStateException()
+				.isThrownBy(() -> search.withEnclosingClasses(Search.always))
+				.withMessage("A custom 'searchEnclosingClass' predicate can only be combined with SearchStrategy.TYPE_HIERARCHY");
+
 			assertThatIllegalArgumentException()
 				.isThrownBy(() -> search.withAnnotationFilter(null))
 				.withMessage("AnnotationFilter must not be null");
+
 			assertThatIllegalArgumentException()
 				.isThrownBy(() -> search.withRepeatableContainers(null))
 				.withMessage("RepeatableContainers must not be null");
+
 			assertThatIllegalArgumentException()
 				.isThrownBy(() -> search.from(null))
 				.withMessage("AnnotatedElement must not be null");
 		}
 
 		@Test
-		void searchOnClassWithDefaultAnnotationFilterAndRepeatableContainers() {
+		void searchFromClassWithDefaultAnnotationFilterAndDefaultRepeatableContainers() {
 			Stream<Class<?>> classes = MergedAnnotations.search(SearchStrategy.DIRECT)
 				.from(TransactionalComponent.class)
 				.stream()
@@ -111,7 +121,7 @@ class MergedAnnotationsTests {
 		}
 
 		@Test
-		void searchOnClassWithCustomAnnotationFilter() {
+		void searchFromClassWithCustomAnnotationFilter() {
 			Stream<Class<?>> classes = MergedAnnotations.search(SearchStrategy.DIRECT)
 				.withAnnotationFilter(annotationName -> annotationName.endsWith("Indexed"))
 				.from(TransactionalComponent.class)
@@ -121,17 +131,77 @@ class MergedAnnotationsTests {
 		}
 
 		@Test
-		void searchOnClassWithCustomRepeatableContainers() {
+		void searchFromClassWithCustomRepeatableContainers() {
 			assertThat(MergedAnnotations.from(HierarchyClass.class).stream(TestConfiguration.class)).isEmpty();
 			RepeatableContainers containers = RepeatableContainers.of(TestConfiguration.class, Hierarchy.class);
 
 			MergedAnnotations annotations = MergedAnnotations.search(SearchStrategy.DIRECT)
 				.withRepeatableContainers(containers)
 				.from(HierarchyClass.class);
-			assertThat(annotations.stream(TestConfiguration.class).map(annotation -> annotation.getString("location")))
+			assertThat(annotations.stream(TestConfiguration.class))
+				.map(annotation -> annotation.getString("location"))
 				.containsExactly("A", "B");
-			assertThat(annotations.stream(TestConfiguration.class).map(annotation -> annotation.getString("value")))
+			assertThat(annotations.stream(TestConfiguration.class))
+				.map(annotation -> annotation.getString("value"))
 				.containsExactly("A", "B");
+		}
+
+		/**
+		 * @since 6.0
+		 */
+		@Test
+		void searchFromNonAnnotatedInnerClassWithAnnotatedEnclosingClassWithEnclosingClassPredicates() {
+			Class<?> testCase = AnnotatedClass.NonAnnotatedInnerClass.class;
+			Search search = MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY);
+
+			assertThat(search.from(testCase).stream()).isEmpty();
+			assertThat(search.withEnclosingClasses(Search.never).from(testCase).stream()).isEmpty();
+			assertThat(search.withEnclosingClasses(ClassUtils::isStaticClass).from(testCase).stream()).isEmpty();
+
+			Stream<Class<?>> classes = search.withEnclosingClasses(ClassUtils::isInnerClass)
+					.from(testCase)
+					.stream()
+					.map(MergedAnnotation::getType);
+			assertThat(classes).containsExactly(Component.class, Indexed.class);
+
+			classes = search.withEnclosingClasses(Search.always)
+					.from(testCase)
+					.stream()
+					.map(MergedAnnotation::getType);
+			assertThat(classes).containsExactly(Component.class, Indexed.class);
+
+			classes = search.withEnclosingClasses(ClassUtils::isInnerClass)
+					.withRepeatableContainers(RepeatableContainers.none())
+					.withAnnotationFilter(annotationName -> annotationName.endsWith("Indexed"))
+					.from(testCase)
+					.stream()
+					.map(MergedAnnotation::getType);
+			assertThat(classes).containsExactly(Component.class);
+		}
+
+		/**
+		 * @since 6.0
+		 */
+		@Test
+		void searchFromNonAnnotatedStaticNestedClassWithAnnotatedEnclosingClassWithEnclosingClassPredicates() {
+			Class<?> testCase = AnnotatedClass.NonAnnotatedStaticNestedClass.class;
+			Search search = MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY);
+
+			assertThat(search.from(testCase).stream()).isEmpty();
+			assertThat(search.withEnclosingClasses(Search.never).from(testCase).stream()).isEmpty();
+			assertThat(search.withEnclosingClasses(ClassUtils::isInnerClass).from(testCase).stream()).isEmpty();
+
+			Stream<Class<?>> classes = search.withEnclosingClasses(ClassUtils::isStaticClass)
+					.from(testCase)
+					.stream()
+					.map(MergedAnnotation::getType);
+			assertThat(classes).containsExactly(Component.class, Indexed.class);
+
+			classes = search.withEnclosingClasses(Search.always)
+					.from(testCase)
+					.stream()
+					.map(MergedAnnotation::getType);
+			assertThat(classes).containsExactly(Component.class, Indexed.class);
 		}
 
 	}

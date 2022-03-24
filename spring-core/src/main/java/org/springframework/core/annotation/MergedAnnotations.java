@@ -356,11 +356,23 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
+		Predicate<Class<?>> searchEnclosingClass =
+				(searchStrategy == SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES ?
+						Search.always : Search.never);
+		return from(element, searchStrategy, searchEnclosingClass, repeatableContainers, annotationFilter);
+	}
+
+	private static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
+			Predicate<Class<?>> searchEnclosingClass, RepeatableContainers repeatableContainers,
+			AnnotationFilter annotationFilter) {
+
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.notNull(searchStrategy, "SearchStrategy must not be null");
+		Assert.notNull(searchEnclosingClass, "Predicate must not be null");
 		Assert.notNull(repeatableContainers, "RepeatableContainers must not be null");
 		Assert.notNull(annotationFilter, "AnnotationFilter must not be null");
-		return TypeMappedAnnotations.from(element, searchStrategy, repeatableContainers, annotationFilter);
+		return TypeMappedAnnotations.from(element, searchStrategy, searchEnclosingClass,
+				repeatableContainers, annotationFilter);
 	}
 
 	/**
@@ -500,7 +512,14 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 */
 	static final class Search {
 
+		static final Predicate<Class<?>> always = clazz -> true;
+
+		static final Predicate<Class<?>> never = clazz -> false;
+
+
 		private final SearchStrategy searchStrategy;
+
+		private Predicate<Class<?>> searchEnclosingClass = never;
 
 		private RepeatableContainers repeatableContainers = RepeatableContainers.standardRepeatables();
 
@@ -511,6 +530,47 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 			this.searchStrategy = searchStrategy;
 		}
 
+		/**
+		 * Configure whether the search algorithm should search on
+		 * {@linkplain Class#getEnclosingClass() enclosing classes}.
+		 * <p>This feature is disabled by default and is only supported when using
+		 * {@link SearchStrategy#TYPE_HIERARCHY}.
+		 * <p>Enclosing classes will be recursively searched if the supplied
+		 * {@link Predicate} evaluates to {@code true}. Typically, the predicate
+		 * will be used to differentiate between <em>inner classes</em> and
+		 * {@code static} nested classes.
+		 * <ul>
+		 * <li>To limit the enclosing class search to inner classes, provide
+		 * {@link org.springframework.util.ClassUtils#isInnerClass(Class) ClassUtils::isInnerClass}
+		 * as the predicate.</li>
+		 * <li>To limit the enclosing class search to static nested classes, provide
+		 * {@link org.springframework.util.ClassUtils#isStaticClass(Class) ClassUtils::isStaticClass}
+		 * as the predicate.</li>
+		 * <li>To force the algorithm to always search enclosing classes, provide
+		 * {@code clazz -> true} as the predicate.</li>
+		 * <li>For any other use case, provide a custom predicate.</li>
+		 * </ul>
+		 * <p><strong>WARNING:</strong> if the supplied predicate always evaluates
+		 * to {@code true}, the algorithm will search recursively for annotations
+		 * on an enclosing class for any source type, regardless whether the source
+		 * type is an <em>inner class</em>, a {@code static} nested class, or a
+		 * nested interface. Thus, it may find more annotations than you would expect.
+		 * @param searchEnclosingClass a predicate which evaluates to {@code true}
+		 * if a search should be performed on the enclosing class of the class
+		 * supplied to the predicate
+		 * @return this {@code Search} instance for chained method invocations
+		 * @see SearchStrategy#TYPE_HIERARCHY
+		 * @see #withRepeatableContainers(RepeatableContainers)
+		 * @see #withAnnotationFilter(AnnotationFilter)
+		 * @see #from(AnnotatedElement)
+		 */
+		public Search withEnclosingClasses(Predicate<Class<?>> searchEnclosingClass) {
+			Assert.notNull(searchEnclosingClass, "Predicate must not be null");
+			Assert.state(this.searchStrategy == SearchStrategy.TYPE_HIERARCHY,
+					"A custom 'searchEnclosingClass' predicate can only be combined with SearchStrategy.TYPE_HIERARCHY");
+			this.searchEnclosingClass = searchEnclosingClass;
+			return this;
+		}
 
 		/**
 		 * Configure the {@link RepeatableContainers} to use.
@@ -550,13 +610,14 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		 * @return a new {@link MergedAnnotations} instance containing all
 		 * annotations and meta-annotations from the specified element and,
 		 * depending on the {@link SearchStrategy}, related inherited elements
+		 * @see #withEnclosingClasses(Predicate)
 		 * @see #withRepeatableContainers(RepeatableContainers)
 		 * @see #withAnnotationFilter(AnnotationFilter)
 		 * @see MergedAnnotations#from(AnnotatedElement, SearchStrategy, RepeatableContainers, AnnotationFilter)
 		 */
 		public MergedAnnotations from(AnnotatedElement element) {
-			return MergedAnnotations.from(element, this.searchStrategy, this.repeatableContainers,
-					this.annotationFilter);
+			return MergedAnnotations.from(element, this.searchStrategy, this.searchEnclosingClass,
+					this.repeatableContainers, this.annotationFilter);
 		}
 
 	}
@@ -600,8 +661,12 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		/**
 		 * Perform a full search of the entire type hierarchy, including
 		 * superclasses and implemented interfaces.
-		 * <p>Superclass annotations do not need to be meta-annotated with
-		 * {@link Inherited @Inherited}.
+		 * <p>When combined with {@link Search#withEnclosingClasses(Predicate)},
+		 * {@linkplain Class#getEnclosingClass() enclosing classes} will also be
+		 * recursively searched if the supplied {@link Predicate} evaluates to
+		 * {@code true}.
+		 * <p>Superclass and enclosing class annotations do not need to be
+		 * meta-annotated with {@link Inherited @Inherited}.
 		 */
 		TYPE_HIERARCHY,
 
