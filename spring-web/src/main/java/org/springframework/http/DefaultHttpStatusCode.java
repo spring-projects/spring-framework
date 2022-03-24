@@ -18,7 +18,7 @@ package org.springframework.http;
 
 import java.io.Serializable;
 
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 
 /**
  * Default implementation of {@link HttpStatusCode}.
@@ -79,7 +79,7 @@ final class DefaultHttpStatusCode
 	}
 
 	@Override
-	public int compareTo(@NotNull HttpStatusCode o) {
+	public int compareTo(@NonNull HttpStatusCode o) {
 		return Integer.compare(this.value, o.value());
 	}
 

@@ -18,12 +18,12 @@ package org.springframework.expression.spel;
 
 import java.math.BigDecimal;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.support.StandardTypeComparator;
+import org.springframework.lang.NonNull;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -143,7 +143,7 @@ public class StandardTypeComparatorTests {
 		}
 
 		@Override
-		public int compareTo(@NotNull ComparableType other) {
+		public int compareTo(@NonNull ComparableType other) {
 			return this.id - other.id;
 		}
 
