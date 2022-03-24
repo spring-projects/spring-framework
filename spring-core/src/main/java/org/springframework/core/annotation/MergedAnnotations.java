@@ -356,10 +356,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
-		Predicate<Class<?>> searchEnclosingClass =
-				(searchStrategy == SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES ?
-						Search.always : Search.never);
-		return from(element, searchStrategy, searchEnclosingClass, repeatableContainers, annotationFilter);
+		return from(element, searchStrategy, Search.never, repeatableContainers, annotationFilter);
 	}
 
 	private static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
@@ -668,28 +665,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		 * <p>Superclass and enclosing class annotations do not need to be
 		 * meta-annotated with {@link Inherited @Inherited}.
 		 */
-		TYPE_HIERARCHY,
-
-		/**
-		 * Perform a full search of the entire type hierarchy on the source
-		 * <em>and</em> any enclosing classes.
-		 * <p>This strategy is similar to {@link #TYPE_HIERARCHY} except that
-		 * {@linkplain Class#getEnclosingClass() enclosing classes} are also
-		 * searched.
-		 * <p>Superclass and enclosing class annotations do not need to be
-		 * meta-annotated with {@link Inherited @Inherited}.
-		 * <p>When searching a {@link Method} source, this strategy is identical
-		 * to {@link #TYPE_HIERARCHY}.
-		 * <p><strong>WARNING:</strong> This strategy searches recursively for
-		 * annotations on the enclosing class for any source type, regardless
-		 * whether the source type is an <em>inner class</em>, a {@code static}
-		 * nested class, or a nested interface. Thus, it may find more annotations
-		 * than you would expect.
-		 * @deprecated as of Spring Framework 6.0 M3, for potential removal or
-		 * replacement before 6.0 GA
-		 */
-		@Deprecated
-		TYPE_HIERARCHY_AND_ENCLOSING_CLASSES
+		TYPE_HIERARCHY
 
 	}
 

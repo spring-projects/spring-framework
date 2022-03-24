@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.annotation.MergedAnnotations.Search;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -422,29 +424,34 @@ class AnnotationsScannerTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void typeHierarchyWithEnclosedStrategyOnEnclosedStaticClassScansAnnotations() {
+	void typeHierarchyStrategyWithEnclosingClassPredicatesOnEnclosedStaticClassScansAnnotations() {
 		Class<?> source = AnnotationEnclosingClassSample.EnclosedStatic.EnclosedStaticStatic.class;
-		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES))
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY, ClassUtils::isInnerClass))
+				.containsExactly("0:EnclosedThree");
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY, Search.always).toList())
+				.isEqualTo(scan(source, SearchStrategy.TYPE_HIERARCHY, ClassUtils::isStaticClass).toList())
 				.containsExactly("0:EnclosedThree", "1:EnclosedTwo", "2:EnclosedOne");
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void typeHierarchyWithEnclosedStrategyOnEnclosedInnerClassScansAnnotations() {
+	void typeHierarchyStrategyWithEnclosingClassPredicatesOnEnclosedInnerClassScansAnnotations() {
 		Class<?> source = AnnotationEnclosingClassSample.EnclosedInner.EnclosedInnerInner.class;
-		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES))
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY, ClassUtils::isStaticClass))
+				.containsExactly("0:EnclosedThree");
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY, Search.always).toList())
+				.isEqualTo(scan(source, SearchStrategy.TYPE_HIERARCHY, ClassUtils::isInnerClass).toList())
 				.containsExactly("0:EnclosedThree", "1:EnclosedTwo", "2:EnclosedOne");
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void typeHierarchyWithEnclosedStrategyOnMethodHierarchyUsesTypeHierarchyScan() {
+	void typeHierarchyStrategyWithEnclosingClassPredicatesOnMethodHierarchyUsesTypeHierarchyScan() {
 		Method source = methodFrom(WithHierarchy.class);
-		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES)).containsExactly(
-				"0:TestAnnotation1", "1:TestAnnotation5", "1:TestInheritedAnnotation5",
-				"2:TestAnnotation6", "3:TestAnnotation2", "3:TestInheritedAnnotation2",
-				"4:TestAnnotation3", "5:TestAnnotation4");
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY, Search.always).toList())
+				.isEqualTo(scan(source, SearchStrategy.TYPE_HIERARCHY, ClassUtils::isInnerClass).toList())
+				.containsExactly(
+					"0:TestAnnotation1", "1:TestAnnotation5", "1:TestInheritedAnnotation5",
+					"2:TestAnnotation6", "3:TestAnnotation2", "3:TestInheritedAnnotation2",
+					"4:TestAnnotation3", "5:TestAnnotation4");
 	}
 
 	@Test
@@ -509,8 +516,14 @@ class AnnotationsScannerTests {
 	}
 
 	private Stream<String> scan(AnnotatedElement element, SearchStrategy searchStrategy) {
+		return scan(element, searchStrategy, Search.never);
+	}
+
+	private Stream<String> scan(AnnotatedElement element, SearchStrategy searchStrategy,
+			Predicate<Class<?>> searchEnclosingClass) {
+
 		List<String> results = new ArrayList<>();
-		scan(this, element, searchStrategy,
+		scan(this, element, searchStrategy, searchEnclosingClass,
 				(criteria, aggregateIndex, source, annotations) -> {
 					trackIndexedAnnotations(aggregateIndex, annotations, results);
 					return null; // continue searching
@@ -521,7 +534,13 @@ class AnnotationsScannerTests {
 	private static <C, R> R scan(C context, AnnotatedElement source, SearchStrategy searchStrategy,
 			AnnotationsProcessor<C, R> processor) {
 
-		return AnnotationsScanner.scan(context, source, searchStrategy, Search.never, processor);
+		return scan(context, source, searchStrategy, Search.never, processor);
+	}
+
+	private static <C, R> R scan(C context, AnnotatedElement source, SearchStrategy searchStrategy,
+			Predicate<Class<?>> searchEnclosingClass, AnnotationsProcessor<C, R> processor) {
+
+		return AnnotationsScanner.scan(context, source, searchStrategy, searchEnclosingClass, processor);
 	}
 
 	private void trackIndexedAnnotations(int aggregateIndex, Annotation[] annotations, List<String> results) {

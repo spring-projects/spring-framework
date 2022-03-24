@@ -107,7 +107,6 @@ abstract class AnnotationsScanner {
 			case INHERITED_ANNOTATIONS -> processClassInheritedAnnotations(context, source, searchStrategy, processor);
 			case SUPERCLASS -> processClassHierarchy(context, source, processor, false, Search.never);
 			case TYPE_HIERARCHY -> processClassHierarchy(context, source, processor, true, searchEnclosingClass);
-			case TYPE_HIERARCHY_AND_ENCLOSING_CLASSES -> processClassHierarchy(context, source, processor, true, Search.always);
 		};
 	}
 
@@ -246,8 +245,7 @@ abstract class AnnotationsScanner {
 			case DIRECT, INHERITED_ANNOTATIONS -> processMethodInheritedAnnotations(context, source, processor);
 			case SUPERCLASS -> processMethodHierarchy(context, new int[]{0}, source.getDeclaringClass(),
 					processor, source, false);
-			case TYPE_HIERARCHY, TYPE_HIERARCHY_AND_ENCLOSING_CLASSES -> processMethodHierarchy(context, new int[]{0},
-					source.getDeclaringClass(),
+			case TYPE_HIERARCHY -> processMethodHierarchy(context, new int[]{0}, source.getDeclaringClass(),
 					processor, source, true);
 		};
 	}
