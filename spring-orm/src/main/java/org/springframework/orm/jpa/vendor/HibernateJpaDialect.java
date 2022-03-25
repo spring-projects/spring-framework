@@ -79,7 +79,7 @@ import org.springframework.transaction.support.ResourceTransactionDefinition;
  * @author Costin Leau
  * @since 2.0
  * @see HibernateJpaVendorAdapter
- * @see org.hibernate.Session#setFlushMode
+ * @see org.hibernate.Session#setHibernateFlushMode
  * @see org.hibernate.Transaction#setTimeout
  */
 @SuppressWarnings("serial")
@@ -349,10 +349,9 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			this.readOnly = readOnly;
 		}
 
-		@SuppressWarnings("deprecation")
 		public void resetSessionState() {
 			if (this.previousFlushMode != null) {
-				this.session.setFlushMode(this.previousFlushMode);
+				this.session.setHibernateFlushMode(this.previousFlushMode);
 			}
 			if (this.needsConnectionReset &&
 					this.session.getJdbcCoordinator().getLogicalConnection().isPhysicallyConnected()) {
