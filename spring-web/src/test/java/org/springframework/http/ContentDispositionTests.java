@@ -86,6 +86,14 @@ class ContentDispositionTests {
 		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
 	}
 
+	@Test
+	void parseBase64EncodedFilenameHasMoreSegments() {
+		/* https://datatracker.ietf.org/doc/html/rfc2047#section-2
+		* An 'encoded-word' may not be more than 75 characters long */
+		String input = "attachment; filename=\"=?utf-8?B?U3ByaW5n5qGG5p625Li65Z+65LqOSmF2YeeahOeOsOS7o+S8geS4muW6lA==?= =?utf-8?B?55So56iL5bqP5o+Q5L6b5LqG5YWo6Z2i55qE57yW56iL5ZKM6YWN572u5qih?= =?utf-8?B?5Z6LLnR4dA==?=\"";
+		assertThat(parse(input).getFilename()).isEqualTo("Spring框架为基于Java的现代企业应用程序提供了全面的编程和配置模型.txt");
+	}
+
 	@Test // gh-26463
 	void parseBase64EncodedShiftJISFilename() {
 		String input = "attachment; filename=\"=?SHIFT_JIS?B?k/qWe4zqLmNzdg==?=\"";

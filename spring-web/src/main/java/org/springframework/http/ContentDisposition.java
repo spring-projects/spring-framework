@@ -377,7 +377,13 @@ public final class ContentDisposition {
 						if (matcher.find()) {
 							charset = Charset.forName(matcher.group(1));
 							String encodedValue = matcher.group(2);
-							filename = new String(Base64.getDecoder().decode(encodedValue), charset);
+							StringBuilder sb = new StringBuilder(new String(Base64.getDecoder().decode(encodedValue), charset));
+							while (matcher.find()){
+								charset = Charset.forName(matcher.group(1));
+								encodedValue = matcher.group(2);
+								sb.append(new String(Base64.getDecoder().decode(encodedValue), charset));
+							}
+							filename = sb.toString();
 						}
 						else {
 							matcher = QUOTED_PRINTABLE_ENCODED_PATTERN.matcher(value);
