@@ -371,9 +371,15 @@ public final class ContentDisposition {
 					if (value.startsWith("=?") ) {
 						Matcher matcher = BASE64_ENCODED_PATTERN.matcher(value);
 						if (matcher.find()) {
-							String match1 = matcher.group(1);
+							Charset match1 = Charset.forName(matcher.group(1));
 							String match2 = matcher.group(2);
-							filename = new String(Base64.getDecoder().decode(match2), Charset.forName(match1));
+							StringBuilder sb = new StringBuilder(new String(Base64.getDecoder().decode(match2), match1));
+							while (matcher.find()){
+								match1 = Charset.forName(matcher.group(1));
+								match2 = matcher.group(2);
+								sb.append(new String(Base64.getDecoder().decode(match2), match1));
+							}
+							filename = sb.toString();
 						}
 						else {
 							filename = value;
