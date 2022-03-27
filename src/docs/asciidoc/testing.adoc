@@ -5674,7 +5674,6 @@ following example shows the relevant annotations:
 
 [[testcontext-tx-false-positives]]
 .Avoid false positives when testing ORM code
-
 [NOTE]
 =====
 When you test application code that manipulates the state of a Hibernate session or JPA
@@ -5794,6 +5793,86 @@ The following example shows matching methods for JPA:
 
 	// ...
 ----
+=====
+
+[[testcontext-tx-orm-lifecycle-callbacks]]
+.Testing ORM entity lifecycle callbacks
+[NOTE]
+=====
+Similar to the note about avoiding <<testcontext-tx-false-positives, false positives>>
+when testing ORM code, if your application makes use of entity lifecycle callbacks (also
+known as entity listeners), make sure to flush the underlying unit of work within test
+methods that run that code. Failing to _flush_ or _clear_ the underlying unit of work can
+result in certain lifecycle callbacks not being invoked.
+
+For example, when using JPA, `@PostPersist`, `@PreUpdate`, and `@PostUpdate` callbacks
+will not be called unless `entityManager.flush()` is invoked after an entity has been
+saved or updated. Similarly, if an entity is already attached to the current unit of work
+(associated with the current persistence context), an attempt to reload the entity will
+not result in a `@PostLoad` callback unless `entityManager.clear()` is invoked before the
+attempt to reload the entity.
+
+The following example shows how to flush the `EntityManager` to ensure that
+`@PostPersist` callbacks are invoked when an entity is persisted. An entity listener with
+a `@PostPersist` callback method has been registered for the `Person` entity used in the
+example.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// ...
+
+	@Autowired
+	JpaPersonRepository repo;
+
+	@PersistenceContext
+	EntityManager entityManager;
+
+	@Transactional
+	@Test
+	void savePerson() {
+		// EntityManager#persist(...) results in @PrePersist but not @PostPersist
+		repo.save(new Person("Jane"));
+
+		// Manual flush is required for @PostPersist callback to be invoked
+		entityManager.flush();
+
+		// Test code that relies on the @PostPersist callback
+		// having been invoked...
+	}
+
+	// ...
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// ...
+
+	@Autowired
+	lateinit var repo: JpaPersonRepository
+
+	@PersistenceContext
+	lateinit var entityManager: EntityManager
+
+	@Transactional
+	@Test
+	fun savePerson() {
+		// EntityManager#persist(...) results in @PrePersist but not @PostPersist
+		repo.save(Person("Jane"))
+
+		// Manual flush is required for @PostPersist callback to be invoked
+		entityManager.flush()
+
+		// Test code that relies on the @PostPersist callback
+		// having been invoked...
+	}
+
+	// ...
+----
+
+See
+https://github.com/spring-projects/spring-framework/blob/5.3.x/spring-test/src/test/java/org/springframework/test/context/junit/jupiter/orm/JpaEntityListenerTests.java[JpaEntityListenerTests]
+in the Spring Framework test suite for working examples using all JPA lifecycle callbacks.
 =====
 
 
