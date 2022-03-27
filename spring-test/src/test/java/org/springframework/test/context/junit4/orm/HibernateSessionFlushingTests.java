@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import static org.springframework.test.transaction.TransactionAssert.assertThatT
  * @author Juergen Hoeller
  * @author Vlad Mihalcea
  * @since 3.0
+ * @see org.springframework.test.context.junit.jupiter.orm.JpaEntityListenerTests
  */
 @ContextConfiguration
 public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4SpringContextTests {
