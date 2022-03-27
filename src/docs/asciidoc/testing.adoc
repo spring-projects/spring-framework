@@ -5871,7 +5871,7 @@ example.
 ----
 
 See
-https://github.com/spring-projects/spring-framework/blob/5.3.x/spring-test/src/test/java/org/springframework/test/context/junit/jupiter/orm/JpaEntityListenerTests.java[JpaEntityListenerTests]
+https://github.com/spring-projects/spring-framework/blob/main/spring-test/src/test/java/org/springframework/test/context/junit/jupiter/orm/JpaEntityListenerTests.java[JpaEntityListenerTests]
 in the Spring Framework test suite for working examples using all JPA lifecycle callbacks.
 =====
 
