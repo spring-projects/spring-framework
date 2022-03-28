@@ -1281,7 +1281,7 @@ part of a Spring XML configuration file specifies some bean definitions as follo
 
 		<!-- setter injection using the neater ref attribute -->
 		<property name="beanTwo" ref="yetAnotherBean"/>
-		<property name="integerProperty" value="1"/>
+		<property name="i" value="1"/>
 	</bean>
 
 	<bean id="anotherExampleBean" class="examples.AnotherBean"/>
