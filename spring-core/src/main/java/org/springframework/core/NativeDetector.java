@@ -19,9 +19,6 @@ package org.springframework.core;
 /**
  * A common delegate for detecting a GraalVM native image environment.
  *
- * <p>Requires using the {@code -H:+InlineBeforeAnalysis} native image compiler flag in order to allow code removal at
- * build time.
- *
  * @author Sebastien Deleuze
  * @since 5.3.4
  */
