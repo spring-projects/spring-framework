@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import static org.springframework.web.reactive.function.BodyExtractors.toMono;
  * @author Arjen Poutsma
  * @author Denys Ivano
  */
-public class DefaultClientResponseTests {
+class DefaultClientResponseTests {
 
 	private ClientHttpResponse mockResponse;
 
@@ -71,7 +71,7 @@ public class DefaultClientResponseTests {
 
 
 	@BeforeEach
-	public void createMocks() {
+	void createMocks() {
 		mockResponse = mock(ClientHttpResponse.class);
 		given(mockResponse.getHeaders()).willReturn(this.httpHeaders);
 		mockExchangeStrategies = mock(ExchangeStrategies.class);
@@ -80,7 +80,7 @@ public class DefaultClientResponseTests {
 
 
 	@Test
-	public void statusCode() {
+	void statusCode() {
 		HttpStatus status = HttpStatus.CONTINUE;
 		given(mockResponse.getStatusCode()).willReturn(status);
 
@@ -88,7 +88,8 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void rawStatusCode() {
+	@SuppressWarnings("deprecation")
+	void rawStatusCode() {
 		int status = 999;
 		given(mockResponse.getRawStatusCode()).willReturn(status);
 
@@ -96,7 +97,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void header() {
+	void header() {
 		long contentLength = 42L;
 		httpHeaders.setContentLength(contentLength);
 		MediaType contentType = MediaType.TEXT_PLAIN;
@@ -115,7 +116,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void cookies() {
+	void cookies() {
 		ResponseCookie cookie = ResponseCookie.from("foo", "bar").build();
 		MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
 		cookies.add("foo", cookie);
@@ -127,7 +128,7 @@ public class DefaultClientResponseTests {
 
 
 	@Test
-	public void body() {
+	void body() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -142,7 +143,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void bodyToMono() {
+	void bodyToMono() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -157,7 +158,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void bodyToMonoTypeReference() {
+	void bodyToMonoTypeReference() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -174,7 +175,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void bodyToFlux() {
+	void bodyToFlux() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -190,7 +191,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void bodyToFluxTypeReference() {
+	void bodyToFluxTypeReference() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -208,7 +209,8 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void toEntity() {
+	@SuppressWarnings("deprecation")
+	void toEntity() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -226,7 +228,8 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void toEntityWithUnknownStatusCode() throws Exception {
+	@SuppressWarnings("deprecation")
+	void toEntityWithUnknownStatusCode() throws Exception {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -248,7 +251,8 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void toEntityTypeReference() {
+	@SuppressWarnings("deprecation")
+	void toEntityTypeReference() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -268,7 +272,8 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void toEntityList() {
+	@SuppressWarnings("deprecation")
+	void toEntityList() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -286,7 +291,8 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void toEntityListWithUnknownStatusCode() {
+	@SuppressWarnings("deprecation")
+	void toEntityListWithUnknownStatusCode() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -308,7 +314,8 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void toEntityListTypeReference() {
+	@SuppressWarnings("deprecation")
+	void toEntityListTypeReference() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -328,7 +335,8 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void createException() {
+	@SuppressWarnings("deprecation")
+	void createException() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -351,7 +359,8 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void createError() {
+	@SuppressWarnings("deprecation")
+	void createError() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -380,6 +389,7 @@ public class DefaultClientResponseTests {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	private void mockTextPlainResponse(Flux<DataBuffer> body) {
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		given(mockResponse.getStatusCode()).willReturn(HttpStatus.OK);

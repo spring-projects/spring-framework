@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,24 +52,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class DefaultEntityResponseBuilderTests {
+class DefaultEntityResponseBuilderTests {
 
 	@Test
-	public void fromObject() {
+	void fromObject() {
 		String body = "foo";
 		EntityResponse<String> response = EntityResponse.fromObject(body).build().block();
 		assertThat(response.entity()).isSameAs(body);
 	}
 
 	@Test
-	public void fromPublisherClass() {
+	void fromPublisherClass() {
 		Flux<String> body = Flux.just("foo", "bar");
 		EntityResponse<Flux<String>> response = EntityResponse.fromPublisher(body, String.class).build().block();
 		assertThat(response.entity()).isSameAs(body);
 	}
 
 	@Test
-	public void fromPublisher() {
+	void fromPublisher() {
 		Flux<String> body = Flux.just("foo", "bar");
 		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<>() {};
 		EntityResponse<Flux<String>> response = EntityResponse.fromPublisher(body, typeReference).build().block();
@@ -77,7 +77,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void fromProducer() {
+	void fromProducer() {
 		Single<String> body = Single.just("foo");
 		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<>() {};
 		EntityResponse<Single<String>> response = EntityResponse.fromProducer(body, typeReference).build().block();
@@ -85,7 +85,8 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void status() {
+	@SuppressWarnings("deprecation")
+	void status() {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).status(HttpStatus.CREATED).build();
 		StepVerifier.create(result)
@@ -96,7 +97,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void allow() {
+	void allow() {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).allow(HttpMethod.GET).build();
 		Set<HttpMethod> expected = Set.of(HttpMethod.GET);
@@ -107,7 +108,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void contentLength() {
+	void contentLength() {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).contentLength(42).build();
 		StepVerifier.create(result)
@@ -117,7 +118,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void contentType() {
+	void contentType() {
 		String body = "foo";
 		Mono<EntityResponse<String>>
 				result = EntityResponse.fromObject(body).contentType(MediaType.APPLICATION_JSON).build();
@@ -128,7 +129,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void etag() {
+	void etag() {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).eTag("foo").build();
 		StepVerifier.create(result)
@@ -138,7 +139,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void lastModified() {
+	void lastModified() {
 		ZonedDateTime now = ZonedDateTime.now();
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).lastModified(now).build();
@@ -150,7 +151,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void cacheControlTag() {
+	void cacheControlTag() {
 		String body = "foo";
 		Mono<EntityResponse<String>>
 				result = EntityResponse.fromObject(body).cacheControl(CacheControl.noCache()).build();
@@ -161,7 +162,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void varyBy() {
+	void varyBy() {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).varyBy("foo").build();
 		List<String> expected = Collections.singletonList("foo");
@@ -172,7 +173,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void headers() {
+	void headers() {
 		String body = "foo";
 		HttpHeaders headers = new HttpHeaders();
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).headers(headers).build();
@@ -183,7 +184,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void cookies() {
+	void cookies() {
 		MultiValueMap<String, ResponseCookie> newCookies = new LinkedMultiValueMap<>();
 		newCookies.add("name", ResponseCookie.from("name", "value").build());
 		Mono<EntityResponse<String>> result =
@@ -195,7 +196,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void bodyInserter() {
+	void bodyInserter() {
 		String body = "foo";
 		Publisher<String> publisher = Mono.just(body);
 
@@ -229,7 +230,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void notModifiedEtag() {
+	void notModifiedEtag() {
 		String etag = "\"foo\"";
 		EntityResponse<String> responseMono = EntityResponse.fromObject("bar")
 				.eTag(etag)
@@ -251,7 +252,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void notModifiedLastModified() {
+	void notModifiedLastModified() {
 		ZonedDateTime now = ZonedDateTime.now();
 		ZonedDateTime oneMinuteBeforeNow = now.minus(1, ChronoUnit.MINUTES);
 

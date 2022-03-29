@@ -529,6 +529,7 @@ class WebClientIntegrationTests {
 	}
 
 	@ParameterizedWebClientTest
+	@SuppressWarnings("deprecation")
 	void retrieve500(ClientHttpConnector connector) {
 		startServer(connector);
 
@@ -544,7 +545,7 @@ class WebClientIntegrationTests {
 
 		StepVerifier.create(result)
 				.expectErrorSatisfies(throwable -> {
-					assertThat(throwable instanceof WebClientResponseException).isTrue();
+					assertThat(throwable).isInstanceOf(WebClientResponseException.class);
 					WebClientResponseException ex = (WebClientResponseException) throwable;
 					assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 					assertThat(ex.getRawStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -636,11 +637,12 @@ class WebClientIntegrationTests {
 	}
 
 	@ParameterizedWebClientTest
+	@SuppressWarnings("deprecation")
 	void retrieve555UnknownStatus(ClientHttpConnector connector) {
 		startServer(connector);
 
 		int errorStatus = 555;
-		assertThat((Object) HttpStatus.resolve(errorStatus)).isNull();
+		assertThat(HttpStatus.resolve(errorStatus)).isNull();
 		String errorMessage = "Something went wrong";
 		prepareResponse(response -> response.setResponseCode(errorStatus)
 				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
@@ -652,7 +654,7 @@ class WebClientIntegrationTests {
 
 		StepVerifier.create(result)
 				.expectErrorSatisfies(throwable -> {
-					assertThat(throwable instanceof UnknownHttpStatusCodeException).isTrue();
+					assertThat(throwable).isInstanceOf(UnknownHttpStatusCodeException.class);
 					UnknownHttpStatusCodeException ex = (UnknownHttpStatusCodeException) throwable;
 					assertThat(ex.getMessage()).isEqualTo(("Unknown status code ["+errorStatus+"]"));
 					assertThat(ex.getRawStatusCode()).isEqualTo(errorStatus);
@@ -1055,11 +1057,12 @@ class WebClientIntegrationTests {
 	}
 
 	@ParameterizedWebClientTest
+	@SuppressWarnings("deprecation")
 	void exchangeForUnknownStatusCode(ClientHttpConnector connector) {
 		startServer(connector);
 
 		int errorStatus = 555;
-		assertThat((Object) HttpStatus.resolve(errorStatus)).isNull();
+		assertThat(HttpStatus.resolve(errorStatus)).isNull();
 		String errorMessage = "Something went wrong";
 		prepareResponse(response -> response.setResponseCode(errorStatus)
 				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
