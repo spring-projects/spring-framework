@@ -30,13 +30,14 @@ import org.springframework.lang.Nullable;
  * <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/serialization/"
  * target="_blank">Java Object Serialization</a>.
  *
- * <p>These utilities should be used with caution. See
+ * <p><strong>WARNING</strong>: These utilities should be used with caution. See
  * <a href="https://www.oracle.com/java/technologies/javase/seccodeguide.html#8"
  * target="_blank">Secure Coding Guidelines for the Java Programming Language</a>
  * for details.
  *
  * @author Dave Syer
  * @author Loïc Ledoyen
+ * @author Sam Brannen
  * @since 3.0.5
  */
 public abstract class SerializationUtils {
