@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
@@ -168,7 +169,9 @@ class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 							assertThat(parts.size()).isEqualTo(2);
 							assertThat(((FilePart) parts.get("fooPart")).filename()).isEqualTo("foo.txt");
 							assertThat(((FormFieldPart) parts.get("barPart")).value()).isEqualTo("bar");
-							return ServerResponse.ok().build();
+							return Flux.fromIterable(parts.values())
+									.concatMap(Part::delete)
+									.then(ServerResponse.ok().build());
 						}
 						catch(Exception e) {
 							return Mono.error(e);
@@ -183,7 +186,9 @@ class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 							assertThat(parts.size()).isEqualTo(2);
 							assertThat(((FilePart) parts.get(0)).filename()).isEqualTo("foo.txt");
 							assertThat(((FormFieldPart) parts.get(1)).value()).isEqualTo("bar");
-							return ServerResponse.ok().build();
+							return Flux.fromIterable(parts)
+									.concatMap(Part::delete)
+									.then(ServerResponse.ok().build());
 						}
 						catch(Exception e) {
 							return Mono.error(e);
