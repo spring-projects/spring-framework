@@ -242,18 +242,12 @@ class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
 		@Override
 		protected boolean includeWriteAttribute(Method method, String beanKey) {
-			if ("setAge".equals(method.getName())) {
-				return false;
-			}
-			return true;
+			return !"setAge".equals(method.getName());
 		}
 
 		@Override
 		protected boolean includeOperation(Method method, String beanKey) {
-			if ("dontExposeMe".equals(method.getName())) {
-				return false;
-			}
-			return true;
+			return !"dontExposeMe".equals(method.getName());
 		}
 
 		@SuppressWarnings("unused")

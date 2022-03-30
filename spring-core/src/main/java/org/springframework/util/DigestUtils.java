@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,6 @@ public abstract class DigestUtils {
 		MessageDigest messageDigest = getDigest(algorithm);
 		if (inputStream instanceof UpdateMessageDigestInputStream){
 			((UpdateMessageDigestInputStream) inputStream).updateMessageDigest(messageDigest);
-			return messageDigest.digest();
 		}
 		else {
 			final byte[] buffer = new byte[StreamUtils.BUFFER_SIZE];
@@ -135,8 +134,8 @@ public abstract class DigestUtils {
 			while ((bytesRead = inputStream.read(buffer)) != -1) {
 				messageDigest.update(buffer, 0, bytesRead);
 			}
-			return messageDigest.digest();
 		}
+		return messageDigest.digest();
 	}
 
 	private static String digestAsHexString(String algorithm, byte[] bytes) {
