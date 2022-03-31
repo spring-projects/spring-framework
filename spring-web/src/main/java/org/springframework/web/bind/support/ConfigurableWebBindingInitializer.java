@@ -197,29 +197,35 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	}
 
 	/**
+	 * Specify multiple fields that should be allowed for binding. to be applied to every DataBinder.
 	 * @see org.springframework.validation.DataBinder#setAllowedFields
-	 * @see org.springframework.web.bind.WebDataBinder#setDisallowedFields
 	 */
 	public void setAllowedFields(@Nullable String... allowedFields) {
 		this.allowedFields = allowedFields;
 	}
 
+	/**
+	 * Return the fields that should be allowed for binding to be applied to every DataBinder.
+	 */
 	@Nullable
 	public String[] getAllowedFields() {
-		return allowedFields;
+		return this.allowedFields;
 	}
 
 	/**
+	 * Specify multiple fields that <i>not</i> should be allowed for binding. to be applied to every DataBinder.
 	 * @see org.springframework.validation.DataBinder#setDisallowedFields
-	 * @see org.springframework.web.bind.WebDataBinder#setDisallowedFields
 	 */
 	public void setDisallowedFields(@Nullable String... disallowedFields) {
 		this.disallowedFields = disallowedFields;
 	}
 
+	/**
+	 * Return the fields that should <i>not</i> be allowed for binding to be applied to every DataBinder.
+	 */
 	@Nullable
 	public String[] getDisallowedFields() {
-		return disallowedFields;
+		return this.disallowedFields;
 	}
 
 	@Override
