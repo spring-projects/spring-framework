@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.text.MessageFormat;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public enum SpelMessage {
@@ -255,7 +256,11 @@ public enum SpelMessage {
 
 	/** @since 4.3.17 */
 	FLAWED_PATTERN(Kind.ERROR, 1073,
-			"Failed to efficiently evaluate pattern ''{0}'': consider redesigning it");
+			"Failed to efficiently evaluate pattern ''{0}'': consider redesigning it"),
+
+	/** @since 5.2.20 */
+	MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED(Kind.ERROR, 1075,
+			"Array declares too many elements, exceeding the threshold of ''{0}''");
 
 
 	private final Kind kind;
