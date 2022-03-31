@@ -59,6 +59,12 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	@Nullable
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
+	@Nullable
+	private String[] allowedFields;
+
+	@Nullable
+	private String[] disallowedFields;
+
 
 	/**
 	 * Set whether a binder should attempt to "auto-grow" a nested path that contains a null value.
@@ -190,6 +196,31 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 		return this.propertyEditorRegistrars;
 	}
 
+	/**
+	 * @see org.springframework.validation.DataBinder#setAllowedFields
+	 * @see org.springframework.web.bind.WebDataBinder#setDisallowedFields
+	 */
+	public void setAllowedFields(@Nullable String[] allowedFields) {
+		this.allowedFields = allowedFields;
+	}
+
+	@Nullable
+	public String[] getAllowedFields() {
+		return allowedFields;
+	}
+
+	/**
+	 * @see org.springframework.validation.DataBinder#setDisallowedFields
+	 * @see org.springframework.web.bind.WebDataBinder#setDisallowedFields
+	 */
+	public void setDisallowedFields(@Nullable String[] disallowedFields) {
+		this.disallowedFields = disallowedFields;
+	}
+
+	@Nullable
+	public String[] getDisallowedFields() {
+		return disallowedFields;
+	}
 
 	@Override
 	public void initBinder(WebDataBinder binder) {
@@ -214,6 +245,12 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 			for (PropertyEditorRegistrar propertyEditorRegistrar : this.propertyEditorRegistrars) {
 				propertyEditorRegistrar.registerCustomEditors(binder);
 			}
+		}
+		if (this.allowedFields != null) {
+			binder.setAllowedFields(this.allowedFields);
+		}
+		if (this.disallowedFields != null) {
+			binder.setDisallowedFields(this.disallowedFields);
 		}
 	}
 
