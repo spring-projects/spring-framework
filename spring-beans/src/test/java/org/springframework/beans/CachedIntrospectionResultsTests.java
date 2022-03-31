@@ -18,24 +18,34 @@ package org.springframework.beans;
 
 import java.beans.BeanInfo;
 import java.beans.PropertyDescriptor;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
 
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.OverridingClassLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mockConstruction;
 
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Arjen Poutsma
+ * @author luozhenyu
  */
-public class CachedIntrospectionResultsTests {
+class CachedIntrospectionResultsTests {
 
 	@Test
-	public void acceptAndClearClassLoader() throws Exception {
+	void acceptAndClearClassLoader() throws Exception {
 		BeanWrapper bw = new BeanWrapperImpl(TestBean.class);
 		assertThat(bw.isWritableProperty("name")).isTrue();
 		assertThat(bw.isWritableProperty("age")).isTrue();
@@ -56,7 +66,7 @@ public class CachedIntrospectionResultsTests {
 	}
 
 	@Test
-	public void clearClassLoaderForSystemClassLoader() throws Exception {
+	void clearClassLoaderForSystemClassLoader() throws Exception {
 		BeanUtils.getPropertyDescriptors(ArrayList.class);
 		assertThat(CachedIntrospectionResults.strongClassCache.containsKey(ArrayList.class)).isTrue();
 		CachedIntrospectionResults.clearClassLoader(ArrayList.class.getClassLoader());
@@ -64,7 +74,7 @@ public class CachedIntrospectionResultsTests {
 	}
 
 	@Test
-	public void shouldUseExtendedBeanInfoWhenApplicable() throws NoSuchMethodException, SecurityException {
+	void shouldUseExtendedBeanInfoWhenApplicable() throws NoSuchMethodException, SecurityException {
 		// given a class with a non-void returning setter method
 		@SuppressWarnings("unused")
 		class C {
@@ -88,6 +98,44 @@ public class CachedIntrospectionResultsTests {
 		// No write method found for non-void returning 'setFoo' method.
 		// Check to see if CachedIntrospectionResults is delegating to ExtendedBeanInfo as expected
 		assertThat(pd.getWriteMethod()).isEqualTo(C.class.getMethod("setFoo", String.class));
+	}
+
+	@Test
+	void shouldBeInitializedOnceInParallel() throws Exception {
+		final int nThreads = 10;
+		ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+		CountDownLatch countDownLatch = new CountDownLatch(nThreads);
+
+		List<Future<List<CachedIntrospectionResults>>> futures = new ArrayList<>(nThreads);
+		for (int i = 0; i < nThreads; i++) {
+			futures.add(executor.submit(new ConstructionCallable(countDownLatch)));
+		}
+
+		List<CachedIntrospectionResults> resultsList = new ArrayList<>();
+		for (Future<List<CachedIntrospectionResults>> future : futures) {
+			resultsList.addAll(future.get());
+		}
+		executor.shutdown();
+
+		assertThat(resultsList).hasSize(1);
+	}
+
+	private record ConstructionCallable(CountDownLatch countDownLatch)
+			implements Callable<List<CachedIntrospectionResults>> {
+		@Override
+		public List<CachedIntrospectionResults> call() throws Exception {
+			try (MockedConstruction<CachedIntrospectionResults> cachedIntrospectionResults =
+					mockConstruction(CachedIntrospectionResults.class)) {
+				countDownLatch.countDown();
+
+				// Ensure executing at the same time
+				countDownLatch.await();
+				CachedIntrospectionResults.forClass(AbstractMap.SimpleImmutableEntry.class);
+
+				// Return a copy of constructed objects to avoid being cleared
+				return new ArrayList<>(cachedIntrospectionResults.constructed());
+			}
+		}
 	}
 
 }

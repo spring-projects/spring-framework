@@ -179,7 +179,6 @@ public final class CachedIntrospectionResults {
 			return results;
 		}
 
-		results = new CachedIntrospectionResults(beanClass);
 		ConcurrentMap<Class<?>, CachedIntrospectionResults> classCacheToUse;
 
 		if (ClassUtils.isCacheSafe(beanClass, CachedIntrospectionResults.class.getClassLoader()) ||
@@ -193,8 +192,7 @@ public final class CachedIntrospectionResults {
 			classCacheToUse = softClassCache;
 		}
 
-		CachedIntrospectionResults existing = classCacheToUse.putIfAbsent(beanClass, results);
-		return (existing != null ? existing : results);
+		return classCacheToUse.computeIfAbsent(beanClass, CachedIntrospectionResults::new);
 	}
 
 	/**
