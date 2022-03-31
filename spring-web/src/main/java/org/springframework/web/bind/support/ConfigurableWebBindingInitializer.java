@@ -200,7 +200,7 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	 * @see org.springframework.validation.DataBinder#setAllowedFields
 	 * @see org.springframework.web.bind.WebDataBinder#setDisallowedFields
 	 */
-	public void setAllowedFields(@Nullable String[] allowedFields) {
+	public void setAllowedFields(@Nullable String... allowedFields) {
 		this.allowedFields = allowedFields;
 	}
 
@@ -213,7 +213,7 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	 * @see org.springframework.validation.DataBinder#setDisallowedFields
 	 * @see org.springframework.web.bind.WebDataBinder#setDisallowedFields
 	 */
-	public void setDisallowedFields(@Nullable String[] disallowedFields) {
+	public void setDisallowedFields(@Nullable String... disallowedFields) {
 		this.disallowedFields = disallowedFields;
 	}
 
