@@ -1,11 +1,17 @@
 package org.springframework.web.bind.support;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.testfixture.beans.TestBean;
+
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Unit tests for {@link ConfigurableWebBindingInitializer}.
+ *
+ * @author Michaël van de Giessen
+ */
 public class ConfigurableWebBindingInitializerTest {
 	private static final String[] ALLOWED = new String[]{"allowed"};
 	private static final String[] DISALLOWED =  new String[]{"disallowed"};
@@ -20,8 +26,8 @@ public class ConfigurableWebBindingInitializerTest {
 		sut.initBinder(this.binder);
 
 		// we expect them to be set on the initialising WebDataBinder
-		assertArrayEquals(ALLOWED,this.binder.getAllowedFields());
-		assertArrayEquals(DISALLOWED,this.binder.getDisallowedFields());
+		assertThat(this.binder.getAllowedFields()).containsExactly(ALLOWED);
+		assertThat(this.binder.getDisallowedFields()).containsExactly(DISALLOWED);
 	}
 
 	@Test
@@ -36,7 +42,7 @@ public class ConfigurableWebBindingInitializerTest {
 		sut.initBinder(this.binder);
 
 		// we expect original values to be retained on the initialising WebDataBinder
-		assertArrayEquals(ALLOWED,this.binder.getAllowedFields());
-		assertArrayEquals(DISALLOWED,this.binder.getDisallowedFields());
+		assertThat(this.binder.getAllowedFields()).containsExactly(ALLOWED);
+		assertThat(this.binder.getDisallowedFields()).containsExactly(DISALLOWED);
 	}
 }
