@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
-import org.junit.jupiter.api.Disabled
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan
@@ -41,7 +40,6 @@ import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpSe
 import reactor.core.publisher.Flux
 import java.time.Duration
 
-@Disabled
 class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 
 	override fun initApplicationContext(): ApplicationContext {
