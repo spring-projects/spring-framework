@@ -66,6 +66,17 @@ public abstract class MimeTypeUtils {
 	public static final String ALL_VALUE = "*/*";
 
 	/**
+	 * Public constant mime type for {@code application/graphql+json}.
+	 * @see <a href="https://github.com/graphql/graphql-over-http">GraphQL over HTTP spec</a>
+	 * */
+	public static final MimeType APPLICATION_GRAPHQL;
+
+	/**
+	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_GRAPHQL}.
+	 */
+	public static final String APPLICATION_GRAPHQL_VALUE = "application/graphql+json";
+
+	/**
 	 * Public constant mime type for {@code application/json}.
 	 * */
 	public static final MimeType APPLICATION_JSON;
@@ -165,6 +176,7 @@ public abstract class MimeTypeUtils {
 	static {
 		// Not using "parseMimeType" to avoid static init cost
 		ALL = new MimeType("*", "*");
+		APPLICATION_GRAPHQL = new MimeType("application", "graphql+json");
 		APPLICATION_JSON = new MimeType("application", "json");
 		APPLICATION_OCTET_STREAM = new MimeType("application", "octet-stream");
 		APPLICATION_XML = new MimeType("application", "xml");
