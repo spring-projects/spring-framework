@@ -258,11 +258,20 @@ public class AnnotatedBeanDefinitionReader {
 		}
 
 		abd.setInstanceSupplier(supplier);
+		/**
+		 * 处理@Scope注解
+		 */
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
 		abd.setScope(scopeMetadata.getScopeName());
+		/**
+		 * 取beanName
+		 * 此处是AnnotationBeanNameGenerator
+		 */
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
 
+		//通用注解解析到abd结构中，主要是处理Lazy, primary DependsOn, Role ,Description这五个注解
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
+		// @Qualifier特殊限定符处理,一般用这个注解的扫描类，是没有这些东西的，我猜其他子类的扫描器可能会有这些东西
 		if (qualifiers != null) {
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class == qualifier) {

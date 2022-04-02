@@ -8,7 +8,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class Main {
 	public static void main(String[] args) {
-		//ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:application.xml");
+		//ApplicationContext applicationContext1 = new ClassPathXmlApplicationContext("classpath:application.xml");
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
 		FirstBean bean = applicationContext.getBean(FirstBean.class);
 		bean.test();

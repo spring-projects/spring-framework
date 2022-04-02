@@ -547,6 +547,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
 			// Prepare this context for refreshing.
+			/**
+			 * 1、设置容器启动时间
+			 * 2、设置活跃状态为true
+			 * 3、设置关闭状态为false
+			 * 4、获取Environment对象，并加载当前系统的属性值到Environment对象中
+			 * 5、准备监听器和时间的集合对象，默认为空的集合
+			 */
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
@@ -619,8 +626,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void prepareRefresh() {
 		// Switch to active.
+		//容器启动时间
 		this.startupDate = System.currentTimeMillis();
+		//容器的关闭标志位
 		this.closed.set(false);
+		//容器的激活标志位
 		this.active.set(true);
 
 		if (logger.isDebugEnabled()) {
@@ -633,10 +643,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Initialize any placeholder property sources in the context environment.
+		// 预留接口，便于子类功能扩展
 		initPropertySources();
 
 		// Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties
+		// 1、检查是否存在环境变量如果存在直接用,不存在重更新获取
+		// 2、创建并获取环境对象、验证需要的属性文件是否符合
 		getEnvironment().validateRequiredProperties();
 
 		// Store pre-refresh ApplicationListeners...
@@ -670,6 +683,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #getBeanFactory()
 	 */
 	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
+		/**
+		 * refreshBeanFactory  委派模式 有两个类 实现了该方法
+		 * GenericApplicationContext 和  AbstractRefreshableApplicationContext
+		 * 如果是AnnotationConfigApplicationContext 启动spring
+		 * 则在 AnnotationConfigApplicationContext的默认构造器中调用父类（GenericApplicationContext）的构造器 创建一个beanFactory
+		 * e.g. this.beanFactory = new DefaultListableBeanFactory();
+		 *
+		 * 如果是通过XML配置读入 ClassPathXmlApplicationContext
+		 * 则refreshBeanFactory 是调用 AbstractRefreshableApplicationContext的refreshBeanFactory 创建一个DefaultListableBeanFactory
+		 */
 		refreshBeanFactory();
 		return getBeanFactory();
 	}

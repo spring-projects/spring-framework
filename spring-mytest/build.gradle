@@ -13,6 +13,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     api(project(':spring-context'))
+    api group: 'jakarta.annotation', name: 'jakarta.annotation-api', version: '2.0.0'
 /*
     optional(project(":spring-instrument"))
 */

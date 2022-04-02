@@ -69,7 +69,13 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		//在父类中初始化beanFactory，即直接new了一个DefaultListableBeanFactory。
 		StartupStep createAnnotatedBeanDefReader = this.getApplicationStartup().start("spring.context.annotated-bean-reader.create");
 		//TODO
+		/*
+		 * 创建一个读取注解的Bean定义读取器
+		 * 什么是bean定义？BeanDefinition
+		 * 完成了spring内部BeanDefinition的注册（主要是后置处理器）
+		 */
 		this.reader = new AnnotatedBeanDefinitionReader(this);
+		String[] beanDefinitionNames = this.reader.getRegistry().getBeanDefinitionNames();
 		createAnnotatedBeanDefReader.end();
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
