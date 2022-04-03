@@ -3288,6 +3288,11 @@ controller-specific `Formatter` instances, as the following example shows:
 ----
 <1> Adding a custom formatter (a `DateFormatter`, in this case).
 
+[[webflux-ann-initbinder-model-design]]
+==== Model Design
+[.small]#<<web.adoc#mvc-ann-initbinder-model-design, Web MVC>>#
+
+include::web-data-binding-model-design.adoc[]
 
 
 [[webflux-ann-controller-exceptions]]

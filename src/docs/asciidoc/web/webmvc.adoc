@@ -3662,6 +3662,13 @@ controller-specific `Formatter` implementations, as the following example shows:
 ----
 <1> Defining an `@InitBinder` method on a custom formatter.
 
+[[mvc-ann-initbinder-model-design]]
+==== Model Design
+[.small]#<<web-reactive.adoc#webflux-ann-initbinder-model-design, WebFlux>>#
+
+include::web-data-binding-model-design.adoc[]
+
+
 [[mvc-ann-exceptionhandler]]
 === Exceptions
 [.small]#<<web-reactive.adoc#webflux-ann-controller-exceptions, WebFlux>>#
