@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+}
+
+group 'org.springframework'
+version '5.0.21.BUILD-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.12'
+    compile(project(":spring-context"))
+}
