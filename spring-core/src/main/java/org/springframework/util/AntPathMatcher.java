@@ -275,6 +275,10 @@ public class AntPathMatcher implements PathMatcher {
 			if (!matchStrings(pattDir, pathDirs[pathIdxEnd], uriTemplateVariables)) {
 				return false;
 			}
+			if (pattIdxEnd == (pattDirs.length - 1)
+					&& pattern.endsWith(this.pathSeparator) != path.endsWith(this.pathSeparator)) {
+				return false;
+			}
 			pattIdxEnd--;
 			pathIdxEnd--;
 		}
