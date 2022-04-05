@@ -85,6 +85,11 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 	}
 
 	@Override
+	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid) throws BeansException {
+		setPropertyValues(pvs, ignoreUnknown, ignoreInvalid, false);
+	}
+
+	@Override
 	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid, boolean ignoreNoDefaultValue)
 			throws BeansException {
 
