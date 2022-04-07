@@ -122,6 +122,14 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		return (contentLength < 0 ? null : contentLength);
 	}
 
+	/**
+	 * Adds the default headers for the given resource to the given message.
+	 * @since 6.0
+	 */
+	public void addDefaultHeaders(HttpOutputMessage message, Resource resource, @Nullable MediaType contentType) throws IOException {
+		addDefaultHeaders(message.getHeaders(), resource, contentType);
+	}
+
 	@Override
 	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {

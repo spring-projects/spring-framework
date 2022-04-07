@@ -438,10 +438,17 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						// Content phase
 						ResourceHttpMessageWriter writer = getResourceHttpMessageWriter();
 						Assert.state(writer != null, "No ResourceHttpMessageWriter");
-						return writer.write(Mono.just(resource),
-								null, ResolvableType.forClass(Resource.class), mediaType,
-								exchange.getRequest(), exchange.getResponse(),
-								Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix()));
+						if (HttpMethod.HEAD == httpMethod) {
+							writer.addHeaders(exchange.getResponse(), resource, mediaType,
+									Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix()));
+							return exchange.getResponse().setComplete();
+						}
+						else {
+							return writer.write(Mono.just(resource),
+									null, ResolvableType.forClass(Resource.class), mediaType,
+									exchange.getRequest(), exchange.getResponse(),
+									Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix()));
+						}
 					}
 					catch (IOException ex) {
 						return Mono.error(ex);

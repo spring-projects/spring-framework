@@ -118,7 +118,8 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.containsHeader("Last-Modified")).isTrue();
 		assertThat(this.response.getDateHeader("Last-Modified") / 1000).isEqualTo(resourceLastModified("test/foo.css") / 1000);
 		assertThat(this.response.getHeader("Accept-Ranges")).isEqualTo("bytes");
-		assertThat(this.response.getHeaders("Accept-Ranges").size()).isEqualTo(1);
+		assertThat(this.response.getHeaders("Accept-Ranges")).hasSize(1);
+		assertThat(this.response.getContentAsByteArray()).isEmpty();
 	}
 
 	@Test

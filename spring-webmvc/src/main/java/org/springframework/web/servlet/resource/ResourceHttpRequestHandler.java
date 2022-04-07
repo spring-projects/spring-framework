@@ -585,7 +585,14 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 		if (request.getHeader(HttpHeaders.RANGE) == null) {
 			Assert.state(this.resourceHttpMessageConverter != null, "Not initialized");
-			this.resourceHttpMessageConverter.write(resource, mediaType, outputMessage);
+
+			if (HttpMethod.HEAD.matches(request.getMethod())) {
+				this.resourceHttpMessageConverter.addDefaultHeaders(outputMessage, resource, mediaType);
+				outputMessage.flush();
+			}
+			else {
+				this.resourceHttpMessageConverter.write(resource, mediaType, outputMessage);
+			}
 		}
 		else {
 			Assert.state(this.resourceRegionHttpMessageConverter != null, "Not initialized");

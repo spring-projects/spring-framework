@@ -120,7 +120,10 @@ public class ResourceWebHandlerTests {
 		assertThat(headers.containsKey("Last-Modified")).isTrue();
 		assertThat(resourceLastModifiedDate("test/foo.css") / 1000).isEqualTo(headers.getLastModified() / 1000);
 		assertThat(headers.getFirst("Accept-Ranges")).isEqualTo("bytes");
-		assertThat(headers.get("Accept-Ranges").size()).isEqualTo(1);
+		assertThat(headers.get("Accept-Ranges")).hasSize(1);
+
+		StepVerifier.create(exchange.getResponse().getBody())
+				.verifyComplete();
 	}
 
 	@Test
