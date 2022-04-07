@@ -455,9 +455,6 @@ public abstract class JdbcUtils {
 		if (source != null && source.startsWith("DB2")) {
 			name = "DB2";
 		}
-		else if ("MariaDB".equals(source)) {
-			name = "MySQL";
-		}
 		else if ("Sybase SQL Server".equals(source) ||
 				"Adaptive Server Enterprise".equals(source) ||
 				"ASE".equals(source) ||

@@ -37,6 +37,7 @@ public class JdbcUtilsTests {
 		assertThat(JdbcUtils.commonDatabaseName("Sybase SQL Server")).isEqualTo("Sybase");
 		assertThat(JdbcUtils.commonDatabaseName("Adaptive Server Enterprise")).isEqualTo("Sybase");
 		assertThat(JdbcUtils.commonDatabaseName("MySQL")).isEqualTo("MySQL");
+		assertThat(JdbcUtils.commonDatabaseName("MariaDB")).isEqualTo("MariaDB");
 	}
 
 	@Test
