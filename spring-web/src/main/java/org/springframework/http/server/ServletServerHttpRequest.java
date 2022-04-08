@@ -197,7 +197,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	@Override
 	public InetSocketAddress getLocalAddress() {
-		return new InetSocketAddress(this.servletRequest.getLocalName(), this.servletRequest.getLocalPort());
+		return new InetSocketAddress(this.servletRequest.getLocalAddr(), this.servletRequest.getLocalPort());
 	}
 
 	@Override
