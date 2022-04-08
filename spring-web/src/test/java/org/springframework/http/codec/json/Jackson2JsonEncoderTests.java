@@ -103,7 +103,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 		);
 	}
 
-	@Test // SPR-15866
+	@Test  // SPR-15866
 	public void canEncodeWithCustomMimeType() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(new ObjectMapper(), textJavascript);
@@ -231,9 +231,8 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 		);
 	}
 
-	@Test // gh-28045
+	@Test  // gh-28045
 	public void jacksonValueUnwrappedBeforeObjectMapperSelection() {
-
 		JacksonViewBean bean = new JacksonViewBean();
 		bean.setWithView1("with");
 		bean.setWithView2("with");
@@ -248,13 +247,15 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 		ObjectMapper mapper = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true);
 		this.encoder.registerObjectMappersForType(JacksonViewBean.class, map -> map.put(halMediaType, mapper));
 
+		String ls = System.lineSeparator();  // output below is different between Unix and Windows
 		testEncode(Mono.just(jacksonValue), type, halMediaType, Collections.emptyMap(), step -> step
-				.consumeNextWith(expectString("{\n  \"withView1\" : \"with\"\n}").andThen(DataBufferUtils::release))
+				.consumeNextWith(expectString("{" + ls + "  \"withView1\" : \"with\"" + ls + "}")
+						.andThen(DataBufferUtils::release))
 				.verifyComplete()
 		);
 	}
 
-	@Test // gh-22771
+	@Test  // gh-22771
 	public void encodeWithFlushAfterWriteOff() {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, false);
