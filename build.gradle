@@ -51,7 +51,7 @@ configure(allprojects) { project ->
 			}
 			dependency "com.google.code.findbugs:jsr305:3.0.2"
 
-			dependencySet(group: 'org.aspectj', version: '1.9.9') {
+			dependencySet(group: 'org.aspectj', version: '1.9.9.1') {
 				entry 'aspectjrt'
 				entry 'aspectjtools'
 				entry 'aspectjweaver'
@@ -145,7 +145,7 @@ configure(allprojects) { project ->
 				entry 'mockwebserver'
 			}
 
-			dependency "org.jruby:jruby:9.3.3.0"
+			dependency "org.jruby:jruby:9.3.4.0"
 			dependency "org.python:jython-standalone:2.7.1"
 			dependency "org.mozilla:rhino:1.7.11"
 
