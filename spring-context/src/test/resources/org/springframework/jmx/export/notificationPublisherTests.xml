@@ -17,7 +17,7 @@
 				<entry key="spring:type=PublisherStandardMBean" value-ref="publisherStandardMBean"/>
 			</map>
 		</property>
-    <property name="server" ref="server"/>
+    	<property name="server" ref="server"/>
 	</bean>
 
 </beans>

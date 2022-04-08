@@ -203,7 +203,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	@Nullable
 	protected SslInfo initSslInfo() {
 		X509Certificate[] certificates = getX509Certificates();
-		return certificates != null ? new DefaultSslInfo(getSslSessionId(), certificates) : null;
+		return (certificates != null ? new DefaultSslInfo(getSslSessionId(), certificates) : null);
 	}
 
 	@Nullable
@@ -213,8 +213,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Nullable
 	private X509Certificate[] getX509Certificates() {
-		String name = "jakarta.servlet.request.X509Certificate";
-		return (X509Certificate[]) this.request.getAttribute(name);
+		return (X509Certificate[]) this.request.getAttribute("jakarta.servlet.request.X509Certificate");
 	}
 
 	@Override
