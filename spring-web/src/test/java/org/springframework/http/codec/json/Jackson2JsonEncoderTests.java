@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +81,6 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 
 		// SPR-15910
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Object.class), APPLICATION_OCTET_STREAM)).isFalse();
-
-
 	}
 
 	@Override
@@ -100,7 +98,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 				APPLICATION_STREAM_JSON, null);
 	}
 
-	@Test // SPR-15866
+	@Test  // SPR-15866
 	public void canEncodeWithCustomMimeType() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(new ObjectMapper(), textJavascript);
@@ -212,7 +210,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 				null, hints);
 	}
 
-	@Test // gh-22771
+	@Test  // gh-22771
 	public void encodeWithFlushAfterWriteOff() {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, false);
@@ -235,7 +233,6 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
 				.verifyComplete(),
 				new MimeType("application", "json", StandardCharsets.US_ASCII), null);
-
 	}
 
 
