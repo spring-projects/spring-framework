@@ -21,6 +21,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
+import org.aopalliance.aop.Advice;
+import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -31,11 +33,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.aop.ClassFilter;
+import org.springframework.aop.IntroductionAdvisor;
+import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.aop.SpringProxy;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.config.AopConfigUtils;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyConfig;
+import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.PropertyValue;
@@ -52,6 +60,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.DecoratingProxy;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -304,10 +313,26 @@ public class AspectJAutoProxyCreatorTests {
 	@ValueSource(classes = {ProxyTargetClassFalseConfig.class, ProxyTargetClassTrueConfig.class})
 	void lambdaIsAlwaysProxiedWithJdkProxy(Class<?> configClass) {
 		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(configClass)) {
-			Supplier<?> supplier = context.getBean(Supplier.class);
+			@SuppressWarnings("unchecked")
+			Supplier<String> supplier = context.getBean(Supplier.class);
 			assertThat(AopUtils.isAopProxy(supplier)).as("AOP proxy").isTrue();
 			assertThat(AopUtils.isJdkDynamicProxy(supplier)).as("JDK Dynamic proxy").isTrue();
-			assertThat(supplier.get()).asString().isEqualTo("advised: lambda");
+			assertThat(supplier.getClass().getInterfaces())
+				.containsExactlyInAnyOrder(Supplier.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
+			assertThat(supplier.get()).isEqualTo("advised: lambda");
+		}
+	}
+
+	@ParameterizedTest(name = "[{index}] {0}")
+	@ValueSource(classes = {MixinProxyTargetClassFalseConfig.class, MixinProxyTargetClassTrueConfig.class})
+	void lambdaIsAlwaysProxiedWithJdkProxyWithIntroductions(Class<?> configClass) {
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(configClass)) {
+			MessageGenerator messageGenerator = context.getBean(MessageGenerator.class);
+			assertThat(AopUtils.isAopProxy(messageGenerator)).as("AOP proxy").isTrue();
+			assertThat(AopUtils.isJdkDynamicProxy(messageGenerator)).as("JDK Dynamic proxy").isTrue();
+			assertThat(messageGenerator.getClass().getInterfaces())
+				.containsExactlyInAnyOrder(MessageGenerator.class, Mixin.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
+			assertThat(messageGenerator.generateMessage()).isEqualTo("mixin: lambda");
 		}
 	}
 
@@ -615,4 +640,80 @@ class ProxyTargetClassFalseConfig extends AbstractProxyTargetClassConfig {
 @Configuration(proxyBeanMethods = false)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 class ProxyTargetClassTrueConfig extends AbstractProxyTargetClassConfig {
+}
+
+@FunctionalInterface
+interface MessageGenerator {
+	String generateMessage();
+}
+
+interface Mixin {
+}
+
+class MixinIntroductionInterceptor implements IntroductionInterceptor {
+
+	@Override
+	public Object invoke(MethodInvocation invocation) throws Throwable {
+		return "mixin: " + invocation.proceed();
+	}
+
+	@Override
+	public boolean implementsInterface(Class<?> intf) {
+		return Mixin.class.isAssignableFrom(intf);
+	}
+
+}
+
+@SuppressWarnings("serial")
+class MixinAdvisor extends AbstractPointcutAdvisor implements IntroductionAdvisor {
+
+	@Override
+	public org.springframework.aop.Pointcut getPointcut() {
+		return org.springframework.aop.Pointcut.TRUE;
+	}
+
+	@Override
+	public Advice getAdvice() {
+		return new MixinIntroductionInterceptor();
+	}
+
+	@Override
+	public Class<?>[] getInterfaces() {
+		return new Class[] { Mixin.class };
+	}
+
+	@Override
+	public ClassFilter getClassFilter() {
+		return MessageGenerator.class::isAssignableFrom;
+	}
+
+	@Override
+	public void validateInterfaces() {
+		/* no-op */
+	}
+
+}
+
+abstract class AbstractMixinConfig {
+
+	@Bean
+	MessageGenerator messageGenerator() {
+		return () -> "lambda";
+	}
+
+	@Bean
+	MixinAdvisor mixinAdvisor() {
+		return new MixinAdvisor();
+	}
+
+}
+
+@Configuration(proxyBeanMethods = false)
+@EnableAspectJAutoProxy(proxyTargetClass = false)
+class MixinProxyTargetClassFalseConfig extends AbstractMixinConfig {
+}
+
+@Configuration(proxyBeanMethods = false)
+@EnableAspectJAutoProxy(proxyTargetClass = true)
+class MixinProxyTargetClassTrueConfig extends AbstractMixinConfig {
 }
