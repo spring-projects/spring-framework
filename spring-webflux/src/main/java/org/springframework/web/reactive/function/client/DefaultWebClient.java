@@ -232,6 +232,13 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
+		public DefaultRequestBodyUriSpec header(String headerValue) {
+			String[] header = headerValue.split(":");
+			getHeaders().add(header[0], header[1]);
+			return this;
+		}
+
+		@Override
 		public DefaultRequestBodyUriSpec header(String headerName, String... headerValues) {
 			for (String headerValue : headerValues) {
 				getHeaders().add(headerName, headerValue);

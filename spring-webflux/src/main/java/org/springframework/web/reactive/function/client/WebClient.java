@@ -436,6 +436,13 @@ public interface WebClient {
 
 		/**
 		 * Add the given, single header value under the given name.
+		 * @param headerValue the header value
+		 * @return this builder
+		 */
+		S header(String headerValue);
+
+		/**
+		 * Add the given, single header value under the given name.
 		 * @param headerName  the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
