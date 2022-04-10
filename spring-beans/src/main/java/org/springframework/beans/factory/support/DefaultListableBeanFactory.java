@@ -747,7 +747,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			// Check raw bean class, e.g. in case of a proxy.
 			if (bd.hasBeanClass()) {
 				Class<?> beanClass = bd.getBeanClass();
-				if (beanClass != beanType) {
+
+				// If the bean definitation has factory method , then ignore it's configuration class's annotations
+				if (beanClass != beanType && bd.getResolvedFactoryMethod() == null) {
 					MergedAnnotation<A> annotation =
 							MergedAnnotations.from(beanClass, SearchStrategy.TYPE_HIERARCHY).get(annotationType);
 					if (annotation.isPresent()) {
