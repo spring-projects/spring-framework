@@ -1,10 +1,10 @@
-package com.spring.research.config;
+package com.spring.research.embed.tomcat.config;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-@ComponentScan("com.spring.research")
+@ComponentScan("com.spring.research.embed.tomcat")
 @Configuration
-public class Config {
+public class AppConfig {
 
 }
