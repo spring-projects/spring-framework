@@ -1,0 +1,20 @@
+
+description = "Spring Research"
+
+
+group 'org.springframework'
+version '5.0.21.BUILD-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+
+dependencies {
+    compile(project(":spring-webmvc"))
+    compile(project(":spring-web"))
+    optional(project(":spring-context"))
+    compile ("org.apache.tomcat.embed:tomcat-embed-core:8.5.33")
+    compile ("org.apache.tomcat.embed:tomcat-embed-jasper:8.5.33")
+    }
+

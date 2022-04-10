@@ -31,3 +31,4 @@ rootProject.children.each {project ->
 }
 include 'spring-helloworld'
 
+include 'spring-research'
