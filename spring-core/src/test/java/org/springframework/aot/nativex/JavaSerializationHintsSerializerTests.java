@@ -45,7 +45,7 @@ public class JavaSerializationHintsSerializerTests {
 		JavaSerializationHints hints = new JavaSerializationHints().registerType(TypeReference.of(String.class));
 		assertEquals("""
 				[
-					{ "name" : "java.lang.String" }
+					{ "name": "java.lang.String" }
 				]""", hints);
 	}
 
@@ -56,8 +56,8 @@ public class JavaSerializationHintsSerializerTests {
 				.registerType(TypeReference.of(Environment.class));
 		assertEquals("""
 				[
-					{ "name" : "java.lang.String" },
-					{ "name" : "org.springframework.core.env.Environment" }
+					{ "name": "java.lang.String" },
+					{ "name": "org.springframework.core.env.Environment" }
 				]""", hints);
 	}
 

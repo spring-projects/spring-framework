@@ -16,8 +16,6 @@
 
 package org.springframework.aot.nativex;
 
-import java.io.IOException;
-
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -35,13 +33,13 @@ public class ResourceHintsSerializerTests {
 	private final ResourceHintsSerializer serializer = new ResourceHintsSerializer();
 
 	@Test
-	void empty() throws IOException, JSONException {
+	void empty() throws JSONException {
 		ResourceHints hints = new ResourceHints();
 		assertEquals("{}", hints);
 	}
 
 	@Test
-	void registerExactMatch() throws  JSONException {
+	void registerExactMatch() throws JSONException {
 		ResourceHints hints = new ResourceHints();
 		hints.registerPattern("com/example/test.properties");
 		hints.registerPattern("com/example/another.properties");
@@ -49,8 +47,8 @@ public class ResourceHintsSerializerTests {
 				{
 					"resources": {
 						"includes": [
-							{ "pattern" : "\\\\Qcom/example/test.properties\\\\E"},
-							{ "pattern" : "\\\\Qcom/example/another.properties\\\\E"}
+							{ "pattern": "\\\\Qcom/example/test.properties\\\\E"},
+							{ "pattern": "\\\\Qcom/example/another.properties\\\\E"}
 						]
 					}
 				}""", hints);
@@ -63,8 +61,8 @@ public class ResourceHintsSerializerTests {
 		assertEquals("""
 				{
 					"resources": {
-						"includes" : [
-							{ "pattern" : "\\\\Qcom/example/\\\\E.*\\\\Q.properties\\\\E"}
+						"includes": [
+							{ "pattern": "\\\\Qcom/example/\\\\E.*\\\\Q.properties\\\\E"}
 						]
 					}
 				}""", hints);
@@ -79,12 +77,12 @@ public class ResourceHintsSerializerTests {
 				{
 					"resources": {
 						"includes": [
-							{ "pattern" : "\\\\Qcom/example/\\\\E.*\\\\Q.properties\\\\E"},
-							{ "pattern" : "\\\\Qorg/example/\\\\E.*\\\\Q.properties\\\\E"}
+							{ "pattern": "\\\\Qcom/example/\\\\E.*\\\\Q.properties\\\\E"},
+							{ "pattern": "\\\\Qorg/example/\\\\E.*\\\\Q.properties\\\\E"}
 						],
 						"excludes": [
-							{ "pattern" : "\\\\Qcom/example/to-ignore.properties\\\\E"},
-							{ "pattern" : "\\\\Qorg/example/to-ignore.properties\\\\E"}
+							{ "pattern": "\\\\Qcom/example/to-ignore.properties\\\\E"},
+							{ "pattern": "\\\\Qorg/example/to-ignore.properties\\\\E"}
 						]
 					}
 				}""", hints);
@@ -97,8 +95,8 @@ public class ResourceHintsSerializerTests {
 		assertEquals("""
 				{
 					"resources": {
-						"includes" : [
-							{ "pattern" : "\\\\Qjava/lang/String.class\\\\E"}
+						"includes": [
+							{ "pattern": "\\\\Qjava/lang/String.class\\\\E"}
 						]
 					}
 				}""", hints);
@@ -112,8 +110,8 @@ public class ResourceHintsSerializerTests {
 		assertEquals("""
 				{
 					"bundles": [
-						{ "name" : "com.example.message"},
-						{ "name" : "com.example.message2"}
+						{ "name": "com.example.message"},
+						{ "name": "com.example.message2"}
 					]
 				}""", hints);
 	}

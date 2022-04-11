@@ -73,30 +73,30 @@ public class ReflectionHintsSerializerTests {
 		assertEquals("""
 				[
 					{
-						"name" : "org.springframework.core.codec.StringDecoder",
-						"condition" : { "typeReachable" : "java.lang.String" },
-						"allPublicFields" : true,
-						"allDeclaredFields" : true,
-						"queryAllPublicConstructors" : true,
-						"queryAllDeclaredConstructors" : true,
-						"allPublicConstructors" : true,
-						"allDeclaredConstructors" : true,
-						"queryAllPublicMethods" : true,
-						"queryAllDeclaredMethods" : true,
-						"allPublicMethods" : true,
-						"allDeclaredMethods" : true,
-						"allPublicClasses" : true,
-						"allDeclaredClasses" : true,
-						"fields" : [
-							{ "name" : "DEFAULT_CHARSET" },
-							{ "name" : "defaultCharset", "allowWrite" = true, "allowUnsafeAccess" = true }
+						"name": "org.springframework.core.codec.StringDecoder",
+						"condition": { "typeReachable": "java.lang.String" },
+						"allPublicFields": true,
+						"allDeclaredFields": true,
+						"queryAllPublicConstructors": true,
+						"queryAllDeclaredConstructors": true,
+						"allPublicConstructors": true,
+						"allDeclaredConstructors": true,
+						"queryAllPublicMethods": true,
+						"queryAllDeclaredMethods": true,
+						"allPublicMethods": true,
+						"allDeclaredMethods": true,
+						"allPublicClasses": true,
+						"allDeclaredClasses": true,
+						"fields": [
+							{ "name": "DEFAULT_CHARSET" },
+							{ "name": "defaultCharset", "allowWrite": true, "allowUnsafeAccess": true }
 						],
-						"methods" : [
-							{ "name" : "setDefaultCharset", "parameterTypes": [ "java.nio.charset.Charset" ] }
+						"methods": [
+							{ "name": "setDefaultCharset", "parameterTypes": [ "java.nio.charset.Charset" ] }
 						],
-						"queriedMethods" :  [
-							{ "name" : "<init>", "parameterTypes": [ "java.util.List", "boolean", "org.springframework.util.MimeType" ] },
-							{ "name" : "getDefaultCharset" }
+						"queriedMethods":  [
+							{ "name": "<init>", "parameterTypes": [ "java.util.List", "boolean", "org.springframework.util.MimeType" ] },
+							{ "name": "getDefaultCharset" }
 						]
 					}
 				]""", hints);
@@ -112,8 +112,8 @@ public class ReflectionHintsSerializerTests {
 
 		assertEquals("""
 				[
-					{ "name" : "java.lang.Integer" },
-					{ "name" : "java.lang.Long" }
+					{ "name": "java.lang.Integer" },
+					{ "name": "java.lang.Long" }
 				]""", hints);
 	}
 

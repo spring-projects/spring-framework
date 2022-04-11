@@ -47,7 +47,7 @@ public class ProxyHintsSerializerTests {
 		hints.registerJdkProxy(Function.class);
 		assertEquals("""
 				[
-					{ "interfaces" : [ "java.util.function.Function" ] }
+					{ "interfaces": [ "java.util.function.Function" ] }
 				]""", hints);
 	}
 
@@ -58,8 +58,8 @@ public class ProxyHintsSerializerTests {
 		hints.registerJdkProxy(Function.class, Consumer.class);
 		assertEquals("""
 				[
-					{ "interfaces" : [ "java.util.function.Function" ] },
-					{ "interfaces" : [ "java.util.function.Function", "java.util.function.Consumer" ] }
+					{ "interfaces": [ "java.util.function.Function" ] },
+					{ "interfaces": [ "java.util.function.Function", "java.util.function.Consumer" ] }
 				]""", hints);
 	}
 

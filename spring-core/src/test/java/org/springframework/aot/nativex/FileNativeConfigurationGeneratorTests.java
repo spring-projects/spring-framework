@@ -72,8 +72,8 @@ public class FileNativeConfigurationGeneratorTests {
 		generator.generate(hints);
 		assertEquals("""
 				[
-					{ "name" : "java.lang.Integer" },
-					{ "name" : "java.lang.Long" }
+					{ "name": "java.lang.Integer" },
+					{ "name": "java.lang.Long" }
 				]""", "serialization-config.json");
 	}
 
@@ -87,8 +87,8 @@ public class FileNativeConfigurationGeneratorTests {
 		generator.generate(hints);
 		assertEquals("""
 				[
-					{ "interfaces" : [ "java.util.function.Function" ] },
-					{ "interfaces" : [ "java.util.function.Function", "java.util.function.Consumer" ] }
+					{ "interfaces": [ "java.util.function.Function" ] },
+					{ "interfaces": [ "java.util.function.Function", "java.util.function.Consumer" ] }
 				]""", "proxy-config.json");
 	}
 
@@ -121,30 +121,30 @@ public class FileNativeConfigurationGeneratorTests {
 		assertEquals("""
 				[
 					{
-						"name" : "org.springframework.core.codec.StringDecoder",
-						"condition" : { "typeReachable" : "java.lang.String" },
-						"allPublicFields" : true,
-						"allDeclaredFields" : true,
-						"queryAllPublicConstructors" : true,
-						"queryAllDeclaredConstructors" : true,
-						"allPublicConstructors" : true,
-						"allDeclaredConstructors" : true,
-						"queryAllPublicMethods" : true,
-						"queryAllDeclaredMethods" : true,
-						"allPublicMethods" : true,
-						"allDeclaredMethods" : true,
-						"allPublicClasses" : true,
-						"allDeclaredClasses" : true,
-						"fields" : [
-							{ "name" : "DEFAULT_CHARSET" },
-							{ "name" : "defaultCharset", "allowWrite" = true, "allowUnsafeAccess" = true }
+						"name": "org.springframework.core.codec.StringDecoder",
+						"condition": { "typeReachable": "java.lang.String" },
+						"allPublicFields": true,
+						"allDeclaredFields": true,
+						"queryAllPublicConstructors": true,
+						"queryAllDeclaredConstructors": true,
+						"allPublicConstructors": true,
+						"allDeclaredConstructors": true,
+						"queryAllPublicMethods": true,
+						"queryAllDeclaredMethods": true,
+						"allPublicMethods": true,
+						"allDeclaredMethods": true,
+						"allPublicClasses": true,
+						"allDeclaredClasses": true,
+						"fields": [
+							{ "name": "DEFAULT_CHARSET" },
+							{ "name": "defaultCharset", "allowWrite": true, "allowUnsafeAccess": true }
 						],
-						"methods" : [
-							{ "name" : "setDefaultCharset", "parameterTypes": [ "java.nio.charset.Charset" ] }
+						"methods": [
+							{ "name": "setDefaultCharset", "parameterTypes": [ "java.nio.charset.Charset" ] }
 						],
-						"queriedMethods" :  [
-							{ "name" : "<init>", "parameterTypes": [ "java.util.List", "boolean", "org.springframework.util.MimeType" ] },
-							{ "name" : "getDefaultCharset" }
+						"queriedMethods":  [
+							{ "name": "<init>", "parameterTypes": [ "java.util.List", "boolean", "org.springframework.util.MimeType" ] },
+							{ "name": "getDefaultCharset" }
 						]
 					}
 				]""", "reflect-config.json");
@@ -161,9 +161,9 @@ public class FileNativeConfigurationGeneratorTests {
 		assertEquals("""
 				{
 					"resources": {
-						"includes" : [
-							{"pattern" : "\\\\Qcom/example/test.properties\\\\E"},
-							{"pattern" : "\\\\Qcom/example/another.properties\\\\E"}
+						"includes": [
+							{"pattern": "\\\\Qcom/example/test.properties\\\\E"},
+							{"pattern": "\\\\Qcom/example/another.properties\\\\E"}
 						]
 					}
 				}""", "resource-config.json");
