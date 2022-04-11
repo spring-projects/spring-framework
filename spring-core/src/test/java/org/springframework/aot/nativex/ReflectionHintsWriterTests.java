@@ -16,6 +16,7 @@
 
 package org.springframework.aot.nativex;
 
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
@@ -33,13 +34,11 @@ import org.springframework.core.codec.StringDecoder;
 import org.springframework.util.MimeType;
 
 /**
- * Tests for {@link ReflectionHintsSerializer}.
+ * Tests for {@link ReflectionHintsWriter}.
  *
  * @author Sebastien Deleuze
  */
-public class ReflectionHintsSerializerTests {
-
-	private final ReflectionHintsSerializer serializer = new ReflectionHintsSerializer();
+public class ReflectionHintsWriterTests {
 
 	@Test
 	void empty() throws JSONException {
@@ -158,6 +157,7 @@ public class ReflectionHintsSerializerTests {
 				]
 				""", hints);
 	}
+
 	@Test
 	void methodAndQueriedMethods() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
@@ -188,7 +188,10 @@ public class ReflectionHintsSerializerTests {
 	}
 
 	private void assertEquals(String expectedString, ReflectionHints hints) throws JSONException {
-		JSONAssert.assertEquals(expectedString, serializer.serialize(hints), JSONCompareMode.LENIENT);
+		StringWriter out = new StringWriter();
+		BasicJsonWriter writer = new BasicJsonWriter(out, "\t");
+		ReflectionHintsWriter.INSTANCE.write(writer, hints);
+		JSONAssert.assertEquals(expectedString, out.toString(), JSONCompareMode.LENIENT);
 	}
 
 }

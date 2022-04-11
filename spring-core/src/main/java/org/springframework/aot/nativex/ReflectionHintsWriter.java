@@ -16,7 +16,6 @@
 
 package org.springframework.aot.nativex;
 
-import java.io.StringWriter;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,7 +33,7 @@ import org.springframework.aot.hint.TypeReference;
 import org.springframework.lang.Nullable;
 
 /**
- * Serialize {@link ReflectionHints} to the JSON output expected by the GraalV
+ * Write {@link ReflectionHints} to the JSON output expected by the GraalVM
  * {@code native-image} compiler, typically named {@code reflect-config.json}.
  *
  * @author Sebastien Deleuze
@@ -43,13 +42,12 @@ import org.springframework.lang.Nullable;
  * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/Reflection/">Reflection Use in Native Images</a>
  * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
  */
-class ReflectionHintsSerializer {
+class ReflectionHintsWriter {
 
-	public String serialize(ReflectionHints hints) {
-		StringWriter sw = new StringWriter();
-		BasicJsonWriter writer = new BasicJsonWriter(sw, "  ");
+	public static final ReflectionHintsWriter INSTANCE = new ReflectionHintsWriter();
+
+	public void write(BasicJsonWriter writer, ReflectionHints hints) {
 		writer.writeArray(hints.typeHints().map(this::toAttributes).toList());
-		return sw.toString();
 	}
 
 	private Map<String, Object> toAttributes(TypeHint hint) {

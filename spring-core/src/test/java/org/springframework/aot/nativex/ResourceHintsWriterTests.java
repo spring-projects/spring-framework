@@ -16,6 +16,8 @@
 
 package org.springframework.aot.nativex;
 
+import java.io.StringWriter;
+
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -24,13 +26,11 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.aot.hint.ResourceHints;
 
 /**
- * Tests for {@link ResourceHintsSerializer}.
+ * Tests for {@link ResourceHintsWriter}.
  *
  * @author Sebastien Deleuze
  */
-public class ResourceHintsSerializerTests {
-
-	private final ResourceHintsSerializer serializer = new ResourceHintsSerializer();
+public class ResourceHintsWriterTests {
 
 	@Test
 	void empty() throws JSONException {
@@ -117,7 +117,10 @@ public class ResourceHintsSerializerTests {
 	}
 
 	private void assertEquals(String expectedString, ResourceHints hints) throws JSONException {
-		JSONAssert.assertEquals(expectedString, serializer.serialize(hints), JSONCompareMode.LENIENT);
+		StringWriter out = new StringWriter();
+		BasicJsonWriter writer = new BasicJsonWriter(out, "\t");
+		ResourceHintsWriter.INSTANCE.write(writer, hints);
+		JSONAssert.assertEquals(expectedString, out.toString(), JSONCompareMode.LENIENT);
 	}
 
 }

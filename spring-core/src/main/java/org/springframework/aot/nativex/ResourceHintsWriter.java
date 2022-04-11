@@ -16,7 +16,6 @@
 
 package org.springframework.aot.nativex;
 
-import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -32,7 +31,7 @@ import org.springframework.aot.hint.ResourcePatternHint;
 import org.springframework.lang.Nullable;
 
 /**
- * Serialize a {@link ResourceHints} to the JSON output expected by the GraalVM
+ * Write a {@link ResourceHints} to the JSON output expected by the GraalVM
  * {@code native-image} compiler, typically named {@code resource-config.json}.
  *
  * @author Sebastien Deleuze
@@ -41,16 +40,15 @@ import org.springframework.lang.Nullable;
  * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/Resources/">Accessing Resources in Native Images</a>
  * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
  */
-class ResourceHintsSerializer {
+class ResourceHintsWriter {
 
-	public String serialize(ResourceHints hints) {
-		StringWriter out = new StringWriter();
-		BasicJsonWriter writer = new BasicJsonWriter(out, "\t");
+	public static final ResourceHintsWriter INSTANCE = new ResourceHintsWriter();
+
+	public void write(BasicJsonWriter writer, ResourceHints hints) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		attributes.put("resources", toAttributes(hints));
 		handleResourceBundles(attributes, hints.resourceBundles());
 		writer.writeObject(attributes);
-		return out.toString();
 	}
 
 	private Map<String, Object> toAttributes(ResourceHints hint) {

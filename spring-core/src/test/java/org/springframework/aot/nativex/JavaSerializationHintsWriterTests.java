@@ -16,56 +16,56 @@
 
 package org.springframework.aot.nativex;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.io.StringWriter;
 
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
-import org.springframework.aot.hint.ProxyHints;
+import org.springframework.aot.hint.JavaSerializationHints;
+import org.springframework.aot.hint.TypeReference;
+import org.springframework.core.env.Environment;
 
 /**
- * Tests for {@link ProxyHintsSerializer}.
+ * Tests for {@link JavaSerializationHintsWriter}.
  *
  * @author Sebastien Deleuze
  */
-public class ProxyHintsSerializerTests {
-
-	private final ProxyHintsSerializer serializer = new ProxyHintsSerializer();
+public class JavaSerializationHintsWriterTests {
 
 	@Test
 	void empty() throws JSONException {
-		ProxyHints hints = new ProxyHints();
+		JavaSerializationHints hints = new JavaSerializationHints();
 		assertEquals("[]", hints);
 	}
 
 	@Test
 	void one() throws JSONException {
-		ProxyHints hints = new ProxyHints();
-		hints.registerJdkProxy(Function.class);
+		JavaSerializationHints hints = new JavaSerializationHints().registerType(TypeReference.of(String.class));
 		assertEquals("""
 				[
-					{ "interfaces": [ "java.util.function.Function" ] }
+					{ "name": "java.lang.String" }
 				]""", hints);
 	}
 
 	@Test
 	void two() throws JSONException {
-		ProxyHints hints = new ProxyHints();
-		hints.registerJdkProxy(Function.class);
-		hints.registerJdkProxy(Function.class, Consumer.class);
+		JavaSerializationHints hints = new JavaSerializationHints()
+				.registerType(TypeReference.of(String.class))
+				.registerType(TypeReference.of(Environment.class));
 		assertEquals("""
 				[
-					{ "interfaces": [ "java.util.function.Function" ] },
-					{ "interfaces": [ "java.util.function.Function", "java.util.function.Consumer" ] }
+					{ "name": "java.lang.String" },
+					{ "name": "org.springframework.core.env.Environment" }
 				]""", hints);
 	}
 
-	private void assertEquals(String expectedString, ProxyHints hints) throws JSONException {
-
-		JSONAssert.assertEquals(expectedString, serializer.serialize(hints), JSONCompareMode.LENIENT);
+	private void assertEquals(String expectedString, JavaSerializationHints hints) throws JSONException {
+		StringWriter out = new StringWriter();
+		BasicJsonWriter writer = new BasicJsonWriter(out, "\t");
+		JavaSerializationHintsWriter.INSTANCE.write(writer, hints);
+		JSONAssert.assertEquals(expectedString, out.toString(), JSONCompareMode.LENIENT);
 	}
 
 }

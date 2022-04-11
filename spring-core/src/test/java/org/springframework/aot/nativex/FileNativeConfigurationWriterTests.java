@@ -45,11 +45,11 @@ import org.springframework.util.MimeType;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link FileNativeConfigurationGenerator}.
+ * Tests for {@link FileNativeConfigurationWriter}.
  *
  * @author Sebastien Deleuze
  */
-public class FileNativeConfigurationGeneratorTests {
+public class FileNativeConfigurationWriterTests {
 
 	@TempDir
 	static Path tempDir;
@@ -57,19 +57,19 @@ public class FileNativeConfigurationGeneratorTests {
 	@Test
 	void emptyConfig() {
 		Path empty = tempDir.resolve("empty");
-		FileNativeConfigurationGenerator generator = new FileNativeConfigurationGenerator(empty);
-		generator.generate(new RuntimeHints());
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(empty);
+		generator.write(new RuntimeHints());
 		assertThat(empty.toFile().listFiles()).isNull();
 	}
 
 	@Test
 	void serializationConfig() throws IOException, JSONException {
-		FileNativeConfigurationGenerator generator = new FileNativeConfigurationGenerator(tempDir);
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		JavaSerializationHints serializationHints = hints.javaSerialization();
 		serializationHints.registerType(Integer.class);
 		serializationHints.registerType(Long.class);
-		generator.generate(hints);
+		generator.write(hints);
 		assertEquals("""
 				[
 					{ "name": "java.lang.Integer" },
@@ -79,12 +79,12 @@ public class FileNativeConfigurationGeneratorTests {
 
 	@Test
 	void proxyConfig() throws IOException, JSONException {
-		FileNativeConfigurationGenerator generator = new FileNativeConfigurationGenerator(tempDir);
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ProxyHints proxyHints = hints.proxies();
 		proxyHints.registerJdkProxy(Function.class);
 		proxyHints.registerJdkProxy(Function.class, Consumer.class);
-		generator.generate(hints);
+		generator.write(hints);
 		assertEquals("""
 				[
 					{ "interfaces": [ "java.util.function.Function" ] },
@@ -94,7 +94,7 @@ public class FileNativeConfigurationGeneratorTests {
 
 	@Test
 	void reflectionConfig() throws IOException, JSONException {
-		FileNativeConfigurationGenerator generator = new FileNativeConfigurationGenerator(tempDir);
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ReflectionHints reflectionHints = hints.reflection();
 		reflectionHints.registerType(StringDecoder.class, builder -> {
@@ -117,7 +117,7 @@ public class FileNativeConfigurationGeneratorTests {
 					.withMethod("getDefaultCharset", Collections.emptyList(), constructorHint ->
 							constructorHint.withMode(ExecutableMode.INTROSPECT));
 		});
-		generator.generate(hints);
+		generator.write(hints);
 		assertEquals("""
 				[
 					{
@@ -152,12 +152,12 @@ public class FileNativeConfigurationGeneratorTests {
 
 	@Test
 	void resourceConfig() throws IOException, JSONException {
-		FileNativeConfigurationGenerator generator = new FileNativeConfigurationGenerator(tempDir);
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ResourceHints resourceHints = hints.resources();
 		resourceHints.registerPattern("com/example/test.properties");
 		resourceHints.registerPattern("com/example/another.properties");
-		generator.generate(hints);
+		generator.write(hints);
 		assertEquals("""
 				{
 					"resources": {
@@ -174,11 +174,11 @@ public class FileNativeConfigurationGeneratorTests {
 		String groupId = "foo.bar";
 		String artifactId = "baz";
 		String filename = "resource-config.json";
-		FileNativeConfigurationGenerator generator = new FileNativeConfigurationGenerator(tempDir, groupId, artifactId);
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir, groupId, artifactId);
 		RuntimeHints hints = new RuntimeHints();
 		ResourceHints resourceHints = hints.resources();
 		resourceHints.registerPattern("com/example/test.properties");
-		generator.generate(hints);
+		generator.write(hints);
 		Path jsonFile = tempDir.resolve("META-INF").resolve("native-image").resolve(groupId).resolve(artifactId).resolve(filename);
 		assertThat(jsonFile.toFile().exists()).isTrue();
 	}
