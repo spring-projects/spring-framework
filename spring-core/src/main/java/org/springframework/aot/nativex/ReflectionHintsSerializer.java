@@ -16,8 +16,12 @@
 
 package org.springframework.aot.nativex;
 
-import java.util.Iterator;
+import java.io.StringWriter;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.springframework.aot.hint.ExecutableHint;
@@ -27,129 +31,100 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.lang.Nullable;
 
 /**
- * Serialize {@link ReflectionHints} to the JSON file expected by GraalVM {@code native-image} compiler,
- * typically named {@code reflect-config.json}.
+ * Serialize {@link ReflectionHints} to the JSON output expected by the GraalV
+ * {@code native-image} compiler, typically named {@code reflect-config.json}.
  *
  * @author Sebastien Deleuze
+ * @author Stephane Nicoll
  * @since 6.0
  * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/Reflection/">Reflection Use in Native Images</a>
  * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
  */
-@SuppressWarnings("serial")
 class ReflectionHintsSerializer {
 
 	public String serialize(ReflectionHints hints) {
-		StringBuilder builder = new StringBuilder();
-		builder.append("[\n");
-		Iterator<TypeHint> hintIterator = hints.typeHints().iterator();
-		while (hintIterator.hasNext()) {
-			TypeHint hint = hintIterator.next();
-			String name = JsonUtils.escape(hint.getType().getCanonicalName());
-			builder.append("{\n\"name\": \"").append(name).append("\"");
-			serializeCondition(hint, builder);
-			serializeMembers(hint, builder);
-			serializeFields(hint, builder);
-			serializeExecutables(hint, builder);
-			builder.append(" }");
-			if (hintIterator.hasNext()) {
-				builder.append(",\n");
-			}
-		}
-		builder.append("\n]");
-		return builder.toString();
+		StringWriter sw = new StringWriter();
+		BasicJsonWriter writer = new BasicJsonWriter(sw, "  ");
+		writer.writeArray(hints.typeHints().map(this::toAttributes).toList());
+		return sw.toString();
 	}
 
-	private void serializeCondition(TypeHint hint, StringBuilder builder) {
+	private Map<String, Object> toAttributes(TypeHint hint) {
+		Map<String, Object> attributes = new LinkedHashMap<>();
+		attributes.put("name", hint.getType().getCanonicalName());
+		handleCondition(attributes, hint);
+		handleCategories(attributes, hint.getMemberCategories());
+		handleFields(attributes, hint.fields());
+		handleExecutables(attributes, Stream.concat(hint.constructors(), hint.methods()).toList());
+		return attributes;
+	}
+
+	private void handleCondition(Map<String, Object> attributes, TypeHint hint) {
 		if (hint.getReachableType() != null) {
-			String name = JsonUtils.escape(hint.getReachableType().getCanonicalName());
-			builder.append(",\n\"condition\": { \"typeReachable\": \"").append(name).append("\" }");
+			Map<String, Object> conditionAttributes = new LinkedHashMap<>();
+			conditionAttributes.put("typeReachable", hint.getReachableType().getCanonicalName());
+			attributes.put("condition", conditionAttributes);
 		}
 	}
 
-	private void serializeFields(TypeHint hint, StringBuilder builder) {
-		Iterator<FieldHint> fieldIterator = hint.fields().iterator();
-		if (fieldIterator.hasNext()) {
-			builder.append(",\n\"fields\": [\n");
-			while (fieldIterator.hasNext()) {
-				FieldHint fieldHint = fieldIterator.next();
-				String name = JsonUtils.escape(fieldHint.getName());
-				builder.append("{ \"name\": \"").append(name).append("\"");
-				if (fieldHint.isAllowWrite()) {
-					builder.append(", \"allowWrite\": ").append(fieldHint.isAllowWrite());
-				}
-				if (fieldHint.isAllowUnsafeAccess()) {
-					builder.append(", \"allowUnsafeAccess\": ").append(fieldHint.isAllowUnsafeAccess());
-				}
-				builder.append(" }");
-				if (fieldIterator.hasNext()) {
-					builder.append(",\n");
-				}
-			}
-			builder.append("\n]");
-		}
+	private void handleFields(Map<String, Object> attributes, Stream<FieldHint> fields) {
+		addIfNotEmpty(attributes, "fields", fields.map(this::toAttributes).toList());
 	}
 
-	private void serializeExecutables(TypeHint hint, StringBuilder builder) {
-		List<ExecutableHint> executables = Stream.concat(hint.constructors(), hint.methods()).toList();
-		Iterator<ExecutableHint> methodIterator = executables.stream().filter(h -> h.getModes().contains(ExecutableMode.INVOKE) || h.getModes().isEmpty()).iterator();
-		Iterator<ExecutableHint> queriedMethodIterator = executables.stream().filter(h -> h.getModes().contains(ExecutableMode.INTROSPECT)).iterator();
-		if (methodIterator.hasNext()) {
-			builder.append(",\n");
-			serializeMethods("methods", methodIterator, builder);
+	private Map<String, Object> toAttributes(FieldHint hint) {
+		Map<String, Object> attributes = new LinkedHashMap<>();
+		attributes.put("name", hint.getName());
+		if (hint.isAllowWrite()) {
+			attributes.put("allowWrite", hint.isAllowWrite());
 		}
-		if (queriedMethodIterator.hasNext()) {
-			builder.append(",\n");
-			serializeMethods("queriedMethods", queriedMethodIterator, builder);
+		if (hint.isAllowUnsafeAccess()) {
+			attributes.put("allowUnsafeAccess", hint.isAllowUnsafeAccess());
 		}
+		return attributes;
 	}
 
-	private void serializeMethods(String fieldName, Iterator<ExecutableHint> methodIterator, StringBuilder builder) {
-		builder.append("\"").append(JsonUtils.escape(fieldName)).append("\": [\n");
-		while (methodIterator.hasNext()) {
-			ExecutableHint hint = methodIterator.next();
-			String name = JsonUtils.escape(hint.getName());
-			builder.append("{\n\"name\": \"").append(name).append("\", ").append("\"parameterTypes\": [ ");
-			Iterator<TypeReference> parameterIterator =  hint.getParameterTypes().iterator();
-			while (parameterIterator.hasNext()) {
-				String parameterName = JsonUtils.escape(parameterIterator.next().getCanonicalName());
-				builder.append("\"").append(parameterName).append("\"");
-				if (parameterIterator.hasNext()) {
-					builder.append(", ");
-				}
-			}
-			builder.append(" ] }\n");
-			if (methodIterator.hasNext()) {
-				builder.append(",\n");
-			}
-		}
-		builder.append("]\n");
+	private void handleExecutables(Map<String, Object> attributes, List<ExecutableHint> hints) {
+		addIfNotEmpty(attributes, "methods", hints.stream()
+				.filter(h -> h.getModes().contains(ExecutableMode.INVOKE) || h.getModes().isEmpty())
+				.map(this::toAttributes).toList());
+		addIfNotEmpty(attributes, "queriedMethods", hints.stream()
+				.filter(h -> h.getModes().contains(ExecutableMode.INTROSPECT))
+				.map(this::toAttributes).toList());
 	}
 
-	private void serializeMembers(TypeHint hint, StringBuilder builder) {
-		Iterator<MemberCategory> categoryIterator = hint.getMemberCategories().iterator();
-		if (categoryIterator.hasNext()) {
-			builder.append(",\n");
-			while (categoryIterator.hasNext()) {
-				switch (categoryIterator.next()) {
-					case PUBLIC_FIELDS -> builder.append("\"allPublicFields\": true");
-					case DECLARED_FIELDS -> builder.append("\"allDeclaredFields\": true");
-					case INTROSPECT_PUBLIC_CONSTRUCTORS -> builder.append("\"queryAllPublicConstructors\": true");
-					case INTROSPECT_DECLARED_CONSTRUCTORS -> builder.append("\"queryAllDeclaredConstructors\": true");
-					case INVOKE_PUBLIC_CONSTRUCTORS -> builder.append("\"allPublicConstructors\": true");
-					case INVOKE_DECLARED_CONSTRUCTORS -> builder.append("\"allDeclaredConstructors\": true");
-					case INTROSPECT_PUBLIC_METHODS -> builder.append("\"queryAllPublicMethods\": true");
-					case INTROSPECT_DECLARED_METHODS -> builder.append("\"queryAllDeclaredMethods\": true");
-					case INVOKE_PUBLIC_METHODS -> builder.append("\"allPublicMethods\": true");
-					case INVOKE_DECLARED_METHODS -> builder.append("\"allDeclaredMethods\": true");
-					case PUBLIC_CLASSES -> builder.append("\"allPublicClasses\": true");
-					case DECLARED_CLASSES -> builder.append("\"allDeclaredClasses\": true");
+	private Map<String, Object> toAttributes(ExecutableHint hint) {
+		Map<String, Object> attributes = new LinkedHashMap<>();
+		attributes.put("name", hint.getName());
+		attributes.put("parameterTypes", hint.getParameterTypes().stream().map(TypeReference::getCanonicalName).toList());
+		return attributes;
+	}
+
+	private void handleCategories(Map<String, Object> attributes, Set<MemberCategory> categories) {
+		categories.forEach(category -> {
+					switch (category) {
+						case PUBLIC_FIELDS -> attributes.put("allPublicFields", true);
+						case DECLARED_FIELDS -> attributes.put("allDeclaredFields", true);
+						case INTROSPECT_PUBLIC_CONSTRUCTORS -> attributes.put("queryAllPublicConstructors", true);
+						case INTROSPECT_DECLARED_CONSTRUCTORS -> attributes.put("queryAllDeclaredConstructors", true);
+						case INVOKE_PUBLIC_CONSTRUCTORS -> attributes.put("allPublicConstructors", true);
+						case INVOKE_DECLARED_CONSTRUCTORS -> attributes.put("allDeclaredConstructors", true);
+						case INTROSPECT_PUBLIC_METHODS -> attributes.put("queryAllPublicMethods", true);
+						case INTROSPECT_DECLARED_METHODS -> attributes.put("queryAllDeclaredMethods", true);
+						case INVOKE_PUBLIC_METHODS -> attributes.put("allPublicMethods", true);
+						case INVOKE_DECLARED_METHODS -> attributes.put("allDeclaredMethods", true);
+						case PUBLIC_CLASSES -> attributes.put("allPublicClasses", true);
+						case DECLARED_CLASSES -> attributes.put("allDeclaredClasses", true);
+					}
 				}
-				if (categoryIterator.hasNext()) {
-					builder.append(",\n");
-				}
-			}
+		);
+	}
+
+	private void addIfNotEmpty(Map<String, Object> attributes, String name, @Nullable Object value) {
+		if (value != null && (value instanceof Collection<?> collection && !collection.isEmpty())) {
+			attributes.put(name, value);
 		}
 	}
 

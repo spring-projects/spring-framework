@@ -16,20 +16,27 @@
 
 package org.springframework.aot.nativex;
 
+import java.io.StringWriter;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.aot.hint.ResourceBundleHint;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.ResourcePatternHint;
+import org.springframework.lang.Nullable;
 
 /**
- * Serialize a {@link ResourceHints} to the JSON file expected by GraalVM {@code native-image} compiler,
- * typically named {@code resource-config.json}.
+ * Serialize a {@link ResourceHints} to the JSON output expected by the GraalVM
+ * {@code native-image} compiler, typically named {@code resource-config.json}.
  *
  * @author Sebastien Deleuze
+ * @author Stephane Nicoll
  * @since 6.0
  * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/Resources/">Accessing Resources in Native Images</a>
  * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
@@ -37,71 +44,48 @@ import org.springframework.aot.hint.ResourcePatternHint;
 class ResourceHintsSerializer {
 
 	public String serialize(ResourceHints hints) {
-		StringBuilder builder = new StringBuilder();
-		builder.append("{\n\"resources\" : {\n");
-		serializeInclude(hints, builder);
-		serializeExclude(hints, builder);
-		builder.append("},\n");
-		serializeBundles(hints, builder);
-		builder.append("}\n");
-		return builder.toString();
+		StringWriter out = new StringWriter();
+		BasicJsonWriter writer = new BasicJsonWriter(out, "\t");
+		Map<String, Object> attributes = new LinkedHashMap<>();
+		attributes.put("resources", toAttributes(hints));
+		handleResourceBundles(attributes, hints.resourceBundles());
+		writer.writeObject(attributes);
+		return out.toString();
 	}
 
-	private void serializeInclude(ResourceHints hints, StringBuilder builder) {
-		builder.append("\"includes\" : [\n");
-		Iterator<ResourcePatternHint> patternIterator = hints.resourcePatterns().iterator();
-		while (patternIterator.hasNext()) {
-			ResourcePatternHint hint = patternIterator.next();
-			Iterator<String> includeIterator = hint.getIncludes().iterator();
-			while (includeIterator.hasNext()) {
-				String pattern = JsonUtils.escape(patternToRegexp(includeIterator.next()));
-				builder.append("{ \"pattern\": \"").append(pattern).append("\" }");
-				if (includeIterator.hasNext()) {
-					builder.append(", ");
-				}
-			}
-			if (patternIterator.hasNext()) {
-				builder.append(",\n");
-			}
-		}
-		builder.append("\n],\n");
+	private Map<String, Object> toAttributes(ResourceHints hint) {
+		Map<String, Object> attributes = new LinkedHashMap<>();
+		addIfNotEmpty(attributes, "includes", hint.resourcePatterns().map(ResourcePatternHint::getIncludes)
+				.flatMap(List::stream).distinct().map(this::toAttributes).toList());
+		addIfNotEmpty(attributes, "excludes", hint.resourcePatterns().map(ResourcePatternHint::getExcludes)
+				.flatMap(List::stream).distinct().map(this::toAttributes).toList());
+		return attributes;
 	}
 
-	private void serializeExclude(ResourceHints hints, StringBuilder builder) {
-		builder.append("\"excludes\" : [\n");
-		Iterator<ResourcePatternHint> patternIterator = hints.resourcePatterns().iterator();
-		while (patternIterator.hasNext()) {
-			ResourcePatternHint hint = patternIterator.next();
-			Iterator<String> excludeIterator = hint.getExcludes().iterator();
-			while (excludeIterator.hasNext()) {
-				String pattern = JsonUtils.escape(patternToRegexp(excludeIterator.next()));
-				builder.append("{ \"pattern\": \"").append(pattern).append("\" }");
-				if (excludeIterator.hasNext()) {
-					builder.append(", ");
-				}
-			}
-			if (patternIterator.hasNext()) {
-				builder.append(",\n");
-			}
-		}
-		builder.append("\n]\n");
+	private void handleResourceBundles(Map<String, Object> attributes, Stream<ResourceBundleHint> ressourceBundles) {
+		addIfNotEmpty(attributes, "bundles", ressourceBundles.map(this::toAttributes).toList());
 	}
 
-	private void serializeBundles(ResourceHints hints, StringBuilder builder) {
-		builder.append("\"bundles\" : [\n");
-		Iterator<ResourceBundleHint> bundleIterator = hints.resourceBundles().iterator();
-		while (bundleIterator.hasNext()) {
-			String baseName = JsonUtils.escape(bundleIterator.next().getBaseName());
-			builder.append("{ \"name\": \"").append(baseName).append("\" }");
-			if (bundleIterator.hasNext()) {
-				builder.append(",\n");
-			}
-		}
-		builder.append("]\n");
+	private Map<String, Object> toAttributes(ResourceBundleHint hint) {
+		Map<String, Object> attributes = new LinkedHashMap<>();
+		attributes.put("name", hint.getBaseName());
+		return attributes;
+	}
+
+	private Map<String, Object> toAttributes(String pattern) {
+		Map<String, Object> attributes = new LinkedHashMap<>();
+		attributes.put("pattern", patternToRegexp(pattern));
+		return attributes;
 	}
 
 	private String patternToRegexp(String pattern) {
 		return Arrays.stream(pattern.split("\\*")).map(Pattern::quote).collect(Collectors.joining(".*"));
+	}
+
+	private void addIfNotEmpty(Map<String, Object> attributes, String name, @Nullable Object value) {
+		if (value != null && (value instanceof Collection<?> collection && !collection.isEmpty())) {
+			attributes.put(name, value);
+		}
 	}
 
 }
