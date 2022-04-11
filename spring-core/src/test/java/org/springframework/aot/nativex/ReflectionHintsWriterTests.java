@@ -95,7 +95,7 @@ public class ReflectionHintsWriterTests {
 						],
 						"queriedMethods":  [
 							{ "name": "<init>", "parameterTypes": [ "java.util.List", "boolean", "org.springframework.util.MimeType" ] },
-							{ "name": "getDefaultCharset" }
+							{ "name": "getDefaultCharset", "parameterTypes": [ ] }
 						]
 					}
 				]""", hints);
@@ -191,7 +191,7 @@ public class ReflectionHintsWriterTests {
 		StringWriter out = new StringWriter();
 		BasicJsonWriter writer = new BasicJsonWriter(out, "\t");
 		ReflectionHintsWriter.INSTANCE.write(writer, hints);
-		JSONAssert.assertEquals(expectedString, out.toString(), JSONCompareMode.LENIENT);
+		JSONAssert.assertEquals(expectedString, out.toString(), JSONCompareMode.NON_EXTENSIBLE);
 	}
 
 }

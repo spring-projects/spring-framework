@@ -46,7 +46,7 @@ class ResourceHintsWriter {
 
 	public void write(BasicJsonWriter writer, ResourceHints hints) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
-		attributes.put("resources", toAttributes(hints));
+		addIfNotEmpty(attributes, "resources", toAttributes(hints));
 		handleResourceBundles(attributes, hints.resourceBundles());
 		writer.writeObject(attributes);
 	}
@@ -81,7 +81,17 @@ class ResourceHintsWriter {
 	}
 
 	private void addIfNotEmpty(Map<String, Object> attributes, String name, @Nullable Object value) {
-		if (value != null && (value instanceof Collection<?> collection && !collection.isEmpty())) {
+		if (value instanceof Collection<?> collection) {
+			if (!collection.isEmpty()) {
+				attributes.put(name, value);
+			}
+		}
+		else if (value instanceof Map<?, ?> map) {
+			if (!map.isEmpty()) {
+				attributes.put(name, value);
+			}
+		}
+		else if (value != null) {
 			attributes.put(name, value);
 		}
 	}

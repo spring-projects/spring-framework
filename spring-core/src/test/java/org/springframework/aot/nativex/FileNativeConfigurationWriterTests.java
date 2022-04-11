@@ -144,7 +144,7 @@ public class FileNativeConfigurationWriterTests {
 						],
 						"queriedMethods":  [
 							{ "name": "<init>", "parameterTypes": [ "java.util.List", "boolean", "org.springframework.util.MimeType" ] },
-							{ "name": "getDefaultCharset" }
+							{ "name": "getDefaultCharset", "parameterTypes": [ ] }
 						]
 					}
 				]""", "reflect-config.json");
@@ -186,7 +186,7 @@ public class FileNativeConfigurationWriterTests {
 	private void assertEquals(String expectedString, String filename) throws IOException, JSONException {
 		Path jsonFile = tempDir.resolve("META-INF").resolve("native-image").resolve(filename);
 		String content = new String(Files.readAllBytes(jsonFile));
-		JSONAssert.assertEquals(expectedString, content, JSONCompareMode.LENIENT);
+		JSONAssert.assertEquals(expectedString, content, JSONCompareMode.NON_EXTENSIBLE);
 	}
 
 }
