@@ -16,35 +16,34 @@
 
 package org.springframework.aot.nativex;
 
-import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.springframework.aot.hint.JavaSerializationHints;
 import org.springframework.aot.hint.TypeReference;
 
 /**
- * Serialize a {@link JavaSerializationHints} to the JSON file expected by GraalVM {@code native-image} compiler,
- * typically named {@code serialization-config.json}.
+ * Write a {@link JavaSerializationHints} to the JSON output expected by the
+ * GraalVM {@code native-image} compiler, typically named
+ * {@code serialization-config.json}.
  *
  * @author Sebastien Deleuze
+ * @author Stephane Nicoll
  * @since 6.0
  * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
  */
-class JavaSerializationHintsSerializer {
+class JavaSerializationHintsWriter {
 
-	public String serialize(JavaSerializationHints hints) {
-		StringBuilder builder = new StringBuilder();
-		builder.append("[\n");
-		Iterator<TypeReference> typeIterator = hints.types().iterator();
-		while (typeIterator.hasNext()) {
-			TypeReference type = typeIterator.next();
-			String name = JsonUtils.escape(type.getCanonicalName());
-			builder.append("{ \"name\": \"").append(name).append("\" }");
-			if (typeIterator.hasNext()) {
-				builder.append(",\n");
-			}
-		}
-		builder.append("\n]\n");
-		return builder.toString();
+	public static final JavaSerializationHintsWriter INSTANCE = new JavaSerializationHintsWriter();
+
+	public void write(BasicJsonWriter writer, JavaSerializationHints hints) {
+		writer.writeArray(hints.types().map(this::toAttributes).toList());
+	}
+
+	private Map<String, Object> toAttributes(TypeReference typeReference) {
+		LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
+		attributes.put("name", typeReference.getCanonicalName());
+		return attributes;
 	}
 
 }

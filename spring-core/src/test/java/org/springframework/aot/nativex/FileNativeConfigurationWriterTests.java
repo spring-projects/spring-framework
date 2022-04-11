@@ -45,11 +45,11 @@ import org.springframework.util.MimeType;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link FileNativeConfigurationGenerator}.
+ * Tests for {@link FileNativeConfigurationWriter}.
  *
  * @author Sebastien Deleuze
  */
-public class FileNativeConfigurationGeneratorTests {
+public class FileNativeConfigurationWriterTests {
 
 	@TempDir
 	static Path tempDir;
@@ -57,44 +57,44 @@ public class FileNativeConfigurationGeneratorTests {
 	@Test
 	void emptyConfig() {
 		Path empty = tempDir.resolve("empty");
-		FileNativeConfigurationGenerator generator = new FileNativeConfigurationGenerator(empty);
-		generator.generate(new RuntimeHints());
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(empty);
+		generator.write(new RuntimeHints());
 		assertThat(empty.toFile().listFiles()).isNull();
 	}
 
 	@Test
 	void serializationConfig() throws IOException, JSONException {
-		FileNativeConfigurationGenerator generator = new FileNativeConfigurationGenerator(tempDir);
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		JavaSerializationHints serializationHints = hints.javaSerialization();
 		serializationHints.registerType(Integer.class);
 		serializationHints.registerType(Long.class);
-		generator.generate(hints);
+		generator.write(hints);
 		assertEquals("""
 				[
-					{ "name" : "java.lang.Integer" },
-					{ "name" : "java.lang.Long" }
+					{ "name": "java.lang.Integer" },
+					{ "name": "java.lang.Long" }
 				]""", "serialization-config.json");
 	}
 
 	@Test
 	void proxyConfig() throws IOException, JSONException {
-		FileNativeConfigurationGenerator generator = new FileNativeConfigurationGenerator(tempDir);
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ProxyHints proxyHints = hints.proxies();
 		proxyHints.registerJdkProxy(Function.class);
 		proxyHints.registerJdkProxy(Function.class, Consumer.class);
-		generator.generate(hints);
+		generator.write(hints);
 		assertEquals("""
 				[
-					{ "interfaces" : [ "java.util.function.Function" ] },
-					{ "interfaces" : [ "java.util.function.Function", "java.util.function.Consumer" ] }
+					{ "interfaces": [ "java.util.function.Function" ] },
+					{ "interfaces": [ "java.util.function.Function", "java.util.function.Consumer" ] }
 				]""", "proxy-config.json");
 	}
 
 	@Test
 	void reflectionConfig() throws IOException, JSONException {
-		FileNativeConfigurationGenerator generator = new FileNativeConfigurationGenerator(tempDir);
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ReflectionHints reflectionHints = hints.reflection();
 		reflectionHints.registerType(StringDecoder.class, builder -> {
@@ -117,34 +117,34 @@ public class FileNativeConfigurationGeneratorTests {
 					.withMethod("getDefaultCharset", Collections.emptyList(), constructorHint ->
 							constructorHint.withMode(ExecutableMode.INTROSPECT));
 		});
-		generator.generate(hints);
+		generator.write(hints);
 		assertEquals("""
 				[
 					{
-						"name" : "org.springframework.core.codec.StringDecoder",
-						"condition" : { "typeReachable" : "java.lang.String" },
-						"allPublicFields" : true,
-						"allDeclaredFields" : true,
-						"queryAllPublicConstructors" : true,
-						"queryAllDeclaredConstructors" : true,
-						"allPublicConstructors" : true,
-						"allDeclaredConstructors" : true,
-						"queryAllPublicMethods" : true,
-						"queryAllDeclaredMethods" : true,
-						"allPublicMethods" : true,
-						"allDeclaredMethods" : true,
-						"allPublicClasses" : true,
-						"allDeclaredClasses" : true,
-						"fields" : [
-							{ "name" : "DEFAULT_CHARSET" },
-							{ "name" : "defaultCharset", "allowWrite" = true, "allowUnsafeAccess" = true }
+						"name": "org.springframework.core.codec.StringDecoder",
+						"condition": { "typeReachable": "java.lang.String" },
+						"allPublicFields": true,
+						"allDeclaredFields": true,
+						"queryAllPublicConstructors": true,
+						"queryAllDeclaredConstructors": true,
+						"allPublicConstructors": true,
+						"allDeclaredConstructors": true,
+						"queryAllPublicMethods": true,
+						"queryAllDeclaredMethods": true,
+						"allPublicMethods": true,
+						"allDeclaredMethods": true,
+						"allPublicClasses": true,
+						"allDeclaredClasses": true,
+						"fields": [
+							{ "name": "DEFAULT_CHARSET" },
+							{ "name": "defaultCharset", "allowWrite": true, "allowUnsafeAccess": true }
 						],
-						"methods" : [
-							{ "name" : "setDefaultCharset", "parameterTypes": [ "java.nio.charset.Charset" ] }
+						"methods": [
+							{ "name": "setDefaultCharset", "parameterTypes": [ "java.nio.charset.Charset" ] }
 						],
-						"queriedMethods" :  [
-							{ "name" : "<init>", "parameterTypes": [ "java.util.List", "boolean", "org.springframework.util.MimeType" ] },
-							{ "name" : "getDefaultCharset" }
+						"queriedMethods":  [
+							{ "name": "<init>", "parameterTypes": [ "java.util.List", "boolean", "org.springframework.util.MimeType" ] },
+							{ "name": "getDefaultCharset", "parameterTypes": [ ] }
 						]
 					}
 				]""", "reflect-config.json");
@@ -152,18 +152,18 @@ public class FileNativeConfigurationGeneratorTests {
 
 	@Test
 	void resourceConfig() throws IOException, JSONException {
-		FileNativeConfigurationGenerator generator = new FileNativeConfigurationGenerator(tempDir);
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ResourceHints resourceHints = hints.resources();
 		resourceHints.registerPattern("com/example/test.properties");
 		resourceHints.registerPattern("com/example/another.properties");
-		generator.generate(hints);
+		generator.write(hints);
 		assertEquals("""
 				{
 					"resources": {
-						"includes" : [
-							{"pattern" : "\\\\Qcom/example/test.properties\\\\E"},
-							{"pattern" : "\\\\Qcom/example/another.properties\\\\E"}
+						"includes": [
+							{"pattern": "\\\\Qcom/example/test.properties\\\\E"},
+							{"pattern": "\\\\Qcom/example/another.properties\\\\E"}
 						]
 					}
 				}""", "resource-config.json");
@@ -174,11 +174,11 @@ public class FileNativeConfigurationGeneratorTests {
 		String groupId = "foo.bar";
 		String artifactId = "baz";
 		String filename = "resource-config.json";
-		FileNativeConfigurationGenerator generator = new FileNativeConfigurationGenerator(tempDir, groupId, artifactId);
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir, groupId, artifactId);
 		RuntimeHints hints = new RuntimeHints();
 		ResourceHints resourceHints = hints.resources();
 		resourceHints.registerPattern("com/example/test.properties");
-		generator.generate(hints);
+		generator.write(hints);
 		Path jsonFile = tempDir.resolve("META-INF").resolve("native-image").resolve(groupId).resolve(artifactId).resolve(filename);
 		assertThat(jsonFile.toFile().exists()).isTrue();
 	}
@@ -186,7 +186,7 @@ public class FileNativeConfigurationGeneratorTests {
 	private void assertEquals(String expectedString, String filename) throws IOException, JSONException {
 		Path jsonFile = tempDir.resolve("META-INF").resolve("native-image").resolve(filename);
 		String content = new String(Files.readAllBytes(jsonFile));
-		JSONAssert.assertEquals(expectedString, content, JSONCompareMode.LENIENT);
+		JSONAssert.assertEquals(expectedString, content, JSONCompareMode.NON_EXTENSIBLE);
 	}
 
 }

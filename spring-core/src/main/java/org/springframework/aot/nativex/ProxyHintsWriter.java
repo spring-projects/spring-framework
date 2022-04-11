@@ -16,45 +16,37 @@
 
 package org.springframework.aot.nativex;
 
-import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.springframework.aot.hint.JdkProxyHint;
 import org.springframework.aot.hint.ProxyHints;
 import org.springframework.aot.hint.TypeReference;
 
 /**
- * Serialize {@link JdkProxyHint}s contained in a {@link ProxyHints} to the JSON file expected by GraalVM
- * {@code native-image} compiler, typically named {@code proxy-config.json}.
+ * Write {@link JdkProxyHint}s contained in a {@link ProxyHints} to the JSON
+ * output expected by the GraalVM {@code native-image} compiler, typically named
+ * {@code proxy-config.json}.
  *
  * @author Sebastien Deleuze
+ * @author Stephane Nicoll
  * @since 6.0
  * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/DynamicProxy/">Dynamic Proxy in Native Image</a>
  * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
  */
-class ProxyHintsSerializer {
+class ProxyHintsWriter {
 
-	public String serialize(ProxyHints hints) {
-		StringBuilder builder = new StringBuilder();
-		builder.append("[\n");
-		Iterator<JdkProxyHint> hintIterator = hints.jdkProxies().iterator();
-		while (hintIterator.hasNext()) {
-			builder.append("{ \"interfaces\": [ ");
-			JdkProxyHint hint = hintIterator.next();
-			Iterator<TypeReference> interfaceIterator = hint.getProxiedInterfaces().iterator();
-			while (interfaceIterator.hasNext()) {
-				String name = JsonUtils.escape(interfaceIterator.next().getCanonicalName());
-				builder.append("\"").append(name).append("\"");
-				if (interfaceIterator.hasNext()) {
-					builder.append(", ");
-				}
-			}
-			builder.append(" ] }");
-			if (hintIterator.hasNext()) {
-				builder.append(",\n");
-			}
-		}
-		builder.append("\n]\n");
-		return builder.toString();
+	public static final ProxyHintsWriter INSTANCE = new ProxyHintsWriter();
+
+	public void write(BasicJsonWriter writer, ProxyHints hints) {
+		writer.writeArray(hints.jdkProxies().map(this::toAttributes).toList());
+	}
+
+	private Map<String, Object> toAttributes(JdkProxyHint hint) {
+		Map<String, Object> attributes = new LinkedHashMap<>();
+		attributes.put("interfaces", hint.getProxiedInterfaces().stream()
+				.map(TypeReference::getCanonicalName).toList());
+		return attributes;
 	}
 
 }
