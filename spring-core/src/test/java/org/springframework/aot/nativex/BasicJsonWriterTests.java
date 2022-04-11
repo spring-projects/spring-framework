@@ -24,6 +24,9 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.TypeReference;
+import org.springframework.aot.nativex.BasicJsonWriterTests.Nested.Inner;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -136,55 +139,80 @@ class BasicJsonWriterTests {
 
 	@Test
 	void writeWithEscapeDoubleQuote() {
-		assertEscapedValue("foo\"bar", "foo\\\"bar");
+		assertStringAttribute("foo\"bar", "foo\\\"bar");
 	}
 
 	@Test
 	void writeWithEscapeBackslash() {
-		assertEscapedValue("foo\"bar", "foo\\\"bar");
+		assertStringAttribute("foo\"bar", "foo\\\"bar");
 	}
 
 	@Test
 	void writeWithEscapeBackspace() {
-		assertEscapedValue("foo\bbar", "foo\\bbar");
+		assertStringAttribute("foo\bbar", "foo\\bbar");
 	}
 
 	@Test
 	void writeWithEscapeFormFeed() {
-		assertEscapedValue("foo\fbar", "foo\\fbar");
+		assertStringAttribute("foo\fbar", "foo\\fbar");
 	}
 
 	@Test
 	void writeWithEscapeNewline() {
-		assertEscapedValue("foo\nbar", "foo\\nbar");
+		assertStringAttribute("foo\nbar", "foo\\nbar");
 	}
 
 	@Test
 	void writeWithEscapeCarriageReturn() {
-		assertEscapedValue("foo\rbar", "foo\\rbar");
+		assertStringAttribute("foo\rbar", "foo\\rbar");
 	}
 
 	@Test
 	void writeWithEscapeTab() {
-		assertEscapedValue("foo\tbar", "foo\\tbar");
+		assertStringAttribute("foo\tbar", "foo\\tbar");
 	}
 
 	@Test
 	void writeWithEscapeUnicode() {
-		assertEscapedValue("foo\u001Fbar", "foo\\u001fbar");
+		assertStringAttribute("foo\u001Fbar", "foo\\u001fbar");
 	}
 
-	void assertEscapedValue(String value, String expectedEscapedValue) {
+	@Test
+	void writeWithTypeReferenceForSimpleClass() {
+		 assertStringAttribute(TypeReference.of(String.class), "java.lang.String");
+	}
+
+	@Test
+	void writeWithTypeReferenceForInnerClass() {
+		assertStringAttribute(TypeReference.of(Nested.class),
+				"org.springframework.aot.nativex.BasicJsonWriterTests$Nested");
+	}
+
+	@Test
+	void writeWithTypeReferenceForDoubleInnerClass() {
+		assertStringAttribute(TypeReference.of(Inner.class),
+				"org.springframework.aot.nativex.BasicJsonWriterTests$Nested$Inner");
+	}
+
+	void assertStringAttribute(Object value, String expectedValue) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		attributes.put("test", value);
 		this.json.writeObject(attributes);
-		assertThat(out.toString()).contains("\"test\": \"" + expectedEscapedValue + "\"");
+		assertThat(out.toString()).contains("\"test\": \"" + expectedValue + "\"");
 	}
 
 	private static LinkedHashMap<String, Object> orderedMap(String key, Object value) {
 		LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 		map.put(key, value);
 		return map;
+	}
+
+
+	static class Nested {
+
+		static class Inner {
+
+		}
 	}
 
 }

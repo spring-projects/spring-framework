@@ -52,7 +52,7 @@ class ReflectionHintsWriter {
 
 	private Map<String, Object> toAttributes(TypeHint hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
-		attributes.put("name", hint.getType().getCanonicalName());
+		attributes.put("name", hint.getType());
 		handleCondition(attributes, hint);
 		handleCategories(attributes, hint.getMemberCategories());
 		handleFields(attributes, hint.fields());
@@ -63,7 +63,7 @@ class ReflectionHintsWriter {
 	private void handleCondition(Map<String, Object> attributes, TypeHint hint) {
 		if (hint.getReachableType() != null) {
 			Map<String, Object> conditionAttributes = new LinkedHashMap<>();
-			conditionAttributes.put("typeReachable", hint.getReachableType().getCanonicalName());
+			conditionAttributes.put("typeReachable", hint.getReachableType());
 			attributes.put("condition", conditionAttributes);
 		}
 	}

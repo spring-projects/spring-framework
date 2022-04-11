@@ -42,7 +42,7 @@ class JavaSerializationHintsWriter {
 
 	private Map<String, Object> toAttributes(TypeReference typeReference) {
 		LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
-		attributes.put("name", typeReference.getCanonicalName());
+		attributes.put("name", typeReference);
 		return attributes;
 	}
 

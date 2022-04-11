@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.springframework.aot.hint.TypeReference;
+import org.springframework.lang.Nullable;
+
 /**
  * Very basic json writer for the purposes of translating runtime hints to native
  * configuration.
@@ -129,6 +132,9 @@ class BasicJsonWriter {
 		else if (value instanceof List<?> list) {
 			writeArray(list, false);
 		}
+		else if (value instanceof TypeReference typeReference) {
+			this.writer.print(quote(toName(typeReference)));
+		}
 		else if (value instanceof CharSequence string) {
 			this.writer.print(quote(escape(string)));
 		}
@@ -143,6 +149,22 @@ class BasicJsonWriter {
 	private String quote(String name) {
 		return "\"" + name + "\"";
 	}
+
+	private String toName(TypeReference typeReference) {
+		StringBuilder names = new StringBuilder();
+		buildName(typeReference, names);
+		return typeReference.getPackageName() + "." + names;
+	}
+
+	private void buildName(@Nullable TypeReference type, StringBuilder sb) {
+		if (type == null) {
+			return;
+		}
+		String typeName = (type.getEnclosingType() != null) ? "$" + type.getSimpleName() : type.getSimpleName();
+		sb.insert(0, typeName);
+		buildName(type.getEnclosingType(), sb);
+	}
+
 
 	private static String escape(CharSequence input) {
 		StringBuilder builder = new StringBuilder();
