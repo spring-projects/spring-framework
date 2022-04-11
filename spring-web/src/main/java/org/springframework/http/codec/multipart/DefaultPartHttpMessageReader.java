@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -222,12 +223,30 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 				return Flux.error(new DecodingException("No multipart boundary found in Content-Type: \"" +
 						message.getHeaders().getContentType() + "\""));
 			}
-			Flux<MultipartParser.Token> tokens = MultipartParser.parse(message.getBody(), boundary,
+			Flux<MultipartParser.Token> allPartsTokens = MultipartParser.parse(message.getBody(), boundary,
 					this.maxHeadersSize, this.headersCharset);
 
-			return PartGenerator.createParts(tokens, this.maxParts, this.maxInMemorySize, this.maxDiskUsagePerPart,
-					this.streaming, this.fileStorage.directory(), this.blockingOperationScheduler);
+			AtomicInteger partCount = new AtomicInteger();
+			return allPartsTokens
+					.windowUntil(MultipartParser.Token::isLast)
+					.concatMap(partsTokens -> {
+						if (tooManyParts(partCount)) {
+							return Mono.error(new DecodingException("Too many parts (" + partCount.get() + "/" +
+									this.maxParts + " allowed)"));
+						}
+						else {
+							return PartGenerator.createPart(partsTokens,
+									this.maxInMemorySize, this.maxDiskUsagePerPart, this.streaming,
+									this.fileStorage.directory(), this.blockingOperationScheduler);
+						}
+					});
 		});
 	}
+
+	private boolean tooManyParts(AtomicInteger partCount) {
+		int count = partCount.incrementAndGet();
+		return this.maxParts > 0 && count > this.maxParts;
+	}
+
 
 }
