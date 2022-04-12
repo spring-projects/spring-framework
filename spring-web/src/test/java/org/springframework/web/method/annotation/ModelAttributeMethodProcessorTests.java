@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -269,7 +269,7 @@ public class ModelAttributeMethodProcessorTests {
 		assertThat(this.container.getModel().get("testBean")).isSameAs(testBean);
 	}
 
-	@Test // gh-25182
+	@Test  // gh-25182
 	public void resolveConstructorListArgumentFromCommaSeparatedRequestParameter() throws Exception {
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest();
 		mockRequest.addParameter("listOfStrings", "1,2");
@@ -279,7 +279,6 @@ public class ModelAttributeMethodProcessorTests {
 		given(factory.createBinder(any(), any(), eq("testBeanWithConstructorArgs")))
 				.willAnswer(invocation -> {
 					WebRequestDataBinder binder = new WebRequestDataBinder(invocation.getArgument(1));
-
 					// Add conversion service which will convert "1,2" to a list
 					binder.setConversionService(new DefaultFormattingConversionService());
 					return binder;
@@ -308,7 +307,6 @@ public class ModelAttributeMethodProcessorTests {
 		private boolean bindInvoked;
 
 		private boolean validateInvoked;
-
 
 		public StubRequestDataBinder(Object target, String objectName) {
 			super(target, objectName);
@@ -345,7 +343,7 @@ public class ModelAttributeMethodProcessorTests {
 	}
 
 
-	@SessionAttributes(types=TestBean.class)
+	@SessionAttributes(types = TestBean.class)
 	private static class ModelAttributeHandler {
 
 		@SuppressWarnings("unused")
@@ -360,6 +358,7 @@ public class ModelAttributeMethodProcessorTests {
 		}
 	}
 
+
 	static class TestBeanWithConstructorArgs {
 
 		final List<String> listOfStrings;
@@ -367,14 +366,14 @@ public class ModelAttributeMethodProcessorTests {
 		public TestBeanWithConstructorArgs(List<String> listOfStrings) {
 			this.listOfStrings = listOfStrings;
 		}
-
 	}
 
-	@ModelAttribute("modelAttrName") @SuppressWarnings("unused")
+
+	@ModelAttribute("modelAttrName")
+	@SuppressWarnings("unused")
 	private String annotatedReturnValue() {
 		return null;
 	}
-
 
 	@SuppressWarnings("unused")
 	private TestBean notAnnotatedReturnValue() {
