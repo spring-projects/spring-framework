@@ -1059,7 +1059,7 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public Context currentContext() {
-			return this.sink.currentContext();
+			return Context.of(this.sink.contextView());
 		}
 
 	}
@@ -1156,7 +1156,7 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public Context currentContext() {
-			return this.sink.currentContext();
+			return Context.of(this.sink.contextView());
 		}
 
 	}
