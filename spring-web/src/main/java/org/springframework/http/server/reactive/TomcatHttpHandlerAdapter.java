@@ -153,7 +153,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 					return EOF_BUFFER;
 				}
 				else {
-					return null;
+					return AbstractListenerReadPublisher.EMPTY_BUFFER;
 				}
 			}
 			finally {
