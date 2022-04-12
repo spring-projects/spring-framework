@@ -367,7 +367,7 @@ public final class CachedIntrospectionResults {
 
 		for (Method method : beanClass.getMethods()) {
 			if (!this.propertyDescriptors.containsKey(method.getName()) &&
-					!readMethodNames.contains((method.getName())) && isPlainAccessor(method)) {
+					!readMethodNames.contains(method.getName()) && isPlainAccessor(method)) {
 				this.propertyDescriptors.put(method.getName(),
 						new GenericTypeAwarePropertyDescriptor(beanClass, method.getName(), method, null, null));
 				readMethodNames.add(method.getName());
@@ -376,8 +376,11 @@ public final class CachedIntrospectionResults {
 	}
 
 	private boolean isPlainAccessor(Method method) {
-		if (method.getParameterCount() > 0 || method.getReturnType() == void.class ||
-				method.getDeclaringClass() == Object.class || Modifier.isStatic(method.getModifiers())) {
+		if (Modifier.isStatic(method.getModifiers()) ||
+				method.getDeclaringClass() == Object.class || method.getDeclaringClass() == Class.class ||
+				method.getParameterCount() > 0 || method.getReturnType() == void.class ||
+				ClassLoader.class.isAssignableFrom(method.getReturnType()) ||
+				ProtectionDomain.class.isAssignableFrom(method.getReturnType())) {
 			return false;
 		}
 		try {
