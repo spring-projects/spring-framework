@@ -145,7 +145,10 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				headers.setContentLength(length);
 			}
 		}
-		headers.set(HttpHeaders.ACCEPT_RANGES, "bytes");
+		if (message instanceof ServerHttpResponse) {
+			// server side
+			headers.set(HttpHeaders.ACCEPT_RANGES, "bytes");
+		}
 	}
 
 	private static MediaType getResourceMediaType(
