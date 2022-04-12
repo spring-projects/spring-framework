@@ -38,8 +38,10 @@ public class FileNativeConfigurationWriter extends NativeConfigurationWriter {
 
 	private final Path basePath;
 
+	@Nullable
 	private final String groupId;
 
+	@Nullable
 	private final String artifactId;
 
 	public FileNativeConfigurationWriter(Path basePath) {

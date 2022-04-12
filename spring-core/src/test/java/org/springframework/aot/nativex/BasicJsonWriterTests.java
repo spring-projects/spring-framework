@@ -179,7 +179,7 @@ class BasicJsonWriterTests {
 
 	@Test
 	void writeWithTypeReferenceForSimpleClass() {
-		 assertStringAttribute(TypeReference.of(String.class), "java.lang.String");
+		assertStringAttribute(TypeReference.of(String.class), "java.lang.String");
 	}
 
 	@Test
