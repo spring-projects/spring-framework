@@ -1964,9 +1964,9 @@ The following example shows a simple implementation of an MDP:
 	public class ExampleListener implements MessageListener {
 
 		public void onMessage(Message message) {
-			if (message instanceof TextMessage) {
+			if (message instanceof TextMessage textMessage) {
 				try {
-					System.out.println(((TextMessage) message).getText());
+					System.out.println(textMessage.getText());
 				}
 				catch (JMSException ex) {
 					throw new RuntimeException(ex);
