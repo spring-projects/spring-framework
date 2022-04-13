@@ -23,7 +23,7 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -34,9 +34,9 @@ import java.util.Map;
 
 import org.springframework.aot.test.generator.file.ResourceFile;
 import org.springframework.aot.test.generator.file.ResourceFiles;
-import org.springframework.aot.test.generator.file.SourceFile;
-import org.springframework.aot.test.generator.file.SourceFiles;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link ClassLoader} used to expose dynamically generated content.
@@ -50,20 +50,15 @@ public class DynamicClassLoader extends ClassLoader {
 	private static final Logger logger = System.getLogger(DynamicClassLoader.class.getName());
 
 
-	private final SourceFiles sourceFiles;
-
 	private final ResourceFiles resourceFiles;
 
 	private final Map<String, DynamicClassFileObject> classFiles;
 
-	private final ClassLoader sourceLoader;
 
+	public DynamicClassLoader(ClassLoader parent, ResourceFiles resourceFiles,
+			Map<String, DynamicClassFileObject> classFiles) {
 
-	public DynamicClassLoader(ClassLoader sourceLoader, SourceFiles sourceFiles,
-			ResourceFiles resourceFiles, Map<String, DynamicClassFileObject> classFiles) {
-		super(sourceLoader.getParent());
-		this.sourceLoader = sourceLoader;
-		this.sourceFiles = sourceFiles;
+		super(parent);
 		this.resourceFiles = resourceFiles;
 		this.classFiles = classFiles;
 	}
@@ -75,40 +70,41 @@ public class DynamicClassLoader extends ClassLoader {
 		if (classFile != null) {
 			return defineClass(name, classFile);
 		}
-		try {
-			Class<?> fromSourceLoader = this.sourceLoader.loadClass(name);
-			if (Modifier.isPublic(fromSourceLoader.getModifiers())) {
-				return fromSourceLoader;
-			}
-		}
-		catch (Exception ex) {
-			// Continue
-		}
-		try (InputStream classStream = this.sourceLoader.getResourceAsStream(name.replace(".", "/") + ".class")) {
-			byte[] bytes = classStream.readAllBytes();
-			return defineClass(name, bytes, 0, bytes.length, null);
-		}
-		catch (IOException ex) {
-			throw new ClassNotFoundException(name);
-		}
+		return super.findClass(name);
 	}
 
 	private Class<?> defineClass(String name, DynamicClassFileObject classFile) {
 		byte[] bytes = classFile.getBytes();
-		SourceFile sourceFile = this.sourceFiles.get(name);
-		if (sourceFile != null && sourceFile.getTarget() != null) {
+		Class<?> targetClass = getTargetClass(name);
+		if (targetClass != null) {
 			try {
-				Lookup lookup = MethodHandles.privateLookupIn(sourceFile.getTarget(),
-						MethodHandles.lookup());
+				Lookup lookup = MethodHandles.privateLookupIn(targetClass, MethodHandles.lookup());
 				return lookup.defineClass(bytes);
 			}
 			catch (IllegalAccessException ex) {
-				logger.log(Level.WARNING,
-						"Unable to define class using MethodHandles Lookup, "
-								+ "only public methods and classes will be accessible");
+				logger.log(Level.WARNING, "Unable to define class using MethodHandles Lookup, "
+						+ "only public methods and classes will be accessible");
 			}
 		}
 		return defineClass(name, bytes, 0, bytes.length, null);
+	}
+
+	private Class<?> getTargetClass(String name) {
+		ClassLoader parentClassLoader = getParent();
+		if (parentClassLoader.getClass().getName()
+				.equals(CompileWithTargetClassAccessClassLoader.class.getName())) {
+			String packageName = ClassUtils.getPackageName(name);
+			Method method = ReflectionUtils.findMethod(parentClassLoader.getClass(), "getTargetClasses");
+			ReflectionUtils.makeAccessible(method);
+			String[] targetCasses = (String[]) ReflectionUtils.invokeMethod(method, parentClassLoader);
+			for (String targetClass : targetCasses) {
+				String targetPackageName = ClassUtils.getPackageName(targetClass);
+				if (targetPackageName.equals(packageName)) {
+					return ClassUtils.resolveClassName(targetClass, this);
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override

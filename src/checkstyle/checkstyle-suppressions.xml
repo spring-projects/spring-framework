@@ -38,6 +38,9 @@
 	<suppress files="ResolvableType" checks="FinalClass"/>
 	<suppress files="[\\/]src[\\/]testFixtures[\\/]java[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
 
+	<!-- spring-core-test -->
+	<suppress files="CompileWithTargetClassAccess" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+
 	<!-- spring-expression -->
 	<suppress files="ExpressionException" checks="MutableException"/>
 	<suppress files="SpelMessage" checks="JavadocVariable|JavadocStyle"/>

@@ -20,11 +20,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.springframework.lang.Nullable;
-
 
 /**
  * Internal class used by {@link SourceFiles} and {@link ResourceFiles} to
@@ -52,6 +53,12 @@ final class DynamicFiles<F extends DynamicFile> implements Iterable<F> {
 	@SuppressWarnings("unchecked")
 	static <F extends DynamicFile> DynamicFiles<F> none() {
 		return (DynamicFiles<F>) NONE;
+	}
+
+	DynamicFiles<F> and(Iterable<F> files) {
+		Map<String, F> merged = new LinkedHashMap<>(this.files);
+		files.forEach(file -> merged.put(file.getPath(), file));
+		return new DynamicFiles<>(Collections.unmodifiableMap(merged));
 	}
 
 	DynamicFiles<F> and(F[] files) {
@@ -85,10 +92,15 @@ final class DynamicFiles<F extends DynamicFile> implements Iterable<F> {
 	}
 
 	F getSingle() {
-		if (this.files.size() != 1) {
+		return getSingle(candidate -> true);
+	}
+
+	F getSingle(Predicate<F> filter) {
+		List<F> files = this.files.values().stream().filter(filter).toList();
+		if (files.size() != 1) {
 			throw new IllegalStateException("No single file available");
 		}
-		return this.files.values().iterator().next();
+		return files.iterator().next();
 	}
 
 	@Override

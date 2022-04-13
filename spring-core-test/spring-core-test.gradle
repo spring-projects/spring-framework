@@ -4,6 +4,9 @@ dependencies {
 	api(project(":spring-core"))
 	api("org.assertj:assertj-core")
 	api("com.thoughtworks.qdox:qdox")
+	compileOnly("org.junit.jupiter:junit-jupiter")
+	compileOnly("org.junit.platform:junit-platform-engine")
+	compileOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType(PublishToMavenRepository).configureEach {

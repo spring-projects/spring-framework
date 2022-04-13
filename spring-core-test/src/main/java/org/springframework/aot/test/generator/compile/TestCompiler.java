@@ -16,6 +16,7 @@
 
 package org.springframework.aot.test.generator.compile;
 
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -97,6 +98,16 @@ public final class TestCompiler {
 	 * @param sourceFiles the additional source files
 	 * @return a new {@link TestCompiler} instance
 	 */
+	public TestCompiler withSources(Iterable<SourceFile> sourceFiles) {
+		return new TestCompiler(this.classLoader, this.compiler,
+				this.sourceFiles.and(sourceFiles), this.resourceFiles);
+	}
+
+	/**
+	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * @param sourceFiles the additional source files
+	 * @return a new {@link TestCompiler} instance
+	 */
 	public TestCompiler withSources(SourceFiles sourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler,
 				this.sourceFiles.and(sourceFiles), this.resourceFiles);
@@ -108,6 +119,16 @@ public final class TestCompiler {
 	 * @return a new {@link TestCompiler} instance
 	 */
 	public TestCompiler withResources(ResourceFile... resourceFiles) {
+		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
+				this.resourceFiles.and(resourceFiles));
+	}
+
+	/**
+	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * @param resourceFiles the additional source files
+	 * @return a new {@link TestCompiler} instance
+	 */
+	public TestCompiler withResources(Iterable<ResourceFile> resourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
 				this.resourceFiles.and(resourceFiles));
 	}
@@ -179,8 +200,11 @@ public final class TestCompiler {
 		ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(dynamicClassLoader);
-			compiled.accept(new Compiled(dynamicClassLoader, this.sourceFiles,
-					this.resourceFiles));
+			compiled.accept(new Compiled(dynamicClassLoader, this.sourceFiles, this.resourceFiles));
+		}
+		catch (IllegalAccessError ex) {
+			throw new IllegalAccessError(ex.getMessage() + ". " +
+					"For non-public access ensure annotate your tests with @CompileWithTargetClassAccess");
 		}
 		finally {
 			Thread.currentThread().setContextClassLoader(previousClassLoader);
@@ -202,11 +226,30 @@ public final class TestCompiler {
 					null, compilationUnits);
 			boolean result = task.call();
 			if (!result || errors.hasReportedErrors()) {
-				throw new CompilationException("Unable to compile source" + errors);
+				throw new CompilationException(errors.toString(), this.sourceFiles, this.resourceFiles);
 			}
 		}
-		return new DynamicClassLoader(classLoaderToUse, this.sourceFiles,
-				this.resourceFiles, fileManager.getClassFiles());
+		return new DynamicClassLoader(classLoaderToUse, this.resourceFiles, fileManager.getClassFiles());
+	}
+
+	/**
+	 * Print the contents of the source and resource files to the specified
+	 * {@link PrintStream}.
+	 * @param printStream the destination print stream
+	 * @return this instance
+	 */
+	public TestCompiler printFiles(PrintStream printStream) {
+		for (SourceFile sourceFile : this.sourceFiles) {
+			printStream.append("---- source:   " + sourceFile.getPath() + "\n\n");
+			printStream.append(sourceFile.getContent());
+			printStream.append("\n\n");
+		}
+		for (ResourceFile resourceFile : this.resourceFiles) {
+			printStream.append("---- resource: " + resourceFile.getPath() + "\n\n");
+			printStream.append(resourceFile.getContent());
+			printStream.append("\n\n");
+		}
+		return this;
 	}
 
 

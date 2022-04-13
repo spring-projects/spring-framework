@@ -32,6 +32,7 @@ import org.springframework.aot.generator.DefaultGeneratedTypeContext;
 import org.springframework.aot.generator.GeneratedType;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.aot.test.generator.compile.CompileWithTargetClassAccess;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.aot.test.generator.file.SourceFile;
 import org.springframework.aot.test.generator.file.SourceFiles;
@@ -126,6 +127,7 @@ class PersistenceAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	@CompileWithTargetClassAccess(classes = DefaultPersistenceUnitField.class)
 	void generateEntityManagerFactoryInjection() {
 		GenericApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBeanDefinition("test", new RootBeanDefinition(DefaultPersistenceUnitField.class));

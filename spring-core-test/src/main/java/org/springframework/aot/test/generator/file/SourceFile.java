@@ -16,7 +16,10 @@
 
 package org.springframework.aot.test.generator.file;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 
 import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.JavaClass;
@@ -25,7 +28,9 @@ import com.thoughtworks.qdox.model.JavaSource;
 import org.assertj.core.api.AssertProvider;
 import org.assertj.core.util.Strings;
 
+import org.springframework.core.io.InputStreamSource;
 import org.springframework.lang.Nullable;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * {@link DynamicFile} that holds Java source code and provides
@@ -59,7 +64,7 @@ public final class SourceFile extends DynamicFile
 	 * @return a {@link SourceFile} instance
 	 */
 	public static SourceFile of(CharSequence charSequence) {
-		return of(null, appendable -> appendable.append(charSequence));
+		return of(null, charSequence);
 	}
 
 	/**
@@ -72,6 +77,33 @@ public final class SourceFile extends DynamicFile
 	 */
 	public static SourceFile of(@Nullable String path, CharSequence charSequence) {
 		return of(path, appendable -> appendable.append(charSequence));
+	}
+
+	/**
+	 * Factory method to create a new {@link SourceFile} from the given
+	 * {@link InputStreamSource}.
+	 * @param inputStreamSource the source for the file
+	 * @return a {@link SourceFile} instance
+	 */
+	public static SourceFile of(InputStreamSource inputStreamSource) {
+		return of(null, inputStreamSource);
+	}
+
+	/**
+	 * Factory method to create a new {@link SourceFile} from the given
+	 * {@link InputStreamSource}.
+	 * @param path the relative path of the file or {@code null} to have the
+	 * path deduced
+	 * @param inputStreamSource the source for the file
+	 * @return a {@link SourceFile} instance
+	 */
+	public static SourceFile of(@Nullable String path, InputStreamSource inputStreamSource) {
+		return of(path, appendable -> appendable.append(copyToString(inputStreamSource)));
+	}
+
+	private static String copyToString(InputStreamSource inputStreamSource) throws IOException {
+		InputStreamReader reader = new InputStreamReader(inputStreamSource.getInputStream(), StandardCharsets.UTF_8);
+		return FileCopyUtils.copyToString(reader);
 	}
 
 	/**
@@ -134,15 +166,9 @@ public final class SourceFile extends DynamicFile
 	}
 
 	/**
-	 * Return the target class for this source file or {@code null}. The target
-	 * class can be used if private lookup access is required.
-	 * @return the target class
+	 * Return the class name of the source file.
+	 * @return the class name
 	 */
-	@Nullable
-	public Class<?> getTarget() {
-		return null; // Not yet supported
-	}
-
 	public String getClassName() {
 		return this.javaSource.getClasses().get(0).getFullyQualifiedName();
 	}
