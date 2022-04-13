@@ -100,6 +100,7 @@ import java.lang.annotation.Target;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
+ * @see ControllerAdvice
  * @see org.springframework.web.context.request.WebRequest
  */
 @Target(ElementType.METHOD)
