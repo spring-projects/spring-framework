@@ -62,8 +62,10 @@ public class BeanDefinitionsContribution implements BeanFactoryContribution {
 	}
 
 	private static List<BeanRegistrationContributionProvider> initializeProviders(DefaultListableBeanFactory beanFactory) {
-		List<BeanRegistrationContributionProvider> providers = new ArrayList<>(SpringFactoriesLoader.loadFactories(
-				BeanRegistrationContributionProvider.class, beanFactory.getBeanClassLoader(), ArgumentResolver.from(type -> type.isInstance(beanFactory) ? beanFactory : null)));
+		List<BeanRegistrationContributionProvider> providers = new ArrayList<>(
+				SpringFactoriesLoader.forDefaultResourceLocation(beanFactory.getBeanClassLoader()).load(
+						BeanRegistrationContributionProvider.class,
+						ArgumentResolver.from(type -> type.isInstance(beanFactory) ? beanFactory : null)));
 		providers.add(new DefaultBeanRegistrationContributionProvider(beanFactory));
 		return providers;
 	}

@@ -74,48 +74,48 @@ class SpringFactoriesLoaderTests {
 	}
 
 	@Test
-	void loadFactoriesWithNoRegisteredImplementations() {
-		List<Integer> factories = SpringFactoriesLoader.loadFactories(Integer.class, null);
+	void loadWhenNoRegisteredImplementationsReturnsEmptyList() {
+		List<Integer> factories = SpringFactoriesLoader.forDefaultResourceLocation().load(Integer.class);
 		assertThat(factories).isEmpty();
 	}
 
 	@Test
-	void loadFactoriesInCorrectOrderWithDuplicateRegistrationsPresent() {
-		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(DummyFactory.class, null);
+	void loadWhenDuplicateRegistrationsPresentReturnsListInCorrectOrder() {
+		List<DummyFactory> factories = SpringFactoriesLoader.forDefaultResourceLocation().load(DummyFactory.class);
 		assertThat(factories).hasSize(2);
 		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
 		assertThat(factories.get(1)).isInstanceOf(MyDummyFactory2.class);
 	}
 
 	@Test
-	void loadPackagePrivateFactory() {
+	void loadWhenPackagePrivateFactory() {
 		List<DummyPackagePrivateFactory> factories =
-				SpringFactoriesLoader.loadFactories(DummyPackagePrivateFactory.class, null);
+				SpringFactoriesLoader.forDefaultResourceLocation().load(DummyPackagePrivateFactory.class);
 		assertThat(factories).hasSize(1);
 		assertThat(Modifier.isPublic(factories.get(0).getClass().getModifiers())).isFalse();
 	}
 
 	@Test
-	void attemptToLoadFactoryOfIncompatibleType() {
+	void loadWhenIncompatibleTypeThrowsException() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> SpringFactoriesLoader.loadFactories(String.class, null))
+			.isThrownBy(() -> SpringFactoriesLoader.forDefaultResourceLocation().load(String.class))
 			.withMessageContaining("Unable to instantiate factory class "
 					+ "[org.springframework.core.io.support.MyDummyFactory1] for factory type [java.lang.String]");
 	}
 
 	@Test
-	void attemptToLoadFactoryOfIncompatibleTypeWithLoggingFailureHandler() {
+	void loadWithLoggingFailureHandlerWhenIncompatibleTypeReturnsEmptyList() {
 		Log logger = mock(Log.class);
 		FailureHandler failureHandler = FailureHandler.logging(logger);
-		List<String> factories = SpringFactoriesLoader.loadFactories(String.class, null, failureHandler);
+		List<String> factories = SpringFactoriesLoader.forDefaultResourceLocation().load(String.class, failureHandler);
 		assertThat(factories).isEmpty();
 	}
 
 	@Test
-	void loadFactoryWithNonDefaultConstructor() {
+	void loadWithArgumentResolverWhenNoDefaultConstructor() {
 		ArgumentResolver resolver = ArgumentResolver.of(String.class, "injected");
-		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(DummyFactory.class,
-				LimitedClassLoader.constructorArgumentFactories, resolver);
+		List<DummyFactory> factories = SpringFactoriesLoader.forDefaultResourceLocation(LimitedClassLoader.constructorArgumentFactories)
+					.load(DummyFactory.class, resolver);
 		assertThat(factories).hasSize(3);
 		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
 		assertThat(factories.get(1)).isInstanceOf(MyDummyFactory2.class);
@@ -124,25 +124,49 @@ class SpringFactoriesLoaderTests {
 	}
 
 	@Test
-	void loadFactoryWithMultipleConstructors() {
+	void loadWhenMultipleConstructorsThrowsException() {
 		ArgumentResolver resolver = ArgumentResolver.of(String.class, "injected");
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> SpringFactoriesLoader.loadFactories(DummyFactory.class,
-						LimitedClassLoader.multipleArgumentFactories, resolver))
+				.isThrownBy(() -> SpringFactoriesLoader.forDefaultResourceLocation(LimitedClassLoader.multipleArgumentFactories)
+							.load(DummyFactory.class, resolver))
 				.withMessageContaining("Unable to instantiate factory class "
 						+ "[org.springframework.core.io.support.MultipleConstructorArgsDummyFactory] for factory type [org.springframework.core.io.support.DummyFactory]")
 				.havingRootCause().withMessageContaining("Class [org.springframework.core.io.support.MultipleConstructorArgsDummyFactory] has no suitable constructor");
 	}
 
 	@Test
-	void loadFactoryWithMissingArgumentUsingLoggingFailureHandler() {
+	void loadWithLoggingFailureHandlerWhenMissingArgumentDropsItem() {
 		Log logger = mock(Log.class);
 		FailureHandler failureHandler = FailureHandler.logging(logger);
-		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(
-				DummyFactory.class, LimitedClassLoader.multipleArgumentFactories, failureHandler);
+		List<DummyFactory> factories = SpringFactoriesLoader.forDefaultResourceLocation(LimitedClassLoader.multipleArgumentFactories)
+					.load(DummyFactory.class, failureHandler);
 		assertThat(factories).hasSize(2);
 		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
 		assertThat(factories.get(1)).isInstanceOf(MyDummyFactory2.class);
+	}
+
+	@Test
+	void loadFactoriesLoadsFromDefaultLocation() {
+		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(
+				DummyFactory.class, null);
+		assertThat(factories).hasSize(2);
+		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
+		assertThat(factories.get(1)).isInstanceOf(MyDummyFactory2.class);
+	}
+
+	@Test
+	void loadForResourceLocationWhenLocationDoesNotExistReturnsEmptyList() {
+		List<DummyFactory> factories = SpringFactoriesLoader.forResourceLocation(
+				"META-INF/missing/missing-spring.factories").load(DummyFactory.class);
+		assertThat(factories).isEmpty();
+	}
+
+	@Test
+	void loadForResourceLocationLoadsFactories() {
+		List<DummyFactory> factories = SpringFactoriesLoader.forResourceLocation(
+				"META-INF/custom/custom-spring.factories").load(DummyFactory.class);
+		assertThat(factories).hasSize(1);
+		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
 	}
 
 

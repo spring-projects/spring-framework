@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -89,7 +89,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @since 3.2
  */
-public final class SpringFactoriesLoader {
+public class SpringFactoriesLoader {
 
 	/**
 	 * The location to look for factories.
@@ -97,17 +97,59 @@ public final class SpringFactoriesLoader {
 	 */
 	public static final String FACTORIES_RESOURCE_LOCATION = "META-INF/spring.factories";
 
+	private static final ArgumentResolver NO_ARGUMENT_RESOLVER = null;
+
+	private static final FailureHandler NO_FAILURE_HANDLER = null;
+
+	private static final FailureHandler THROWING_FAILURE_HANDLER = FailureHandler.throwing();
 
 	private static final Log logger = LogFactory.getLog(SpringFactoriesLoader.class);
 
-	private static final FailureHandler THROWING_HANDLER = FailureHandler.throwing();
-
-	static final Map<ClassLoader, Map<String, List<String>>> cache = new ConcurrentReferenceHashMap<>();
+	static final Map<ClassLoader, Map<String, SpringFactoriesLoader>> cache = new ConcurrentReferenceHashMap<>();
 
 
-	private SpringFactoriesLoader() {
+	@Nullable
+	private final ClassLoader classLoader;
+
+	private final Map<String, List<String>> factories;
+
+
+	private SpringFactoriesLoader(@Nullable ClassLoader classLoader, String resourceLocation) {
+		this.classLoader = classLoader;
+		this.factories = loadFactoriesResource((classLoader != null) ? classLoader
+				: SpringFactoriesLoader.class.getClassLoader(), resourceLocation);
 	}
 
+	protected SpringFactoriesLoader(@Nullable ClassLoader classLoader, Map<String, List<String>> factories) {
+		this.classLoader = classLoader;
+		this.factories = factories;
+	}
+
+
+	private Map<String, List<String>> loadFactoriesResource(ClassLoader classLoader, String resourceLocation) {
+		Map<String, List<String>> result = new LinkedHashMap<>();
+		try {
+			Enumeration<URL> urls = classLoader.getResources(resourceLocation);
+			while (urls.hasMoreElements()) {
+				UrlResource resource = new UrlResource(urls.nextElement());
+				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
+				properties.forEach((name, value) -> {
+					List<String> implementations = result.computeIfAbsent(((String) name).trim(), key -> new ArrayList<>());
+					Arrays.stream(StringUtils.commaDelimitedListToStringArray((String) value))
+						.map(String::trim).forEach(implementations::add);
+				});
+			}
+			result.replaceAll(this::toDistinctUnmodifiableList);
+		}
+		catch (IOException ex) {
+			throw new IllegalArgumentException("Unable to load factories from location [" + resourceLocation + "]", ex);
+		}
+		return Collections.unmodifiableMap(result);
+	}
+
+	private List<String> toDistinctUnmodifiableList(String factoryType, List<String> implementations) {
+		return implementations.stream().distinct().toList();
+	}
 
 	/**
 	 * Load and instantiate the factory implementations of the given type from
@@ -121,12 +163,11 @@ public final class SpringFactoriesLoader {
 	 * discovered for a given factory type, only one instance of the duplicated
 	 * implementation type will be instantiated.
 	 * @param factoryType the interface or abstract class representing the factory
-	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
 	 * @throws IllegalArgumentException if any factory implementation class cannot
 	 * be loaded or if an error occurs while instantiating any factory
 	 */
-	public static <T> List<T> loadFactories(Class<T> factoryType, @Nullable ClassLoader classLoader) {
-		return loadFactories(factoryType, classLoader, null, null);
+	public <T> List<T> load(Class<T> factoryType) {
+		return load(factoryType, NO_ARGUMENT_RESOLVER, NO_FAILURE_HANDLER);
 	}
 
 	/**
@@ -138,16 +179,13 @@ public final class SpringFactoriesLoader {
 	 * discovered for a given factory type, only one instance of the duplicated
 	 * implementation type will be instantiated.
 	 * @param factoryType the interface or abstract class representing the factory
-	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
 	 * @param argumentResolver strategy used to resolve constructor arguments by their type
 	 * @throws IllegalArgumentException if any factory implementation class cannot
 	 * be loaded or if an error occurs while instantiating any factory
 	 * @since 6.0
 	 */
-	public static <T> List<T> loadFactories(Class<T> factoryType, @Nullable ClassLoader classLoader,
-			@Nullable ArgumentResolver argumentResolver) {
-
-		return loadFactories(factoryType, classLoader, argumentResolver, null);
+	public <T> List<T> load(Class<T> factoryType, @Nullable ArgumentResolver argumentResolver) {
+		return load(factoryType, argumentResolver, NO_FAILURE_HANDLER);
 	}
 
 	/**
@@ -161,14 +199,11 @@ public final class SpringFactoriesLoader {
 	 * <p>For any factory implementation class that cannot be loaded or error that occurs while
 	 * instantiating it, the given failure handler is called.
 	 * @param factoryType the interface or abstract class representing the factory
-	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
 	 * @param failureHandler strategy used to handle factory instantiation failures
 	 * @since 6.0
 	 */
-	public static <T> List<T> loadFactories(Class<T> factoryType, @Nullable ClassLoader classLoader,
-			@Nullable FailureHandler failureHandler) {
-
-		return loadFactories(factoryType, classLoader, null, failureHandler);
+	public <T> List<T> load(Class<T> factoryType, @Nullable FailureHandler failureHandler) {
+		return load(factoryType, NO_ARGUMENT_RESOLVER, failureHandler);
 	}
 
 	/**
@@ -183,30 +218,62 @@ public final class SpringFactoriesLoader {
 	 * <p>For any factory implementation class that cannot be loaded or error that occurs while
 	 * instantiating it, the given failure handler is called.
 	 * @param factoryType the interface or abstract class representing the factory
-	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
 	 * @param argumentResolver strategy used to resolve constructor arguments by their type
 	 * @param failureHandler strategy used to handle factory instantiation failures
 	 * @since 6.0
 	 */
-	public static <T> List<T> loadFactories(Class<T> factoryType, @Nullable ClassLoader classLoader,
-			@Nullable ArgumentResolver argumentResolver, @Nullable FailureHandler failureHandler) {
-
+	public <T> List<T> load(Class<T> factoryType, @Nullable ArgumentResolver argumentResolver, @Nullable FailureHandler failureHandler) {
 		Assert.notNull(factoryType, "'factoryType' must not be null");
-		ClassLoader classLoaderToUse = (classLoader != null ? classLoader
-				: SpringFactoriesLoader.class.getClassLoader());
-		List<String> factoryImplementationNames = loadFactoryNames(factoryType, classLoaderToUse);
-		logger.trace(LogMessage.format("Loaded [%s] names: %s", factoryType.getName(), factoryImplementationNames));
-		List<T> result = new ArrayList<>(factoryImplementationNames.size());
-		FailureHandler failureHandlerToUse = (failureHandler != null) ? failureHandler : THROWING_HANDLER;
-		for (String factoryImplementationName : factoryImplementationNames) {
-			T factory = instantiateFactory(factoryImplementationName, factoryType,
-					classLoaderToUse, argumentResolver, failureHandlerToUse);
+		List<String> implementationNames = loadFactoryNames(factoryType);
+		logger.trace(LogMessage.format("Loaded [%s] names: %s", factoryType.getName(), implementationNames));
+		List<T> result = new ArrayList<>(implementationNames.size());
+		FailureHandler failureHandlerToUse = (failureHandler != null) ? failureHandler : THROWING_FAILURE_HANDLER;
+		for (String implementationName : implementationNames) {
+			T factory = instantiateFactory(implementationName, factoryType, argumentResolver, failureHandlerToUse);
 			if (factory != null) {
 				result.add(factory);
 			}
 		}
 		AnnotationAwareOrderComparator.sort(result);
 		return result;
+	}
+
+	private List<String> loadFactoryNames(Class<?> factoryType) {
+		return this.factories.getOrDefault(factoryType.getName(), Collections.emptyList());
+	}
+
+	@Nullable
+	protected <T> T instantiateFactory(String implementationName, Class<T> type, @Nullable ArgumentResolver argumentResolver, FailureHandler failureHandler) {
+		try {
+			Class<?> factoryImplementationClass = ClassUtils.forName(implementationName, this.classLoader);
+			Assert.isTrue(type.isAssignableFrom(factoryImplementationClass),
+					() -> "Class [" + implementationName + "] is not assignable to factory type [" + type.getName() + "]");
+			FactoryInstantiator<T> factoryInstantiator = FactoryInstantiator.forClass(factoryImplementationClass);
+			return factoryInstantiator.instantiate(argumentResolver);
+		}
+		catch (Throwable ex) {
+			failureHandler.handleFailure(type, implementationName, ex);
+			return null;
+		}
+	}
+
+	/**
+	 * Load and instantiate the factory implementations of the given type from
+	 * {@value #FACTORIES_RESOURCE_LOCATION}, using the given class loader.
+	 * <p>The returned factories are sorted through {@link AnnotationAwareOrderComparator}.
+	 * <p>As of Spring Framework 5.3, if duplicate implementation class names are
+	 * discovered for a given factory type, only one instance of the duplicated
+	 * implementation type will be instantiated.
+	 * <p>For more advanced factory loading with {@link ArgumentResolver} or
+	 * {@link FailureHandler} support use {@link #forDefaultResourceLocation(ClassLoader)}
+	 * to obtain a {@link SpringFactoriesLoader} instance.
+	 * @param factoryType the interface or abstract class representing the factory
+	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
+	 * @throws IllegalArgumentException if any factory implementation class cannot
+	 * be loaded or if an error occurs while instantiating any factory
+	 */
+	public static <T> List<T> loadFactories(Class<T> factoryType, @Nullable ClassLoader classLoader) {
+		return forDefaultResourceLocation(classLoader).load(factoryType);
 	}
 
 	/**
@@ -223,68 +290,70 @@ public final class SpringFactoriesLoader {
 	 * @see #loadFactories
 	 */
 	public static List<String> loadFactoryNames(Class<?> factoryType, @Nullable ClassLoader classLoader) {
-		ClassLoader classLoaderToUse = (classLoader != null ? classLoader
-				: SpringFactoriesLoader.class.getClassLoader());
-		String factoryTypeName = factoryType.getName();
-		return getAllFactories(classLoaderToUse).getOrDefault(factoryTypeName, Collections.emptyList());
+		return forDefaultResourceLocation(classLoader).loadFactoryNames(factoryType);
 	}
 
-	private static Map<String, List<String>> getAllFactories(ClassLoader classLoader) {
-		Map<String, List<String>> result = cache.get(classLoader);
-		if (result != null) {
-			return result;
-		}
-		result = loadAllFactories(classLoader);
-		cache.put(classLoader, result);
-		return result;
+	/**
+	 * Return a {@link SpringFactoriesLoader} instance that will load and
+	 * instantiate the factory implementations from
+	 * {@value #FACTORIES_RESOURCE_LOCATION}, using the default class loader.
+	 * @return a {@link SpringFactoriesLoader} instance
+	 * @since 6.0
+	 * @see #forDefaultResourceLocation(ClassLoader)
+	 */
+	public static SpringFactoriesLoader forDefaultResourceLocation() {
+		return forDefaultResourceLocation(null);
 	}
 
-	private static Map<String, List<String>> loadAllFactories(ClassLoader classLoader) {
-		Map<String, List<String>> result;
-		result = new HashMap<>();
-		try {
-			Enumeration<URL> urls = classLoader.getResources(FACTORIES_RESOURCE_LOCATION);
-			while (urls.hasMoreElements()) {
-				UrlResource resource = new UrlResource(urls.nextElement());
-				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
-				for (Map.Entry<?, ?> entry : properties.entrySet()) {
-					String factoryTypeName = ((String) entry.getKey()).trim();
-					String[] factoryImplementationNames =
-							StringUtils.commaDelimitedListToStringArray((String) entry.getValue());
-					for (String factoryImplementationName : factoryImplementationNames) {
-						result.computeIfAbsent(factoryTypeName, key -> new ArrayList<>())
-								.add(factoryImplementationName.trim());
-					}
-				}
-			}
-			result.replaceAll(SpringFactoriesLoader::toDistinctUnmodifiableList);
-		}
-		catch (IOException ex) {
-			throw new IllegalArgumentException("Unable to load factories from location [" +
-					FACTORIES_RESOURCE_LOCATION + "]", ex);
-		}
-		return Collections.unmodifiableMap(result);
+	/**
+	 * Return a {@link SpringFactoriesLoader} instance that will load and
+	 * instantiate the factory implementations from
+	 * {@value #FACTORIES_RESOURCE_LOCATION}, using the given class loader.
+	 * @param classLoader the ClassLoader to use for loading resources; can be
+	 * {@code null} to use the default
+	 * @return a {@link SpringFactoriesLoader} instance
+	 * @since 6.0
+	 * @see #forDefaultResourceLocation()
+	 */
+	public static SpringFactoriesLoader forDefaultResourceLocation(@Nullable ClassLoader classLoader) {
+		return forResourceLocation(classLoader, FACTORIES_RESOURCE_LOCATION);
 	}
 
-	private static List<String> toDistinctUnmodifiableList(String factoryType, List<String> implementations) {
-		return implementations.stream().distinct().toList();
+	/**
+	 * Return a {@link SpringFactoriesLoader} instance that will load and
+	 * instantiate the factory implementations from the given location, using
+	 * the default class loader.
+	 * @return a {@link SpringFactoriesLoader} instance
+	 * @since 6.0
+	 * @see #forResourceLocation(ClassLoader, String)
+	 */
+	public static SpringFactoriesLoader forResourceLocation(String resourceLocation) {
+		return forResourceLocation(null, resourceLocation);
 	}
 
-	@Nullable
-	private static <T> T instantiateFactory(String factoryImplementationName,
-			Class<T> factoryType, ClassLoader classLoader, @Nullable ArgumentResolver argumentResolver,
-			FailureHandler failureHandler) {
-		try {
-			Class<?> factoryImplementationClass = ClassUtils.forName(factoryImplementationName, classLoader);
-			Assert.isTrue(factoryType.isAssignableFrom(factoryImplementationClass),
-					() -> "Class [" + factoryImplementationName + "] is not assignable to factory type [" + factoryType.getName() + "]");
-			FactoryInstantiator<T> factoryInstantiator = FactoryInstantiator.forClass(factoryImplementationClass);
-			return factoryInstantiator.instantiate(argumentResolver);
+	/**
+	 * Return a {@link SpringFactoriesLoader} instance that will load and
+	 * instantiate the factory implementations from the given location, using
+	 * the given class loader.
+	 * @param classLoader the ClassLoader to use for loading resources; can be
+	 * {@code null} to use the default
+	 * @return a {@link SpringFactoriesLoader} instance
+	 * @since 6.0
+	 * @see #forResourceLocation(String)
+	 */
+	public static SpringFactoriesLoader forResourceLocation(@Nullable ClassLoader classLoader, String resourceLocation) {
+		Assert.hasText(resourceLocation, "'resourceLocation' must not be empty");
+		Map<String, SpringFactoriesLoader> loaders = SpringFactoriesLoader.cache.get(classLoader);
+		if (loaders == null) {
+			loaders = new ConcurrentReferenceHashMap<>();
+			SpringFactoriesLoader.cache.put(classLoader, loaders);
 		}
-		catch (Throwable ex) {
-			failureHandler.handleFailure(factoryType, factoryImplementationName, ex);
-			return null;
+		SpringFactoriesLoader loader = loaders.get(resourceLocation);
+		if (loader == null) {
+			loader = new SpringFactoriesLoader(classLoader, resourceLocation);
+			loaders.put(resourceLocation, loader);
 		}
+		return loader;
 	}
 
 
@@ -301,6 +370,7 @@ public final class SpringFactoriesLoader {
 			ReflectionUtils.makeAccessible(constructor);
 			this.constructor = constructor;
 		}
+
 
 		T instantiate(@Nullable ArgumentResolver argumentResolver) throws Exception {
 			Object[] args = resolveArgs(argumentResolver);
@@ -363,6 +433,7 @@ public final class SpringFactoriesLoader {
 		}
 
 	}
+
 
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
@@ -534,6 +605,7 @@ public final class SpringFactoriesLoader {
 		}
 
 	}
+
 
 	/**
 	 * Strategy for handling a failure that occurs when instantiating a factory.
