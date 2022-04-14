@@ -19,6 +19,7 @@ package org.springframework.aot.hint;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -85,6 +86,20 @@ class ReflectionHintsTests {
 				hint -> hint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(
 				typeWithMemberCategories(Integer.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+	}
+
+	@Test
+	void registerTypesApplyTheSameHints() {
+		this.reflectionHints.registerTypes(Stream.of(Integer.class, String.class, Double.class)
+				.map(TypeReference::of).toList(), hint -> hint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+		assertThat(this.reflectionHints.typeHints())
+				.anySatisfy(
+						typeWithMemberCategories(Integer.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
+				.anySatisfy(
+						typeWithMemberCategories(String.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
+				.anySatisfy(
+						typeWithMemberCategories(Double.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
+				.hasSize(3);
 	}
 
 	@Test

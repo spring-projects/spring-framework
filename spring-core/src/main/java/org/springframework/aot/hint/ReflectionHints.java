@@ -96,6 +96,19 @@ public class ReflectionHints {
 	}
 
 	/**
+	 * Register or customize reflection hints for the types defined by the
+	 * specified list of {@link TypeReference type references}. The specified
+	 * {@code typeHint} consumer is invoked for each type.
+	 * @param types the types to customize
+	 * @param typeHint a builder to further customize hints for each type
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ReflectionHints registerTypes(Iterable<TypeReference> types, Consumer<TypeHint.Builder> typeHint) {
+		types.forEach(type -> registerType(type, typeHint));
+		return this;
+	}
+
+	/**
 	 * Register the need for reflection on the specified {@link Field}.
 	 * @param field the field that requires reflection
 	 * @param fieldHint a builder to further customize the hints of this field
