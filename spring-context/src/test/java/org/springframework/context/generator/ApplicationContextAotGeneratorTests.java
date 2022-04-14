@@ -18,6 +18,8 @@ package org.springframework.context.generator;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -149,6 +151,27 @@ class ApplicationContextAotGeneratorTests {
 	}
 
 	@Test
+	void generateApplicationContextLoadsBeanFactoryContributors() {
+		GeneratedTypeContext generationContext = createGenerationContext();
+		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
+		GenericApplicationContext applicationContext = new GenericApplicationContext();
+		applicationContext.setClassLoader(
+				new TestSpringFactoriesClassLoader("bean-factory-contributors.factories"));
+		generator.generateApplicationContext(applicationContext, generationContext);
+		assertThat(write(generationContext.getMainGeneratedType())).contains("""
+				public class Test implements ApplicationContextInitializer<GenericApplicationContext> {
+					@Override
+					public void initialize(GenericApplicationContext context) {
+						// infrastructure
+						DefaultListableBeanFactory beanFactory = context.getDefaultListableBeanFactory();
+						beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
+						// Test
+					}
+				}
+				""");
+	}
+
+	@Test
 	void generateApplicationContextApplyContributionAsIsWithNewLineAtTheEnd() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		registerAotContributingBeanDefinition(applicationContext, "bpp", code -> code.add("// Hello"));
@@ -211,8 +234,7 @@ class ApplicationContextAotGeneratorTests {
 		GeneratedTypeContext generationContext = createGenerationContext();
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		DefaultListableBeanFactory beanFactory = applicationContext.getDefaultListableBeanFactory();
-		@SuppressWarnings("unchecked")
-		BiPredicate<String, BeanDefinition> excludeFilter = mock(BiPredicate.class);
+		BiPredicate<String, BeanDefinition> excludeFilter = mockExcludeFilter();
 		given(excludeFilter.test(eq("bean1"), any(BeanDefinition.class))).willReturn(Boolean.FALSE);
 		given(excludeFilter.test(eq("bean2"), any(BeanDefinition.class))).willReturn(Boolean.TRUE);
 		applicationContext.registerBeanDefinition("bean2", new RootBeanDefinition(SimpleComponent.class));
@@ -227,6 +249,11 @@ class ApplicationContextAotGeneratorTests {
 		verify(excludeFilter).test("bean1", beanFactory.getMergedBeanDefinition("bean1"));
 	}
 
+
+	@SuppressWarnings("unchecked")
+	private BiPredicate<String, BeanDefinition> mockExcludeFilter() {
+		return mock(BiPredicate.class);
+	}
 
 	@SuppressWarnings("rawtypes")
 	private void compile(GenericApplicationContext applicationContext, Consumer<ApplicationContextInitializer> initializer) {
@@ -306,6 +333,15 @@ class ApplicationContextAotGeneratorTests {
 
 	}
 
+	static class TextAotContributingBeanFactoryPostProcessor implements AotContributingBeanFactoryPostProcessor {
+
+		@Override
+		public BeanFactoryContribution contribute(ConfigurableListableBeanFactory beanFactory) {
+			return initialization -> initialization.contribute(code -> code.add("// Test\n"));
+		}
+
+	}
+
 	static class NoOpAotContributingBeanFactoryPostProcessor implements AotContributingBeanFactoryPostProcessor {
 
 		@Override
@@ -348,6 +384,25 @@ class ApplicationContextAotGeneratorTests {
 		@Override
 		public BiPredicate<String, BeanDefinition> getBeanDefinitionExcludeFilter() {
 			return this.excludeFilter;
+		}
+
+	}
+
+	static class TestSpringFactoriesClassLoader extends ClassLoader {
+
+		private final String factoriesName;
+
+		TestSpringFactoriesClassLoader(String factoriesName) {
+			super(RuntimeHintsPostProcessorTests.class.getClassLoader());
+			this.factoriesName = factoriesName;
+		}
+
+		@Override
+		public Enumeration<URL> getResources(String name) throws IOException {
+			if ("META-INF/spring.factories".equals(name)) {
+				return super.getResources("org/springframework/context/generator/aot/" + this.factoriesName);
+			}
+			return super.getResources(name);
 		}
 
 	}

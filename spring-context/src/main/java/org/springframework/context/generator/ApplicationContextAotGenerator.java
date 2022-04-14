@@ -42,6 +42,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.OrderComparator;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
@@ -150,7 +151,8 @@ public class ApplicationContextAotGenerator {
 		for (String ppName : postProcessorNames) {
 			postProcessors.add(beanFactory.getBean(ppName, AotContributingBeanFactoryPostProcessor.class));
 		}
-		postProcessors.add(new RuntimeHintsPostProcessor());
+		postProcessors.addAll(SpringFactoriesLoader.loadFactories(AotContributingBeanFactoryPostProcessor.class,
+				beanFactory.getBeanClassLoader()));
 		sortPostProcessors(postProcessors, beanFactory);
 		return postProcessors;
 	}
