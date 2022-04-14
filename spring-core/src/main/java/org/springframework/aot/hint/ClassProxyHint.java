@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * A hint that describes the need for a proxy against a concrete class.
@@ -55,6 +54,9 @@ public final class ClassProxyHint {
 	 * @return a builder for the hint
 	 */
 	public static Builder of(Class<?> targetClass) {
+		if (targetClass.isInterface()) {
+			throw new IllegalArgumentException("Should not be an interface: " + targetClass);
+		}
 		return of(TypeReference.of(targetClass));
 	}
 
@@ -103,7 +105,7 @@ public final class ClassProxyHint {
 		private final LinkedList<TypeReference> proxiedInterfaces = new LinkedList<>();
 
 
-		public Builder(TypeReference targetClass) {
+		Builder(TypeReference targetClass) {
 			this.targetClass = targetClass;
 		}
 
@@ -124,7 +126,7 @@ public final class ClassProxyHint {
 		 */
 		public Builder proxiedInterfaces(Class<?>... proxiedInterfaces) {
 			this.proxiedInterfaces.addAll(Arrays.stream(proxiedInterfaces)
-					.map(TypeReference::of).collect(Collectors.toList()));
+					.map(TypeReference::of).toList());
 			return this;
 		}
 
@@ -132,7 +134,7 @@ public final class ClassProxyHint {
 		 * Create a {@link ClassProxyHint} based on the state of this builder.
 		 * @return a class proxy hint
 		 */
-		public ClassProxyHint build() {
+		ClassProxyHint build() {
 			return new ClassProxyHint(this);
 		}
 

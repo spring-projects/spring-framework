@@ -223,7 +223,7 @@ public final class TypeHint {
 		 * Create a {@link TypeHint} based on the state of this builder.
 		 * @return a type hint
 		 */
-		public TypeHint build() {
+		TypeHint build() {
 			return new TypeHint(this);
 		}
 

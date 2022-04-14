@@ -86,7 +86,7 @@ public final class ExecutableHint extends MemberHint {
 	/**
 	 * Builder for {@link ExecutableHint}.
 	 */
-	public static final class Builder {
+	public static class Builder {
 
 		private final String name;
 
@@ -95,7 +95,7 @@ public final class ExecutableHint extends MemberHint {
 		private final Set<ExecutableMode> modes = new LinkedHashSet<>();
 
 
-		private Builder(String name, List<TypeReference> parameterTypes) {
+		Builder(String name, List<TypeReference> parameterTypes) {
 			this.name = name;
 			this.parameterTypes = parameterTypes;
 		}
@@ -127,7 +127,7 @@ public final class ExecutableHint extends MemberHint {
 		 * Create an {@link ExecutableHint} based on the state of this builder.
 		 * @return an executable hint
 		 */
-		public ExecutableHint build() {
+		ExecutableHint build() {
 			return new ExecutableHint(this);
 		}
 

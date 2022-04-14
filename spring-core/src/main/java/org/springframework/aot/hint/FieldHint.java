@@ -66,7 +66,7 @@ public final class FieldHint extends MemberHint {
 		private boolean allowUnsafeAccess;
 
 
-		public Builder(String name) {
+		Builder(String name) {
 			this.name = name;
 		}
 
@@ -94,7 +94,7 @@ public final class FieldHint extends MemberHint {
 		 * Create a {@link FieldHint} based on the state of this builder.
 		 * @return a field hint
 		 */
-		public FieldHint build() {
+		FieldHint build() {
 			return new FieldHint(this);
 		}
 

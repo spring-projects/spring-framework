@@ -96,7 +96,7 @@ public final class ResourcePatternHint {
 		 * builder.
 		 * @return a resource pattern hint
 		 */
-		public ResourcePatternHint build() {
+		ResourcePatternHint build() {
 			return new ResourcePatternHint(this);
 		}
 

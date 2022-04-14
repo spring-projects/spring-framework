@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * A hint that describes the need of a JDK {@link Proxy}, that is an
@@ -37,6 +36,24 @@ public final class JdkProxyHint {
 
 	private JdkProxyHint(Builder builder) {
 		this.proxiedInterfaces = List.copyOf(builder.proxiedInterfaces);
+	}
+
+	/**
+	 * Initialize a builder with the proxied interfaces to use.
+	 * @param proxiedInterfaces the interfaces the proxy should implement
+	 * @return a builder for the hint
+	 */
+	public static Builder of(TypeReference... proxiedInterfaces) {
+		return new Builder().proxiedInterfaces(proxiedInterfaces);
+	}
+
+	/**
+	 * Initialize a builder with the proxied interfaces to use.
+	 * @param proxiedInterfaces the interfaces the proxy should implement
+	 * @return a builder for the hint
+	 */
+	public static Builder of(Class<?>... proxiedInterfaces) {
+		return new Builder().proxiedInterfaces(proxiedInterfaces);
 	}
 
 	/**
@@ -70,8 +87,11 @@ public final class JdkProxyHint {
 	 */
 	public static class Builder {
 
-		private final LinkedList<TypeReference> proxiedInterfaces = new LinkedList<>();
+		private final LinkedList<TypeReference> proxiedInterfaces;
 
+		Builder() {
+			this.proxiedInterfaces = new LinkedList<>();
+		}
 
 		/**
 		 * Add the specified interfaces that the proxy should implement.
@@ -89,8 +109,7 @@ public final class JdkProxyHint {
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder proxiedInterfaces(Class<?>... proxiedInterfaces) {
-			this.proxiedInterfaces.addAll(Arrays.stream(proxiedInterfaces)
-					.map(TypeReference::of).collect(Collectors.toList()));
+			this.proxiedInterfaces.addAll(toTypeReferences(proxiedInterfaces));
 			return this;
 		}
 
@@ -98,8 +117,17 @@ public final class JdkProxyHint {
 		 * Create a {@link JdkProxyHint} based on the state of this builder.
 		 * @return a jdk proxy hint
 		 */
-		public JdkProxyHint build() {
+		JdkProxyHint build() {
 			return new JdkProxyHint(this);
+		}
+
+		private static List<TypeReference> toTypeReferences(Class<?>... proxiedInterfaces) {
+			List<String> concreteTypes = Arrays.stream(proxiedInterfaces)
+					.filter(candidate -> !candidate.isInterface()).map(Class::getName).toList();
+			if (!concreteTypes.isEmpty()) {
+				throw new IllegalArgumentException("Not an interface: " + concreteTypes);
+			}
+			return Arrays.stream(proxiedInterfaces).map(TypeReference::of).toList();
 		}
 
 	}

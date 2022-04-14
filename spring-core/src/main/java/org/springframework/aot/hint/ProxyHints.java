@@ -16,13 +16,9 @@
 
 package org.springframework.aot.hint;
 
-import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.aot.hint.ClassProxyHint.Builder;
@@ -58,11 +54,13 @@ public class ProxyHints {
 
 	/**
 	 * Register a {@link JdkProxyHint}.
-	 * @param hint the supplier to the hint
+	 * @param jdkProxyHint the supplier to the hint
 	 * @return {@code this}, to facilitate method chaining
 	 */
-	public ProxyHints registerJdkProxy(Supplier<JdkProxyHint> hint) {
-		this.jdkProxies.add(hint.get());
+	public ProxyHints registerJdkProxy(Consumer<JdkProxyHint.Builder> jdkProxyHint) {
+		JdkProxyHint.Builder builder = new JdkProxyHint.Builder();
+		jdkProxyHint.accept(builder);
+		this.jdkProxies.add(builder.build());
 		return this;
 	}
 
@@ -73,8 +71,8 @@ public class ProxyHints {
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ProxyHints registerJdkProxy(TypeReference... proxiedInterfaces) {
-		return registerJdkProxy(() -> new JdkProxyHint.Builder()
-				.proxiedInterfaces(proxiedInterfaces).build());
+		return registerJdkProxy(jdkProxyHint ->
+				jdkProxyHint.proxiedInterfaces(proxiedInterfaces));
 	}
 
 	/**
@@ -84,13 +82,8 @@ public class ProxyHints {
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ProxyHints registerJdkProxy(Class<?>... proxiedInterfaces) {
-		List<String> concreteTypes = Arrays.stream(proxiedInterfaces)
-				.filter(candidate -> !candidate.isInterface()).map(Class::getName).collect(Collectors.toList());
-		if (!concreteTypes.isEmpty()) {
-			throw new IllegalArgumentException("Not an interface: " + concreteTypes);
-		}
-		return registerJdkProxy(() -> new JdkProxyHint.Builder()
-				.proxiedInterfaces(proxiedInterfaces).build());
+		return registerJdkProxy(jdkProxyHint ->
+				jdkProxyHint.proxiedInterfaces(proxiedInterfaces));
 	}
 
 	/**
@@ -101,10 +94,7 @@ public class ProxyHints {
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ProxyHints registerClassProxy(TypeReference targetClass, Consumer<Builder> classProxyHint) {
-		Builder builder = ClassProxyHint.of(targetClass);
-		classProxyHint.accept(builder);
-		this.classProxies.add(builder.build());
-		return this;
+		return addClassProxyHint(ClassProxyHint.of(targetClass), classProxyHint);
 	}
 
 	/**
@@ -114,10 +104,13 @@ public class ProxyHints {
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ProxyHints registerClassProxy(Class<?> targetClass, Consumer<Builder> classProxyHint) {
-		if (targetClass.isInterface()) {
-			throw new IllegalArgumentException("Should not be an interface: " + targetClass);
-		}
-		return registerClassProxy(TypeReference.of(targetClass), classProxyHint);
+		return addClassProxyHint(ClassProxyHint.of(targetClass), classProxyHint);
+	}
+
+	private ProxyHints addClassProxyHint(ClassProxyHint.Builder builder, Consumer<ClassProxyHint.Builder> classProxyHint) {
+		classProxyHint.accept(builder);
+		this.classProxies.add(builder.build());
+		return this;
 	}
 
 }

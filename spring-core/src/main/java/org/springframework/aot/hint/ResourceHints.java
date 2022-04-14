@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.springframework.aot.hint.ResourcePatternHint.Builder;
+import org.springframework.lang.Nullable;
 
 /**
  * Gather the need for resources available at runtime.
@@ -72,7 +73,7 @@ public class ResourceHints {
 	 * @param resourceHint a builder to further customize the resource pattern
 	 * @return {@code this}, to facilitate method chaining
 	 */
-	public ResourceHints registerPattern(String include, Consumer<Builder> resourceHint) {
+	public ResourceHints registerPattern(String include, @Nullable Consumer<Builder> resourceHint) {
 		Builder builder = new Builder().includes(include);
 		if (resourceHint != null) {
 			resourceHint.accept(builder);
@@ -136,7 +137,7 @@ public class ResourceHints {
 		return candidate.replace(".", "/") + ".class";
 	}
 
-	private void buildName(TypeReference type, StringBuilder sb) {
+	private void buildName(@Nullable TypeReference type, StringBuilder sb) {
 		if (type == null) {
 			return;
 		}
