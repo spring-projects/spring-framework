@@ -14,34 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.testfixture.beans.factory.generator;
+package org.springframework.beans.factory.aot;
 
-import java.io.IOException;
+/**
+ * Test enum that include a class body.
+ *
+ * @author Phillip Webb
+ */
+public enum EnumWithClassBody {
 
-public class SimpleConfiguration {
+	/**
+	 * No class body.
+	 */
+	ONE,
 
-	public SimpleConfiguration() {
-	}
+	/**
+	 * With class body.
+	 */
+	TWO {
 
-	public String stringBean() {
-		return "Hello";
-	}
+		@Override
+		public String toString() {
+			return "2";
+		}
 
-	@SuppressWarnings("unused")
-	private static String privateStaticStringBean() {
-		return "Hello";
-	}
-
-	static String packageStaticStringBean() {
-		return "Hello";
-	}
-
-	public static Integer integerBean() {
-		return 42;
-	}
-
-	public Integer throwingIntegerBean() throws IOException {
-		return 42;
 	}
 
 }

@@ -14,34 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.testfixture.beans.factory.generator;
+package org.springframework.beans.factory.aot;
 
-import java.io.IOException;
-
-public class SimpleConfiguration {
-
-	public SimpleConfiguration() {
-	}
-
-	public String stringBean() {
-		return "Hello";
-	}
-
-	@SuppressWarnings("unused")
-	private static String privateStaticStringBean() {
-		return "Hello";
-	}
-
-	static String packageStaticStringBean() {
-		return "Hello";
-	}
-
-	public static Integer integerBean() {
-		return 42;
-	}
-
-	public Integer throwingIntegerBean() throws IOException {
-		return 42;
-	}
+/**
+ * Fake CGLIB generated class.
+ *
+ * @author Phillip Webb
+ */
+class ExampleClass$$GeneratedBy extends ExampleClass {
 
 }

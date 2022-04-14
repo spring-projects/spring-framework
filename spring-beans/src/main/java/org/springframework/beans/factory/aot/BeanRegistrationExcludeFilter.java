@@ -14,34 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.testfixture.beans.factory.generator;
+package org.springframework.beans.factory.aot;
 
-import java.io.IOException;
+import org.springframework.beans.factory.support.RegisteredBean;
 
-public class SimpleConfiguration {
+/**
+ * Filter that can be used to exclude AOT processing of a
+ * {@link RegisteredBean}.
+ *
+ * @author Phillip Webb
+ * @author Stephane Nicoll
+ * @since 6.0
+ */
+@FunctionalInterface
+public interface BeanRegistrationExcludeFilter {
 
-	public SimpleConfiguration() {
-	}
-
-	public String stringBean() {
-		return "Hello";
-	}
-
-	@SuppressWarnings("unused")
-	private static String privateStaticStringBean() {
-		return "Hello";
-	}
-
-	static String packageStaticStringBean() {
-		return "Hello";
-	}
-
-	public static Integer integerBean() {
-		return 42;
-	}
-
-	public Integer throwingIntegerBean() throws IOException {
-		return 42;
-	}
+	/**
+	 * Return if the registered bean should be excluded from AOT processing and
+	 * registration.
+	 * @param registeredBean the registered bean
+	 * @return if the registered bean should be excluded
+	 */
+	boolean isExcluded(RegisteredBean registeredBean);
 
 }
