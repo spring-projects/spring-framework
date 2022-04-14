@@ -39,7 +39,7 @@ inline fun <reified T : Any> ListableBeanFactory.getBeansOfType(includeNonSingle
 
 /**
  * Extension for [ListableBeanFactory.getBeanNamesForAnnotation] providing a
- * `getBeansOfType<Foo>()` variant.
+ * `getBeanNamesForAnnotation<Foo>()` variant.
  *
  * @author Sebastien Deleuze
  * @since 5.0
