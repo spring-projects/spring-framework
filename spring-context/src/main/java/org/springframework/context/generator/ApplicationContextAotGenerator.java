@@ -150,6 +150,7 @@ public class ApplicationContextAotGenerator {
 		for (String ppName : postProcessorNames) {
 			postProcessors.add(beanFactory.getBean(ppName, AotContributingBeanFactoryPostProcessor.class));
 		}
+		postProcessors.add(new RuntimeHintsPostProcessor());
 		sortPostProcessors(postProcessors, beanFactory);
 		return postProcessors;
 	}
