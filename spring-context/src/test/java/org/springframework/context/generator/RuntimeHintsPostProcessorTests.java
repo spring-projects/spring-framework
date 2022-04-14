@@ -16,10 +16,9 @@
 
 package org.springframework.context.generator;
 
-import java.io.File;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
-import java.net.URLClassLoader;
+import java.util.Enumeration;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -77,7 +76,7 @@ class RuntimeHintsPostProcessorTests {
 	@Test
 	void shouldProcessRegistrarInSpringFactory() {
 		GenericApplicationContext applicationContext = createContext();
-		applicationContext.setClassLoader(new TestSpringFactoriesClassLoader());
+		applicationContext.setClassLoader(new TestSpringFactoriesClassLoader("test.factories"));
 		this.generator.generateApplicationContext(applicationContext, this.generationContext);
 		assertThatSampleRegistrarContributed();
 	}
@@ -162,19 +161,21 @@ class RuntimeHintsPostProcessorTests {
 	}
 
 
-	private static class TestSpringFactoriesClassLoader extends URLClassLoader {
+	static class TestSpringFactoriesClassLoader extends ClassLoader {
 
-		TestSpringFactoriesClassLoader() {
-			super(new URL[] {testLocation()}, RuntimeHintsPostProcessorTests.class.getClassLoader());
+		private final String factoriesName;
+
+		TestSpringFactoriesClassLoader(String factoriesName) {
+			super(RuntimeHintsPostProcessorTests.class.getClassLoader());
+			this.factoriesName = factoriesName;
 		}
 
-		private static URL testLocation() {
-			try {
-				return new File("src/test/resources/org/springframework/context/annotation/runtimehints/").toURI().toURL();
+		@Override
+		public Enumeration<URL> getResources(String name) throws IOException {
+			if ("META-INF/spring.factories".equals(name)) {
+				return super.getResources("org/springframework/context/generator/runtimehints/" + this.factoriesName);
 			}
-			catch (MalformedURLException ex) {
-				throw new IllegalStateException(ex);
-			}
+			return super.getResources(name);
 		}
 
 	}
