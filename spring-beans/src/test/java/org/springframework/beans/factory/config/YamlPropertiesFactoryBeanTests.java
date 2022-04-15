@@ -16,14 +16,12 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Map;
 import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
 
 import org.snakeyaml.engine.v2.exceptions.DuplicateKeyException;
 import org.snakeyaml.engine.v2.exceptions.ScannerException;
-
 import org.springframework.beans.factory.config.YamlProcessor.MatchStatus;
 import org.springframework.beans.factory.config.YamlProcessor.ResolutionMethod;
 import org.springframework.core.io.ByteArrayResource;
