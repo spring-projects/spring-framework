@@ -27,14 +27,14 @@ final class ReflectionTypeReference extends AbstractTypeReference {
 
 	private final Class<?> type;
 
-	@Nullable
-	private final TypeReference enclosing;
-
-
 	private ReflectionTypeReference(Class<?> type) {
+		super(type.getPackageName(), type.getSimpleName(), safeCreate(type.getEnclosingClass()));
 		this.type = type;
-		this.enclosing = (type.getEnclosingClass() != null
-				? TypeReference.of(type.getEnclosingClass()) : null);
+	}
+
+	@Nullable
+	private static ReflectionTypeReference safeCreate(@Nullable Class<?> type) {
+		return (type != null ? new ReflectionTypeReference(type) : null);
 	}
 
 	static ReflectionTypeReference of(Class<?> type) {
@@ -47,18 +47,9 @@ final class ReflectionTypeReference extends AbstractTypeReference {
 	}
 
 	@Override
-	public String getPackageName() {
-		return this.type.getPackageName();
-	}
-
-	@Override
-	public String getSimpleName() {
-		return this.type.getSimpleName();
-	}
-
-	@Override
-	public TypeReference getEnclosingType() {
-		return this.enclosing;
+	protected boolean isPrimitive() {
+		return this.type.isPrimitive() ||
+				(this.type.isArray() && this.type.getComponentType().isPrimitive());
 	}
 
 }

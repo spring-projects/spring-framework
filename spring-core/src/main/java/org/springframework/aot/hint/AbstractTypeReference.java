@@ -18,6 +18,8 @@ package org.springframework.aot.hint;
 
 import java.util.Objects;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Base {@link TypeReference} implementation that ensures consistent behaviour
  * for {@code equals()}, {@code hashCode()}, and {@code toString()} based on
@@ -27,6 +29,54 @@ import java.util.Objects;
  * @since 6.0
  */
 public abstract class AbstractTypeReference implements TypeReference {
+
+	private final String packageName;
+
+	private final String simpleName;
+
+	@Nullable
+	private final TypeReference enclosingType;
+
+	protected AbstractTypeReference(String packageName, String simpleName, @Nullable TypeReference enclosingType) {
+		this.packageName = packageName;
+		this.simpleName = simpleName;
+		this.enclosingType = enclosingType;
+	}
+
+	@Override
+	public String getName() {
+		TypeReference enclosingType = getEnclosingType();
+		String simpleName = getSimpleName();
+		return (enclosingType != null
+				? (enclosingType.getName() + '$' + simpleName)
+				: addPackageIfNecessary(simpleName));
+	}
+
+	@Override
+	public String getPackageName() {
+		return this.packageName;
+	}
+
+	@Override
+	public String getSimpleName() {
+		return this.simpleName;
+	}
+
+	@Nullable
+	@Override
+	public TypeReference getEnclosingType() {
+		return this.enclosingType;
+	}
+
+	protected abstract boolean isPrimitive();
+
+	protected String addPackageIfNecessary(String part) {
+		if (this.packageName.isEmpty() ||
+				this.packageName.equals("java.lang") && isPrimitive()) {
+			return part;
+		}
+		return this.packageName + '.' + part;
+	}
 
 	@Override
 	public int hashCode() {

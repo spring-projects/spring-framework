@@ -131,19 +131,7 @@ public class ResourceHints {
 	}
 
 	private String toIncludePattern(TypeReference type) {
-		StringBuilder names = new StringBuilder();
-		buildName(type, names);
-		String candidate = type.getPackageName() + "." + names;
-		return candidate.replace(".", "/") + ".class";
-	}
-
-	private void buildName(@Nullable TypeReference type, StringBuilder sb) {
-		if (type == null) {
-			return;
-		}
-		String typeName = (type.getEnclosingType() != null) ? "$" + type.getSimpleName() : type.getSimpleName();
-		sb.insert(0, typeName);
-		buildName(type.getEnclosingType(), sb);
+		return type.getName().replace(".", "/") + ".class";
 	}
 
 }

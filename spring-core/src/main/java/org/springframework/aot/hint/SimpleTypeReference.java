@@ -16,6 +16,8 @@
 
 package org.springframework.aot.hint;
 
+import java.util.List;
+
 import javax.lang.model.SourceVersion;
 
 import org.springframework.lang.Nullable;
@@ -28,21 +30,14 @@ import org.springframework.util.Assert;
  */
 final class SimpleTypeReference extends AbstractTypeReference {
 
+	private static final List<String> PRIMITIVE_NAMES = List.of("boolean", "byte",
+			"short", "int", "long", "char", "float", "double", "void");
+
 	@Nullable
 	private String canonicalName;
 
-	private final String packageName;
-
-	private final String simpleName;
-
-	@Nullable
-	private final TypeReference enclosingType;
-
-
 	SimpleTypeReference(String packageName, String simpleName, @Nullable TypeReference enclosingType) {
-		this.packageName = packageName;
-		this.simpleName = simpleName;
-		this.enclosingType = enclosingType;
+		super(packageName, simpleName, enclosingType);
 	}
 
 	static SimpleTypeReference of(String className) {
@@ -63,7 +58,8 @@ final class SimpleTypeReference extends AbstractTypeReference {
 
 	private static boolean isValidClassName(String className) {
 		for (String s : className.split("\\.", -1)) {
-			if (!SourceVersion.isIdentifier(s)) {
+			String candidate = s.replace("[", "").replace("]", "");
+			if (!SourceVersion.isIdentifier(candidate)) {
 				return false;
 			}
 		}
@@ -72,8 +68,13 @@ final class SimpleTypeReference extends AbstractTypeReference {
 
 	private static SimpleTypeReference createTypeReference(String className) {
 		int i = className.lastIndexOf('.');
-		return (i != -1 ? new SimpleTypeReference(className.substring(0, i), className.substring(i + 1), null)
-				: new SimpleTypeReference("", className, null));
+		if (i != -1) {
+			return new SimpleTypeReference(className.substring(0, i), className.substring(i + 1), null);
+		}
+		else {
+			String packageName = isPrimitive(className) ? "java.lang" : "";
+			return new SimpleTypeReference(packageName, className, null);
+		}
 	}
 
 	@Override
@@ -81,10 +82,18 @@ final class SimpleTypeReference extends AbstractTypeReference {
 		if (this.canonicalName == null) {
 			StringBuilder names = new StringBuilder();
 			buildName(this, names);
-			this.canonicalName = (this.packageName.isEmpty()
-					? names.toString() : this.packageName + "." + names);
+			this.canonicalName = addPackageIfNecessary(names.toString());
 		}
 		return this.canonicalName;
+	}
+
+	@Override
+	protected boolean isPrimitive() {
+		return isPrimitive(getSimpleName());
+	}
+
+	private static boolean isPrimitive(String name) {
+		return PRIMITIVE_NAMES.stream().anyMatch(name::startsWith);
 	}
 
 	private static void buildName(@Nullable TypeReference type, StringBuilder sb) {
@@ -94,21 +103,6 @@ final class SimpleTypeReference extends AbstractTypeReference {
 		String typeName = (type.getEnclosingType() != null) ? "." + type.getSimpleName() : type.getSimpleName();
 		sb.insert(0, typeName);
 		buildName(type.getEnclosingType(), sb);
-	}
-
-	@Override
-	public String getPackageName() {
-		return this.packageName;
-	}
-
-	@Override
-	public String getSimpleName() {
-		return this.simpleName;
-	}
-
-	@Override
-	public TypeReference getEnclosingType() {
-		return this.enclosingType;
 	}
 
 }

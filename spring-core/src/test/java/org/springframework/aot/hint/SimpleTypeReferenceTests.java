@@ -16,8 +16,12 @@
 
 package org.springframework.aot.hint;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +33,48 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Stephane Nicoll
  */
 class SimpleTypeReferenceTests {
+
+
+	@ParameterizedTest
+	@MethodSource("primitivesAndPrimitivesArray")
+	void primitivesAreHandledProperly(TypeReference typeReference, String expectedName) {
+		assertThat(typeReference.getName()).isEqualTo(expectedName);
+		assertThat(typeReference.getCanonicalName()).isEqualTo(expectedName);
+		assertThat(typeReference.getPackageName()).isEqualTo("java.lang");
+	}
+
+	static Stream<Arguments> primitivesAndPrimitivesArray() {
+		return Stream.of(
+				Arguments.of(SimpleTypeReference.of("boolean"), "boolean"),
+				Arguments.of(SimpleTypeReference.of("byte"), "byte"),
+				Arguments.of(SimpleTypeReference.of("short"), "short"),
+				Arguments.of(SimpleTypeReference.of("int"), "int"),
+				Arguments.of(SimpleTypeReference.of("long"), "long"),
+				Arguments.of(SimpleTypeReference.of("char"), "char"),
+				Arguments.of(SimpleTypeReference.of("float"), "float"),
+				Arguments.of(SimpleTypeReference.of("double"), "double"),
+				Arguments.of(SimpleTypeReference.of("boolean[]"), "boolean[]"),
+				Arguments.of(SimpleTypeReference.of("byte[]"), "byte[]"),
+				Arguments.of(SimpleTypeReference.of("short[]"), "short[]"),
+				Arguments.of(SimpleTypeReference.of("int[]"), "int[]"),
+				Arguments.of(SimpleTypeReference.of("long[]"), "long[]"),
+				Arguments.of(SimpleTypeReference.of("char[]"), "char[]"),
+				Arguments.of(SimpleTypeReference.of("float[]"), "float[]"),
+				Arguments.of(SimpleTypeReference.of("double[]"), "double[]"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("arrays")
+	void arraysHaveSuitableReflectionTargetName(TypeReference typeReference, String expectedName) {
+		assertThat(typeReference.getName()).isEqualTo(expectedName);
+	}
+
+	static Stream<Arguments> arrays() {
+		return Stream.of(
+				Arguments.of(SimpleTypeReference.of("java.lang.Object[]"), "java.lang.Object[]"),
+				Arguments.of(SimpleTypeReference.of("java.lang.Integer[]"), "java.lang.Integer[]"),
+				Arguments.of(SimpleTypeReference.of("com.example.Test[]"), "com.example.Test[]"));
+	}
 
 	@Test
 	void typeReferenceInRootPackage() {

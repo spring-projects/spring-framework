@@ -32,14 +32,14 @@ public final class GeneratedTypeReference extends AbstractTypeReference {
 
 	private final ClassName className;
 
-	@Nullable
-	private final TypeReference enclosingType;
-
 	private GeneratedTypeReference(ClassName className) {
+		super(className.packageName(), className.simpleName(), safeCreate(className.enclosingClassName()));
 		this.className = className;
-		this.enclosingType = (className.enclosingClassName() != null
-				? new GeneratedTypeReference(className.enclosingClassName())
-				: null);
+	}
+
+	@Nullable
+	private static GeneratedTypeReference safeCreate(@Nullable ClassName className) {
+		return (className != null ? new GeneratedTypeReference(className) : null);
 	}
 
 	public static GeneratedTypeReference of(ClassName className) {
@@ -53,18 +53,8 @@ public final class GeneratedTypeReference extends AbstractTypeReference {
 	}
 
 	@Override
-	public String getPackageName() {
-		return this.className.packageName();
-	}
-
-	@Override
-	public String getSimpleName() {
-		return this.className.simpleName();
-	}
-
-	@Override
-	public TypeReference getEnclosingType() {
-		return this.enclosingType;
+	protected boolean isPrimitive() {
+		return this.className.isPrimitive();
 	}
 
 }

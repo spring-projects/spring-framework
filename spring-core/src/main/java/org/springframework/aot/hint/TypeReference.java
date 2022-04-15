@@ -28,6 +28,12 @@ import org.springframework.lang.Nullable;
 public interface TypeReference {
 
 	/**
+	 * Return the fully qualified name of this type reference.
+	 * @return the reflection target name
+	 */
+	String getName();
+
+	/**
 	 * Return the {@linkplain Class#getCanonicalName() canonical name} of this
 	 * type reference.
 	 * @return the canonical name

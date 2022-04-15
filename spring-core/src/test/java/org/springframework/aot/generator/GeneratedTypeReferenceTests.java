@@ -16,7 +16,12 @@
 
 package org.springframework.aot.generator;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.javapoet.ClassName;
@@ -29,6 +34,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Stephane Nicoll
  */
 class GeneratedTypeReferenceTests {
+
+
+	@ParameterizedTest
+	@MethodSource("reflectionTargetNames")
+	void hasSuitableReflectionTargetName(TypeReference typeReference, String binaryName) {
+		assertThat(typeReference.getName()).isEqualTo(binaryName);
+	}
+
+	static Stream<Arguments> reflectionTargetNames() {
+		return Stream.of(
+				Arguments.of(GeneratedTypeReference.of(ClassName.get("com.example", "Test")), "com.example.Test"),
+				Arguments.of(GeneratedTypeReference.of(ClassName.get("com.example", "Test", "Inner")), "com.example.Test$Inner"));
+	}
 
 	@Test
 	void createWithClassName() {
