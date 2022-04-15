@@ -84,7 +84,7 @@ configure(allprojects) { project ->
 				exclude group: "stax", name: "stax-api"
 			}
 			dependency "org.ogce:xpp3:1.1.6"
-			dependency "org.yaml:snakeyaml:1.30"
+			dependency "org.snakeyaml:snakeyaml-engine:2.3"
 
 			dependency "com.h2database:h2:2.1.210"
 			dependency "com.github.ben-manes.caffeine:caffeine:3.0.6"

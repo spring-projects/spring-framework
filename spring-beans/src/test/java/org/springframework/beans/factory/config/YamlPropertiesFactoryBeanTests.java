@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.DuplicateKeyException;
-import org.yaml.snakeyaml.scanner.ScannerException;
+
+import org.snakeyaml.engine.v2.exceptions.DuplicateKeyException;
+import org.snakeyaml.engine.v2.exceptions.ScannerException;
 
 import org.springframework.beans.factory.config.YamlProcessor.MatchStatus;
 import org.springframework.beans.factory.config.YamlProcessor.ResolutionMethod;
@@ -225,14 +225,4 @@ class YamlPropertiesFactoryBeanTests {
 		assertThat(properties.getProperty("foo[2].three")).isEqualTo("four");
 		assertThat(properties.get("foo")).isNull();
 	}
-
-	@Test
-	@SuppressWarnings("unchecked")
-	void yaml() {
-		Yaml yaml = new Yaml();
-		Map<String, ?> map = yaml.loadAs("foo: bar\nspam:\n  foo: baz", Map.class);
-		assertThat(map.get("foo")).isEqualTo("bar");
-		assertThat(((Map<String, Object>) map.get("spam")).get("foo")).isEqualTo("baz");
-	}
-
 }

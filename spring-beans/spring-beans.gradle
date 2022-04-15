@@ -5,7 +5,7 @@ apply plugin: "kotlin"
 dependencies {
 	api(project(":spring-core"))
 	optional("jakarta.inject:jakarta.inject-api")
-	optional("org.yaml:snakeyaml")
+	optional("org.snakeyaml:snakeyaml-engine")
 	optional("org.apache.groovy:groovy-xml")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")

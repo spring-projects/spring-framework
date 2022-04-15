@@ -24,9 +24,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.yaml.snakeyaml.constructor.ConstructorException;
-import org.yaml.snakeyaml.parser.ParserException;
-import org.yaml.snakeyaml.scanner.ScannerException;
+import org.snakeyaml.engine.v2.exceptions.ConstructorException;
+import org.snakeyaml.engine.v2.exceptions.ParserException;
+import org.snakeyaml.engine.v2.exceptions.ScannerException;
 
 import org.springframework.core.io.ByteArrayResource;
 
@@ -68,6 +68,13 @@ class YamlProcessorTests {
 	void stringResource() {
 		setYaml("foo # a document that is a literal");
 		this.processor.process((properties, map) -> assertThat(map.get("document")).isEqualTo("foo"));
+	}
+
+	@Test
+	void norwayProblem() {
+		setYaml("foo: no");
+		this.processor.process((properties, map) ->
+			assertThat(map.get("foo")).as("In YAML 1.1 it would be: false").isEqualTo("no"));
 	}
 
 	@Test
@@ -158,31 +165,7 @@ class YamlProcessorTests {
 		setYaml("value: !!java.net.URL [\"" + url + "\"]");
 		assertThatExceptionOfType(ConstructorException.class)
 				.isThrownBy(() -> this.processor.process((properties, map) -> {}))
-				.withMessageContaining("Unsupported type encountered in YAML document: java.net.URL");
-	}
-
-	@Test
-	void customTypesSupportedDueToExplicitConfiguration() throws Exception {
-		this.processor.setSupportedTypes(URL.class, String.class);
-
-		URL url = new URL("https://localhost:9000/");
-		setYaml("value: !!java.net.URL [!!java.lang.String [\"" + url + "\"]]");
-
-		this.processor.process((properties, map) -> {
-			assertThat(properties).containsExactly(entry("value", url));
-			assertThat(map).containsExactly(entry("value", url));
-		});
-	}
-
-	@Test
-	void customTypeNotSupportedDueToExplicitConfiguration() {
-		this.processor.setSupportedTypes(List.class);
-
-		setYaml("value: !!java.net.URL [\"https://localhost:9000/\"]");
-
-		assertThatExceptionOfType(ConstructorException.class)
-				.isThrownBy(() -> this.processor.process((properties, map) -> {}))
-				.withMessageContaining("Unsupported type encountered in YAML document: java.net.URL");
+				.withMessageContaining("java.net.URL");
 	}
 
 	private void setYaml(String yaml) {

@@ -22,7 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.yaml.snakeyaml.constructor.DuplicateKeyException;
+import org.snakeyaml.engine.v2.exceptions.DuplicateKeyException;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.ByteArrayResource;

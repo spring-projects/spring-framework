@@ -17,7 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,29 +25,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-import org.yaml.snakeyaml.reader.UnicodeReader;
-import org.yaml.snakeyaml.representer.Representer;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * Base class for YAML factories.
  *
- * <p>Requires SnakeYAML 1.18 or higher, as of Spring Framework 5.0.6.
+ * <p>Requires SnakeYAML engine 2.3 or higher
  *
  * @author Dave Syer
  * @author Juergen Hoeller
@@ -66,9 +58,6 @@ public abstract class YamlProcessor {
 	private List<DocumentMatcher> documentMatchers = Collections.emptyList();
 
 	private boolean matchDefault = true;
-
-	private Set<String> supportedTypes = Collections.emptySet();
-
 
 	/**
 	 * A map of document matchers allowing callers to selectively use only
@@ -128,29 +117,6 @@ public abstract class YamlProcessor {
 	}
 
 	/**
-	 * Set the supported types that can be loaded from YAML documents.
-	 * <p>If no supported types are configured, only Java standard classes
-	 * (as defined in {@link org.yaml.snakeyaml.constructor.SafeConstructor})
-	 * encountered in YAML documents will be supported.
-	 * If an unsupported type is encountered, an {@link IllegalStateException}
-	 * will be thrown when the corresponding YAML node is processed.
-	 * @param supportedTypes the supported types, or an empty array to clear the
-	 * supported types
-	 * @since 5.1.16
-	 * @see #createYaml()
-	 */
-	public void setSupportedTypes(Class<?>... supportedTypes) {
-		if (ObjectUtils.isEmpty(supportedTypes)) {
-			this.supportedTypes = Collections.emptySet();
-		}
-		else {
-			Assert.noNullElements(supportedTypes, "'supportedTypes' must not contain null elements");
-			this.supportedTypes = Arrays.stream(supportedTypes).map(Class::getName)
-					.collect(Collectors.toUnmodifiableSet());
-		}
-	}
-
-	/**
 	 * Provide an opportunity for subclasses to process the Yaml parsed from the supplied
 	 * resources. Each resource is parsed in turn and the documents inside checked against
 	 * the {@link #setDocumentMatchers(DocumentMatcher...) matchers}. If a document
@@ -161,7 +127,7 @@ public abstract class YamlProcessor {
 	 * @see #createYaml()
 	 */
 	protected void process(MatchCallback callback) {
-		Yaml yaml = createYaml();
+		Load yaml = createYaml();
 		for (Resource resource : this.resources) {
 			boolean found = process(callback, yaml, resource);
 			if (this.resolutionMethod == ResolutionMethod.FIRST_FOUND && found) {
@@ -171,31 +137,21 @@ public abstract class YamlProcessor {
 	}
 
 	/**
-	 * Create the {@link Yaml} instance to use.
-	 * <p>The default implementation sets the "allowDuplicateKeys" flag to {@code false},
-	 * enabling built-in duplicate key handling in SnakeYAML 1.18+.
-	 * <p>As of Spring Framework 5.1.16, if custom {@linkplain #setSupportedTypes
-	 * supported types} have been configured, the default implementation creates
-	 * a {@code Yaml} instance that filters out unsupported types encountered in
-	 * YAML documents. If an unsupported type is encountered, an
-	 * {@link IllegalStateException} will be thrown when the node is processed.
-	 * @see LoaderOptions#setAllowDuplicateKeys(boolean)
+	 * Create the {@link Load} instance to use.
 	 */
-	protected Yaml createYaml() {
-		LoaderOptions loaderOptions = new LoaderOptions();
-		loaderOptions.setAllowDuplicateKeys(false);
-		return new Yaml(new FilteringConstructor(loaderOptions), new Representer(),
-				new DumperOptions(), loaderOptions);
+	protected Load createYaml() {
+		LoadSettings settings = LoadSettings.builder().build();
+		return  new Load(settings);
 	}
 
-	private boolean process(MatchCallback callback, Yaml yaml, Resource resource) {
+	private boolean process(MatchCallback callback, Load yaml, Resource resource) {
 		int count = 0;
 		try {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loading from YAML: " + resource);
 			}
-			try (Reader reader = new UnicodeReader(resource.getInputStream())) {
-				for (Object object : yaml.loadAll(reader)) {
+			try (InputStream is  = resource.getInputStream()) {
+				for (Object object : yaml.loadAllFromInputStream(is)) {
 					if (object != null && process(asMap(object), callback)) {
 						count++;
 						if (this.resolutionMethod == ResolutionMethod.FIRST_FOUND) {
@@ -426,26 +382,6 @@ public abstract class YamlProcessor {
 		 * Take the first resource in the list that exists and use just that.
 		 */
 		FIRST_FOUND
-	}
-
-
-	/**
-	 * {@link Constructor} that supports filtering of unsupported types.
-	 * <p>If an unsupported type is encountered in a YAML document, an
-	 * {@link IllegalStateException} will be thrown from {@link #getClassForName}.
-	 */
-	private class FilteringConstructor extends Constructor {
-
-		FilteringConstructor(LoaderOptions loaderOptions) {
-			super(loaderOptions);
-		}
-
-		@Override
-		protected Class<?> getClassForName(String name) throws ClassNotFoundException {
-			Assert.state(YamlProcessor.this.supportedTypes.contains(name),
-					() -> "Unsupported type encountered in YAML document: " + name);
-			return super.getClassForName(name);
-		}
 	}
 
 }
