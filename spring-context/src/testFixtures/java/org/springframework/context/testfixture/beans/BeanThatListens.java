@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationListener;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Genkui Du
  */
 public class BeanThatListens implements ApplicationListener<ApplicationEvent> {
 

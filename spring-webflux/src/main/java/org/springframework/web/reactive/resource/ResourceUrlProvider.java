@@ -52,7 +52,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
- * @author
+ * @author Genkui Du
  * @since 5.0
  */
 public class ResourceUrlProvider implements ApplicationListener<ContextRefreshedEvent>, ApplicationContextAware {
