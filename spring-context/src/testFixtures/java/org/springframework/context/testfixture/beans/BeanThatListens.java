@@ -17,6 +17,7 @@
 package org.springframework.context.testfixture.beans;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -31,7 +32,7 @@ public class BeanThatListens implements ApplicationListener<ApplicationEvent> {
 
 	private BeanThatBroadcasts beanThatBroadcasts;
 
-	private int eventCount;
+	private final AtomicInteger eventCount = new AtomicInteger(0);
 
 
 	public BeanThatListens() {
@@ -48,18 +49,18 @@ public class BeanThatListens implements ApplicationListener<ApplicationEvent> {
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
-		eventCount++;
+		eventCount.getAndIncrement();
 		if (beanThatBroadcasts != null) {
 			beanThatBroadcasts.receivedCount++;
 		}
 	}
 
 	public int getEventCount() {
-		return eventCount;
+		return eventCount.get();
 	}
 
 	public void zero() {
-		eventCount = 0;
+		eventCount.set(0);
 	}
 
 }

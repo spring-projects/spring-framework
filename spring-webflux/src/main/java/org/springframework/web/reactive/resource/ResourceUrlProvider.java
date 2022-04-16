@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,6 +52,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author
  * @since 5.0
  */
 public class ResourceUrlProvider implements ApplicationListener<ContextRefreshedEvent>, ApplicationContextAware {
@@ -58,6 +60,9 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	private static final Log logger = LogFactory.getLog(ResourceUrlProvider.class);
 
 	private final Map<PathPattern, ResourceWebHandler> handlerMap = new LinkedHashMap<>();
+
+	private final Object handlerLock = new Object();
+
 
 	@Nullable
 	private ApplicationContext applicationContext;
@@ -84,18 +89,22 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * auto-detection is turned off.
 	 */
 	public void registerHandlers(Map<String, ResourceWebHandler> handlerMap) {
-		this.handlerMap.clear();
-		handlerMap.forEach((rawPattern, resourceWebHandler) -> {
-			rawPattern = prependLeadingSlash(rawPattern);
-			PathPattern pattern = PathPatternParser.defaultInstance.parse(rawPattern);
-			this.handlerMap.put(pattern, resourceWebHandler);
-		});
+		synchronized (this.handlerLock) {
+			this.handlerMap.clear();
+			handlerMap.forEach((rawPattern, resourceWebHandler) -> {
+				rawPattern = prependLeadingSlash(rawPattern);
+				PathPattern pattern = PathPatternParser.defaultInstance.parse(rawPattern);
+				this.handlerMap.put(pattern, resourceWebHandler);
+			});
+		}
 	}
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-		if (this.applicationContext == event.getApplicationContext() && this.handlerMap.isEmpty()) {
-			detectResourceHandlers(this.applicationContext);
+		synchronized (this.handlerLock) {
+			if (this.applicationContext == event.getApplicationContext() && this.handlerMap.isEmpty()) {
+				detectResourceHandlers(this.applicationContext);
+			}
 		}
 	}
 
@@ -150,11 +159,16 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	private Mono<String> resolveResourceUrl(ServerWebExchange exchange, PathContainer lookupPath) {
-		return this.handlerMap.entrySet().stream()
-				.filter(entry -> entry.getKey().matches(lookupPath))
-				.min((entry1, entry2) ->
-						PathPattern.SPECIFICITY_COMPARATOR.compare(entry1.getKey(), entry2.getKey()))
-				.map(entry -> {
+
+		Optional<Map.Entry<PathPattern, ResourceWebHandler>> minOptional;
+		synchronized (this.handlerLock) {
+			minOptional = this.handlerMap.entrySet().stream()
+					.filter(entry -> entry.getKey().matches(lookupPath))
+					.min((entry1, entry2) ->
+							PathPattern.SPECIFICITY_COMPARATOR.compare(entry1.getKey(), entry2.getKey()));
+		}
+
+		return minOptional.map(entry -> {
 					PathContainer path = entry.getKey().extractPathWithinPattern(lookupPath);
 					int endIndex = lookupPath.elements().size() - path.elements().size();
 					PathContainer mapping = lookupPath.subPath(0, endIndex);
@@ -164,7 +178,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 					return chain.resolveUrlPath(path.value(), handler.getLocations())
 							.map(resolvedPath -> mapping.value() + resolvedPath);
 				})
-				.orElseGet(() ->{
+				.orElseGet(() -> {
 					if (logger.isTraceEnabled()) {
 						logger.trace(exchange.getLogPrefix() + "No match for \"" + lookupPath + "\"");
 					}

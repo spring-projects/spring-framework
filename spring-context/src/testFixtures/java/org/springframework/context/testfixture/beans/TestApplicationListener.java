@@ -19,27 +19,30 @@ package org.springframework.context.testfixture.beans;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Listener that maintains a global count of events.
  *
  * @author Rod Johnson
+ * @author GenKui Du
  * @since January 21, 2001
  */
 public class TestApplicationListener implements ApplicationListener<ApplicationEvent> {
 
-	private int eventCount;
+	private final AtomicInteger eventCount = new AtomicInteger(0);
 
 	public int getEventCount() {
-		return eventCount;
+		return eventCount.get();
 	}
 
 	public void zeroCounter() {
-		eventCount = 0;
+		eventCount.set(0);
 	}
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent e) {
-		++eventCount;
+		eventCount.getAndIncrement();
 	}
 
 }
