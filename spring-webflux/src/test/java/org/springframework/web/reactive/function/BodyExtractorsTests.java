@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.function;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.util.IllegalReferenceCountException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -407,6 +410,44 @@ public class BodyExtractorsTests {
 				.expectNext(dataBuffer)
 				.expectComplete()
 				.verify();
+	}
+
+	@Test
+	void toMonoInputStream() {
+		BodyExtractor<Mono<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(
+				stream -> new String(stream.readAllBytes(), StandardCharsets.UTF_8));
+
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(body);
+		Mono<String> result = extractor.extract(request, this.context);
+
+		StepVerifier.create(result)
+				.expectNext("foo")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	void toMonoOutputStream() {
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		BodyExtractor<Mono<Void>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(
+				() -> outputStream);
+
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(body);
+		Mono<?> result = extractor.extract(request, this.context);
+
+		StepVerifier.create(result)
+				.expectComplete()
+				.verify();
+
+		assertThat(outputStream.toString(StandardCharsets.UTF_8)).isEqualTo("foo");
 	}
 
 	@Test // SPR-17054

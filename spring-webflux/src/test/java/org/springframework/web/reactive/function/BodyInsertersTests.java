@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -437,6 +438,49 @@ public class BodyInsertersTests {
 				.verify();
 	}
 
+	@Test
+	void fromOutputStream() {
+		byte[] bytes = "foo".getBytes(UTF_8);
+
+		BodyInserter<Void, ReactiveHttpOutputMessage> inserter = BodyInserters.fromOutputStream(
+				outputStream -> outputStream.write(bytes));
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+
+		StepVerifier.create(response.getBody())
+				.consumeNextWith(dataBuffer -> {
+					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
+					dataBuffer.read(resultBytes);
+					DataBufferUtils.release(dataBuffer);
+					assertThat(resultBytes).isEqualTo(bytes);
+				})
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	void fromInputStream() {
+		byte[] bytes = "foo".getBytes(UTF_8);
+
+		BodyInserter<Void, ReactiveHttpOutputMessage> inserter = BodyInserters.fromInputStream(
+				() -> new ByteArrayInputStream(bytes));
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+
+		StepVerifier.create(response.getBody())
+				.consumeNextWith(dataBuffer -> {
+					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
+					dataBuffer.read(resultBytes);
+					DataBufferUtils.release(dataBuffer);
+					assertThat(resultBytes).isEqualTo(bytes);
+				})
+				.expectComplete()
+				.verify();
+	}
 
 	interface SafeToSerialize {}
 

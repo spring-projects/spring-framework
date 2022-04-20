@@ -44,6 +44,7 @@ import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.core.codec.InputStreamDecoder;
 import org.springframework.http.codec.ResourceHttpMessageReader;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.ServerSentEventHttpMessageReader;
@@ -341,6 +342,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
 		addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new DataBufferDecoder()));
+		addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new InputStreamDecoder()));
 		if (nettyByteBufPresent) {
 			addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new NettyByteBufDecoder()));
 		}

@@ -40,6 +40,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.support.InterceptingHttpAccessor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
@@ -203,6 +204,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @param requestFactory the HTTP request factory to use
 	 * @see org.springframework.http.client.SimpleClientHttpRequestFactory
 	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+	 * @see JdkClientHttpRequestFactory
 	 */
 	public RestTemplate(ClientHttpRequestFactory requestFactory) {
 		this();

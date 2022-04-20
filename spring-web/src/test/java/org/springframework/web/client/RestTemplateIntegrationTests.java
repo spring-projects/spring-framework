@@ -46,10 +46,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.client.*;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.LinkedMultiValueMap;
@@ -93,7 +90,8 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		return Stream.of(
 			named("JDK", new SimpleClientHttpRequestFactory()),
 			named("HttpComponents", new HttpComponentsClientHttpRequestFactory()),
-			named("OkHttp", new OkHttp3ClientHttpRequestFactory())
+			named("OkHttp", new OkHttp3ClientHttpRequestFactory()),
+			named("JDKClient", new JdkClientHttpRequestFactory())
 		);
 	}
 
