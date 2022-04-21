@@ -23,13 +23,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ReactiveAdapter;
-import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
+
 
 /**
  * An implementation of {@link HttpServiceMethodArgumentResolver} that resolves
@@ -42,111 +41,64 @@ import org.springframework.web.bind.annotation.PathVariable;
  */
 public class PathVariableArgumentResolver implements HttpServiceMethodArgumentResolver {
 
-	private static final Log LOG = LogFactory.getLog(PathVariableArgumentResolver.class);
-	private static final TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
-	@Nullable
+	private static final Log logger = LogFactory.getLog(PathVariableArgumentResolver.class);
+
+
 	private final ConversionService conversionService;
 
-	public PathVariableArgumentResolver(@Nullable ConversionService conversionService) {
+
+	public PathVariableArgumentResolver(ConversionService conversionService) {
+		Assert.notNull(conversionService, "ConversionService is required");
 		this.conversionService = conversionService;
 	}
 
+
+	@SuppressWarnings("unchecked")
 	@Override
-	public void resolve(@Nullable Object argument, MethodParameter parameter,
-			HttpRequestDefinition requestDefinition) {
+	public void resolve(
+			@Nullable Object argument, MethodParameter parameter, HttpRequestDefinition requestDefinition) {
+
 		PathVariable annotation = parameter.getParameterAnnotation(PathVariable.class);
 		if (annotation == null) {
 			return;
 		}
-		String resolvedAnnotationName = StringUtils.hasText(annotation.value())
-				? annotation.value() : annotation.name();
-		boolean required = annotation.required();
-		Object resolvedArgument = resolveFromOptional(argument);
-		if (resolvedArgument instanceof Map<?, ?> valueMap) {
-			if (StringUtils.hasText(resolvedAnnotationName)) {
-				Object value = valueMap.get(resolvedAnnotationName);
-				Object resolvedValue = resolveFromOptional(value);
-				addUriParameter(requestDefinition, resolvedAnnotationName, resolvedValue, required);
-				return;
+
+		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
+			if (argument != null) {
+				Assert.isInstanceOf(Map.class, argument);
+				((Map<String, ?>) argument).forEach((key, value) ->
+						addUriParameter(key, value, annotation.required(), requestDefinition));
 			}
-			valueMap.entrySet()
-					.forEach(entry -> addUriParameter(requestDefinition, entry, required));
+		}
+		else {
+			String name = StringUtils.hasText(annotation.value()) ? annotation.value() : annotation.name();
+			name = StringUtils.hasText(name) ? name : parameter.getParameterName();
+			Assert.notNull(name, "Failed to determine path variable name for parameter: " + parameter);
+			addUriParameter(name, argument, annotation.required(), requestDefinition);
+		}
+	}
+
+	private void addUriParameter(
+			String name, @Nullable Object value, boolean required, HttpRequestDefinition requestDefinition) {
+
+		if (value instanceof Optional) {
+			value = ((Optional<?>) value).orElse(null);
+		}
+
+		if (value == null) {
+			Assert.isTrue(!required, "Missing required path variable '" + name + "'");
 			return;
 		}
-		String name = StringUtils.hasText(resolvedAnnotationName)
-				? resolvedAnnotationName : parameter.getParameterName();
-		addUriParameter(requestDefinition, name, resolvedArgument, required);
-	}
 
-	private void addUriParameter(HttpRequestDefinition requestDefinition, @Nullable String name,
-			@Nullable Object value, boolean required) {
-		if (name == null) {
-			throw new IllegalStateException("Path variable name cannot be null");
-		}
-		String stringValue = getStringValue(value, required);
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("Path variable " + name + " resolved to " + stringValue);
-		}
-		requestDefinition.getUriVariables().put(name, stringValue);
-	}
-
-	@Nullable
-	private String getStringValue(@Nullable Object value, boolean required) {
-		validateForNull(value, required);
-		validateForReactiveWrapper(value);
-		return value != null
-				? convertToString(TypeDescriptor.valueOf(value.getClass()), value) : null;
-	}
-
-	private void addUriParameter(HttpRequestDefinition requestDefinition,
-			Map.Entry<?, ?> entry, boolean required) {
-		Object resolvedName = resolveFromOptional(entry.getKey());
-		String stringName = getStringValue(resolvedName, true);
-		Object resolvedValue = resolveFromOptional(entry.getValue());
-		addUriParameter(requestDefinition, stringName, resolvedValue, required);
-	}
-
-	private void validateForNull(@Nullable Object argument, boolean required) {
-		if (argument == null) {
-			if (required) {
-				throw new IllegalStateException("Required variable cannot be null");
-			}
-		}
-	}
-
-	private void validateForReactiveWrapper(@Nullable Object object) {
-		if (object != null) {
-			Class<?> type = object.getClass();
-			ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
-			ReactiveAdapter adapter = adapterRegistry.getAdapter(type);
-			if (adapter != null) {
-				throw new IllegalStateException(getClass().getSimpleName() +
-						" does not support reactive type wrapper: " + type);
-			}
+		if (!(value instanceof String)) {
+			value = this.conversionService.convert(value, String.class);
 		}
 
-	}
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved path variable '" + name + "' to " + value);
+		}
 
-	@Nullable
-	private Object resolveFromOptional(@Nullable Object argument) {
-		if (argument instanceof Optional) {
-			return ((Optional<?>) argument).orElse(null);
-		}
-		return argument;
-	}
-
-	@Nullable
-	private String convertToString(TypeDescriptor typeDescriptor, @Nullable Object value) {
-		if (value == null) {
-			return null;
-		}
-		if (value instanceof String) {
-			return (String) value;
-		}
-		if (this.conversionService != null) {
-			return (String) this.conversionService.convert(value, typeDescriptor, STRING_TYPE_DESCRIPTOR);
-		}
-		return String.valueOf(value);
+		requestDefinition.getUriVariables().put(name, (String) value);
 	}
 
 }

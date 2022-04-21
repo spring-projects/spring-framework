@@ -51,13 +51,17 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  *
  * @author Rossen Stoyanchev
  */
-public class HttpServiceMethodTests extends HttpServiceMethodTestSupport {
+public class HttpServiceMethodTests {
 
 	private static final ParameterizedTypeReference<String> BODY_TYPE = new ParameterizedTypeReference<>() {};
 
+
+	private final TestHttpClientAdapter clientAdapter = new TestHttpClientAdapter();
+
+
 	@Test
 	void reactorService() {
-		ReactorService service = createService(ReactorService.class);
+		ReactorService service = this.clientAdapter.createService(ReactorService.class);
 
 		Mono<Void> voidMono = service.execute();
 		StepVerifier.create(voidMono).verifyComplete();
@@ -90,7 +94,7 @@ public class HttpServiceMethodTests extends HttpServiceMethodTestSupport {
 
 	@Test
 	void rxJavaService() {
-		RxJavaService service = createService(RxJavaService.class);
+		RxJavaService service = this.clientAdapter.createService(RxJavaService.class);
 		Completable completable = service.execute();
 		assertThat(completable).isNotNull();
 
@@ -117,7 +121,7 @@ public class HttpServiceMethodTests extends HttpServiceMethodTestSupport {
 	@Test
 	void blockingService() {
 
-		BlockingService service = createService(BlockingService.class);
+		BlockingService service = this.clientAdapter.createService(BlockingService.class);
 
 		service.execute();
 
@@ -137,11 +141,11 @@ public class HttpServiceMethodTests extends HttpServiceMethodTestSupport {
 	@Test
 	void methodAnnotatedService() {
 
-		MethodAnnotatedService service = createService(MethodAnnotatedService.class);
+		MethodAnnotatedService service = this.clientAdapter.createService(MethodAnnotatedService.class);
 
 		service.performGet();
 
-		HttpRequestDefinition request = getRequestDefinition();
+		HttpRequestDefinition request = this.clientAdapter.getRequestDefinition();
 		assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.GET);
 		assertThat(request.getUriTemplate()).isNull();
 		assertThat(request.getHeaders().getContentType()).isNull();
@@ -149,7 +153,7 @@ public class HttpServiceMethodTests extends HttpServiceMethodTestSupport {
 
 		service.performPost();
 
-		request = getRequestDefinition();
+		request = this.clientAdapter.getRequestDefinition();
 		assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(request.getUriTemplate()).isEqualTo("/url");
 		assertThat(request.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
@@ -159,11 +163,11 @@ public class HttpServiceMethodTests extends HttpServiceMethodTestSupport {
 	@Test
 	void typeAndMethodAnnotatedService() {
 
-		MethodAnnotatedService service = createService(TypeAndMethodAnnotatedService.class);
+		MethodAnnotatedService service = this.clientAdapter.createService(TypeAndMethodAnnotatedService.class);
 
 		service.performGet();
 
-		HttpRequestDefinition request = getRequestDefinition();
+		HttpRequestDefinition request = this.clientAdapter.getRequestDefinition();
 		assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.GET);
 		assertThat(request.getUriTemplate()).isEqualTo("/base");
 		assertThat(request.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_CBOR);
@@ -171,7 +175,7 @@ public class HttpServiceMethodTests extends HttpServiceMethodTestSupport {
 
 		service.performPost();
 
-		request = getRequestDefinition();
+		request = this.clientAdapter.getRequestDefinition();
 		assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(request.getUriTemplate()).isEqualTo("/base/url");
 		assertThat(request.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
@@ -179,9 +183,8 @@ public class HttpServiceMethodTests extends HttpServiceMethodTestSupport {
 	}
 
 	private void verifyClientInvocation(String methodName, @Nullable ParameterizedTypeReference<?> expectedBodyType) {
-		TestHttpClientAdapter clientAdapter = getClientAdapter();
-		assertThat((clientAdapter.getMethodName())).isEqualTo(methodName);
-		assertThat(clientAdapter.getBodyType()).isEqualTo(expectedBodyType);
+		assertThat((this.clientAdapter.getInvokedMethodName())).isEqualTo(methodName);
+		assertThat(this.clientAdapter.getBodyType()).isEqualTo(expectedBodyType);
 	}
 
 
@@ -273,4 +276,5 @@ public class HttpServiceMethodTests extends HttpServiceMethodTestSupport {
 	@HttpRequest(url = "/base", contentType = APPLICATION_CBOR_VALUE, accept = APPLICATION_CBOR_VALUE)
 	private interface TypeAndMethodAnnotatedService extends MethodAnnotatedService {
 	}
+
 }

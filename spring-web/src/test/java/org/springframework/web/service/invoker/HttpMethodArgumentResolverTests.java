@@ -16,11 +16,7 @@
 
 package org.springframework.web.service.invoker;
 
-import java.util.Collections;
-
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -29,65 +25,65 @@ import org.springframework.web.service.annotation.HttpRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
 /**
  * Tests for {@link HttpMethodArgumentResolver}.
  *
  * @author Olga Maciaszek-Sharma
  */
-class HttpMethodArgumentResolverTests extends HttpServiceMethodTestSupport {
+public class HttpMethodArgumentResolverTests {
 
-	private final Service service = createService(Service.class,
-			Collections.singletonList(new HttpMethodArgumentResolver()));
+	private final TestHttpClientAdapter clientAdapter = new TestHttpClientAdapter();
 
+	private final Service service = this.clientAdapter.createService(Service.class, new HttpMethodArgumentResolver());
+
+	
 	@Test
 	void shouldResolveRequestMethodFromArgument() {
-		Mono<Void> execution = this.service.execute(HttpMethod.GET);
-
-		StepVerifier.create(execution).verifyComplete();
-		assertThat(getRequestDefinition().getHttpMethod()).isEqualTo(HttpMethod.GET);
+		this.service.execute(HttpMethod.GET);
+		assertThat(getActualMethod()).isEqualTo(HttpMethod.GET);
 	}
-
+	
 	@Test
 	void shouldIgnoreArgumentsNotMatchingType() {
-		Mono<Void> execution = this.service.execute("test");
-
-		StepVerifier.create(execution).verifyComplete();
-		assertThat(getRequestDefinition().getHttpMethod()).isNull();
+		this.service.execute("test");
+		assertThat(getActualMethod()).isNull();
 	}
 
 	@Test
-	void shouldOverrideMethodAnnotationWithMethodArgument() {
-		Mono<Void> execution = this.service.executeGet(HttpMethod.POST);
-
-		StepVerifier.create(execution).verifyComplete();
-		assertThat(getRequestDefinition().getHttpMethod()).isEqualTo(HttpMethod.POST);
+	void shouldOverrideMethodAnnotation() {
+		this.service.executeGet(HttpMethod.POST);
+		assertThat(getActualMethod()).isEqualTo(HttpMethod.POST);
 	}
 
 	@Test
 	void shouldIgnoreNullValue() {
-		Mono<Void> execution = this.service.executeForNull(null);
+		this.service.executeForNull(null);
+		assertThat(getActualMethod()).isNull();
+	}
 
-		StepVerifier.create(execution).verifyComplete();
-		assertThat(getRequestDefinition().getHttpMethod()).isNull();
+	@Nullable
+	private HttpMethod getActualMethod() {
+		return this.clientAdapter.getRequestDefinition().getHttpMethod();
 	}
 
 
 	private interface Service {
 
 		@HttpRequest
-		Mono<Void> execute(HttpMethod method);
+		void execute(HttpMethod method);
 
 		@GetRequest
-		Mono<Void> executeGet(HttpMethod method);
+		void executeGet(HttpMethod method);
 
 		@HttpRequest
-		Mono<Void> execute(String test);
+		void execute(String test);
 
 		@HttpRequest
-		Mono<Void> execute(HttpMethod firstMethod, HttpMethod secondMethod);
+		void execute(HttpMethod firstMethod, HttpMethod secondMethod);
 
 		@HttpRequest
-		Mono<Void> executeForNull(@Nullable HttpMethod method);
+		void executeForNull(@Nullable HttpMethod method);
 	}
 
 }
