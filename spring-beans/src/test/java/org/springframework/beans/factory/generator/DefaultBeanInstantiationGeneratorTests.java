@@ -209,7 +209,7 @@ class DefaultBeanInstantiationGeneratorTests {
 	}
 
 	private String code(CodeContribution contribution) {
-		return CodeSnippet.process(contribution.statements().toCodeBlock());
+		return CodeSnippet.process(contribution.statements().toLambdaBody());
 	}
 
 	@Nullable

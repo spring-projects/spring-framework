@@ -345,7 +345,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 			}
 			code.add("\n").indent().indent();
 			code.add(".instanceSupplier(");
-			code.add(instanceStatements.toCodeBlock());
+			code.add(instanceStatements.toLambdaBody());
 			code.add(")").unindent().unindent();
 			handleBeanDefinitionMetadata(code);
 		}
@@ -421,7 +421,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 			if (statements.isEmpty()) {
 				return;
 			}
-			code.add(statements.toCodeBlock(".customize((" + bdVariable + ") ->"));
+			code.add(statements.toLambdaBody(".customize((" + bdVariable + ") ->"));
 			code.add(")");
 		}
 

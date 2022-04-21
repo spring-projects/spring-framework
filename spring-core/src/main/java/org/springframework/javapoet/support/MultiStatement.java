@@ -117,12 +117,23 @@ public final class MultiStatement {
 	}
 
 	/**
+	 * Return a {@link CodeBlock} that applies all the {@code statements} of
+	 * this instance.
+	 * @return the code block
+	 */
+	public CodeBlock toCodeBlock() {
+		Builder code = CodeBlock.builder();
+		this.statements.forEach(statement -> statement.add(code));
+		return code.build();
+	}
+
+	/**
 	 * Return a {@link CodeBlock} that applies all the {@code statements} of this
 	 * instance. If only one statement is available, it is not completed using the
 	 * {@code ;} termination so that it can be used in the context of a lambda.
 	 * @return the statement(s)
 	 */
-	public CodeBlock toCodeBlock() {
+	public CodeBlock toLambdaBody() {
 		Builder code = CodeBlock.builder();
 		for (int i = 0; i < this.statements.size(); i++) {
 			Statement statement = this.statements.get(i);
@@ -137,7 +148,7 @@ public final class MultiStatement {
 	 * @param lambda the context of the lambda, must end with {@code ->}
 	 * @return the lambda body
 	 */
-	public CodeBlock toCodeBlock(CodeBlock lambda) {
+	public CodeBlock toLambdaBody(CodeBlock lambda) {
 		Builder code = CodeBlock.builder();
 		code.add(lambda);
 		if (isMulti()) {
@@ -146,7 +157,7 @@ public final class MultiStatement {
 		else {
 			code.add(" ");
 		}
-		code.add(toCodeBlock());
+		code.add(toLambdaBody());
 		if (isMulti()) {
 			code.add("\n").unindent().add("}");
 		}
@@ -159,8 +170,8 @@ public final class MultiStatement {
 	 * @param lambda the context of the lambda, must end with {@code ->}
 	 * @return the lambda body
 	 */
-	public CodeBlock toCodeBlock(String lambda) {
-		return toCodeBlock(CodeBlock.of(lambda));
+	public CodeBlock toLambdaBody(String lambda) {
+		return toLambdaBody(CodeBlock.of(lambda));
 	}
 
 	private boolean isMulti() {
@@ -177,6 +188,13 @@ public final class MultiStatement {
 		Statement(CodeBlock codeBlock, boolean addStatementTermination) {
 			this.codeBlock = codeBlock;
 			this.addStatementTermination = addStatementTermination;
+		}
+
+		void add(CodeBlock.Builder code) {
+			code.add(this.codeBlock);
+			if (this.addStatementTermination) {
+				code.add(";\n");
+			}
 		}
 
 		void contribute(CodeBlock.Builder code, boolean multi, boolean isLastStatement) {

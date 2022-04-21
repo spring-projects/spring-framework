@@ -43,7 +43,7 @@ class AutowiredAnnotationBeanInstantiationContributionTests {
 	@Test
 	void contributeWithPackageProtectedFieldInjection() {
 		CodeContribution contribution = contribute(PackageProtectedFieldInjectionSample.class);
-		assertThat(CodeSnippet.process(contribution.statements().toCodeBlock())).isEqualTo("""
+		assertThat(CodeSnippet.process(contribution.statements().toLambdaBody())).isEqualTo("""
 				instanceContext.field("environment")
 						.invoke(beanFactory, (attributes) -> bean.environment = attributes.get(0))""");
 		assertThat(contribution.runtimeHints().reflection().typeHints()).singleElement().satisfies(typeHint -> {
@@ -61,7 +61,7 @@ class AutowiredAnnotationBeanInstantiationContributionTests {
 	@Test
 	void contributeWithPrivateFieldInjection() {
 		CodeContribution contribution = contribute(PrivateFieldInjectionSample.class);
-		assertThat(CodeSnippet.process(contribution.statements().toCodeBlock())).isEqualTo("""
+		assertThat(CodeSnippet.process(contribution.statements().toLambdaBody())).isEqualTo("""
 				instanceContext.field("environment")
 						.invoke(beanFactory, (attributes) -> {
 							Field environmentField = ReflectionUtils.findField(AutowiredAnnotationBeanInstantiationContributionTests.PrivateFieldInjectionSample.class, "environment");
@@ -82,7 +82,7 @@ class AutowiredAnnotationBeanInstantiationContributionTests {
 	@Test
 	void contributeWithPublicMethodInjection() {
 		CodeContribution contribution = contribute(PublicMethodInjectionSample.class);
-		assertThat(CodeSnippet.process(contribution.statements().toCodeBlock())).isEqualTo("""
+		assertThat(CodeSnippet.process(contribution.statements().toLambdaBody())).isEqualTo("""
 				instanceContext.method("setTestBean", TestBean.class)
 						.invoke(beanFactory, (attributes) -> bean.setTestBean(attributes.get(0)))""");
 		assertThat(contribution.runtimeHints().reflection().typeHints()).singleElement().satisfies(typeHint -> {
@@ -98,7 +98,7 @@ class AutowiredAnnotationBeanInstantiationContributionTests {
 	@Test
 	void contributeWithInjectionPoints() {
 		CodeContribution contribution = contribute(ResourceInjectionBean.class);
-		assertThat(CodeSnippet.process(contribution.statements().toCodeBlock())).isEqualTo("""
+		assertThat(CodeSnippet.process(contribution.statements().toLambdaBody())).isEqualTo("""
 				instanceContext.field("testBean")
 						.resolve(beanFactory, false).ifResolved((attributes) -> {
 							Field testBeanField = ReflectionUtils.findField(AutowiredAnnotationBeanPostProcessorTests.ResourceInjectionBean.class, "testBean");
