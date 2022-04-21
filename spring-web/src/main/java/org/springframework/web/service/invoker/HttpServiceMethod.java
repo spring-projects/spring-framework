@@ -28,7 +28,9 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -104,6 +106,8 @@ final class HttpServiceMethod {
 		Assert.isTrue(arguments.length == this.parameters.length, "Method argument mismatch");
 		for (int i = 0; i < this.parameters.length; i++) {
 			Object argumentValue = arguments[i];
+			ParameterNameDiscoverer nameDiscoverer = new DefaultParameterNameDiscoverer();
+			this.parameters[i].initParameterNameDiscovery(nameDiscoverer);
 			for (HttpServiceMethodArgumentResolver resolver : this.argumentResolvers) {
 				resolver.resolve(argumentValue, this.parameters[i], requestDefinition);
 			}
