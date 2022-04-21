@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
+ * Shortcut for {@link HttpRequest} for HTTP PUT requests.
  *
  * @author Rossen Stoyanchev
  * @since 6.0

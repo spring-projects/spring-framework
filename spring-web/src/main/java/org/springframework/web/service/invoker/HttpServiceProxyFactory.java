@@ -24,8 +24,6 @@ import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.MethodIntrospector;
@@ -91,7 +89,7 @@ public class HttpServiceProxyFactory {
 
 
 	/**
-	 *
+	 * {@link MethodInterceptor} that invokes an {@link HttpServiceMethod}.
 	 */
 	private static final class HttpServiceMethodInterceptor implements MethodInterceptor {
 
@@ -101,9 +99,8 @@ public class HttpServiceProxyFactory {
 			methods.forEach(serviceMethod -> this.serviceMethodMap.put(serviceMethod.getMethod(), serviceMethod));
 		}
 
-		@Nullable
 		@Override
-		public Object invoke(@NotNull MethodInvocation invocation) throws Throwable {
+		public Object invoke(MethodInvocation invocation) throws Throwable {
 			Method method = invocation.getMethod();
 			HttpServiceMethod httpServiceMethod = this.serviceMethodMap.get(method);
 			return httpServiceMethod.invoke(invocation.getArguments());

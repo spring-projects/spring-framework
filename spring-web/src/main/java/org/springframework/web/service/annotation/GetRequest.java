@@ -26,6 +26,7 @@ import org.springframework.core.annotation.AliasFor;
 
 
 /**
+ * Shortcut for {@link HttpRequest} for HTTP GET requests.
  *
  * @author Rossen Stoyanchev
  * @since 6.0

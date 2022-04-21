@@ -28,7 +28,6 @@ import org.reactivestreams.Publisher;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -56,7 +55,7 @@ public class HttpRequestDefinition {
 
 	@Nullable
 	private URI uri;
-	
+
 	@Nullable
 	private String uriTemplate;
 
@@ -80,7 +79,7 @@ public class HttpRequestDefinition {
 
 	@Nullable
 	private Publisher<?> bodyPublisher;
-	
+
 	@Nullable
 	private ParameterizedTypeReference<?> bodyPublisherElementType;
 

@@ -19,7 +19,6 @@ package org.springframework.web.service.invoker;
 import java.util.Map;
 import java.util.Optional;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -143,7 +142,6 @@ class PathVariableArgumentResolverTests {
 		assertThat(getActualUriVariables().get(name)).isEqualTo(expectedValue);
 	}
 
-	@NotNull
 	private Map<String, String> getActualUriVariables() {
 		return this.clientAdapter.getRequestDefinition().getUriVariables();
 	}

@@ -37,13 +37,13 @@ public class HttpMethodArgumentResolverTests {
 
 	private final Service service = this.clientAdapter.createService(Service.class, new HttpMethodArgumentResolver());
 
-	
+
 	@Test
 	void shouldResolveRequestMethodFromArgument() {
 		this.service.execute(HttpMethod.GET);
 		assertThat(getActualMethod()).isEqualTo(HttpMethod.GET);
 	}
-	
+
 	@Test
 	void shouldIgnoreArgumentsNotMatchingType() {
 		this.service.execute("test");
