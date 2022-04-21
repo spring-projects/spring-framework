@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,13 @@ package org.springframework.orm.jpa.support;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -37,6 +39,8 @@ import jakarta.persistence.PersistenceProperty;
 import jakarta.persistence.PersistenceUnit;
 import jakarta.persistence.SynchronizationType;
 
+import org.springframework.aot.generator.CodeContribution;
+import org.springframework.aot.generator.ProtectedAccess.Options;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
@@ -45,17 +49,23 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.InjectionMetadata;
+import org.springframework.beans.factory.annotation.InjectionMetadata.InjectedElement;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.NamedBeanHolder;
+import org.springframework.beans.factory.generator.AotContributingBeanPostProcessor;
+import org.springframework.beans.factory.generator.BeanFieldGenerator;
+import org.springframework.beans.factory.generator.BeanInstantiationContribution;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.javapoet.CodeBlock;
+import org.springframework.javapoet.support.MultiStatement;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.lang.Nullable;
@@ -66,6 +76,7 @@ import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -164,6 +175,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 2.0
  * @see jakarta.persistence.PersistenceUnit
  * @see jakarta.persistence.PersistenceContext
@@ -171,7 +183,8 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class PersistenceAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
-		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware, Serializable {
+		MergedBeanDefinitionPostProcessor, AotContributingBeanPostProcessor,
+		PriorityOrdered, BeanFactoryAware, Serializable {
 
 	@Nullable
 	private Object jndiEnvironment;
@@ -332,8 +345,23 @@ public class PersistenceAnnotationBeanPostProcessor
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		findInjectionMetadata(beanDefinition, beanType, beanName);
+	}
+
+	@Override
+	public BeanInstantiationContribution contribute(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		InjectionMetadata metadata = findInjectionMetadata(beanDefinition, beanType, beanName);
+		Collection<InjectedElement> injectedElements = metadata.getInjectedElements();
+		if (!CollectionUtils.isEmpty(injectedElements)) {
+			return new PersistenceAnnotationBeanInstantiationContribution(injectedElements);
+		}
+		return null;
+	}
+
+	private InjectionMetadata findInjectionMetadata(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		InjectionMetadata metadata = findPersistenceMetadata(beanName, beanType, null);
 		metadata.checkConfigMembers(beanDefinition);
+		return metadata;
 	}
 
 	@Override
@@ -723,6 +751,68 @@ public class PersistenceAnnotationBeanPostProcessor
 			}
 			return em;
 		}
+	}
+
+	private static final class PersistenceAnnotationBeanInstantiationContribution implements BeanInstantiationContribution {
+
+		private static final BeanFieldGenerator fieldGenerator = new BeanFieldGenerator();
+
+		private final Collection<PersistenceElement> injectedElements;
+
+		private PersistenceAnnotationBeanInstantiationContribution(Collection<InjectedElement> injectedElements) {
+			this.injectedElements = injectedElements.stream()
+					.filter(obj -> obj instanceof PersistenceElement)
+					.map(PersistenceElement.class::cast).toList();
+		}
+
+		@Override
+		public void applyTo(CodeContribution contribution) {
+			this.injectedElements.forEach(element -> {
+				Member member = element.getMember();
+				analyzeMember(contribution, member);
+				injectElement(contribution, element);
+			});
+		}
+
+		private void analyzeMember(CodeContribution contribution, Member member) {
+			if (member instanceof Method) {
+				contribution.protectedAccess().analyze(member, Options.defaults().build());
+			}
+			else if (member instanceof Field field) {
+				contribution.protectedAccess().analyze(member, BeanFieldGenerator.FIELD_OPTIONS);
+				if (Modifier.isPrivate(field.getModifiers())) {
+					contribution.runtimeHints().reflection().registerField(field);
+				}
+			}
+		}
+
+		private void injectElement(CodeContribution contribution, PersistenceElement element) {
+			MultiStatement statements = contribution.statements();
+			statements.addStatement("$T entityManagerFactory = $T.findEntityManagerFactory(beanFactory, $S)",
+					EntityManagerFactory.class, EntityManagerFactoryUtils.class, element.unitName);
+			boolean requireEntityManager = (element.type != null);
+			if (requireEntityManager) {
+				Properties persistenceProperties = element.properties;
+				boolean hasPersistenceProperties = persistenceProperties != null && !persistenceProperties.isEmpty();
+				if (hasPersistenceProperties) {
+					statements.addStatement("$T persistenceProperties = new Properties()", Properties.class);
+					persistenceProperties.stringPropertyNames().stream().sorted(String::compareTo).forEach(propertyName ->
+							statements.addStatement("persistenceProperties.put($S, $S)",
+									propertyName, persistenceProperties.getProperty(propertyName)));
+				}
+				statements.addStatement("$T entityManager = $T.createSharedEntityManager(entityManagerFactory, $L, $L)",
+						EntityManager.class, SharedEntityManagerCreator.class, (hasPersistenceProperties) ? "persistenceProperties" : null, element.synchronizedWithTransaction);
+			}
+			Member member = element.getMember();
+			CodeBlock value = (requireEntityManager) ? CodeBlock.of("entityManager") : CodeBlock.of("entityManagerFactory");
+			if (member instanceof Field field) {
+				statements.add(fieldGenerator.generateSetValue("bean", field, value));
+			}
+			else {
+				statements.addStatement("bean.$L($L)", member.getName(), value);
+			}
+		}
+
 	}
 
 }

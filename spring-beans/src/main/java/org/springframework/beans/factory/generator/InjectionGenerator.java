@@ -34,7 +34,6 @@ import org.springframework.beans.factory.generator.config.BeanDefinitionRegistra
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.CodeBlock.Builder;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Generate the necessary code to {@link #generateInstantiation(Executable)
@@ -53,13 +52,12 @@ import org.springframework.util.ReflectionUtils;
  */
 public class InjectionGenerator {
 
-	private static final Options FIELD_INJECTION_OPTIONS = Options.defaults()
-			.useReflection(member -> Modifier.isPrivate(member.getModifiers())).build();
-
 	private static final Options METHOD_INJECTION_OPTIONS = Options.defaults()
 			.useReflection(member -> false).build();
 
 	private final BeanParameterGenerator parameterGenerator = new BeanParameterGenerator();
+
+	private final BeanFieldGenerator fieldGenerator = new BeanFieldGenerator();
 
 
 	/**
@@ -110,7 +108,7 @@ public class InjectionGenerator {
 			return METHOD_INJECTION_OPTIONS;
 		}
 		if (member instanceof Field) {
-			return FIELD_INJECTION_OPTIONS;
+			return BeanFieldGenerator.FIELD_OPTIONS;
 		}
 		throw new IllegalArgumentException("Could not handle member " + member);
 	}
@@ -230,24 +228,13 @@ public class InjectionGenerator {
 		code.add("instanceContext.field($S", injectionPoint.getName());
 		code.add(")\n").indent().indent();
 		if (required) {
-			code.add(".invoke(beanFactory, (attributes) ->");
+			code.add(".invoke(beanFactory, ");
 		}
 		else {
-			code.add(".resolve(beanFactory, false).ifResolved((attributes) ->");
+			code.add(".resolve(beanFactory, false).ifResolved(");
 		}
-		boolean hasAssignment = Modifier.isPrivate(injectionPoint.getModifiers());
-		if (hasAssignment) {
-			code.beginControlFlow("");
-			String fieldName = String.format("%sField", injectionPoint.getName());
-			code.addStatement("$T $L = $T.findField($T.class, $S)", Field.class, fieldName, ReflectionUtils.class,
-					injectionPoint.getDeclaringClass(), injectionPoint.getName());
-			code.addStatement("$T.makeAccessible($L)", ReflectionUtils.class, fieldName);
-			code.addStatement("$T.setField($L, bean, attributes.get(0))", ReflectionUtils.class, fieldName);
-			code.unindent().add("}");
-		}
-		else {
-			code.add(" bean.$L = attributes.get(0)", injectionPoint.getName());
-		}
+		code.add(this.fieldGenerator.generateSetValue("bean", injectionPoint,
+				CodeBlock.of("attributes.get(0)")).toLambdaBody("(attributes) ->"));
 		code.add(")").unindent().unindent();
 		return code.build();
 	}

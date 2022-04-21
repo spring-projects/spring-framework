@@ -150,4 +150,17 @@ class MultiStatementTests {
 				"}");
 	}
 
+	@Test
+	void addWithAnotherMultiStatement() {
+		MultiStatement statements = new MultiStatement();
+		statements.addStatement(CodeBlock.of("test.invoke()"));
+		MultiStatement another = new MultiStatement();
+		another.addStatement(CodeBlock.of("test.another()"));
+		statements.add(another);
+		assertThat(statements.toCodeBlock().toString()).isEqualTo("""
+				test.invoke();
+				test.another();
+				""");
+	}
+
 }

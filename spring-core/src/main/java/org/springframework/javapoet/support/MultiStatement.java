@@ -45,6 +45,16 @@ public final class MultiStatement {
 	}
 
 	/**
+	 * Add the statements defined in the specified multi statement to this instance.
+	 * @param multiStatement the statements to add
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public MultiStatement add(MultiStatement multiStatement) {
+		this.statements.addAll(multiStatement.statements);
+		return this;
+	}
+
+	/**
 	 * Add the specified {@link CodeBlock codeblock} rendered as-is.
 	 * @param codeBlock the code block to add
 	 * @return {@code this}, to facilitate method chaining
