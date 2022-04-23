@@ -218,7 +218,7 @@ on the server side (for example, in Spring MVC REST controllers).
 
 Concrete implementations for the main media (MIME) types are provided in the framework
 and are, by default, registered with the `RestTemplate` on the client side and with
-`RequestMethodHandlerAdapter` on the server side (see
+`RequestMappingHandlerAdapter` on the server side (see
 <<web.adoc#mvc-config-message-converters, Configuring Message Converters>>).
 
 The implementations of `HttpMessageConverter` are described in the following sections.
