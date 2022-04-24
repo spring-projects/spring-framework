@@ -67,18 +67,20 @@ public abstract class MimeTypeUtils {
 
 	/**
 	 * Public constant mime type for {@code application/graphql+json}.
+	 * @since 5.3.19
 	 * @see <a href="https://github.com/graphql/graphql-over-http">GraphQL over HTTP spec</a>
-	 * */
+	 */
 	public static final MimeType APPLICATION_GRAPHQL;
 
 	/**
 	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_GRAPHQL}.
+	 * @since 5.3.19
 	 */
 	public static final String APPLICATION_GRAPHQL_VALUE = "application/graphql+json";
 
 	/**
 	 * Public constant mime type for {@code application/json}.
-	 * */
+	 */
 	public static final MimeType APPLICATION_JSON;
 
 	/**
