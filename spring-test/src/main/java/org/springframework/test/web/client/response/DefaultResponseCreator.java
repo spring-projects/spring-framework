@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.test.web.client.response;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
@@ -40,7 +39,7 @@ import org.springframework.util.Assert;
  */
 public class DefaultResponseCreator implements ResponseCreator {
 
-	private HttpStatus statusCode;
+	private final int statusCode;
 
 	private byte[] content = new byte[0];
 
@@ -56,6 +55,15 @@ public class DefaultResponseCreator implements ResponseCreator {
 	 */
 	protected DefaultResponseCreator(HttpStatus statusCode) {
 		Assert.notNull(statusCode, "HttpStatus must not be null");
+		this.statusCode = statusCode.value();
+	}
+
+	/**
+	 * Protected constructor.
+	 * Use static factory methods in {@link MockRestResponseCreators}.
+	 * @since 5.3.17
+	 */
+	protected DefaultResponseCreator(int statusCode) {
 		this.statusCode = statusCode;
 	}
 
@@ -111,14 +119,9 @@ public class DefaultResponseCreator implements ResponseCreator {
 
 	@Override
 	public ClientHttpResponse createResponse(@Nullable ClientHttpRequest request) throws IOException {
-		MockClientHttpResponse response;
-		if (this.contentResource != null) {
-			InputStream stream = this.contentResource.getInputStream();
-			response = new MockClientHttpResponse(stream, this.statusCode);
-		}
-		else {
-			response = new MockClientHttpResponse(this.content, this.statusCode);
-		}
+		MockClientHttpResponse response = (this.contentResource != null ?
+				new MockClientHttpResponse(this.contentResource.getInputStream(), this.statusCode) :
+				new MockClientHttpResponse(this.content, this.statusCode));
 		response.getHeaders().putAll(this.headers);
 		return response;
 	}

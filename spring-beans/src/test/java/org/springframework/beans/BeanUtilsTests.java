@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,8 +203,25 @@ class BeanUtilsTests {
 		assertThat(tb2.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
 	}
 
+	/**
+	 * {@code Integer} can be copied to {@code Number}.
+	 */
 	@Test
-	void copyPropertiesHonorsGenericTypeMatches() {
+	void copyPropertiesFromSubTypeToSuperType() {
+		IntegerHolder integerHolder = new IntegerHolder();
+		integerHolder.setNumber(42);
+		NumberHolder numberHolder = new NumberHolder();
+
+		BeanUtils.copyProperties(integerHolder, numberHolder);
+		assertThat(integerHolder.getNumber()).isEqualTo(42);
+		assertThat(numberHolder.getNumber()).isEqualTo(42);
+	}
+
+	/**
+	 * {@code List<Integer>} can be copied to {@code List<Integer>}.
+	 */
+	@Test
+	void copyPropertiesHonorsGenericTypeMatchesFromIntegerToInteger() {
 		IntegerListHolder1 integerListHolder1 = new IntegerListHolder1();
 		integerListHolder1.getList().add(42);
 		IntegerListHolder2 integerListHolder2 = new IntegerListHolder2();
@@ -214,6 +231,68 @@ class BeanUtilsTests {
 		assertThat(integerListHolder2.getList()).containsOnly(42);
 	}
 
+	/**
+	 * {@code List<?>} can be copied to {@code List<?>}.
+	 */
+	@Test
+	void copyPropertiesHonorsGenericTypeMatchesFromWildcardToWildcard() {
+		List<?> list = Arrays.asList("foo", 42);
+		WildcardListHolder1 wildcardListHolder1 = new WildcardListHolder1();
+		wildcardListHolder1.setList(list);
+		WildcardListHolder2 wildcardListHolder2 = new WildcardListHolder2();
+		assertThat(wildcardListHolder2.getList()).isEmpty();
+
+		BeanUtils.copyProperties(wildcardListHolder1, wildcardListHolder2);
+		assertThat(wildcardListHolder1.getList()).isEqualTo(list);
+		assertThat(wildcardListHolder2.getList()).isEqualTo(list);
+	}
+
+	/**
+	 * {@code List<Integer>} can be copied to {@code List<?>}.
+	 */
+	@Test
+	void copyPropertiesHonorsGenericTypeMatchesFromIntegerToWildcard() {
+		IntegerListHolder1 integerListHolder1 = new IntegerListHolder1();
+		integerListHolder1.getList().add(42);
+		WildcardListHolder2 wildcardListHolder2 = new WildcardListHolder2();
+
+		BeanUtils.copyProperties(integerListHolder1, wildcardListHolder2);
+		assertThat(integerListHolder1.getList()).containsOnly(42);
+		assertThat(wildcardListHolder2.getList()).isEqualTo(Arrays.asList(42));
+	}
+
+	/**
+	 * {@code List<Integer>} can be copied to {@code List<? extends Number>}.
+	 */
+	@Test
+	void copyPropertiesHonorsGenericTypeMatchesForUpperBoundedWildcard() {
+		IntegerListHolder1 integerListHolder1 = new IntegerListHolder1();
+		integerListHolder1.getList().add(42);
+		NumberUpperBoundedWildcardListHolder numberListHolder = new NumberUpperBoundedWildcardListHolder();
+
+		BeanUtils.copyProperties(integerListHolder1, numberListHolder);
+		assertThat(integerListHolder1.getList()).containsOnly(42);
+		assertThat(numberListHolder.getList()).hasSize(1);
+		assertThat(numberListHolder.getList().contains(Integer.valueOf(42))).isTrue();
+	}
+
+	/**
+	 * {@code Number} can NOT be copied to {@code Integer}.
+	 */
+	@Test
+	void copyPropertiesDoesNotCopyeFromSuperTypeToSubType() {
+		NumberHolder numberHolder = new NumberHolder();
+		numberHolder.setNumber(Integer.valueOf(42));
+		IntegerHolder integerHolder = new IntegerHolder();
+
+		BeanUtils.copyProperties(numberHolder, integerHolder);
+		assertThat(numberHolder.getNumber()).isEqualTo(42);
+		assertThat(integerHolder.getNumber()).isNull();
+	}
+
+	/**
+	 * {@code List<Integer>} can NOT be copied to {@code List<Long>}.
+	 */
 	@Test
 	void copyPropertiesDoesNotHonorGenericTypeMismatches() {
 		IntegerListHolder1 integerListHolder = new IntegerListHolder1();
@@ -223,6 +302,20 @@ class BeanUtilsTests {
 		BeanUtils.copyProperties(integerListHolder, longListHolder);
 		assertThat(integerListHolder.getList()).containsOnly(42);
 		assertThat(longListHolder.getList()).isEmpty();
+	}
+
+	/**
+	 * {@code List<Integer>} can NOT be copied to {@code List<Number>}.
+	 */
+	@Test
+	void copyPropertiesDoesNotHonorGenericTypeMismatchesFromSubTypeToSuperType() {
+		IntegerListHolder1 integerListHolder = new IntegerListHolder1();
+		integerListHolder.getList().add(42);
+		NumberListHolder numberListHolder = new NumberListHolder();
+
+		BeanUtils.copyProperties(integerListHolder, numberListHolder);
+		assertThat(integerListHolder.getList()).containsOnly(42);
+		assertThat(numberListHolder.getList()).isEmpty();
 	}
 
 	@Test  // gh-26531
@@ -412,6 +505,90 @@ class BeanUtilsTests {
 		assertThat(BeanUtils.resolveSignature(signature, MethodSignatureBean.class)).isEqualTo(desiredMethod);
 	}
 
+
+	@SuppressWarnings("unused")
+	private static class NumberHolder {
+
+		private Number number;
+
+		public Number getNumber() {
+			return number;
+		}
+
+		public void setNumber(Number number) {
+			this.number = number;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class IntegerHolder {
+
+		private Integer number;
+
+		public Integer getNumber() {
+			return number;
+		}
+
+		public void setNumber(Integer number) {
+			this.number = number;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class WildcardListHolder1 {
+
+		private List<?> list = new ArrayList<>();
+
+		public List<?> getList() {
+			return list;
+		}
+
+		public void setList(List<?> list) {
+			this.list = list;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class WildcardListHolder2 {
+
+		private List<?> list = new ArrayList<>();
+
+		public List<?> getList() {
+			return list;
+		}
+
+		public void setList(List<?> list) {
+			this.list = list;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class NumberUpperBoundedWildcardListHolder {
+
+		private List<? extends Number> list = new ArrayList<>();
+
+		public List<? extends Number> getList() {
+			return list;
+		}
+
+		public void setList(List<? extends Number> list) {
+			this.list = list;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class NumberListHolder {
+
+		private List<Number> list = new ArrayList<>();
+
+		public List<Number> getList() {
+			return list;
+		}
+
+		public void setList(List<Number> list) {
+			this.list = list;
+		}
+	}
 
 	@SuppressWarnings("unused")
 	private static class IntegerListHolder1 {

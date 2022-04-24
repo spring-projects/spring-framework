@@ -43,6 +43,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -89,16 +90,16 @@ class WebClientIntegrationTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "[{index}] {displayName} [{0}]")
+	@ParameterizedTest(name = "[{index}] {0}")
 	@MethodSource("arguments")
 	@interface ParameterizedWebClientTest {
 	}
 
-	static Stream<ClientHttpConnector> arguments() {
+	static Stream<Named<ClientHttpConnector>> arguments() {
 		return Stream.of(
-				new ReactorClientHttpConnector(),
-				new JettyClientHttpConnector(),
-				new HttpComponentsClientHttpConnector()
+				Named.named("Reactor Netty", new ReactorClientHttpConnector()),
+				Named.named("Jetty", new JettyClientHttpConnector()),
+				Named.named("HttpComponents", new HttpComponentsClientHttpConnector())
 		);
 	}
 

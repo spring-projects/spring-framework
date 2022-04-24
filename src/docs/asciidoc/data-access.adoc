@@ -1015,9 +1015,11 @@ to ensure completion and buffer results in the calling code.
 ==== Rolling Back a Declarative Transaction
 
 The previous section outlined the basics of how to specify transactional settings for
-classes, typically service layer classes, declaratively in your application. This
-section describes how you can control the rollback of transactions in a simple,
-declarative fashion.
+classes, typically service layer classes, declaratively in your application. This section
+describes how you can control the rollback of transactions in a simple, declarative
+fashion in XML configuration. For details on controlling rollback semantics declaratively
+with the `@Transactional` annotation, see
+<<transaction-declarative-attransactional-settings>>.
 
 The recommended way to indicate to the Spring Framework's transaction infrastructure
 that a transaction's work is to be rolled back is to throw an `Exception` from code that
@@ -1027,14 +1029,59 @@ the call stack and makes a determination whether to mark the transaction for rol
 
 In its default configuration, the Spring Framework's transaction infrastructure code
 marks a transaction for rollback only in the case of runtime, unchecked exceptions.
-That is, when the thrown exception is an instance or subclass of `RuntimeException`. (
-`Error` instances also, by default, result in a rollback). Checked exceptions that are
+That is, when the thrown exception is an instance or subclass of `RuntimeException`.
+(`Error` instances also, by default, result in a rollback). Checked exceptions that are
 thrown from a transactional method do not result in rollback in the default
 configuration.
 
 You can configure exactly which `Exception` types mark a transaction for rollback,
-including checked exceptions. The following XML snippet demonstrates how you configure
-rollback for a checked, application-specific `Exception` type:
+including checked exceptions by specifying _rollback rules_.
+
+.Rollback rules
+[[transaction-declarative-rollback-rules]]
+[NOTE]
+====
+Rollback rules determine if a transaction should be rolled back when a given exception is
+thrown, and the rules are based on patterns. A pattern can be a fully qualified class
+name or a substring of a fully qualified class name for an exception type (which must be
+a subclass of `Throwable`), with no wildcard support at present. For example, a value of
+`"javax.servlet.ServletException"` or `"ServletException"` will match
+`javax.servlet.ServletException` and its subclasses.
+
+Rollback rules may be configured in XML via the `rollback-for` and `no-rollback-for`
+attributes, which allow patterns to be specified as strings. When using
+<<transaction-declarative-attransactional-settings,`@Transactional`>>, rollback rules may
+be configured via the `rollbackFor`/`noRollbackFor` and
+`rollbackForClassName`/`noRollbackForClassName` attributes, which allow patterns to be
+specified as `Class` references or strings, respectively. When an exception type is
+specified as a class reference its fully qualified name will be used as the pattern.
+Consequently, `@Transactional(rollbackFor = example.CustomException.class)` is equivalent
+to `@Transactional(rollbackForClassName = "example.CustomException")`.
+
+[WARNING]
+=====
+You must carefully consider how specific the pattern is and whether to include package
+information (which isn't mandatory). For example, `"Exception"` will match nearly
+anything and will probably hide other rules. `"java.lang.Exception"` would be correct if
+`"Exception"` were meant to define a rule for all checked exceptions. With more unique
+exception names such as `"BaseBusinessException"` there is likely no need to use the
+fully qualified class name for the exception pattern.
+
+Furthermore, rollback rules may result in unintentional matches for similarly named
+exceptions and nested classes. This is due to the fact that a thrown exception is
+considered to be a match for a given rollback rule if the name of thrown exception
+contains the exception pattern configured for the rollback rule. For example, given a
+rule configured to match on `com.example.CustomException`, that rule would match against
+an exception named `com.example.CustomExceptionV2` (an exception in the same package as
+`CustomException` but with an additional suffix) or an exception named
+`com.example.CustomException$AnotherException` (an exception declared as a nested class
+in `CustomException`).
+=====
+====
+
+The following XML snippet demonstrates how to configure rollback for a checked,
+application-specific `Exception` type by supplying an _exception pattern_ via the
+`rollback-for` attribute:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -1046,8 +1093,8 @@ rollback for a checked, application-specific `Exception` type:
 	</tx:advice>
 ----
 
-If you do not want a transaction rolled
-back when an exception is thrown, you can also specify 'no rollback rules'. The following example tells the Spring Framework's
+If you do not want a transaction rolled back when an exception is thrown, you can also
+specify 'no rollback' rules. The following example tells the Spring Framework's
 transaction infrastructure to commit the attendant transaction even in the face of an
 unhandled `InstrumentNotFoundException`:
 
@@ -1061,11 +1108,11 @@ unhandled `InstrumentNotFoundException`:
 	</tx:advice>
 ----
 
-When the Spring Framework's transaction infrastructure catches an exception and it
-consults the configured rollback rules to determine whether to mark the transaction for
-rollback, the strongest matching rule wins. So, in the case of the following
-configuration, any exception other than an `InstrumentNotFoundException` results in a
-rollback of the attendant transaction:
+When the Spring Framework's transaction infrastructure catches an exception and consults
+the configured rollback rules to determine whether to mark the transaction for rollback,
+the strongest matching rule wins. So, in the case of the following configuration, any
+exception other than an `InstrumentNotFoundException` results in a rollback of the
+attendant transaction:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -1076,10 +1123,10 @@ rollback of the attendant transaction:
 	</tx:advice>
 ----
 
-You can also indicate a required rollback programmatically. Although simple,
-this process is quite invasive and tightly couples your code to the Spring Framework's
-transaction infrastructure. The following example shows how to programmatically indicate
-a required rollback:
+You can also indicate a required rollback programmatically. Although simple, this process
+is quite invasive and tightly couples your code to the Spring Framework's transaction
+infrastructure. The following example shows how to programmatically indicate a required
+rollback:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1661,7 +1708,8 @@ The default `@Transactional` settings are as follows:
 * The transaction is read-write.
 * The transaction timeout defaults to the default timeout of the underlying transaction
   system, or to none if timeouts are not supported.
-* Any `RuntimeException` triggers rollback, and any checked `Exception` does not.
+* Any `RuntimeException` or `Error` triggers rollback, and any checked `Exception` does
+  not.
 
 You can change these default settings. The following table summarizes the various
 properties of the `@Transactional` annotation:
@@ -1675,6 +1723,14 @@ properties of the `@Transactional` annotation:
 | `String`
 | Optional qualifier that specifies the transaction manager to be used.
 
+| `transactionManager`
+| `String`
+| Alias for `value`.
+
+| `label`
+| Array of `String` labels to add an expressive description to the transaction.
+| Labels may be evaluated by transaction managers to associate implementation-specific behavior with the actual transaction.
+
 | <<tx-propagation,propagation>>
 | `enum`: `Propagation`
 | Optional propagation setting.
@@ -1687,31 +1743,34 @@ properties of the `@Transactional` annotation:
 | `int` (in seconds of granularity)
 | Optional transaction timeout. Applies only to propagation values of `REQUIRED` or `REQUIRES_NEW`.
 
+| `timeoutString`
+| `String` (in seconds of granularity)
+| Alternative for specifying the `timeout` in seconds as a `String` value -- for example, as a placeholder.
+
 | `readOnly`
 | `boolean`
 | Read-write versus read-only transaction. Only applicable to values of `REQUIRED` or `REQUIRES_NEW`.
 
 | `rollbackFor`
 | Array of `Class` objects, which must be derived from `Throwable.`
-| Optional array of exception classes that must cause rollback.
+| Optional array of exception types that must cause rollback.
 
 | `rollbackForClassName`
-| Array of class names. The classes must be derived from `Throwable.`
-| Optional array of names of exception classes that must cause rollback.
+| Array of exception name patterns.
+| Optional array of exception name patterns that must cause rollback.
 
 | `noRollbackFor`
 | Array of `Class` objects, which must be derived from `Throwable.`
-| Optional array of exception classes that must not cause rollback.
+| Optional array of exception types that must not cause rollback.
 
 | `noRollbackForClassName`
-| Array of `String` class names, which must be derived from `Throwable.`
-| Optional array of names of exception classes that must not cause rollback.
-
-| `label`
-| Array of `String` labels to add an expressive description to the transaction.
-| Labels may be evaluated by transaction managers to associate
-implementation-specific behavior with the actual transaction.
+| Array of exception name patterns.
+| Optional array of exception name patterns that must not cause rollback.
 |===
+
+TIP: See <<transaction-declarative-rollback-rules, Rollback rules>> for further details
+on rollback rule semantics, patterns, and warnings regarding possible unintentional
+matches.
 
 Currently, you cannot have explicit control over the name of a transaction, where 'name'
 means the transaction name that appears in a transaction monitor, if applicable

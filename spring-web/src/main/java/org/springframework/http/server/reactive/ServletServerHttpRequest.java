@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,7 +198,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	@Nullable
 	protected SslInfo initSslInfo() {
 		X509Certificate[] certificates = getX509Certificates();
-		return certificates != null ? new DefaultSslInfo(getSslSessionId(), certificates) : null;
+		return (certificates != null ? new DefaultSslInfo(getSslSessionId(), certificates) : null);
 	}
 
 	@Nullable
@@ -208,8 +208,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Nullable
 	private X509Certificate[] getX509Certificates() {
-		String name = "javax.servlet.request.X509Certificate";
-		return (X509Certificate[]) this.request.getAttribute(name);
+		return (X509Certificate[]) this.request.getAttribute("javax.servlet.request.X509Certificate");
 	}
 
 	@Override
@@ -236,10 +235,10 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	/**
 	 * Read from the request body InputStream and return a DataBuffer.
 	 * Invoked only when {@link ServletInputStream#isReady()} returns "true".
-	 * @return a DataBuffer with data read, or {@link #EOF_BUFFER} if the input
-	 * stream returned -1, or null if 0 bytes were read.
+	 * @return a DataBuffer with data read, or
+	 * {@link AbstractListenerReadPublisher#EMPTY_BUFFER} if 0 bytes were read,
+	 * or {@link #EOF_BUFFER} if the input stream returned -1.
 	 */
-	@Nullable
 	DataBuffer readFromInputStream() throws IOException {
 		int read = this.request.getInputStream().read(this.buffer);
 		logBytesRead(read);
@@ -254,7 +253,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			return EOF_BUFFER;
 		}
 
-		return null;
+		return AbstractListenerReadPublisher.EMPTY_BUFFER;
 	}
 
 	protected final void logBytesRead(int read) {

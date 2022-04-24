@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ import java.lang.reflect.WildcardType;
 import org.springframework.lang.Nullable;
 
 /**
- * Utility to work with Java 5 generic type parameters.
- * Mainly for internal use within the framework.
+ * Utility to work with generic type parameters.
+ *
+ * <p>Mainly for internal use within the framework.
  *
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
