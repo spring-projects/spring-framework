@@ -66,7 +66,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * mapping and for content negotiation (with similar deprecations in
  * {@link org.springframework.web.accept.ContentNegotiationManagerFactoryBean
  * ContentNegotiationManagerFactoryBean}). For further context, please read issue
- * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24719</a>.
+ * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24179</a>.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
