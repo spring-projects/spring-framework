@@ -944,6 +944,31 @@ class BeanFactoryGenericsTests {
 		assertThat(resolved.get(1)).isSameAs(bf.getBean("store1"));
 	}
 
+	@Test
+	void testOrderedStreamWithHierarchicalBeanFactoryStructural() {
+		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setParentBeanFactory(parent);
+		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
+
+		bf.registerSingleton("no_bean_definition", new NumberStore());
+
+		RootBeanDefinition bd1 = new RootBeanDefinition(NumberStoreFactory.class);
+		bd1.setFactoryMethodName("newDoubleStore");
+		bf.registerBeanDefinition("child_store", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition(NumberStoreFactory.class);
+		bd2.setFactoryMethodName("newFloatStore");
+		parent.registerBeanDefinition("parent_store", bd2);
+
+		ObjectProvider<NumberStore<?>> numberStoreProvider = bf.getBeanProvider(ResolvableType.forClass(NumberStore.class));
+		List<NumberStore<?>> resolved = numberStoreProvider.orderedStream().collect(Collectors.toList());
+		assertThat(resolved.size()).isEqualTo(3);
+		assertThat(resolved.get(0)).isSameAs(bf.getBean("parent_store"));
+		assertThat(resolved.get(1)).isSameAs(bf.getBean("child_store"));
+		assertThat(resolved.get(2)).isSameAs(bf.getBean("no_bean_definition"));
+	}
+
 
 	@SuppressWarnings("serial")
 	public static class NamedUrlList extends ArrayList<URL> {

@@ -54,6 +54,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
+import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
@@ -2146,10 +2147,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		@Nullable
 		public Object getOrderSource(Object obj) {
 			String beanName = this.instancesToBeanNames.get(obj);
-			if (beanName == null || !containsBeanDefinition(beanName)) {
+			RootBeanDefinition beanDefinition;
+			if (beanName == null || (beanDefinition = getRootBeanDefinition(beanName)) == null) {
 				return null;
 			}
-			RootBeanDefinition beanDefinition = getMergedLocalBeanDefinition(beanName);
 			List<Object> sources = new ArrayList<>(2);
 			Method factoryMethod = beanDefinition.getResolvedFactoryMethod();
 			if (factoryMethod != null) {
@@ -2160,6 +2161,34 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				sources.add(targetType);
 			}
 			return sources.toArray();
+		}
+
+		@Nullable
+		private RootBeanDefinition getRootBeanDefinition(String beanName) {
+			BeanFactory beanFactory = DefaultListableBeanFactory.this;
+			while (beanFactory != null) {
+				if (beanFactory instanceof AbstractBeanFactory abf) {
+					if (abf.containsBeanDefinition(beanName)) {
+						return abf.getMergedLocalBeanDefinition(beanName);
+					}
+				} else if (beanFactory instanceof ConfigurableBeanFactory cbf) {
+					try {
+						BeanDefinition bd = cbf.getMergedBeanDefinition(beanName);
+						if (bd != null && bd instanceof RootBeanDefinition rbd) {
+							return rbd;
+						}
+					} catch (NoSuchBeanDefinitionException e) {
+						// skip exception, and find in parent bean factory if possible
+					}
+				}
+
+				if (beanFactory instanceof HierarchicalBeanFactory hbf) {
+					beanFactory = hbf.getParentBeanFactory();
+				} else {
+					beanFactory = null;
+				}
+			}
+			return null;
 		}
 	}
 
