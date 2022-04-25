@@ -17,10 +17,8 @@
 package org.springframework.web.socket.client;
 
 import java.net.URI;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.SmartLifecycle;
 import org.springframework.web.util.UriComponentsBuilder;
 

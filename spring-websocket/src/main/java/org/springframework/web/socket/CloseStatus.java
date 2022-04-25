@@ -17,7 +17,6 @@
 package org.springframework.web.socket;
 
 import java.io.Serializable;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
