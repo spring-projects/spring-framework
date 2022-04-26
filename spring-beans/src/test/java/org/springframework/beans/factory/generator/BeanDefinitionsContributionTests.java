@@ -16,6 +16,9 @@
 
 package org.springframework.beans.factory.generator;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.function.BiPredicate;
 
@@ -28,11 +31,14 @@ import org.springframework.aot.generator.DefaultGeneratedTypeContext;
 import org.springframework.aot.generator.GeneratedType;
 import org.springframework.aot.generator.GeneratedTypeContext;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.support.CodeSnippet;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,6 +49,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Stephane Nicoll
  */
 class BeanDefinitionsContributionTests {
+
+	@Test
+	void loadContributorWithConstructorArgumentOnBeanFactory() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.setBeanClassLoader(new TestSpringFactoriesClassLoader(
+				"bean-registration-contribution-provider-constructor.factories"));
+		BeanDefinitionsContribution contribution = new BeanDefinitionsContribution(beanFactory);
+		assertThat(contribution).extracting("contributionProviders").asList()
+				.anySatisfy(provider -> assertThat(provider).isInstanceOfSatisfying(TestConstructorBeanRegistrationContributionProvider.class,
+						testProvider -> assertThat(testProvider.beanFactory).isSameAs(beanFactory)))
+				.anySatisfy(provider -> assertThat(provider).isInstanceOf(DefaultBeanRegistrationContributionProvider.class))
+				.hasSize(2);
+	}
 
 	@Test
 	void contributeThrowsContributionNotFoundIfNoContributionIsAvailable() {
@@ -156,6 +175,42 @@ class BeanDefinitionsContributionTests {
 		public BeanFactoryContribution getContributionFor(String beanName, RootBeanDefinition beanDefinition) {
 			return (beanName.equals(this.beanName) ? this.contribution : null);
 		}
+	}
+
+	static class TestConstructorBeanRegistrationContributionProvider implements BeanRegistrationContributionProvider {
+
+		private final ConfigurableListableBeanFactory beanFactory;
+
+		TestConstructorBeanRegistrationContributionProvider(ConfigurableListableBeanFactory beanFactory) {
+			Assert.notNull(beanFactory, "BeanFactory must not be null");
+			this.beanFactory = beanFactory;
+		}
+
+		@Nullable
+		@Override
+		public BeanFactoryContribution getContributionFor(String beanName, RootBeanDefinition beanDefinition) {
+			return null;
+		}
+
+	}
+
+	static class TestSpringFactoriesClassLoader extends ClassLoader {
+
+		private final String factoriesName;
+
+		TestSpringFactoriesClassLoader(String factoriesName) {
+			super(BeanDefinitionsContributionTests.class.getClassLoader());
+			this.factoriesName = factoriesName;
+		}
+
+		@Override
+		public Enumeration<URL> getResources(String name) throws IOException {
+			if ("META-INF/spring.factories".equals(name)) {
+				return super.getResources("org/springframework/beans/factory/generator/" + this.factoriesName);
+			}
+			return super.getResources(name);
+		}
+
 	}
 
 }

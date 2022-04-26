@@ -28,6 +28,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.core.io.support.SpringFactoriesLoader.ArgumentResolver;
 
 /**
  * A {@link BeanFactoryContribution} that generates the bean definitions of a
@@ -62,7 +63,7 @@ public class BeanDefinitionsContribution implements BeanFactoryContribution {
 
 	private static List<BeanRegistrationContributionProvider> initializeProviders(DefaultListableBeanFactory beanFactory) {
 		List<BeanRegistrationContributionProvider> providers = new ArrayList<>(SpringFactoriesLoader.loadFactories(
-				BeanRegistrationContributionProvider.class, beanFactory.getBeanClassLoader()));
+				BeanRegistrationContributionProvider.class, beanFactory.getBeanClassLoader(), ArgumentResolver.from(type -> type.isInstance(beanFactory) ? beanFactory : null)));
 		providers.add(new DefaultBeanRegistrationContributionProvider(beanFactory));
 		return providers;
 	}
