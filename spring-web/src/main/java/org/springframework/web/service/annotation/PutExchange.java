@@ -24,8 +24,9 @@ import java.lang.annotation.Target;
 
 import org.springframework.core.annotation.AliasFor;
 
+
 /**
- * Shortcut for {@link HttpRequest} for HTTP PUT requests.
+ * Shortcut for {@link HttpExchange} for HTTP PUT requests.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
@@ -33,25 +34,25 @@ import org.springframework.core.annotation.AliasFor;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@HttpRequest(method = "PUT")
-public @interface PutRequest {
+@HttpExchange(method = "PUT")
+public @interface PutExchange {
 
 	/**
-	 * Alias for {@link HttpRequest#value}.
+	 * Alias for {@link HttpExchange#value}.
 	 */
-	@AliasFor(annotation = HttpRequest.class)
+	@AliasFor(annotation = HttpExchange.class)
 	String[] value() default {};
 
 	/**
-	 * Alias for {@link HttpRequest#url()}.
+	 * Alias for {@link HttpExchange#url()}.
 	 */
-	@AliasFor(annotation = HttpRequest.class)
+	@AliasFor(annotation = HttpExchange.class)
 	String[] url() default {};
 
 	/**
-	 * Alias for {@link HttpRequest#contentType()}.
+	 * Alias for {@link HttpExchange#contentType()}.
 	 */
-	@AliasFor(annotation = HttpRequest.class)
+	@AliasFor(annotation = HttpExchange.class)
 	String contentType() default "";
 
 }

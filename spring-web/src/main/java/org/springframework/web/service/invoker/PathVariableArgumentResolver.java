@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 
 /**
- * An implementation of {@link HttpServiceMethodArgumentResolver} that resolves
+ * An implementation of {@link HttpServiceArgumentResolver} that resolves
  * request path variables based on method arguments annotated
  * with {@link  PathVariable}. {@code null} values are allowed only
  * if {@link PathVariable#required()} is {@code true}.
@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @author Olga Maciaszek-Sharma
  * @since 6.0
  */
-public class PathVariableArgumentResolver implements HttpServiceMethodArgumentResolver {
+public class PathVariableArgumentResolver implements HttpServiceArgumentResolver {
 
 	private static final Log logger = LogFactory.getLog(PathVariableArgumentResolver.class);
 
@@ -56,7 +56,7 @@ public class PathVariableArgumentResolver implements HttpServiceMethodArgumentRe
 	@SuppressWarnings("unchecked")
 	@Override
 	public void resolve(
-			@Nullable Object argument, MethodParameter parameter, HttpRequestDefinition requestDefinition) {
+			@Nullable Object argument, MethodParameter parameter, HttpRequestSpec requestSpec) {
 
 		PathVariable annotation = parameter.getParameterAnnotation(PathVariable.class);
 		if (annotation == null) {
@@ -67,19 +67,19 @@ public class PathVariableArgumentResolver implements HttpServiceMethodArgumentRe
 			if (argument != null) {
 				Assert.isInstanceOf(Map.class, argument);
 				((Map<String, ?>) argument).forEach((key, value) ->
-						addUriParameter(key, value, annotation.required(), requestDefinition));
+						addUriParameter(key, value, annotation.required(), requestSpec));
 			}
 		}
 		else {
 			String name = StringUtils.hasText(annotation.value()) ? annotation.value() : annotation.name();
 			name = StringUtils.hasText(name) ? name : parameter.getParameterName();
 			Assert.notNull(name, "Failed to determine path variable name for parameter: " + parameter);
-			addUriParameter(name, argument, annotation.required(), requestDefinition);
+			addUriParameter(name, argument, annotation.required(), requestSpec);
 		}
 	}
 
 	private void addUriParameter(
-			String name, @Nullable Object value, boolean required, HttpRequestDefinition requestDefinition) {
+			String name, @Nullable Object value, boolean required, HttpRequestSpec requestSpec) {
 
 		if (value instanceof Optional) {
 			value = ((Optional<?>) value).orElse(null);
@@ -98,7 +98,7 @@ public class PathVariableArgumentResolver implements HttpServiceMethodArgumentRe
 			logger.trace("Resolved path variable '" + name + "' to " + value);
 		}
 
-		requestDefinition.getUriVariables().put(name, (String) value);
+		requestSpec.getUriVariables().put(name, (String) value);
 	}
 
 }

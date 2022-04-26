@@ -32,9 +32,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
-import org.springframework.web.service.annotation.GetRequest;
-import org.springframework.web.service.annotation.HttpRequest;
-import org.springframework.web.service.annotation.PostRequest;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_CBOR_VALUE;
@@ -145,7 +145,7 @@ public class HttpServiceMethodTests {
 
 		service.performGet();
 
-		HttpRequestDefinition request = this.clientAdapter.getRequestDefinition();
+		HttpRequestSpec request = this.clientAdapter.getRequestSpec();
 		assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.GET);
 		assertThat(request.getUriTemplate()).isNull();
 		assertThat(request.getHeaders().getContentType()).isNull();
@@ -153,7 +153,7 @@ public class HttpServiceMethodTests {
 
 		service.performPost();
 
-		request = this.clientAdapter.getRequestDefinition();
+		request = this.clientAdapter.getRequestSpec();
 		assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(request.getUriTemplate()).isEqualTo("/url");
 		assertThat(request.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
@@ -167,7 +167,7 @@ public class HttpServiceMethodTests {
 
 		service.performGet();
 
-		HttpRequestDefinition request = this.clientAdapter.getRequestDefinition();
+		HttpRequestSpec request = this.clientAdapter.getRequestSpec();
 		assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.GET);
 		assertThat(request.getUriTemplate()).isEqualTo("/base");
 		assertThat(request.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_CBOR);
@@ -175,7 +175,7 @@ public class HttpServiceMethodTests {
 
 		service.performPost();
 
-		request = this.clientAdapter.getRequestDefinition();
+		request = this.clientAdapter.getRequestSpec();
 		assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(request.getUriTemplate()).isEqualTo("/base/url");
 		assertThat(request.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
@@ -191,25 +191,25 @@ public class HttpServiceMethodTests {
 	@SuppressWarnings("unused")
 	private interface ReactorService {
 
-		@HttpRequest
+		@HttpExchange
 		Mono<Void> execute();
 
-		@GetRequest
+		@GetExchange
 		Mono<HttpHeaders> getHeaders();
 
-		@GetRequest
+		@GetExchange
 		Mono<String> getBody();
 
-		@GetRequest
+		@GetExchange
 		Flux<String> getFluxBody();
 
-		@GetRequest
+		@GetExchange
 		Mono<ResponseEntity<Void>> getVoidEntity();
 
-		@GetRequest
+		@GetExchange
 		Mono<ResponseEntity<String>> getEntity();
 
-		@GetRequest
+		@GetExchange
 		Mono<ResponseEntity<Flux<String>>> getFluxEntity();
 	}
 
@@ -217,25 +217,25 @@ public class HttpServiceMethodTests {
 	@SuppressWarnings("unused")
 	private interface RxJavaService {
 
-		@HttpRequest
+		@HttpExchange
 		Completable execute();
 
-		@GetRequest
+		@GetExchange
 		Single<HttpHeaders> getHeaders();
 
-		@GetRequest
+		@GetExchange
 		Single<String> getBody();
 
-		@GetRequest
+		@GetExchange
 		Flowable<String> getFlowableBody();
 
-		@GetRequest
+		@GetExchange
 		Single<ResponseEntity<Void>> getVoidEntity();
 
-		@GetRequest
+		@GetExchange
 		Single<ResponseEntity<String>> getEntity();
 
-		@GetRequest
+		@GetExchange
 		Single<ResponseEntity<Flowable<String>>> getFlowableEntity();
 	}
 
@@ -243,19 +243,19 @@ public class HttpServiceMethodTests {
 	@SuppressWarnings("unused")
 	private interface BlockingService {
 
-		@HttpRequest
+		@HttpExchange
 		void execute();
 
-		@GetRequest
+		@GetExchange
 		HttpHeaders getHeaders();
 
-		@GetRequest
+		@GetExchange
 		String getBody();
 
-		@GetRequest
+		@GetExchange
 		ResponseEntity<Void> getVoidEntity();
 
-		@GetRequest
+		@GetExchange
 		ResponseEntity<String> getEntity();
 	}
 
@@ -263,17 +263,17 @@ public class HttpServiceMethodTests {
 	@SuppressWarnings("unused")
 	private interface MethodAnnotatedService {
 
-		@GetRequest
+		@GetExchange
 		void performGet();
 
-		@PostRequest(url = "/url", contentType = APPLICATION_JSON_VALUE, accept = APPLICATION_JSON_VALUE)
+		@PostExchange(url = "/url", contentType = APPLICATION_JSON_VALUE, accept = APPLICATION_JSON_VALUE)
 		void performPost();
 
 	}
 
 
 	@SuppressWarnings("unused")
-	@HttpRequest(url = "/base", contentType = APPLICATION_CBOR_VALUE, accept = APPLICATION_CBOR_VALUE)
+	@HttpExchange(url = "/base", contentType = APPLICATION_CBOR_VALUE, accept = APPLICATION_CBOR_VALUE)
 	private interface TypeAndMethodAnnotatedService extends MethodAnnotatedService {
 	}
 

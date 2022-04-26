@@ -30,7 +30,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -39,15 +38,15 @@ import org.springframework.util.MultiValueMap;
 
 
 /**
- * Container for HTTP request values accumulated from an
- * {@link HttpRequest @HttpRequest}-annotated method and arguments passed to it.
- * This allows an {@link HttpClientAdapter} adapt these inputs as it sees fit
- * to the API of the underlying client.
+ * Container for HTTP request values extracted from an
+ * {@link org.springframework.web.service.annotation.HttpExchange @HttpExchange}-annotated
+ * method and argument values passed to it. This is then given to
+ * {@link HttpClientAdapter} to adapt to the underlying HTTP client.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
  */
-public class HttpRequestDefinition {
+public class HttpRequestSpec {
 
 	private static final MultiValueMap<String, String> EMPTY_COOKIES_MAP =
 			CollectionUtils.toMultiValueMap(Collections.emptyMap());
@@ -84,6 +83,10 @@ public class HttpRequestDefinition {
 	private ParameterizedTypeReference<?> bodyPublisherElementType;
 
 	private boolean complete;
+
+
+	public HttpRequestSpec() {
+	}
 
 
 	public void setUri(URI uri) {
@@ -174,6 +177,8 @@ public class HttpRequestDefinition {
 
 
 	void setComplete() {
+
+		this.complete = true;
 
 		this.uriVariables = (this.uriVariables != null ?
 				Collections.unmodifiableMap(this.uriVariables) : Collections.emptyMap());

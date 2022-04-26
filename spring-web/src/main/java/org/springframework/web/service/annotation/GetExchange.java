@@ -24,8 +24,9 @@ import java.lang.annotation.Target;
 
 import org.springframework.core.annotation.AliasFor;
 
+
 /**
- * Shortcut for {@link HttpRequest} for HTTP POST requests.
+ * Shortcut for {@link HttpExchange} for HTTP GET requests.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
@@ -33,31 +34,25 @@ import org.springframework.core.annotation.AliasFor;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@HttpRequest(method = "POST")
-public @interface PostRequest {
+@HttpExchange(method = "GET")
+public @interface GetExchange {
 
 	/**
-	 * Alias for {@link HttpRequest#value}.
+	 * Alias for {@link HttpExchange#value}.
 	 */
-	@AliasFor(annotation = HttpRequest.class)
+	@AliasFor(annotation = HttpExchange.class)
 	String value() default "";
 
 	/**
-	 * Alias for {@link HttpRequest#url()}.
+	 * Alias for {@link HttpExchange#url()}.
 	 */
-	@AliasFor(annotation = HttpRequest.class)
+	@AliasFor(annotation = HttpExchange.class)
 	String url() default "";
 
 	/**
-	 * Alias for {@link HttpRequest#contentType()}.
+	 * Alias for {@link HttpExchange#accept()}.
 	 */
-	@AliasFor(annotation = HttpRequest.class)
-	String contentType() default "";
-
-	/**
-	 * Alias for {@link HttpRequest#accept()}.
-	 */
-	@AliasFor(annotation = HttpRequest.class)
+	@AliasFor(annotation = HttpExchange.class)
 	String[] accept() default {};
 
 }

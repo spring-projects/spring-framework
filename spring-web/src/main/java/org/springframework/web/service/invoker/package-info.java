@@ -1,6 +1,6 @@
 /**
  * Support to create a client proxy for an HTTP service annotated with
- * {@link org.springframework.web.service.annotation.HttpRequest} methods.
+ * {@link org.springframework.web.service.annotation.HttpExchange} methods.
  */
 @NonNullApi
 @NonNullFields

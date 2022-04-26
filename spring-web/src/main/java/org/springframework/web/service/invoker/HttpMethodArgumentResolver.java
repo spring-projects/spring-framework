@@ -25,20 +25,20 @@ import org.springframework.lang.Nullable;
 
 
 /**
- * {@link HttpServiceMethodArgumentResolver} that resolves the target
+ * {@link HttpServiceArgumentResolver} that resolves the target
  * request's HTTP method from an {@link HttpMethod} argument.
  *
  * @author Olga Maciaszek-Sharma
  * @since 6.0
  */
-public class HttpMethodArgumentResolver implements HttpServiceMethodArgumentResolver {
+public class HttpMethodArgumentResolver implements HttpServiceArgumentResolver {
 
 	private static final Log logger = LogFactory.getLog(HttpMethodArgumentResolver.class);
 
 
 	@Override
 	public void resolve(
-			@Nullable Object argument, MethodParameter parameter, HttpRequestDefinition requestDefinition) {
+			@Nullable Object argument, MethodParameter parameter, HttpRequestSpec requestSpec) {
 
 		if (argument == null) {
 			return;
@@ -47,7 +47,7 @@ public class HttpMethodArgumentResolver implements HttpServiceMethodArgumentReso
 			if (logger.isTraceEnabled()) {
 				logger.trace("Resolved HTTP method to: " + httpMethod.name());
 			}
-			requestDefinition.setHttpMethod(httpMethod);
+			requestSpec.setHttpMethod(httpMethod);
 		}
 	}
 

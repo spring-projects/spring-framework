@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
-import org.springframework.web.service.annotation.GetRequest;
-import org.springframework.web.service.annotation.HttpRequest;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -64,25 +64,25 @@ public class HttpMethodArgumentResolverTests {
 
 	@Nullable
 	private HttpMethod getActualMethod() {
-		return this.clientAdapter.getRequestDefinition().getHttpMethod();
+		return this.clientAdapter.getRequestSpec().getHttpMethod();
 	}
 
 
 	private interface Service {
 
-		@HttpRequest
+		@HttpExchange
 		void execute(HttpMethod method);
 
-		@GetRequest
+		@GetExchange
 		void executeGet(HttpMethod method);
 
-		@HttpRequest
+		@HttpExchange
 		void execute(String test);
 
-		@HttpRequest
+		@HttpExchange
 		void execute(HttpMethod firstMethod, HttpMethod secondMethod);
 
-		@HttpRequest
+		@HttpExchange
 		void executeForNull(@Nullable HttpMethod method);
 	}
 

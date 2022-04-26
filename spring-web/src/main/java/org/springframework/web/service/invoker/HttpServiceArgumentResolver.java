@@ -18,24 +18,24 @@ package org.springframework.web.service.invoker;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
-import org.springframework.web.service.annotation.HttpRequest;
+import org.springframework.web.service.annotation.HttpExchange;
 
 
 /**
- * Resolve an argument from an {@link HttpRequest @HttpRequest} annotated method
+ * Resolve an argument from an {@link HttpExchange @HttpExchange}-annotated method
  * to one or more HTTP request values.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
  */
-public interface HttpServiceMethodArgumentResolver {
+public interface HttpServiceArgumentResolver {
 
 	/**
 	 * Resolve the argument value.
 	 * @param argument the argument value
 	 * @param parameter the method parameter for the argument
-	 * @param requestDefinition container to add HTTP request values to
+	 * @param requestSpec container to add HTTP request values to
 	 */
-	void resolve(@Nullable Object argument, MethodParameter parameter, HttpRequestDefinition requestDefinition);
+	void resolve(@Nullable Object argument, MethodParameter parameter, HttpRequestSpec requestSpec);
 
 }

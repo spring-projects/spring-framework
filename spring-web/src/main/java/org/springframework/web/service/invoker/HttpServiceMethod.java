@@ -43,12 +43,12 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.service.annotation.HttpRequest;
+import org.springframework.web.service.annotation.HttpExchange;
 
 
 /**
- * Implements the invocation of an {@link HttpRequest @HttpRequest} annotated,
- * {@link HttpServiceProxyFactory#createService(Class) HTTP Service proxy} method
+ * Implements the invocation of an {@link HttpExchange @HttpExchange}-annotated,
+ * {@link HttpServiceProxyFactory#createClient(Class) HTTP Service proxy} method
  * by delegating to an {@link HttpClientAdapter} to perform actual requests.
  *
  * @author Rossen Stoyanchev
@@ -60,22 +60,22 @@ final class HttpServiceMethod {
 
 	private final MethodParameter[] parameters;
 
-	private final List<HttpServiceMethodArgumentResolver> argumentResolvers;
+	private final List<HttpServiceArgumentResolver> argumentResolvers;
 
-	private final HttpRequestDefinitionFactory requestDefinitionFactory;
+	private final HttpRequestSpecFactory requestSpecFactory;
 
 	private final ResponseFunction responseFunction;
 
 
 	HttpServiceMethod(
-			Method method, Class<?> containingClass, List<HttpServiceMethodArgumentResolver> argumentResolvers,
+			Method method, Class<?> containingClass, List<HttpServiceArgumentResolver> argumentResolvers,
 			HttpClientAdapter client, ReactiveAdapterRegistry reactiveRegistry,
 			Duration blockTimeout) {
 
 		this.method = method;
 		this.parameters = initMethodParameters(method);
 		this.argumentResolvers = argumentResolvers;
-		this.requestDefinitionFactory = HttpRequestDefinitionFactory.create(method, containingClass);
+		this.requestSpecFactory = HttpRequestSpecFactory.create(method, containingClass);
 		this.responseFunction = ResponseFunction.create(client, method, reactiveRegistry, blockTimeout);
 	}
 
@@ -96,34 +96,34 @@ final class HttpServiceMethod {
 
 	@Nullable
 	public Object invoke(Object[] arguments) {
-		HttpRequestDefinition requestDefinition = this.requestDefinitionFactory.initializeRequest();
-		applyArguments(requestDefinition, arguments);
-		requestDefinition.setComplete();
-		return this.responseFunction.execute(requestDefinition);
+		HttpRequestSpec requestSpec = this.requestSpecFactory.initializeRequestSpec();
+		applyArguments(requestSpec, arguments);
+		requestSpec.setComplete();
+		return this.responseFunction.execute(requestSpec);
 	}
 
-	private void applyArguments(HttpRequestDefinition requestDefinition, Object[] arguments) {
+	private void applyArguments(HttpRequestSpec requestSpec, Object[] arguments) {
 		Assert.isTrue(arguments.length == this.parameters.length, "Method argument mismatch");
 		for (int i = 0; i < this.parameters.length; i++) {
 			Object argumentValue = arguments[i];
 			ParameterNameDiscoverer nameDiscoverer = new DefaultParameterNameDiscoverer();
 			this.parameters[i].initParameterNameDiscovery(nameDiscoverer);
-			for (HttpServiceMethodArgumentResolver resolver : this.argumentResolvers) {
-				resolver.resolve(argumentValue, this.parameters[i], requestDefinition);
+			for (HttpServiceArgumentResolver resolver : this.argumentResolvers) {
+				resolver.resolve(argumentValue, this.parameters[i], requestSpec);
 			}
 		}
 	}
 
 
 	/**
-	 * Factory for an {@link HttpRequestDefinition} with values extracted from
-	 * the type and method-level {@link HttpRequest @HttpRequest} annotations.
+	 * Factory for an {@link HttpRequestSpec} with values extracted from
+	 * the type and method-level {@link HttpExchange @HttpRequest} annotations.
 	 */
-	private record HttpRequestDefinitionFactory(
+	private record HttpRequestSpecFactory(
 			@Nullable HttpMethod httpMethod, @Nullable String url,
 			@Nullable MediaType contentType, @Nullable List<MediaType> acceptMediaTypes) {
 
-		private HttpRequestDefinitionFactory(
+		private HttpRequestSpecFactory(
 				@Nullable HttpMethod httpMethod, @Nullable String url,
 				@Nullable MediaType contentType, @Nullable List<MediaType> acceptMediaTypes) {
 
@@ -133,31 +133,31 @@ final class HttpServiceMethod {
 			this.acceptMediaTypes = acceptMediaTypes;
 		}
 
-		public HttpRequestDefinition initializeRequest() {
-			HttpRequestDefinition requestDefinition = new HttpRequestDefinition();
+		public HttpRequestSpec initializeRequestSpec() {
+			HttpRequestSpec requestSpec = new HttpRequestSpec();
 			if (this.httpMethod != null) {
-				requestDefinition.setHttpMethod(this.httpMethod);
+				requestSpec.setHttpMethod(this.httpMethod);
 			}
 			if (this.url != null) {
-				requestDefinition.setUriTemplate(this.url);
+				requestSpec.setUriTemplate(this.url);
 			}
 			if (this.contentType != null) {
-				requestDefinition.getHeaders().setContentType(this.contentType);
+				requestSpec.getHeaders().setContentType(this.contentType);
 			}
 			if (this.acceptMediaTypes != null) {
-				requestDefinition.getHeaders().setAccept(this.acceptMediaTypes);
+				requestSpec.getHeaders().setAccept(this.acceptMediaTypes);
 			}
-			return requestDefinition;
+			return requestSpec;
 		}
 
 
 		/**
 		 * Introspect the method and create the request factory for it.
 		 */
-		public static HttpRequestDefinitionFactory create(Method method, Class<?> containingClass) {
+		public static HttpRequestSpecFactory create(Method method, Class<?> containingClass) {
 
-			HttpRequest annot1 = AnnotatedElementUtils.findMergedAnnotation(containingClass, HttpRequest.class);
-			HttpRequest annot2 = AnnotatedElementUtils.findMergedAnnotation(method, HttpRequest.class);
+			HttpExchange annot1 = AnnotatedElementUtils.findMergedAnnotation(containingClass, HttpExchange.class);
+			HttpExchange annot2 = AnnotatedElementUtils.findMergedAnnotation(method, HttpExchange.class);
 
 			Assert.notNull(annot2, "Expected HttpRequest annotation");
 
@@ -166,12 +166,12 @@ final class HttpServiceMethod {
 			MediaType contentType = initContentType(annot1, annot2);
 			List<MediaType> acceptableMediaTypes = initAccept(annot1, annot2);
 
-			return new HttpRequestDefinitionFactory(httpMethod, url, contentType, acceptableMediaTypes);
+			return new HttpRequestSpecFactory(httpMethod, url, contentType, acceptableMediaTypes);
 		}
 
 
 		@Nullable
-		private static HttpMethod initHttpMethod(@Nullable HttpRequest typeAnnot, HttpRequest annot) {
+		private static HttpMethod initHttpMethod(@Nullable HttpExchange typeAnnot, HttpExchange annot) {
 
 			String value1 = (typeAnnot != null ? typeAnnot.method() : null);
 			String value2 = annot.method();
@@ -188,7 +188,7 @@ final class HttpServiceMethod {
 		}
 
 		@Nullable
-		private static String initUrl(@Nullable HttpRequest typeAnnot, HttpRequest annot) {
+		private static String initUrl(@Nullable HttpExchange typeAnnot, HttpExchange annot) {
 
 			String url1 = (typeAnnot != null ? typeAnnot.url() : null);
 			String url2 = annot.url();
@@ -208,7 +208,7 @@ final class HttpServiceMethod {
 		}
 
 		@Nullable
-		private static MediaType initContentType(@Nullable HttpRequest typeAnnot, HttpRequest annot) {
+		private static MediaType initContentType(@Nullable HttpExchange typeAnnot, HttpExchange annot) {
 
 			String value1 = (typeAnnot != null ? typeAnnot.contentType() : null);
 			String value2 = annot.contentType();
@@ -225,7 +225,7 @@ final class HttpServiceMethod {
 		}
 
 		@Nullable
-		private static List<MediaType> initAccept(@Nullable HttpRequest typeAnnot, HttpRequest annot) {
+		private static List<MediaType> initAccept(@Nullable HttpExchange typeAnnot, HttpExchange annot) {
 
 			String[] value1 = (typeAnnot != null ? typeAnnot.accept() : null);
 			String[] value2 = annot.accept();
@@ -249,12 +249,12 @@ final class HttpServiceMethod {
 	 * return type blocking if necessary.
 	 */
 	private record ResponseFunction(
-			Function<HttpRequestDefinition, Publisher<?>> responseFunction,
+			Function<HttpRequestSpec, Publisher<?>> responseFunction,
 			@Nullable ReactiveAdapter returnTypeAdapter,
 			boolean blockForOptional, Duration blockTimeout) {
 
 		private ResponseFunction(
-				Function<HttpRequestDefinition, Publisher<?>> responseFunction,
+				Function<HttpRequestSpec, Publisher<?>> responseFunction,
 				@Nullable ReactiveAdapter returnTypeAdapter,
 				boolean blockForOptional, Duration blockTimeout) {
 
@@ -265,9 +265,9 @@ final class HttpServiceMethod {
 		}
 
 		@Nullable
-		public Object execute(HttpRequestDefinition requestDefinition) {
+		public Object execute(HttpRequestSpec requestSpec) {
 
-			Publisher<?> responsePublisher = this.responseFunction.apply(requestDefinition);
+			Publisher<?> responsePublisher = this.responseFunction.apply(requestSpec);
 
 			if (this.returnTypeAdapter != null) {
 				return this.returnTypeAdapter.fromPublisher(responsePublisher);
@@ -293,7 +293,7 @@ final class HttpServiceMethod {
 			MethodParameter actualParam = (reactiveAdapter != null ? returnParam.nested() : returnParam.nestedIfOptional());
 			Class<?> actualType = actualParam.getNestedParameterType();
 
-			Function<HttpRequestDefinition, Publisher<?>> responseFunction;
+			Function<HttpRequestSpec, Publisher<?>> responseFunction;
 			if (actualType.equals(void.class) || actualType.equals(Void.class)) {
 				responseFunction = client::requestToVoid;
 			}
@@ -323,7 +323,7 @@ final class HttpServiceMethod {
 		}
 
 		@SuppressWarnings("ConstantConditions")
-		private static Function<HttpRequestDefinition, Publisher<?>> initResponseEntityFunction(
+		private static Function<HttpRequestSpec, Publisher<?>> initResponseEntityFunction(
 				HttpClientAdapter client, MethodParameter methodParam, @Nullable ReactiveAdapter reactiveAdapter) {
 
 			if (reactiveAdapter == null) {
@@ -349,7 +349,7 @@ final class HttpServiceMethod {
 					});
 		}
 
-		private static Function<HttpRequestDefinition, Publisher<?>> initBodyFunction(
+		private static Function<HttpRequestSpec, Publisher<?>> initBodyFunction(
 				HttpClientAdapter client, MethodParameter methodParam, @Nullable ReactiveAdapter reactiveAdapter) {
 
 			ParameterizedTypeReference<?> bodyType =

@@ -25,26 +25,26 @@ import org.springframework.http.ResponseEntity;
 
 
 /**
- * Decouple an {@link HttpServiceProxyFactory#createService(Class) HTTP Service proxy}
- * from the underlying HTTP client.
+ * Contract to abstract the underlying HTTP client and decouple it from the
+ * {@link HttpServiceProxyFactory#createClient(Class) HTTP Service proxy}.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
  */
 public interface HttpClientAdapter {
 
-	Mono<Void> requestToVoid(HttpRequestDefinition requestDefinition);
+	Mono<Void> requestToVoid(HttpRequestSpec spec);
 
-	Mono<HttpHeaders> requestToHeaders(HttpRequestDefinition requestDefinition);
+	Mono<HttpHeaders> requestToHeaders(HttpRequestSpec spec);
 
-	<T> Mono<T> requestToBody(HttpRequestDefinition requestDefinition, ParameterizedTypeReference<T> bodyType);
+	<T> Mono<T> requestToBody(HttpRequestSpec spec, ParameterizedTypeReference<T> bodyType);
 
-	<T> Flux<T> requestToBodyFlux(HttpRequestDefinition requestDefinition, ParameterizedTypeReference<T> bodyType);
+	<T> Flux<T> requestToBodyFlux(HttpRequestSpec spec, ParameterizedTypeReference<T> bodyType);
 
-	Mono<ResponseEntity<Void>> requestToBodilessEntity(HttpRequestDefinition requestDefinition);
+	Mono<ResponseEntity<Void>> requestToBodilessEntity(HttpRequestSpec spec);
 
-	<T> Mono<ResponseEntity<T>> requestToEntity(HttpRequestDefinition requestDefinition, ParameterizedTypeReference<T> bodyType);
+	<T> Mono<ResponseEntity<T>> requestToEntity(HttpRequestSpec spec, ParameterizedTypeReference<T> bodyType);
 
-	<T> Mono<ResponseEntity<Flux<T>>> requestToEntityFlux(HttpRequestDefinition requestDefinition, ParameterizedTypeReference<T> bodyType);
+	<T> Mono<ResponseEntity<Flux<T>>> requestToEntityFlux(HttpRequestSpec spec, ParameterizedTypeReference<T> bodyType);
 
 }

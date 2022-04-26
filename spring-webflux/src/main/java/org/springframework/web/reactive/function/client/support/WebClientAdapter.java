@@ -27,7 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.invoker.HttpClientAdapter;
-import org.springframework.web.service.invoker.HttpRequestDefinition;
+import org.springframework.web.service.invoker.HttpRequestSpec;
 
 
 /**
@@ -47,67 +47,67 @@ public class WebClientAdapter implements HttpClientAdapter {
 
 
 	@Override
-	public Mono<Void> requestToVoid(HttpRequestDefinition request) {
-		return toBodySpec(request).exchangeToMono(ClientResponse::releaseBody);
+	public Mono<Void> requestToVoid(HttpRequestSpec requestSpec) {
+		return toBodySpec(requestSpec).exchangeToMono(ClientResponse::releaseBody);
 	}
 
 	@Override
-	public Mono<HttpHeaders> requestToHeaders(HttpRequestDefinition request) {
-		return toBodySpec(request).retrieve().toBodilessEntity().map(ResponseEntity::getHeaders);
+	public Mono<HttpHeaders> requestToHeaders(HttpRequestSpec requestSpec) {
+		return toBodySpec(requestSpec).retrieve().toBodilessEntity().map(ResponseEntity::getHeaders);
 	}
 
 	@Override
-	public <T> Mono<T> requestToBody(HttpRequestDefinition request, ParameterizedTypeReference<T> bodyType) {
-		return toBodySpec(request).retrieve().bodyToMono(bodyType);
+	public <T> Mono<T> requestToBody(HttpRequestSpec reqrequestSpecest, ParameterizedTypeReference<T> bodyType) {
+		return toBodySpec(reqrequestSpecest).retrieve().bodyToMono(bodyType);
 	}
 
 	@Override
-	public <T> Flux<T> requestToBodyFlux(HttpRequestDefinition request, ParameterizedTypeReference<T> bodyType) {
-		return toBodySpec(request).retrieve().bodyToFlux(bodyType);
+	public <T> Flux<T> requestToBodyFlux(HttpRequestSpec requestSpec, ParameterizedTypeReference<T> bodyType) {
+		return toBodySpec(requestSpec).retrieve().bodyToFlux(bodyType);
 	}
 
 	@Override
-	public Mono<ResponseEntity<Void>> requestToBodilessEntity(HttpRequestDefinition request) {
-		return toBodySpec(request).retrieve().toBodilessEntity();
+	public Mono<ResponseEntity<Void>> requestToBodilessEntity(HttpRequestSpec requestSpec) {
+		return toBodySpec(requestSpec).retrieve().toBodilessEntity();
 	}
 
 	@Override
-	public <T> Mono<ResponseEntity<T>> requestToEntity(HttpRequestDefinition request, ParameterizedTypeReference<T> bodyType) {
-		return toBodySpec(request).retrieve().toEntity(bodyType);
+	public <T> Mono<ResponseEntity<T>> requestToEntity(HttpRequestSpec spec, ParameterizedTypeReference<T> bodyType) {
+		return toBodySpec(spec).retrieve().toEntity(bodyType);
 	}
 
 	@Override
-	public <T> Mono<ResponseEntity<Flux<T>>> requestToEntityFlux(HttpRequestDefinition request, ParameterizedTypeReference<T> bodyType) {
-		return toBodySpec(request).retrieve().toEntityFlux(bodyType);
+	public <T> Mono<ResponseEntity<Flux<T>>> requestToEntityFlux(HttpRequestSpec spec, ParameterizedTypeReference<T> bodyType) {
+		return toBodySpec(spec).retrieve().toEntityFlux(bodyType);
 	}
 
 	@SuppressWarnings("ReactiveStreamsUnusedPublisher")
-	private WebClient.RequestBodySpec toBodySpec(HttpRequestDefinition request) {
+	private WebClient.RequestBodySpec toBodySpec(HttpRequestSpec requestSpec) {
 
-		HttpMethod httpMethod = request.getHttpMethodRequired();
+		HttpMethod httpMethod = requestSpec.getHttpMethodRequired();
 		WebClient.RequestBodyUriSpec uriSpec = this.webClient.method(httpMethod);
 
 		WebClient.RequestBodySpec bodySpec;
-		if (request.getUri() != null) {
-			bodySpec = uriSpec.uri(request.getUri());
+		if (requestSpec.getUri() != null) {
+			bodySpec = uriSpec.uri(requestSpec.getUri());
 		}
-		else if (request.getUriTemplate() != null) {
-			bodySpec = (!request.getUriVariables().isEmpty() ?
-					uriSpec.uri(request.getUriTemplate(), request.getUriVariables()) :
-					uriSpec.uri(request.getUriTemplate(), request.getUriVariableValues()));
+		else if (requestSpec.getUriTemplate() != null) {
+			bodySpec = (!requestSpec.getUriVariables().isEmpty() ?
+					uriSpec.uri(requestSpec.getUriTemplate(), requestSpec.getUriVariables()) :
+					uriSpec.uri(requestSpec.getUriTemplate(), requestSpec.getUriVariableValues()));
 		}
 		else {
 			bodySpec = uriSpec.uri("");
 		}
 
-		bodySpec.headers(headers -> headers.putAll(request.getHeaders()));
-		bodySpec.cookies(cookies -> cookies.putAll(request.getCookies()));
+		bodySpec.headers(headers -> headers.putAll(requestSpec.getHeaders()));
+		bodySpec.cookies(cookies -> cookies.putAll(requestSpec.getCookies()));
 
-		if (request.getBodyValue() != null) {
-			bodySpec.bodyValue(request.getBodyValue());
+		if (requestSpec.getBodyValue() != null) {
+			bodySpec.bodyValue(requestSpec.getBodyValue());
 		}
-		else if (request.getBodyPublisher() != null) {
-			bodySpec.body(request.getBodyPublisher(), request.getBodyPublisherElementType());
+		else if (requestSpec.getBodyPublisher() != null) {
+			bodySpec.body(requestSpec.getBodyPublisher(), requestSpec.getBodyPublisherElementType());
 		}
 
 		return bodySpec;

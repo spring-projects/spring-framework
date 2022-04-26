@@ -29,18 +29,18 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.web.service.annotation.HttpRequest;
+import org.springframework.web.service.annotation.HttpExchange;
 
 
 /**
- * Factory to create a proxy for an HTTP service with {@link HttpRequest} methods.
+ * Factory to create a proxy for an HTTP service with {@link HttpExchange} methods.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
  */
 public class HttpServiceProxyFactory {
 
-	private final List<HttpServiceMethodArgumentResolver> argumentResolvers;
+	private final List<HttpServiceArgumentResolver> argumentResolvers;
 
 	private final HttpClientAdapter clientAdapter;
 
@@ -50,7 +50,7 @@ public class HttpServiceProxyFactory {
 
 
 	public HttpServiceProxyFactory(
-			List<HttpServiceMethodArgumentResolver> argumentResolvers, HttpClientAdapter clientAdapter,
+			List<HttpServiceArgumentResolver> argumentResolvers, HttpClientAdapter clientAdapter,
 			ReactiveAdapterRegistry reactiveAdapterRegistry, Duration blockTimeout) {
 
 		this.argumentResolvers = argumentResolvers;
@@ -66,7 +66,7 @@ public class HttpServiceProxyFactory {
 	 * @param <S> the service type
 	 * @return the created proxy
 	 */
-	public <S> S createService(Class<S> serviceType) {
+	public <S> S createClient(Class<S> serviceType) {
 
 		List<HttpServiceMethod> methods =
 				MethodIntrospector.selectMethods(serviceType, this::isHttpRequestMethod)
@@ -78,7 +78,7 @@ public class HttpServiceProxyFactory {
 	}
 
 	private boolean isHttpRequestMethod(Method method) {
-		return AnnotatedElementUtils.hasAnnotation(method, HttpRequest.class);
+		return AnnotatedElementUtils.hasAnnotation(method, HttpExchange.class);
 	}
 
 	private HttpServiceMethod initServiceMethod(Method method, Class<?> serviceType) {
@@ -93,16 +93,16 @@ public class HttpServiceProxyFactory {
 	 */
 	private static final class HttpServiceMethodInterceptor implements MethodInterceptor {
 
-		private final Map<Method, HttpServiceMethod> serviceMethodMap = new HashMap<>();
+		private final Map<Method, HttpServiceMethod> httpServiceMethods = new HashMap<>();
 
 		private HttpServiceMethodInterceptor(List<HttpServiceMethod> methods) {
-			methods.forEach(serviceMethod -> this.serviceMethodMap.put(serviceMethod.getMethod(), serviceMethod));
+			methods.forEach(serviceMethod -> this.httpServiceMethods.put(serviceMethod.getMethod(), serviceMethod));
 		}
 
 		@Override
-		public Object invoke(MethodInvocation invocation) throws Throwable {
+		public Object invoke(MethodInvocation invocation) {
 			Method method = invocation.getMethod();
-			HttpServiceMethod httpServiceMethod = this.serviceMethodMap.get(method);
+			HttpServiceMethod httpServiceMethod = this.httpServiceMethods.get(method);
 			return httpServiceMethod.invoke(invocation.getArguments());
 		}
 

@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.Mapping;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Mapping
-public @interface HttpRequest {
+public @interface HttpExchange {
 
 	/**
 	 * This is an alias for {@link #url}.
@@ -52,7 +52,7 @@ public @interface HttpRequest {
 
 	/**
 	 * The URL for the request, either a full URL or a path only that is relative
-	 * to a URL declared in a type-level {@code @HttpRequest}, and/or a globally
+	 * to a URL declared in a type-level {@code @HttpExchange}, and/or a globally
 	 * configured base URL.
 	 * <p>By default, this is empty.
 	 */
@@ -66,7 +66,6 @@ public @interface HttpRequest {
 	 * <p>By default, this is empty.
 	 */
 	String method() default "";
-
 
 	/**
 	 * The media type for the {@code "Content-Type"} header.

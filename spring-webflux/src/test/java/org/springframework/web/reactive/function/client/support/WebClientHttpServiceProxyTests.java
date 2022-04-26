@@ -33,7 +33,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.service.annotation.GetRequest;
+import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 
@@ -65,7 +65,7 @@ public class WebClientHttpServiceProxyTests {
 				Collections.emptyList(), webClientAdapter, ReactiveAdapterRegistry.getSharedInstance(),
 				Duration.ofSeconds(5));
 
-		this.httpService = proxyFactory.createService(TestHttpService.class);
+		this.httpService = proxyFactory.createClient(TestHttpService.class);
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -98,7 +98,7 @@ public class WebClientHttpServiceProxyTests {
 
 	private interface TestHttpService {
 
-		@GetRequest("/greeting")
+		@GetExchange("/greeting")
 		Mono<String> getGreeting();
 
 	}

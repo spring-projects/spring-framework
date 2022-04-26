@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.service.annotation.HttpRequest;
+import org.springframework.web.service.annotation.HttpExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -143,44 +143,44 @@ class PathVariableArgumentResolverTests {
 	}
 
 	private Map<String, String> getActualUriVariables() {
-		return this.clientAdapter.getRequestDefinition().getUriVariables();
+		return this.clientAdapter.getRequestSpec().getUriVariables();
 	}
 
 
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private interface Service {
 
-		@HttpRequest
+		@HttpExchange
 		void execute(@PathVariable String id);
 
-		@HttpRequest
+		@HttpExchange
 		void executeNotRequired(@Nullable @PathVariable(required = false) String id);
 
-		@HttpRequest
+		@HttpExchange
 		void executeOptional(@PathVariable Optional<Boolean> id);
 
-		@HttpRequest
+		@HttpExchange
 		void executeOptionalNotRequired(@PathVariable(required = false) Optional<String> id);
 
-		@HttpRequest
+		@HttpExchange
 		void executeNamedWithValue(@Nullable @PathVariable(name = "test", value = "id") String employeeId);
 
-		@HttpRequest
+		@HttpExchange
 		void executeNamed(@PathVariable(name = "id") String employeeId);
 
-		@HttpRequest
+		@HttpExchange
 		void executeValueNamed(@PathVariable("id") String employeeId);
 
-		@HttpRequest
+		@HttpExchange
 		void execute(@PathVariable Object id);
 
-		@HttpRequest
+		@HttpExchange
 		void execute(@PathVariable Boolean id);
 
-		@HttpRequest
+		@HttpExchange
 		void executeValueMap(@Nullable @PathVariable Map<String, String> map);
 
-		@HttpRequest
+		@HttpExchange
 		void executeOptionalValueMap(@PathVariable Map<String, Optional<String>> map);
 	}
 
