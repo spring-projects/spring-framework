@@ -19,7 +19,6 @@ package org.springframework.test.web.servlet.request;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -155,7 +154,7 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 				String filename = part.getSubmittedFileName();
 				InputStream is = part.getInputStream();
 				if (filename != null) {
-					request.addFile(new MockStandardMultipartFile(part, filename));
+					request.addFile(new MockMultipartFile(name, filename, part.getContentType(), is));
 				}
 				else {
 					InputStreamReader reader = new InputStreamReader(is, getCharsetOrDefault(part, defaultCharset));
@@ -179,52 +178,5 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 			}
 		}
 		return defaultCharset;
-	}
-
-	/**
-	 * Spring MultipartFile adapter, wrapping a Servlet Part object.
-	 */
-	@SuppressWarnings("serial")
-	private static class MockStandardMultipartFile extends MockMultipartFile implements Part, Serializable {
-
-		private final Part part;
-
-		private final String filename;
-
-		public MockStandardMultipartFile(Part part, String filename) throws IOException {
-			super(part.getName(), part.getInputStream());
-			this.part = part;
-			this.filename = filename;
-		}
-
-		@Override
-		public String getSubmittedFileName() {
-			return this.part.getSubmittedFileName();
-		}
-
-		@Override
-		public void write(String fileName) throws IOException {
-			this.part.write(fileName);
-		}
-
-		@Override
-		public void delete() throws IOException {
-			this.part.delete();
-		}
-
-		@Override
-		public String getHeader(String name) {
-			return this.part.getHeader(name);
-		}
-
-		@Override
-		public Collection<String> getHeaders(String name) {
-			return this.part.getHeaders(name);
-		}
-
-		@Override
-		public Collection<String> getHeaderNames() {
-			return this.part.getHeaderNames();
-		}
 	}
 }
