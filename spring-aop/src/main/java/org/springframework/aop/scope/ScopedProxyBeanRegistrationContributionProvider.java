@@ -92,7 +92,7 @@ class ScopedProxyBeanRegistrationContributionProvider implements BeanRegistratio
 				statements.addStatement("factory.setTargetBeanName($S)", targetBeanName);
 				statements.addStatement("factory.setBeanFactory(beanFactory)");
 				statements.addStatement("return factory.getObject()");
-				codeContribution.statements().add(statements.toLambdaBody("() ->"));
+				codeContribution.statements().add(statements.toLambda("() ->"));
 				return codeContribution;
 			}
 		};

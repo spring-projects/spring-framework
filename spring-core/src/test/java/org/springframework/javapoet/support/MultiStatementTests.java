@@ -119,7 +119,7 @@ class MultiStatementTests {
 	void singleStatementWithLambda() {
 		MultiStatement statements = new MultiStatement();
 		statements.addStatement("field.method($S)", "hello");
-		CodeBlock codeBlock = statements.toLambdaBody(CodeBlock.of("() ->"));
+		CodeBlock codeBlock = statements.toLambda(CodeBlock.of("() ->"));
 		assertThat(codeBlock.toString()).isEqualTo("() -> field.method(\"hello\")");
 	}
 
@@ -128,7 +128,7 @@ class MultiStatementTests {
 		MultiStatement statements = new MultiStatement();
 		statements.addStatement("field.method($S)", "hello");
 		statements.addStatement("field.anotherMethod($S)", "hello");
-		CodeBlock codeBlock = statements.toLambdaBody(CodeBlock.of("() ->"));
+		CodeBlock codeBlock = statements.toLambda(CodeBlock.of("() ->"));
 		assertThat(codeBlock.toString().lines()).containsExactly(
 				"() -> {",
 				"  field.method(\"hello\");",
@@ -141,7 +141,7 @@ class MultiStatementTests {
 		MultiStatement statements = new MultiStatement();
 		statements.addAll(List.of(0, 1, 2),
 				index -> CodeBlock.of("field[$L] = $S", index, "hello"));
-		CodeBlock codeBlock = statements.toLambdaBody("() ->");
+		CodeBlock codeBlock = statements.toLambda("() ->");
 		assertThat(codeBlock.toString().lines()).containsExactly(
 				"() -> {",
 				"  field[0] = \"hello\";",

@@ -234,7 +234,7 @@ public class InjectionGenerator {
 			code.add(".resolve(beanFactory, false).ifResolved(");
 		}
 		code.add(this.fieldGenerator.generateSetValue("bean", injectionPoint,
-				CodeBlock.of("attributes.get(0)")).toLambdaBody("(attributes) ->"));
+				CodeBlock.of("attributes.get(0)")).toLambda("(attributes) ->"));
 		code.add(")").unindent().unindent();
 		return code.build();
 	}

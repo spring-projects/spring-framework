@@ -421,7 +421,7 @@ public class BeanRegistrationBeanFactoryContribution implements BeanFactoryContr
 			if (statements.isEmpty()) {
 				return;
 			}
-			code.add(statements.toLambdaBody(".customize((" + bdVariable + ") ->"));
+			code.add(statements.toLambda(".customize((" + bdVariable + ") ->"));
 			code.add(")");
 		}
 

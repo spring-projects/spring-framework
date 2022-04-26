@@ -141,7 +141,7 @@ public final class MultiStatement {
 	 * Return a {@link CodeBlock} that applies all the {@code statements} of this
 	 * instance. If only one statement is available, it is not completed using the
 	 * {@code ;} termination so that it can be used in the context of a lambda.
-	 * @return the statement(s)
+	 * @return the body of the lambda
 	 */
 	public CodeBlock toLambdaBody() {
 		Builder code = CodeBlock.builder();
@@ -155,12 +155,12 @@ public final class MultiStatement {
 	/**
 	 * Return a {@link CodeBlock} that applies all the {@code statements} of this
 	 * instance in the context of a lambda.
-	 * @param lambda the context of the lambda, must end with {@code ->}
-	 * @return the lambda body
+	 * @param lambdaParameter the parameter(s) of the lambda, must end with {@code ->}
+	 * @return a lambda whose body is generated from the statements of this instance
 	 */
-	public CodeBlock toLambdaBody(CodeBlock lambda) {
+	public CodeBlock toLambda(CodeBlock lambdaParameter) {
 		Builder code = CodeBlock.builder();
-		code.add(lambda);
+		code.add(lambdaParameter);
 		if (isMulti()) {
 			code.beginControlFlow("");
 		}
@@ -177,11 +177,11 @@ public final class MultiStatement {
 	/**
 	 * Return a {@link CodeBlock} that applies all the {@code statements} of this
 	 * instance in the context of a lambda.
-	 * @param lambda the context of the lambda, must end with {@code ->}
-	 * @return the lambda body
+	 * @param lambdaParameter the parameter(s) of the lambda, must end with {@code ->}
+	 * @return a lambda whose body is generated from the statements of this instance
 	 */
-	public CodeBlock toLambdaBody(String lambda) {
-		return toLambdaBody(CodeBlock.of(lambda));
+	public CodeBlock toLambda(String lambdaParameter) {
+		return toLambda(CodeBlock.of(lambdaParameter));
 	}
 
 	private boolean isMulti() {
