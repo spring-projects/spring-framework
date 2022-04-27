@@ -34,8 +34,8 @@ public interface HttpServiceArgumentResolver {
 	 * Resolve the argument value.
 	 * @param argument the argument value
 	 * @param parameter the method parameter for the argument
-	 * @param requestSpec container to add HTTP request values to
+	 * @param requestValues builder to add HTTP request values to
 	 */
-	void resolve(@Nullable Object argument, MethodParameter parameter, HttpRequestSpec requestSpec);
+	void resolve(@Nullable Object argument, MethodParameter parameter, HttpRequestValues.Builder requestValues);
 
 }

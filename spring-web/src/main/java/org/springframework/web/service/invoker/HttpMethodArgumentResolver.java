@@ -38,7 +38,7 @@ public class HttpMethodArgumentResolver implements HttpServiceArgumentResolver {
 
 	@Override
 	public void resolve(
-			@Nullable Object argument, MethodParameter parameter, HttpRequestSpec requestSpec) {
+			@Nullable Object argument, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
 		if (argument == null) {
 			return;
@@ -47,7 +47,7 @@ public class HttpMethodArgumentResolver implements HttpServiceArgumentResolver {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Resolved HTTP method to: " + httpMethod.name());
 			}
-			requestSpec.setHttpMethod(httpMethod);
+			requestValues.setHttpMethod(httpMethod);
 		}
 	}
 

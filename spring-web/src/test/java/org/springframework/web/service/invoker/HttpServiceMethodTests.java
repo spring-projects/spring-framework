@@ -141,45 +141,45 @@ public class HttpServiceMethodTests {
 	@Test
 	void methodAnnotatedService() {
 
-		MethodAnnotatedService service = this.clientAdapter.createService(MethodAnnotatedService.class);
+		MethodLevelAnnotatedService service = this.clientAdapter.createService(MethodLevelAnnotatedService.class);
 
 		service.performGet();
 
-		HttpRequestSpec request = this.clientAdapter.getRequestSpec();
-		assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.GET);
-		assertThat(request.getUriTemplate()).isNull();
-		assertThat(request.getHeaders().getContentType()).isNull();
-		assertThat(request.getHeaders().getAccept()).isEmpty();
+		HttpRequestValues requestValues = this.clientAdapter.getRequestValues();
+		assertThat(requestValues.getHttpMethod()).isEqualTo(HttpMethod.GET);
+		assertThat(requestValues.getUriTemplate()).isEqualTo("");
+		assertThat(requestValues.getHeaders().getContentType()).isNull();
+		assertThat(requestValues.getHeaders().getAccept()).isEmpty();
 
 		service.performPost();
 
-		request = this.clientAdapter.getRequestSpec();
-		assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.POST);
-		assertThat(request.getUriTemplate()).isEqualTo("/url");
-		assertThat(request.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-		assertThat(request.getHeaders().getAccept()).containsExactly(MediaType.APPLICATION_JSON);
+		requestValues = this.clientAdapter.getRequestValues();
+		assertThat(requestValues.getHttpMethod()).isEqualTo(HttpMethod.POST);
+		assertThat(requestValues.getUriTemplate()).isEqualTo("/url");
+		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(requestValues.getHeaders().getAccept()).containsExactly(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
 	void typeAndMethodAnnotatedService() {
 
-		MethodAnnotatedService service = this.clientAdapter.createService(TypeAndMethodAnnotatedService.class);
+		MethodLevelAnnotatedService service = this.clientAdapter.createService(TypeAndMethodLevelAnnotatedService.class);
 
 		service.performGet();
 
-		HttpRequestSpec request = this.clientAdapter.getRequestSpec();
-		assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.GET);
-		assertThat(request.getUriTemplate()).isEqualTo("/base");
-		assertThat(request.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_CBOR);
-		assertThat(request.getHeaders().getAccept()).containsExactly(MediaType.APPLICATION_CBOR);
+		HttpRequestValues requestValues = this.clientAdapter.getRequestValues();
+		assertThat(requestValues.getHttpMethod()).isEqualTo(HttpMethod.GET);
+		assertThat(requestValues.getUriTemplate()).isEqualTo("/base");
+		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_CBOR);
+		assertThat(requestValues.getHeaders().getAccept()).containsExactly(MediaType.APPLICATION_CBOR);
 
 		service.performPost();
 
-		request = this.clientAdapter.getRequestSpec();
-		assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.POST);
-		assertThat(request.getUriTemplate()).isEqualTo("/base/url");
-		assertThat(request.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-		assertThat(request.getHeaders().getAccept()).containsExactly(MediaType.APPLICATION_JSON);
+		requestValues = this.clientAdapter.getRequestValues();
+		assertThat(requestValues.getHttpMethod()).isEqualTo(HttpMethod.POST);
+		assertThat(requestValues.getUriTemplate()).isEqualTo("/base/url");
+		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(requestValues.getHeaders().getAccept()).containsExactly(MediaType.APPLICATION_JSON);
 	}
 
 	private void verifyClientInvocation(String methodName, @Nullable ParameterizedTypeReference<?> expectedBodyType) {
@@ -191,7 +191,7 @@ public class HttpServiceMethodTests {
 	@SuppressWarnings("unused")
 	private interface ReactorService {
 
-		@HttpExchange
+		@GetExchange
 		Mono<Void> execute();
 
 		@GetExchange
@@ -217,7 +217,7 @@ public class HttpServiceMethodTests {
 	@SuppressWarnings("unused")
 	private interface RxJavaService {
 
-		@HttpExchange
+		@GetExchange
 		Completable execute();
 
 		@GetExchange
@@ -243,7 +243,7 @@ public class HttpServiceMethodTests {
 	@SuppressWarnings("unused")
 	private interface BlockingService {
 
-		@HttpExchange
+		@GetExchange
 		void execute();
 
 		@GetExchange
@@ -261,7 +261,7 @@ public class HttpServiceMethodTests {
 
 
 	@SuppressWarnings("unused")
-	private interface MethodAnnotatedService {
+	private interface MethodLevelAnnotatedService {
 
 		@GetExchange
 		void performGet();
@@ -274,7 +274,7 @@ public class HttpServiceMethodTests {
 
 	@SuppressWarnings("unused")
 	@HttpExchange(url = "/base", contentType = APPLICATION_CBOR_VALUE, accept = APPLICATION_CBOR_VALUE)
-	private interface TypeAndMethodAnnotatedService extends MethodAnnotatedService {
+	private interface TypeAndMethodLevelAnnotatedService extends MethodLevelAnnotatedService {
 	}
 
 }

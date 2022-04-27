@@ -56,7 +56,7 @@ public class PathVariableArgumentResolver implements HttpServiceArgumentResolver
 	@SuppressWarnings("unchecked")
 	@Override
 	public void resolve(
-			@Nullable Object argument, MethodParameter parameter, HttpRequestSpec requestSpec) {
+			@Nullable Object argument, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
 		PathVariable annotation = parameter.getParameterAnnotation(PathVariable.class);
 		if (annotation == null) {
@@ -67,22 +67,26 @@ public class PathVariableArgumentResolver implements HttpServiceArgumentResolver
 			if (argument != null) {
 				Assert.isInstanceOf(Map.class, argument);
 				((Map<String, ?>) argument).forEach((key, value) ->
-						addUriParameter(key, value, annotation.required(), requestSpec));
+						addUriParameter(key, value, annotation.required(), requestValues));
 			}
 		}
 		else {
 			String name = StringUtils.hasText(annotation.value()) ? annotation.value() : annotation.name();
 			name = StringUtils.hasText(name) ? name : parameter.getParameterName();
 			Assert.notNull(name, "Failed to determine path variable name for parameter: " + parameter);
-			addUriParameter(name, argument, annotation.required(), requestSpec);
+			addUriParameter(name, argument, annotation.required(), requestValues);
 		}
 	}
 
 	private void addUriParameter(
-			String name, @Nullable Object value, boolean required, HttpRequestSpec requestSpec) {
+			String name, @Nullable Object value, boolean required, HttpRequestValues.Builder requestValues) {
 
 		if (value instanceof Optional) {
 			value = ((Optional<?>) value).orElse(null);
+		}
+
+		if (!(value instanceof String)) {
+			value = this.conversionService.convert(value, String.class);
 		}
 
 		if (value == null) {
@@ -90,15 +94,11 @@ public class PathVariableArgumentResolver implements HttpServiceArgumentResolver
 			return;
 		}
 
-		if (!(value instanceof String)) {
-			value = this.conversionService.convert(value, String.class);
-		}
-
 		if (logger.isTraceEnabled()) {
 			logger.trace("Resolved path variable '" + name + "' to " + value);
 		}
 
-		requestSpec.getUriVariables().put(name, (String) value);
+		requestValues.setUriVariable(name, (String) value);
 	}
 
 }

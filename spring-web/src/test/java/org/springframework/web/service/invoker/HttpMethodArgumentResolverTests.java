@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.web.service.annotation.GetExchange;
-import org.springframework.web.service.annotation.HttpExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,7 +46,7 @@ public class HttpMethodArgumentResolverTests {
 	@Test
 	void shouldIgnoreArgumentsNotMatchingType() {
 		this.service.execute("test");
-		assertThat(getActualMethod()).isNull();
+		assertThat(getActualMethod()).isEqualTo(HttpMethod.GET);
 	}
 
 	@Test
@@ -59,30 +58,29 @@ public class HttpMethodArgumentResolverTests {
 	@Test
 	void shouldIgnoreNullValue() {
 		this.service.executeForNull(null);
-		assertThat(getActualMethod()).isNull();
+		assertThat(getActualMethod()).isEqualTo(HttpMethod.GET);
 	}
 
-	@Nullable
 	private HttpMethod getActualMethod() {
-		return this.clientAdapter.getRequestSpec().getHttpMethod();
+		return this.clientAdapter.getRequestValues().getHttpMethod();
 	}
 
 
 	private interface Service {
 
-		@HttpExchange
+		@GetExchange
 		void execute(HttpMethod method);
 
 		@GetExchange
 		void executeGet(HttpMethod method);
 
-		@HttpExchange
+		@GetExchange
 		void execute(String test);
 
-		@HttpExchange
+		@GetExchange
 		void execute(HttpMethod firstMethod, HttpMethod secondMethod);
 
-		@HttpExchange
+		@GetExchange
 		void executeForNull(@Nullable HttpMethod method);
 	}
 

@@ -44,7 +44,7 @@ class TestHttpClientAdapter implements HttpClientAdapter {
 	private String invokedMethodName;
 
 	@Nullable
-	private HttpRequestSpec requestSpec;
+	private HttpRequestValues requestValues;
 
 	@Nullable
 	private ParameterizedTypeReference<?> bodyType;
@@ -67,9 +67,9 @@ class TestHttpClientAdapter implements HttpClientAdapter {
 		return this.invokedMethodName;
 	}
 
-	public HttpRequestSpec getRequestSpec() {
-		assertThat(this.requestSpec).isNotNull();
-		return this.requestSpec;
+	public HttpRequestValues getRequestValues() {
+		assertThat(this.requestValues).isNotNull();
+		return this.requestValues;
 	}
 
 	@Nullable
@@ -81,56 +81,56 @@ class TestHttpClientAdapter implements HttpClientAdapter {
 	// HttpClientAdapter implementation
 
 	@Override
-	public Mono<Void> requestToVoid(HttpRequestSpec requestSpec) {
-		saveInput("requestToVoid", requestSpec, null);
+	public Mono<Void> requestToVoid(HttpRequestValues requestValues) {
+		saveInput("requestToVoid", requestValues, null);
 		return Mono.empty();
 	}
 
 	@Override
-	public Mono<HttpHeaders> requestToHeaders(HttpRequestSpec requestSpec) {
-		saveInput("requestToHeaders", requestSpec, null);
+	public Mono<HttpHeaders> requestToHeaders(HttpRequestValues requestValues) {
+		saveInput("requestToHeaders", requestValues, null);
 		return Mono.just(new HttpHeaders());
 	}
 
 	@Override
-	public <T> Mono<T> requestToBody(HttpRequestSpec requestSpec, ParameterizedTypeReference<T> bodyType) {
-		saveInput("requestToBody", requestSpec, bodyType);
+	public <T> Mono<T> requestToBody(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+		saveInput("requestToBody", requestValues, bodyType);
 		return (Mono<T>) Mono.just(getInvokedMethodName());
 	}
 
 	@Override
-	public <T> Flux<T> requestToBodyFlux(HttpRequestSpec requestSpec, ParameterizedTypeReference<T> bodyType) {
-		saveInput("requestToBodyFlux", requestSpec, bodyType);
+	public <T> Flux<T> requestToBodyFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+		saveInput("requestToBodyFlux", requestValues, bodyType);
 		return (Flux<T>) Flux.just("request", "To", "Body", "Flux");
 	}
 
 	@Override
-	public Mono<ResponseEntity<Void>> requestToBodilessEntity(HttpRequestSpec requestSpec) {
-		saveInput("requestToBodilessEntity", requestSpec, null);
+	public Mono<ResponseEntity<Void>> requestToBodilessEntity(HttpRequestValues requestValues) {
+		saveInput("requestToBodilessEntity", requestValues, null);
 		return Mono.just(ResponseEntity.ok().build());
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<T>> requestToEntity(
-			HttpRequestSpec requestSpec, ParameterizedTypeReference<T> type) {
+			HttpRequestValues requestValues, ParameterizedTypeReference<T> type) {
 
-		saveInput("requestToEntity", requestSpec, type);
+		saveInput("requestToEntity", requestValues, type);
 		return Mono.just((ResponseEntity<T>) ResponseEntity.ok("requestToEntity"));
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<Flux<T>>> requestToEntityFlux(
-			HttpRequestSpec requestSpec, ParameterizedTypeReference<T> bodyType) {
+			HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
 
-		saveInput("requestToEntityFlux", requestSpec, bodyType);
+		saveInput("requestToEntityFlux", requestValues, bodyType);
 		return Mono.just(ResponseEntity.ok((Flux<T>) Flux.just("request", "To", "Entity", "Flux")));
 	}
 
 	private <T> void saveInput(
-			String methodName, HttpRequestSpec requestSpec, @Nullable ParameterizedTypeReference<T> bodyType) {
+			String methodName, HttpRequestValues requestValues, @Nullable ParameterizedTypeReference<T> bodyType) {
 
 		this.invokedMethodName = methodName;
-		this.requestSpec = requestSpec;
+		this.requestValues = requestValues;
 		this.bodyType = bodyType;
 	}
 

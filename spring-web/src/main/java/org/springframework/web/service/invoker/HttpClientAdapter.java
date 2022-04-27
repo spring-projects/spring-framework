@@ -33,18 +33,18 @@ import org.springframework.http.ResponseEntity;
  */
 public interface HttpClientAdapter {
 
-	Mono<Void> requestToVoid(HttpRequestSpec spec);
+	Mono<Void> requestToVoid(HttpRequestValues requestValues);
 
-	Mono<HttpHeaders> requestToHeaders(HttpRequestSpec spec);
+	Mono<HttpHeaders> requestToHeaders(HttpRequestValues requestValues);
 
-	<T> Mono<T> requestToBody(HttpRequestSpec spec, ParameterizedTypeReference<T> bodyType);
+	<T> Mono<T> requestToBody(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType);
 
-	<T> Flux<T> requestToBodyFlux(HttpRequestSpec spec, ParameterizedTypeReference<T> bodyType);
+	<T> Flux<T> requestToBodyFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType);
 
-	Mono<ResponseEntity<Void>> requestToBodilessEntity(HttpRequestSpec spec);
+	Mono<ResponseEntity<Void>> requestToBodilessEntity(HttpRequestValues requestValues);
 
-	<T> Mono<ResponseEntity<T>> requestToEntity(HttpRequestSpec spec, ParameterizedTypeReference<T> bodyType);
+	<T> Mono<ResponseEntity<T>> requestToEntity(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType);
 
-	<T> Mono<ResponseEntity<Flux<T>>> requestToEntityFlux(HttpRequestSpec spec, ParameterizedTypeReference<T> bodyType);
+	<T> Mono<ResponseEntity<Flux<T>>> requestToEntityFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType);
 
 }
