@@ -21,7 +21,6 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.service.annotation.GetExchange;
@@ -39,8 +38,7 @@ class PathVariableArgumentResolverTests {
 
 	private final TestHttpClientAdapter clientAdapter = new TestHttpClientAdapter();
 
-	private final Service service = this.clientAdapter.createService(
-			Service.class, new PathVariableArgumentResolver(new DefaultConversionService()));
+	private final Service service = this.clientAdapter.createService(Service.class);
 
 
 	@Test

@@ -16,14 +16,10 @@
 
 package org.springframework.web.service.invoker;
 
-import java.time.Duration;
-import java.util.Arrays;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
@@ -53,11 +49,8 @@ class TestHttpClientAdapter implements HttpClientAdapter {
 	/**
 	 * Create the proxy for the give service type.
 	 */
-	public <S> S createService(Class<S> serviceType, HttpServiceArgumentResolver... resolvers) {
-
-		HttpServiceProxyFactory factory = new HttpServiceProxyFactory(
-				Arrays.asList(resolvers), this, ReactiveAdapterRegistry.getSharedInstance(), Duration.ofSeconds(5));
-
+	public <S> S createService(Class<S> serviceType) {
+		HttpServiceProxyFactory factory = HttpServiceProxyFactory.builder(this).build();
 		return factory.createClient(serviceType);
 	}
 

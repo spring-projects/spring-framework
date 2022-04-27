@@ -19,7 +19,6 @@ package org.springframework.web.reactive.function.client.support;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.function.Consumer;
 
 import okhttp3.mockwebserver.MockResponse;
@@ -30,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.annotation.GetExchange;
@@ -59,11 +57,8 @@ public class WebClientHttpServiceProxyTests {
 				.baseUrl(this.server.url("/").toString())
 				.build();
 
-		WebClientAdapter webClientAdapter = new WebClientAdapter(webClient);
-
-		HttpServiceProxyFactory proxyFactory = new HttpServiceProxyFactory(
-				Collections.emptyList(), webClientAdapter, ReactiveAdapterRegistry.getSharedInstance(),
-				Duration.ofSeconds(5));
+		WebClientAdapter clientAdapter = new WebClientAdapter(webClient);
+		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(clientAdapter).build();
 
 		this.httpService = proxyFactory.createClient(TestHttpService.class);
 	}

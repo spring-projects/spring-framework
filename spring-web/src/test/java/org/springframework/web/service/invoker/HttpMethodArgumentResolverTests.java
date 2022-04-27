@@ -34,7 +34,7 @@ public class HttpMethodArgumentResolverTests {
 
 	private final TestHttpClientAdapter clientAdapter = new TestHttpClientAdapter();
 
-	private final Service service = this.clientAdapter.createService(Service.class, new HttpMethodArgumentResolver());
+	private final Service service = this.clientAdapter.createService(Service.class);
 
 
 	@Test
