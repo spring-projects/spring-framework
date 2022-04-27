@@ -55,12 +55,12 @@ public class PathVariableArgumentResolver implements HttpServiceArgumentResolver
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void resolve(
+	public boolean resolve(
 			@Nullable Object argument, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
 		PathVariable annotation = parameter.getParameterAnnotation(PathVariable.class);
 		if (annotation == null) {
-			return;
+			return false;
 		}
 
 		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
@@ -76,6 +76,8 @@ public class PathVariableArgumentResolver implements HttpServiceArgumentResolver
 			Assert.notNull(name, "Failed to determine path variable name for parameter: " + parameter);
 			addUriParameter(name, argument, annotation.required(), requestValues);
 		}
+
+		return true;
 	}
 
 	private void addUriParameter(

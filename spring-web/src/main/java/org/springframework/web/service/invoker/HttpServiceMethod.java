@@ -30,7 +30,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -81,9 +80,14 @@ final class HttpServiceMethod {
 
 	private static MethodParameter[] initMethodParameters(Method method) {
 		int count = method.getParameterCount();
+		if (count == 0) {
+			return new MethodParameter[0];
+		}
+		DefaultParameterNameDiscoverer nameDiscoverer = new DefaultParameterNameDiscoverer();
 		MethodParameter[] parameters = new MethodParameter[count];
 		for (int i = 0; i < count; i++) {
 			parameters[i] = new MethodParameter(method, i);
+			parameters[i].initParameterNameDiscovery(nameDiscoverer);
 		}
 		return parameters;
 	}
@@ -103,12 +107,12 @@ final class HttpServiceMethod {
 
 	private void applyArguments(HttpRequestValues.Builder requestValues, Object[] arguments) {
 		Assert.isTrue(arguments.length == this.parameters.length, "Method argument mismatch");
-		for (int i = 0; i < this.parameters.length; i++) {
-			Object argumentValue = arguments[i];
-			ParameterNameDiscoverer nameDiscoverer = new DefaultParameterNameDiscoverer();
-			this.parameters[i].initParameterNameDiscovery(nameDiscoverer);
+		for (int i = 0; i < arguments.length; i++) {
+			Object value = arguments[i];
 			for (HttpServiceArgumentResolver resolver : this.argumentResolvers) {
-				resolver.resolve(argumentValue, this.parameters[i], requestValues);
+				if (resolver.resolve(value, this.parameters[i], requestValues)) {
+					break;
+				}
 			}
 		}
 	}
