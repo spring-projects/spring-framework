@@ -25,20 +25,47 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.web.bind.annotation.Mapping;
 
+
 /**
- * Supported method parameters:
+ * Annotation that declares an HTTP service method as an HTTP endpoint defined
+ * through attributes of the annotation and method argument values.
+ *
+ * <p>The annotation may only be used at the type level for example to specify
+ * a base URL path. At the method level, use one of the HTTP method specific,
+ * shortcut annotations, each of which is <em>meta-annotated</em> with
+ * {@link HttpExchange}:
  * <ul>
- * <li>{@link java.net.URI} -- dynamic URL
- * <li>{@link org.springframework.http.HttpMethod} - dynamic HTTP method
- * <li>{@link org.springframework.http.HttpHeaders} - request headers
- * <li>{@link org.springframework.http.HttpCookie} - request headers
- * <li>...
+ * <li>{@link GetExchange}
+ * <li>{@link PostExchange}
+ * <li>{@link PutExchange}
+ * <li>{@link PatchExchange}
+ * <li>{@link DeleteExchange}
+ * <li>{@link OptionsExchange}
+ * <li>{@link HeadExchange}
  * </ul>
+ *
+ * <p>Supported method arguments:
+ * <table>
+ * <tr>
+ * <th>Method Argument</th>
+ * <th>Description</th>
+ * </tr>
+ * <tr>
+ * <td>{@link org.springframework.http.HttpMethod}</td>
+ * <td>Set the HTTP method for the request, overriding the annotation
+ * {@link #method()} attribute value</td>
+ * </tr>
+ * <tr>
+ * <td>{@link org.springframework.web.bind.annotation.PathVariable @PathVariable}</td>
+ * <td>Provide a path variable to expand the URI template with. This may be an
+ * individual value or a Map of values.</td>
+ * </tr>
+ * </table>
  *
  * @author Rossen Stoyanchev
  * @since 6.0
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Mapping
@@ -82,6 +109,5 @@ public @interface HttpExchange {
 	 * <p>By default, this is empty.
 	 */
 	String[] accept() default {};
-
 
 }

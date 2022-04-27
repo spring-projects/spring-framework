@@ -26,7 +26,7 @@ import org.springframework.core.annotation.AliasFor;
 
 
 /**
- * Shortcut for {@link HttpExchange} for HTTP PUT requests.
+ * Shortcut for {@link HttpExchange} for HTTP PATCH requests.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
@@ -34,8 +34,8 @@ import org.springframework.core.annotation.AliasFor;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@HttpExchange(method = "PUT")
-public @interface PutExchange {
+@HttpExchange(method = "PATCH")
+public @interface PatchExchange {
 
 	/**
 	 * Alias for {@link HttpExchange#value}.
