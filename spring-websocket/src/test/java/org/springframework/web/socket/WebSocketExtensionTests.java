@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,10 +18,12 @@ package org.springframework.web.socket;
 
 import java.util.List;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.glassfish.tyrus.core.TyrusExtension;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import org.springframework.web.socket.adapter.standard.StandardToWebSocketExtensionAdapter;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture for {@link WebSocketExtension}
@@ -31,22 +33,32 @@ public class WebSocketExtensionTests {
 
 	@Test
 	public void parseHeaderSingle() {
-		List<WebSocketExtension> extensions = WebSocketExtension.parseExtensions("x-test-extension ; foo=bar ; bar=baz");
-		assertThat(extensions, Matchers.hasSize(1));
+		List<WebSocketExtension> extensions =
+				WebSocketExtension.parseExtensions("x-test-extension ; foo=bar ; bar=baz");
+
+		assertThat(extensions).hasSize(1);
 		WebSocketExtension extension = extensions.get(0);
 
-		assertEquals("x-test-extension", extension.getName());
-		assertEquals(2, extension.getParameters().size());
-		assertEquals("bar", extension.getParameters().get("foo"));
-		assertEquals("baz", extension.getParameters().get("bar"));
+		assertThat(extension.getName()).isEqualTo("x-test-extension");
+		assertThat(extension.getParameters().size()).isEqualTo(2);
+		assertThat(extension.getParameters().get("foo")).isEqualTo("bar");
+		assertThat(extension.getParameters().get("bar")).isEqualTo("baz");
 	}
 
 	@Test
 	public void parseHeaderMultiple() {
-		List<WebSocketExtension> extensions = WebSocketExtension.parseExtensions("x-foo-extension, x-bar-extension");
-		assertThat(extensions, Matchers.hasSize(2));
-		assertEquals("x-foo-extension", extensions.get(0).getName());
-		assertEquals("x-bar-extension", extensions.get(1).getName());
+		List<WebSocketExtension> extensions =
+				WebSocketExtension.parseExtensions("x-foo-extension, x-bar-extension");
+
+		assertThat(extensions.stream().map(WebSocketExtension::getName))
+				.containsExactly("x-foo-extension", "x-bar-extension");
 	}
 
+	@Test // gh-26449
+	public void equality() {
+		WebSocketExtension ext1 = new WebSocketExtension("myExtension");
+		WebSocketExtension ext2 = new StandardToWebSocketExtensionAdapter(new TyrusExtension("myExtension"));
+
+		assertThat(ext1).isEqualTo(ext2);
+	}
 }

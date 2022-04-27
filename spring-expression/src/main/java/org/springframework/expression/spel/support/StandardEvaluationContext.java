@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,9 @@ package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.BeanResolver;
@@ -38,18 +38,30 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Provides a default EvaluationContext implementation.
+ * A powerful and highly configurable {@link EvaluationContext} implementation.
+ * This context uses standard implementations of all applicable strategies,
+ * based on reflection to resolve properties, methods and fields.
  *
- * <p>To resolve properties/methods/fields this context uses a reflection mechanism.
+ * <p>For a simpler builder-style context variant for data-binding purposes,
+ * consider using {@link SimpleEvaluationContext} instead which allows for
+ * opting into several SpEL features as needed by specific evaluation cases.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 3.0
+ * @see SimpleEvaluationContext
+ * @see ReflectivePropertyAccessor
+ * @see ReflectiveConstructorResolver
+ * @see ReflectiveMethodResolver
+ * @see StandardTypeLocator
+ * @see StandardTypeConverter
+ * @see StandardTypeComparator
+ * @see StandardOperatorOverloader
  */
 public class StandardEvaluationContext implements EvaluationContext {
 
-	private TypedValue rootObject = TypedValue.NULL;
+	private TypedValue rootObject;
 
 	@Nullable
 	private volatile List<PropertyAccessor> propertyAccessors;
@@ -76,19 +88,27 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	private OperatorOverloader operatorOverloader = new StandardOperatorOverloader();
 
-	private final Map<String, Object> variables = new HashMap<>();
+	private final Map<String, Object> variables = new ConcurrentHashMap<>();
 
 
+	/**
+	 * Create a {@code StandardEvaluationContext} with a null root object.
+	 */
 	public StandardEvaluationContext() {
-		setRootObject(null);
+		this.rootObject = TypedValue.NULL;
 	}
 
-	public StandardEvaluationContext(Object rootObject) {
-		setRootObject(rootObject);
+	/**
+	 * Create a {@code StandardEvaluationContext} with the given root object.
+	 * @param rootObject the root object to use
+	 * @see #setRootObject
+	 */
+	public StandardEvaluationContext(@Nullable Object rootObject) {
+		this.rootObject = new TypedValue(rootObject);
 	}
 
 
-	public void setRootObject(Object rootObject, TypeDescriptor typeDescriptor) {
+	public void setRootObject(@Nullable Object rootObject, TypeDescriptor typeDescriptor) {
 		this.rootObject = new TypedValue(rootObject, typeDescriptor);
 	}
 
@@ -183,7 +203,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	@Override
 	public TypeConverter getTypeConverter() {
 		if (this.typeConverter == null) {
-			 this.typeConverter = new StandardTypeConverter();
+			this.typeConverter = new StandardTypeConverter();
 		}
 		return this.typeConverter;
 	}
@@ -209,12 +229,22 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	@Override
-	public void setVariable(String name, @Nullable Object value) {
-		this.variables.put(name, value);
+	public void setVariable(@Nullable String name, @Nullable Object value) {
+		// For backwards compatibility, we ignore null names here...
+		// And since ConcurrentHashMap cannot store null values, we simply take null
+		// as a remove from the Map (with the same result from lookupVariable below).
+		if (name != null) {
+			if (value != null) {
+				this.variables.put(name, value);
+			}
+			else {
+				this.variables.remove(name);
+			}
+		}
 	}
 
-	public void setVariables(Map<String,Object> variables) {
-		this.variables.putAll(variables);
+	public void setVariables(Map<String, Object> variables) {
+		variables.forEach(this::setVariable);
 	}
 
 	public void registerFunction(String name, Method method) {
@@ -222,6 +252,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	@Override
+	@Nullable
 	public Object lookupVariable(String name) {
 		return this.variables.get(name);
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,145 +17,174 @@
 package org.springframework.web.reactive.function.client;
 
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Optional;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Implementations of {@link ExchangeFilterFunction} that provide various useful request filter
- * operations, such as basic authentication, error handling, etc.
+ * Static factory methods providing access to built-in implementations of
+ * {@link ExchangeFilterFunction} for basic authentication, error handling, etc.
  *
  * @author Rob Winch
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 5.0
  */
 public abstract class ExchangeFilterFunctions {
 
 	/**
-	 * Name of the {@link ClientRequest} attribute that contains the username, as used by
-	 * {@link #basicAuthentication()}
+	 * Name of the request attribute with {@link Credentials} for {@link #basicAuthentication()}.
+	 * @deprecated as of Spring 5.1 in favor of using
+	 * {@link HttpHeaders#setBasicAuth(String, String)} while building the request.
 	 */
-	public static final String USERNAME_ATTRIBUTE = ExchangeFilterFunctions.class.getName() + ".username";
-
-	/**
-	 * Name of the {@link ClientRequest} attribute that contains the password, as used by
-	 * {@link #basicAuthentication()}
-	 */
-	public static final String PASSWORD_ATTRIBUTE = ExchangeFilterFunctions.class.getName() + ".password";
+	@Deprecated
+	public static final String BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE =
+			ExchangeFilterFunctions.class.getName() + ".basicAuthenticationCredentials";
 
 
 	/**
-	 * Return a filter that adds an Authorization header for HTTP Basic Authentication, based on
-	 * the given username and password.
-	 * @param username the username to use
-	 * @param password the password to use
-	 * @return the {@link ExchangeFilterFunction} that adds the Authorization header
+	 * Consume up to the specified number of bytes from the response body and
+	 * cancel if any more data arrives.
+	 * <p>Internally delegates to {@link DataBufferUtils#takeUntilByteCount}.
+	 * @param maxByteCount the limit as number of bytes
+	 * @return the filter to limit the response size with
+	 * @since 5.1
 	 */
-	public static ExchangeFilterFunction basicAuthentication(String username, String password) {
-		Assert.notNull(username, "'username' must not be null");
-		Assert.notNull(password, "'password' must not be null");
-
-		return basicAuthenticationInternal(r -> Optional.of(new Credentials(username, password)));
+	public static ExchangeFilterFunction limitResponseSize(long maxByteCount) {
+		return (request, next) ->
+				next.exchange(request).map(response ->
+						response.mutate()
+								.body(body -> DataBufferUtils.takeUntilByteCount(body, maxByteCount))
+								.build());
 	}
 
 	/**
-	 * Return a filter that adds an Authorization header for HTTP Basic Authentication, based on
-	 * the username and password provided in the
-	 * {@linkplain ClientRequest#attributes() request attributes}. If the attributes are not found,
-	 * no authorization header
-	 * @return the {@link ExchangeFilterFunction} that adds the Authorization header
-	 * @see #USERNAME_ATTRIBUTE
-	 * @see #PASSWORD_ATTRIBUTE
-	 */
-	public static ExchangeFilterFunction basicAuthentication() {
-		return basicAuthenticationInternal(
-				request -> {
-					Optional<String> username = request.attribute(USERNAME_ATTRIBUTE).map(o -> (String)o);
-					Optional<String> password = request.attribute(PASSWORD_ATTRIBUTE).map(o -> (String)o);
-					if (username.isPresent() && password.isPresent()) {
-						return Optional.of(new Credentials(username.get(), password.get()));
-					} else {
-						return Optional.empty();
-					}
-				});
-	}
-
-	private static ExchangeFilterFunction basicAuthenticationInternal(
-			Function<ClientRequest, Optional<Credentials>> credentialsFunction) {
-
-		return ExchangeFilterFunction.ofRequestProcessor(
-				clientRequest -> credentialsFunction.apply(clientRequest).map(
-						credentials -> {
-							ClientRequest authorizedRequest = ClientRequest.from(clientRequest)
-									.headers(headers -> {
-										headers.set(HttpHeaders.AUTHORIZATION,
-												authorization(credentials));
-									})
-									.build();
-							return Mono.just(authorizedRequest);
-						})
-						.orElse(Mono.just(clientRequest)));
-	}
-
-	private static String authorization(Credentials credentials) {
-		byte[] credentialBytes = credentials.toByteArray(StandardCharsets.ISO_8859_1);
-		byte[] encodedBytes = Base64.getEncoder().encode(credentialBytes);
-		String encodedCredentials = new String(encodedBytes, StandardCharsets.ISO_8859_1);
-		return "Basic " + encodedCredentials;
-	}
-
-	/**
-	 * Return a filter that returns a given {@link Throwable} as response if the given
+	 * Return a filter that generates an error signal when the given
 	 * {@link HttpStatus} predicate matches.
-	 * @param statusPredicate the predicate that should match the
-	 * {@linkplain ClientResponse#statusCode() response status}
-	 * @param exceptionFunction the function that returns the exception
-	 * @return the {@link ExchangeFilterFunction} that returns the given exception if the predicate
-	 * matches
+	 * @param statusPredicate the predicate to check the HTTP status with
+	 * @param exceptionFunction the function that to create the exception
+	 * @return the filter to generate an error signal
 	 */
 	public static ExchangeFilterFunction statusError(Predicate<HttpStatus> statusPredicate,
 			Function<ClientResponse, ? extends Throwable> exceptionFunction) {
 
-		Assert.notNull(statusPredicate, "'statusPredicate' must not be null");
-		Assert.notNull(exceptionFunction, "'exceptionFunction' must not be null");
+		Assert.notNull(statusPredicate, "Predicate must not be null");
+		Assert.notNull(exceptionFunction, "Function must not be null");
 
 		return ExchangeFilterFunction.ofResponseProcessor(
-				clientResponse -> {
-					if (statusPredicate.test(clientResponse.statusCode())) {
-						return Mono.error(exceptionFunction.apply(clientResponse));
-					}
-					else {
-						return Mono.just(clientResponse);
-					}
-				}
-		);
+				response -> (statusPredicate.test(response.statusCode()) ?
+						Mono.error(exceptionFunction.apply(response)) : Mono.just(response)));
+	}
+
+	/**
+	 * Return a filter that applies HTTP Basic Authentication to the request
+	 * headers via {@link HttpHeaders#setBasicAuth(String)} and
+	 * {@link HttpHeaders#encodeBasicAuth(String, String, Charset)}.
+	 * @param username the username
+	 * @param password the password
+	 * @return the filter to add authentication headers with
+	 * @see HttpHeaders#encodeBasicAuth(String, String, Charset)
+	 * @see HttpHeaders#setBasicAuth(String)
+	 */
+	public static ExchangeFilterFunction basicAuthentication(String username, String password) {
+		String encodedCredentials = HttpHeaders.encodeBasicAuth(username, password, null);
+		return (request, next) ->
+				next.exchange(ClientRequest.from(request)
+						.headers(headers -> headers.setBasicAuth(encodedCredentials))
+						.build());
+	}
+
+	/**
+	 * Variant of {@link #basicAuthentication(String, String)} that looks up
+	 * the {@link Credentials Credentials} in a
+	 * {@link #BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE request attribute}.
+	 * @return the filter to use
+	 * @see Credentials
+	 * @deprecated as of Spring 5.1 in favor of using
+	 * {@link HttpHeaders#setBasicAuth(String, String)} while building the request.
+	 */
+	@Deprecated
+	public static ExchangeFilterFunction basicAuthentication() {
+		return (request, next) -> {
+			Object attr = request.attributes().get(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE);
+			if (attr instanceof Credentials) {
+				Credentials cred = (Credentials) attr;
+				return next.exchange(ClientRequest.from(request)
+						.headers(headers -> headers.setBasicAuth(cred.username, cred.password))
+						.build());
+			}
+			else {
+				return next.exchange(request);
+			}
+		};
 	}
 
 
-	private static final class Credentials {
+	/**
+	 * Stores username and password for HTTP basic authentication.
+	 * @deprecated as of Spring 5.1 in favor of using
+	 * {@link HttpHeaders#setBasicAuth(String, String)} while building the request.
+	 */
+	@Deprecated
+	public static final class Credentials {
 
-		private String username;
+		private final String username;
 
-		private String password;
+		private final String password;
 
+		/**
+		 * Create a new {@code Credentials} instance with the given username and password.
+		 * @param username the username
+		 * @param password the password
+		 */
 		public Credentials(String username, String password) {
+			Assert.notNull(username, "'username' must not be null");
+			Assert.notNull(password, "'password' must not be null");
 			this.username = username;
 			this.password = password;
 		}
 
-		public byte[] toByteArray(Charset charset) {
-			String credentials = this.username + ":" + this.password;
-			return credentials.getBytes(charset);
+		/**
+		 * Return a {@literal Consumer} that stores the given username and password
+		 * as a request attribute of type {@code Credentials} that is in turn
+		 * used by {@link ExchangeFilterFunctions#basicAuthentication()}.
+		 * @param username the username
+		 * @param password the password
+		 * @return a consumer that can be passed into
+		 * {@linkplain ClientRequest.Builder#attributes(java.util.function.Consumer)}
+		 * @see ClientRequest.Builder#attributes(java.util.function.Consumer)
+		 * @see #BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE
+		 */
+		public static Consumer<Map<String, Object>> basicAuthenticationCredentials(String username, String password) {
+			Credentials credentials = new Credentials(username, password);
+			return (map -> map.put(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE, credentials));
 		}
 
+		@Override
+		public boolean equals(@Nullable Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof Credentials)) {
+				return false;
+			}
+			Credentials otherCred = (Credentials) other;
+			return (this.username.equals(otherCred.username) && this.password.equals(otherCred.password));
+		}
+
+		@Override
+		public int hashCode() {
+			return 31 * this.username.hashCode() + this.password.hashCode();
+		}
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,10 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
+import org.springframework.core.annotation.RepeatableContainers;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -32,6 +36,7 @@ import org.springframework.util.MultiValueMap;
  * @author Mark Pollack
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.0
  */
 public class StandardMethodMetadata implements MethodMetadata {
@@ -40,11 +45,15 @@ public class StandardMethodMetadata implements MethodMetadata {
 
 	private final boolean nestedAnnotationsAsMap;
 
+	private final MergedAnnotations mergedAnnotations;
+
 
 	/**
 	 * Create a new StandardMethodMetadata wrapper for the given Method.
 	 * @param introspectedMethod the Method to introspect
+	 * @deprecated since 5.2 in favor of obtaining instances via {@link AnnotationMetadata}
 	 */
+	@Deprecated
 	public StandardMethodMetadata(Method introspectedMethod) {
 		this(introspectedMethod, false);
 	}
@@ -59,13 +68,22 @@ public class StandardMethodMetadata implements MethodMetadata {
 	 * {@link org.springframework.core.annotation.AnnotationAttributes} for compatibility
 	 * with ASM-based {@link AnnotationMetadata} implementations
 	 * @since 3.1.1
+	 * @deprecated since 5.2 in favor of obtaining instances via {@link AnnotationMetadata}
 	 */
+	@Deprecated
 	public StandardMethodMetadata(Method introspectedMethod, boolean nestedAnnotationsAsMap) {
 		Assert.notNull(introspectedMethod, "Method must not be null");
 		this.introspectedMethod = introspectedMethod;
 		this.nestedAnnotationsAsMap = nestedAnnotationsAsMap;
+		this.mergedAnnotations = MergedAnnotations.from(
+				introspectedMethod, SearchStrategy.DIRECT, RepeatableContainers.none());
 	}
 
+
+	@Override
+	public MergedAnnotations getAnnotations() {
+		return this.mergedAnnotations;
+	}
 
 	/**
 	 * Return the underlying Method.
@@ -106,34 +124,47 @@ public class StandardMethodMetadata implements MethodMetadata {
 
 	@Override
 	public boolean isOverridable() {
-		return (!isStatic() && !isFinal() && !Modifier.isPrivate(this.introspectedMethod.getModifiers()));
+		return !isStatic() && !isFinal() && !isPrivate();
+	}
+
+	private boolean isPrivate() {
+		return Modifier.isPrivate(this.introspectedMethod.getModifiers());
 	}
 
 	@Override
-	public boolean isAnnotated(String annotationName) {
-		return AnnotatedElementUtils.isAnnotated(this.introspectedMethod, annotationName);
-	}
-
-	@Override
-	public Map<String, Object> getAnnotationAttributes(String annotationName) {
-		return getAnnotationAttributes(annotationName, false);
-	}
-
-	@Override
+	@Nullable
 	public Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+		if (this.nestedAnnotationsAsMap) {
+			return MethodMetadata.super.getAnnotationAttributes(annotationName, classValuesAsString);
+		}
 		return AnnotatedElementUtils.getMergedAnnotationAttributes(this.introspectedMethod,
-				annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
+				annotationName, classValuesAsString, false);
 	}
 
 	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName) {
-		return getAllAnnotationAttributes(annotationName, false);
-	}
-
-	@Override
+	@Nullable
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+		if (this.nestedAnnotationsAsMap) {
+			return MethodMetadata.super.getAllAnnotationAttributes(annotationName, classValuesAsString);
+		}
 		return AnnotatedElementUtils.getAllAnnotationAttributes(this.introspectedMethod,
-				annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
+				annotationName, classValuesAsString, false);
+	}
+
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		return ((this == obj) || ((obj instanceof StandardMethodMetadata) &&
+				this.introspectedMethod.equals(((StandardMethodMetadata) obj).introspectedMethod)));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.introspectedMethod.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return this.introspectedMethod.toString();
 	}
 
 }

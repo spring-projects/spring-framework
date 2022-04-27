@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.List;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.server.RequestPath;
 import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -40,7 +41,8 @@ public interface ResourceResolver {
 	 * Resolve the supplied request and request path to a {@link Resource} that
 	 * exists under one of the given resource locations.
 	 * @param exchange the current exchange
-	 * @param requestPath the portion of the request path to use
+	 * @param requestPath the portion of the request path to use. This is
+	 * expected to be the encoded path, i.e. {@link RequestPath#value()}.
 	 * @param locations the locations to search in when looking up resources
 	 * @param chain the chain of remaining resolvers to delegate to
 	 * @return the resolved resource or an empty {@code Mono} if unresolved
@@ -53,7 +55,8 @@ public interface ResourceResolver {
 	 * to access the resource that is located at the given <em>internal</em>
 	 * resource path.
 	 * <p>This is useful when rendering URL links to clients.
-	 * @param resourcePath the internal resource path
+	 * @param resourcePath the "internal" resource path to resolve a path for
+	 * public use. This is expected to be the encoded path.
 	 * @param locations the locations to search in when looking up resources
 	 * @param chain the chain of resolvers to delegate to
 	 * @return the resolved public URL path or an empty {@code Mono} if unresolved

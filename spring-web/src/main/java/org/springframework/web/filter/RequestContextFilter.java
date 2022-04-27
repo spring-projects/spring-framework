@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -100,8 +101,8 @@ public class RequestContextFilter extends OncePerRequestFilter {
 		}
 		finally {
 			resetContextHolders();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Cleared thread-bound request context: " + request);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Cleared thread-bound request context: " + request);
 			}
 			attributes.requestCompleted();
 		}
@@ -110,8 +111,8 @@ public class RequestContextFilter extends OncePerRequestFilter {
 	private void initContextHolders(HttpServletRequest request, ServletRequestAttributes requestAttributes) {
 		LocaleContextHolder.setLocale(request.getLocale(), this.threadContextInheritable);
 		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Bound request context to thread: " + request);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Bound request context to thread: " + request);
 		}
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -84,19 +84,25 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 				public String getFilename() {
 					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}
+				@Override
+				public long contentLength() throws IOException {
+					long length = inputMessage.getHeaders().getContentLength();
+					return (length != -1 ? length : super.contentLength());
+				}
 			};
 		}
-		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {
+		else if (Resource.class == clazz || ByteArrayResource.class.isAssignableFrom(clazz)) {
 			byte[] body = StreamUtils.copyToByteArray(inputMessage.getBody());
 			return new ByteArrayResource(body) {
 				@Override
+				@Nullable
 				public String getFilename() {
 					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}
 			};
 		}
 		else {
-			throw new IllegalStateException("Unsupported resource class: " + clazz);
+			throw new HttpMessageNotReadableException("Unsupported resource class: " + clazz, inputMessage);
 		}
 	}
 
@@ -125,6 +131,8 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 	protected void writeContent(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+		// We cannot use try-with-resources here for the InputStream, since we have
+		// custom handling of the close() method in a finally-block.
 		try {
 			InputStream in = resource.getInputStream();
 			try {

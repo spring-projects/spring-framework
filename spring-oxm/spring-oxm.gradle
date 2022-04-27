@@ -1,0 +1,66 @@
+plugins {
+	id "org.unbroken-dome.xjc"
+}
+
+description = "Spring Object/XML Marshalling"
+
+configurations {
+	jibx
+}
+
+dependencies {
+	jibx "org.jibx:jibx-bind:1.3.3"
+	jibx "org.apache.bcel:bcel:6.0"
+}
+
+xjc {
+	xjcVersion = '2.2'
+}
+
+sourceSets {
+	test {
+		xjcTargetPackage = 'org.springframework.oxm.jaxb.test'
+	}
+}
+
+dependencies {
+	api(project(":spring-beans"))
+	api(project(":spring-core"))
+	optional("javax.xml.bind:jaxb-api")
+	optional("javax.activation:javax.activation-api")
+	optional("com.thoughtworks.xstream:xstream")
+	optional("org.jibx:jibx-run")
+	testImplementation(project(":spring-context"))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation("org.ogce:xpp3")
+	testImplementation("org.codehaus.jettison:jettison") {
+		exclude group: "stax", module: "stax-api"
+	}
+	//testImplementation(files(genJaxb.classesDir).builtBy(genJaxb))
+	testImplementation("org.xmlunit:xmlunit-assertj")
+	testImplementation("org.xmlunit:xmlunit-matchers")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
+}
+
+// JiBX compiler is currently not compatible with JDK 9+.
+// If testToolchain has been set, we assume the custom JDK version is 9+.
+if ((JavaVersion.current() == JavaVersion.VERSION_1_8) && !project.hasProperty("testToolchain")) {
+	compileTestJava {
+		def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
+
+		doLast() {
+			project.ant {
+				taskdef(name: "jibx",
+						classname: "org.jibx.binding.ant.CompileTask",
+						classpath: configurations.jibx.asPath)
+
+				jibx(verbose: false, load: true, binding: bindingXml) {
+					classpathset(dir: sourceSets.test.java.classesDirectory.get().getAsFile()) {
+						include(name: "**/jibx/**/*")
+					}
+				}
+			}
+		}
+	}
+}

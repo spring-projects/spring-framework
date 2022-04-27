@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,14 +19,15 @@ package org.springframework.web.method.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -39,16 +40,27 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test fixture with {@link ModelAttributeMethodProcessor}.
  *
  * @author Rossen Stoyanchev
+ * @author Vladislav Kisel
  */
 public class ModelAttributeMethodProcessorTests {
 
@@ -64,12 +76,13 @@ public class ModelAttributeMethodProcessorTests {
 	private MethodParameter paramModelAttr;
 	private MethodParameter paramBindingDisabledAttr;
 	private MethodParameter paramNonSimpleType;
+	private MethodParameter beanWithConstructorArgs;
 
 	private MethodParameter returnParamNamedModelAttr;
 	private MethodParameter returnParamNonSimpleType;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.request = new ServletWebRequest(new MockHttpServletRequest());
 		this.container = new ModelAndViewContainer();
@@ -77,7 +90,7 @@ public class ModelAttributeMethodProcessorTests {
 
 		Method method = ModelAttributeHandler.class.getDeclaredMethod("modelAttribute",
 				TestBean.class, Errors.class, int.class, TestBean.class,
-				TestBean.class, TestBean.class);
+				TestBean.class, TestBean.class, TestBeanWithConstructorArgs.class);
 
 		this.paramNamedValidModelAttr = new SynthesizingMethodParameter(method, 0);
 		this.paramErrors = new SynthesizingMethodParameter(method, 1);
@@ -85,6 +98,7 @@ public class ModelAttributeMethodProcessorTests {
 		this.paramModelAttr = new SynthesizingMethodParameter(method, 3);
 		this.paramBindingDisabledAttr = new SynthesizingMethodParameter(method, 4);
 		this.paramNonSimpleType = new SynthesizingMethodParameter(method, 5);
+		this.beanWithConstructorArgs = new SynthesizingMethodParameter(method, 6);
 
 		method = getClass().getDeclaredMethod("annotatedReturnValue");
 		this.returnParamNamedModelAttr = new MethodParameter(method, -1);
@@ -96,12 +110,12 @@ public class ModelAttributeMethodProcessorTests {
 
 	@Test
 	public void supportedParameters() throws Exception {
-		assertTrue(this.processor.supportsParameter(this.paramNamedValidModelAttr));
-		assertTrue(this.processor.supportsParameter(this.paramModelAttr));
+		assertThat(this.processor.supportsParameter(this.paramNamedValidModelAttr)).isTrue();
+		assertThat(this.processor.supportsParameter(this.paramModelAttr)).isTrue();
 
-		assertFalse(this.processor.supportsParameter(this.paramErrors));
-		assertFalse(this.processor.supportsParameter(this.paramInt));
-		assertFalse(this.processor.supportsParameter(this.paramNonSimpleType));
+		assertThat(this.processor.supportsParameter(this.paramErrors)).isFalse();
+		assertThat(this.processor.supportsParameter(this.paramInt)).isFalse();
+		assertThat(this.processor.supportsParameter(this.paramNonSimpleType)).isFalse();
 	}
 
 	@Test
@@ -109,32 +123,32 @@ public class ModelAttributeMethodProcessorTests {
 		processor = new ModelAttributeMethodProcessor(true);
 
 		// Only non-simple types, even if not annotated
-		assertTrue(this.processor.supportsParameter(this.paramNamedValidModelAttr));
-		assertTrue(this.processor.supportsParameter(this.paramErrors));
-		assertTrue(this.processor.supportsParameter(this.paramModelAttr));
-		assertTrue(this.processor.supportsParameter(this.paramNonSimpleType));
+		assertThat(this.processor.supportsParameter(this.paramNamedValidModelAttr)).isTrue();
+		assertThat(this.processor.supportsParameter(this.paramErrors)).isTrue();
+		assertThat(this.processor.supportsParameter(this.paramModelAttr)).isTrue();
+		assertThat(this.processor.supportsParameter(this.paramNonSimpleType)).isTrue();
 
-		assertFalse(this.processor.supportsParameter(this.paramInt));
+		assertThat(this.processor.supportsParameter(this.paramInt)).isFalse();
 	}
 
 	@Test
 	public void supportedReturnTypes() throws Exception {
 		processor = new ModelAttributeMethodProcessor(false);
-		assertTrue(this.processor.supportsReturnType(returnParamNamedModelAttr));
-		assertFalse(this.processor.supportsReturnType(returnParamNonSimpleType));
+		assertThat(this.processor.supportsReturnType(returnParamNamedModelAttr)).isTrue();
+		assertThat(this.processor.supportsReturnType(returnParamNonSimpleType)).isFalse();
 	}
 
 	@Test
 	public void supportedReturnTypesInDefaultResolutionMode() throws Exception {
 		processor = new ModelAttributeMethodProcessor(true);
-		assertTrue(this.processor.supportsReturnType(returnParamNamedModelAttr));
-		assertTrue(this.processor.supportsReturnType(returnParamNonSimpleType));
+		assertThat(this.processor.supportsReturnType(returnParamNamedModelAttr)).isTrue();
+		assertThat(this.processor.supportsReturnType(returnParamNonSimpleType)).isTrue();
 	}
 
 	@Test
 	public void bindExceptionRequired() throws Exception {
-		assertTrue(this.processor.isBindExceptionRequired(null, this.paramNonSimpleType));
-		assertFalse(this.processor.isBindExceptionRequired(null, this.paramNamedValidModelAttr));
+		assertThat(this.processor.isBindExceptionRequired(null, this.paramNonSimpleType)).isTrue();
+		assertThat(this.processor.isBindExceptionRequired(null, this.paramNamedValidModelAttr)).isFalse();
 	}
 
 	@Test
@@ -166,8 +180,8 @@ public class ModelAttributeMethodProcessorTests {
 
 		this.processor.resolveArgument(this.paramNamedValidModelAttr, this.container, this.request, factory);
 
-		assertTrue(dataBinder.isBindInvoked());
-		assertTrue(dataBinder.isValidateInvoked());
+		assertThat(dataBinder.isBindInvoked()).isTrue();
+		assertThat(dataBinder.isValidateInvoked()).isTrue();
 	}
 
 	@Test
@@ -185,8 +199,8 @@ public class ModelAttributeMethodProcessorTests {
 
 		this.processor.resolveArgument(this.paramNamedValidModelAttr, this.container, this.request, factory);
 
-		assertFalse(dataBinder.isBindInvoked());
-		assertTrue(dataBinder.isValidateInvoked());
+		assertThat(dataBinder.isBindInvoked()).isFalse();
+		assertThat(dataBinder.isValidateInvoked()).isTrue();
 	}
 
 	@Test
@@ -201,11 +215,11 @@ public class ModelAttributeMethodProcessorTests {
 
 		this.processor.resolveArgument(this.paramBindingDisabledAttr, this.container, this.request, factory);
 
-		assertFalse(dataBinder.isBindInvoked());
-		assertTrue(dataBinder.isValidateInvoked());
+		assertThat(dataBinder.isBindInvoked()).isFalse();
+		assertThat(dataBinder.isValidateInvoked()).isTrue();
 	}
 
-	@Test(expected = BindException.class)
+	@Test
 	public void resolveArgumentBindException() throws Exception {
 		String name = "testBean";
 		Object target = new TestBean();
@@ -216,7 +230,8 @@ public class ModelAttributeMethodProcessorTests {
 		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
 		given(binderFactory.createBinder(this.request, target, name)).willReturn(dataBinder);
 
-		this.processor.resolveArgument(this.paramNonSimpleType, this.container, this.request, binderFactory);
+		assertThatExceptionOfType(BindException.class).isThrownBy(() ->
+				this.processor.resolveArgument(this.paramNonSimpleType, this.container, this.request, binderFactory));
 		verify(binderFactory).createBinder(this.request, target, name);
 	}
 
@@ -237,23 +252,42 @@ public class ModelAttributeMethodProcessorTests {
 		this.processor.resolveArgument(this.paramModelAttr, this.container, this.request, binderFactory);
 
 		Object[] values = this.container.getModel().values().toArray();
-		assertSame("Resolved attribute should be updated to be last", testBean, values[1]);
-		assertSame("BindingResult of resolved attr should be last", dataBinder.getBindingResult(), values[2]);
+		assertThat(values[1]).as("Resolved attribute should be updated to be last").isSameAs(testBean);
+		assertThat(values[2]).as("BindingResult of resolved attr should be last").isSameAs(dataBinder.getBindingResult());
 	}
 
 	@Test
 	public void handleAnnotatedReturnValue() throws Exception {
 		this.processor.handleReturnValue("expected", this.returnParamNamedModelAttr, this.container, this.request);
-		assertEquals("expected", this.container.getModel().get("modelAttrName"));
+		assertThat(this.container.getModel().get("modelAttrName")).isEqualTo("expected");
 	}
 
 	@Test
 	public void handleNotAnnotatedReturnValue() throws Exception {
 		TestBean testBean = new TestBean("expected");
 		this.processor.handleReturnValue(testBean, this.returnParamNonSimpleType, this.container, this.request);
-		assertSame(testBean, this.container.getModel().get("testBean"));
+		assertThat(this.container.getModel().get("testBean")).isSameAs(testBean);
 	}
 
+	@Test  // gh-25182
+	public void resolveConstructorListArgumentFromCommaSeparatedRequestParameter() throws Exception {
+		MockHttpServletRequest mockRequest = new MockHttpServletRequest();
+		mockRequest.addParameter("listOfStrings", "1,2");
+		ServletWebRequest requestWithParam = new ServletWebRequest(mockRequest);
+
+		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
+		given(factory.createBinder(any(), any(), eq("testBeanWithConstructorArgs")))
+				.willAnswer(invocation -> {
+					WebRequestDataBinder binder = new WebRequestDataBinder(invocation.getArgument(1));
+					// Add conversion service which will convert "1,2" to a list
+					binder.setConversionService(new DefaultFormattingConversionService());
+					return binder;
+				});
+
+		Object resolved = this.processor.resolveArgument(this.beanWithConstructorArgs, this.container, requestWithParam, factory);
+		assertThat(resolved).isInstanceOf(TestBeanWithConstructorArgs.class);
+		assertThat(((TestBeanWithConstructorArgs) resolved).listOfStrings).containsExactly("1", "2");
+	}
 
 	private void testGetAttributeFromModel(String expectedAttrName, MethodParameter param) throws Exception {
 		Object target = new TestBean();
@@ -273,7 +307,6 @@ public class ModelAttributeMethodProcessorTests {
 		private boolean bindInvoked;
 
 		private boolean validateInvoked;
-
 
 		public StubRequestDataBinder(Object target, String objectName) {
 			super(target, objectName);
@@ -310,7 +343,7 @@ public class ModelAttributeMethodProcessorTests {
 	}
 
 
-	@SessionAttributes(types=TestBean.class)
+	@SessionAttributes(types = TestBean.class)
 	private static class ModelAttributeHandler {
 
 		@SuppressWarnings("unused")
@@ -320,16 +353,27 @@ public class ModelAttributeMethodProcessorTests {
 				int intArg,
 				@ModelAttribute TestBean defaultNameAttr,
 				@ModelAttribute(name="noBindAttr", binding=false) @Valid TestBean noBindAttr,
-				TestBean notAnnotatedAttr) {
+				TestBean notAnnotatedAttr,
+				TestBeanWithConstructorArgs beanWithConstructorArgs) {
 		}
 	}
 
 
-	@ModelAttribute("modelAttrName") @SuppressWarnings("unused")
+	static class TestBeanWithConstructorArgs {
+
+		final List<String> listOfStrings;
+
+		public TestBeanWithConstructorArgs(List<String> listOfStrings) {
+			this.listOfStrings = listOfStrings;
+		}
+	}
+
+
+	@ModelAttribute("modelAttrName")
+	@SuppressWarnings("unused")
 	private String annotatedReturnValue() {
 		return null;
 	}
-
 
 	@SuppressWarnings("unused")
 	private TestBean notAnnotatedReturnValue() {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,10 +34,10 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class MailSendException extends MailException {
 
-	private transient final Map<Object, Exception> failedMessages;
+	private final transient Map<Object, Exception> failedMessages;
 
 	@Nullable
-	private Exception[] messageExceptions;
+	private final Exception[] messageExceptions;
 
 
 	/**
@@ -56,6 +56,7 @@ public class MailSendException extends MailException {
 	public MailSendException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 		this.failedMessages = new LinkedHashMap<>();
+		this.messageExceptions = null;
 	}
 
 	/**
@@ -65,13 +66,13 @@ public class MailSendException extends MailException {
 	 * to the invoked send method.
 	 * @param msg the detail message
 	 * @param cause the root cause from the mail API in use
-	 * @param failedMessages Map of failed messages as keys and thrown
+	 * @param failedMessages a Map of failed messages as keys and thrown
 	 * exceptions as values
 	 */
 	public MailSendException(@Nullable String msg, @Nullable Throwable cause, Map<Object, Exception> failedMessages) {
 		super(msg, cause);
 		this.failedMessages = new LinkedHashMap<>(failedMessages);
-		this.messageExceptions = failedMessages.values().toArray(new Exception[failedMessages.size()]);
+		this.messageExceptions = failedMessages.values().toArray(new Exception[0]);
 	}
 
 	/**
@@ -79,7 +80,7 @@ public class MailSendException extends MailException {
 	 * messages that failed as keys, and the thrown exceptions as values.
 	 * <p>The messages should be the same that were originally passed
 	 * to the invoked send method.
-	 * @param failedMessages Map of failed messages as keys and thrown
+	 * @param failedMessages a Map of failed messages as keys and thrown
 	 * exceptions as values
 	 */
 	public MailSendException(Map<Object, Exception> failedMessages) {
@@ -123,6 +124,7 @@ public class MailSendException extends MailException {
 
 
 	@Override
+	@Nullable
 	public String getMessage() {
 		if (ObjectUtils.isEmpty(this.messageExceptions)) {
 			return super.getMessage();

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,17 +16,20 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
+import java.net.URLDecoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.RequestPath;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -52,12 +55,34 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	@Nullable
 	private MultiValueMap<String, HttpCookie> cookies;
 
+	@Nullable
+	private SslInfo sslInfo;
+
+	@Nullable
+	private String id;
+
+	@Nullable
+	private String logPrefix;
+
 
 	/**
 	 * Constructor with the URI and headers for the request.
 	 * @param uri the URI for the request
 	 * @param contextPath the context path for the request
-	 * @param headers the headers for the request
+	 * @param headers the headers for the request (as {@link MultiValueMap})
+	 * @since 5.3
+	 */
+	public AbstractServerHttpRequest(URI uri, @Nullable String contextPath, MultiValueMap<String, String> headers) {
+		this.uri = uri;
+		this.path = RequestPath.parse(uri, contextPath);
+		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
+	}
+
+	/**
+	 * Constructor with the URI and headers for the request.
+	 * @param uri the URI for the request
+	 * @param contextPath the context path for the request
+	 * @param headers the headers for the request (as {@link HttpHeaders})
 	 */
 	public AbstractServerHttpRequest(URI uri, @Nullable String contextPath, HttpHeaders headers) {
 		this.uri = uri;
@@ -65,6 +90,27 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 	}
 
+
+	@Override
+	public String getId() {
+		if (this.id == null) {
+			this.id = initId();
+			if (this.id == null) {
+				this.id = ObjectUtils.getIdentityHexString(this);
+			}
+		}
+		return this.id;
+	}
+
+	/**
+	 * Obtain the request id to use, or {@code null} in which case the Object
+	 * identity of this request instance is used.
+	 * @since 5.1
+	 */
+	@Nullable
+	protected String initId() {
+		return null;
+	}
 
 	@Override
 	public URI getURI() {
@@ -112,8 +158,15 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		return queryParams;
 	}
 
+	@SuppressWarnings("deprecation")
 	private String decodeQueryParam(String value) {
-		return StringUtils.uriDecode(value, StandardCharsets.UTF_8);
+		try {
+			return URLDecoder.decode(value, "UTF-8");
+		}
+		catch (UnsupportedEncodingException ex) {
+			// Should never happen but we got a platform default fallback anyway.
+			return URLDecoder.decode(value);
+		}
 	}
 
 	@Override
@@ -134,5 +187,49 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * thread-safe access to cookie data.
 	 */
 	protected abstract MultiValueMap<String, HttpCookie> initCookies();
+
+	@Nullable
+	@Override
+	public SslInfo getSslInfo() {
+		if (this.sslInfo == null) {
+			this.sslInfo = initSslInfo();
+		}
+		return this.sslInfo;
+	}
+
+	/**
+	 * Obtain SSL session information from the underlying "native" request.
+	 * @return the session information, or {@code null} if none available
+	 * @since 5.0.2
+	 */
+	@Nullable
+	protected abstract SslInfo initSslInfo();
+
+	/**
+	 * Return the underlying server response.
+	 * <p><strong>Note:</strong> This is exposed mainly for internal framework
+	 * use such as WebSocket upgrades in the spring-webflux module.
+	 */
+	public abstract <T> T getNativeRequest();
+
+	/**
+	 * For internal use in logging at the HTTP adapter layer.
+	 * @since 5.1
+	 */
+	String getLogPrefix() {
+		if (this.logPrefix == null) {
+			this.logPrefix = "[" + initLogPrefix() + "] ";
+		}
+		return this.logPrefix;
+	}
+
+	/**
+	 * Subclasses can override this to provide the prefix to use for log messages.
+	 * <p>By default, this is {@link #getId()}.
+	 * @since 5.3.15
+	 */
+	protected String initLogPrefix() {
+		return getId();
+	}
 
 }

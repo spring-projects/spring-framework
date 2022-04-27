@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -77,10 +77,10 @@ public class ProfileValueChecker extends Statement {
 	 * <p>If a test is not enabled, this method will abort further evaluation
 	 * of the execution chain with a failed assumption; otherwise, this method
 	 * will simply evaluate the next {@link Statement} in the execution chain.
-	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(Class)
-	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(Method, Class)
 	 * @throws AssumptionViolatedException if the test is disabled
 	 * @throws Throwable if evaluation of the next statement fails
+	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(Class)
+	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(Method, Class)
 	 */
 	@Override
 	public void evaluate() throws Throwable {

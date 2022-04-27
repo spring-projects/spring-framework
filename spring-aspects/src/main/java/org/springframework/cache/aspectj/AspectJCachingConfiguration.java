@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,29 +29,20 @@ import org.springframework.context.annotation.Role;
  *
  * @author Chris Beams
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 3.1
  * @see org.springframework.cache.annotation.EnableCaching
  * @see org.springframework.cache.annotation.CachingConfigurationSelector
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class AspectJCachingConfiguration extends AbstractCachingConfiguration {
 
 	@Bean(name = CacheManagementConfigUtils.CACHE_ASPECT_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public AnnotationCacheAspect cacheAspect() {
 		AnnotationCacheAspect cacheAspect = AnnotationCacheAspect.aspectOf();
-		if (this.cacheResolver != null) {
-			cacheAspect.setCacheResolver(this.cacheResolver);
-		}
-		else if (this.cacheManager != null) {
-			cacheAspect.setCacheManager(this.cacheManager);
-		}
-		if (this.keyGenerator != null) {
-			cacheAspect.setKeyGenerator(this.keyGenerator);
-		}
-		if (this.errorHandler != null) {
-			cacheAspect.setErrorHandler(this.errorHandler);
-		}
+		cacheAspect.configure(this.errorHandler, this.keyGenerator, this.cacheResolver, this.cacheManager);
 		return cacheAspect;
 	}
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <!--
 	Tests for independent prototype behaviour.
@@ -8,16 +8,16 @@
 <beans>
 
 	<!-- Simple target -->
-	<bean id="target" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="target" class="org.springframework.beans.testfixture.beans.TestBean">
 		<!-- initial value :-) -->
 		<property name="name"><value>Adam</value></property>
 	</bean>
 
-	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor">
+	<bean id="nopInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor">
 	</bean>
 
 	<bean id="countingBeforeAdvice"
-		class="org.springframework.tests.aop.advice.CountingBeforeAdvice"
+		class="org.springframework.aop.testfixture.advice.CountingBeforeAdvice"
 	/>
 
 	<!--
@@ -49,7 +49,7 @@
 	-->
 	<bean id="noTarget"
 		class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
+		<property name="proxyInterfaces"><value>org.springframework.beans.testfixture.beans.ITestBean</value></property>
 		<property name="interceptorNames"><value>nopInterceptor,unsupportedInterceptor</value></property>
 	</bean>
 

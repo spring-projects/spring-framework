@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,7 +34,7 @@ import org.springframework.ui.Model;
  * Or controllers may return model attribute(s) and rely on a default view name
  * being selected based on the request path.
  *
- * <p>{@link Rendering} can be used to combine a view name with model attributes,
+ * <p>{@code Rendering} can be used to combine a view name with model attributes,
  * set the HTTP status or headers, and for other more advanced options around
  * redirect scenarios.
  *
@@ -87,6 +87,8 @@ public interface Rendering {
 
 	/**
 	 * Defines a builder for {@link Rendering}.
+	 *
+	 * @param <B> a self reference to the builder type
 	 */
 	interface Builder<B extends Builder<B>> {
 
@@ -147,7 +149,6 @@ public interface Rendering {
 		 * Whether to the provided redirect URL should be prepended with the
 		 * application context path (if any).
 		 * <p>By default this is set to {@code true}.
-		 *
 		 * @see RedirectView#setContextRelative(boolean)
 		 */
 		RedirectBuilder contextRelative(boolean contextRelative);
@@ -156,7 +157,6 @@ public interface Rendering {
 		 * Whether to append the query string of the current URL to the target
 		 * redirect URL or not.
 		 * <p>By default this is set to {@code false}.
-		 *
 		 * @see RedirectView#setPropagateQuery(boolean)
 		 */
 		RedirectBuilder propagateQuery(boolean propagate);

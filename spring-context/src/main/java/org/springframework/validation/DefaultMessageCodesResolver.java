@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
@@ -142,7 +143,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 * object/field-specific code, a field-specific code, a plain error code.
 	 * <p>Arrays, Lists and Maps are resolved both for specific elements and
 	 * the whole collection.
-	 * <p>See the {@link DefaultMessageCodesResolver class level Javadoc} for
+	 * <p>See the {@link DefaultMessageCodesResolver class level javadoc} for
 	 * details on the generated codes.
 	 * @return the list of codes
 	 */
@@ -242,11 +243,10 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 		 * null elements altogether.
 		 */
 		public static String toDelimitedString(String... elements) {
-			StringBuilder rtn = new StringBuilder();
+			StringJoiner rtn = new StringJoiner(CODE_SEPARATOR);
 			for (String element : elements) {
 				if (StringUtils.hasLength(element)) {
-					rtn.append(rtn.length() == 0 ? "" : CODE_SEPARATOR);
-					rtn.append(element);
+					rtn.add(element);
 				}
 			}
 			return rtn.toString();

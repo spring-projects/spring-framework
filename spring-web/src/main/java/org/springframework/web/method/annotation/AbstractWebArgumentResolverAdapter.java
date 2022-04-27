@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -81,17 +81,20 @@ public abstract class AbstractWebArgumentResolverAdapter implements HandlerMetho
 		}
 		catch (Exception ex) {
 			// ignore (see class-level doc)
-			logger.debug("Error in checking support for parameter [" + parameter + "], message: " + ex.getMessage());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Error in checking support for parameter [" + parameter + "]: " + ex.getMessage());
+			}
 			return false;
 		}
 	}
 
 	/**
 	 * Delegate to the {@link WebArgumentResolver} instance.
-	 * @exception IllegalStateException if the resolved value is not assignable
+	 * @throws IllegalStateException if the resolved value is not assignable
 	 * to the method parameter.
 	 */
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 

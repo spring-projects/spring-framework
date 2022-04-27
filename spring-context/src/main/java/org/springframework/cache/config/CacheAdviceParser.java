@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -72,7 +72,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 		CacheNamespaceHandler.parseKeyGenerator(element, builder.getBeanDefinition());
 
 		List<Element> cacheDefs = DomUtils.getChildElementsByTagName(element, DEFS_ELEMENT);
-		if (cacheDefs.size() >= 1) {
+		if (!cacheDefs.isEmpty()) {
 			// Using attributes source.
 			List<RootBeanDefinition> attributeSourceDefinitions = parseDefinitionsSources(cacheDefs, parserContext);
 			builder.addPropertyValue("cacheOperationSources", attributeSourceDefinitions);
@@ -111,13 +111,9 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			CacheableOperation.Builder builder = prop.merge(opElement,
 					parserContext.getReaderContext(), new CacheableOperation.Builder());
 			builder.setUnless(getAttributeValue(opElement, "unless", ""));
-			builder.setSync(Boolean.valueOf(getAttributeValue(opElement, "sync", "false")));
+			builder.setSync(Boolean.parseBoolean(getAttributeValue(opElement, "sync", "false")));
 
-			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
-			if (col == null) {
-				col = new ArrayList<>(2);
-				cacheOpMap.put(nameHolder, col);
-			}
+			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
 
@@ -132,19 +128,15 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 			String wide = opElement.getAttribute("all-entries");
 			if (StringUtils.hasText(wide)) {
-				builder.setCacheWide(Boolean.valueOf(wide.trim()));
+				builder.setCacheWide(Boolean.parseBoolean(wide.trim()));
 			}
 
 			String after = opElement.getAttribute("before-invocation");
 			if (StringUtils.hasText(after)) {
-				builder.setBeforeInvocation(Boolean.valueOf(after.trim()));
+				builder.setBeforeInvocation(Boolean.parseBoolean(after.trim()));
 			}
 
-			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
-			if (col == null) {
-				col = new ArrayList<>(2);
-				cacheOpMap.put(nameHolder, col);
-			}
+			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
 
@@ -158,11 +150,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 					parserContext.getReaderContext(), new CachePutOperation.Builder());
 			builder.setUnless(getAttributeValue(opElement, "unless", ""));
 
-			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
-			if (col == null) {
-				col = new ArrayList<>(2);
-				cacheOpMap.put(nameHolder, col);
-			}
+			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
 

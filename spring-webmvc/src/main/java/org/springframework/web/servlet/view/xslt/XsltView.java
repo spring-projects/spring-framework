@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.io.Reader;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.ErrorListener;
@@ -202,7 +203,9 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @see #setTransformerFactoryClass
 	 * @see #getTransformerFactory()
 	 */
-	protected TransformerFactory newTransformerFactory(@Nullable Class<? extends TransformerFactory> transformerFactoryClass) {
+	protected TransformerFactory newTransformerFactory(
+			@Nullable Class<? extends TransformerFactory> transformerFactoryClass) {
+
 		if (transformerFactoryClass != null) {
 			try {
 				return ReflectionUtils.accessibleConstructor(transformerFactoryClass).newInstance();
@@ -342,7 +345,9 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @see #copyOutputProperties(Transformer)
 	 * @see #configureIndentation(Transformer)
 	 */
-	protected void configureTransformer(Map<String, Object> model, HttpServletResponse response, Transformer transformer) {
+	protected void configureTransformer(Map<String, Object> model, HttpServletResponse response,
+			Transformer transformer) {
+
 		copyModelParameters(model, transformer);
 		copyOutputProperties(transformer);
 		configureIndentation(transformer);
@@ -424,9 +429,6 @@ public class XsltView extends AbstractUrlBasedView {
 		Source stylesheetSource = getStylesheetSource();
 		try {
 			Templates templates = getTransformerFactory().newTemplates(stylesheetSource);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Loading templates '" + templates + "'");
-			}
 			return templates;
 		}
 		catch (TransformerConfigurationException ex) {
@@ -462,7 +464,7 @@ public class XsltView extends AbstractUrlBasedView {
 		Assert.state(url != null, "'url' not set");
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Loading XSLT stylesheet from '" + url + "'");
+			logger.debug("Applying stylesheet [" + url + "]");
 		}
 		try {
 			Resource resource = obtainApplicationContext().getResource(url);

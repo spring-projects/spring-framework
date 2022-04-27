@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.InvalidPathException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.EventListener;
@@ -29,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
@@ -86,7 +88,7 @@ import org.springframework.web.util.WebUtils;
  */
 public class MockServletContext implements ServletContext {
 
-	/** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish: {@value} */
+	/** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish: {@value}. */
 	private static final String COMMON_DEFAULT_SERVLET_NAME = "default";
 
 	private static final String TEMP_DIR_SYSTEM_PROPERTY = "java.io.tmpdir";
@@ -266,6 +268,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Nullable
 	public String getMimeType(String filePath) {
 		String extension = StringUtils.getFilenameExtension(filePath);
 		if (this.mimeTypes.containsKey(extension)) {
@@ -292,8 +295,10 @@ public class MockServletContext implements ServletContext {
 	@Nullable
 	public Set<String> getResourcePaths(String path) {
 		String actualPath = (path.endsWith("/") ? path : path + "/");
-		Resource resource = this.resourceLoader.getResource(getResourceLocation(actualPath));
+		String resourceLocation = getResourceLocation(actualPath);
+		Resource resource = null;
 		try {
+			resource = this.resourceLoader.getResource(resourceLocation);
 			File file = resource.getFile();
 			String[] fileList = file.list();
 			if (ObjectUtils.isEmpty(fileList)) {
@@ -309,8 +314,11 @@ public class MockServletContext implements ServletContext {
 			}
 			return resourcePaths;
 		}
-		catch (IOException ex) {
-			logger.warn("Couldn't get resource paths for " + resource, ex);
+		catch (InvalidPathException | IOException ex ) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not get resource paths for " +
+						(resource != null ? resource : resourceLocation), ex);
+			}
 			return null;
 		}
 	}
@@ -318,18 +326,23 @@ public class MockServletContext implements ServletContext {
 	@Override
 	@Nullable
 	public URL getResource(String path) throws MalformedURLException {
-		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
-		if (!resource.exists()) {
-			return null;
-		}
+		String resourceLocation = getResourceLocation(path);
+		Resource resource = null;
 		try {
+			resource = this.resourceLoader.getResource(resourceLocation);
+			if (!resource.exists()) {
+				return null;
+			}
 			return resource.getURL();
 		}
 		catch (MalformedURLException ex) {
 			throw ex;
 		}
-		catch (IOException ex) {
-			logger.warn("Couldn't get URL for " + resource, ex);
+		catch (InvalidPathException | IOException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not get URL for resource " +
+						(resource != null ? resource : resourceLocation), ex);
+			}
 			return null;
 		}
 	}
@@ -337,15 +350,20 @@ public class MockServletContext implements ServletContext {
 	@Override
 	@Nullable
 	public InputStream getResourceAsStream(String path) {
-		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
-		if (!resource.exists()) {
-			return null;
-		}
+		String resourceLocation = getResourceLocation(path);
+		Resource resource = null;
 		try {
+			resource = this.resourceLoader.getResource(resourceLocation);
+			if (!resource.exists()) {
+				return null;
+			}
 			return resource.getInputStream();
 		}
-		catch (IOException ex) {
-			logger.warn("Couldn't open InputStream for " + resource, ex);
+		catch (InvalidPathException | IOException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not open InputStream for resource " +
+						(resource != null ? resource : resourceLocation), ex);
+			}
 			return null;
 		}
 	}
@@ -413,8 +431,8 @@ public class MockServletContext implements ServletContext {
 		registerNamedDispatcher(this.defaultServletName, new MockRequestDispatcher(this.defaultServletName));
 	}
 
-	@Override
 	@Deprecated
+	@Override
 	@Nullable
 	public Servlet getServlet(String name) {
 		return null;
@@ -451,12 +469,17 @@ public class MockServletContext implements ServletContext {
 	@Override
 	@Nullable
 	public String getRealPath(String path) {
-		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
+		String resourceLocation = getResourceLocation(path);
+		Resource resource = null;
 		try {
+			resource = this.resourceLoader.getResource(resourceLocation);
 			return resource.getFile().getAbsolutePath();
 		}
-		catch (IOException ex) {
-			logger.warn("Couldn't determine real path of resource " + resource, ex);
+		catch (InvalidPathException | IOException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not determine real path of resource " +
+						(resource != null ? resource : resourceLocation), ex);
+			}
 			return null;
 		}
 	}
@@ -571,33 +594,33 @@ public class MockServletContext implements ServletContext {
 		return this.sessionCookieConfig;
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	public void setSessionTimeout(int sessionTimeout) {
 		this.sessionTimeout = sessionTimeout;
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	public int getSessionTimeout() {
 		return this.sessionTimeout;
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	public void setRequestCharacterEncoding(@Nullable String requestCharacterEncoding) {
 		this.requestCharacterEncoding = requestCharacterEncoding;
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	@Nullable
 	public String getRequestCharacterEncoding() {
 		return this.requestCharacterEncoding;
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	public void setResponseCharacterEncoding(@Nullable String responseCharacterEncoding) {
 		this.responseCharacterEncoding = responseCharacterEncoding;
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	@Nullable
 	public String getResponseCharacterEncoding() {
 		return this.responseCharacterEncoding;
@@ -613,7 +636,7 @@ public class MockServletContext implements ServletContext {
 		throw new UnsupportedOperationException();
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	public ServletRegistration.Dynamic addJspFile(String servletName, String jspFile) {
 		throw new UnsupportedOperationException();
 	}

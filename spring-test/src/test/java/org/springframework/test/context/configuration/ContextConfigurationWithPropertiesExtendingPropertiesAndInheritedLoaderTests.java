@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,12 +19,12 @@ package org.springframework.test.context.configuration;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.junit4.PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests;
-import org.springframework.tests.sample.beans.Pet;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests which verify that the same custom {@link ContextLoader} can
@@ -50,11 +50,11 @@ public class ContextConfigurationWithPropertiesExtendingPropertiesAndInheritedLo
 
 	@Test
 	public void verifyExtendedAnnotationAutowiredFields() {
-		assertNotNull("The dog field should have been autowired.", this.dog);
-		assertEquals("Fido", this.dog.getName());
+		assertThat(this.dog).as("The dog field should have been autowired.").isNotNull();
+		assertThat(this.dog.getName()).isEqualTo("Fido");
 
-		assertNotNull("The testString2 field should have been autowired.", this.testString2);
-		assertEquals("Test String #2", this.testString2);
+		assertThat(this.testString2).as("The testString2 field should have been autowired.").isNotNull();
+		assertThat(this.testString2).isEqualTo("Test String #2");
 	}
 
 }

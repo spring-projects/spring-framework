@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,11 +17,11 @@
 package org.springframework.web.bind.annotation;
 
 /**
- * Java 5 enumeration of HTTP request methods. Intended for use with the
+ * Enumeration of HTTP request methods. Intended for use with the
  * {@link RequestMapping#method()} attribute of the {@link RequestMapping} annotation.
  *
  * <p>Note that, by default, {@link org.springframework.web.servlet.DispatcherServlet}
- * supports GET, HEAD, POST, PUT, PATCH and DELETE only. DispatcherServlet will
+ * supports GET, HEAD, POST, PUT, PATCH, and DELETE only. DispatcherServlet will
  * process TRACE and OPTIONS with the default HttpServlet behavior unless explicitly
  * told to dispatch those request types as well: Check out the "dispatchOptionsRequest"
  * and "dispatchTraceRequest" properties, switching them to "true" if necessary.

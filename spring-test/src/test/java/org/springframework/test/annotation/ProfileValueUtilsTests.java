@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,10 +20,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link ProfileValueUtils}.
@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @since 3.0
  */
-public class ProfileValueUtilsTests {
+class ProfileValueUtilsTests {
 
 	private static final String NON_ANNOTATED_METHOD = "nonAnnotatedMethod";
 	private static final String ENABLED_ANNOTATED_METHOD = "enabledAnnotatedMethod";
@@ -41,51 +41,47 @@ public class ProfileValueUtilsTests {
 	private static final String VALUE = "enigma";
 
 
-	@BeforeClass
-	public static void setProfileValue() {
+	@BeforeAll
+	static void setProfileValue() {
 		System.setProperty(NAME, VALUE);
 	}
 
 	private void assertClassIsEnabled(Class<?> testClass) throws Exception {
-		assertTrue("Test class [" + testClass + "] should be enabled.",
-			ProfileValueUtils.isTestEnabledInThisEnvironment(testClass));
+		assertThat(ProfileValueUtils.isTestEnabledInThisEnvironment(testClass)).as("Test class [" + testClass + "] should be enabled.").isTrue();
 	}
 
 	private void assertClassIsDisabled(Class<?> testClass) throws Exception {
-		assertFalse("Test class [" + testClass + "] should be disbled.",
-			ProfileValueUtils.isTestEnabledInThisEnvironment(testClass));
+		assertThat(ProfileValueUtils.isTestEnabledInThisEnvironment(testClass)).as("Test class [" + testClass + "] should be disabled.").isFalse();
 	}
 
 	private void assertMethodIsEnabled(String methodName, Class<?> testClass) throws Exception {
 		Method testMethod = testClass.getMethod(methodName);
-		assertTrue("Test method [" + testMethod + "] should be enabled.",
-			ProfileValueUtils.isTestEnabledInThisEnvironment(testMethod, testClass));
+		assertThat(ProfileValueUtils.isTestEnabledInThisEnvironment(testMethod, testClass)).as("Test method [" + testMethod + "] should be enabled.").isTrue();
 	}
 
 	private void assertMethodIsDisabled(String methodName, Class<?> testClass) throws Exception {
 		Method testMethod = testClass.getMethod(methodName);
-		assertFalse("Test method [" + testMethod + "] should be disabled.",
-			ProfileValueUtils.isTestEnabledInThisEnvironment(testMethod, testClass));
+		assertThat(ProfileValueUtils.isTestEnabledInThisEnvironment(testMethod, testClass)).as("Test method [" + testMethod + "] should be disabled.").isFalse();
 	}
 
 	private void assertMethodIsEnabled(ProfileValueSource profileValueSource, String methodName, Class<?> testClass)
 			throws Exception {
 		Method testMethod = testClass.getMethod(methodName);
-		assertTrue("Test method [" + testMethod + "] should be enabled for ProfileValueSource [" + profileValueSource
-				+ "].", ProfileValueUtils.isTestEnabledInThisEnvironment(profileValueSource, testMethod, testClass));
+		assertThat(ProfileValueUtils.isTestEnabledInThisEnvironment(profileValueSource, testMethod, testClass)).as("Test method [" + testMethod + "] should be enabled for ProfileValueSource [" + profileValueSource
+				+ "].").isTrue();
 	}
 
 	private void assertMethodIsDisabled(ProfileValueSource profileValueSource, String methodName, Class<?> testClass)
 			throws Exception {
 		Method testMethod = testClass.getMethod(methodName);
-		assertFalse("Test method [" + testMethod + "] should be disabled for ProfileValueSource [" + profileValueSource
-				+ "].", ProfileValueUtils.isTestEnabledInThisEnvironment(profileValueSource, testMethod, testClass));
+		assertThat(ProfileValueUtils.isTestEnabledInThisEnvironment(profileValueSource, testMethod, testClass)).as("Test method [" + testMethod + "] should be disabled for ProfileValueSource [" + profileValueSource
+				+ "].").isFalse();
 	}
 
 	// -------------------------------------------------------------------
 
 	@Test
-	public void isTestEnabledInThisEnvironmentForProvidedClass() throws Exception {
+	void isTestEnabledInThisEnvironmentForProvidedClass() throws Exception {
 		assertClassIsEnabled(NonAnnotated.class);
 		assertClassIsEnabled(EnabledAnnotatedSingleValue.class);
 		assertClassIsEnabled(EnabledAnnotatedMultiValue.class);
@@ -101,7 +97,7 @@ public class ProfileValueUtilsTests {
 	}
 
 	@Test
-	public void isTestEnabledInThisEnvironmentForProvidedMethodAndClass() throws Exception {
+	void isTestEnabledInThisEnvironmentForProvidedMethodAndClass() throws Exception {
 		assertMethodIsEnabled(NON_ANNOTATED_METHOD, NonAnnotated.class);
 
 		assertMethodIsEnabled(NON_ANNOTATED_METHOD, EnabledAnnotatedSingleValue.class);
@@ -133,7 +129,7 @@ public class ProfileValueUtilsTests {
 	}
 
 	@Test
-	public void isTestEnabledInThisEnvironmentForProvidedProfileValueSourceMethodAndClass() throws Exception {
+	void isTestEnabledInThisEnvironmentForProvidedProfileValueSourceMethodAndClass() throws Exception {
 
 		ProfileValueSource profileValueSource = SystemProfileValueSource.getInstance();
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,40 +16,38 @@
 
 package org.springframework.jmx;
 
+import java.net.BindException;
+
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.LifecycleMethodExecutionExceptionHandler;
+import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
+import org.opentest4j.TestAbortedException;
 
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.jmx.AbstractMBeanServerTests.BindExceptionHandler;
 import org.springframework.jmx.export.MBeanExporter;
-import org.springframework.tests.TestGroup;
 import org.springframework.util.MBeanTestUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * <strong>Note:</strong> certain tests throughout this hierarchy require the presence of
- * the {@code jmxremote_optional.jar} in your classpath. For this reason, these tests are
- * run only if {@link TestGroup#JMXMP} is enabled.
- *
- * <p>If you wish to run these tests, follow the instructions in the TestGroup class to
- * enable JMXMP tests (i.e., set the following Java system property:
- * {@code -DtestGroups=jmxmp}).
- *
  * <p>If you run into the <em>"Unsupported protocol: jmxmp"</em> error, you will need to
- * download the <a href="http://www.oracle.com/technetwork/java/javase/tech/download-jsp-141676.html">JMX
+ * download the <a href="https://www.oracle.com/technetwork/java/javase/tech/download-jsp-141676.html">JMX
  * Remote API 1.0.1_04 Reference Implementation</a> from Oracle and extract
  * {@code jmxremote_optional.jar} into your classpath, for example in the {@code lib/ext}
  * folder of your JVM.
  *
  * <p>See also:
  * <ul>
- * <li>
  * <li><a href="https://jira.spring.io/browse/SPR-8093">SPR-8093</a></li>
  * <li><a href="https://issuetracker.springsource.com/browse/EBR-349">EBR-349</a></li>
  * </ul>
@@ -60,12 +58,13 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @author Stephane Nicoll
  */
+@ExtendWith(BindExceptionHandler.class)
 public abstract class AbstractMBeanServerTests {
 
 	protected MBeanServer server;
 
 
-	@Before
+	@BeforeEach
 	public final void setUp() throws Exception {
 		this.server = MBeanServerFactory.createMBeanServer();
 		try {
@@ -77,32 +76,39 @@ public abstract class AbstractMBeanServerTests {
 		}
 	}
 
-	protected ConfigurableApplicationContext loadContext(String configLocation) {
-		GenericApplicationContext ctx = new GenericApplicationContext();
-		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(configLocation);
-		ctx.getDefaultListableBeanFactory().registerSingleton("server", this.server);
-		ctx.refresh();
-		return ctx;
-	}
-
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		releaseServer();
 		onTearDown();
 	}
 
 	private void releaseServer() throws Exception {
-		MBeanServerFactory.releaseMBeanServer(getServer());
+		try {
+			MBeanServerFactory.releaseMBeanServer(getServer());
+		}
+		catch (IllegalArgumentException ex) {
+			if (!ex.getMessage().contains("not in list")) {
+				throw ex;
+			}
+		}
 		MBeanTestUtils.resetMBeanServers();
 	}
 
-	protected void onTearDown() throws Exception {
+	protected final ConfigurableApplicationContext loadContext(String configLocation) {
+		GenericApplicationContext ctx = new GenericApplicationContext();
+		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(configLocation);
+		ctx.getDefaultListableBeanFactory().registerSingleton("server", getServer());
+		ctx.refresh();
+		return ctx;
 	}
 
 	protected void onSetUp() throws Exception {
 	}
 
-	public MBeanServer getServer() {
+	protected void onTearDown() throws Exception {
+	}
+
+	protected final MBeanServer getServer() {
 		return this.server;
 	}
 
@@ -115,11 +121,43 @@ public abstract class AbstractMBeanServerTests {
 	}
 
 	protected void assertIsRegistered(String message, ObjectName objectName) {
-		assertTrue(message, getServer().isRegistered(objectName));
+		assertThat(getServer().isRegistered(objectName)).as(message).isTrue();
 	}
 
 	protected void assertIsNotRegistered(String message, ObjectName objectName) {
-		assertFalse(message, getServer().isRegistered(objectName));
+		assertThat(getServer().isRegistered(objectName)).as(message).isFalse();
+	}
+
+
+	static class BindExceptionHandler implements TestExecutionExceptionHandler, LifecycleMethodExecutionExceptionHandler {
+
+		@Override
+		public void handleTestExecutionException(ExtensionContext context, Throwable throwable) throws Throwable {
+			handleBindException(throwable);
+		}
+
+		@Override
+		public void handleBeforeEachMethodExecutionException(ExtensionContext context, Throwable throwable)
+				throws Throwable {
+			handleBindException(throwable);
+		}
+
+		@Override
+		public void handleAfterEachMethodExecutionException(ExtensionContext context, Throwable throwable)
+				throws Throwable {
+			handleBindException(throwable);
+		}
+
+		private void handleBindException(Throwable throwable) throws Throwable {
+			// Abort test?
+			if (throwable instanceof BindException) {
+				throw new TestAbortedException("Failed to bind to MBeanServer", throwable);
+			}
+			// Else rethrow to conform to the contracts of TestExecutionExceptionHandler and LifecycleMethodExecutionExceptionHandler
+			throw throwable;
+		}
+
 	}
 
 }
+

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,12 +45,14 @@ import org.springframework.util.ClassUtils;
  * @see java.io.ObjectOutputStream
  * @see #doReadRemoteInvocation
  * @see #doWriteRemoteInvocationResult
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public abstract class RemoteInvocationSerializingExporter extends RemoteInvocationBasedExporter
 		implements InitializingBean {
 
 	/**
-	 * Default content type: "application/x-java-serialized-object"
+	 * Default content type: "application/x-java-serialized-object".
 	 */
 	public static final String CONTENT_TYPE_SERIALIZED_OBJECT = "application/x-java-serialized-object";
 

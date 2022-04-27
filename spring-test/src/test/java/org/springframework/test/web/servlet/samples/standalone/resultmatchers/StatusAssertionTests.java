@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,21 +19,28 @@ package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.http.HttpStatus.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.I_AM_A_TEAPOT;
+import static org.springframework.http.HttpStatus.NOT_IMPLEMENTED;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * Examples of expectations on the status and the status reason found in the response.
@@ -41,39 +48,40 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-public class StatusAssertionTests {
+@TestInstance(PER_CLASS)
+class StatusAssertionTests {
 
 	private final MockMvc mockMvc = standaloneSetup(new StatusController()).build();
 
 	@Test
-	public void testStatusInt() throws Exception {
-		this.mockMvc.perform(get("/created")).andExpect(status().is(201));
-		this.mockMvc.perform(get("/createdWithComposedAnnotation")).andExpect(status().is(201));
-		this.mockMvc.perform(get("/badRequest")).andExpect(status().is(400));
-	}
-
-	@Test
-	public void testHttpStatus() throws Exception {
+	void httpStatus() throws Exception {
 		this.mockMvc.perform(get("/created")).andExpect(status().isCreated());
 		this.mockMvc.perform(get("/createdWithComposedAnnotation")).andExpect(status().isCreated());
 		this.mockMvc.perform(get("/badRequest")).andExpect(status().isBadRequest());
 	}
 
 	@Test
-	public void testMatcher() throws Exception {
-		this.mockMvc.perform(get("/badRequest")).andExpect(status().is(equalTo(400)));
+	void statusCode() throws Exception {
+		this.mockMvc.perform(get("/teaPot")).andExpect(status().is(I_AM_A_TEAPOT.value()));
+		this.mockMvc.perform(get("/created")).andExpect(status().is(CREATED.value()));
+		this.mockMvc.perform(get("/createdWithComposedAnnotation")).andExpect(status().is(CREATED.value()));
+		this.mockMvc.perform(get("/badRequest")).andExpect(status().is(BAD_REQUEST.value()));
+		this.mockMvc.perform(get("/throwsException")).andExpect(status().is(I_AM_A_TEAPOT.value()));
 	}
 
 	@Test
-	public void testReasonEqualTo() throws Exception {
+	void statusCodeWithMatcher() throws Exception {
+		this.mockMvc.perform(get("/badRequest")).andExpect(status().is(equalTo(BAD_REQUEST.value())));
+	}
+
+	@Test
+	void reason() throws Exception {
 		this.mockMvc.perform(get("/badRequest")).andExpect(status().reason("Expired token"));
-
-		// Hamcrest matchers...
-		this.mockMvc.perform(get("/badRequest")).andExpect(status().reason(equalTo("Expired token")));
 	}
 
 	@Test
-	public void testReasonMatcher() throws Exception {
+	void reasonWithMatcher() throws Exception {
+		this.mockMvc.perform(get("/badRequest")).andExpect(status().reason(equalTo("Expired token")));
 		this.mockMvc.perform(get("/badRequest")).andExpect(status().reason(endsWith("token")));
 	}
 
@@ -90,26 +98,41 @@ public class StatusAssertionTests {
 		HttpStatus status() default INTERNAL_SERVER_ERROR;
 	}
 
-	@Controller
+	@RestController
+	@ResponseStatus(I_AM_A_TEAPOT)
 	private static class StatusController {
+
+		@RequestMapping("/teaPot")
+		void teaPot() {
+		}
 
 		@RequestMapping("/created")
 		@ResponseStatus(CREATED)
-		public @ResponseBody void created(){
+		void created() {
 		}
 
 		@Get(path = "/createdWithComposedAnnotation", status = CREATED)
-		public @ResponseBody void createdWithComposedAnnotation() {
+		void createdWithComposedAnnotation() {
 		}
 
 		@RequestMapping("/badRequest")
 		@ResponseStatus(code = BAD_REQUEST, reason = "Expired token")
-		public @ResponseBody void badRequest(){
+		void badRequest() {
 		}
 
 		@RequestMapping("/notImplemented")
 		@ResponseStatus(NOT_IMPLEMENTED)
-		public @ResponseBody void notImplemented(){
+		void notImplemented() {
+		}
+
+		@RequestMapping("/throwsException")
+		@ResponseStatus(NOT_IMPLEMENTED)
+		void throwsException() {
+			throw new IllegalStateException();
+		}
+
+		@ExceptionHandler
+		void exceptionHandler(IllegalStateException ex) {
 		}
 	}
 

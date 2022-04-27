@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
-	<bean id="listOfArrays" class="org.springframework.tests.sample.beans.GenericBean">
+	<bean id="listOfArrays" class="org.springframework.beans.testfixture.beans.GenericBean">
 		<property name="listOfArrays">
 			<list>
 				<list>
@@ -43,7 +43,7 @@
 			autowire="constructor">
 	</bean>
 
-  <bean id="integerBean" class="org.springframework.tests.sample.beans.GenericIntegerBean">
+  <bean id="integerBean" class="org.springframework.beans.testfixture.beans.GenericIntegerBean">
     <property name="genericProperty" value="10"/>
     <property name="genericListProperty">
       <list>
@@ -53,7 +53,7 @@
     </property>
   </bean>
 
-  <bean id="setOfIntegerBean" class="org.springframework.tests.sample.beans.GenericSetOfIntegerBean">
+  <bean id="setOfIntegerBean" class="org.springframework.beans.testfixture.beans.GenericSetOfIntegerBean">
     <property name="genericProperty" value="10"/>
     <property name="genericListProperty">
       <list>
@@ -64,7 +64,7 @@
   </bean>
 
   <bean id="setBean" class="org.springframework.beans.factory.support.BeanFactoryGenericsTests$UrlSet">
-    <property name="urlNames" value="http://www.springframework.org"/>
+    <property name="urlNames" value="https://www.springframework.org"/>
   </bean>
 
 </beans>

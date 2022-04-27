@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,13 +19,11 @@ package org.springframework.beans.support;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -36,9 +34,8 @@ import static org.junit.Assert.*;
 public class PagedListHolderTests {
 
 	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testPagedListHolder() {
-		Assume.group(TestGroup.LONG_RUNNING);
-
 		TestBean tb1 = new TestBean();
 		tb1.setName("eva");
 		tb1.setAge(25);
@@ -54,114 +51,114 @@ public class PagedListHolderTests {
 		tbs.add(tb3);
 
 		PagedListHolder holder = new PagedListHolder(tbs);
-		assertTrue("Correct source", holder.getSource() == tbs);
-		assertTrue("Correct number of elements", holder.getNrOfElements() == 3);
-		assertTrue("Correct number of pages", holder.getPageCount() == 1);
-		assertTrue("Correct page size", holder.getPageSize() == PagedListHolder.DEFAULT_PAGE_SIZE);
-		assertTrue("Correct page number", holder.getPage() == 0);
-		assertTrue("First page", holder.isFirstPage());
-		assertTrue("Last page", holder.isLastPage());
-		assertTrue("Correct first element", holder.getFirstElementOnPage() == 0);
-		assertTrue("Correct first element", holder.getLastElementOnPage() == 2);
-		assertTrue("Correct page list size", holder.getPageList().size() == 3);
-		assertTrue("Correct page list contents", holder.getPageList().get(0) == tb1);
-		assertTrue("Correct page list contents", holder.getPageList().get(1) == tb2);
-		assertTrue("Correct page list contents", holder.getPageList().get(2) == tb3);
+		assertThat(holder.getSource() == tbs).as("Correct source").isTrue();
+		assertThat(holder.getNrOfElements() == 3).as("Correct number of elements").isTrue();
+		assertThat(holder.getPageCount() == 1).as("Correct number of pages").isTrue();
+		assertThat(holder.getPageSize() == PagedListHolder.DEFAULT_PAGE_SIZE).as("Correct page size").isTrue();
+		assertThat(holder.getPage() == 0).as("Correct page number").isTrue();
+		assertThat(holder.isFirstPage()).as("First page").isTrue();
+		assertThat(holder.isLastPage()).as("Last page").isTrue();
+		assertThat(holder.getFirstElementOnPage() == 0).as("Correct first element").isTrue();
+		assertThat(holder.getLastElementOnPage() == 2).as("Correct first element").isTrue();
+		assertThat(holder.getPageList().size() == 3).as("Correct page list size").isTrue();
+		assertThat(holder.getPageList().get(0) == tb1).as("Correct page list contents").isTrue();
+		assertThat(holder.getPageList().get(1) == tb2).as("Correct page list contents").isTrue();
+		assertThat(holder.getPageList().get(2) == tb3).as("Correct page list contents").isTrue();
 
 		holder.setPageSize(2);
-		assertTrue("Correct number of pages", holder.getPageCount() == 2);
-		assertTrue("Correct page size", holder.getPageSize() == 2);
-		assertTrue("Correct page number", holder.getPage() == 0);
-		assertTrue("First page", holder.isFirstPage());
-		assertFalse("Last page", holder.isLastPage());
-		assertTrue("Correct first element", holder.getFirstElementOnPage() == 0);
-		assertTrue("Correct last element", holder.getLastElementOnPage() == 1);
-		assertTrue("Correct page list size", holder.getPageList().size() == 2);
-		assertTrue("Correct page list contents", holder.getPageList().get(0) == tb1);
-		assertTrue("Correct page list contents", holder.getPageList().get(1) == tb2);
+		assertThat(holder.getPageCount() == 2).as("Correct number of pages").isTrue();
+		assertThat(holder.getPageSize() == 2).as("Correct page size").isTrue();
+		assertThat(holder.getPage() == 0).as("Correct page number").isTrue();
+		assertThat(holder.isFirstPage()).as("First page").isTrue();
+		assertThat(holder.isLastPage()).as("Last page").isFalse();
+		assertThat(holder.getFirstElementOnPage() == 0).as("Correct first element").isTrue();
+		assertThat(holder.getLastElementOnPage() == 1).as("Correct last element").isTrue();
+		assertThat(holder.getPageList().size() == 2).as("Correct page list size").isTrue();
+		assertThat(holder.getPageList().get(0) == tb1).as("Correct page list contents").isTrue();
+		assertThat(holder.getPageList().get(1) == tb2).as("Correct page list contents").isTrue();
 
 		holder.setPage(1);
-		assertTrue("Correct page number", holder.getPage() == 1);
-		assertFalse("First page", holder.isFirstPage());
-		assertTrue("Last page", holder.isLastPage());
-		assertTrue("Correct first element", holder.getFirstElementOnPage() == 2);
-		assertTrue("Correct last element", holder.getLastElementOnPage() == 2);
-		assertTrue("Correct page list size", holder.getPageList().size() == 1);
-		assertTrue("Correct page list contents", holder.getPageList().get(0) == tb3);
+		assertThat(holder.getPage() == 1).as("Correct page number").isTrue();
+		assertThat(holder.isFirstPage()).as("First page").isFalse();
+		assertThat(holder.isLastPage()).as("Last page").isTrue();
+		assertThat(holder.getFirstElementOnPage() == 2).as("Correct first element").isTrue();
+		assertThat(holder.getLastElementOnPage() == 2).as("Correct last element").isTrue();
+		assertThat(holder.getPageList().size() == 1).as("Correct page list size").isTrue();
+		assertThat(holder.getPageList().get(0) == tb3).as("Correct page list contents").isTrue();
 
 		holder.setPageSize(3);
-		assertTrue("Correct number of pages", holder.getPageCount() == 1);
-		assertTrue("Correct page size", holder.getPageSize() == 3);
-		assertTrue("Correct page number", holder.getPage() == 0);
-		assertTrue("First page", holder.isFirstPage());
-		assertTrue("Last page", holder.isLastPage());
-		assertTrue("Correct first element", holder.getFirstElementOnPage() == 0);
-		assertTrue("Correct last element", holder.getLastElementOnPage() == 2);
+		assertThat(holder.getPageCount() == 1).as("Correct number of pages").isTrue();
+		assertThat(holder.getPageSize() == 3).as("Correct page size").isTrue();
+		assertThat(holder.getPage() == 0).as("Correct page number").isTrue();
+		assertThat(holder.isFirstPage()).as("First page").isTrue();
+		assertThat(holder.isLastPage()).as("Last page").isTrue();
+		assertThat(holder.getFirstElementOnPage() == 0).as("Correct first element").isTrue();
+		assertThat(holder.getLastElementOnPage() == 2).as("Correct last element").isTrue();
 
 		holder.setPage(1);
 		holder.setPageSize(2);
-		assertTrue("Correct number of pages", holder.getPageCount() == 2);
-		assertTrue("Correct page size", holder.getPageSize() == 2);
-		assertTrue("Correct page number", holder.getPage() == 1);
-		assertFalse("First page", holder.isFirstPage());
-		assertTrue("Last page", holder.isLastPage());
-		assertTrue("Correct first element", holder.getFirstElementOnPage() == 2);
-		assertTrue("Correct last element", holder.getLastElementOnPage() == 2);
+		assertThat(holder.getPageCount() == 2).as("Correct number of pages").isTrue();
+		assertThat(holder.getPageSize() == 2).as("Correct page size").isTrue();
+		assertThat(holder.getPage() == 1).as("Correct page number").isTrue();
+		assertThat(holder.isFirstPage()).as("First page").isFalse();
+		assertThat(holder.isLastPage()).as("Last page").isTrue();
+		assertThat(holder.getFirstElementOnPage() == 2).as("Correct first element").isTrue();
+		assertThat(holder.getLastElementOnPage() == 2).as("Correct last element").isTrue();
 
 		holder.setPageSize(2);
 		holder.setPage(1);
 		((MutableSortDefinition) holder.getSort()).setProperty("name");
 		((MutableSortDefinition) holder.getSort()).setIgnoreCase(false);
 		holder.resort();
-		assertTrue("Correct source", holder.getSource() == tbs);
-		assertTrue("Correct number of elements", holder.getNrOfElements() == 3);
-		assertTrue("Correct number of pages", holder.getPageCount() == 2);
-		assertTrue("Correct page size", holder.getPageSize() == 2);
-		assertTrue("Correct page number", holder.getPage() == 0);
-		assertTrue("First page", holder.isFirstPage());
-		assertFalse("Last page", holder.isLastPage());
-		assertTrue("Correct first element", holder.getFirstElementOnPage() == 0);
-		assertTrue("Correct last element", holder.getLastElementOnPage() == 1);
-		assertTrue("Correct page list size", holder.getPageList().size() == 2);
-		assertTrue("Correct page list contents", holder.getPageList().get(0) == tb3);
-		assertTrue("Correct page list contents", holder.getPageList().get(1) == tb1);
+		assertThat(holder.getSource() == tbs).as("Correct source").isTrue();
+		assertThat(holder.getNrOfElements() == 3).as("Correct number of elements").isTrue();
+		assertThat(holder.getPageCount() == 2).as("Correct number of pages").isTrue();
+		assertThat(holder.getPageSize() == 2).as("Correct page size").isTrue();
+		assertThat(holder.getPage() == 0).as("Correct page number").isTrue();
+		assertThat(holder.isFirstPage()).as("First page").isTrue();
+		assertThat(holder.isLastPage()).as("Last page").isFalse();
+		assertThat(holder.getFirstElementOnPage() == 0).as("Correct first element").isTrue();
+		assertThat(holder.getLastElementOnPage() == 1).as("Correct last element").isTrue();
+		assertThat(holder.getPageList().size() == 2).as("Correct page list size").isTrue();
+		assertThat(holder.getPageList().get(0) == tb3).as("Correct page list contents").isTrue();
+		assertThat(holder.getPageList().get(1) == tb1).as("Correct page list contents").isTrue();
 
 		((MutableSortDefinition) holder.getSort()).setProperty("name");
 		holder.resort();
-		assertTrue("Correct page list contents", holder.getPageList().get(0) == tb2);
-		assertTrue("Correct page list contents", holder.getPageList().get(1) == tb1);
+		assertThat(holder.getPageList().get(0) == tb2).as("Correct page list contents").isTrue();
+		assertThat(holder.getPageList().get(1) == tb1).as("Correct page list contents").isTrue();
 
 		((MutableSortDefinition) holder.getSort()).setProperty("name");
 		holder.resort();
-		assertTrue("Correct page list contents", holder.getPageList().get(0) == tb3);
-		assertTrue("Correct page list contents", holder.getPageList().get(1) == tb1);
+		assertThat(holder.getPageList().get(0) == tb3).as("Correct page list contents").isTrue();
+		assertThat(holder.getPageList().get(1) == tb1).as("Correct page list contents").isTrue();
 
 		holder.setPage(1);
-		assertTrue("Correct page list size", holder.getPageList().size() == 1);
-		assertTrue("Correct page list contents", holder.getPageList().get(0) == tb2);
+		assertThat(holder.getPageList().size() == 1).as("Correct page list size").isTrue();
+		assertThat(holder.getPageList().get(0) == tb2).as("Correct page list contents").isTrue();
 
 		((MutableSortDefinition) holder.getSort()).setProperty("age");
 		holder.resort();
-		assertTrue("Correct page list contents", holder.getPageList().get(0) == tb1);
-		assertTrue("Correct page list contents", holder.getPageList().get(1) == tb3);
+		assertThat(holder.getPageList().get(0) == tb1).as("Correct page list contents").isTrue();
+		assertThat(holder.getPageList().get(1) == tb3).as("Correct page list contents").isTrue();
 
 		((MutableSortDefinition) holder.getSort()).setIgnoreCase(true);
 		holder.resort();
-		assertTrue("Correct page list contents", holder.getPageList().get(0) == tb1);
-		assertTrue("Correct page list contents", holder.getPageList().get(1) == tb3);
+		assertThat(holder.getPageList().get(0) == tb1).as("Correct page list contents").isTrue();
+		assertThat(holder.getPageList().get(1) == tb3).as("Correct page list contents").isTrue();
 
 		holder.nextPage();
-		assertEquals(1, holder.getPage());
+		assertThat(holder.getPage()).isEqualTo(1);
 		holder.previousPage();
-		assertEquals(0, holder.getPage());
+		assertThat(holder.getPage()).isEqualTo(0);
 		holder.nextPage();
-		assertEquals(1, holder.getPage());
+		assertThat(holder.getPage()).isEqualTo(1);
 		holder.nextPage();
-		assertEquals(1, holder.getPage());
+		assertThat(holder.getPage()).isEqualTo(1);
 		holder.previousPage();
-		assertEquals(0, holder.getPage());
+		assertThat(holder.getPage()).isEqualTo(0);
 		holder.previousPage();
-		assertEquals(0, holder.getPage());
+		assertThat(holder.getPage()).isEqualTo(0);
 	}
 
 

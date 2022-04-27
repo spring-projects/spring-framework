@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
 /**
- * Abstract implementation of the Tiles {@link org.apache.tiles.preparer.PreparerFactory}
+ * Abstract implementation of the Tiles {@link org.apache.tiles.preparer.factory.PreparerFactory}
  * interface, obtaining the current Spring WebApplicationContext and delegating to
  * {@link #getPreparer(String, org.springframework.web.context.WebApplicationContext)}.
  *

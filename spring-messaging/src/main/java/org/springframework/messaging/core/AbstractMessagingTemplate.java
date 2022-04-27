@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,16 +29,19 @@ import org.springframework.messaging.Message;
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
  * @since 4.0
+ * @param <D> the destination type
  */
 public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceivingTemplate<D>
 		implements MessageRequestReplyOperations<D> {
 
 	@Override
+	@Nullable
 	public Message<?> sendAndReceive(Message<?> requestMessage) {
 		return sendAndReceive(getRequiredDefaultDestination(), requestMessage);
 	}
 
 	@Override
+	@Nullable
 	public Message<?> sendAndReceive(D destination, Message<?> requestMessage) {
 		return doSendAndReceive(destination, requestMessage);
 	}
@@ -48,16 +51,19 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(Object request, Class<T> targetClass) {
 		return convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass);
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass) {
 		return convertSendAndReceive(destination, request, null, targetClass);
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(
 			D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass) {
 
@@ -65,6 +71,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(
 			Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
 
@@ -72,6 +79,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass,
 			@Nullable MessagePostProcessor postProcessor) {
 
@@ -80,6 +88,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(D destination, Object request, @Nullable Map<String, Object> headers,
 			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
 

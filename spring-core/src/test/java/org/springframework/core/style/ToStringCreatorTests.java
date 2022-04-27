@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,23 +23,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ObjectUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Keith Donald
  */
-public class ToStringCreatorTests {
+class ToStringCreatorTests {
 
 	private SomeObject s1, s2, s3;
 
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		s1 = new SomeObject() {
 			@Override
 			public String toString() {
@@ -61,7 +61,7 @@ public class ToStringCreatorTests {
 	}
 
 	@Test
-	public void defaultStyleMap() {
+	void defaultStyleMap() {
 		final Map<String, String> map = getMap();
 		Object stringy = new Object() {
 			@Override
@@ -69,9 +69,8 @@ public class ToStringCreatorTests {
 				return new ToStringCreator(this).append("familyFavoriteSport", map).toString();
 			}
 		};
-		assertEquals("[ToStringCreatorTests.4@" + ObjectUtils.getIdentityHexString(stringy) +
-				" familyFavoriteSport = map['Keri' -> 'Softball', 'Scot' -> 'Fishing', 'Keith' -> 'Flag Football']]",
-				stringy.toString());
+		assertThat(stringy.toString()).isEqualTo(("[ToStringCreatorTests.4@" + ObjectUtils.getIdentityHexString(stringy) +
+				" familyFavoriteSport = map['Keri' -> 'Softball', 'Scot' -> 'Fishing', 'Keith' -> 'Flag Football']]"));
 	}
 
 	private Map<String, String> getMap() {
@@ -83,53 +82,52 @@ public class ToStringCreatorTests {
 	}
 
 	@Test
-	public void defaultStyleArray() {
+	void defaultStyleArray() {
 		SomeObject[] array = new SomeObject[] {s1, s2, s3};
 		String str = new ToStringCreator(array).toString();
-		assertEquals("[@" + ObjectUtils.getIdentityHexString(array) +
-				" array<ToStringCreatorTests.SomeObject>[A, B, C]]", str);
+		assertThat(str).isEqualTo(("[@" + ObjectUtils.getIdentityHexString(array) +
+				" array<ToStringCreatorTests.SomeObject>[A, B, C]]"));
 	}
 
 	@Test
-	public void primitiveArrays() {
+	void primitiveArrays() {
 		int[] integers = new int[] {0, 1, 2, 3, 4};
 		String str = new ToStringCreator(integers).toString();
-		assertEquals("[@" + ObjectUtils.getIdentityHexString(integers) + " array<Integer>[0, 1, 2, 3, 4]]", str);
+		assertThat(str).isEqualTo(("[@" + ObjectUtils.getIdentityHexString(integers) + " array<Integer>[0, 1, 2, 3, 4]]"));
 	}
 
 	@Test
-	public void appendList() {
+	void appendList() {
 		List<SomeObject> list = new ArrayList<>();
 		list.add(s1);
 		list.add(s2);
 		list.add(s3);
 		String str = new ToStringCreator(this).append("myLetters", list).toString();
-		assertEquals("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this) + " myLetters = list[A, B, C]]",
-				str);
+		assertThat(str).isEqualTo(("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this) + " myLetters = list[A, B, C]]"));
 	}
 
 	@Test
-	public void appendSet() {
+	void appendSet() {
 		Set<SomeObject> set = new LinkedHashSet<>();
 		set.add(s1);
 		set.add(s2);
 		set.add(s3);
 		String str = new ToStringCreator(this).append("myLetters", set).toString();
-		assertEquals("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this) + " myLetters = set[A, B, C]]", str);
+		assertThat(str).isEqualTo(("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this) + " myLetters = set[A, B, C]]"));
 	}
 
 	@Test
-	public void appendClass() {
+	void appendClass() {
 		String str = new ToStringCreator(this).append("myClass", this.getClass()).toString();
-		assertEquals("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this) +
-				" myClass = ToStringCreatorTests]", str);
+		assertThat(str).isEqualTo(("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this) +
+				" myClass = ToStringCreatorTests]"));
 	}
 
 	@Test
-	public void appendMethod() throws Exception {
-		String str = new ToStringCreator(this).append("myMethod", this.getClass().getMethod("appendMethod")).toString();
-		assertEquals("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this) +
-				" myMethod = appendMethod@ToStringCreatorTests]", str);
+	void appendMethod() throws Exception {
+		String str = new ToStringCreator(this).append("myMethod", this.getClass().getDeclaredMethod("appendMethod")).toString();
+		assertThat(str).isEqualTo(("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this) +
+				" myMethod = appendMethod@ToStringCreatorTests]"));
 	}
 
 

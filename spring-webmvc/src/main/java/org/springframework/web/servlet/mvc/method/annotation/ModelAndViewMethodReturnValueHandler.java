@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,12 +49,10 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 
 
 	/**
-	 * Configure one more simple patterns (as described in
-	 * {@link org.springframework.util.PatternMatchUtils#simpleMatch}) to use in order to recognize
-	 * custom redirect prefixes in addition to "redirect:".
-	 * <p>Note that simply configuring this property will not make a custom
-	 * redirect prefix work. There must be a custom View that recognizes the
-	 * prefix as well.
+	 * Configure one more simple patterns (as described in {@link PatternMatchUtils#simpleMatch})
+	 * to use in order to recognize custom redirect prefixes in addition to "redirect:".
+	 * <p>Note that simply configuring this property will not make a custom redirect prefix work.
+	 * There must be a custom {@link View} that recognizes the prefix as well.
 	 * @since 4.1
 	 */
 	public void setRedirectPatterns(@Nullable String... redirectPatterns) {
@@ -62,7 +60,8 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 	}
 
 	/**
-	 * The configured redirect patterns, if any.
+	 * Return the configured redirect patterns, if any.
+	 * @since 4.1
 	 */
 	@Nullable
 	public String[] getRedirectPatterns() {
@@ -95,10 +94,8 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 		else {
 			View view = mav.getView();
 			mavContainer.setView(view);
-			if (view instanceof SmartView) {
-				if (((SmartView) view).isRedirectView()) {
-					mavContainer.setRedirectModelScenario(true);
-				}
+			if (view instanceof SmartView && ((SmartView) view).isRedirectView()) {
+				mavContainer.setRedirectModelScenario(true);
 			}
 		}
 		mavContainer.setStatus(mav.getStatus());
@@ -114,10 +111,7 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 	 * reference; "false" otherwise.
 	 */
 	protected boolean isRedirectViewName(String viewName) {
-		if (PatternMatchUtils.simpleMatch(this.redirectPatterns, viewName)) {
-			return true;
-		}
-		return viewName.startsWith("redirect:");
+		return (PatternMatchUtils.simpleMatch(this.redirectPatterns, viewName) || viewName.startsWith("redirect:"));
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -96,6 +96,8 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	@Nullable
 	private ConnectionFactory connectionFactory;
 
+	private boolean lazyResourceRetrieval = false;
+
 
 	/**
 	 * Create a new JmsTransactionManager for bean-style usage.
@@ -128,7 +130,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	 * Set the JMS ConnectionFactory that this instance should manage transactions for.
 	 */
 	public void setConnectionFactory(@Nullable ConnectionFactory cf) {
-		if (cf != null && cf instanceof TransactionAwareConnectionFactoryProxy) {
+		if (cf instanceof TransactionAwareConnectionFactoryProxy) {
 			// If we got a TransactionAwareConnectionFactoryProxy, we need to perform transactions
 			// for its underlying target ConnectionFactory, else JMS access code won't see
 			// properly exposed transactions (i.e. transactions for the target ConnectionFactory).
@@ -157,6 +159,19 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		ConnectionFactory connectionFactory = getConnectionFactory();
 		Assert.state(connectionFactory != null, "No ConnectionFactory set");
 		return connectionFactory;
+	}
+
+	/**
+	 * Specify whether this transaction manager should lazily retrieve a JMS
+	 * Connection and Session on access within a transaction ({@code true}).
+	 * By default, it will eagerly create a JMS Connection and Session at
+	 * transaction begin ({@code false}).
+	 * @since 5.1.6
+	 * @see JmsResourceHolder#getConnection()
+	 * @see JmsResourceHolder#getSession()
+	 */
+	public void setLazyResourceRetrieval(boolean lazyResourceRetrieval) {
+		this.lazyResourceRetrieval = lazyResourceRetrieval;
 	}
 
 	/**
@@ -200,12 +215,18 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		Connection con = null;
 		Session session = null;
 		try {
-			con = createConnection();
-			session = createSession(con);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Created JMS transaction on Session [" + session + "] from Connection [" + con + "]");
+			JmsResourceHolder resourceHolder;
+			if (this.lazyResourceRetrieval) {
+				resourceHolder = new LazyJmsResourceHolder(connectionFactory);
 			}
-			JmsResourceHolder resourceHolder = new JmsResourceHolder(connectionFactory, con, session);
+			else {
+				con = createConnection();
+				session = createSession(con);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Created JMS transaction on Session [" + session + "] from Connection [" + con + "]");
+				}
+				resourceHolder = new JmsResourceHolder(connectionFactory, con, session);
+			}
 			resourceHolder.setSynchronizedWithTransaction(true);
 			int timeout = determineTimeout(definition);
 			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -250,7 +271,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		JmsTransactionObject txObject = (JmsTransactionObject) status.getTransaction();
-		Session session = txObject.getResourceHolder().getSession();
+		Session session = txObject.getResourceHolder().getOriginalSession();
 		if (session != null) {
 			try {
 				if (status.isDebug()) {
@@ -270,7 +291,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		JmsTransactionObject txObject = (JmsTransactionObject) status.getTransaction();
-		Session session = txObject.getResourceHolder().getSession();
+		Session session = txObject.getResourceHolder().getOriginalSession();
 		if (session != null) {
 			try {
 				if (status.isDebug()) {
@@ -318,6 +339,85 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	protected Session createSession(Connection con) throws JMSException {
 		return con.createSession(true, Session.AUTO_ACKNOWLEDGE);
+	}
+
+
+	/**
+	 * Lazily initializing variant of {@link JmsResourceHolder},
+	 * initializing a JMS Connection and Session on user access.
+	 */
+	private class LazyJmsResourceHolder extends JmsResourceHolder {
+
+		private boolean connectionInitialized = false;
+
+		private boolean sessionInitialized = false;
+
+		public LazyJmsResourceHolder(@Nullable ConnectionFactory connectionFactory) {
+			super(connectionFactory);
+		}
+
+		@Override
+		@Nullable
+		public Connection getConnection() {
+			initializeConnection();
+			return super.getConnection();
+		}
+
+		@Override
+		@Nullable
+		public <C extends Connection> C getConnection(Class<C> connectionType) {
+			initializeConnection();
+			return super.getConnection(connectionType);
+		}
+
+		@Override
+		@Nullable
+		public Session getSession() {
+			initializeSession();
+			return super.getSession();
+		}
+
+		@Override
+		@Nullable
+		public <S extends Session> S getSession(Class<S> sessionType) {
+			initializeSession();
+			return super.getSession(sessionType);
+		}
+
+		@Override
+		@Nullable
+		public <S extends Session> S getSession(Class<S> sessionType, @Nullable Connection connection) {
+			initializeSession();
+			return super.getSession(sessionType, connection);
+		}
+
+		private void initializeConnection() {
+			if (!this.connectionInitialized) {
+				try {
+					addConnection(createConnection());
+				}
+				catch (JMSException ex) {
+					throw new CannotCreateTransactionException(
+							"Failed to lazily initialize JMS Connection for transaction", ex);
+				}
+				this.connectionInitialized = true;
+			}
+		}
+
+		private void initializeSession() {
+			if (!this.sessionInitialized) {
+				Connection con = getConnection();
+				Assert.state(con != null, "No transactional JMS Connection");
+				try {
+					addSession(createSession(con), con);
+				}
+				catch (JMSException ex) {
+					throw new CannotCreateTransactionException(
+							"Failed to lazily initialize JMS Session for transaction", ex);
+				}
+				this.sessionInitialized = true;
+			}
+		}
 	}
 
 

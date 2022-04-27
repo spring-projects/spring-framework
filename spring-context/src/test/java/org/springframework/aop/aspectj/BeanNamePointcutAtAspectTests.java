@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,15 +18,17 @@ package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.aop.framework.Advised;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for correct application of the bean() PCD for &#64;AspectJ-based aspects.
@@ -35,7 +37,9 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class BeanNamePointcutAtAspectTests {
+class BeanNamePointcutAtAspectTests {
+
+	private ClassPathXmlApplicationContext ctx;
 
 	private ITestBean testBean1;
 
@@ -44,37 +48,44 @@ public class BeanNamePointcutAtAspectTests {
 	private CounterAspect counterAspect;
 
 
-	@org.junit.Before
-	@SuppressWarnings("resource")
-	public void setUp() {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+	@BeforeEach
+	void setup() {
+		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		counterAspect = (CounterAspect) ctx.getBean("counterAspect");
 		testBean1 = (ITestBean) ctx.getBean("testBean1");
 		testBean3 = (ITestBean) ctx.getBean("testBean3");
 	}
 
+	@AfterEach
+	void tearDown() {
+		this.ctx.close();
+	}
+
+
+
 	@Test
-	public void testMatchingBeanName() {
-		assertTrue("Expected a proxy", testBean1 instanceof Advised);
+	void matchingBeanName() {
+		boolean condition = testBean1 instanceof Advised;
+		assertThat(condition).as("Expected a proxy").isTrue();
 
 		// Call two methods to test for SPR-3953-like condition
 		testBean1.setAge(20);
 		testBean1.setName("");
-		assertEquals(2, counterAspect.count);
+		assertThat(counterAspect.count).isEqualTo(2);
 	}
 
 	@Test
-	public void testNonMatchingBeanName() {
-		assertFalse("Didn't expect a proxy", testBean3 instanceof Advised);
+	void nonMatchingBeanName() {
+		boolean condition = testBean3 instanceof Advised;
+		assertThat(condition).as("Didn't expect a proxy").isFalse();
 
 		testBean3.setAge(20);
-		assertEquals(0, counterAspect.count);
+		assertThat(counterAspect.count).isEqualTo(0);
 	}
 
 	@Test
-	public void testProgrammaticProxyCreation() {
+	void programmaticProxyCreation() {
 		ITestBean testBean = new TestBean();
 
 		AspectJProxyFactory factory = new AspectJProxyFactory();
@@ -85,9 +96,10 @@ public class BeanNamePointcutAtAspectTests {
 
 		ITestBean proxyTestBean = factory.getProxy();
 
-		assertTrue("Expected a proxy", proxyTestBean instanceof Advised);
+		boolean condition = proxyTestBean instanceof Advised;
+		assertThat(condition).as("Expected a proxy").isTrue();
 		proxyTestBean.setAge(20);
-		assertEquals("Programmatically created proxy shouldn't match bean()", 0, myCounterAspect.count);
+		assertThat(myCounterAspect.count).as("Programmatically created proxy shouldn't match bean()").isEqualTo(0);
 	}
 
 }

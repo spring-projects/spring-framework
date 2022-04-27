@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,30 +16,44 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.function.RouterFunction;
+import org.springframework.web.servlet.function.RouterFunctions;
+import org.springframework.web.servlet.function.ServerResponse;
+import org.springframework.web.servlet.function.support.RouterFunctionMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.util.ServletRequestPathUtils;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
+import org.springframework.web.util.pattern.PatternParseException;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.servlet.HandlerMapping.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
 
 /**
  * Unit tests for {@link HandlerMappingIntrospector}.
@@ -50,127 +64,178 @@ import static org.springframework.web.servlet.HandlerMapping.*;
 public class HandlerMappingIntrospectorTests {
 
 	@Test
-	public void detectHandlerMappings() throws Exception {
-		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
-		cxt.registerSingleton("hmA", SimpleUrlHandlerMapping.class);
-		cxt.registerSingleton("hmB", SimpleUrlHandlerMapping.class);
-		cxt.registerSingleton("hmC", SimpleUrlHandlerMapping.class);
-		cxt.refresh();
+	void detectHandlerMappings() {
+		StaticWebApplicationContext context = new StaticWebApplicationContext();
+		context.registerSingleton("A", SimpleUrlHandlerMapping.class);
+		context.registerSingleton("B", SimpleUrlHandlerMapping.class);
+		context.registerSingleton("C", SimpleUrlHandlerMapping.class);
+		context.refresh();
 
-		List<?> expected = Arrays.asList(cxt.getBean("hmA"), cxt.getBean("hmB"), cxt.getBean("hmC"));
-		List<HandlerMapping> actual = new HandlerMappingIntrospector(cxt).getHandlerMappings();
+		List<?> expected = Arrays.asList(context.getBean("A"), context.getBean("B"), context.getBean("C"));
+		List<HandlerMapping> actual = initIntrospector(context).getHandlerMappings();
 
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
-	public void detectHandlerMappingsOrdered() throws Exception {
-		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
-		MutablePropertyValues pvs = new MutablePropertyValues(Collections.singletonMap("order", "3"));
-		cxt.registerSingleton("hmA", SimpleUrlHandlerMapping.class, pvs);
-		pvs = new MutablePropertyValues(Collections.singletonMap("order", "2"));
-		cxt.registerSingleton("hmB", SimpleUrlHandlerMapping.class, pvs);
-		pvs = new MutablePropertyValues(Collections.singletonMap("order", "1"));
-		cxt.registerSingleton("hmC", SimpleUrlHandlerMapping.class, pvs);
-		cxt.refresh();
+	void detectHandlerMappingsOrdered() {
+		GenericWebApplicationContext context = new GenericWebApplicationContext();
+		context.registerBean("B", SimpleUrlHandlerMapping.class, () -> {
+			SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+			mapping.setOrder(2);
+			return mapping;
+		});
+		context.registerBean("C", SimpleUrlHandlerMapping.class, () -> {
+			SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+			mapping.setOrder(3);
+			return mapping;
+		});
+		context.registerBean("A", SimpleUrlHandlerMapping.class, () -> {
+			SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+			mapping.setOrder(1);
+			return mapping;
+		});
+		context.refresh();
 
-		List<?> expected = Arrays.asList(cxt.getBean("hmC"), cxt.getBean("hmB"), cxt.getBean("hmA"));
-		List<HandlerMapping> actual = new HandlerMappingIntrospector(cxt).getHandlerMappings();
+		List<?> expected = Arrays.asList(context.getBean("A"), context.getBean("B"), context.getBean("C"));
+		List<HandlerMapping> actual = initIntrospector(context).getHandlerMappings();
 
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
-	@Test @SuppressWarnings("deprecation")
-	public void defaultHandlerMappings() throws Exception {
-		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
-		cxt.refresh();
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void getMatchable(boolean usePathPatterns) throws Exception {
 
-		List<HandlerMapping> actual = new HandlerMappingIntrospector(cxt).getHandlerMappings();
-		assertEquals(2, actual.size());
-		assertEquals(BeanNameUrlHandlerMapping.class, actual.get(0).getClass());
-		assertEquals(RequestMappingHandlerMapping.class, actual.get(1).getClass());
+		TestPathPatternParser parser = new TestPathPatternParser();
+
+		GenericWebApplicationContext context = new GenericWebApplicationContext();
+		context.registerBean("mapping", SimpleUrlHandlerMapping.class, () -> {
+			SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+			if (usePathPatterns) {
+				mapping.setPatternParser(parser);
+			}
+			mapping.setUrlMap(Collections.singletonMap("/path/*", new Object()));
+			return mapping;
+		});
+		context.refresh();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path/123");
+		MatchableHandlerMapping mapping = initIntrospector(context).getMatchableHandlerMapping(request);
+
+		assertThat(mapping).isNotNull();
+		assertThat(request.getAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE)).as("Attribute changes not ignored").isNull();
+		assertThat(request.getAttribute(ServletRequestPathUtils.PATH_ATTRIBUTE)).as("Parsed path not cleaned").isNull();
+
+		assertThat(mapping.match(request, "/p*/*")).isNotNull();
+		assertThat(mapping.match(request, "/b*/*")).isNull();
+
+		if (usePathPatterns) {
+			assertThat(parser.getParsedPatterns()).containsExactly("/path/*", "/p*/*", "/b*/*");
+		}
 	}
 
 	@Test
-	public void getMatchable() throws Exception {
-		MutablePropertyValues pvs = new MutablePropertyValues(
-				Collections.singletonMap("urlMap", Collections.singletonMap("/path", new Object())));
-
+	void getMatchableWhereHandlerMappingDoesNotImplementMatchableInterface() {
 		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
-		cxt.registerSingleton("hm", SimpleUrlHandlerMapping.class, pvs);
-		cxt.refresh();
-
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path");
-		MatchableHandlerMapping hm = new HandlerMappingIntrospector(cxt).getMatchableHandlerMapping(request);
-
-		assertEquals(cxt.getBean("hm"), hm);
-		assertNull("Attributes changes not ignored", request.getAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE));
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void getMatchableWhereHandlerMappingDoesNotImplementMatchableInterface() throws Exception {
-		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
-		cxt.registerSingleton("hm1", TestHandlerMapping.class);
+		cxt.registerSingleton("mapping", TestHandlerMapping.class);
 		cxt.refresh();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		new HandlerMappingIntrospector(cxt).getMatchableHandlerMapping(request);
+		assertThatIllegalStateException().isThrownBy(() -> initIntrospector(cxt).getMatchableHandlerMapping(request));
+	}
+
+	@Test // gh-26833
+	void getMatchablePreservesRequestAttributes() throws Exception {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.register(TestConfig.class);
+		context.refresh();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/path");
+		request.setAttribute("name", "value");
+
+		MatchableHandlerMapping matchable = initIntrospector(context).getMatchableHandlerMapping(request);
+		assertThat(matchable).isNotNull();
+
+		// RequestPredicates.restoreAttributes clears and re-adds attributes
+		assertThat(request.getAttribute("name")).isEqualTo("value");
 	}
 
 	@Test
-	public void getCorsConfigurationPreFlight() throws Exception {
-		AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
-		cxt.register(TestConfig.class);
-		cxt.refresh();
+	void getCorsConfigurationPreFlight() {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.register(TestConfig.class);
+		context.refresh();
 
 		// PRE-FLIGHT
 
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/path");
 		request.addHeader("Origin", "http://localhost:9000");
 		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST");
-		CorsConfiguration corsConfig = new HandlerMappingIntrospector(cxt).getCorsConfiguration(request);
+		CorsConfiguration corsConfig = initIntrospector(context).getCorsConfiguration(request);
 
-		assertNotNull(corsConfig);
-		assertEquals(Collections.singletonList("http://localhost:9000"), corsConfig.getAllowedOrigins());
-		assertEquals(Collections.singletonList("POST"), corsConfig.getAllowedMethods());
+		assertThat(corsConfig).isNotNull();
+		assertThat(corsConfig.getAllowedOrigins()).isEqualTo(Collections.singletonList("http://localhost:9000"));
+		assertThat(corsConfig.getAllowedMethods()).isEqualTo(Collections.singletonList("POST"));
 	}
 
 	@Test
-	public void getCorsConfigurationActual() throws Exception {
-		AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
-		cxt.register(TestConfig.class);
-		cxt.refresh();
+	void getCorsConfigurationActual() {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.register(TestConfig.class);
+		context.refresh();
 
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/path");
 		request.addHeader("Origin", "http://localhost:9000");
-		CorsConfiguration corsConfig = new HandlerMappingIntrospector(cxt).getCorsConfiguration(request);
+		CorsConfiguration corsConfig = initIntrospector(context).getCorsConfiguration(request);
 
-		assertNotNull(corsConfig);
-		assertEquals(Collections.singletonList("http://localhost:9000"), corsConfig.getAllowedOrigins());
-		assertEquals(Collections.singletonList("POST"), corsConfig.getAllowedMethods());
+		assertThat(corsConfig).isNotNull();
+		assertThat(corsConfig.getAllowedOrigins()).isEqualTo(Collections.singletonList("http://localhost:9000"));
+		assertThat(corsConfig.getAllowedMethods()).isEqualTo(Collections.singletonList("POST"));
+	}
+
+	private HandlerMappingIntrospector initIntrospector(WebApplicationContext context) {
+		HandlerMappingIntrospector introspector = new HandlerMappingIntrospector();
+		introspector.setApplicationContext(context);
+		introspector.afterPropertiesSet();
+		return introspector;
 	}
 
 
 	private static class TestHandlerMapping implements HandlerMapping {
 
 		@Override
-		public HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+		public HandlerExecutionChain getHandler(HttpServletRequest request) {
 			return new HandlerExecutionChain(new Object());
 		}
 	}
 
 
-	@Configuration @SuppressWarnings({"WeakerAccess", "unused"})
+	@Configuration
 	static class TestConfig {
 
 		@Bean
+		public RouterFunctionMapping routerFunctionMapping() {
+			RouterFunctionMapping mapping = new RouterFunctionMapping();
+			mapping.setOrder(1);
+			return mapping;
+		}
+
+		@Bean
 		public RequestMappingHandlerMapping handlerMapping() {
-			return new RequestMappingHandlerMapping();
+			RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+			mapping.setOrder(2);
+			return mapping;
 		}
 
 		@Bean
 		public TestController testController() {
 			return new TestController();
+		}
+
+		@Bean
+		public RouterFunction<?> routerFunction() {
+			return RouterFunctions.route().GET("/fn-path", request -> ServerResponse.ok().build()).build();
 		}
 	}
 
@@ -180,7 +245,23 @@ public class HandlerMappingIntrospectorTests {
 	private static class TestController {
 
 		@PostMapping("/path")
-		public void handle() {
+		void handle() {
+		}
+	}
+
+	private static class TestPathPatternParser extends PathPatternParser {
+
+		private final List<String> parsedPatterns = new ArrayList<>();
+
+
+		public List<String> getParsedPatterns() {
+			return this.parsedPatterns;
+		}
+
+		@Override
+		public PathPattern parse(String pathPattern) throws PatternParseException {
+			this.parsedPatterns.add(pathPattern);
+			return super.parse(pathPattern);
 		}
 	}
 

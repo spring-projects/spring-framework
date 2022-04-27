@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,9 +45,22 @@ import org.springframework.web.context.request.NativeWebRequest;
  */
 public interface CallableProcessingInterceptor {
 
+	/**
+	 * Constant indicating that no result has been determined by this
+	 * interceptor, giving subsequent interceptors a chance.
+	 * @see #handleTimeout
+	 * @see #handleError
+	 */
 	Object RESULT_NONE = new Object();
 
+	/**
+	 * Constant indicating that the response has been handled by this interceptor
+	 * without a result and that no further interceptors are to be invoked.
+	 * @see #handleTimeout
+	 * @see #handleError
+	 */
 	Object RESPONSE_HANDLED = new Object();
+
 
 	/**
 	 * Invoked <em>before</em> the start of concurrent handling in the original
@@ -58,6 +71,7 @@ public interface CallableProcessingInterceptor {
 	 * {@link #preProcess(NativeWebRequest, Callable)}. Capturing the state of
 	 * Spring Security's SecurityContextHolder and migrating it to the new Thread
 	 * is a concrete example of where this is useful.
+	 * <p>The default implementation is empty.
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @throws Exception in case of errors
@@ -69,6 +83,7 @@ public interface CallableProcessingInterceptor {
 	 * Invoked <em>after</em> the start of concurrent handling in the async
 	 * thread in which the {@code Callable} is executed and <em>before</em> the
 	 * actual invocation of the {@code Callable}.
+	 * <p>The default implementation is empty.
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @throws Exception in case of errors
@@ -81,6 +96,7 @@ public interface CallableProcessingInterceptor {
 	 * async thread in which the {@code Callable} is executed. This method may
 	 * be invoked later than {@code afterTimeout} or {@code afterCompletion}
 	 * depending on when the {@code Callable} finishes processing.
+	 * <p>The default implementation is empty.
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @param concurrentResult the result of concurrent processing, which could
@@ -96,6 +112,7 @@ public interface CallableProcessingInterceptor {
 	 * the {@code Callable} task completes. Implementations may return a value,
 	 * including an {@link Exception}, to use instead of the value the
 	 * {@link Callable} did not return in time.
+	 * <p>The default implementation always returns {@link #RESULT_NONE}.
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @return a concurrent result value; if the value is anything other than
@@ -112,6 +129,7 @@ public interface CallableProcessingInterceptor {
 	 * the async request before the {@code Callable} task completes.
 	 * Implementations may return a value, including an {@link Exception}, to
 	 * use instead of the value the {@link Callable} did not return in time.
+	 * <p>The default implementation always returns {@link #RESULT_NONE}.
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @param t the error that occurred while request processing
@@ -128,6 +146,7 @@ public interface CallableProcessingInterceptor {
 	/**
 	 * Invoked from a container thread when async processing completes for any
 	 * reason including timeout or network error.
+	 * <p>The default implementation is empty.
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @throws Exception in case of errors

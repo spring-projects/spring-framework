@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,8 @@
 
 package org.springframework.scripting.support;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +29,7 @@ import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.asm.Type;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -39,10 +39,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -136,9 +134,10 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Rick Evans
  * @author Mark Fisher
+ * @author Sam Brannen
  * @since 2.0
  */
-public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProcessorAdapter implements
+public class ScriptFactoryPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
 		BeanClassLoaderAware, BeanFactoryAware, ResourceLoaderAware, DisposableBean, Ordered {
 
 	/**
@@ -149,12 +148,21 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 */
 	public static final String INLINE_SCRIPT_PREFIX = "inline:";
 
+	/**
+	 * The {@code refreshCheckDelay} attribute.
+	 */
 	public static final String REFRESH_CHECK_DELAY_ATTRIBUTE = Conventions.getQualifiedAttributeName(
 			ScriptFactoryPostProcessor.class, "refreshCheckDelay");
 
+	/**
+	 * The {@code proxyTargetClass} attribute.
+	 */
 	public static final String PROXY_TARGET_CLASS_ATTRIBUTE = Conventions.getQualifiedAttributeName(
 			ScriptFactoryPostProcessor.class, "proxyTargetClass");
 
+	/**
+	 * The {@code language} attribute.
+	 */
 	public static final String LANGUAGE_ATTRIBUTE = Conventions.getQualifiedAttributeName(
 			ScriptFactoryPostProcessor.class, "language");
 
@@ -163,7 +171,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	private static final String SCRIPTED_OBJECT_NAME_PREFIX = "scriptedObject.";
 
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private long defaultRefreshCheckDelay = -1;
@@ -180,8 +188,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 	final DefaultListableBeanFactory scriptBeanFactory = new DefaultListableBeanFactory();
 
-	/** Map from bean name String to ScriptSource object */
-	private final Map<String, ScriptSource> scriptSourceCache = new HashMap<>();
+	/** Map from bean name String to ScriptSource object. */
+	private final Map<String, ScriptSource> scriptSourceCache = new ConcurrentHashMap<>();
 
 
 	/**
@@ -225,11 +233,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 		// Filter out BeanPostProcessors that are part of the AOP infrastructure,
 		// since those are only meant to apply to beans defined in the original factory.
-		for (Iterator<BeanPostProcessor> it = this.scriptBeanFactory.getBeanPostProcessors().iterator(); it.hasNext();) {
-			if (it.next() instanceof AopInfrastructureBean) {
-				it.remove();
-			}
-		}
+		this.scriptBeanFactory.getBeanPostProcessors().removeIf(beanPostProcessor ->
+				beanPostProcessor instanceof AopInfrastructureBean);
 	}
 
 	@Override
@@ -244,6 +249,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 
 	@Override
+	@Nullable
 	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 		// We only apply special treatment to ScriptFactory implementations here.
 		if (!ScriptFactory.class.isAssignableFrom(beanClass)) {
@@ -279,8 +285,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			if (ex instanceof BeanCreationException &&
 					((BeanCreationException) ex).getMostSpecificCause() instanceof BeanCurrentlyInCreationException) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Could not determine scripted object type for bean '" + beanName + "': "
-							+ ex.getMessage());
+					logger.trace("Could not determine scripted object type for bean '" + beanName + "': " +
+							ex.getMessage());
 				}
 			}
 			else {
@@ -291,6 +297,11 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		}
 
 		return null;
+	}
+
+	@Override
+	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
+		return pvs;
 	}
 
 	@Override
@@ -416,7 +427,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			proxyTargetClass = (Boolean) attributeValue;
 		}
 		else if (attributeValue instanceof String) {
-			proxyTargetClass = Boolean.valueOf((String) attributeValue);
+			proxyTargetClass = Boolean.parseBoolean((String) attributeValue);
 		}
 		else if (attributeValue != null) {
 			throw new BeanDefinitionStoreException("Invalid proxy target class attribute [" +
@@ -450,14 +461,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @see #convertToScriptSource
 	 */
 	protected ScriptSource getScriptSource(String beanName, String scriptSourceLocator) {
-		synchronized (this.scriptSourceCache) {
-			ScriptSource scriptSource = this.scriptSourceCache.get(beanName);
-			if (scriptSource == null) {
-				scriptSource = convertToScriptSource(beanName, scriptSourceLocator, this.resourceLoader);
-				this.scriptSourceCache.put(beanName, scriptSource);
-			}
-			return scriptSource;
-		}
+		return this.scriptSourceCache.computeIfAbsent(beanName, key ->
+				convertToScriptSource(beanName, scriptSourceLocator, this.resourceLoader));
 	}
 
 	/**
@@ -505,16 +510,13 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			Signature signature = new Signature(setterName, Type.VOID_TYPE, new Type[] {Type.getType(propertyType)});
 			maker.add(signature, new Type[0]);
 		}
-		if (bd instanceof AbstractBeanDefinition) {
-			AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
-			if (abd.getInitMethodName() != null) {
-				Signature signature = new Signature(abd.getInitMethodName(), Type.VOID_TYPE, new Type[0]);
-				maker.add(signature, new Type[0]);
-			}
-			if (StringUtils.hasText(abd.getDestroyMethodName())) {
-				Signature signature = new Signature(abd.getDestroyMethodName(), Type.VOID_TYPE, new Type[0]);
-				maker.add(signature, new Type[0]);
-			}
+		if (bd.getInitMethodName() != null) {
+			Signature signature = new Signature(bd.getInitMethodName(), Type.VOID_TYPE, new Type[0]);
+			maker.add(signature, new Type[0]);
+		}
+		if (StringUtils.hasText(bd.getDestroyMethodName())) {
+			Signature signature = new Signature(bd.getDestroyMethodName(), Type.VOID_TYPE, new Type[0]);
+			maker.add(signature, new Type[0]);
 		}
 		return maker.create();
 	}

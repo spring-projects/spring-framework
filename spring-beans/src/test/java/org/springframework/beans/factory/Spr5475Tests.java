@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,22 +16,22 @@
 
 package org.springframework.beans.factory;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 
 /**
  * SPR-5475 exposed the fact that the error message displayed when incorrectly
  * invoking a factory method is not instructive to the user and rather misleading.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class Spr5475Tests {
 
@@ -41,7 +41,8 @@ public class Spr5475Tests {
 				rootBeanDefinition(Foo.class)
 					.setFactoryMethod("noArgFactory")
 					.addConstructorArgValue("bogusArg").getBeanDefinition(),
-				"Error creating bean with name 'foo': No matching factory method found: factory method 'noArgFactory(String)'. " +
+				"Error creating bean with name 'foo': No matching factory method found on class " +
+				"[org.springframework.beans.factory.Spr5475Tests$Foo]: factory method 'noArgFactory(String)'. " +
 				"Check that a method with the specified name and arguments exists and that it is static.");
 	}
 
@@ -52,7 +53,8 @@ public class Spr5475Tests {
 					.setFactoryMethod("noArgFactory")
 					.addConstructorArgValue("bogusArg1")
 					.addConstructorArgValue("bogusArg2".getBytes()).getBeanDefinition(),
-				"Error creating bean with name 'foo': No matching factory method found: factory method 'noArgFactory(String,byte[])'. " +
+				"Error creating bean with name 'foo': No matching factory method found on class " +
+				"[org.springframework.beans.factory.Spr5475Tests$Foo]: factory method 'noArgFactory(String,byte[])'. " +
 				"Check that a method with the specified name and arguments exists and that it is static.");
 	}
 
@@ -66,21 +68,17 @@ public class Spr5475Tests {
 		def.setConstructorArgumentValues(cav);
 
 		assertExceptionMessageForMisconfiguredFactoryMethod(def,
-				"Error creating bean with name 'foo': No matching factory method found: factory method 'noArgFactory(CharSequence,byte[])'. " +
+				"Error creating bean with name 'foo': No matching factory method found on class " +
+				"[org.springframework.beans.factory.Spr5475Tests$Foo]: factory method 'noArgFactory(CharSequence,byte[])'. " +
 				"Check that a method with the specified name and arguments exists and that it is static.");
 	}
 
 	private void assertExceptionMessageForMisconfiguredFactoryMethod(BeanDefinition bd, String expectedMessage) {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("foo", bd);
-
-		try {
-			factory.preInstantiateSingletons();
-			fail("should have failed with BeanCreationException due to incorrectly invoked factory method");
-		}
-		catch (BeanCreationException ex) {
-			assertThat(ex.getMessage(), equalTo(expectedMessage));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				factory::preInstantiateSingletons)
+			.withMessageContaining(expectedMessage);
 	}
 
 	@Test

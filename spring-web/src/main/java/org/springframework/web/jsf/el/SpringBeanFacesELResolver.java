@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.web.jsf.el;
 
 import java.beans.FeatureDescriptor;
 import java.util.Iterator;
+
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ELResolver;
@@ -35,33 +36,33 @@ import org.springframework.web.jsf.FacesContextUtils;
  * <p>Configure this resolver in your {@code faces-config.xml} file as follows:
  *
  * <pre class="code">
- * &lt;application>
+ * &lt;application&gt;
  *   ...
- *   &lt;el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver&lt;/el-resolver>
- * &lt;/application></pre>
+ *   &lt;el-resolver&gt;org.springframework.web.jsf.el.SpringBeanFacesELResolver&lt;/el-resolver&gt;
+ * &lt;/application&gt;</pre>
  *
  * All your JSF expressions can then implicitly refer to the names of
  * Spring-managed service layer beans, for example in property values of
  * JSF-managed beans:
  *
  * <pre class="code">
- * &lt;managed-bean>
- *   &lt;managed-bean-name>myJsfManagedBean&lt;/managed-bean-name>
- *   &lt;managed-bean-class>example.MyJsfManagedBean&lt;/managed-bean-class>
- *   &lt;managed-bean-scope>session&lt;/managed-bean-scope>
- *   &lt;managed-property>
- *     &lt;property-name>mySpringManagedBusinessObject&lt;/property-name>
- *     &lt;value>#{mySpringManagedBusinessObject}&lt;/value>
- *   &lt;/managed-property>
- * &lt;/managed-bean></pre>
+ * &lt;managed-bean&gt;
+ *   &lt;managed-bean-name&gt;myJsfManagedBean&lt;/managed-bean-name&gt;
+ *   &lt;managed-bean-class&gt;example.MyJsfManagedBean&lt;/managed-bean-class&gt;
+ *   &lt;managed-bean-scope&gt;session&lt;/managed-bean-scope&gt;
+ *   &lt;managed-property&gt;
+ *     &lt;property-name&gt;mySpringManagedBusinessObject&lt;/property-name&gt;
+ *     &lt;value&gt;#{mySpringManagedBusinessObject}&lt;/value&gt;
+ *   &lt;/managed-property&gt;
+ * &lt;/managed-bean&gt;</pre>
  *
  * with "mySpringManagedBusinessObject" defined as Spring bean in
  * applicationContext.xml:
  *
  * <pre class="code">
- * &lt;bean id="mySpringManagedBusinessObject" class="example.MySpringManagedBusinessObject">
+ * &lt;bean id="mySpringManagedBusinessObject" class="example.MySpringManagedBusinessObject"&gt;
  *   ...
- * &lt;/bean></pre>
+ * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
  * @since 2.5

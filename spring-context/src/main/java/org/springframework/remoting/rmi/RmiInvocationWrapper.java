@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.remoting.rmi;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.util.Assert;
 
@@ -33,6 +34,7 @@ import org.springframework.util.Assert;
  * @since 14.05.2003
  * @see RmiServiceExporter
  */
+@Deprecated
 class RmiInvocationWrapper implements RmiInvocationHandler {
 
 	private final Object wrappedObject;
@@ -41,7 +43,7 @@ class RmiInvocationWrapper implements RmiInvocationHandler {
 
 
 	/**
-	 * Create a new RmiInvocationWrapper for the given object
+	 * Create a new RmiInvocationWrapper for the given object.
 	 * @param wrappedObject the object to wrap with an RmiInvocationHandler
 	 * @param rmiExporter the RMI exporter to handle the actual invocation
 	 */
@@ -58,6 +60,7 @@ class RmiInvocationWrapper implements RmiInvocationHandler {
 	 * @see RmiBasedExporter#getServiceInterface()
 	 */
 	@Override
+	@Nullable
 	public String getTargetInterfaceName() {
 		Class<?> ifc = this.rmiExporter.getServiceInterface();
 		return (ifc != null ? ifc.getName() : null);
@@ -68,6 +71,7 @@ class RmiInvocationWrapper implements RmiInvocationHandler {
 	 * @see RmiBasedExporter#invoke(org.springframework.remoting.support.RemoteInvocation, Object)
 	 */
 	@Override
+	@Nullable
 	public Object invoke(RemoteInvocation invocation)
 		throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 

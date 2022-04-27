@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -73,6 +73,8 @@ public class SockJsServiceRegistration {
 
 	private final List<String> allowedOrigins = new ArrayList<>();
 
+	private final List<String> allowedOriginPatterns = new ArrayList<>();
+
 	@Nullable
 	private Boolean suppressCors;
 
@@ -81,18 +83,6 @@ public class SockJsServiceRegistration {
 
 
 	public SockJsServiceRegistration() {
-	}
-
-	/**
-	 * Deprecated constructor with a TaskScheduler.
-	 * @deprecated as of 5.0 a TaskScheduler is not provided upfront, not until
-	 * it is obvious that it is needed; call {@link #getTaskScheduler()} to check
-	 * and then {@link #setTaskScheduler(TaskScheduler)} to set it before a call
-	 * to {@link #createSockJsService()}
-	 */
-	@Deprecated
-	public SockJsServiceRegistration(TaskScheduler defaultTaskScheduler) {
-		this.scheduler = defaultTaskScheduler;
 	}
 
 
@@ -116,7 +106,7 @@ public class SockJsServiceRegistration {
 	 * also be set to point to a URL served by the application.
 	 * <p>Note that it's possible to specify a relative URL in which case the URL
 	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
-	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then the
+	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then
 	 * the relative URL must start with "../../" to traverse up to the location
 	 * above the SockJS mapping. In case of a prefix-based Servlet mapping one more
 	 * traversal may be needed.
@@ -233,12 +223,25 @@ public class SockJsServiceRegistration {
 	}
 
 	/**
+	 * Configure allowed {@code Origin} header values.
 	 * @since 4.1.2
 	 */
 	protected SockJsServiceRegistration setAllowedOrigins(String... allowedOrigins) {
 		this.allowedOrigins.clear();
 		if (!ObjectUtils.isEmpty(allowedOrigins)) {
 			this.allowedOrigins.addAll(Arrays.asList(allowedOrigins));
+		}
+		return this;
+	}
+
+	/**
+	 * Configure allowed {@code Origin} pattern header values.
+	 * @since 5.3.2
+	 */
+	protected SockJsServiceRegistration setAllowedOriginPatterns(String... allowedOriginPatterns) {
+		this.allowedOriginPatterns.clear();
+		if (!ObjectUtils.isEmpty(allowedOriginPatterns)) {
+			this.allowedOriginPatterns.addAll(Arrays.asList(allowedOriginPatterns));
 		}
 		return this;
 	}
@@ -295,6 +298,7 @@ public class SockJsServiceRegistration {
 			service.setSuppressCors(this.suppressCors);
 		}
 		service.setAllowedOrigins(this.allowedOrigins);
+		service.setAllowedOriginPatterns(this.allowedOriginPatterns);
 
 		if (this.messageCodec != null) {
 			service.setMessageCodec(this.messageCodec);

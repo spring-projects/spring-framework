@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,19 +19,17 @@ package org.springframework.context.support;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 
 /**
  * Unit tests cornering SPR-7502.
@@ -44,8 +42,8 @@ public class SerializableBeanFactoryMemoryLeakTests {
 	 * Defensively zero-out static factory count - other tests
 	 * may have misbehaved before us.
 	 */
-	@BeforeClass
-	@AfterClass
+	@BeforeAll
+	@AfterAll
 	public static void zeroOutFactoryCount() throws Exception {
 		getSerializableFactoryMap().clear();
 	}
@@ -80,17 +78,17 @@ public class SerializableBeanFactoryMemoryLeakTests {
 	}
 
 	private void assertFactoryCountThroughoutLifecycle(ConfigurableApplicationContext ctx) throws Exception {
-		assertThat(serializableFactoryCount(), equalTo(0));
+		assertThat(serializableFactoryCount()).isEqualTo(0);
 		try {
 			ctx.refresh();
-			assertThat(serializableFactoryCount(), equalTo(1));
+			assertThat(serializableFactoryCount()).isEqualTo(1);
 			ctx.close();
 		}
 		catch (BeanCreationException ex) {
 			// ignore - this is expected on refresh() for failure case tests
 		}
 		finally {
-			assertThat(serializableFactoryCount(), equalTo(0));
+			assertThat(serializableFactoryCount()).isEqualTo(0);
 		}
 	}
 

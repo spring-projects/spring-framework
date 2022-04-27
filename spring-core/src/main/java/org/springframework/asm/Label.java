@@ -1,564 +1,622 @@
-/***
- * ASM: a very small and fast Java bytecode manipulation framework
- * Copyright (c) 2000-2011 INRIA, France Telecom
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the copyright holders nor the names of its
- *    contributors may be used to endorse or promote products derived from
- *    this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- */
+// ASM: a very small and fast Java bytecode manipulation framework
+// Copyright (c) 2000-2011 INRIA, France Telecom
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holders nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+// THE POSSIBILITY OF SUCH DAMAGE.
 package org.springframework.asm;
 
 /**
- * A label represents a position in the bytecode of a method. Labels are used
- * for jump, goto, and switch instructions, and for try catch blocks. A label
- * designates the <i>instruction</i> that is just after. Note however that there
- * can be other elements between a label and the instruction it designates (such
+ * A position in the bytecode of a method. Labels are used for jump, goto, and switch instructions,
+ * and for try catch blocks. A label designates the <i>instruction</i> that is just after. Note
+ * however that there can be other elements between a label and the instruction it designates (such
  * as other labels, stack map frames, line numbers, etc.).
  *
  * @author Eric Bruneton
  */
 public class Label {
 
-    /**
-     * Indicates if this label is only used for debug attributes. Such a label
-     * is not the start of a basic block, the target of a jump instruction, or
-     * an exception handler. It can be safely ignored in control flow graph
-     * analysis algorithms (for optimization purposes).
-     */
-    static final int DEBUG = 1;
+  /**
+   * A flag indicating that a label is only used for debug attributes. Such a label is not the start
+   * of a basic block, the target of a jump instruction, or an exception handler. It can be safely
+   * ignored in control flow graph analysis algorithms (for optimization purposes).
+   */
+  static final int FLAG_DEBUG_ONLY = 1;
 
-    /**
-     * Indicates if the position of this label is known.
-     */
-    static final int RESOLVED = 2;
+  /**
+   * A flag indicating that a label is the target of a jump instruction, or the start of an
+   * exception handler.
+   */
+  static final int FLAG_JUMP_TARGET = 2;
 
-    /**
-     * Indicates if this label has been updated, after instruction resizing.
-     */
-    static final int RESIZED = 4;
+  /** A flag indicating that the bytecode offset of a label is known. */
+  static final int FLAG_RESOLVED = 4;
 
-    /**
-     * Indicates if this basic block has been pushed in the basic block stack.
-     * See {@link MethodWriter#visitMaxs visitMaxs}.
-     */
-    static final int PUSHED = 8;
+  /** A flag indicating that a label corresponds to a reachable basic block. */
+  static final int FLAG_REACHABLE = 8;
 
-    /**
-     * Indicates if this label is the target of a jump instruction, or the start
-     * of an exception handler.
-     */
-    static final int TARGET = 16;
+  /**
+   * A flag indicating that the basic block corresponding to a label ends with a subroutine call. By
+   * construction in {@link MethodWriter#visitJumpInsn}, labels with this flag set have at least two
+   * outgoing edges:
+   *
+   * <ul>
+   *   <li>the first one corresponds to the instruction that follows the jsr instruction in the
+   *       bytecode, i.e. where execution continues when it returns from the jsr call. This is a
+   *       virtual control flow edge, since execution never goes directly from the jsr to the next
+   *       instruction. Instead, it goes to the subroutine and eventually returns to the instruction
+   *       following the jsr. This virtual edge is used to compute the real outgoing edges of the
+   *       basic blocks ending with a ret instruction, in {@link #addSubroutineRetSuccessors}.
+   *   <li>the second one corresponds to the target of the jsr instruction,
+   * </ul>
+   */
+  static final int FLAG_SUBROUTINE_CALLER = 16;
 
-    /**
-     * Indicates if a stack map frame must be stored for this label.
-     */
-    static final int STORE = 32;
+  /**
+   * A flag indicating that the basic block corresponding to a label is the start of a subroutine.
+   */
+  static final int FLAG_SUBROUTINE_START = 32;
 
-    /**
-     * Indicates if this label corresponds to a reachable basic block.
-     */
-    static final int REACHABLE = 64;
+  /** A flag indicating that the basic block corresponding to a label is the end of a subroutine. */
+  static final int FLAG_SUBROUTINE_END = 64;
 
-    /**
-     * Indicates if this basic block ends with a JSR instruction.
-     */
-    static final int JSR = 128;
+  /**
+   * The number of elements to add to the {@link #otherLineNumbers} array when it needs to be
+   * resized to store a new source line number.
+   */
+  static final int LINE_NUMBERS_CAPACITY_INCREMENT = 4;
 
-    /**
-     * Indicates if this basic block ends with a RET instruction.
-     */
-    static final int RET = 256;
+  /**
+   * The number of elements to add to the {@link #forwardReferences} array when it needs to be
+   * resized to store a new forward reference.
+   */
+  static final int FORWARD_REFERENCES_CAPACITY_INCREMENT = 6;
 
-    /**
-     * Indicates if this basic block is the start of a subroutine.
-     */
-    static final int SUBROUTINE = 512;
+  /**
+   * The bit mask to extract the type of a forward reference to this label. The extracted type is
+   * either {@link #FORWARD_REFERENCE_TYPE_SHORT} or {@link #FORWARD_REFERENCE_TYPE_WIDE}.
+   *
+   * @see #forwardReferences
+   */
+  static final int FORWARD_REFERENCE_TYPE_MASK = 0xF0000000;
 
-    /**
-     * Indicates if this subroutine basic block has been visited by a
-     * visitSubroutine(null, ...) call.
-     */
-    static final int VISITED = 1024;
+  /**
+   * The type of forward references stored with two bytes in the bytecode. This is the case, for
+   * instance, of a forward reference from an ifnull instruction.
+   */
+  static final int FORWARD_REFERENCE_TYPE_SHORT = 0x10000000;
 
-    /**
-     * Indicates if this subroutine basic block has been visited by a
-     * visitSubroutine(!null, ...) call.
-     */
-    static final int VISITED2 = 2048;
+  /**
+   * The type of forward references stored in four bytes in the bytecode. This is the case, for
+   * instance, of a forward reference from a lookupswitch instruction.
+   */
+  static final int FORWARD_REFERENCE_TYPE_WIDE = 0x20000000;
 
-    /**
-     * Field used to associate user information to a label. Warning: this field
-     * is used by the ASM tree package. In order to use it with the ASM tree
-     * package you must override the
-     * {@code org.objectweb.asm.tree.MethodNode#getLabelNode} method.
-     */
-    public Object info;
+  /**
+   * The bit mask to extract the 'handle' of a forward reference to this label. The extracted handle
+   * is the bytecode offset where the forward reference value is stored (using either 2 or 4 bytes,
+   * as indicated by the {@link #FORWARD_REFERENCE_TYPE_MASK}).
+   *
+   * @see #forwardReferences
+   */
+  static final int FORWARD_REFERENCE_HANDLE_MASK = 0x0FFFFFFF;
 
-    /**
-     * Flags that indicate the status of this label.
-     *
-     * @see #DEBUG
-     * @see #RESOLVED
-     * @see #RESIZED
-     * @see #PUSHED
-     * @see #TARGET
-     * @see #STORE
-     * @see #REACHABLE
-     * @see #JSR
-     * @see #RET
-     */
-    int status;
+  /**
+   * A sentinel element used to indicate the end of a list of labels.
+   *
+   * @see #nextListElement
+   */
+  static final Label EMPTY_LIST = new Label();
 
-    /**
-     * The line number corresponding to this label, if known. If there are
-     * several lines, each line is stored in a separate label, all linked via
-     * their next field (these links are created in ClassReader and removed just
-     * before visitLabel is called, so that this does not impact the rest of the
-     * code).
-     */
-    int line;
+  /**
+   * A user managed state associated with this label. Warning: this field is used by the ASM tree
+   * package. In order to use it with the ASM tree package you must override the getLabelNode method
+   * in MethodNode.
+   */
+  public Object info;
 
-    /**
-     * The position of this label in the code, if known.
-     */
-    int position;
+  /**
+   * The type and status of this label or its corresponding basic block. Must be zero or more of
+   * {@link #FLAG_DEBUG_ONLY}, {@link #FLAG_JUMP_TARGET}, {@link #FLAG_RESOLVED}, {@link
+   * #FLAG_REACHABLE}, {@link #FLAG_SUBROUTINE_CALLER}, {@link #FLAG_SUBROUTINE_START}, {@link
+   * #FLAG_SUBROUTINE_END}.
+   */
+  short flags;
 
-    /**
-     * Number of forward references to this label, times two.
-     */
-    private int referenceCount;
+  /**
+   * The source line number corresponding to this label, or 0. If there are several source line
+   * numbers corresponding to this label, the first one is stored in this field, and the remaining
+   * ones are stored in {@link #otherLineNumbers}.
+   */
+  private short lineNumber;
 
-    /**
-     * Informations about forward references. Each forward reference is
-     * described by two consecutive integers in this array: the first one is the
-     * position of the first byte of the bytecode instruction that contains the
-     * forward reference, while the second is the position of the first byte of
-     * the forward reference itself. In fact the sign of the first integer
-     * indicates if this reference uses 2 or 4 bytes, and its absolute value
-     * gives the position of the bytecode instruction. This array is also used
-     * as a bitset to store the subroutines to which a basic block belongs. This
-     * information is needed in {@link MethodWriter#visitMaxs}, after all
-     * forward references have been resolved. Hence the same array can be used
-     * for both purposes without problems.
-     */
-    private int[] srcAndRefPositions;
+  /**
+   * The source line numbers corresponding to this label, in addition to {@link #lineNumber}, or
+   * null. The first element of this array is the number n of source line numbers it contains, which
+   * are stored between indices 1 and n (inclusive).
+   */
+  private int[] otherLineNumbers;
 
-    // ------------------------------------------------------------------------
+  /**
+   * The offset of this label in the bytecode of its method, in bytes. This value is set if and only
+   * if the {@link #FLAG_RESOLVED} flag is set.
+   */
+  int bytecodeOffset;
 
-    /*
-     * Fields for the control flow and data flow graph analysis algorithms (used
-     * to compute the maximum stack size or the stack map frames). A control
-     * flow graph contains one node per "basic block", and one edge per "jump"
-     * from one basic block to another. Each node (i.e., each basic block) is
-     * represented by the Label object that corresponds to the first instruction
-     * of this basic block. Each node also stores the list of its successors in
-     * the graph, as a linked list of Edge objects.
-     *
-     * The control flow analysis algorithms used to compute the maximum stack
-     * size or the stack map frames are similar and use two steps. The first
-     * step, during the visit of each instruction, builds information about the
-     * state of the local variables and the operand stack at the end of each
-     * basic block, called the "output frame", <i>relatively</i> to the frame
-     * state at the beginning of the basic block, which is called the "input
-     * frame", and which is <i>unknown</i> during this step. The second step, in
-     * {@link MethodWriter#visitMaxs}, is a fix point algorithm that computes
-     * information about the input frame of each basic block, from the input
-     * state of the first basic block (known from the method signature), and by
-     * the using the previously computed relative output frames.
-     *
-     * The algorithm used to compute the maximum stack size only computes the
-     * relative output and absolute input stack heights, while the algorithm
-     * used to compute stack map frames computes relative output frames and
-     * absolute input frames.
-     */
+  /**
+   * The forward references to this label. The first element is the number of forward references,
+   * times 2 (this corresponds to the index of the last element actually used in this array). Then,
+   * each forward reference is described with two consecutive integers noted
+   * 'sourceInsnBytecodeOffset' and 'reference':
+   *
+   * <ul>
+   *   <li>'sourceInsnBytecodeOffset' is the bytecode offset of the instruction that contains the
+   *       forward reference,
+   *   <li>'reference' contains the type and the offset in the bytecode where the forward reference
+   *       value must be stored, which can be extracted with {@link #FORWARD_REFERENCE_TYPE_MASK}
+   *       and {@link #FORWARD_REFERENCE_HANDLE_MASK}.
+   * </ul>
+   *
+   * <p>For instance, for an ifnull instruction at bytecode offset x, 'sourceInsnBytecodeOffset' is
+   * equal to x, and 'reference' is of type {@link #FORWARD_REFERENCE_TYPE_SHORT} with value x + 1
+   * (because the ifnull instruction uses a 2 bytes bytecode offset operand stored one byte after
+   * the start of the instruction itself). For the default case of a lookupswitch instruction at
+   * bytecode offset x, 'sourceInsnBytecodeOffset' is equal to x, and 'reference' is of type {@link
+   * #FORWARD_REFERENCE_TYPE_WIDE} with value between x + 1 and x + 4 (because the lookupswitch
+   * instruction uses a 4 bytes bytecode offset operand stored one to four bytes after the start of
+   * the instruction itself).
+   */
+  private int[] forwardReferences;
 
-    /**
-     * Start of the output stack relatively to the input stack. The exact
-     * semantics of this field depends on the algorithm that is used.
-     *
-     * When only the maximum stack size is computed, this field is the number of
-     * elements in the input stack.
-     *
-     * When the stack map frames are completely computed, this field is the
-     * offset of the first output stack element relatively to the top of the
-     * input stack. This offset is always negative or null. A null offset means
-     * that the output stack must be appended to the input stack. A -n offset
-     * means that the first n output stack elements must replace the top n input
-     * stack elements, and that the other elements must be appended to the input
-     * stack.
-     */
-    int inputStackTop;
+  // -----------------------------------------------------------------------------------------------
 
-    /**
-     * Maximum height reached by the output stack, relatively to the top of the
-     * input stack. This maximum is always positive or null.
-     */
-    int outputStackMax;
+  // Fields for the control flow and data flow graph analysis algorithms (used to compute the
+  // maximum stack size or the stack map frames). A control flow graph contains one node per "basic
+  // block", and one edge per "jump" from one basic block to another. Each node (i.e., each basic
+  // block) is represented with the Label object that corresponds to the first instruction of this
+  // basic block. Each node also stores the list of its successors in the graph, as a linked list of
+  // Edge objects.
+  //
+  // The control flow analysis algorithms used to compute the maximum stack size or the stack map
+  // frames are similar and use two steps. The first step, during the visit of each instruction,
+  // builds information about the state of the local variables and the operand stack at the end of
+  // each basic block, called the "output frame", <i>relatively</i> to the frame state at the
+  // beginning of the basic block, which is called the "input frame", and which is <i>unknown</i>
+  // during this step. The second step, in {@link MethodWriter#computeAllFrames} and {@link
+  // MethodWriter#computeMaxStackAndLocal}, is a fix point algorithm
+  // that computes information about the input frame of each basic block, from the input state of
+  // the first basic block (known from the method signature), and by the using the previously
+  // computed relative output frames.
+  //
+  // The algorithm used to compute the maximum stack size only computes the relative output and
+  // absolute input stack heights, while the algorithm used to compute stack map frames computes
+  // relative output frames and absolute input frames.
 
-    /**
-     * Information about the input and output stack map frames of this basic
-     * block. This field is only used when {@link ClassWriter#COMPUTE_FRAMES}
-     * option is used.
-     */
-    Frame frame;
+  /**
+   * The number of elements in the input stack of the basic block corresponding to this label. This
+   * field is computed in {@link MethodWriter#computeMaxStackAndLocal}.
+   */
+  short inputStackSize;
 
-    /**
-     * The successor of this label, in the order they are visited. This linked
-     * list does not include labels used for debug info only. If
-     * {@link ClassWriter#COMPUTE_FRAMES} option is used then, in addition, it
-     * does not contain successive labels that denote the same bytecode position
-     * (in this case only the first label appears in this list).
-     */
-    Label successor;
+  /**
+   * The number of elements in the output stack, at the end of the basic block corresponding to this
+   * label. This field is only computed for basic blocks that end with a RET instruction.
+   */
+  short outputStackSize;
 
-    /**
-     * The successors of this node in the control flow graph. These successors
-     * are stored in a linked list of {@link Edge Edge} objects, linked to each
-     * other by their {@link Edge#next} field.
-     */
-    Edge successors;
+  /**
+   * The maximum height reached by the output stack, relatively to the top of the input stack, in
+   * the basic block corresponding to this label. This maximum is always positive or {@literal
+   * null}.
+   */
+  short outputStackMax;
 
-    /**
-     * The next basic block in the basic block stack. This stack is used in the
-     * main loop of the fix point algorithm used in the second step of the
-     * control flow analysis algorithms. It is also used in
-     * {@link #visitSubroutine} to avoid using a recursive method, and in
-     * ClassReader to temporarily store multiple source lines for a label.
-     *
-     * @see MethodWriter#visitMaxs
-     */
-    Label next;
+  /**
+   * The id of the subroutine to which this basic block belongs, or 0. If the basic block belongs to
+   * several subroutines, this is the id of the "oldest" subroutine that contains it (with the
+   * convention that a subroutine calling another one is "older" than the callee). This field is
+   * computed in {@link MethodWriter#computeMaxStackAndLocal}, if the method contains JSR
+   * instructions.
+   */
+  short subroutineId;
 
-    // ------------------------------------------------------------------------
-    // Constructor
-    // ------------------------------------------------------------------------
+  /**
+   * The input and output stack map frames of the basic block corresponding to this label. This
+   * field is only used when the {@link MethodWriter#COMPUTE_ALL_FRAMES} or {@link
+   * MethodWriter#COMPUTE_INSERTED_FRAMES} option is used.
+   */
+  Frame frame;
 
-    /**
-     * Constructs a new label.
-     */
-    public Label() {
+  /**
+   * The successor of this label, in the order they are visited in {@link MethodVisitor#visitLabel}.
+   * This linked list does not include labels used for debug info only. If the {@link
+   * MethodWriter#COMPUTE_ALL_FRAMES} or {@link MethodWriter#COMPUTE_INSERTED_FRAMES} option is used
+   * then it does not contain either successive labels that denote the same bytecode offset (in this
+   * case only the first label appears in this list).
+   */
+  Label nextBasicBlock;
+
+  /**
+   * The outgoing edges of the basic block corresponding to this label, in the control flow graph of
+   * its method. These edges are stored in a linked list of {@link Edge} objects, linked to each
+   * other by their {@link Edge#nextEdge} field.
+   */
+  Edge outgoingEdges;
+
+  /**
+   * The next element in the list of labels to which this label belongs, or {@literal null} if it
+   * does not belong to any list. All lists of labels must end with the {@link #EMPTY_LIST}
+   * sentinel, in order to ensure that this field is null if and only if this label does not belong
+   * to a list of labels. Note that there can be several lists of labels at the same time, but that
+   * a label can belong to at most one list at a time (unless some lists share a common tail, but
+   * this is not used in practice).
+   *
+   * <p>List of labels are used in {@link MethodWriter#computeAllFrames} and {@link
+   * MethodWriter#computeMaxStackAndLocal} to compute stack map frames and the maximum stack size,
+   * respectively, as well as in {@link #markSubroutine} and {@link #addSubroutineRetSuccessors} to
+   * compute the basic blocks belonging to subroutines and their outgoing edges. Outside of these
+   * methods, this field should be null (this property is a precondition and a postcondition of
+   * these methods).
+   */
+  Label nextListElement;
+
+  // -----------------------------------------------------------------------------------------------
+  // Constructor and accessors
+  // -----------------------------------------------------------------------------------------------
+
+  /** Constructs a new label. */
+  public Label() {
+    // Nothing to do.
+  }
+
+  /**
+   * Returns the bytecode offset corresponding to this label. This offset is computed from the start
+   * of the method's bytecode. <i>This method is intended for {@link Attribute} sub classes, and is
+   * normally not needed by class generators or adapters.</i>
+   *
+   * @return the bytecode offset corresponding to this label.
+   * @throws IllegalStateException if this label is not resolved yet.
+   */
+  public int getOffset() {
+    if ((flags & FLAG_RESOLVED) == 0) {
+      throw new IllegalStateException("Label offset position has not been resolved yet");
     }
+    return bytecodeOffset;
+  }
 
-    // ------------------------------------------------------------------------
-    // Methods to compute offsets and to manage forward references
-    // ------------------------------------------------------------------------
+  /**
+   * Returns the "canonical" {@link Label} instance corresponding to this label's bytecode offset,
+   * if known, otherwise the label itself. The canonical instance is the first label (in the order
+   * of their visit by {@link MethodVisitor#visitLabel}) corresponding to this bytecode offset. It
+   * cannot be known for labels which have not been visited yet.
+   *
+   * <p><i>This method should only be used when the {@link MethodWriter#COMPUTE_ALL_FRAMES} option
+   * is used.</i>
+   *
+   * @return the label itself if {@link #frame} is null, otherwise the Label's frame owner. This
+   *     corresponds to the "canonical" label instance described above thanks to the way the label
+   *     frame is set in {@link MethodWriter#visitLabel}.
+   */
+  final Label getCanonicalInstance() {
+    return frame == null ? this : frame.owner;
+  }
 
-    /**
-     * Returns the offset corresponding to this label. This offset is computed
-     * from the start of the method's bytecode. <i>This method is intended for
-     * {@link Attribute} sub classes, and is normally not needed by class
-     * generators or adapters.</i>
-     *
-     * @return the offset corresponding to this label.
-     * @throws IllegalStateException
-     *             if this label is not resolved yet.
-     */
-    public int getOffset() {
-        if ((status & RESOLVED) == 0) {
-            throw new IllegalStateException(
-                    "Label offset position has not been resolved yet");
+  // -----------------------------------------------------------------------------------------------
+  // Methods to manage line numbers
+  // -----------------------------------------------------------------------------------------------
+
+  /**
+   * Adds a source line number corresponding to this label.
+   *
+   * @param lineNumber a source line number (which should be strictly positive).
+   */
+  final void addLineNumber(final int lineNumber) {
+    if (this.lineNumber == 0) {
+      this.lineNumber = (short) lineNumber;
+    } else {
+      if (otherLineNumbers == null) {
+        otherLineNumbers = new int[LINE_NUMBERS_CAPACITY_INCREMENT];
+      }
+      int otherLineNumberIndex = ++otherLineNumbers[0];
+      if (otherLineNumberIndex >= otherLineNumbers.length) {
+        int[] newLineNumbers = new int[otherLineNumbers.length + LINE_NUMBERS_CAPACITY_INCREMENT];
+        System.arraycopy(otherLineNumbers, 0, newLineNumbers, 0, otherLineNumbers.length);
+        otherLineNumbers = newLineNumbers;
+      }
+      otherLineNumbers[otherLineNumberIndex] = lineNumber;
+    }
+  }
+
+  /**
+   * Makes the given visitor visit this label and its source line numbers, if applicable.
+   *
+   * @param methodVisitor a method visitor.
+   * @param visitLineNumbers whether to visit of the label's source line numbers, if any.
+   */
+  final void accept(final MethodVisitor methodVisitor, final boolean visitLineNumbers) {
+    methodVisitor.visitLabel(this);
+    if (visitLineNumbers && lineNumber != 0) {
+      methodVisitor.visitLineNumber(lineNumber & 0xFFFF, this);
+      if (otherLineNumbers != null) {
+        for (int i = 1; i <= otherLineNumbers[0]; ++i) {
+          methodVisitor.visitLineNumber(otherLineNumbers[i], this);
         }
-        return position;
+      }
     }
+  }
 
-    /**
-     * Puts a reference to this label in the bytecode of a method. If the
-     * position of the label is known, the offset is computed and written
-     * directly. Otherwise, a null offset is written and a new forward reference
-     * is declared for this label.
-     *
-     * @param owner
-     *            the code writer that calls this method.
-     * @param out
-     *            the bytecode of the method.
-     * @param source
-     *            the position of first byte of the bytecode instruction that
-     *            contains this label.
-     * @param wideOffset
-     *            <tt>true</tt> if the reference must be stored in 4 bytes, or
-     *            <tt>false</tt> if it must be stored with 2 bytes.
-     * @throws IllegalArgumentException
-     *             if this label has not been created by the given code writer.
-     */
-    void put(final MethodWriter owner, final ByteVector out, final int source,
-            final boolean wideOffset) {
-        if ((status & RESOLVED) == 0) {
-            if (wideOffset) {
-                addReference(-1 - source, out.length);
-                out.putInt(-1);
-            } else {
-                addReference(source, out.length);
-                out.putShort(-1);
-            }
-        } else {
-            if (wideOffset) {
-                out.putInt(position - source);
-            } else {
-                out.putShort(position - source);
-            }
+  // -----------------------------------------------------------------------------------------------
+  // Methods to compute offsets and to manage forward references
+  // -----------------------------------------------------------------------------------------------
+
+  /**
+   * Puts a reference to this label in the bytecode of a method. If the bytecode offset of the label
+   * is known, the relative bytecode offset between the label and the instruction referencing it is
+   * computed and written directly. Otherwise, a null relative offset is written and a new forward
+   * reference is declared for this label.
+   *
+   * @param code the bytecode of the method. This is where the reference is appended.
+   * @param sourceInsnBytecodeOffset the bytecode offset of the instruction that contains the
+   *     reference to be appended.
+   * @param wideReference whether the reference must be stored in 4 bytes (instead of 2 bytes).
+   */
+  final void put(
+      final ByteVector code, final int sourceInsnBytecodeOffset, final boolean wideReference) {
+    if ((flags & FLAG_RESOLVED) == 0) {
+      if (wideReference) {
+        addForwardReference(sourceInsnBytecodeOffset, FORWARD_REFERENCE_TYPE_WIDE, code.length);
+        code.putInt(-1);
+      } else {
+        addForwardReference(sourceInsnBytecodeOffset, FORWARD_REFERENCE_TYPE_SHORT, code.length);
+        code.putShort(-1);
+      }
+    } else {
+      if (wideReference) {
+        code.putInt(bytecodeOffset - sourceInsnBytecodeOffset);
+      } else {
+        code.putShort(bytecodeOffset - sourceInsnBytecodeOffset);
+      }
+    }
+  }
+
+  /**
+   * Adds a forward reference to this label. This method must be called only for a true forward
+   * reference, i.e. only if this label is not resolved yet. For backward references, the relative
+   * bytecode offset of the reference can be, and must be, computed and stored directly.
+   *
+   * @param sourceInsnBytecodeOffset the bytecode offset of the instruction that contains the
+   *     reference stored at referenceHandle.
+   * @param referenceType either {@link #FORWARD_REFERENCE_TYPE_SHORT} or {@link
+   *     #FORWARD_REFERENCE_TYPE_WIDE}.
+   * @param referenceHandle the offset in the bytecode where the forward reference value must be
+   *     stored.
+   */
+  private void addForwardReference(
+      final int sourceInsnBytecodeOffset, final int referenceType, final int referenceHandle) {
+    if (forwardReferences == null) {
+      forwardReferences = new int[FORWARD_REFERENCES_CAPACITY_INCREMENT];
+    }
+    int lastElementIndex = forwardReferences[0];
+    if (lastElementIndex + 2 >= forwardReferences.length) {
+      int[] newValues = new int[forwardReferences.length + FORWARD_REFERENCES_CAPACITY_INCREMENT];
+      System.arraycopy(forwardReferences, 0, newValues, 0, forwardReferences.length);
+      forwardReferences = newValues;
+    }
+    forwardReferences[++lastElementIndex] = sourceInsnBytecodeOffset;
+    forwardReferences[++lastElementIndex] = referenceType | referenceHandle;
+    forwardReferences[0] = lastElementIndex;
+  }
+
+  /**
+   * Sets the bytecode offset of this label to the given value and resolves the forward references
+   * to this label, if any. This method must be called when this label is added to the bytecode of
+   * the method, i.e. when its bytecode offset becomes known. This method fills in the blanks that
+   * where left in the bytecode by each forward reference previously added to this label.
+   *
+   * @param code the bytecode of the method.
+   * @param bytecodeOffset the bytecode offset of this label.
+   * @return {@literal true} if a blank that was left for this label was too small to store the
+   *     offset. In such a case the corresponding jump instruction is replaced with an equivalent
+   *     ASM specific instruction using an unsigned two bytes offset. These ASM specific
+   *     instructions are later replaced with standard bytecode instructions with wider offsets (4
+   *     bytes instead of 2), in ClassReader.
+   */
+  final boolean resolve(final byte[] code, final int bytecodeOffset) {
+    this.flags |= FLAG_RESOLVED;
+    this.bytecodeOffset = bytecodeOffset;
+    if (forwardReferences == null) {
+      return false;
+    }
+    boolean hasAsmInstructions = false;
+    for (int i = forwardReferences[0]; i > 0; i -= 2) {
+      final int sourceInsnBytecodeOffset = forwardReferences[i - 1];
+      final int reference = forwardReferences[i];
+      final int relativeOffset = bytecodeOffset - sourceInsnBytecodeOffset;
+      int handle = reference & FORWARD_REFERENCE_HANDLE_MASK;
+      if ((reference & FORWARD_REFERENCE_TYPE_MASK) == FORWARD_REFERENCE_TYPE_SHORT) {
+        if (relativeOffset < Short.MIN_VALUE || relativeOffset > Short.MAX_VALUE) {
+          // Change the opcode of the jump instruction, in order to be able to find it later in
+          // ClassReader. These ASM specific opcodes are similar to jump instruction opcodes, except
+          // that the 2 bytes offset is unsigned (and can therefore represent values from 0 to
+          // 65535, which is sufficient since the size of a method is limited to 65535 bytes).
+          int opcode = code[sourceInsnBytecodeOffset] & 0xFF;
+          if (opcode < Opcodes.IFNULL) {
+            // Change IFEQ ... JSR to ASM_IFEQ ... ASM_JSR.
+            code[sourceInsnBytecodeOffset] = (byte) (opcode + Constants.ASM_OPCODE_DELTA);
+          } else {
+            // Change IFNULL and IFNONNULL to ASM_IFNULL and ASM_IFNONNULL.
+            code[sourceInsnBytecodeOffset] = (byte) (opcode + Constants.ASM_IFNULL_OPCODE_DELTA);
+          }
+          hasAsmInstructions = true;
         }
+        code[handle++] = (byte) (relativeOffset >>> 8);
+        code[handle] = (byte) relativeOffset;
+      } else {
+        code[handle++] = (byte) (relativeOffset >>> 24);
+        code[handle++] = (byte) (relativeOffset >>> 16);
+        code[handle++] = (byte) (relativeOffset >>> 8);
+        code[handle] = (byte) relativeOffset;
+      }
     }
+    return hasAsmInstructions;
+  }
 
-    /**
-     * Adds a forward reference to this label. This method must be called only
-     * for a true forward reference, i.e. only if this label is not resolved
-     * yet. For backward references, the offset of the reference can be, and
-     * must be, computed and stored directly.
-     *
-     * @param sourcePosition
-     *            the position of the referencing instruction. This position
-     *            will be used to compute the offset of this forward reference.
-     * @param referencePosition
-     *            the position where the offset for this forward reference must
-     *            be stored.
-     */
-    private void addReference(final int sourcePosition,
-            final int referencePosition) {
-        if (srcAndRefPositions == null) {
-            srcAndRefPositions = new int[6];
-        }
-        if (referenceCount >= srcAndRefPositions.length) {
-            int[] a = new int[srcAndRefPositions.length + 6];
-            System.arraycopy(srcAndRefPositions, 0, a, 0,
-                    srcAndRefPositions.length);
-            srcAndRefPositions = a;
-        }
-        srcAndRefPositions[referenceCount++] = sourcePosition;
-        srcAndRefPositions[referenceCount++] = referencePosition;
+  // -----------------------------------------------------------------------------------------------
+  // Methods related to subroutines
+  // -----------------------------------------------------------------------------------------------
+
+  /**
+   * Finds the basic blocks that belong to the subroutine starting with the basic block
+   * corresponding to this label, and marks these blocks as belonging to this subroutine. This
+   * method follows the control flow graph to find all the blocks that are reachable from the
+   * current basic block WITHOUT following any jsr target.
+   *
+   * <p>Note: a precondition and postcondition of this method is that all labels must have a null
+   * {@link #nextListElement}.
+   *
+   * @param subroutineId the id of the subroutine starting with the basic block corresponding to
+   *     this label.
+   */
+  final void markSubroutine(final short subroutineId) {
+    // Data flow algorithm: put this basic block in a list of blocks to process (which are blocks
+    // belonging to subroutine subroutineId) and, while there are blocks to process, remove one from
+    // the list, mark it as belonging to the subroutine, and add its successor basic blocks in the
+    // control flow graph to the list of blocks to process (if not already done).
+    Label listOfBlocksToProcess = this;
+    listOfBlocksToProcess.nextListElement = EMPTY_LIST;
+    while (listOfBlocksToProcess != EMPTY_LIST) {
+      // Remove a basic block from the list of blocks to process.
+      Label basicBlock = listOfBlocksToProcess;
+      listOfBlocksToProcess = listOfBlocksToProcess.nextListElement;
+      basicBlock.nextListElement = null;
+
+      // If it is not already marked as belonging to a subroutine, mark it as belonging to
+      // subroutineId and add its successors to the list of blocks to process (unless already done).
+      if (basicBlock.subroutineId == 0) {
+        basicBlock.subroutineId = subroutineId;
+        listOfBlocksToProcess = basicBlock.pushSuccessors(listOfBlocksToProcess);
+      }
     }
+  }
 
-    /**
-     * Resolves all forward references to this label. This method must be called
-     * when this label is added to the bytecode of the method, i.e. when its
-     * position becomes known. This method fills in the blanks that where left
-     * in the bytecode by each forward reference previously added to this label.
-     *
-     * @param owner
-     *            the code writer that calls this method.
-     * @param position
-     *            the position of this label in the bytecode.
-     * @param data
-     *            the bytecode of the method.
-     * @return <tt>true</tt> if a blank that was left for this label was to
-     *         small to store the offset. In such a case the corresponding jump
-     *         instruction is replaced with a pseudo instruction (using unused
-     *         opcodes) using an unsigned two bytes offset. These pseudo
-     *         instructions will be replaced with standard bytecode instructions
-     *         with wider offsets (4 bytes instead of 2), in ClassReader.
-     * @throws IllegalArgumentException
-     *             if this label has already been resolved, or if it has not
-     *             been created by the given code writer.
-     */
-    boolean resolve(final MethodWriter owner, final int position,
-            final byte[] data) {
-        boolean needUpdate = false;
-        this.status |= RESOLVED;
-        this.position = position;
-        int i = 0;
-        while (i < referenceCount) {
-            int source = srcAndRefPositions[i++];
-            int reference = srcAndRefPositions[i++];
-            int offset;
-            if (source >= 0) {
-                offset = position - source;
-                if (offset < Short.MIN_VALUE || offset > Short.MAX_VALUE) {
-                    /*
-                     * changes the opcode of the jump instruction, in order to
-                     * be able to find it later (see resizeInstructions in
-                     * MethodWriter). These temporary opcodes are similar to
-                     * jump instruction opcodes, except that the 2 bytes offset
-                     * is unsigned (and can therefore represent values from 0 to
-                     * 65535, which is sufficient since the size of a method is
-                     * limited to 65535 bytes).
-                     */
-                    int opcode = data[reference - 1] & 0xFF;
-                    if (opcode <= Opcodes.JSR) {
-                        // changes IFEQ ... JSR to opcodes 202 to 217
-                        data[reference - 1] = (byte) (opcode + 49);
-                    } else {
-                        // changes IFNULL and IFNONNULL to opcodes 218 and 219
-                        data[reference - 1] = (byte) (opcode + 20);
-                    }
-                    needUpdate = true;
-                }
-                data[reference++] = (byte) (offset >>> 8);
-                data[reference] = (byte) offset;
-            } else {
-                offset = position + source + 1;
-                data[reference++] = (byte) (offset >>> 24);
-                data[reference++] = (byte) (offset >>> 16);
-                data[reference++] = (byte) (offset >>> 8);
-                data[reference] = (byte) offset;
-            }
-        }
-        return needUpdate;
+  /**
+   * Finds the basic blocks that end a subroutine starting with the basic block corresponding to
+   * this label and, for each one of them, adds an outgoing edge to the basic block following the
+   * given subroutine call. In other words, completes the control flow graph by adding the edges
+   * corresponding to the return from this subroutine, when called from the given caller basic
+   * block.
+   *
+   * <p>Note: a precondition and postcondition of this method is that all labels must have a null
+   * {@link #nextListElement}.
+   *
+   * @param subroutineCaller a basic block that ends with a jsr to the basic block corresponding to
+   *     this label. This label is supposed to correspond to the start of a subroutine.
+   */
+  final void addSubroutineRetSuccessors(final Label subroutineCaller) {
+    // Data flow algorithm: put this basic block in a list blocks to process (which are blocks
+    // belonging to a subroutine starting with this label) and, while there are blocks to process,
+    // remove one from the list, put it in a list of blocks that have been processed, add a return
+    // edge to the successor of subroutineCaller if applicable, and add its successor basic blocks
+    // in the control flow graph to the list of blocks to process (if not already done).
+    Label listOfProcessedBlocks = EMPTY_LIST;
+    Label listOfBlocksToProcess = this;
+    listOfBlocksToProcess.nextListElement = EMPTY_LIST;
+    while (listOfBlocksToProcess != EMPTY_LIST) {
+      // Move a basic block from the list of blocks to process to the list of processed blocks.
+      Label basicBlock = listOfBlocksToProcess;
+      listOfBlocksToProcess = basicBlock.nextListElement;
+      basicBlock.nextListElement = listOfProcessedBlocks;
+      listOfProcessedBlocks = basicBlock;
+
+      // Add an edge from this block to the successor of the caller basic block, if this block is
+      // the end of a subroutine and if this block and subroutineCaller do not belong to the same
+      // subroutine.
+      if ((basicBlock.flags & FLAG_SUBROUTINE_END) != 0
+          && basicBlock.subroutineId != subroutineCaller.subroutineId) {
+        basicBlock.outgoingEdges =
+            new Edge(
+                basicBlock.outputStackSize,
+                // By construction, the first outgoing edge of a basic block that ends with a jsr
+                // instruction leads to the jsr continuation block, i.e. where execution continues
+                // when ret is called (see {@link #FLAG_SUBROUTINE_CALLER}).
+                subroutineCaller.outgoingEdges.successor,
+                basicBlock.outgoingEdges);
+      }
+      // Add its successors to the list of blocks to process. Note that {@link #pushSuccessors} does
+      // not push basic blocks which are already in a list. Here this means either in the list of
+      // blocks to process, or in the list of already processed blocks. This second list is
+      // important to make sure we don't reprocess an already processed block.
+      listOfBlocksToProcess = basicBlock.pushSuccessors(listOfBlocksToProcess);
     }
-
-    /**
-     * Returns the first label of the series to which this label belongs. For an
-     * isolated label or for the first label in a series of successive labels,
-     * this method returns the label itself. For other labels it returns the
-     * first label of the series.
-     *
-     * @return the first label of the series to which this label belongs.
-     */
-    Label getFirst() {
-        return !ClassReader.FRAMES || frame == null ? this : frame.owner;
+    // Reset the {@link #nextListElement} of all the basic blocks that have been processed to null,
+    // so that this method can be called again with a different subroutine or subroutine caller.
+    while (listOfProcessedBlocks != EMPTY_LIST) {
+      Label newListOfProcessedBlocks = listOfProcessedBlocks.nextListElement;
+      listOfProcessedBlocks.nextListElement = null;
+      listOfProcessedBlocks = newListOfProcessedBlocks;
     }
+  }
 
-    // ------------------------------------------------------------------------
-    // Methods related to subroutines
-    // ------------------------------------------------------------------------
-
-    /**
-     * Returns true is this basic block belongs to the given subroutine.
-     *
-     * @param id
-     *            a subroutine id.
-     * @return true is this basic block belongs to the given subroutine.
-     */
-    boolean inSubroutine(final long id) {
-        if ((status & Label.VISITED) != 0) {
-            return (srcAndRefPositions[(int) (id >>> 32)] & (int) id) != 0;
-        }
-        return false;
+  /**
+   * Adds the successors of this label in the method's control flow graph (except those
+   * corresponding to a jsr target, and those already in a list of labels) to the given list of
+   * blocks to process, and returns the new list.
+   *
+   * @param listOfLabelsToProcess a list of basic blocks to process, linked together with their
+   *     {@link #nextListElement} field.
+   * @return the new list of blocks to process.
+   */
+  private Label pushSuccessors(final Label listOfLabelsToProcess) {
+    Label newListOfLabelsToProcess = listOfLabelsToProcess;
+    Edge outgoingEdge = outgoingEdges;
+    while (outgoingEdge != null) {
+      // By construction, the second outgoing edge of a basic block that ends with a jsr instruction
+      // leads to the jsr target (see {@link #FLAG_SUBROUTINE_CALLER}).
+      boolean isJsrTarget =
+          (flags & Label.FLAG_SUBROUTINE_CALLER) != 0 && outgoingEdge == outgoingEdges.nextEdge;
+      if (!isJsrTarget && outgoingEdge.successor.nextListElement == null) {
+        // Add this successor to the list of blocks to process, if it does not already belong to a
+        // list of labels.
+        outgoingEdge.successor.nextListElement = newListOfLabelsToProcess;
+        newListOfLabelsToProcess = outgoingEdge.successor;
+      }
+      outgoingEdge = outgoingEdge.nextEdge;
     }
+    return newListOfLabelsToProcess;
+  }
 
-    /**
-     * Returns true if this basic block and the given one belong to a common
-     * subroutine.
-     *
-     * @param block
-     *            another basic block.
-     * @return true if this basic block and the given one belong to a common
-     *         subroutine.
-     */
-    boolean inSameSubroutine(final Label block) {
-        if ((status & VISITED) == 0 || (block.status & VISITED) == 0) {
-            return false;
-        }
-        for (int i = 0; i < srcAndRefPositions.length; ++i) {
-            if ((srcAndRefPositions[i] & block.srcAndRefPositions[i]) != 0) {
-                return true;
-            }
-        }
-        return false;
-    }
+  // -----------------------------------------------------------------------------------------------
+  // Overridden Object methods
+  // -----------------------------------------------------------------------------------------------
 
-    /**
-     * Marks this basic block as belonging to the given subroutine.
-     *
-     * @param id
-     *            a subroutine id.
-     * @param nbSubroutines
-     *            the total number of subroutines in the method.
-     */
-    void addToSubroutine(final long id, final int nbSubroutines) {
-        if ((status & VISITED) == 0) {
-            status |= VISITED;
-            srcAndRefPositions = new int[nbSubroutines / 32 + 1];
-        }
-        srcAndRefPositions[(int) (id >>> 32)] |= (int) id;
-    }
-
-    /**
-     * Finds the basic blocks that belong to a given subroutine, and marks these
-     * blocks as belonging to this subroutine. This method follows the control
-     * flow graph to find all the blocks that are reachable from the current
-     * block WITHOUT following any JSR target.
-     *
-     * @param JSR
-     *            a JSR block that jumps to this subroutine. If this JSR is not
-     *            null it is added to the successor of the RET blocks found in
-     *            the subroutine.
-     * @param id
-     *            the id of this subroutine.
-     * @param nbSubroutines
-     *            the total number of subroutines in the method.
-     */
-    void visitSubroutine(final Label JSR, final long id, final int nbSubroutines) {
-        // user managed stack of labels, to avoid using a recursive method
-        // (recursivity can lead to stack overflow with very large methods)
-        Label stack = this;
-        while (stack != null) {
-            // removes a label l from the stack
-            Label l = stack;
-            stack = l.next;
-            l.next = null;
-
-            if (JSR != null) {
-                if ((l.status & VISITED2) != 0) {
-                    continue;
-                }
-                l.status |= VISITED2;
-                // adds JSR to the successors of l, if it is a RET block
-                if ((l.status & RET) != 0) {
-                    if (!l.inSameSubroutine(JSR)) {
-                        Edge e = new Edge();
-                        e.info = l.inputStackTop;
-                        e.successor = JSR.successors.successor;
-                        e.next = l.successors;
-                        l.successors = e;
-                    }
-                }
-            } else {
-                // if the l block already belongs to subroutine 'id', continue
-                if (l.inSubroutine(id)) {
-                    continue;
-                }
-                // marks the l block as belonging to subroutine 'id'
-                l.addToSubroutine(id, nbSubroutines);
-            }
-            // pushes each successor of l on the stack, except JSR targets
-            Edge e = l.successors;
-            while (e != null) {
-                // if the l block is a JSR block, then 'l.successors.next' leads
-                // to the JSR target (see {@link #visitJumpInsn}) and must
-                // therefore not be followed
-                if ((l.status & Label.JSR) == 0 || e != l.successors.next) {
-                    // pushes e.successor on the stack if it not already added
-                    if (e.successor.next == null) {
-                        e.successor.next = stack;
-                        stack = e.successor;
-                    }
-                }
-                e = e.next;
-            }
-        }
-    }
-
-    // ------------------------------------------------------------------------
-    // Overriden Object methods
-    // ------------------------------------------------------------------------
-
-    /**
-     * Returns a string representation of this label.
-     *
-     * @return a string representation of this label.
-     */
-    @Override
-    public String toString() {
-        return "L" + System.identityHashCode(this);
-    }
+  /**
+   * Returns a string representation of this label.
+   *
+   * @return a string representation of this label.
+   */
+  @Override
+  public String toString() {
+    return "L" + System.identityHashCode(this);
+  }
 }

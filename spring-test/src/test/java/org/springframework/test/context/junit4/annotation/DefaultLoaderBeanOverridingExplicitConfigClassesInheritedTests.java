@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.DelegatingSmartContextLoader;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify support for configuration classes in
@@ -38,8 +38,8 @@ public class DefaultLoaderBeanOverridingExplicitConfigClassesInheritedTests exte
 	@Test
 	@Override
 	public void verifyEmployeeSetFromBaseContextConfig() {
-		assertNotNull("The employee should have been autowired.", this.employee);
-		assertEquals("The employee bean should have been overridden.", "Yoda", this.employee.getName());
+		assertThat(this.employee).as("The employee should have been autowired.").isNotNull();
+		assertThat(this.employee.getName()).as("The employee bean should have been overridden.").isEqualTo("Yoda");
 	}
 
 }

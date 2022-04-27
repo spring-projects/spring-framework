@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -36,8 +36,8 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.ReflectionUtils;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Costin Leau
@@ -59,78 +59,73 @@ public class ExpressionEvaluatorTests {
 
 
 	@Test
-	public void testMultipleCachingSource() throws Exception {
+	public void testMultipleCachingSource() {
 		Collection<CacheOperation> ops = getOps("multipleCaching");
-		assertEquals(2, ops.size());
+		assertThat(ops.size()).isEqualTo(2);
 		Iterator<CacheOperation> it = ops.iterator();
 		CacheOperation next = it.next();
-		assertTrue(next instanceof CacheableOperation);
-		assertTrue(next.getCacheNames().contains("test"));
-		assertEquals("#a", next.getKey());
+		assertThat(next instanceof CacheableOperation).isTrue();
+		assertThat(next.getCacheNames().contains("test")).isTrue();
+		assertThat(next.getKey()).isEqualTo("#a");
 		next = it.next();
-		assertTrue(next instanceof CacheableOperation);
-		assertTrue(next.getCacheNames().contains("test"));
-		assertEquals("#b", next.getKey());
+		assertThat(next instanceof CacheableOperation).isTrue();
+		assertThat(next.getCacheNames().contains("test")).isTrue();
+		assertThat(next.getKey()).isEqualTo("#b");
 	}
 
 	@Test
-	public void testMultipleCachingEval() throws Exception {
+	public void testMultipleCachingEval() {
 		AnnotatedClass target = new AnnotatedClass();
-		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, "multipleCaching", Object.class,
-				Object.class);
-		Object[] args = new Object[] { new Object(), new Object() };
+		Method method = ReflectionUtils.findMethod(
+				AnnotatedClass.class, "multipleCaching", Object.class, Object.class);
+		Object[] args = new Object[] {new Object(), new Object()};
 		Collection<ConcurrentMapCache> caches = Collections.singleton(new ConcurrentMapCache("test"));
 
 		EvaluationContext evalCtx = this.eval.createEvaluationContext(caches, method, args,
-				target, target.getClass(), null);
+				target, target.getClass(), method, CacheOperationExpressionEvaluator.NO_RESULT, null);
 		Collection<CacheOperation> ops = getOps("multipleCaching");
 
 		Iterator<CacheOperation> it = ops.iterator();
-
 		AnnotatedElementKey key = new AnnotatedElementKey(method, AnnotatedClass.class);
 
 		Object keyA = this.eval.key(it.next().getKey(), key, evalCtx);
 		Object keyB = this.eval.key(it.next().getKey(), key, evalCtx);
 
-		assertEquals(args[0], keyA);
-		assertEquals(args[1], keyB);
+		assertThat(keyA).isEqualTo(args[0]);
+		assertThat(keyB).isEqualTo(args[1]);
 	}
 
 	@Test
-	public void withReturnValue() throws Exception {
+	public void withReturnValue() {
 		EvaluationContext context = createEvaluationContext("theResult");
 		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
-		assertThat(value, equalTo("theResult"));
+		assertThat(value).isEqualTo("theResult");
 	}
 
 	@Test
-	public void withNullReturn() throws Exception {
+	public void withNullReturn() {
 		EvaluationContext context = createEvaluationContext(null);
 		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
-		assertThat(value, nullValue());
+		assertThat(value).isNull();
 	}
 
 	@Test
-	public void withoutReturnValue() throws Exception {
+	public void withoutReturnValue() {
 		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.NO_RESULT);
 		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
-		assertThat(value, nullValue());
+		assertThat(value).isNull();
 	}
 
 	@Test
-	public void unavailableReturnValue() throws Exception {
+	public void unavailableReturnValue() {
 		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.RESULT_UNAVAILABLE);
-		try {
-			new SpelExpressionParser().parseExpression("#result").getValue(context);
-			fail("Should have failed to parse expression, result not available");
-		}
-		catch (VariableNotAvailableException e) {
-			assertEquals("wrong variable name", "result", e.getName());
-		}
+		assertThatExceptionOfType(VariableNotAvailableException.class).isThrownBy(() ->
+				new SpelExpressionParser().parseExpression("#result").getValue(context))
+			.satisfies(ex ->  assertThat(ex.getName()).isEqualTo("result"));
 	}
 
 	@Test
-	public void resolveBeanReference() throws Exception {
+	public void resolveBeanReference() {
 		StaticApplicationContext applicationContext = new StaticApplicationContext();
 		BeanDefinition beanDefinition = new RootBeanDefinition(String.class);
 		applicationContext.registerBeanDefinition("myBean", beanDefinition);
@@ -138,7 +133,7 @@ public class ExpressionEvaluatorTests {
 
 		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.NO_RESULT, applicationContext);
 		Object value = new SpelExpressionParser().parseExpression("@myBean.class.getName()").getValue(context);
-		assertThat(value, is(String.class.getName()));
+		assertThat(value).isEqualTo(String.class.getName());
 	}
 
 	private EvaluationContext createEvaluationContext(Object result) {
@@ -147,11 +142,12 @@ public class ExpressionEvaluatorTests {
 
 	private EvaluationContext createEvaluationContext(Object result, BeanFactory beanFactory) {
 		AnnotatedClass target = new AnnotatedClass();
-		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, "multipleCaching", Object.class,
-				Object.class);
-		Object[] args = new Object[] { new Object(), new Object() };
+		Method method = ReflectionUtils.findMethod(
+				AnnotatedClass.class, "multipleCaching", Object.class, Object.class);
+		Object[] args = new Object[] {new Object(), new Object()};
 		Collection<ConcurrentMapCache> caches = Collections.singleton(new ConcurrentMapCache("test"));
-		return this.eval.createEvaluationContext(caches, method, args, target, target.getClass(), result, beanFactory);
+		return this.eval.createEvaluationContext(
+				caches, method, args, target, target.getClass(), method, result, beanFactory);
 	}
 
 

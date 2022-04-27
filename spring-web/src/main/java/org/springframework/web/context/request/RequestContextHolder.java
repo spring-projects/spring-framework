@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -132,7 +132,7 @@ public abstract class RequestContextHolder  {
 						"Are you referring to request attributes outside of an actual web request, " +
 						"or processing a request outside of the originally receiving thread? " +
 						"If you are actually operating within a web request and still receive this message, " +
-						"your code is probably running outside of DispatcherServlet/DispatcherPortlet: " +
+						"your code is probably running outside of DispatcherServlet: " +
 						"In this case, use RequestContextListener or RequestContextFilter to expose the current request.");
 			}
 		}
@@ -145,6 +145,7 @@ public abstract class RequestContextHolder  {
  	 */
 	private static class FacesRequestAttributesFactory {
 
+		@Nullable
 		public static RequestAttributes getFacesRequestAttributes() {
 			FacesContext facesContext = FacesContext.getCurrentInstance();
 			return (facesContext != null ? new FacesRequestAttributes(facesContext) : null);

@@ -1,7 +1,7 @@
 /**
  * Spring's repackaging of
- * <a href="http://asm.ow2.org">ASM</a>
- * (for internal use only).
+ * <a href="https://gitlab.ow2.org/asm/asm">ASM 9.x</a>
+ * (with Spring-specific patches; for internal use only).
  *
  * <p>This repackaging technique avoids any potential conflicts with
  * dependencies on ASM at the application level or from third-party

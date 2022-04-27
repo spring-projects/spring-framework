@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -66,14 +66,14 @@ public class PatternParseException extends IllegalArgumentException {
 	 * with a pointer to the error position, as well as the error message.
 	 */
 	public String toDetailedString() {
-		StringBuilder buf = new StringBuilder();
-		buf.append(this.pattern).append('\n');
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.pattern).append('\n');
 		for (int i = 0; i < this.position; i++) {
-			buf.append(' ');
+			sb.append(' ');
 		}
-		buf.append("^\n");
-		buf.append(getMessage());
-		return buf.toString();
+		sb.append("^\n");
+		sb.append(getMessage());
+		return sb.toString();
 	}
 
 	public int getPosition() {
@@ -95,17 +95,17 @@ public class PatternParseException extends IllegalArgumentException {
 	public enum PatternMessage {
 
 		MISSING_CLOSE_CAPTURE("Expected close capture character after variable name '}'"),
-		MISSING_OPEN_CAPTURE("Missing preceeding open capture character before variable name'{'"),
+		MISSING_OPEN_CAPTURE("Missing preceding open capture character before variable name'{'"),
 		ILLEGAL_NESTED_CAPTURE("Not allowed to nest variable captures"),
 		CANNOT_HAVE_ADJACENT_CAPTURES("Adjacent captures are not allowed"),
-		ILLEGAL_CHARACTER_AT_START_OF_CAPTURE_DESCRIPTOR("Character ''{0}'' is not allowed at start of captured variable name"),
-		ILLEGAL_CHARACTER_IN_CAPTURE_DESCRIPTOR("Character ''{0}'' is not allowed in a captured variable name"),
-		NO_MORE_DATA_EXPECTED_AFTER_CAPTURE_THE_REST("No more pattern data allowed after '{*...}' pattern element"),
+		ILLEGAL_CHARACTER_AT_START_OF_CAPTURE_DESCRIPTOR("Char ''{0}'' not allowed at start of captured variable name"),
+		ILLEGAL_CHARACTER_IN_CAPTURE_DESCRIPTOR("Char ''{0}'' is not allowed in a captured variable name"),
+		NO_MORE_DATA_EXPECTED_AFTER_CAPTURE_THE_REST("No more pattern data allowed after '{*...}' or '**' pattern element"),
 		BADLY_FORMED_CAPTURE_THE_REST("Expected form when capturing the rest of the path is simply '{*...}'"),
 		MISSING_REGEX_CONSTRAINT("Missing regex constraint on capture"),
 		ILLEGAL_DOUBLE_CAPTURE("Not allowed to capture ''{0}'' twice in the same pattern"),
 		REGEX_PATTERN_SYNTAX_EXCEPTION("Exception occurred in regex pattern compilation"),
-		CAPTURE_ALL_IS_STANDALONE_CONSTRUCT("'{*...}' can only be preceeded by a path separator");
+		CAPTURE_ALL_IS_STANDALONE_CONSTRUCT("'{*...}' can only be preceded by a path separator");
 
 		private final String message;
 

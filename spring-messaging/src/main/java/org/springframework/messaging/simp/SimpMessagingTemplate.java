@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -224,14 +224,16 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 			throws MessagingException {
 
 		Assert.notNull(user, "User must not be null");
+		Assert.isTrue(!user.contains("%2F"), "Invalid sequence \"%2F\" in user name: " + user);
 		user = StringUtils.replace(user, "/", "%2F");
+		destination = destination.startsWith("/") ? destination : "/" + destination;
 		super.convertAndSend(this.destinationPrefix + user + destination, payload, headers, postProcessor);
 	}
 
 
 	/**
 	 * Creates a new map and puts the given headers under the key
-	 * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS}.
+	 * {@link NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS}.
 	 * effectively treats the input header map as headers to be sent out to the
 	 * destination.
 	 * <p>However if the given headers already contain the key
@@ -262,10 +264,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		initHeaders(headerAccessor);
-		for (Map.Entry<String, Object> headerEntry : headers.entrySet()) {
-			Object value = headerEntry.getValue();
-			headerAccessor.setNativeHeader(headerEntry.getKey(), (value != null ? value.toString() : null));
-		}
+		headers.forEach((key, value) -> headerAccessor.setNativeHeader(key, (value != null ? value.toString() : null)));
 		return headerAccessor.getMessageHeaders();
 	}
 

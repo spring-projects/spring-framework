@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.util.xml;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
@@ -64,22 +65,20 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 
 	@Override
 	public boolean getFeature(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
-		if (NAMESPACES_FEATURE_NAME.equals(name)) {
-			return this.namespacesFeature;
-		}
-		else if (NAMESPACE_PREFIXES_FEATURE_NAME.equals(name)) {
-			return this.namespacePrefixesFeature;
-		}
-		else if (IS_STANDALONE_FEATURE_NAME.equals(name)) {
-			if (this.isStandalone != null) {
-				return this.isStandalone;
-			}
-			else {
-				throw new SAXNotSupportedException("startDocument() callback not completed yet");
-			}
-		}
-		else {
-			return super.getFeature(name);
+		switch (name) {
+			case NAMESPACES_FEATURE_NAME:
+				return this.namespacesFeature;
+			case NAMESPACE_PREFIXES_FEATURE_NAME:
+				return this.namespacePrefixesFeature;
+			case IS_STANDALONE_FEATURE_NAME:
+				if (this.isStandalone != null) {
+					return this.isStandalone;
+				}
+				else {
+					throw new SAXNotSupportedException("startDocument() callback not completed yet");
+				}
+			default:
+				return super.getFeature(name);
 		}
 	}
 
@@ -147,7 +146,7 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	 * Parse the StAX XML reader passed at construction-time.
 	 * <p><b>NOTE:</b>: The given system identifier is not read, but ignored.
 	 * @param ignored is ignored
-	 * @throws SAXException A SAX exception, possibly wrapping a {@code XMLStreamException}
+	 * @throws SAXException a SAX exception, possibly wrapping a {@code XMLStreamException}
 	 */
 	@Override
 	public final void parse(String ignored) throws SAXException {
@@ -184,12 +183,9 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	 * @see org.xml.sax.ContentHandler#startPrefixMapping(String, String)
 	 */
 	protected void startPrefixMapping(@Nullable String prefix, String namespace) throws SAXException {
-		if (getContentHandler() != null) {
+		if (getContentHandler() != null && StringUtils.hasLength(namespace)) {
 			if (prefix == null) {
 				prefix = "";
-			}
-			if (!StringUtils.hasLength(namespace)) {
-				return;
 			}
 			if (!namespace.equals(this.namespaces.get(prefix))) {
 				getContentHandler().startPrefixMapping(prefix, namespace);
@@ -203,11 +199,9 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	 * @see org.xml.sax.ContentHandler#endPrefixMapping(String)
 	 */
 	protected void endPrefixMapping(String prefix) throws SAXException {
-		if (getContentHandler() != null) {
-			if (this.namespaces.containsKey(prefix)) {
-				getContentHandler().endPrefixMapping(prefix);
-				this.namespaces.remove(prefix);
-			}
+		if (getContentHandler() != null && this.namespaces.containsKey(prefix)) {
+			getContentHandler().endPrefixMapping(prefix);
+			this.namespaces.remove(prefix);
 		}
 	}
 

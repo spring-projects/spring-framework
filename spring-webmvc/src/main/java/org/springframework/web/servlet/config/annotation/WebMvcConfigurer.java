@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,10 +25,12 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 /**
@@ -47,21 +49,11 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 public interface WebMvcConfigurer {
 
 	/**
-	 * Helps with configuring HandlerMappings path matching options such as trailing slash match,
-	 * suffix registration, path matcher and path helper.
-	 * Configured path matcher and path helper instances are shared for:
-	 * <ul>
-	 * <li>RequestMappings</li>
-	 * <li>ViewControllerMappings</li>
-	 * <li>ResourcesMappings</li>
-	 * </ul>
-	 * <p>Note that if a {@link org.springframework.web.util.pattern.ParsingPathMatcher}
-	 * is configured here,
-	 * the {@link PathMatchConfigurer#setUseTrailingSlashMatch(Boolean)} and
-	 * {@link PathMatchConfigurer#setUseSuffixPatternMatch(Boolean)} options must be set
-	 * to {@literal false}as they can lead to illegal patterns,
-	 * see {@link org.springframework.web.util.pattern.ParsingPathMatcher}.
+	 * Help with configuring {@link HandlerMapping} path matching options such as
+	 * whether to use parsed {@code PathPatterns} or String pattern matching
+	 * with {@code PathMatcher}, whether to match trailing slashes, and more.
 	 * @since 4.0.3
+	 * @see PathMatchConfigurer
 	 */
 	default void configurePathMatch(PathMatchConfigurer configurer) {
 	}
@@ -88,7 +80,7 @@ public interface WebMvcConfigurer {
 	}
 
 	/**
-	 * Add {@link Converter}s and {@link Formatter}s in addition to the ones
+	 * Add {@link Converter Converters} and {@link Formatter Formatters} in addition to the ones
 	 * registered by default.
 	 */
 	default void addFormatters(FormatterRegistry registry) {
@@ -96,15 +88,9 @@ public interface WebMvcConfigurer {
 
 	/**
 	 * Add Spring MVC lifecycle interceptors for pre- and post-processing of
-	 * controller method invocations. Interceptors can be registered to apply
-	 * to all requests or be limited to a subset of URL patterns.
-	 * <p><strong>Note</strong> that interceptors registered here only apply to
-	 * controllers and not to resource handler requests. To intercept requests for
-	 * static resources either declare a
-	 * {@link org.springframework.web.servlet.handler.MappedInterceptor MappedInterceptor}
-	 * bean or switch to advanced configuration mode by extending
-	 * {@link org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
-	 * WebMvcConfigurationSupport} and then override {@code resourceHandlerMapping}.
+	 * controller method invocations and resource handler requests.
+	 * Interceptors can be registered to apply to all requests or be limited
+	 * to a subset of URL patterns.
 	 */
 	default void addInterceptors(InterceptorRegistry registry) {
 	}
@@ -113,13 +99,23 @@ public interface WebMvcConfigurer {
 	 * Add handlers to serve static resources such as images, js, and, css
 	 * files from specific locations under web application root, the classpath,
 	 * and others.
+	 * @see ResourceHandlerRegistry
 	 */
 	default void addResourceHandlers(ResourceHandlerRegistry registry) {
 	}
 
 	/**
-	 * Configure cross origin requests processing.
+	 * Configure "global" cross origin request processing. The configured CORS
+	 * mappings apply to annotated controllers, functional endpoints, and static
+	 * resources.
+	 * <p>Annotated controllers can further declare more fine-grained config via
+	 * {@link org.springframework.web.bind.annotation.CrossOrigin @CrossOrigin}.
+	 * In such cases "global" CORS configuration declared here is
+	 * {@link org.springframework.web.cors.CorsConfiguration#combine(CorsConfiguration) combined}
+	 * with local CORS configuration defined on a controller method.
 	 * @since 4.2
+	 * @see CorsRegistry
+	 * @see CorsConfiguration#combine(CorsConfiguration)
 	 */
 	default void addCorsMappings(CorsRegistry registry) {
 	}
@@ -130,6 +126,7 @@ public interface WebMvcConfigurer {
 	 * cases where there is no need for custom controller logic -- e.g. render a
 	 * home page, perform simple site URL redirects, return a 404 status with
 	 * HTML content, a 204 with no content, and more.
+	 * @see ViewControllerRegistry
 	 */
 	default void addViewControllers(ViewControllerRegistry registry) {
 	}
@@ -164,23 +161,28 @@ public interface WebMvcConfigurer {
 	}
 
 	/**
-	 * Configure the {@link HttpMessageConverter}s to use for reading or writing
-	 * to the body of the request or response. If no converters are added, a
-	 * default list of converters is registered.
-	 * <p><strong>Note</strong> that adding converters to the list, turns off
-	 * default converter registration. To simply add a converter without impacting
-	 * default registration, consider using the method
-	 * {@link #extendMessageConverters(java.util.List)} instead.
+	 * Configure the {@link HttpMessageConverter HttpMessageConverter}s for
+	 * reading from the request body and for writing to the response body.
+	 * <p>By default, all built-in converters are configured as long as the
+	 * corresponding 3rd party libraries such Jackson JSON, JAXB2, and others
+	 * are present on the classpath.
+	 * <p><strong>Note</strong> use of this method turns off default converter
+	 * registration. Alternatively, use
+	 * {@link #extendMessageConverters(java.util.List)} to modify that default
+	 * list of converters.
 	 * @param converters initially an empty list of converters
 	 */
 	default void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
 	/**
-	 * A hook for extending or modifying the list of converters after it has been
-	 * configured. This may be useful for example to allow default converters to
-	 * be registered and then insert a custom converter through this method.
-	 * @param converters the list of configured converters to extend.
+	 * Extend or modify the list of converters after it has been, either
+	 * {@link #configureMessageConverters(List) configured} or initialized with
+	 * a default list.
+	 * <p>Note that the order of converter registration is important. Especially
+	 * in cases where clients accept {@link org.springframework.http.MediaType#ALL}
+	 * the converters configured earlier will be preferred.
+	 * @param converters the list of configured converters to be extended
 	 * @since 4.1.3
 	 */
 	default void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -190,7 +192,7 @@ public interface WebMvcConfigurer {
 	 * Configure exception resolvers.
 	 * <p>The given list starts out empty. If it is left empty, the framework
 	 * configures a default set of resolvers, see
-	 * {@link WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List)}.
+	 * {@link WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List, org.springframework.web.accept.ContentNegotiationManager)}.
 	 * Or if any exception resolvers are added to the list, then the application
 	 * effectively takes over and must provide, fully initialized, exception
 	 * resolvers.
@@ -199,7 +201,7 @@ public interface WebMvcConfigurer {
 	 * or modify the list of exception resolvers configured by default.
 	 * @param resolvers initially an empty list
 	 * @see #extendHandlerExceptionResolvers(List)
-	 * @see WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List)
+	 * @see WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List, org.springframework.web.accept.ContentNegotiationManager)
 	 */
 	default void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
 	}
@@ -210,7 +212,7 @@ public interface WebMvcConfigurer {
 	 * interfering with default ones.
 	 * @param resolvers the list of configured resolvers to extend
 	 * @since 4.3
-	 * @see WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List)
+	 * @see WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List, org.springframework.web.accept.ContentNegotiationManager)
 	 */
 	default void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
 	}

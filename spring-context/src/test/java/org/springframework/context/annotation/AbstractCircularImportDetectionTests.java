@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,12 +16,12 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * TCK-style unit tests for handling circular use of the {@link Import} annotation.
@@ -43,13 +43,12 @@ public abstract class AbstractCircularImportDetectionTests {
 			newParser().parse(loadAsConfigurationSource(A.class), "A");
 		}
 		catch (BeanDefinitionParsingException ex) {
-			assertTrue("Wrong message. Got: " + ex.getMessage(),
-					ex.getMessage().contains(
-						"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.B' " +
-						"to import class 'AbstractCircularImportDetectionTests.A'"));
+			assertThat(ex.getMessage().contains(
+							"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.B' " +
+							"to import class 'AbstractCircularImportDetectionTests.A'")).as("Wrong message. Got: " + ex.getMessage()).isTrue();
 			threw = true;
 		}
-		assertTrue(threw);
+		assertThat(threw).isTrue();
 	}
 
 	@Test
@@ -59,13 +58,12 @@ public abstract class AbstractCircularImportDetectionTests {
 			newParser().parse(loadAsConfigurationSource(X.class), "X");
 		}
 		catch (BeanDefinitionParsingException ex) {
-			assertTrue("Wrong message. Got: " + ex.getMessage(),
-					ex.getMessage().contains(
-						"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.Z2' " +
-						"to import class 'AbstractCircularImportDetectionTests.Z'"));
+			assertThat(ex.getMessage().contains(
+							"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.Z2' " +
+							"to import class 'AbstractCircularImportDetectionTests.Z'")).as("Wrong message. Got: " + ex.getMessage()).isTrue();
 			threw = true;
 		}
-		assertTrue(threw);
+		assertThat(threw).isTrue();
 	}
 
 

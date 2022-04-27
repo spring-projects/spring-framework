@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -89,14 +89,13 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * Transform the given relative request path to an absolute path,
 	 * taking the path of the given request as a point of reference.
 	 * The resulting path is also cleaned from sequences like "path/..".
-	 *
 	 * @param path the relative path to transform
 	 * @param exchange the current exchange
 	 * @return the absolute request path for the given resource path
 	 */
 	protected String toAbsolutePath(String path, ServerWebExchange exchange) {
 		String requestPath = exchange.getRequest().getURI().getPath();
-		String absolutePath = StringUtils.applyRelativePath(requestPath, path);
+		String absolutePath = (path.startsWith("/") ? path : StringUtils.applyRelativePath(requestPath, path));
 		return StringUtils.cleanPath(absolutePath);
 	}
 

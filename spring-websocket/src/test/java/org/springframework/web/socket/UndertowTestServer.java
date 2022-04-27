@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.web.socket;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
@@ -31,6 +32,7 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.InstanceHandle;
+import io.undertow.servlet.api.ServletInfo;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
 import org.xnio.OptionMap;
 import org.xnio.Xnio;
@@ -76,11 +78,13 @@ public class UndertowTestServer implements WebSocketTestServer {
 			throw new IllegalStateException(ex);
 		}
 
+		ServletInfo servletInfo = servlet("DispatcherServlet", DispatcherServlet.class, servletFactory)
+				.addMapping("/").setAsyncSupported(true);
 		DeploymentInfo servletBuilder = deployment()
 				.setClassLoader(UndertowTestServer.class.getClassLoader())
 				.setDeploymentName("undertow-websocket-test")
 				.setContextPath("/")
-				.addServlet(servlet("DispatcherServlet", DispatcherServlet.class, servletFactory).addMapping("/").setAsyncSupported(true))
+				.addServlet(servletInfo)
 				.addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, info);
 		for (final Filter filter : filters) {
 			String filterName = filter.getClass().getName();

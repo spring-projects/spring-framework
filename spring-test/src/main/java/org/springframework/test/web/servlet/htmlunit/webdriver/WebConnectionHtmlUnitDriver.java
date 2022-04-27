@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,6 @@ import com.gargoylesoftware.htmlunit.WebConnection;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -35,14 +34,11 @@ import org.springframework.util.Assert;
  *
  * @author Rob Winch
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 4.2
  * @see MockMvcHtmlUnitDriverBuilder
  */
 public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
-
-	@Nullable
-	private WebClient webClient;
-
 
 	public WebConnectionHtmlUnitDriver() {
 	}
@@ -72,9 +68,7 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 	 */
 	@Override
 	protected final WebClient modifyWebClient(WebClient webClient) {
-		this.webClient = super.modifyWebClient(webClient);
-		this.webClient = modifyWebClientInternal(this.webClient);
-		return this.webClient;
+		return modifyWebClientInternal(super.modifyWebClient(webClient));
 	}
 
 	/**
@@ -90,12 +84,12 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 	}
 
 	/**
-	 * Return the current {@link WebClient}.
+	 * Return the current {@link WebClient} in a public fashion.
 	 * @since 4.3
 	 */
+	@Override
 	public WebClient getWebClient() {
-		Assert.state(this.webClient != null, "No WebClient set");
-		return this.webClient;
+		return super.getWebClient();
 	}
 
 	/**

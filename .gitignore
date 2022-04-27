@@ -21,6 +21,9 @@ classes/
 /build
 buildSrc/build
 /spring-*/build
+/spring-core/kotlin-coroutines/build
+/framework-bom/build
+/integration-tests/build
 /src/asciidoc/build
 target/
 
@@ -38,3 +41,6 @@ out
 test-output
 atlassian-ide-plugin.xml
 .gradletasknamecache
+
+# VS Code
+.vscode/

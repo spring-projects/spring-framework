@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,18 +16,20 @@
 
 package org.springframework.test.context;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.SpringProperties;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
+import org.springframework.test.context.TestContextAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@code BootstrapUtils} is a collection of utility methods to assist with
@@ -57,13 +59,19 @@ abstract class BootstrapUtils {
 	private static final String WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME =
 			"org.springframework.test.context.web.WebAppConfiguration";
 
+	private static final Class<? extends Annotation> webAppConfigurationClass = loadWebAppConfigurationClass();
+
 	private static final Log logger = LogFactory.getLog(BootstrapUtils.class);
 
 
 	/**
 	 * Create the {@code BootstrapContext} for the specified {@linkplain Class test class}.
 	 * <p>Uses reflection to create a {@link org.springframework.test.context.support.DefaultBootstrapContext}
-	 * that uses a {@link org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate}.
+	 * that uses a default {@link CacheAwareContextLoaderDelegate} &mdash; configured
+	 * via the {@link CacheAwareContextLoaderDelegate#DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_PROPERTY_NAME}
+	 * system property or falling back to the
+	 * {@link org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate}
+	 * if the system property is not defined.
 	 * @param testClass the test class for which the bootstrap context should be created
 	 * @return a new {@code BootstrapContext}; never {@code null}
 	 */
@@ -88,19 +96,21 @@ abstract class BootstrapUtils {
 
 	@SuppressWarnings("unchecked")
 	private static CacheAwareContextLoaderDelegate createCacheAwareContextLoaderDelegate() {
-		Class<? extends CacheAwareContextLoaderDelegate> clazz = null;
+		String className = SpringProperties.getProperty(
+				CacheAwareContextLoaderDelegate.DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_PROPERTY_NAME);
+		className = (StringUtils.hasText(className) ? className.trim() :
+				DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_CLASS_NAME);
 		try {
-			clazz = (Class<? extends CacheAwareContextLoaderDelegate>) ClassUtils.forName(
-				DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_CLASS_NAME, BootstrapUtils.class.getClassLoader());
-
+			Class<? extends CacheAwareContextLoaderDelegate> clazz =
+					(Class<? extends CacheAwareContextLoaderDelegate>) ClassUtils.forName(
+						className, BootstrapUtils.class.getClassLoader());
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Instantiating CacheAwareContextLoaderDelegate from class [%s]",
-					clazz.getName()));
+				logger.debug(String.format("Instantiating CacheAwareContextLoaderDelegate from class [%s]", className));
 			}
 			return BeanUtils.instantiateClass(clazz, CacheAwareContextLoaderDelegate.class);
 		}
 		catch (Throwable ex) {
-			throw new IllegalStateException("Could not load CacheAwareContextLoaderDelegate [" + clazz + "]", ex);
+			throw new IllegalStateException("Could not create CacheAwareContextLoaderDelegate [" + className + "]", ex);
 		}
 	}
 
@@ -150,24 +160,49 @@ abstract class BootstrapUtils {
 
 	@Nullable
 	private static Class<?> resolveExplicitTestContextBootstrapper(Class<?> testClass) {
-		Set<BootstrapWith> annotations = AnnotatedElementUtils.findAllMergedAnnotations(testClass, BootstrapWith.class);
-		if (annotations.size() < 1) {
+		Set<BootstrapWith> annotations = new LinkedHashSet<>();
+		AnnotationDescriptor<BootstrapWith> descriptor =
+				TestContextAnnotationUtils.findAnnotationDescriptor(testClass, BootstrapWith.class);
+		while (descriptor != null) {
+			annotations.addAll(descriptor.findAllLocalMergedAnnotations());
+			descriptor = descriptor.next();
+		}
+
+		if (annotations.isEmpty()) {
 			return null;
 		}
-		Assert.state(annotations.size() <= 1, () -> String.format(
+		if (annotations.size() == 1) {
+			return annotations.iterator().next().value();
+		}
+
+		// Allow directly-present annotation to override annotations that are meta-present.
+		BootstrapWith bootstrapWith = testClass.getDeclaredAnnotation(BootstrapWith.class);
+		if (bootstrapWith != null) {
+			return bootstrapWith.value();
+		}
+
+		throw new IllegalStateException(String.format(
 				"Configuration error: found multiple declarations of @BootstrapWith for test class [%s]: %s",
 				testClass.getName(), annotations));
-		return annotations.iterator().next().value();
 	}
 
 	private static Class<?> resolveDefaultTestContextBootstrapper(Class<?> testClass) throws Exception {
-		ClassLoader classLoader = BootstrapUtils.class.getClassLoader();
-		AnnotationAttributes attributes = AnnotatedElementUtils.findMergedAnnotationAttributes(testClass,
-			WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME, false, false);
-		if (attributes != null) {
-			return ClassUtils.forName(DEFAULT_WEB_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME, classLoader);
+		boolean webApp = TestContextAnnotationUtils.hasAnnotation(testClass, webAppConfigurationClass);
+		String bootstrapperClassName = (webApp ? DEFAULT_WEB_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME :
+				DEFAULT_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME);
+		return ClassUtils.forName(bootstrapperClassName, BootstrapUtils.class.getClassLoader());
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Class<? extends Annotation> loadWebAppConfigurationClass() {
+		try {
+			return (Class<? extends Annotation>) ClassUtils.forName(WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME,
+				BootstrapUtils.class.getClassLoader());
 		}
-		return ClassUtils.forName(DEFAULT_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME, classLoader);
+		catch (ClassNotFoundException | LinkageError ex) {
+			throw new IllegalStateException(
+				"Failed to load class for @" + WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME, ex);
+		}
 	}
 
 }

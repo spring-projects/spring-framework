@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.BeanMetadataElement;
@@ -31,6 +32,7 @@ import org.springframework.lang.Nullable;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 27.05.2003
+ * @param <E> the element type
  */
 @SuppressWarnings("serial")
 public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetadataElement {
@@ -51,6 +53,20 @@ public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetad
 		super(initialCapacity);
 	}
 
+
+	/**
+	 * Return a new instance containing an arbitrary number of elements.
+	 * @param elements the elements to be contained in the list
+	 * @param <E> the {@code List}'s element type
+	 * @return a {@code List} containing the specified elements
+	 * @since 5.3.16
+	 */
+	@SuppressWarnings("unchecked")
+	public static <E> ManagedList<E> of(E... elements) {
+		ManagedList<E> list = new ManagedList<>();
+		list.addAll(Arrays.asList(elements));
+		return list;
+	}
 
 	/**
 	 * Set the configuration source {@code Object} for this metadata element.

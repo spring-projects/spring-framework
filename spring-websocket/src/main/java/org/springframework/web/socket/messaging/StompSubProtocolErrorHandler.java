@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  */
 public class StompSubProtocolErrorHandler implements SubProtocolErrorHandler<byte[]> {
 
-	private static byte[] EMPTY_PAYLOAD = new byte[0];
+	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 
 	@Override
@@ -57,6 +57,7 @@ public class StompSubProtocolErrorHandler implements SubProtocolErrorHandler<byt
 	}
 
 	@Override
+	@Nullable
 	public Message<byte[]> handleErrorMessageToClient(Message<byte[]> errorMessage) {
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(errorMessage, StompHeaderAccessor.class);
 		Assert.notNull(accessor, "No StompHeaderAccessor");

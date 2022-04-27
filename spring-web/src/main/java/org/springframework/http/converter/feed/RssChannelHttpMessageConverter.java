@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ import org.springframework.http.MediaType;
  * that can read and write RSS feeds. Specifically, this converter can handle {@link Channel}
  * objects from the <a href="https://github.com/rometools/rome">ROME</a> project.
  *
- * <p>><b>NOTE: As of Spring 4.1, this is based on the {@code com.rometools}
+ * <p><b>NOTE: As of Spring 4.1, this is based on the {@code com.rometools}
  * variant of ROME, version 1.5. Please upgrade your build dependency.</b>
  *
  * <p>By default, this converter reads and writes the media type ({@code application/rss+xml}).

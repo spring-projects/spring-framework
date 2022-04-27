@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
@@ -44,6 +45,7 @@ import org.springframework.util.ErrorHandler;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Brian Clozel
  * @see #setTaskExecutor
  */
 public class SimpleApplicationEventMulticaster extends AbstractApplicationEventMulticaster {
@@ -53,6 +55,9 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 	@Nullable
 	private ErrorHandler errorHandler;
+
+	@Nullable
+	private volatile Log lazyLogger;
 
 
 	/**
@@ -121,7 +126,6 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		return this.errorHandler;
 	}
 
-
 	@Override
 	public void multicastEvent(ApplicationEvent event) {
 		multicastEvent(event, resolveDefaultEventType(event));
@@ -130,8 +134,8 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	@Override
 	public void multicastEvent(final ApplicationEvent event, @Nullable ResolvableType eventType) {
 		ResolvableType type = (eventType != null ? eventType : resolveDefaultEventType(event));
-		for (final ApplicationListener<?> listener : getApplicationListeners(event, type)) {
-			Executor executor = getTaskExecutor();
+		Executor executor = getTaskExecutor();
+		for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {
 			if (executor != null) {
 				executor.execute(() -> invokeListener(listener, event));
 			}
@@ -151,35 +155,64 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * @param event the current event to propagate
 	 * @since 4.1
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	protected void invokeListener(ApplicationListener listener, ApplicationEvent event) {
+	protected void invokeListener(ApplicationListener<?> listener, ApplicationEvent event) {
 		ErrorHandler errorHandler = getErrorHandler();
 		if (errorHandler != null) {
 			try {
-				listener.onApplicationEvent(event);
+				doInvokeListener(listener, event);
 			}
 			catch (Throwable err) {
 				errorHandler.handleError(err);
 			}
 		}
 		else {
-			try {
-				listener.onApplicationEvent(event);
+			doInvokeListener(listener, event);
+		}
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private void doInvokeListener(ApplicationListener listener, ApplicationEvent event) {
+		try {
+			listener.onApplicationEvent(event);
+		}
+		catch (ClassCastException ex) {
+			String msg = ex.getMessage();
+			if (msg == null || matchesClassCastMessage(msg, event.getClass()) ||
+					(event instanceof PayloadApplicationEvent &&
+							matchesClassCastMessage(msg, ((PayloadApplicationEvent) event).getPayload().getClass()))) {
+				// Possibly a lambda-defined listener which we could not resolve the generic event type for
+				// -> let's suppress the exception.
+				Log loggerToUse = this.lazyLogger;
+				if (loggerToUse == null) {
+					loggerToUse = LogFactory.getLog(getClass());
+					this.lazyLogger = loggerToUse;
+				}
+				if (loggerToUse.isTraceEnabled()) {
+					loggerToUse.trace("Non-matching event type for listener: " + listener, ex);
+				}
 			}
-			catch (ClassCastException ex) {
-				String msg = ex.getMessage();
-				if (msg == null || msg.startsWith(event.getClass().getName())) {
-					// Possibly a lambda-defined listener which we could not resolve the generic event type for
-					Log logger = LogFactory.getLog(getClass());
-					if (logger.isDebugEnabled()) {
-						logger.debug("Non-matching event type for listener: " + listener, ex);
-					}
-				}
-				else {
-					throw ex;
-				}
+			else {
+				throw ex;
 			}
 		}
+	}
+
+	private boolean matchesClassCastMessage(String classCastMessage, Class<?> eventClass) {
+		// On Java 8, the message starts with the class name: "java.lang.String cannot be cast..."
+		if (classCastMessage.startsWith(eventClass.getName())) {
+			return true;
+		}
+		// On Java 11, the message starts with "class ..." a.k.a. Class.toString()
+		if (classCastMessage.startsWith(eventClass.toString())) {
+			return true;
+		}
+		// On Java 9, the message used to contain the module name: "java.base/java.lang.String cannot be cast..."
+		int moduleSeparatorIndex = classCastMessage.indexOf('/');
+		if (moduleSeparatorIndex != -1 && classCastMessage.startsWith(eventClass.getName(), moduleSeparatorIndex + 1)) {
+			return true;
+		}
+		// Assuming an unrelated class cast failure...
+		return false;
 	}
 
 }

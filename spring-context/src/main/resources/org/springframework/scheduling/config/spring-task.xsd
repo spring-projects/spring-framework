@@ -13,8 +13,8 @@
 		]]></xsd:documentation>
 	</xsd:annotation>
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
-	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="https://www.springframework.org/schema/beans/spring-beans.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="https://www.springframework.org/schema/tool/spring-tool.xsd"/>
 
 	<xsd:element name="annotation-driven">
 		<xsd:annotation>
@@ -244,7 +244,7 @@
 		<xsd:attribute name="cron" type="xsd:string" use="optional">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	A cron-based trigger. See the org.springframework.scheduling.support.CronSequenceGenerator
+	A cron-based trigger. See the org.springframework.scheduling.support.CronExpression#parse
 	JavaDoc for example patterns.
 				]]></xsd:documentation>
 			</xsd:annotation>

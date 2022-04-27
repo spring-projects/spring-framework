@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Method;
+import java.util.Properties;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -42,7 +43,7 @@ import org.springframework.util.ClassUtils;
  * @since 4.0
  */
 public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCandidateResolver
-		implements BeanFactoryAware {
+		implements BeanFactoryAware, Cloneable {
 
 	@Nullable
 	private BeanFactory beanFactory;
@@ -127,7 +128,11 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		if (cacheType) {
 			rbd.targetType = targetType;
 		}
-		if (descriptor.fallbackMatchAllowed() && targetType.hasUnresolvableGenerics()) {
+		if (descriptor.fallbackMatchAllowed() &&
+				(targetType.hasUnresolvableGenerics() || targetType.resolve() == Properties.class)) {
+			// Fallback matches allow unresolvable generics, e.g. plain HashMap to Map<String,String>;
+			// and pragmatically also java.util.Properties to any Map (since despite formally being a
+			// Map<Object,Object>, java.util.Properties is usually perceived as a Map<String,String>).
 			return true;
 		}
 		// Full check for complex generic type match...
@@ -170,6 +175,23 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 			}
 		}
 		return null;
+	}
+
+
+	/**
+	 * This implementation clones all instance fields through standard
+	 * {@link Cloneable} support, allowing for subsequent reconfiguration
+	 * of the cloned instance through a fresh {@link #setBeanFactory} call.
+	 * @see #clone()
+	 */
+	@Override
+	public AutowireCandidateResolver cloneIfNecessary() {
+		try {
+			return (AutowireCandidateResolver) clone();
+		}
+		catch (CloneNotSupportedException ex) {
+			throw new IllegalStateException(ex);
+		}
 	}
 
 }

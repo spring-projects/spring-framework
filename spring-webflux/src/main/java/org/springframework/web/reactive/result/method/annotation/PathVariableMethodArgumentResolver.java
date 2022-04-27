@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,12 +55,15 @@ import org.springframework.web.server.ServerWebExchange;
 public class PathVariableMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
 	/**
-	 * @param factory a bean factory to use for resolving  ${...}
-	 * placeholder and #{...} SpEL expressions in default values;
+	 * Create a new {@link PathVariableMethodArgumentResolver}.
+	 * @param factory a bean factory to use for resolving {@code ${...}}
+	 * placeholder and {@code #{...}} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to contain expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public PathVariableMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public PathVariableMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory,
+			ReactiveAdapterRegistry registry) {
+
 		super(factory, registry);
 	}
 
@@ -82,7 +85,6 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueSyncAr
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		String attributeName = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		return exchange.getAttributeOrDefault(attributeName, Collections.emptyMap()).get(name);
@@ -90,11 +92,10 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueSyncAr
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) {
-		throw new ServerErrorException(name, parameter);
+		throw new ServerErrorException(name, parameter, null);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void handleResolvedValue(
 			@Nullable Object arg, String name, MethodParameter parameter, Model model, ServerWebExchange exchange) {
 

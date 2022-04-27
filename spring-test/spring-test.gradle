@@ -1,0 +1,97 @@
+description = "Spring TestContext Framework"
+
+apply plugin: "kotlin"
+
+dependencies {
+	api(project(":spring-core"))
+	optional(project(":spring-aop"))
+	optional(project(":spring-beans"))
+	optional(project(":spring-context"))
+	optional(project(":spring-jdbc"))
+	optional(project(":spring-orm"))
+	optional(project(":spring-tx"))
+	optional(project(":spring-web"))
+	optional(project(":spring-webflux"))
+	optional(project(":spring-webmvc"))
+	optional(project(":spring-websocket"))
+	optional("javax.activation:javax.activation-api")
+	optional("javax.el:javax.el-api")
+	optional("javax.inject:javax.inject")
+	optional("javax.servlet:javax.servlet-api")
+	optional("javax.servlet.jsp:javax.servlet.jsp-api")
+	optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api")
+	optional("javax.xml.bind:jaxb-api")
+	optional("javax.websocket:javax.websocket-api")
+	optional("junit:junit")
+	optional("org.junit.jupiter:junit-jupiter-api")
+	optional("org.testng:testng")
+	optional("org.aspectj:aspectjweaver")
+	optional("org.codehaus.groovy:groovy")
+	optional("org.hamcrest:hamcrest")
+	optional("org.apache.taglibs:taglibs-standard-jstlel")
+	optional("net.sourceforge.htmlunit:htmlunit")
+	optional("org.seleniumhq.selenium:htmlunit-driver") {
+		exclude group: "net.bytebuddy", module: "byte-buddy"
+	}
+	optional("org.seleniumhq.selenium:selenium-java") {
+		exclude group: "net.bytebuddy", module: "byte-buddy"
+	}
+	optional("org.xmlunit:xmlunit-matchers")
+	optional("org.skyscreamer:jsonassert")
+	optional("com.jayway.jsonpath:json-path")
+	optional("commons-fileupload:commons-fileupload")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("io.projectreactor:reactor-test")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testImplementation(project(":spring-context-support"))
+	testImplementation(project(":spring-oxm"))
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-context")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-tx")))
+	testImplementation(testFixtures(project(":spring-web")))
+	testImplementation("javax.annotation:javax.annotation-api")
+	testImplementation("javax.cache:cache-api")
+	testImplementation("javax.ejb:javax.ejb-api")
+	testImplementation("javax.interceptor:javax.interceptor-api")
+	testImplementation("javax.mail:javax.mail-api")
+	testImplementation("org.hibernate:hibernate-core")
+	testImplementation("org.hibernate:hibernate-validator")
+	testImplementation("javax.validation:validation-api")
+	testImplementation("org.junit.platform:junit-platform-testkit")
+	testImplementation("com.fasterxml.jackson.core:jackson-databind")
+	testImplementation("com.thoughtworks.xstream:xstream")
+	testImplementation("com.rometools:rome")
+	testImplementation("org.apache.tiles:tiles-api")
+	testImplementation("org.apache.tiles:tiles-core")
+	testImplementation("org.apache.tiles:tiles-servlet")
+	testImplementation("org.hsqldb:hsqldb")
+	testImplementation("org.apache.httpcomponents:httpclient")
+	testImplementation("io.projectreactor.netty:reactor-netty-http")
+	testImplementation("de.bechte.junit:junit-hierarchicalcontextrunner")
+	testRuntimeOnly("org.junit.vintage:junit-vintage-engine") {
+		exclude group: "junit", module: "junit"
+	}
+	testRuntimeOnly("org.junit.support:testng-engine")
+	testRuntimeOnly("org.glassfish:javax.el")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
+}
+
+test {
+	description = "Runs JUnit 4, JUnit Jupiter, and TestNG tests."
+	useJUnitPlatform {
+		includeEngines "junit-vintage", "junit-jupiter", "testng"
+		excludeTags "failing-test-case"
+	}
+	// We use `include` instead of `filter.includeTestsMatching`, since
+	// the latter results in some tests being executed/reported
+	// multiple times.
+	include(["**/*Tests.class", "**/*Test.class"])
+	filter.excludeTestsMatching("*TestCase")
+	systemProperty("testGroups", project.properties.get("testGroups"))
+	// Java Util Logging for the JUnit Platform.
+	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
+}

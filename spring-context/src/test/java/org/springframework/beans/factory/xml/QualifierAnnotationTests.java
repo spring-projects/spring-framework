@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.FactoryBean;
@@ -35,8 +35,9 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 
 import static java.lang.String.format;
-import static org.junit.Assert.*;
-import static org.springframework.util.ClassUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.util.ClassUtils.convertClassNameToResourcePath;
 
 /**
  * @author Mark Fisher
@@ -46,8 +47,9 @@ import static org.springframework.util.ClassUtils.*;
 public class QualifierAnnotationTests {
 
 	private static final String CLASSNAME = QualifierAnnotationTests.class.getName();
+
 	private static final String CONFIG_LOCATION =
-		format("classpath:%s-context.xml", convertClassNameToResourcePath(CLASSNAME));
+			format("classpath:%s-context.xml", convertClassNameToResourcePath(CLASSNAME));
 
 
 	@Test
@@ -56,13 +58,9 @@ public class QualifierAnnotationTests {
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(CONFIG_LOCATION);
 		context.registerSingleton("testBean", NonQualifiedTestBean.class);
-		try {
-			context.refresh();
-			fail("Should have thrown a BeanCreationException");
-		}
-		catch (BeanCreationException e) {
-			assertTrue(e.getMessage().contains("found 6"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				context::refresh)
+			.withMessageContaining("found 6");
 	}
 
 	@Test
@@ -74,7 +72,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByValueTestBean testBean = (QualifiedByValueTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("Larry", person.getName());
+		assertThat(person.getName()).isEqualTo("Larry");
 	}
 
 	@Test
@@ -99,7 +97,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByParentValueTestBean testBean = (QualifiedByParentValueTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("ParentLarry", person.getName());
+		assertThat(person.getName()).isEqualTo("ParentLarry");
 	}
 
 	@Test
@@ -111,8 +109,8 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByBeanNameTestBean testBean = (QualifiedByBeanNameTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("LarryBean", person.getName());
-		assertTrue(testBean.myProps != null && testBean.myProps.isEmpty());
+		assertThat(person.getName()).isEqualTo("LarryBean");
+		assertThat(testBean.myProps != null && testBean.myProps.isEmpty()).isTrue();
 	}
 
 	@Test
@@ -124,7 +122,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByFieldNameTestBean testBean = (QualifiedByFieldNameTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("LarryBean", person.getName());
+		assertThat(person.getName()).isEqualTo("LarryBean");
 	}
 
 	@Test
@@ -136,7 +134,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByParameterNameTestBean testBean = (QualifiedByParameterNameTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("LarryBean", person.getName());
+		assertThat(person.getName()).isEqualTo("LarryBean");
 	}
 
 	@Test
@@ -148,7 +146,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByAliasTestBean testBean = (QualifiedByAliasTestBean) context.getBean("testBean");
 		Person person = testBean.getStooge();
-		assertEquals("LarryBean", person.getName());
+		assertThat(person.getName()).isEqualTo("LarryBean");
 	}
 
 	@Test
@@ -160,7 +158,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByAnnotationTestBean testBean = (QualifiedByAnnotationTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("LarrySpecial", person.getName());
+		assertThat(person.getName()).isEqualTo("LarrySpecial");
 	}
 
 	@Test
@@ -172,7 +170,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByCustomValueTestBean testBean = (QualifiedByCustomValueTestBean) context.getBean("testBean");
 		Person person = testBean.getCurly();
-		assertEquals("Curly", person.getName());
+		assertThat(person.getName()).isEqualTo("Curly");
 	}
 
 	@Test
@@ -184,7 +182,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByAnnotationValueTestBean testBean = (QualifiedByAnnotationValueTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("LarrySpecial", person.getName());
+		assertThat(person.getName()).isEqualTo("LarrySpecial");
 	}
 
 	@Test
@@ -193,13 +191,9 @@ public class QualifierAnnotationTests {
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(CONFIG_LOCATION);
 		context.registerSingleton("testBean", QualifiedByAttributesTestBean.class);
-		try {
-			context.refresh();
-			fail("should have thrown a BeanCreationException");
-		}
-		catch (BeanCreationException e) {
-			assertTrue(e.getMessage().contains("found 6"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				context::refresh)
+			.withMessageContaining("found 6");
 	}
 
 	@Test
@@ -215,8 +209,8 @@ public class QualifierAnnotationTests {
 
 		MultiQualifierClient testBean = (MultiQualifierClient) context.getBean("testBean");
 
-		assertNotNull( testBean.factoryTheta);
-		assertNotNull( testBean.implTheta);
+		assertThat(testBean.factoryTheta).isNotNull();
+		assertThat(testBean.implTheta).isNotNull();
 	}
 
 	@Test

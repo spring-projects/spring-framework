@@ -5,6 +5,8 @@
  * to gain access to instances of those implementations.
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.test.web.client.match;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

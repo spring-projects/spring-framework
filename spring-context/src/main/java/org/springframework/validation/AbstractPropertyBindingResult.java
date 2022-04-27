@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -71,7 +71,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 */
 	@Override
 	public PropertyEditorRegistry getPropertyEditorRegistry() {
-		return getPropertyAccessor();
+		return (getTarget() != null ? getPropertyAccessor() : null);
 	}
 
 	/**
@@ -88,8 +88,10 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * @see #getPropertyAccessor()
 	 */
 	@Override
+	@Nullable
 	public Class<?> getFieldType(@Nullable String field) {
-		return getPropertyAccessor().getPropertyType(fixedField(field));
+		return (getTarget() != null ? getPropertyAccessor().getPropertyType(fixedField(field)) :
+				super.getFieldType(field));
 	}
 
 	/**
@@ -97,6 +99,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * @see #getPropertyAccessor()
 	 */
 	@Override
+	@Nullable
 	protected Object getActualFieldValue(String field) {
 		return getPropertyAccessor().getPropertyValue(field);
 	}
@@ -150,6 +153,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * if applicable.
 	 */
 	@Override
+	@Nullable
 	public PropertyEditor findEditor(@Nullable String field, @Nullable Class<?> valueType) {
 		Class<?> valueTypeForLookup = valueType;
 		if (valueTypeForLookup == null) {
@@ -158,7 +162,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 		PropertyEditor editor = super.findEditor(field, valueTypeForLookup);
 		if (editor == null && this.conversionService != null) {
 			TypeDescriptor td = null;
-			if (field != null) {
+			if (field != null && getTarget() != null) {
 				TypeDescriptor ptd = getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field));
 				if (ptd != null && (valueType == null || valueType.isAssignableFrom(ptd.getType()))) {
 					td = ptd;

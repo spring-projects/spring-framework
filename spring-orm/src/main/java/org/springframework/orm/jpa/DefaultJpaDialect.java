@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import java.io.Serializable;
 import java.sql.SQLException;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
@@ -57,6 +58,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * @see #cleanupTransaction
 	 */
 	@Override
+	@Nullable
 	public Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException {
 
@@ -70,6 +72,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	}
 
 	@Override
+	@Nullable
 	public Object prepareTransaction(EntityManager entityManager, boolean readOnly, @Nullable String name)
 			throws PersistenceException {
 
@@ -90,6 +93,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * indicating that no JDBC Connection can be provided.
 	 */
 	@Override
+	@Nullable
 	public ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
 			throws PersistenceException, SQLException {
 
@@ -119,6 +123,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
 	 */
 	@Override
+	@Nullable
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		return EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
 	}

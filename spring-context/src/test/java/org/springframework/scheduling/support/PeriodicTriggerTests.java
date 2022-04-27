@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,12 +19,12 @@ package org.springframework.scheduling.support;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.NumberUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Fisher
@@ -177,28 +177,28 @@ public class PeriodicTriggerTests {
 	public void equalsVerification() {
 		PeriodicTrigger trigger1 = new PeriodicTrigger(3000);
 		PeriodicTrigger trigger2 = new PeriodicTrigger(3000);
-		assertFalse(trigger1.equals(new String("not a trigger")));
-		assertFalse(trigger1.equals(null));
-		assertEquals(trigger1, trigger1);
-		assertEquals(trigger2, trigger2);
-		assertEquals(trigger1, trigger2);
+		assertThat(trigger1.equals(new String("not a trigger"))).isFalse();
+		assertThat(trigger1.equals(null)).isFalse();
+		assertThat(trigger1).isEqualTo(trigger1);
+		assertThat(trigger2).isEqualTo(trigger2);
+		assertThat(trigger2).isEqualTo(trigger1);
 		trigger2.setInitialDelay(1234);
-		assertFalse(trigger1.equals(trigger2));
-		assertFalse(trigger2.equals(trigger1));
+		assertThat(trigger1.equals(trigger2)).isFalse();
+		assertThat(trigger2.equals(trigger1)).isFalse();
 		trigger1.setInitialDelay(1234);
-		assertEquals(trigger1, trigger2);
+		assertThat(trigger2).isEqualTo(trigger1);
 		trigger2.setFixedRate(true);
-		assertFalse(trigger1.equals(trigger2));
-		assertFalse(trigger2.equals(trigger1));
+		assertThat(trigger1.equals(trigger2)).isFalse();
+		assertThat(trigger2.equals(trigger1)).isFalse();
 		trigger1.setFixedRate(true);
-		assertEquals(trigger1, trigger2);
+		assertThat(trigger2).isEqualTo(trigger1);
 		PeriodicTrigger trigger3 = new PeriodicTrigger(3, TimeUnit.SECONDS);
 		trigger3.setInitialDelay(7);
 		trigger3.setFixedRate(true);
-		assertFalse(trigger1.equals(trigger3));
-		assertFalse(trigger3.equals(trigger1));
+		assertThat(trigger1.equals(trigger3)).isFalse();
+		assertThat(trigger3.equals(trigger1)).isFalse();
 		trigger1.setInitialDelay(7000);
-		assertEquals(trigger1, trigger3);
+		assertThat(trigger3).isEqualTo(trigger1);
 	}
 
 
@@ -206,14 +206,14 @@ public class PeriodicTriggerTests {
 
 	private static void assertNegligibleDifference(Date d1, Date d2) {
 		long diff = Math.abs(d1.getTime() - d2.getTime());
-		assertTrue("difference exceeds threshold: " + diff, diff < 100);
+		assertThat(diff < 100).as("difference exceeds threshold: " + diff).isTrue();
 	}
 
 	private static void assertApproximateDifference(Date lesser, Date greater, long expected) {
 		long diff = greater.getTime() - lesser.getTime();
 		long variance = Math.abs(expected - diff);
-		assertTrue("expected approximate difference of " + expected +
-				", but actual difference was " + diff, variance < 100);
+		assertThat(variance < 100).as("expected approximate difference of " + expected +
+				", but actual difference was " + diff).isTrue();
 	}
 
 	private static TriggerContext context(Object scheduled, Object actual, Object completion) {

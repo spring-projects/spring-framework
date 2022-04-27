@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,6 @@ import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -37,7 +36,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Represents a user-defined {@link Configuration @Configuration} class.
- * Includes a set of {@link Bean} methods, including all such methods
+ * <p>Includes a set of {@link Bean} methods, including all such methods
  * defined in the ancestry of the class, in a 'flattened-out' manner.
  *
  * @author Chris Beams
@@ -75,7 +74,7 @@ final class ConfigurationClass {
 	 * @param beanName must not be {@code null}
 	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
 	 */
-	public ConfigurationClass(MetadataReader metadataReader, String beanName) {
+	ConfigurationClass(MetadataReader metadataReader, String beanName) {
 		Assert.notNull(beanName, "Bean name must not be null");
 		this.metadata = metadataReader.getAnnotationMetadata();
 		this.resource = metadataReader.getResource();
@@ -90,7 +89,7 @@ final class ConfigurationClass {
 	 * @param importedBy the configuration class importing this one or {@code null}
 	 * @since 3.1.1
 	 */
-	public ConfigurationClass(MetadataReader metadataReader, @Nullable ConfigurationClass importedBy) {
+	ConfigurationClass(MetadataReader metadataReader, @Nullable ConfigurationClass importedBy) {
 		this.metadata = metadataReader.getAnnotationMetadata();
 		this.resource = metadataReader.getResource();
 		this.importedBy.add(importedBy);
@@ -102,9 +101,9 @@ final class ConfigurationClass {
 	 * @param beanName name of the {@code @Configuration} class bean
 	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
 	 */
-	public ConfigurationClass(Class<?> clazz, String beanName) {
+	ConfigurationClass(Class<?> clazz, String beanName) {
 		Assert.notNull(beanName, "Bean name must not be null");
-		this.metadata = new StandardAnnotationMetadata(clazz, true);
+		this.metadata = AnnotationMetadata.introspect(clazz);
 		this.resource = new DescriptiveResource(clazz.getName());
 		this.beanName = beanName;
 	}
@@ -117,8 +116,8 @@ final class ConfigurationClass {
 	 * @param importedBy the configuration class importing this one (or {@code null})
 	 * @since 3.1.1
 	 */
-	public ConfigurationClass(Class<?> clazz, @Nullable ConfigurationClass importedBy) {
-		this.metadata = new StandardAnnotationMetadata(clazz, true);
+	ConfigurationClass(Class<?> clazz, @Nullable ConfigurationClass importedBy) {
+		this.metadata = AnnotationMetadata.introspect(clazz);
 		this.resource = new DescriptiveResource(clazz.getName());
 		this.importedBy.add(importedBy);
 	}
@@ -129,7 +128,7 @@ final class ConfigurationClass {
 	 * @param beanName name of the {@code @Configuration} class bean
 	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
 	 */
-	public ConfigurationClass(AnnotationMetadata metadata, String beanName) {
+	ConfigurationClass(AnnotationMetadata metadata, String beanName) {
 		Assert.notNull(beanName, "Bean name must not be null");
 		this.metadata = metadata;
 		this.resource = new DescriptiveResource(metadata.getClassName());
@@ -137,19 +136,19 @@ final class ConfigurationClass {
 	}
 
 
-	public AnnotationMetadata getMetadata() {
+	AnnotationMetadata getMetadata() {
 		return this.metadata;
 	}
 
-	public Resource getResource() {
+	Resource getResource() {
 		return this.resource;
 	}
 
-	public String getSimpleName() {
+	String getSimpleName() {
 		return ClassUtils.getShortName(getMetadata().getClassName());
 	}
 
-	public void setBeanName(String beanName) {
+	void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
@@ -172,7 +171,7 @@ final class ConfigurationClass {
 	 * Merge the imported-by declarations from the given configuration class into this one.
 	 * @since 4.0.5
 	 */
-	public void mergeImportedBy(ConfigurationClass otherConfigClass) {
+	void mergeImportedBy(ConfigurationClass otherConfigClass) {
 		this.importedBy.addAll(otherConfigClass.importedBy);
 	}
 
@@ -182,49 +181,49 @@ final class ConfigurationClass {
 	 * @since 4.0.5
 	 * @see #isImported()
 	 */
-	public Set<ConfigurationClass> getImportedBy() {
+	Set<ConfigurationClass> getImportedBy() {
 		return this.importedBy;
 	}
 
-	public void addBeanMethod(BeanMethod method) {
+	void addBeanMethod(BeanMethod method) {
 		this.beanMethods.add(method);
 	}
 
-	public Set<BeanMethod> getBeanMethods() {
+	Set<BeanMethod> getBeanMethods() {
 		return this.beanMethods;
 	}
 
-	public void addImportedResource(String importedResource, Class<? extends BeanDefinitionReader> readerClass) {
+	void addImportedResource(String importedResource, Class<? extends BeanDefinitionReader> readerClass) {
 		this.importedResources.put(importedResource, readerClass);
 	}
 
-	public void addImportBeanDefinitionRegistrar(ImportBeanDefinitionRegistrar registrar, AnnotationMetadata importingClassMetadata) {
+	void addImportBeanDefinitionRegistrar(ImportBeanDefinitionRegistrar registrar, AnnotationMetadata importingClassMetadata) {
 		this.importBeanDefinitionRegistrars.put(registrar, importingClassMetadata);
 	}
 
-	public Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> getImportBeanDefinitionRegistrars() {
+	Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> getImportBeanDefinitionRegistrars() {
 		return this.importBeanDefinitionRegistrars;
 	}
 
-	public Map<String, Class<? extends BeanDefinitionReader>> getImportedResources() {
+	Map<String, Class<? extends BeanDefinitionReader>> getImportedResources() {
 		return this.importedResources;
 	}
 
-	public void validate(ProblemReporter problemReporter) {
-		// A configuration class may not be final (CGLIB limitation)
-		if (getMetadata().isAnnotated(Configuration.class.getName())) {
-			if (getMetadata().isFinal()) {
+	void validate(ProblemReporter problemReporter) {
+		// A configuration class may not be final (CGLIB limitation) unless it declares proxyBeanMethods=false
+		Map<String, Object> attributes = this.metadata.getAnnotationAttributes(Configuration.class.getName());
+		if (attributes != null && (Boolean) attributes.get("proxyBeanMethods")) {
+			if (this.metadata.isFinal()) {
 				problemReporter.error(new FinalConfigurationProblem());
 			}
-		}
-
-		for (BeanMethod beanMethod : this.beanMethods) {
-			beanMethod.validate(problemReporter);
+			for (BeanMethod beanMethod : this.beanMethods) {
+				beanMethod.validate(problemReporter);
+			}
 		}
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof ConfigurationClass &&
 				getMetadata().getClassName().equals(((ConfigurationClass) other).getMetadata().getClassName())));
 	}
@@ -245,7 +244,7 @@ final class ConfigurationClass {
 	 */
 	private class FinalConfigurationProblem extends Problem {
 
-		public FinalConfigurationProblem() {
+		FinalConfigurationProblem() {
 			super(String.format("@Configuration class '%s' may not be final. Remove the final modifier to continue.",
 					getSimpleName()), new Location(getResource(), getMetadata()));
 		}

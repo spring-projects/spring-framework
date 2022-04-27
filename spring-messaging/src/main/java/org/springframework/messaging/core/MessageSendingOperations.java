@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,7 +28,7 @@ import org.springframework.messaging.MessagingException;
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @since 4.0
- * @param <D> the type of destination to send messages to
+ * @param <D> the destination type
  */
 public interface MessageSendingOperations<D> {
 
@@ -69,7 +69,7 @@ public interface MessageSendingOperations<D> {
 	 * the given destination.
 	 * @param destination the target destination
 	 * @param payload the Object to use as payload
-	 * @param headers headers for the message to send
+	 * @param headers the headers for the message to send
 	 */
 	void convertAndSend(D destination, Object payload, Map<String, Object> headers) throws MessagingException;
 
@@ -101,10 +101,10 @@ public interface MessageSendingOperations<D> {
 	 * and send the resulting message to the given destination.
 	 * @param destination the target destination
 	 * @param payload the Object to use as payload
-	 * @param headers headers for the message to send
+	 * @param headers the headers for the message to send
 	 * @param postProcessor the post processor to apply to the message
 	 */
-	void convertAndSend(D destination, Object payload, @Nullable Map<String, Object> headers, @Nullable MessagePostProcessor postProcessor)
-			throws MessagingException;
+	void convertAndSend(D destination, Object payload, @Nullable Map<String, Object> headers,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException;
 
 }

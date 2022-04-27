@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,20 +25,20 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 
 /**
- * Represents a bean reference to a type, for example <tt>@foo</tt> or <tt>@'foo.bar'</tt>.
- * For a FactoryBean the syntax <tt>&foo</tt> can be used to access the factory itself.
- * 
+ * Represents a bean reference to a type, for example {@code @foo} or {@code @'foo.bar'}.
+ * For a FactoryBean the syntax {@code &foo} can be used to access the factory itself.
+ *
  * @author Andy Clement
  */
 public class BeanReference extends SpelNodeImpl {
 
-	private final static String FACTORY_BEAN_PREFIX = "&";
-	
+	private static final String FACTORY_BEAN_PREFIX = "&";
+
 	private final String beanName;
 
 
-	public BeanReference(int pos, String beanName) {
-		super(pos);
+	public BeanReference(int startPos, int endPos, String beanName) {
+		super(startPos, endPos);
 		this.beanName = beanName;
 	}
 
@@ -64,13 +64,13 @@ public class BeanReference extends SpelNodeImpl {
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
 		if (!this.beanName.startsWith(FACTORY_BEAN_PREFIX)) {
-			sb.append("@");
+			sb.append('@');
 		}
 		if (!this.beanName.contains(".")) {
 			sb.append(this.beanName);
 		}
 		else {
-			sb.append("'").append(this.beanName).append("'");
+			sb.append('\'').append(this.beanName).append('\'');
 		}
 		return sb.toString();
 	}

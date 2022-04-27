@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,16 +42,17 @@ import java.lang.annotation.Target;
  * is unfortunately not possible to assign a value of {@code null} to an annotation
  * attribute. Thus, in order to support overrides of <em>inherited</em> global
  * configuration, {@code @SqlConfig} attributes have an <em>explicit</em>
- * {@code default} value of either {@code ""} for Strings or {@code DEFAULT} for
- * Enums. This approach allows local declarations of {@code @SqlConfig} to
- * selectively override individual attributes from global declarations of
- * {@code @SqlConfig} by providing a value other than {@code ""} or {@code DEFAULT}.
+ * {@code default} value of either {@code ""} for Strings, <code>{}</code> for
+ * arrays, or {@code DEFAULT} for Enums. This approach allows local declarations
+ * of {@code @SqlConfig} to selectively override individual attributes from global
+ * declarations of {@code @SqlConfig} by providing a value other than {@code ""},
+ * <code>{}</code>, or {@code DEFAULT}.
  *
  * <h3>Inheritance and Overrides</h3>
  * <p>Global {@code @SqlConfig} attributes are <em>inherited</em> whenever local
  * {@code @SqlConfig} attributes do not supply an explicit value other than
- * {@code ""} or {@code DEFAULT}. Explicit local configuration therefore
- * <em>overrides</em> global configuration.
+ * {@code ""}, <code>{}</code>, or {@code DEFAULT}. Explicit local configuration
+ * therefore <em>overrides</em> global configuration.
  *
  * @author Sam Brannen
  * @author Tadaya Tsuyukubo
@@ -145,9 +146,25 @@ public @interface SqlConfig {
 	/**
 	 * The prefix that identifies single-line comments within the SQL scripts.
 	 * <p>Implicitly defaults to {@code "--"}.
+	 * <p>This attribute may <strong>not</strong> be used in conjunction with
+	 * {@link #commentPrefixes commentPrefixes}, but it may be used instead of
+	 * {@link #commentPrefixes commentPrefixes}.
 	 * @see org.springframework.jdbc.datasource.init.ScriptUtils#DEFAULT_COMMENT_PREFIX
+	 * @see #commentPrefixes
 	 */
 	String commentPrefix() default "";
+
+	/**
+	 * The prefixes that identify single-line comments within the SQL scripts.
+	 * <p>Implicitly defaults to {@code ["--"]}.
+	 * <p>This attribute may <strong>not</strong> be used in conjunction with
+	 * {@link #commentPrefix commentPrefix}, but it may be used instead of
+	 * {@link #commentPrefix commentPrefix}.
+	 * @see org.springframework.jdbc.datasource.init.ScriptUtils#DEFAULT_COMMENT_PREFIXES
+	 * @see #commentPrefix
+	 * @since 5.2
+	 */
+	String[] commentPrefixes() default {};
 
 	/**
 	 * The start delimiter that identifies block comments within the SQL scripts.

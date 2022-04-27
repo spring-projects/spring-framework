@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.expression.spel.ast;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
@@ -42,8 +43,8 @@ public class InlineList extends SpelNodeImpl {
 	private TypedValue constant;  // TODO must be immutable list
 
 
-	public InlineList(int pos, SpelNodeImpl... args) {
-		super(pos, args);
+	public InlineList(int startPos, int endPos, SpelNodeImpl... args) {
+		super(startPos, endPos, args);
 		checkIfConstant();
 	}
 
@@ -91,8 +92,8 @@ public class InlineList extends SpelNodeImpl {
 			return this.constant;
 		}
 		else {
-			List<Object> returnValue = new ArrayList<>();
 			int childCount = getChildCount();
+			List<Object> returnValue = new ArrayList<>(childCount);
 			for (int c = 0; c < childCount; c++) {
 				returnValue.add(getChild(c).getValue(expressionState));
 			}
@@ -102,17 +103,13 @@ public class InlineList extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder("{");
+		StringJoiner sj = new StringJoiner(",", "{", "}");
 		// String ast matches input string, not the 'toString()' of the resultant collection, which would use []
 		int count = getChildCount();
 		for (int c = 0; c < count; c++) {
-			if (c > 0) {
-				sb.append(",");
-			}
-			sb.append(getChild(c).toStringAST());
+			sj.add(getChild(c).toStringAST());
 		}
-		sb.append("}");
-		return sb.toString();
+		return sj.toString();
 	}
 
 	/**
@@ -128,12 +125,12 @@ public class InlineList extends SpelNodeImpl {
 		Assert.state(this.constant != null, "No constant");
 		return (List<Object>) this.constant.getValue();
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		return isConstant();
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
 		final String constantFieldName = "inlineList$" + codeflow.nextFieldId();
@@ -144,11 +141,11 @@ public class InlineList extends SpelNodeImpl {
 
 		codeflow.registerNewClinit((mVisitor, cflow) ->
 				generateClinitCode(className, constantFieldName, mVisitor, cflow, false));
-		
+
 		mv.visitFieldInsn(GETSTATIC, className, constantFieldName, "Ljava/util/List;");
 		codeflow.pushDescriptor("Ljava/util/List");
 	}
-	
+
 	void generateClinitCode(String clazzname, String constantFieldName, MethodVisitor mv, CodeFlow codeflow, boolean nested) {
 		mv.visitTypeInsn(NEW, "java/util/ArrayList");
 		mv.visitInsn(DUP);
@@ -167,11 +164,11 @@ public class InlineList extends SpelNodeImpl {
 			// The children might be further lists if they are not constants. In this
 			// situation do not call back into generateCode() because it will register another clinit adder.
 			// Instead, directly build the list here:
-			if (children[c] instanceof InlineList) {
-				((InlineList)children[c]).generateClinitCode(clazzname, constantFieldName, mv, codeflow, true);
+			if (this.children[c] instanceof InlineList) {
+				((InlineList)this.children[c]).generateClinitCode(clazzname, constantFieldName, mv, codeflow, true);
 			}
 			else {
-				children[c].generateCode(mv, codeflow);
+				this.children[c].generateCode(mv, codeflow);
 				String lastDesc = codeflow.lastDescriptor();
 				if (CodeFlow.isPrimitive(lastDesc)) {
 					CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));

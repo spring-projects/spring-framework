@@ -3,9 +3,9 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:lang="http://www.springframework.org/schema/lang"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-				http://www.springframework.org/schema/beans/spring-beans.xsd
+				https://www.springframework.org/schema/beans/spring-beans.xsd
 				http://www.springframework.org/schema/lang
-				http://www.springframework.org/schema/lang/spring-lang-3.0.xsd"
+				https://www.springframework.org/schema/lang/spring-lang-3.0.xsd"
 		default-autowire="byName"
 		default-init-method="startup"
 		default-destroy-method="shutdown">

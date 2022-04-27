@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,13 +17,17 @@
 package org.springframework.validation.beanvalidation;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Consumer;
+
 import javax.validation.Configuration;
 import javax.validation.ConstraintValidatorFactory;
 import javax.validation.MessageInterpolator;
@@ -111,6 +115,9 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	private final Map<String, String> validationPropertyMap = new HashMap<>();
 
 	@Nullable
+	private Consumer<Configuration<?>> configurationInitializer;
+
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	@Nullable
@@ -157,6 +164,11 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 * not both. If you would like to build a custom MessageInterpolator, consider deriving from
 	 * Hibernate Validator's {@link ResourceBundleMessageInterpolator} and passing in a
 	 * Spring-based {@code ResourceBundleLocator} when constructing your interpolator.
+	 * <p>In order for Hibernate's default validation messages to be resolved still, your
+	 * {@link MessageSource} must be configured for optional resolution (usually the default).
+	 * In particular, the {@code MessageSource} instance specified here should not apply
+	 * {@link org.springframework.context.support.AbstractMessageSource#setUseCodeAsDefaultMessage
+	 * "useCodeAsDefaultMessage"} behavior. Please double-check your setup accordingly.
 	 * @see ResourceBundleMessageInterpolator
 	 */
 	public void setValidationMessageSource(MessageSource messageSource) {
@@ -226,6 +238,18 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		return this.validationPropertyMap;
 	}
 
+	/**
+	 * Specify a callback for customizing the Bean Validation {@code Configuration} instance,
+	 * as an alternative to overriding the {@link #postProcessConfiguration(Configuration)}
+	 * method in custom {@code LocalValidatorFactoryBean} subclasses.
+	 * <p>This enables convenient customizations for application purposes. Infrastructure
+	 * extensions may keep overriding the {@link #postProcessConfiguration} template method.
+	 * @since 5.3.19
+	 */
+	public void setConfigurationInitializer(Consumer<Configuration<?>> configurationInitializer) {
+		this.configurationInitializer = configurationInitializer;
+	}
+
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
@@ -285,12 +309,17 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 			configureParameterNameProvider(this.parameterNameDiscoverer, configuration);
 		}
 
+		List<InputStream> mappingStreams = null;
 		if (this.mappingLocations != null) {
+			mappingStreams = new ArrayList<>(this.mappingLocations.length);
 			for (Resource location : this.mappingLocations) {
 				try {
-					configuration.addMapping(location.getInputStream());
+					InputStream stream = location.getInputStream();
+					mappingStreams.add(stream);
+					configuration.addMapping(stream);
 				}
 				catch (IOException ex) {
+					closeMappingStreams(mappingStreams);
 					throw new IllegalStateException("Cannot read mapping resource: " + location);
 				}
 			}
@@ -299,10 +328,18 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		this.validationPropertyMap.forEach(configuration::addProperty);
 
 		// Allow for custom post-processing before we actually build the ValidatorFactory.
+		if (this.configurationInitializer != null) {
+			this.configurationInitializer.accept(configuration);
+		}
 		postProcessConfiguration(configuration);
 
-		this.validatorFactory = configuration.buildValidatorFactory();
-		setTargetValidator(this.validatorFactory.getValidator());
+		try {
+			this.validatorFactory = configuration.buildValidatorFactory();
+			setTargetValidator(this.validatorFactory.getValidator());
+		}
+		finally {
+			closeMappingStreams(mappingStreams);
+		}
 	}
 
 	private void configureParameterNameProvider(ParameterNameDiscoverer discoverer, Configuration<?> configuration) {
@@ -321,6 +358,18 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 						defaultProvider.getParameterNames(method));
 			}
 		});
+	}
+
+	private void closeMappingStreams(@Nullable List<InputStream> mappingStreams){
+		if (!CollectionUtils.isEmpty(mappingStreams)) {
+			for (InputStream stream : mappingStreams) {
+				try {
+					stream.close();
+				}
+				catch (IOException ignored) {
+				}
+			}
+		}
 	}
 
 	/**
@@ -391,7 +440,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 				return super.unwrap(type);
 			}
 			catch (ValidationException ex) {
-				// ignore - we'll try ValidatorFactory unwrapping next
+				// Ignore - we'll try ValidatorFactory unwrapping next
 			}
 		}
 		if (this.validatorFactory != null) {
@@ -399,7 +448,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 				return this.validatorFactory.unwrap(type);
 			}
 			catch (ValidationException ex) {
-				// ignore if just being asked for ValidatorFactory
+				// Ignore if just being asked for ValidatorFactory
 				if (ValidatorFactory.class == type) {
 					return (T) this.validatorFactory;
 				}
@@ -409,6 +458,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		throw new ValidationException("Cannot unwrap to " + type);
 	}
 
+	@Override
 	public void close() {
 		if (this.validatorFactory != null) {
 			this.validatorFactory.close();

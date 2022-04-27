@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.security.Principal;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
@@ -82,11 +83,13 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 
 
 	@Override
+	@Nullable
 	public String getHeader(String headerName) {
 		return getExternalContext().getRequestHeaderMap().get(headerName);
 	}
 
 	@Override
+	@Nullable
 	public String[] getHeaderValues(String headerName) {
 		return getExternalContext().getRequestHeaderValuesMap().get(headerName);
 	}
@@ -97,6 +100,7 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	}
 
 	@Override
+	@Nullable
 	public String getParameter(String paramName) {
 		return getExternalContext().getRequestParameterMap().get(paramName);
 	}
@@ -107,6 +111,7 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	}
 
 	@Override
+	@Nullable
 	public String[] getParameterValues(String paramName) {
 		return getExternalContext().getRequestParameterValuesMap().get(paramName);
 	}
@@ -127,11 +132,13 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	}
 
 	@Override
+	@Nullable
 	public String getRemoteUser() {
 		return getFacesContext().getExternalContext().getRemoteUser();
 	}
 
 	@Override
+	@Nullable
 	public Principal getUserPrincipal() {
 		return getFacesContext().getExternalContext().getUserPrincipal();
 	}

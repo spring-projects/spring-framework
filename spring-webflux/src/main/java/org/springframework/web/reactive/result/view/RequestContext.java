@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,17 +37,17 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.EscapedErrors;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.HtmlUtils;
-import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Context holder for request-specific state, like the {@link MessageSource} to
  * use, current locale, binding errors, etc. Provides easy access to localized
  * messages and Errors instances.
  *
- * <p>Suitable for exposition to views, and usage within FreeMarker templates,
+ * <p>Suitable for exposition to views, and usage within FreeMarker templates
  * and tag libraries.
  *
- * <p>Can be instantiated manually, or automatically exposed to views as model
+ * <p>Can be instantiated manually or automatically exposed to views as a model
  * attribute via AbstractView's "requestContextAttribute" property.
  *
  * @author Rossen Stoyanchev
@@ -203,7 +203,7 @@ public class RequestContext {
 	 */
 	public String getContextUrl(String relativeUrl) {
 		String url = StringUtils.applyRelativePath(getContextPath() + "/", relativeUrl);
-		return getExchange().getResponse().encodeUrl(url);
+		return getExchange().transformUrl(url);
 	}
 
 	/**
@@ -218,9 +218,8 @@ public class RequestContext {
 	 */
 	public String getContextUrl(String relativeUrl, Map<String, ?> params) {
 		String url = StringUtils.applyRelativePath(getContextPath() + "/", relativeUrl);
-		UriTemplate template = new UriTemplate(url);
-		url = template.expand(params).toASCIIString();
-		return getExchange().getResponse().encodeUrl(url);
+		url = UriComponentsBuilder.fromUriString(url).buildAndExpand(params).encode().toUri().toASCIIString();
+		return getExchange().transformUrl(url);
 	}
 
 	/**
@@ -242,8 +241,8 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
-	 * @param defaultMessage String to return if the lookup fails
+	 * @param code the code of the message
+	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
 	public String getMessage(String code, String defaultMessage) {
@@ -252,9 +251,9 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
-	 * @param defaultMessage String to return if the lookup fails
+	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
 	public String getMessage(String code, @Nullable Object[] args, String defaultMessage) {
@@ -263,9 +262,9 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message as a List, or {@code null} if none
-	 * @param defaultMessage String to return if the lookup fails
+	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
 	public String getMessage(String code, @Nullable List<?> args, String defaultMessage) {
@@ -274,20 +273,23 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
-	 * @param defaultMessage String to return if the lookup fails
-	 * @param htmlEscape HTML escape the message?
+	 * @param defaultMessage the String to return if the lookup fails
+	 * @param htmlEscape if the message should be HTML-escaped
 	 * @return the message
 	 */
 	public String getMessage(String code, @Nullable Object[] args, String defaultMessage, boolean htmlEscape) {
 		String msg = this.messageSource.getMessage(code, args, defaultMessage, this.locale);
+		if (msg == null) {
+			return "";
+		}
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -297,7 +299,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -308,7 +310,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -319,9 +321,9 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
-	 * @param htmlEscape HTML escape the message?
+	 * @param htmlEscape if the message should be HTML-escaped
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -343,7 +345,7 @@ public class RequestContext {
 	/**
 	 * Retrieve the given MessageSourceResolvable (e.g. an ObjectError instance).
 	 * @param resolvable the MessageSourceResolvable
-	 * @param htmlEscape HTML escape the message?
+	 * @param htmlEscape if the message should be HTML-escaped
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -355,7 +357,7 @@ public class RequestContext {
 	/**
 	 * Retrieve the Errors instance for the given bind object, using the
 	 * "defaultHtmlEscape" setting.
-	 * @param name name of the bind object
+	 * @param name the name of the bind object
 	 * @return the Errors instance, or {@code null} if not found
 	 */
 	@Nullable
@@ -365,7 +367,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the Errors instance for the given bind object.
-	 * @param name name of the bind object
+	 * @param name the name of the bind object
 	 * @param htmlEscape create an Errors instance with automatic HTML escaping?
 	 * @return the Errors instance, or {@code null} if not found
 	 */

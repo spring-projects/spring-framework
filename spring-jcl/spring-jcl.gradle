@@ -1,0 +1,6 @@
+description = "Spring Commons Logging Bridge"
+
+dependencies {
+	optional("org.apache.logging.log4j:log4j-api")
+	optional("org.slf4j:slf4j-api")
+}

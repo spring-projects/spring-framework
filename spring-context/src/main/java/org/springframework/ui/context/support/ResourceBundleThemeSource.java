@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -61,7 +61,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	@Nullable
 	private ClassLoader beanClassLoader;
 
-	/** Map from theme name to Theme instance */
+	/** Map from theme name to Theme instance. */
 	private final Map<String, Theme> themeCache = new ConcurrentHashMap<>();
 
 
@@ -87,7 +87,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	/**
 	 * Set the prefix that gets applied to the ResourceBundle basenames,
 	 * i.e. the theme names.
-	 * E.g.: basenamePrefix="test.", themeName="theme" -> basename="test.theme".
+	 * E.g.: basenamePrefix="test.", themeName="theme" &rarr; basename="test.theme".
 	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
 	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
 	 * This means that "test.theme" is effectively equivalent to "test/theme",
@@ -136,6 +136,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	 * @see #createMessageSource
 	 */
 	@Override
+	@Nullable
 	public Theme getTheme(String themeName) {
 		Theme theme = this.themeCache.get(themeName);
 		if (theme == null) {

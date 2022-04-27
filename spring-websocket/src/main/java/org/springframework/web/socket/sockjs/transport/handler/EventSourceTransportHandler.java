@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,8 +30,8 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 
 /**
- * A TransportHandler for sending messages via Server-Sent events:
- * <a href="http://dev.w3.org/html5/eventsource/">http://dev.w3.org/html5/eventsource/</a>.
+ * A TransportHandler for sending messages via Server-Sent Events:
+ * <a href="https://dev.w3.org/html5/eventsource/">https://dev.w3.org/html5/eventsource/</a>.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -50,7 +50,7 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 
 	@Override
 	public boolean checkSessionType(SockJsSession session) {
-		return session instanceof EventSourceStreamingSockJsSession;
+		return (session instanceof EventSourceStreamingSockJsSession);
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 	}
 
 
-	private class EventSourceStreamingSockJsSession extends StreamingSockJsSession {
+	private static class EventSourceStreamingSockJsSession extends StreamingSockJsSession {
 
 		public EventSourceStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
 				WebSocketHandler wsHandler, Map<String, Object> attributes) {
@@ -76,7 +76,7 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 
 		@Override
 		protected byte[] getPrelude(ServerHttpRequest request) {
-			return new byte[] { '\r', '\n' };
+			return new byte[] {'\r', '\n'};
 		}
 	}
 

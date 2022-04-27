@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,7 +38,7 @@ abstract class UpdateMessageDigestInputStream extends InputStream {
 	 */
 	public void updateMessageDigest(MessageDigest messageDigest) throws IOException {
 		int data;
-		while ((data = read()) != -1){
+		while ((data = read()) != -1) {
 			messageDigest.update((byte) data);
 		}
 	}
@@ -54,7 +54,7 @@ abstract class UpdateMessageDigestInputStream extends InputStream {
 	public void updateMessageDigest(MessageDigest messageDigest, int len) throws IOException {
 		int data;
 		int bytesRead = 0;
-		while (bytesRead < len && (data = read()) != -1){
+		while (bytesRead < len && (data = read()) != -1) {
 			messageDigest.update((byte) data);
 			bytesRead++;
 		}

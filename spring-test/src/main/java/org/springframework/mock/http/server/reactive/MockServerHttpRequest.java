@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,13 +23,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -37,60 +37,85 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.AbstractServerHttpRequest;
+import org.springframework.http.server.reactive.SslInfo;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Mock extension of {@link AbstractServerHttpRequest} for use in tests without
- * an actual server.
- *
- * <p>Use the static builder methods in this class to create an instance possibly
- * further creating a {@link MockServerWebExchange} via {@link #toExchange()}.
+ * an actual server. Use the static methods to obtain a builder.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class MockServerHttpRequest extends AbstractServerHttpRequest {
+public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
-	private final HttpMethod httpMethod;
+	/**
+	 * String representation of one of {@link HttpMethod} or not empty custom method (e.g. <i>CONNECT</i>).
+	 */
+	private final String httpMethod;
 
 	private final MultiValueMap<String, HttpCookie> cookies;
 
 	@Nullable
+	private final InetSocketAddress localAddress;
+
+	@Nullable
 	private final InetSocketAddress remoteAddress;
+
+	@Nullable
+	private final SslInfo sslInfo;
 
 	private final Flux<DataBuffer> body;
 
-
-	private MockServerHttpRequest(HttpMethod httpMethod, URI uri, @Nullable String contextPath,
-			HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
-			@Nullable InetSocketAddress remoteAddress, Publisher<? extends DataBuffer> body) {
+	private MockServerHttpRequest(String httpMethod,
+			URI uri, @Nullable String contextPath, HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
+			@Nullable InetSocketAddress localAddress, @Nullable InetSocketAddress remoteAddress,
+			@Nullable SslInfo sslInfo, Publisher<? extends DataBuffer> body) {
 
 		super(uri, contextPath, headers);
+		Assert.isTrue(StringUtils.hasText(httpMethod), "HTTP method is required.");
 		this.httpMethod = httpMethod;
 		this.cookies = cookies;
+		this.localAddress = localAddress;
 		this.remoteAddress = remoteAddress;
+		this.sslInfo = sslInfo;
 		this.body = Flux.from(body);
 	}
 
 
 	@Override
+	@Nullable
 	public HttpMethod getMethod() {
-		return this.httpMethod;
+		return HttpMethod.resolve(this.httpMethod);
 	}
 
 	@Override
 	public String getMethodValue() {
-		return this.httpMethod.name();
+		return this.httpMethod;
+	}
+
+	@Override
+	@Nullable
+	public InetSocketAddress getLocalAddress() {
+		return this.localAddress;
 	}
 
 	@Override
 	@Nullable
 	public InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
+	}
+
+	@Override
+	@Nullable
+	protected SslInfo initSslInfo() {
+		return this.sslInfo;
 	}
 
 	@Override
@@ -103,41 +128,18 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		return this.cookies;
 	}
 
-
-	/**
-	 * Shortcut to wrap the request with a {@code MockServerWebExchange}.
-	 */
-	public MockServerWebExchange toExchange() {
-		return new MockServerWebExchange(this);
+	@Override
+	public <T> T getNativeRequest() {
+		throw new IllegalStateException("This is a mock. No running server, no native request.");
 	}
 
 
 	// Static builder methods
 
 	/**
-	 * Create a builder with the given HTTP method and a {@link URI}.
-	 * @param method the HTTP method (GET, POST, etc)
-	 * @param url the URL
-	 * @return the created builder
-	 */
-	public static BodyBuilder method(HttpMethod method, URI url) {
-		return new DefaultBodyBuilder(method, url);
-	}
-
-	/**
-	 * Alternative to {@link #method(HttpMethod, URI)} that accepts a URI template.
-	 * @param method the HTTP method (GET, POST, etc)
-	 * @param urlTemplate the URL template
-	 * @param vars variables to expand into the template
-	 * @return the created builder
-	 */
-	public static BodyBuilder method(HttpMethod method, String urlTemplate, Object... vars) {
-		URI url = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(vars).encode().toUri();
-		return new DefaultBodyBuilder(method, url);
-	}
-
-	/**
-	 * Create an HTTP GET builder with the given url.
+	 * Create an HTTP GET builder with the given URI template. The given URI may
+	 * contain query parameters, or those may be added later via
+	 * {@link BaseBuilder#queryParam queryParam} builder methods.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
@@ -147,7 +149,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Create an HTTP HEAD builder with the given url.
+	 * HTTP HEAD variant. See {@link #get(String, Object...)} for general info.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
@@ -157,7 +159,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Create an HTTP POST builder with the given url.
+	 * HTTP POST variant. See {@link #get(String, Object...)} for general info.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
@@ -167,7 +169,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Create an HTTP PUT builder with the given url.
+	 * HTTP PUT variant. See {@link #get(String, Object...)} for general info.
+	 * {@link BaseBuilder#queryParam queryParam} builder methods.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
@@ -177,7 +180,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Create an HTTP PATCH builder with the given url.
+	 * HTTP PATCH variant. See {@link #get(String, Object...)} for general info.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
@@ -187,7 +190,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Create an HTTP DELETE builder with the given url.
+	 * HTTP DELETE variant. See {@link #get(String, Object...)} for general info.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
@@ -197,13 +200,55 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Creates an HTTP OPTIONS builder with the given url.
+	 * HTTP OPTIONS variant. See {@link #get(String, Object...)} for general info.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
 	 */
 	public static BaseBuilder<?> options(String urlTemplate, Object... uriVars) {
 		return method(HttpMethod.OPTIONS, urlTemplate, uriVars);
+	}
+
+	/**
+	 * Create a builder with the given HTTP method and a {@link URI}.
+	 * @param method the HTTP method (GET, POST, etc)
+	 * @param url the URL
+	 * @return the created builder
+	 */
+	public static BodyBuilder method(HttpMethod method, URI url) {
+		Assert.notNull(method, "HTTP method is required. " +
+				"For a custom HTTP method, please provide a String HTTP method value.");
+		return new DefaultBodyBuilder(method.name(), url);
+	}
+
+	/**
+	 * Alternative to {@link #method(HttpMethod, URI)} that accepts a URI template.
+	 * The given URI may contain query parameters, or those may be added later via
+	 * {@link BaseBuilder#queryParam queryParam} builder methods.
+	 * @param method the HTTP method (GET, POST, etc)
+	 * @param uri the URI template for the target URL
+	 * @param vars variables to expand into the template
+	 * @return the created builder
+	 */
+	public static BodyBuilder method(HttpMethod method, String uri, Object... vars) {
+		return method(method, toUri(uri, vars));
+	}
+
+	/**
+	 * Create a builder with a raw HTTP method value value that is outside the
+	 * range of {@link HttpMethod} enum values.
+	 * @param httpMethod the HTTP methodValue value
+	 * @param uri the URI template for target the URL
+	 * @param vars variables to expand into the template
+	 * @return the created builder
+	 * @since 5.2.7
+	 */
+	public static BodyBuilder method(String httpMethod, String uri, Object... vars) {
+		return new DefaultBodyBuilder(httpMethod, toUri(uri, vars));
+	}
+
+	private static URI toUri(String uri, Object[] vars) {
+		return UriComponentsBuilder.fromUriString(uri).buildAndExpand(vars).encode().toUri();
 	}
 
 
@@ -219,9 +264,39 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		B contextPath(String contextPath);
 
 		/**
+		 * Append the given query parameter to the existing query parameters.
+		 * If no values are given, the resulting URI will contain the query
+		 * parameter name only (i.e. {@code ?foo} instead of {@code ?foo=bar}).
+		 * <p>The provided query name and values will be encoded.
+		 * @param name the query parameter name
+		 * @param values the query parameter values
+		 * @return this UriComponentsBuilder
+		 */
+		B queryParam(String name, Object... values);
+
+		/**
+		 * Add the given query parameters and values. The provided query name
+		 * and corresponding values will be encoded.
+		 * @param params the params
+		 * @return this UriComponentsBuilder
+		 */
+		B queryParams(MultiValueMap<String, String> params);
+
+		/**
 		 * Set the remote address to return.
 		 */
 		B remoteAddress(InetSocketAddress remoteAddress);
+
+		/**
+		 * Set the local address to return.
+		 * @since 5.2.3
+		 */
+		B localAddress(InetSocketAddress localAddress);
+
+		/**
+		 * Set SSL session information and certificates.
+		 */
+		void sslInfo(SslInfo sslInfo);
 
 		/**
 		 * Add one or more cookies.
@@ -263,6 +338,13 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		B acceptCharset(Charset... acceptableCharsets);
 
 		/**
+		 * Set the list of acceptable {@linkplain Locale locales}, as specified
+		 * by the {@code Accept-Languages} header.
+		 * @param acceptableLocales the acceptable locales
+		 */
+		B acceptLanguageAsLocales(Locale... acceptableLocales);
+
+		/**
 		 * Set the value of the {@code If-Modified-Since} header.
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
@@ -299,13 +381,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * @see BodyBuilder#body(String)
 		 */
 		MockServerHttpRequest build();
-
-		/**
-		 * Shortcut for:<br>
-		 * {@code build().toExchange()}
-		 */
-		MockServerWebExchange toExchange();
 	}
+
 
 	/**
 	 * A builder that adds a body to the request.
@@ -345,20 +422,19 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * @return the built request entity
 		 */
 		MockServerHttpRequest body(String body);
-
 	}
 
 
 	private static class DefaultBodyBuilder implements BodyBuilder {
 
-		private static final DataBufferFactory BUFFER_FACTORY = new DefaultDataBufferFactory();
-
-		private final HttpMethod method;
+		private final String methodValue;
 
 		private final URI url;
 
 		@Nullable
 		private String contextPath;
+
+		private final UriComponentsBuilder queryParamsBuilder = UriComponentsBuilder.newInstance();
 
 		private final HttpHeaders headers = new HttpHeaders();
 
@@ -367,8 +443,14 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Nullable
 		private InetSocketAddress remoteAddress;
 
-		public DefaultBodyBuilder(HttpMethod method, URI url) {
-			this.method = method;
+		@Nullable
+		private InetSocketAddress localAddress;
+
+		@Nullable
+		private SslInfo sslInfo;
+
+		DefaultBodyBuilder(String method, URI url) {
+			this.methodValue = method;
 			this.url = url;
 		}
 
@@ -379,9 +461,32 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
+		public BodyBuilder queryParam(String name, Object... values) {
+			this.queryParamsBuilder.queryParam(name, values);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder queryParams(MultiValueMap<String, String> params) {
+			this.queryParamsBuilder.queryParams(params);
+			return this;
+		}
+
+		@Override
 		public BodyBuilder remoteAddress(InetSocketAddress remoteAddress) {
 			this.remoteAddress = remoteAddress;
 			return this;
+		}
+
+		@Override
+		public BodyBuilder localAddress(InetSocketAddress localAddress) {
+			this.localAddress = localAddress;
+			return this;
+		}
+
+		@Override
+		public void sslInfo(SslInfo sslInfo) {
+			this.sslInfo = sslInfo;
 		}
 
 		@Override
@@ -419,6 +524,12 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public BodyBuilder acceptCharset(Charset... acceptableCharsets) {
 			this.headers.setAcceptCharset(Arrays.asList(acceptableCharsets));
+			return this;
+		}
+
+		@Override
+		public BodyBuilder acceptLanguageAsLocales(Locale... acceptableLocales) {
+			this.headers.setAcceptLanguageAsLocales(Arrays.asList(acceptableLocales));
 			return this;
 		}
 
@@ -464,13 +575,10 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
-		public MockServerWebExchange toExchange() {
-			return build().toExchange();
-		}
-
-		@Override
 		public MockServerHttpRequest body(String body) {
-			return body(Flux.just(BUFFER_FACTORY.wrap(body.getBytes(getCharset()))));
+			byte[] bytes = body.getBytes(getCharset());
+			DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
+			return body(Flux.just(buffer));
 		}
 
 		private Charset getCharset() {
@@ -480,14 +588,25 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		@Override
 		public MockServerHttpRequest body(Publisher<? extends DataBuffer> body) {
-			applyCookies();
-			return new MockServerHttpRequest(this.method, this.url, this.contextPath,
-					this.headers, this.cookies, this.remoteAddress, body);
+			applyCookiesIfNecessary();
+			return new MockServerHttpRequest(this.methodValue, getUrlToUse(), this.contextPath,
+					this.headers, this.cookies, this.localAddress, this.remoteAddress, this.sslInfo, body);
 		}
 
-		private void applyCookies() {
-			this.cookies.values().stream().flatMap(Collection::stream)
-					.forEach(cookie -> this.headers.add(HttpHeaders.COOKIE, cookie.toString()));
+		private void applyCookiesIfNecessary() {
+			if (this.headers.get(HttpHeaders.COOKIE) == null) {
+				this.cookies.values().stream().flatMap(Collection::stream)
+						.forEach(cookie -> this.headers.add(HttpHeaders.COOKIE, cookie.toString()));
+			}
+		}
+
+		private URI getUrlToUse() {
+			MultiValueMap<String, String> params =
+					this.queryParamsBuilder.buildAndExpand().encode().getQueryParams();
+			if (!params.isEmpty()) {
+				return UriComponentsBuilder.fromUri(this.url).queryParams(params).build(true).toUri();
+			}
+			return this.url;
 		}
 	}
 

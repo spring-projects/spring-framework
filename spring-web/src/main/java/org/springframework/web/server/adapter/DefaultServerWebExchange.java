@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,15 +20,17 @@ import java.security.Principal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Hints;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -89,11 +91,29 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private final Mono<MultiValueMap<String, Part>> multipartDataMono;
 
+	@Nullable
+	private final ApplicationContext applicationContext;
+
 	private volatile boolean notModified;
+
+	private Function<String, String> urlTransformer = url -> url;
+
+	@Nullable
+	private Object logId;
+
+	private String logPrefix = "";
 
 
 	public DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
-			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer, LocaleContextResolver localeContextResolver) {
+			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer,
+			LocaleContextResolver localeContextResolver) {
+
+		this(request, response, sessionManager, codecConfigurer, localeContextResolver, null);
+	}
+
+	DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
+			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer,
+			LocaleContextResolver localeContextResolver, @Nullable ApplicationContext applicationContext) {
 
 		Assert.notNull(request, "'request' is required");
 		Assert.notNull(response, "'response' is required");
@@ -101,17 +121,21 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		Assert.notNull(codecConfigurer, "'codecConfigurer' is required");
 		Assert.notNull(localeContextResolver, "'localeContextResolver' is required");
 
+		// Initialize before first call to getLogPrefix()
+		this.attributes.put(ServerWebExchange.LOG_ID_ATTRIBUTE, request.getId());
+
 		this.request = request;
 		this.response = response;
 		this.sessionMono = sessionManager.getSession(this).cache();
 		this.localeContextResolver = localeContextResolver;
-		this.formDataMono = initFormData(request, codecConfigurer);
-		this.multipartDataMono = initMultipartData(request, codecConfigurer);
+		this.formDataMono = initFormData(request, codecConfigurer, getLogPrefix());
+		this.multipartDataMono = initMultipartData(request, codecConfigurer, getLogPrefix());
+		this.applicationContext = applicationContext;
 	}
 
 	@SuppressWarnings("unchecked")
 	private static Mono<MultiValueMap<String, String>> initFormData(ServerHttpRequest request,
-			ServerCodecConfigurer configurer) {
+			ServerCodecConfigurer configurer, String logPrefix) {
 
 		try {
 			MediaType contentType = request.getHeaders().getContentType();
@@ -120,7 +144,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 						.filter(reader -> reader.canRead(FORM_DATA_TYPE, MediaType.APPLICATION_FORM_URLENCODED))
 						.findFirst()
 						.orElseThrow(() -> new IllegalStateException("No form data HttpMessageReader.")))
-						.readMono(FORM_DATA_TYPE, request, Collections.emptyMap())
+						.readMono(FORM_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
 						.switchIfEmpty(EMPTY_FORM_DATA)
 						.cache();
 			}
@@ -133,7 +157,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	@SuppressWarnings("unchecked")
 	private static Mono<MultiValueMap<String, Part>> initMultipartData(ServerHttpRequest request,
-			ServerCodecConfigurer configurer) {
+			ServerCodecConfigurer configurer, String logPrefix) {
 
 		try {
 			MediaType contentType = request.getHeaders().getContentType();
@@ -142,7 +166,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 						.filter(reader -> reader.canRead(MULTIPART_DATA_TYPE, MediaType.MULTIPART_FORM_DATA))
 						.findFirst()
 						.orElseThrow(() -> new IllegalStateException("No multipart HttpMessageReader.")))
-						.readMono(MULTIPART_DATA_TYPE, request, Collections.emptyMap())
+						.readMono(MULTIPART_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
 						.switchIfEmpty(EMPTY_MULTIPART_DATA)
 						.cache();
 			}
@@ -188,11 +212,6 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	@Override
-	public LocaleContext getLocaleContext() {
-		return this.localeContextResolver.resolveLocaleContext(this);
-	}
-
-	@Override
 	public Mono<MultiValueMap<String, String>> getFormData() {
 		return this.formDataMono;
 	}
@@ -200,6 +219,17 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	@Override
 	public Mono<MultiValueMap<String, Part>> getMultipartData() {
 		return this.multipartDataMono;
+	}
+
+	@Override
+	public LocaleContext getLocaleContext() {
+		return this.localeContextResolver.resolveLocaleContext(this);
+	}
+
+	@Override
+	@Nullable
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
 	}
 
 	@Override
@@ -288,12 +318,19 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		}
 		// We will perform this validation...
 		etag = padEtagIfNecessary(etag);
-		for (String clientETag : ifNoneMatch) {
+		if (etag.startsWith("W/")) {
+			etag = etag.substring(2);
+		}
+		for (String clientEtag : ifNoneMatch) {
 			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
-			if (StringUtils.hasLength(clientETag) &&
-					clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", ""))) {
-				this.notModified = true;
-				break;
+			if (StringUtils.hasLength(clientEtag)) {
+				if (clientEtag.startsWith("W/")) {
+					clientEtag = clientEtag.substring(2);
+				}
+				if (clientEtag.equals(etag)) {
+					this.notModified = true;
+					break;
+				}
 			}
 		}
 		return true;
@@ -320,6 +357,27 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		// We will perform this validation...
 		this.notModified = ChronoUnit.SECONDS.between(lastModified, Instant.ofEpochMilli(ifModifiedSince)) >= 0;
 		return true;
+	}
+
+	@Override
+	public String transformUrl(String url) {
+		return this.urlTransformer.apply(url);
+	}
+
+	@Override
+	public void addUrlTransformer(Function<String, String> transformer) {
+		Assert.notNull(transformer, "'encoder' must not be null");
+		this.urlTransformer = this.urlTransformer.andThen(transformer);
+	}
+
+	@Override
+	public String getLogPrefix() {
+		Object value = getAttribute(LOG_ID_ATTRIBUTE);
+		if (this.logId != value) {
+			this.logId = value;
+			this.logPrefix = value != null ? "[" + value + "] " : "";
+		}
+		return this.logPrefix;
 	}
 
 }

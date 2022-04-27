@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.activation.FileTypeMap;
+import javax.mail.Address;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
@@ -68,10 +70,10 @@ import org.springframework.util.Assert;
  */
 public class JavaMailSenderImpl implements JavaMailSender {
 
-	/** The default protocol: 'smtp' */
+	/** The default protocol: 'smtp'. */
 	public static final String DEFAULT_PROTOCOL = "smtp";
 
-	/** The default port: -1 */
+	/** The default port: -1. */
 	public static final int DEFAULT_PORT = -1;
 
 	private static final String HEADER_MESSAGE_ID = "Message-ID";
@@ -318,7 +320,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 			simpleMessage.copyTo(message);
 			mimeMessages.add(message.getMimeMessage());
 		}
-		doSend(mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
+		doSend(mimeMessages.toArray(new MimeMessage[0]), simpleMessages);
 	}
 
 
@@ -373,7 +375,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 				preparator.prepare(mimeMessage);
 				mimeMessages.add(mimeMessage);
 			}
-			send(mimeMessages.toArray(new MimeMessage[mimeMessages.size()]));
+			send(mimeMessages.toArray(new MimeMessage[0]));
 		}
 		catch (MailException ex) {
 			throw ex;
@@ -404,7 +406,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	/**
 	 * Actually send the given array of MimeMessages via JavaMail.
-	 * @param mimeMessages MimeMessage objects to send
+	 * @param mimeMessages the MimeMessage objects to send
 	 * @param originalMessages corresponding original message objects
 	 * that the MimeMessages have been created from (with same array
 	 * length and indices as the "mimeMessages" array), if any
@@ -459,7 +461,8 @@ public class JavaMailSenderImpl implements JavaMailSender {
 						// Preserve explicitly specified message id...
 						mimeMessage.setHeader(HEADER_MESSAGE_ID, messageId);
 					}
-					transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
+					Address[] addresses = mimeMessage.getAllRecipients();
+					transport.sendMessage(mimeMessage, (addresses != null ? addresses : new Address[0]));
 				}
 				catch (Exception ex) {
 					Object original = (originalMessages != null ? originalMessages[i] : mimeMessage);

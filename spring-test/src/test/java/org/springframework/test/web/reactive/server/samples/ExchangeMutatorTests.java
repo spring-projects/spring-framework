@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server.samples;
 
 import java.security.Principal;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -36,23 +36,18 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
  * Samples tests that demonstrate applying ServerWebExchange initialization.
+ *
  * @author Rossen Stoyanchev
  */
-public class ExchangeMutatorTests {
+class ExchangeMutatorTests {
 
-	private WebTestClient webTestClient;
+	private final WebTestClient webTestClient = WebTestClient.bindToController(new TestController())
+			.apply(identity("Pablo"))
+			.build();
 
-
-	@Before
-	public void setUp() throws Exception {
-
-		this.webTestClient = WebTestClient.bindToController(new TestController())
-				.apply(identity("Pablo"))
-				.build();
-	}
 
 	@Test
-	public void useGloballyConfiguredIdentity() throws Exception {
+	void useGloballyConfiguredIdentity() {
 		this.webTestClient.get().uri("/userIdentity")
 				.exchange()
 				.expectStatus().isOk()
@@ -60,8 +55,7 @@ public class ExchangeMutatorTests {
 	}
 
 	@Test
-	public void useLocallyConfiguredIdentity() throws Exception {
-
+	void useLocallyConfiguredIdentity() {
 		this.webTestClient
 				.mutateWith(identity("Giovanni"))
 				.get().uri("/userIdentity")

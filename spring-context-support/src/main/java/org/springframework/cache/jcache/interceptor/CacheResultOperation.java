@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,15 +36,18 @@ class CacheResultOperation extends AbstractJCacheKeyOperation<CacheResult> {
 
 	private final ExceptionTypeFilter exceptionTypeFilter;
 
+	@Nullable
 	private final CacheResolver exceptionCacheResolver;
 
+	@Nullable
 	private final String exceptionCacheName;
 
 
 	public CacheResultOperation(CacheMethodDetails<CacheResult> methodDetails, CacheResolver cacheResolver,
-			KeyGenerator keyGenerator, CacheResolver exceptionCacheResolver) {
+			KeyGenerator keyGenerator, @Nullable CacheResolver exceptionCacheResolver) {
 
 		super(methodDetails, cacheResolver, keyGenerator);
+
 		CacheResult ann = methodDetails.getCacheAnnotation();
 		this.exceptionTypeFilter = createExceptionTypeFilter(ann.cachedExceptions(), ann.nonCachedExceptions());
 		this.exceptionCacheResolver = exceptionCacheResolver;
@@ -70,6 +73,7 @@ class CacheResultOperation extends AbstractJCacheKeyOperation<CacheResult> {
 	 * Return the {@link CacheResolver} instance to use to resolve the cache to
 	 * use for matching exceptions thrown by this operation.
 	 */
+	@Nullable
 	public CacheResolver getExceptionCacheResolver() {
 		return this.exceptionCacheResolver;
 	}

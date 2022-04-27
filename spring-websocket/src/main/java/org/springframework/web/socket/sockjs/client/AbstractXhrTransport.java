@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,9 +49,7 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 
 	static {
 		byte[] bytes = new byte[2048];
-		for (int i = 0; i < bytes.length; i++) {
-			bytes[i] = 'h';
-		}
+		Arrays.fill(bytes, (byte) 'h');
 		PRELUDE = new String(bytes, SockJsFrame.CHARSET);
 	}
 
@@ -63,8 +61,7 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 
 	@Override
 	public List<TransportType> getTransportTypes() {
-		return (isXhrStreamingDisabled() ?
-				Collections.singletonList(TransportType.XHR) :
+		return (isXhrStreamingDisabled() ? Collections.singletonList(TransportType.XHR) :
 				Arrays.asList(TransportType.XHR_STREAMING, TransportType.XHR));
 	}
 
@@ -85,6 +82,7 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 	/**
 	 * Whether XHR streaming is disabled or not.
 	 */
+	@Override
 	public boolean isXhrStreamingDisabled() {
 		return this.xhrStreamingDisabled;
 	}
@@ -165,11 +163,5 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 
 	protected abstract ResponseEntity<String> executeSendRequestInternal(
 			URI url, HttpHeaders headers, TextMessage message);
-
-
-	@Override
-	public String toString() {
-		return getClass().getSimpleName();
-	}
 
 }

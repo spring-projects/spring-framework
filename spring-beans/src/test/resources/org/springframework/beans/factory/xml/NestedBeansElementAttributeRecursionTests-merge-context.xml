@@ -2,10 +2,10 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
-		http://www.springframework.org/schema/beans/spring-beans-3.1.xsd"
+		https://www.springframework.org/schema/beans/spring-beans-3.1.xsd"
 		default-merge="false">
 
-	<bean id="abstractTestBean" class="org.springframework.tests.sample.beans.TestBean" abstract="true">
+	<bean id="abstractTestBean" class="org.springframework.beans.testfixture.beans.TestBean" abstract="true">
 		<property name="someList">
 			<list>
 				<value>alpha</value>

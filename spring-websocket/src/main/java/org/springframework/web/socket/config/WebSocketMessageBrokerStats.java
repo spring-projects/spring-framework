@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,17 +16,20 @@
 
 package org.springframework.web.socket.config;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
@@ -39,7 +42,7 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
  * {@code @EnableWebSocketMessageBroker} for Java config and
  * {@code <websocket:message-broker>} for XML.
  *
- * <p>By default aggregated information is logged every 15 minutes at INFO level.
+ * <p>By default aggregated information is logged every 30 minutes at INFO level.
  * The frequency of logging can be changed via {@link #setLoggingPeriod(long)}.
  *
  * <p>This class is declared as a Spring bean by the above configuration with the
@@ -47,6 +50,7 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
  * the {@link org.springframework.jmx.export.MBeanExporter MBeanExporter}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.1
  */
 public class WebSocketMessageBrokerStats {
@@ -64,18 +68,18 @@ public class WebSocketMessageBrokerStats {
 	private StompBrokerRelayMessageHandler stompBrokerRelay;
 
 	@Nullable
-	private ThreadPoolExecutor inboundChannelExecutor;
+	private TaskExecutor inboundChannelExecutor;
 
 	@Nullable
-	private ThreadPoolExecutor outboundChannelExecutor;
+	private TaskExecutor outboundChannelExecutor;
 
 	@Nullable
-	private ScheduledThreadPoolExecutor sockJsTaskScheduler;
+	private TaskScheduler sockJsTaskScheduler;
 
 	@Nullable
 	private ScheduledFuture<?> loggingTask;
 
-	private long loggingPeriod = 30 * 60 * 1000;
+	private long loggingPeriod = TimeUnit.MINUTES.toMillis(30);
 
 
 	public void setSubProtocolWebSocketHandler(SubProtocolWebSocketHandler webSocketHandler) {
@@ -94,7 +98,7 @@ public class WebSocketMessageBrokerStats {
 			}
 		}
 		SubProtocolHandler defaultHandler = this.webSocketHandler.getDefaultProtocolHandler();
-		if (defaultHandler != null && defaultHandler instanceof StompSubProtocolHandler) {
+		if (defaultHandler instanceof StompSubProtocolHandler) {
 			return (StompSubProtocolHandler) defaultHandler;
 		}
 		return null;
@@ -104,25 +108,25 @@ public class WebSocketMessageBrokerStats {
 		this.stompBrokerRelay = stompBrokerRelay;
 	}
 
-	public void setInboundChannelExecutor(ThreadPoolTaskExecutor inboundChannelExecutor) {
-		this.inboundChannelExecutor = inboundChannelExecutor.getThreadPoolExecutor();
+	public void setInboundChannelExecutor(TaskExecutor inboundChannelExecutor) {
+		this.inboundChannelExecutor = inboundChannelExecutor;
 	}
 
-	public void setOutboundChannelExecutor(ThreadPoolTaskExecutor outboundChannelExecutor) {
-		this.outboundChannelExecutor = outboundChannelExecutor.getThreadPoolExecutor();
+	public void setOutboundChannelExecutor(TaskExecutor outboundChannelExecutor) {
+		this.outboundChannelExecutor = outboundChannelExecutor;
 	}
 
-	public void setSockJsTaskScheduler(ThreadPoolTaskScheduler sockJsTaskScheduler) {
-		this.sockJsTaskScheduler = sockJsTaskScheduler.getScheduledThreadPoolExecutor();
-		this.loggingTask = initLoggingTask(60 * 1000);
+	public void setSockJsTaskScheduler(TaskScheduler sockJsTaskScheduler) {
+		this.sockJsTaskScheduler = sockJsTaskScheduler;
+		this.loggingTask = initLoggingTask(TimeUnit.MINUTES.toMillis(1));
 	}
 
 	@Nullable
 	private ScheduledFuture<?> initLoggingTask(long initialDelay) {
 		if (this.sockJsTaskScheduler != null && this.loggingPeriod > 0 && logger.isInfoEnabled()) {
-			return this.sockJsTaskScheduler.scheduleAtFixedRate(() ->
-							logger.info(WebSocketMessageBrokerStats.this.toString()),
-					initialDelay, this.loggingPeriod, TimeUnit.MILLISECONDS);
+			return this.sockJsTaskScheduler.scheduleWithFixedDelay(
+					() -> logger.info(WebSocketMessageBrokerStats.this.toString()),
+					Instant.now().plusMillis(initialDelay), Duration.ofMillis(this.loggingPeriod));
 		}
 		return null;
 	}
@@ -172,34 +176,61 @@ public class WebSocketMessageBrokerStats {
 	 * Get stats about the executor processing incoming messages from WebSocket clients.
 	 */
 	public String getClientInboundExecutorStatsInfo() {
-		return (this.inboundChannelExecutor != null ? getExecutorStatsInfo(this.inboundChannelExecutor) : "null");
+		return getExecutorStatsInfo(this.inboundChannelExecutor);
 	}
 
 	/**
 	 * Get stats about the executor processing outgoing messages to WebSocket clients.
 	 */
 	public String getClientOutboundExecutorStatsInfo() {
-		return (this.outboundChannelExecutor != null ? getExecutorStatsInfo(this.outboundChannelExecutor) : "null");
+		return getExecutorStatsInfo(this.outboundChannelExecutor);
 	}
 
 	/**
 	 * Get stats about the SockJS task scheduler.
 	 */
 	public String getSockJsTaskSchedulerStatsInfo() {
-		return (this.sockJsTaskScheduler != null ? getExecutorStatsInfo(this.sockJsTaskScheduler) : "null");
+		if (this.sockJsTaskScheduler == null) {
+			return "null";
+		}
+		if (this.sockJsTaskScheduler instanceof ThreadPoolTaskScheduler) {
+			return getExecutorStatsInfo(((ThreadPoolTaskScheduler) this.sockJsTaskScheduler)
+					.getScheduledThreadPoolExecutor());
+		}
+		return "unknown";
 	}
 
-	private String getExecutorStatsInfo(Executor executor) {
-		String str = executor.toString();
-		return str.substring(str.indexOf("pool"), str.length() - 1);
+	private String getExecutorStatsInfo(@Nullable Executor executor) {
+		if (executor == null) {
+			return "null";
+		}
+
+		if (executor instanceof ThreadPoolTaskExecutor) {
+			executor = ((ThreadPoolTaskExecutor) executor).getThreadPoolExecutor();
+		}
+
+		if (executor instanceof ThreadPoolExecutor) {
+			// It is assumed that the implementation of toString() in ThreadPoolExecutor
+			// generates text that ends similar to the following:
+			// pool size = #, active threads = #, queued tasks = #, completed tasks = #]
+			String str = executor.toString();
+			int indexOfPool = str.indexOf("pool");
+			if (indexOfPool != -1) {
+				// (length - 1) omits the trailing "]"
+				return str.substring(indexOfPool, str.length() - 1);
+			}
+		}
+
+		return "unknown";
 	}
 
+	@Override
 	public String toString() {
 		return "WebSocketSession[" + getWebSocketSessionStatsInfo() + "]" +
 				", stompSubProtocol[" + getStompSubProtocolStatsInfo() + "]" +
 				", stompBrokerRelay[" + getStompBrokerRelayStatsInfo() + "]" +
 				", inboundChannel[" + getClientInboundExecutorStatsInfo() + "]" +
-				", outboundChannel" + getClientOutboundExecutorStatsInfo() + "]" +
+				", outboundChannel[" + getClientOutboundExecutorStatsInfo() + "]" +
 				", sockJsScheduler[" + getSockJsTaskSchedulerStatsInfo() + "]";
 	}
 

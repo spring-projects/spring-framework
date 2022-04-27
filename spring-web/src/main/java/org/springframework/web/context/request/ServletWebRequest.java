@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,10 +28,12 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
@@ -50,26 +52,16 @@ import org.springframework.web.util.WebUtils;
  */
 public class ServletWebRequest extends ServletRequestAttributes implements NativeWebRequest {
 
-	private static final String ETAG = "ETag";
-
-	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
-
-	private static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
-
-	private static final String IF_NONE_MATCH = "If-None-Match";
-
-	private static final String LAST_MODIFIED = "Last-Modified";
-
 	private static final List<String> SAFE_METHODS = Arrays.asList("GET", "HEAD");
 
 	/**
-	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match"
+	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match".
 	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">Section 2.3 of RFC 7232</a>
 	 */
 	private static final Pattern ETAG_HEADER_VALUE_PATTERN = Pattern.compile("\\*|\\s*((W\\/)?(\"[^\"]*\"))\\s*,?");
 
 	/**
-	 * Date formats as specified in the HTTP RFC
+	 * Date formats as specified in the HTTP RFC.
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
 	 */
 	private static final String[] DATE_FORMATS = new String[] {
@@ -78,7 +70,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			"EEE MMM dd HH:mm:ss yyyy"
 	};
 
-	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
+	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 	private boolean notModified = false;
 
@@ -132,11 +124,13 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
+	@Nullable
 	public String getHeader(String headerName) {
 		return getRequest().getHeader(headerName);
 	}
 
 	@Override
+	@Nullable
 	public String[] getHeaderValues(String headerName) {
 		String[] headerValues = StringUtils.toStringArray(getRequest().getHeaders(headerName));
 		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
@@ -148,11 +142,13 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
+	@Nullable
 	public String getParameter(String paramName) {
 		return getRequest().getParameter(paramName);
 	}
 
 	@Override
+	@Nullable
 	public String[] getParameterValues(String paramName) {
 		return getRequest().getParameterValues(paramName);
 	}
@@ -178,11 +174,13 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
+	@Nullable
 	public String getRemoteUser() {
 		return getRequest().getRemoteUser();
 	}
 
 	@Override
+	@Nullable
 	public Principal getUserPrincipal() {
 		return getRequest().getUserPrincipal();
 	}
@@ -238,11 +236,11 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 						HttpStatus.NOT_MODIFIED.value() : HttpStatus.PRECONDITION_FAILED.value());
 			}
 			if (isHttpGetOrHead) {
-				if (lastModifiedTimestamp > 0 && parseDateValue(response.getHeader(LAST_MODIFIED)) == -1) {
-					response.setDateHeader(LAST_MODIFIED, lastModifiedTimestamp);
+				if (lastModifiedTimestamp > 0 && parseDateValue(response.getHeader(HttpHeaders.LAST_MODIFIED)) == -1) {
+					response.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModifiedTimestamp);
 				}
-				if (StringUtils.hasLength(etag) && response.getHeader(ETAG) == null) {
-					response.setHeader(ETAG, padEtagIfNecessary(etag));
+				if (StringUtils.hasLength(etag) && response.getHeader(HttpHeaders.ETAG) == null) {
+					response.setHeader(HttpHeaders.ETAG, padEtagIfNecessary(etag));
 				}
 			}
 		}
@@ -254,7 +252,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		if (lastModifiedTimestamp < 0) {
 			return false;
 		}
-		long ifUnmodifiedSince = parseDateHeader(IF_UNMODIFIED_SINCE);
+		long ifUnmodifiedSince = parseDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
 		if (ifUnmodifiedSince == -1) {
 			return false;
 		}
@@ -270,7 +268,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 		Enumeration<String> ifNoneMatch;
 		try {
-			ifNoneMatch = getRequest().getHeaders(IF_NONE_MATCH);
+			ifNoneMatch = getRequest().getHeaders(HttpHeaders.IF_NONE_MATCH);
 		}
 		catch (IllegalArgumentException ex) {
 			return false;
@@ -281,13 +279,15 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 		// We will perform this validation...
 		etag = padEtagIfNecessary(etag);
+		if (etag.startsWith("W/")) {
+			etag = etag.substring(2);
+		}
 		while (ifNoneMatch.hasMoreElements()) {
 			String clientETags = ifNoneMatch.nextElement();
-			Matcher eTagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(clientETags);
+			Matcher etagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(clientETags);
 			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
-			while (eTagMatcher.find()) {
-				if (StringUtils.hasLength(eTagMatcher.group()) &&
-						etag.replaceFirst("^W/", "").equals(eTagMatcher.group(3))) {
+			while (etagMatcher.find()) {
+				if (StringUtils.hasLength(etagMatcher.group()) && etag.equals(etagMatcher.group(3))) {
 					this.notModified = true;
 					break;
 				}
@@ -311,7 +311,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		if (lastModifiedTimestamp < 0) {
 			return false;
 		}
-		long ifModifiedSince = parseDateHeader(IF_MODIFIED_SINCE);
+		long ifModifiedSince = parseDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
 		if (ifModifiedSince == -1) {
 			return false;
 		}

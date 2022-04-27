@@ -1,0 +1,30 @@
+description = "Spring Integration Tests"
+
+dependencies {
+	testImplementation(project(":spring-aop"))
+	testImplementation(project(":spring-beans"))
+	testImplementation(project(":spring-context"))
+	testImplementation(project(":spring-core"))
+	testImplementation(testFixtures(project(":spring-aop")))
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-tx")))
+	testImplementation(project(":spring-expression"))
+	testImplementation(project(":spring-jdbc"))
+	testImplementation(project(":spring-orm"))
+	testImplementation(project(":spring-test"))
+	testImplementation(project(":spring-tx"))
+	testImplementation(project(":spring-web"))
+	testImplementation("javax.inject:javax.inject")
+	testImplementation("javax.resource:javax.resource-api")
+	testImplementation("javax.servlet:javax.servlet-api")
+	testImplementation("org.aspectj:aspectjweaver")
+	testImplementation("org.hsqldb:hsqldb")
+	testImplementation("org.hibernate:hibernate-core")
+}
+
+normalization {
+	runtimeClasspath {
+		ignore "META-INF/MANIFEST.MF"
+	}
+}

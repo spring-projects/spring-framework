@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,6 +38,9 @@ import org.springframework.lang.Nullable;
  */
 public class MethodInvoker {
 
+	private static final Object[] EMPTY_ARGUMENTS = new Object[0];
+
+
 	@Nullable
 	protected Class<?> targetClass;
 
@@ -51,9 +54,9 @@ public class MethodInvoker {
 	private String staticMethod;
 
 	@Nullable
-	private Object[] arguments = new Object[0];
+	private Object[] arguments;
 
-	/** The method we will call */
+	/** The method we will call. */
 	@Nullable
 	private Method methodObject;
 
@@ -141,7 +144,7 @@ public class MethodInvoker {
 	 * Return the arguments for the method invocation.
 	 */
 	public Object[] getArguments() {
-		return (this.arguments != null ? this.arguments : new Object[0]);
+		return (this.arguments != null ? this.arguments : EMPTY_ARGUMENTS);
 	}
 
 
@@ -222,8 +225,8 @@ public class MethodInvoker {
 
 		for (Method candidate : candidates) {
 			if (candidate.getName().equals(targetMethod)) {
-				Class<?>[] paramTypes = candidate.getParameterTypes();
-				if (paramTypes.length == argCount) {
+				if (candidate.getParameterCount() == argCount) {
+					Class<?>[] paramTypes = candidate.getParameterTypes();
 					int typeDiffWeight = getTypeDifferenceWeight(paramTypes, arguments);
 					if (typeDiffWeight < minTypeDiffWeight) {
 						minTypeDiffWeight = typeDiffWeight;
@@ -285,7 +288,7 @@ public class MethodInvoker {
 	 * Algorithm that judges the match between the declared parameter types of a candidate method
 	 * and a specific list of arguments that this method is supposed to be invoked with.
 	 * <p>Determines a weight that represents the class hierarchy difference between types and
-	 * arguments. A direct match, i.e. type Integer -> arg of class Integer, does not increase
+	 * arguments. A direct match, i.e. type Integer &rarr; arg of class Integer, does not increase
 	 * the result - all direct matches means weight 0. A match between type Object and arg of
 	 * class Integer would increase the weight by 2, due to the superclass 2 steps up in the
 	 * hierarchy (i.e. Object) being the last one that still matches the required type Object.

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,33 +23,34 @@ import org.springframework.util.ObjectUtils;
 /**
  * Represents an HTTP request or response entity, consisting of headers and body.
  *
- * <p>Typically used in combination with the {@link org.springframework.web.client.RestTemplate},
+ * <p>Often used in combination with the {@link org.springframework.web.client.RestTemplate},
  * like so:
  * <pre class="code">
  * HttpHeaders headers = new HttpHeaders();
  * headers.setContentType(MediaType.TEXT_PLAIN);
- * HttpEntity&lt;String&gt; entity = new HttpEntity&lt;String&gt;(helloWorld, headers);
- * URI location = template.postForLocation("http://example.com", entity);
+ * HttpEntity&lt;String&gt; entity = new HttpEntity&lt;&gt;("Hello World", headers);
+ * URI location = template.postForLocation("https://example.com", entity);
  * </pre>
  * or
  * <pre class="code">
- * HttpEntity&lt;String&gt; entity = template.getForEntity("http://example.com", String.class);
+ * HttpEntity&lt;String&gt; entity = template.getForEntity("https://example.com", String.class);
  * String body = entity.getBody();
  * MediaType contentType = entity.getHeaders().getContentType();
  * </pre>
  * Can also be used in Spring MVC, as a return value from a @Controller method:
  * <pre class="code">
- * &#64;RequestMapping("/handle")
+ * &#64;GetMapping("/handle")
  * public HttpEntity&lt;String&gt; handle() {
  *   HttpHeaders responseHeaders = new HttpHeaders();
  *   responseHeaders.set("MyResponseHeader", "MyValue");
- *   return new HttpEntity&lt;String&gt;("Hello World", responseHeaders);
+ *   return new HttpEntity&lt;&gt;("Hello World", responseHeaders);
  * }
  * </pre>
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0.2
+ * @param <T> the body type
  * @see org.springframework.web.client.RestTemplate
  * @see #getBody()
  * @see #getHeaders()
@@ -98,11 +99,7 @@ public class HttpEntity<T> {
 	 */
 	public HttpEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers) {
 		this.body = body;
-		HttpHeaders tempHeaders = new HttpHeaders();
-		if (headers != null) {
-			tempHeaders.putAll(headers);
-		}
-		this.headers = HttpHeaders.readOnlyHttpHeaders(tempHeaders);
+		this.headers = HttpHeaders.readOnlyHttpHeaders(headers != null ? headers : new HttpHeaders());
 	}
 
 

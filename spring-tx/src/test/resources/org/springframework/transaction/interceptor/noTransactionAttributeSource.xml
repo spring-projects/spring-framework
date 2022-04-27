@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
 	<!-- Simple target -->
-	<bean id="target" class="org.springframework.tests.sample.beans.DerivedTestBean">
+	<bean id="target" class="org.springframework.beans.testfixture.beans.DerivedTestBean">
 		<property name="name"><value>custom</value></property>
 		<property name="age"><value>666</value></property>
 	</bean>

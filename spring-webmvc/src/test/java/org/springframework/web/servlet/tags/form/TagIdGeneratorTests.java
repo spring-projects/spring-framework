@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,11 +20,11 @@ import java.util.stream.IntStream;
 
 import javax.servlet.jsp.PageContext;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockPageContext;
+import org.springframework.web.testfixture.servlet.MockPageContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -41,11 +41,11 @@ public class TagIdGeneratorTests {
 
 	private void assertNextId() {
 		PageContext pageContext = new MockPageContext();
-		assertEquals("foo1", TagIdGenerator.nextId("foo", pageContext));
-		assertEquals("foo2", TagIdGenerator.nextId("foo", pageContext));
-		assertEquals("foo3", TagIdGenerator.nextId("foo", pageContext));
-		assertEquals("foo4", TagIdGenerator.nextId("foo", pageContext));
-		assertEquals("bar1", TagIdGenerator.nextId("bar", pageContext));
+		assertThat(TagIdGenerator.nextId("foo", pageContext)).isEqualTo("foo1");
+		assertThat(TagIdGenerator.nextId("foo", pageContext)).isEqualTo("foo2");
+		assertThat(TagIdGenerator.nextId("foo", pageContext)).isEqualTo("foo3");
+		assertThat(TagIdGenerator.nextId("foo", pageContext)).isEqualTo("foo4");
+		assertThat(TagIdGenerator.nextId("bar", pageContext)).isEqualTo("bar1");
 	}
 
 }

@@ -1,0 +1,32 @@
+description = "Spring Context Support"
+
+dependencies {
+	api(project(":spring-beans"))
+	api(project(":spring-context"))
+	api(project(":spring-core"))
+	optional(project(":spring-jdbc"))  // for Quartz support
+	optional(project(":spring-tx"))  // for Quartz support
+	optional("javax.activation:javax.activation-api")
+	optional("javax.mail:javax.mail-api")
+	optional("javax.cache:cache-api")
+	optional("com.github.ben-manes.caffeine:caffeine")
+	optional("net.sf.ehcache:ehcache")
+	optional("org.quartz-scheduler:quartz")
+	optional("org.codehaus.fabric3.api:commonj")
+	optional("org.freemarker:freemarker")
+	testImplementation(project(":spring-context"))
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-context")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-tx")))
+	testImplementation("org.hsqldb:hsqldb")
+	testImplementation("org.hibernate:hibernate-validator")
+	testImplementation("javax.annotation:javax.annotation-api")
+	testRuntimeOnly("org.ehcache:jcache")
+	testRuntimeOnly("org.ehcache:ehcache")
+	testRuntimeOnly("org.glassfish:javax.el")
+	testRuntimeOnly("com.sun.mail:javax.mail")
+	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
+	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("org.mockito:mockito-core")
+}

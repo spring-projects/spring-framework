@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,15 +16,17 @@
 
 package org.springframework.web.reactive.handler;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeansException;
-import org.springframework.http.server.reactive.PathContainer;
+import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -56,6 +58,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private final Map<PathPattern, Object> handlerMap = new LinkedHashMap<>();
 
+	@Nullable
+	private BiPredicate<Object, ServerWebExchange> handlerPredicate;
+
 
 	/**
 	 * Set whether to lazily initialize handlers. Only applicable to
@@ -80,6 +85,23 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		return Collections.unmodifiableMap(this.handlerMap);
 	}
 
+	/**
+	 * Configure a predicate for extended matching of the handler that was
+	 * matched by URL path. This allows for further narrowing of the mapping by
+	 * checking additional properties of the request. If the predicate returns
+	 * "false", it result in a no-match, which allows another
+	 * {@link org.springframework.web.reactive.HandlerMapping} to match or
+	 * result in a 404 (NOT_FOUND) response.
+	 * @param handlerPredicate a bi-predicate to match the candidate handler
+	 * against the current exchange.
+	 * @since 5.3.5
+	 * @see org.springframework.web.reactive.socket.server.support.WebSocketUpgradeHandlerPredicate
+	 */
+	public void setHandlerPredicate(BiPredicate<Object, ServerWebExchange> handlerPredicate) {
+		this.handlerPredicate = (this.handlerPredicate != null ?
+				this.handlerPredicate.and(handlerPredicate) : handlerPredicate);
+	}
+
 
 	@Override
 	public Mono<Object> getHandlerInternal(ServerWebExchange exchange) {
@@ -91,14 +113,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		catch (Exception ex) {
 			return Mono.error(ex);
 		}
-
-		if (handler != null && logger.isDebugEnabled()) {
-			logger.debug("Mapping [" + lookupPath + "] to " + handler);
-		}
-		else if (handler == null && logger.isTraceEnabled()) {
-			logger.trace("No handler mapping found for [" + lookupPath + "]");
-		}
-
 		return Mono.justOrEmpty(handler);
 	}
 
@@ -107,32 +121,36 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
 	 * and various path pattern matches, e.g. a registered "/t*" matches
 	 * both "/test" and "/team". For details, see the PathPattern class.
-	 * @param lookupPath URL the handler is mapped to
+	 * @param lookupPath the URL the handler is mapped to
 	 * @param exchange the current exchange
 	 * @return the associated handler instance, or {@code null} if not found
 	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
 	@Nullable
-	protected Object lookupHandler(PathContainer lookupPath, ServerWebExchange exchange)
-			throws Exception {
+	protected Object lookupHandler(PathContainer lookupPath, ServerWebExchange exchange) throws Exception {
+		List<PathPattern> matches = null;
+		for (PathPattern pattern : this.handlerMap.keySet()) {
+			if (pattern.matches(lookupPath)) {
+				matches = (matches != null ? matches : new ArrayList<>());
+				matches.add(pattern);
+			}
+		}
+		if (matches == null) {
+			return null;
+		}
+		if (matches.size() > 1) {
+			matches.sort(PathPattern.SPECIFICITY_COMPARATOR);
+			if (logger.isTraceEnabled()) {
+				logger.debug(exchange.getLogPrefix() + "Matching patterns " + matches);
+			}
+		}
 
-		return this.handlerMap.entrySet().stream()
-				.filter(entry -> entry.getKey().matches(lookupPath))
-				.sorted(Comparator.comparing(Map.Entry::getKey))
-				.findFirst()
-				.map(entry -> {
-					PathPattern pattern = entry.getKey();
-					if (logger.isDebugEnabled()) {
-						logger.debug("Matching pattern for request [" + lookupPath + "] is " + pattern);
-					}
-					PathContainer pathWithinMapping = pattern.extractPathWithinPattern(lookupPath);
-					return handleMatch(entry.getValue(), pattern, pathWithinMapping, exchange);
-				})
-				.orElse(null);
-	}
+		PathPattern pattern = matches.get(0);
+		PathContainer pathWithinMapping = pattern.extractPathWithinPattern(lookupPath);
+		PathPattern.PathMatchInfo matchInfo = pattern.matchAndExtract(lookupPath);
+		Assert.notNull(matchInfo, "Expected a match");
 
-	private Object handleMatch(Object handler, PathPattern bestMatch, PathContainer pathWithinMapping,
-			ServerWebExchange exchange) {
+		Object handler = this.handlerMap.get(pattern);
 
 		// Bean name or resolved handler?
 		if (handler instanceof String) {
@@ -140,11 +158,16 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
+		if (this.handlerPredicate != null && !this.handlerPredicate.test(handler, exchange)) {
+			return null;
+		}
+
 		validateHandler(handler, exchange);
 
 		exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handler);
-		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestMatch);
+		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, pattern);
 		exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
+		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, matchInfo.getUriVariables());
 
 		return handler;
 	}
@@ -167,9 +190,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
-	protected void registerHandler(String[] urlPaths, String beanName)
-			throws BeansException, IllegalStateException {
-
+	protected void registerHandler(String[] urlPaths, String beanName) throws BeansException, IllegalStateException {
 		Assert.notNull(urlPaths, "URL path array must not be null");
 		for (String urlPath : urlPaths) {
 			registerHandler(urlPath, beanName);
@@ -184,9 +205,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
-	protected void registerHandler(String urlPath, Object handler)
-			throws BeansException, IllegalStateException {
-
+	protected void registerHandler(String urlPath, Object handler) throws BeansException, IllegalStateException {
 		Assert.notNull(urlPath, "URL path must not be null");
 		Assert.notNull(handler, "Handler object must not be null");
 		Object resolvedHandler = handler;
@@ -196,12 +215,10 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		PathPattern pattern = getPathPatternParser().parse(urlPath);
 		if (this.handlerMap.containsKey(pattern)) {
 			Object existingHandler = this.handlerMap.get(pattern);
-			if (existingHandler != null) {
-				if (existingHandler != resolvedHandler) {
-					throw new IllegalStateException(
-							"Cannot map " + getHandlerDescription(handler) + " to [" + urlPath + "]: " +
-							"there is already " + getHandlerDescription(existingHandler) + " mapped.");
-				}
+			if (existingHandler != null && existingHandler != resolvedHandler) {
+				throw new IllegalStateException(
+						"Cannot map " + getHandlerDescription(handler) + " to [" + urlPath + "]: " +
+						"there is already " + getHandlerDescription(existingHandler) + " mapped.");
 			}
 		}
 
@@ -215,10 +232,15 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 		// Register resolved handler
 		this.handlerMap.put(pattern, resolvedHandler);
-		if (logger.isInfoEnabled()) {
-			logger.info("Mapped URL path [" + urlPath + "] onto " + getHandlerDescription(handler));
+		if (logger.isTraceEnabled()) {
+			logger.trace("Mapped [" + urlPath + "] onto " + getHandlerDescription(handler));
 		}
 	}
+
+	private String getHandlerDescription(Object handler) {
+		return (handler instanceof String ? "'" + handler + "'" : handler.toString());
+	}
+
 
 	private static String prependLeadingSlash(String pattern) {
 		if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
@@ -227,11 +249,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		else {
 			return pattern;
 		}
-	}
-
-	private String getHandlerDescription(Object handler) {
-		return "handler " + (handler instanceof String ?
-				"'" + handler + "'" : "of type [" + handler.getClass() + "]");
 	}
 
 }

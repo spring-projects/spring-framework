@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,7 +28,9 @@ import org.springframework.format.Printer;
  *
  * @author Keith Donald
  * @since 3.0
+ * @deprecated as of 5.3, in favor of standard JSR-310 support
  */
+@Deprecated
 public final class ReadablePartialPrinter implements Printer<ReadablePartial> {
 
 	private final DateTimeFormatter formatter;

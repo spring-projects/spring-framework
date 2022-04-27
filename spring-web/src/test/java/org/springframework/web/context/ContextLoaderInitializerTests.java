@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,17 +17,18 @@
 package org.springframework.web.context;
 
 import java.util.EventListener;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test case for {@link AbstractContextLoaderInitializer}.
@@ -44,7 +45,7 @@ public class ContextLoaderInitializerTests {
 
 	private EventListener eventListener;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		servletContext = new MyMockServletContext();
 		initializer = new MyContextLoaderInitializer();
@@ -55,15 +56,17 @@ public class ContextLoaderInitializerTests {
 	public void register() throws ServletException {
 		initializer.onStartup(servletContext);
 
-		assertTrue(eventListener instanceof ContextLoaderListener);
+		boolean condition1 = eventListener instanceof ContextLoaderListener;
+		assertThat(condition1).isTrue();
 		ContextLoaderListener cll = (ContextLoaderListener) eventListener;
 		cll.contextInitialized(new ServletContextEvent(servletContext));
 
 		WebApplicationContext applicationContext = WebApplicationContextUtils
 				.getRequiredWebApplicationContext(servletContext);
 
-		assertTrue(applicationContext.containsBean(BEAN_NAME));
-		assertTrue(applicationContext.getBean(BEAN_NAME) instanceof MyBean);
+		assertThat(applicationContext.containsBean(BEAN_NAME)).isTrue();
+		boolean condition = applicationContext.getBean(BEAN_NAME) instanceof MyBean;
+		assertThat(condition).isTrue();
 	}
 
 	private class MyMockServletContext extends MockServletContext {

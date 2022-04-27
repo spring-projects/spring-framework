@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="requestScopedTestBean" class="org.springframework.tests.sample.beans.TestBean" scope="request">
+	<bean id="requestScopedTestBean" class="org.springframework.beans.testfixture.beans.TestBean" scope="request">
 		<property name="name" value="#{request.contextPath}" />
 	</bean>
 
-	<bean id="sessionScopedTestBean" class="org.springframework.tests.sample.beans.TestBean" scope="session" />
+	<bean id="sessionScopedTestBean" class="org.springframework.beans.testfixture.beans.TestBean" scope="session" />
 
 </beans>

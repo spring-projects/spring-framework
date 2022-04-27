@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,22 +16,27 @@
 
 package org.springframework.web.context.request;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.ScopeNotActiveException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.CountingTestBean;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.tests.sample.beans.factory.DummyFactory;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR;
 
 /**
  * @author Juergen Hoeller
@@ -41,7 +46,7 @@ public class RequestScopedProxyTests {
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.beanFactory.registerScope("request", new RequestScope());
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
@@ -51,24 +56,24 @@ public class RequestScopedProxyTests {
 
 
 	@Test
-	public void testGetFromScope() throws Exception {
+	public void testGetFromScope() {
 		String name = "requestScopedObject";
 		TestBean bean = (TestBean) this.beanFactory.getBean(name);
-		assertTrue(AopUtils.isCglibProxy(bean));
+		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		RequestAttributes requestAttributes = new ServletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
 		try {
-			assertNull(request.getAttribute("scopedTarget." + name));
-			assertEquals("scoped", bean.getName());
-			assertNotNull(request.getAttribute("scopedTarget." + name));
+			assertThat(request.getAttribute("scopedTarget." + name)).isNull();
+			assertThat(bean.getName()).isEqualTo("scoped");
+			assertThat(request.getAttribute("scopedTarget." + name)).isNotNull();
 			TestBean target = (TestBean) request.getAttribute("scopedTarget." + name);
-			assertEquals(TestBean.class, target.getClass());
-			assertEquals("scoped", target.getName());
-			assertSame(bean, this.beanFactory.getBean(name));
-			assertEquals(bean.toString(), target.toString());
+			assertThat(target.getClass()).isEqualTo(TestBean.class);
+			assertThat(target.getName()).isEqualTo("scoped");
+			assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
+			assertThat(target.toString()).isEqualTo(bean.toString());
 		}
 		finally {
 			RequestContextHolder.setRequestAttributes(null);
@@ -76,7 +81,7 @@ public class RequestScopedProxyTests {
 	}
 
 	@Test
-	public void testGetFromScopeThroughDynamicProxy() throws Exception {
+	public void testGetFromScopeThroughDynamicProxy() {
 		String name = "requestScopedProxy";
 		ITestBean bean = (ITestBean) this.beanFactory.getBean(name);
 		// assertTrue(AopUtils.isJdkDynamicProxy(bean));
@@ -86,14 +91,14 @@ public class RequestScopedProxyTests {
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
 		try {
-			assertNull(request.getAttribute("scopedTarget." + name));
-			assertEquals("scoped", bean.getName());
-			assertNotNull(request.getAttribute("scopedTarget." + name));
+			assertThat(request.getAttribute("scopedTarget." + name)).isNull();
+			assertThat(bean.getName()).isEqualTo("scoped");
+			assertThat(request.getAttribute("scopedTarget." + name)).isNotNull();
 			TestBean target = (TestBean) request.getAttribute("scopedTarget." + name);
-			assertEquals(TestBean.class, target.getClass());
-			assertEquals("scoped", target.getName());
-			assertSame(bean, this.beanFactory.getBean(name));
-			assertEquals(bean.toString(), target.toString());
+			assertThat(target.getClass()).isEqualTo(TestBean.class);
+			assertThat(target.getName()).isEqualTo("scoped");
+			assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
+			assertThat(target.toString()).isEqualTo(bean.toString());
 		}
 		finally {
 			RequestContextHolder.setRequestAttributes(null);
@@ -101,25 +106,25 @@ public class RequestScopedProxyTests {
 	}
 
 	@Test
-	public void testDestructionAtRequestCompletion() throws Exception {
+	public void testDestructionAtRequestCompletion() {
 		String name = "requestScopedDisposableObject";
 		DerivedTestBean bean = (DerivedTestBean) this.beanFactory.getBean(name);
-		assertTrue(AopUtils.isCglibProxy(bean));
+		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
 		try {
-			assertNull(request.getAttribute("scopedTarget." + name));
-			assertEquals("scoped", bean.getName());
-			assertNotNull(request.getAttribute("scopedTarget." + name));
-			assertEquals(DerivedTestBean.class, request.getAttribute("scopedTarget." + name).getClass());
-			assertEquals("scoped", ((TestBean) request.getAttribute("scopedTarget." + name)).getName());
-			assertSame(bean, this.beanFactory.getBean(name));
+			assertThat(request.getAttribute("scopedTarget." + name)).isNull();
+			assertThat(bean.getName()).isEqualTo("scoped");
+			assertThat(request.getAttribute("scopedTarget." + name)).isNotNull();
+			assertThat(request.getAttribute("scopedTarget." + name).getClass()).isEqualTo(DerivedTestBean.class);
+			assertThat(((TestBean) request.getAttribute("scopedTarget." + name)).getName()).isEqualTo("scoped");
+			assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
 
 			requestAttributes.requestCompleted();
-			assertTrue(((TestBean) request.getAttribute("scopedTarget." + name)).wasDestroyed());
+			assertThat(((TestBean) request.getAttribute("scopedTarget." + name)).wasDestroyed()).isTrue();
 		}
 		finally {
 			RequestContextHolder.setRequestAttributes(null);
@@ -127,21 +132,21 @@ public class RequestScopedProxyTests {
 	}
 
 	@Test
-	public void testGetFromFactoryBeanInScope() throws Exception {
+	public void testGetFromFactoryBeanInScope() {
 		String name = "requestScopedFactoryBean";
 		TestBean bean = (TestBean) this.beanFactory.getBean(name);
-		assertTrue(AopUtils.isCglibProxy(bean));
+		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		RequestAttributes requestAttributes = new ServletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
 		try {
-			assertNull(request.getAttribute("scopedTarget." + name));
-			assertEquals(DummyFactory.SINGLETON_NAME, bean.getName());
-			assertNotNull(request.getAttribute("scopedTarget." + name));
-			assertEquals(DummyFactory.class, request.getAttribute("scopedTarget." + name).getClass());
-			assertSame(bean, this.beanFactory.getBean(name));
+			assertThat(request.getAttribute("scopedTarget." + name)).isNull();
+			assertThat(bean.getName()).isEqualTo(DummyFactory.SINGLETON_NAME);
+			assertThat(request.getAttribute("scopedTarget." + name)).isNotNull();
+			assertThat(request.getAttribute("scopedTarget." + name).getClass()).isEqualTo(DummyFactory.class);
+			assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
 		}
 		finally {
 			RequestContextHolder.setRequestAttributes(null);
@@ -149,10 +154,10 @@ public class RequestScopedProxyTests {
 	}
 
 	@Test
-	public void testGetInnerBeanFromScope() throws Exception {
+	public void testGetInnerBeanFromScope() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("outerBean");
-		assertFalse(AopUtils.isAopProxy(bean));
-		assertTrue(AopUtils.isCglibProxy(bean.getSpouse()));
+		assertThat(AopUtils.isAopProxy(bean)).isFalse();
+		assertThat(AopUtils.isCglibProxy(bean.getSpouse())).isTrue();
 
 		String name = "scopedInnerBean";
 
@@ -161,11 +166,11 @@ public class RequestScopedProxyTests {
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
 		try {
-			assertNull(request.getAttribute("scopedTarget." + name));
-			assertEquals("scoped", bean.getSpouse().getName());
-			assertNotNull(request.getAttribute("scopedTarget." + name));
-			assertEquals(TestBean.class, request.getAttribute("scopedTarget." + name).getClass());
-			assertEquals("scoped", ((TestBean) request.getAttribute("scopedTarget." + name)).getName());
+			assertThat(request.getAttribute("scopedTarget." + name)).isNull();
+			assertThat(bean.getSpouse().getName()).isEqualTo("scoped");
+			assertThat(request.getAttribute("scopedTarget." + name)).isNotNull();
+			assertThat(request.getAttribute("scopedTarget." + name).getClass()).isEqualTo(TestBean.class);
+			assertThat(((TestBean) request.getAttribute("scopedTarget." + name)).getName()).isEqualTo("scoped");
 		}
 		finally {
 			RequestContextHolder.setRequestAttributes(null);
@@ -173,10 +178,10 @@ public class RequestScopedProxyTests {
 	}
 
 	@Test
-	public void testGetAnonymousInnerBeanFromScope() throws Exception {
+	public void testGetAnonymousInnerBeanFromScope() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("outerBean");
-		assertFalse(AopUtils.isAopProxy(bean));
-		assertTrue(AopUtils.isCglibProxy(bean.getSpouse()));
+		assertThat(AopUtils.isAopProxy(bean)).isFalse();
+		assertThat(AopUtils.isCglibProxy(bean.getSpouse())).isTrue();
 
 		BeanDefinition beanDef = this.beanFactory.getBeanDefinition("outerBean");
 		BeanDefinitionHolder innerBeanDef =
@@ -188,14 +193,41 @@ public class RequestScopedProxyTests {
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
 		try {
-			assertNull(request.getAttribute("scopedTarget." + name));
-			assertEquals("scoped", bean.getSpouse().getName());
-			assertNotNull(request.getAttribute("scopedTarget." + name));
-			assertEquals(TestBean.class, request.getAttribute("scopedTarget." + name).getClass());
-			assertEquals("scoped", ((TestBean) request.getAttribute("scopedTarget." + name)).getName());
+			assertThat(request.getAttribute("scopedTarget." + name)).isNull();
+			assertThat(bean.getSpouse().getName()).isEqualTo("scoped");
+			assertThat(request.getAttribute("scopedTarget." + name)).isNotNull();
+			assertThat(request.getAttribute("scopedTarget." + name).getClass()).isEqualTo(TestBean.class);
+			assertThat(((TestBean) request.getAttribute("scopedTarget." + name)).getName()).isEqualTo("scoped");
 		}
 		finally {
 			RequestContextHolder.setRequestAttributes(null);
+		}
+	}
+
+	@Test
+	public void scopeNotAvailable() {
+		assertThatExceptionOfType(ScopeNotActiveException.class).isThrownBy(
+				() -> this.beanFactory.getBean(CountingTestBean.class).absquatulate());
+
+		final ObjectProvider<CountingTestBean> beanProvider = this.beanFactory.getBeanProvider(CountingTestBean.class);
+		assertThatExceptionOfType(ScopeNotActiveException.class).isThrownBy(() -> beanProvider.getObject().absquatulate());
+		beanProvider.ifAvailable(TestBean::absquatulate);
+		beanProvider.ifUnique(TestBean::absquatulate);
+
+		final ObjectProvider<CountingTestBean> provider =
+				((ProviderBean) this.beanFactory.createBean(ProviderBean.class, AUTOWIRE_CONSTRUCTOR, false)).provider;
+		assertThatExceptionOfType(ScopeNotActiveException.class).isThrownBy(() -> provider.getObject().absquatulate());
+		provider.ifAvailable(TestBean::absquatulate);
+		provider.ifUnique(TestBean::absquatulate);
+	}
+
+
+	public static class ProviderBean {
+
+		public ObjectProvider<CountingTestBean> provider;
+
+		public ProviderBean(ObjectProvider<CountingTestBean> provider) {
+			this.provider = provider;
 		}
 	}
 

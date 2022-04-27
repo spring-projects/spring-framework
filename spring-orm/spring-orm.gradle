@@ -1,0 +1,21 @@
+description = "Spring Object/Relational Mapping"
+
+dependencies {
+	api(project(":spring-beans"))
+	api(project(":spring-core"))
+	api(project(":spring-jdbc"))
+	api(project(":spring-tx"))
+	optional(project(":spring-aop"))
+	optional(project(":spring-context"))
+	optional(project(":spring-web"))
+	optional("org.eclipse.persistence:org.eclipse.persistence.jpa")
+	optional("org.hibernate:hibernate-core")
+	optional("javax.servlet:javax.servlet-api")
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-context")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-web")))
+	testImplementation("org.aspectj:aspectjweaver")
+	testImplementation("org.hsqldb:hsqldb")
+	testRuntimeOnly("javax.xml.bind:jaxb-api")
+}

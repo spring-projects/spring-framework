@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -50,6 +51,7 @@ public abstract class CacheOperation implements BasicOperation {
 
 
 	/**
+	 * Create a new {@link CacheOperation} instance from the given builder.
 	 * @since 4.3
 	 */
 	protected CacheOperation(Builder b) {
@@ -99,7 +101,7 @@ public abstract class CacheOperation implements BasicOperation {
 	 * @see #toString()
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (other instanceof CacheOperation && toString().equals(other.toString()));
 	}
 
@@ -126,6 +128,7 @@ public abstract class CacheOperation implements BasicOperation {
 
 
 	/**
+	 * Base class for builders that can be used to create a {@link CacheOperation}.
 	 * @since 4.3
 	 */
 	public abstract static class Builder {
@@ -213,13 +216,13 @@ public abstract class CacheOperation implements BasicOperation {
 		 */
 		protected StringBuilder getOperationDescription() {
 			StringBuilder result = new StringBuilder(getClass().getSimpleName());
-			result.append("[").append(this.name);
+			result.append('[').append(this.name);
 			result.append("] caches=").append(this.cacheNames);
 			result.append(" | key='").append(this.key);
 			result.append("' | keyGenerator='").append(this.keyGenerator);
 			result.append("' | cacheManager='").append(this.cacheManager);
 			result.append("' | cacheResolver='").append(this.cacheResolver);
-			result.append("' | condition='").append(this.condition).append("'");
+			result.append("' | condition='").append(this.condition).append('\'');
 			return result;
 		}
 

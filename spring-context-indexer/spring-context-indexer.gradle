@@ -1,0 +1,9 @@
+description = "Spring Context Indexer"
+
+dependencies {
+	testImplementation(project(":spring-context"))
+	testImplementation("javax.inject:javax.inject")
+	testImplementation("javax.annotation:javax.annotation-api")
+	testImplementation("javax.transaction:javax.transaction-api")
+	testImplementation("org.eclipse.persistence:javax.persistence")
+}

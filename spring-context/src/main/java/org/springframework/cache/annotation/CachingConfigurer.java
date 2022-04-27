@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,17 +26,16 @@ import org.springframework.lang.Nullable;
  * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration
  * Configuration} classes annotated with @{@link EnableCaching} that wish or need to
  * specify explicitly how caches are resolved and how keys are generated for annotation-driven
- * cache management. Consider extending {@link CachingConfigurerSupport}, which provides a
- * stub implementation of all interface methods.
+ * cache management.
  *
  * <p>See @{@link EnableCaching} for general examples and context; see
  * {@link #cacheManager()}, {@link #cacheResolver()} and {@link #keyGenerator()}
  * for detailed instructions.
  *
  * @author Chris Beams
+ * @author Stephane Nicoll
  * @since 3.1
  * @see EnableCaching
- * @see CachingConfigurerSupport
  */
 public interface CachingConfigurer {
 
@@ -63,14 +62,16 @@ public interface CachingConfigurer {
 	 * See @{@link EnableCaching} for more complete examples.
 	 */
 	@Nullable
-	CacheManager cacheManager();
+	default CacheManager cacheManager() {
+		return null;
+	}
 
 	/**
 	 * Return the {@link CacheResolver} bean to use to resolve regular caches for
 	 * annotation-driven cache management. This is an alternative and more powerful
 	 * option of specifying the {@link CacheManager} to use.
-	 * <p>If both a {@link #cacheManager()} and {@link #cacheResolver()} are set, the
-	 * cache manager is ignored.
+	 * <p>If both a {@link #cacheManager()} and {@code #cacheResolver()} are set,
+	 * the cache manager is ignored.
 	 * <p>Implementations must explicitly declare
 	 * {@link org.springframework.context.annotation.Bean @Bean}, e.g.
 	 * <pre class="code">
@@ -88,7 +89,9 @@ public interface CachingConfigurer {
 	 * See {@link EnableCaching} for more complete examples.
 	 */
 	@Nullable
-	CacheResolver cacheResolver();
+	default CacheResolver cacheResolver() {
+		return null;
+	}
 
 	/**
 	 * Return the key generator bean to use for annotation-driven cache management.
@@ -109,7 +112,9 @@ public interface CachingConfigurer {
 	 * See @{@link EnableCaching} for more complete examples.
 	 */
 	@Nullable
-	KeyGenerator keyGenerator();
+	default KeyGenerator keyGenerator() {
+		return null;
+	}
 
 	/**
 	 * Return the {@link CacheErrorHandler} to use to handle cache-related errors.
@@ -132,6 +137,8 @@ public interface CachingConfigurer {
 	 * See @{@link EnableCaching} for more complete examples.
 	 */
 	@Nullable
-	CacheErrorHandler errorHandler();
+	default CacheErrorHandler errorHandler() {
+		return null;
+	}
 
 }

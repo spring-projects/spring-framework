@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
 /**
  * A context that holds user-specific <code>java.time</code> (JSR-310) settings
  * such as the user's Chronology (calendar system) and time zone.
- * A {@code null} property value indicate the user has not specified a setting.
+ * <p>A {@code null} property value indicates the user has not specified a setting.
  *
  * @author Juergen Hoeller
  * @since 4.0
@@ -81,8 +81,8 @@ public class DateTimeContext {
 
 
 	/**
-	 * Get the DateTimeFormatter with the this context's settings
-	 * applied to the base {@code formatter}.
+	 * Get the DateTimeFormatter with this context's settings applied to the
+	 * base {@code formatter}.
 	 * @param formatter the base formatter that establishes default
 	 * formatting rules, generally context-independent
 	 * @return the contextual DateTimeFormatter

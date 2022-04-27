@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,11 +24,11 @@ package org.springframework.beans.factory.parsing;
  */
 public class BeanEntry implements ParseState.Entry {
 
-	private String beanDefinitionName;
+	private final String beanDefinitionName;
 
 
 	/**
-	 * Creates a new instance of {@link BeanEntry} class.
+	 * Create a new {@code BeanEntry} instance.
 	 * @param beanDefinitionName the name of the associated bean definition
 	 */
 	public BeanEntry(String beanDefinitionName) {

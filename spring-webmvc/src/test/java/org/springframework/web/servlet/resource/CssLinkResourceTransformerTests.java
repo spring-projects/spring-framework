@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,34 +16,34 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.resource.EncodedResourceResolver.EncodedResource;
+import org.springframework.web.servlet.resource.GzipSupport.GzippedFiles;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for
- * {@link org.springframework.web.servlet.resource.CssLinkResourceTransformer}.
+ * Unit tests for {@link CssLinkResourceTransformer}.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 4.1
  */
+@ExtendWith(GzipSupport.class)
 public class CssLinkResourceTransformerTests {
 
 	private ResourceTransformerChain transformerChain;
@@ -51,39 +51,39 @@ public class CssLinkResourceTransformerTests {
 	private MockHttpServletRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
-		ClassPathResource allowedLocation = new ClassPathResource("test/", getClass());
-		ResourceHttpRequestHandler resourceHandler = new ResourceHttpRequestHandler();
-
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 		PathResourceResolver pathResolver = new PathResourceResolver();
-		pathResolver.setAllowedLocations(allowedLocation);
-		List<ResourceResolver> resolvers = Arrays.asList(versionResolver, pathResolver);
+		pathResolver.setAllowedLocations(new ClassPathResource("test/", getClass()));
+		List<ResourceResolver> resolvers = new ArrayList<>();
+		resolvers.add(versionResolver);
+		resolvers.add(new PathResourceResolver());
+		ResourceUrlProvider resourceUrlProvider = createUrlProvider(resolvers);
+
+		CssLinkResourceTransformer cssLinkTransformer = new CssLinkResourceTransformer();
+		cssLinkTransformer.setResourceUrlProvider(resourceUrlProvider);
+
+		this.transformerChain = new DefaultResourceTransformerChain(
+				new DefaultResourceResolverChain(resolvers), Collections.singletonList(cssLinkTransformer));
+	}
+
+	private ResourceUrlProvider createUrlProvider(List<ResourceResolver> resolvers) {
+		ResourceHttpRequestHandler resourceHandler = new ResourceHttpRequestHandler();
+		resourceHandler.setResourceResolvers(resolvers);
+		resourceHandler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
 
 		ResourceUrlProvider resourceUrlProvider = new ResourceUrlProvider();
 		resourceUrlProvider.setHandlerMap(Collections.singletonMap("/static/**", resourceHandler));
-
-		CssLinkResourceTransformer cssLinkResourceTransformer = new CssLinkResourceTransformer();
-		cssLinkResourceTransformer.setResourceUrlProvider(resourceUrlProvider);
-		List<ResourceTransformer> transformers = Arrays.asList(cssLinkResourceTransformer);
-
-		resourceHandler.setResourceResolvers(resolvers);
-		resourceHandler.setResourceTransformers(transformers);
-		resourceHandler.setLocations(Collections.singletonList(allowedLocation));
-
-		ResourceResolverChain resolverChain = new DefaultResourceResolverChain(resolvers);
-		this.transformerChain = new DefaultResourceTransformerChain(resolverChain, transformers);
+		return resourceUrlProvider;
 	}
 
 
 	@Test
 	public void transform() throws Exception {
 		this.request = new MockHttpServletRequest("GET", "/static/main.css");
-		Resource css = new ClassPathResource("test/main.css", getClass());
-		TransformedResource actual = (TransformedResource) this.transformerChain.transform(this.request, css);
-
+		Resource css = getResource("main.css");
 		String expected = "\n" +
 				"@import url(\"/static/bar-11e16cf79faee7ac698c805cf28248d2.css?#iefix\");\n" +
 				"@import url('/static/bar-11e16cf79faee7ac698c805cf28248d2.css#bla-normal');\n" +
@@ -92,70 +92,82 @@ public class CssLinkResourceTransformerTests {
 				"@import '/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css';\n\n" +
 				"body { background: url(\"/static/images/image-f448cd1d5dba82b774f3202c878230b3.png?#iefix\") }\n";
 
+		TransformedResource actual = (TransformedResource) this.transformerChain.transform(this.request, css);
 		String result = new String(actual.getByteArray(), StandardCharsets.UTF_8);
 		result = StringUtils.deleteAny(result, "\r");
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 	}
 
 	@Test
 	public void transformNoLinks() throws Exception {
 		this.request = new MockHttpServletRequest("GET", "/static/foo.css");
-		Resource expected = new ClassPathResource("test/foo.css", getClass());
+		Resource expected = getResource("foo.css");
 		Resource actual = this.transformerChain.transform(this.request, expected);
-		assertSame(expected, actual);
+		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
 	public void transformExtLinksNotAllowed() throws Exception {
 		this.request = new MockHttpServletRequest("GET", "/static/external.css");
-		ResourceResolverChain resolverChain = Mockito.mock(DefaultResourceResolverChain.class);
-		ResourceTransformerChain transformerChain = new DefaultResourceTransformerChain(resolverChain,
-				Arrays.asList(new CssLinkResourceTransformer()));
 
-		Resource externalCss = new ClassPathResource("test/external.css", getClass());
-		Resource resource = transformerChain.transform(this.request, externalCss);
-		TransformedResource transformedResource = (TransformedResource) resource;
+		List<ResourceTransformer> transformers = Collections.singletonList(new CssLinkResourceTransformer());
+		ResourceResolverChain mockChain = Mockito.mock(DefaultResourceResolverChain.class);
+		ResourceTransformerChain chain = new DefaultResourceTransformerChain(mockChain, transformers);
 
-		String expected = "@import url(\"http://example.org/fonts/css\");\n" +
+		Resource resource = getResource("external.css");
+		String expected = "@import url(\"https://example.org/fonts/css\");\n" +
 				"body { background: url(\"file:///home/spring/image.png\") }\n" +
 				"figure { background: url(\"//example.org/style.css\")}";
+
+		TransformedResource transformedResource = (TransformedResource) chain.transform(this.request, resource);
 		String result = new String(transformedResource.getByteArray(), StandardCharsets.UTF_8);
 		result = StringUtils.deleteAny(result, "\r");
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 
-		Mockito.verify(resolverChain, Mockito.never())
-				.resolveUrlPath("http://example.org/fonts/css", Arrays.asList(externalCss));
-		Mockito.verify(resolverChain, Mockito.never())
-				.resolveUrlPath("file:///home/spring/image.png", Arrays.asList(externalCss));
-		Mockito.verify(resolverChain, Mockito.never())
-				.resolveUrlPath("//example.org/style.css", Arrays.asList(externalCss));
+		List<Resource> locations = Collections.singletonList(resource);
+		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("https://example.org/fonts/css", locations);
+		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("file:///home/spring/image.png", locations);
+		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("//example.org/style.css", locations);
 	}
 
 	@Test
-	public void transformWithNonCssResource() throws Exception {
+	public void transformSkippedForNonCssResource() throws Exception {
 		this.request = new MockHttpServletRequest("GET", "/static/images/image.png");
-		Resource expected = new ClassPathResource("test/images/image.png", getClass());
+		Resource expected = getResource("images/image.png");
 		Resource actual = this.transformerChain.transform(this.request, expected);
-		assertSame(expected, actual);
+
+		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
-	public void transformWithGzippedResource() throws Exception {
+	public void transformSkippedForGzippedResource(GzippedFiles gzippedFiles) throws Exception {
+		gzippedFiles.create("main.css");
+
 		this.request = new MockHttpServletRequest("GET", "/static/main.css");
 		Resource original = new ClassPathResource("test/main.css", getClass());
-		createTempCopy("main.css", "main.css.gz");
-		GzipResourceResolver.GzippedResource expected = new GzipResourceResolver.GzippedResource(original);
-		Resource actual = this.transformerChain.transform(this.request, expected);
-		assertSame(expected, actual);
+		EncodedResource gzipped = new EncodedResource(original, "gzip", ".gz");
+		Resource actual = this.transformerChain.transform(this.request, gzipped);
+
+		assertThat(actual).isSameAs(gzipped);
 	}
 
-	private void createTempCopy(String filePath, String copyFilePath) throws IOException {
-		Resource location = new ClassPathResource("test/", CssLinkResourceTransformerTests.class);
-		Path original = Paths.get(location.getFile().getAbsolutePath(), filePath);
-		Path copy = Paths.get(location.getFile().getAbsolutePath(), copyFilePath);
-		Files.deleteIfExists(copy);
-		Files.copy(original, copy);
-		copy.toFile().deleteOnExit();
+	@Test // https://github.com/spring-projects/spring-framework/issues/22602
+	public void transformEmptyUrlFunction() throws Exception {
+		this.request = new MockHttpServletRequest("GET", "/static/empty_url_function.css");
+		Resource css = getResource("empty_url_function.css");
+		String expected =
+				".fooStyle {\n" +
+				"\tbackground: transparent url() no-repeat left top;\n" +
+				"}";
+
+		TransformedResource actual = (TransformedResource) this.transformerChain.transform(this.request, css);
+		String result = new String(actual.getByteArray(), StandardCharsets.UTF_8);
+		result = StringUtils.deleteAny(result, "\r");
+		assertThat(result).isEqualTo(expected);
+	}
+
+	private Resource getResource(String filePath) {
+		return new ClassPathResource("test/" + filePath, getClass());
 	}
 
 }

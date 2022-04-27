@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -66,12 +66,11 @@ public abstract class StatementCreatorUtils {
 	 * completely, i.e. to never even attempt to retrieve {@link PreparedStatement#getParameterMetaData()}
 	 * for {@link StatementCreatorUtils#setNull} calls.
 	 * <p>The default is "false", trying {@code getParameterType} calls first and falling back to
-	 * {@link PreparedStatement#setNull} / {@link PreparedStatement#setObject} calls based on well-known
-	 * behavior of common databases. Spring records JDBC drivers with non-working {@code getParameterType}
-	 * implementations and won't attempt to call that method for that driver again, always falling back.
-	 * <p>Consider switching this flag to "true" if you experience misbehavior at runtime, e.g. with
-	 * a connection pool setting back the {@link PreparedStatement} instance in case of an exception
-	 * thrown from {@code getParameterType} (as reported on JBoss AS 7).
+	 * {@link PreparedStatement#setNull} / {@link PreparedStatement#setObject} calls based on
+	 * well-known behavior of common databases.
+	 * <p>Consider switching this flag to "true" if you experience misbehavior at runtime,
+	 * e.g. with connection pool issues in case of an exception thrown from {@code getParameterType}
+	 * (as reported on JBoss AS 7) or in case of performance problems (as reported on PostgreSQL).
 	 */
 	public static final String IGNORE_GETPARAMETERTYPE_PROPERTY_NAME = "spring.jdbc.getParameterType.ignore";
 
@@ -153,7 +152,7 @@ public abstract class StatementCreatorUtils {
 	 * @param ps the prepared statement or callable statement
 	 * @param paramIndex index of the parameter we are setting
 	 * @param sqlType the SQL type of the parameter
-	 * @param inValue the value to set (plain value or a SqlTypeValue)
+	 * @param inValue the value to set (plain value or an SqlTypeValue)
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
@@ -171,7 +170,7 @@ public abstract class StatementCreatorUtils {
 	 * @param sqlType the SQL type of the parameter
 	 * @param typeName the type name of the parameter
 	 * (optional, only used for SQL NULL and SqlTypeValue)
-	 * @param inValue the value to set (plain value or a SqlTypeValue)
+	 * @param inValue the value to set (plain value or an SqlTypeValue)
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
@@ -191,7 +190,7 @@ public abstract class StatementCreatorUtils {
 	 * (optional, only used for SQL NULL and SqlTypeValue)
 	 * @param scale the number of digits after the decimal point
 	 * (for DECIMAL and NUMERIC types)
-	 * @param inValue the value to set (plain value or a SqlTypeValue)
+	 * @param inValue the value to set (plain value or an SqlTypeValue)
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
@@ -240,11 +239,18 @@ public abstract class StatementCreatorUtils {
 	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, @Nullable String typeName)
 			throws SQLException {
 
-		if (sqlType == SqlTypeValue.TYPE_UNKNOWN || sqlType == Types.OTHER) {
+		if (sqlType == SqlTypeValue.TYPE_UNKNOWN || (sqlType == Types.OTHER && typeName == null)) {
 			boolean useSetObject = false;
 			Integer sqlTypeToUse = null;
 			if (!shouldIgnoreGetParameterType) {
-				sqlTypeToUse = ps.getParameterMetaData().getParameterType(paramIndex);
+				try {
+					sqlTypeToUse = ps.getParameterMetaData().getParameterType(paramIndex);
+				}
+				catch (SQLException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("JDBC getParameterType call failed - using fallback method instead: " + ex);
+					}
+				}
 			}
 			if (sqlTypeToUse == null) {
 				// Proceed with database-specific checks
@@ -259,7 +265,7 @@ public abstract class StatementCreatorUtils {
 				}
 				else if (databaseProductName.startsWith("DB2") ||
 						jdbcDriverName.startsWith("jConnect") ||
-						jdbcDriverName.startsWith("SQLServer")||
+						jdbcDriverName.startsWith("SQLServer") ||
 						jdbcDriverName.startsWith("Apache Derby")) {
 					sqlTypeToUse = Types.VARCHAR;
 				}
@@ -288,9 +294,11 @@ public abstract class StatementCreatorUtils {
 		else if (inValue instanceof SqlValue) {
 			((SqlValue) inValue).setValue(ps, paramIndex);
 		}
-		else if (sqlType == Types.VARCHAR || sqlType == Types.NVARCHAR ||
-				sqlType == Types.LONGVARCHAR || sqlType == Types.LONGNVARCHAR) {
+		else if (sqlType == Types.VARCHAR || sqlType == Types.LONGVARCHAR ) {
 			ps.setString(paramIndex, inValue.toString());
+		}
+		else if (sqlType == Types.NVARCHAR || sqlType == Types.LONGNVARCHAR) {
+			ps.setNString(paramIndex, inValue.toString());
 		}
 		else if ((sqlType == Types.CLOB || sqlType == Types.NCLOB) && isStringValue(inValue.getClass())) {
 			String strVal = inValue.toString();
@@ -303,10 +311,16 @@ public abstract class StatementCreatorUtils {
 				else {
 					ps.setClob(paramIndex, new StringReader(strVal), strVal.length());
 				}
-				return;
 			}
-			// Fallback: regular setString binding
-			ps.setString(paramIndex, strVal);
+			else {
+				// Fallback: setString or setNString binding
+				if (sqlType == Types.NCLOB) {
+					ps.setNString(paramIndex, strVal);
+				}
+				else {
+					ps.setString(paramIndex, strVal);
+				}
+			}
 		}
 		else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
 			if (inValue instanceof BigDecimal) {
@@ -444,11 +458,16 @@ public abstract class StatementCreatorUtils {
 	public static void cleanupParameters(@Nullable Collection<?> paramValues) {
 		if (paramValues != null) {
 			for (Object inValue : paramValues) {
-				if (inValue instanceof DisposableSqlTypeValue) {
-					((DisposableSqlTypeValue) inValue).cleanup();
+				// Unwrap SqlParameterValue first...
+				if (inValue instanceof SqlParameterValue) {
+					inValue = ((SqlParameterValue) inValue).getValue();
 				}
-				else if (inValue instanceof SqlValue) {
+				// Check for disposable value types
+				if (inValue instanceof SqlValue) {
 					((SqlValue) inValue).cleanup();
+				}
+				else if (inValue instanceof DisposableSqlTypeValue) {
+					((DisposableSqlTypeValue) inValue).cleanup();
 				}
 			}
 		}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,9 +20,11 @@ import java.security.Principal;
 import java.time.Instant;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -30,7 +32,6 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.server.i18n.LocaleContextResolver;
 
 /**
  * Contract for an HTTP request-response interaction. Provides access to the HTTP
@@ -41,6 +42,16 @@ import org.springframework.web.server.i18n.LocaleContextResolver;
  * @since 5.0
  */
 public interface ServerWebExchange {
+
+	/**
+	 * Name of {@link #getAttributes() attribute} whose value can be used to
+	 * correlate log messages for this exchange. Use {@link #getLogPrefix()} to
+	 * obtain a consistently formatted prefix based on this attribute.
+	 * @since 5.1
+	 * @see #getLogPrefix()
+	 */
+	String LOG_ID_ATTRIBUTE = ServerWebExchange.class.getName() + ".LOG_ID";
+
 
 	/**
 	 * Return the current HTTP request.
@@ -79,7 +90,7 @@ public interface ServerWebExchange {
 	@SuppressWarnings("unchecked")
 	default <T> T getRequiredAttribute(String name) {
 		T value = getAttribute(name);
-		Assert.notNull(value, "Required attribute '" + name + "' is missing.");
+		Assert.notNull(value, () -> "Required attribute '" + name + "' is missing");
 		return value;
 	}
 
@@ -113,7 +124,6 @@ public interface ServerWebExchange {
 	/**
 	 * Return the form data from the body of the request if the Content-Type is
 	 * {@code "application/x-www-form-urlencoded"} or an empty map otherwise.
-	 *
 	 * <p><strong>Note:</strong> calling this method causes the request body to
 	 * be read and parsed in full and the resulting {@code MultiValueMap} is
 	 * cached so that this method is safe to call more than once.
@@ -123,17 +133,29 @@ public interface ServerWebExchange {
 	/**
 	 * Return the parts of a multipart request if the Content-Type is
 	 * {@code "multipart/form-data"} or an empty map otherwise.
-	 *
 	 * <p><strong>Note:</strong> calling this method causes the request body to
 	 * be read and parsed in full and the resulting {@code MultiValueMap} is
 	 * cached so that this method is safe to call more than once.
+	 * <p><strong>Note:</strong>the {@linkplain Part#content() contents} of each
+	 * part is not cached, and can only be read once.
 	 */
 	Mono<MultiValueMap<String, Part>> getMultipartData();
 
 	/**
-	 * Return the {@link LocaleContext} using the configured {@link LocaleContextResolver}.
+	 * Return the {@link LocaleContext} using the configured
+	 * {@link org.springframework.web.server.i18n.LocaleContextResolver}.
 	 */
 	LocaleContext getLocaleContext();
+
+	/**
+	 * Return the {@link ApplicationContext} associated with the web application,
+	 * if it was initialized with one via
+	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)}.
+	 * @since 5.0.3
+	 * @see org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)
+	 */
+	@Nullable
+	ApplicationContext getApplicationContext();
 
 	/**
 	 * Returns {@code true} if the one of the {@code checkNotModified} methods
@@ -177,6 +199,34 @@ public interface ServerWebExchange {
 	 */
 	boolean checkNotModified(@Nullable String etag, Instant lastModified);
 
+	/**
+	 * Transform the given url according to the registered transformation function(s).
+	 * By default, this method returns the given {@code url}, though additional
+	 * transformation functions can by registered with {@link #addUrlTransformer}
+	 * @param url the URL to transform
+	 * @return the transformed URL
+	 */
+	String transformUrl(String url);
+
+	/**
+	 * Register an additional URL transformation function for use with {@link #transformUrl}.
+	 * The given function can be used to insert an id for authentication, a nonce for CSRF
+	 * protection, etc.
+	 * <p>Note that the given function is applied after any previously registered functions.
+	 * @param transformer a URL transformation function to add
+	 */
+	void addUrlTransformer(Function<String, String> transformer);
+
+	/**
+	 * Return a log message prefix to use to correlate messages for this exchange.
+	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE}
+	 * along with some extra formatting so that the prefix can be conveniently
+	 * prepended with no further formatting no separators required.
+	 * @return the log message prefix or an empty String if the
+	 * {@link #LOG_ID_ATTRIBUTE} is not set.
+	 * @since 5.1
+	 */
+	String getLogPrefix();
 
 	/**
 	 * Return a builder to mutate properties of this exchange by wrapping it
@@ -198,7 +248,7 @@ public interface ServerWebExchange {
 		 * Configure a consumer to modify the current request using a builder.
 		 * <p>Effectively this:
 		 * <pre>
-		 * exchange.mutate().request(builder-> builder.method(HttpMethod.PUT));
+		 * exchange.mutate().request(builder -&gt; builder.method(HttpMethod.PUT));
 		 *
 		 * // vs...
 		 *

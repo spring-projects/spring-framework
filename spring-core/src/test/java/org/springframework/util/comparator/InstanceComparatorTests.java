@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,17 +18,17 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Tests for {@link InstanceComparator}.
  *
  * @author Phillip Webb
  */
-public class InstanceComparatorTests {
+class InstanceComparatorTests {
 
 	private C1 c1 = new C1();
 
@@ -39,34 +39,34 @@ public class InstanceComparatorTests {
 	private C4 c4 = new C4();
 
 	@Test
-	public void shouldCompareClasses() throws Exception {
+	void shouldCompareClasses() throws Exception {
 		Comparator<Object> comparator = new InstanceComparator<>(C1.class, C2.class);
-		assertThat(comparator.compare(c1, c1), is(0));
-		assertThat(comparator.compare(c1, c2), is(-1));
-		assertThat(comparator.compare(c2, c1), is(1));
-		assertThat(comparator.compare(c2, c3), is(-1));
-		assertThat(comparator.compare(c2, c4), is(-1));
-		assertThat(comparator.compare(c3, c4), is(0));
+		assertThat(comparator.compare(c1, c1)).isEqualTo(0);
+		assertThat(comparator.compare(c1, c2)).isEqualTo(-1);
+		assertThat(comparator.compare(c2, c1)).isEqualTo(1);
+		assertThat(comparator.compare(c2, c3)).isEqualTo(-1);
+		assertThat(comparator.compare(c2, c4)).isEqualTo(-1);
+		assertThat(comparator.compare(c3, c4)).isEqualTo(0);
 	}
 
 	@Test
-	public void shouldCompareInterfaces() throws Exception {
+	void shouldCompareInterfaces() throws Exception {
 		Comparator<Object> comparator = new InstanceComparator<>(I1.class, I2.class);
-		assertThat(comparator.compare(c1, c1), is(0));
-		assertThat(comparator.compare(c1, c2), is(0));
-		assertThat(comparator.compare(c2, c1), is(0));
-		assertThat(comparator.compare(c1, c3), is(-1));
-		assertThat(comparator.compare(c3, c1), is(1));
-		assertThat(comparator.compare(c3, c4), is(0));
+		assertThat(comparator.compare(c1, c1)).isEqualTo(0);
+		assertThat(comparator.compare(c1, c2)).isEqualTo(0);
+		assertThat(comparator.compare(c2, c1)).isEqualTo(0);
+		assertThat(comparator.compare(c1, c3)).isEqualTo(-1);
+		assertThat(comparator.compare(c3, c1)).isEqualTo(1);
+		assertThat(comparator.compare(c3, c4)).isEqualTo(0);
 	}
 
 	@Test
-	public void shouldCompareMix() throws Exception {
+	void shouldCompareMix() throws Exception {
 		Comparator<Object> comparator = new InstanceComparator<>(I1.class, C3.class);
-		assertThat(comparator.compare(c1, c1), is(0));
-		assertThat(comparator.compare(c3, c4), is(-1));
-		assertThat(comparator.compare(c3, null), is(-1));
-		assertThat(comparator.compare(c4, null), is(0));
+		assertThat(comparator.compare(c1, c1)).isEqualTo(0);
+		assertThat(comparator.compare(c3, c4)).isEqualTo(-1);
+		assertThat(comparator.compare(c3, null)).isEqualTo(-1);
+		assertThat(comparator.compare(c4, null)).isEqualTo(0);
 	}
 
 	private static interface I1 {

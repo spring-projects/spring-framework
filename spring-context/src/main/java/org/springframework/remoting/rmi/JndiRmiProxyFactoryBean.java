@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,7 +43,7 @@ import org.springframework.util.ClassUtils;
  * For example:
  *
  * <pre class="code">&lt;property name="jndiEnvironment"&gt;
- * 	 &lt;props>
+ * 	 &lt;props&gt;
  *		 &lt;prop key="java.naming.factory.initial"&gt;com.sun.jndi.cosnaming.CNCtxFactory&lt;/prop&gt;
  *		 &lt;prop key="java.naming.provider.url"&gt;iiop://localhost:1050&lt;/prop&gt;
  *	 &lt;/props&gt;
@@ -61,7 +61,9 @@ import org.springframework.util.ClassUtils;
  * @see java.rmi.RemoteException
  * @see java.rmi.Remote
  * @see javax.rmi.PortableRemoteObject#narrow
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public class JndiRmiProxyFactoryBean extends JndiRmiClientInterceptor
 		implements FactoryBean<Object>, BeanClassLoaderAware {
 

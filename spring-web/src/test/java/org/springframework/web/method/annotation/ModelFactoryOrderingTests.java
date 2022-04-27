@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,13 +25,11 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.Model;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -46,35 +44,34 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests verifying {@code @ModelAttribute} method inter-dependencies.
  *
  * @author Rossen Stoyanchev
  */
-public class ModelFactoryOrderingTests {
+class ModelFactoryOrderingTests {
 
 	private static final Log logger = LogFactory.getLog(ModelFactoryOrderingTests.class);
 
-	private NativeWebRequest webRequest;
+	private final NativeWebRequest webRequest = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
 
-	private ModelAndViewContainer mavContainer;
+	private final ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
-	private SessionAttributeStore sessionAttributeStore;
+	private final SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
 
-	@Before
-	public void setup() {
-		this.sessionAttributeStore = new DefaultSessionAttributeStore();
-		this.webRequest = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
-		this.mavContainer = new ModelAndViewContainer();
+	@BeforeEach
+	void setup() {
 		this.mavContainer.addAttribute("methods", new ArrayList<String>());
 	}
 
 	@Test
-	public void straightLineDependency() throws Exception {
+	void straightLineDependency() throws Exception {
 		runTest(new StraightLineDependencyController());
 		assertInvokedBefore("getA", "getB1", "getB2", "getC1", "getC2", "getC3", "getC4");
 		assertInvokedBefore("getB1", "getB2", "getC1", "getC2", "getC3", "getC4");
@@ -85,7 +82,7 @@ public class ModelFactoryOrderingTests {
 	}
 
 	@Test
-	public void treeDependency() throws Exception {
+	void treeDependency() throws Exception {
 		runTest(new TreeDependencyController());
 		assertInvokedBefore("getA", "getB1", "getB2", "getC1", "getC2", "getC3", "getC4");
 		assertInvokedBefore("getB1", "getC1", "getC2");
@@ -93,7 +90,7 @@ public class ModelFactoryOrderingTests {
 	}
 
 	@Test
-	public void InvertedTreeDependency() throws Exception {
+	void InvertedTreeDependency() throws Exception {
 		runTest(new InvertedTreeDependencyController());
 		assertInvokedBefore("getC1", "getA", "getB1");
 		assertInvokedBefore("getC2", "getA", "getB1");
@@ -104,7 +101,7 @@ public class ModelFactoryOrderingTests {
 	}
 
 	@Test
-	public void unresolvedDependency() throws Exception {
+	void unresolvedDependency() throws Exception {
 		runTest(new UnresolvedDependencyController());
 		assertInvokedBefore("getA", "getC1", "getC2", "getC3", "getC4");
 
@@ -133,19 +130,16 @@ public class ModelFactoryOrderingTests {
 		ModelFactory factory = new ModelFactory(modelMethods, dataBinderFactory, sessionHandler);
 		factory.initModel(this.webRequest, this.mavContainer, new HandlerMethod(controller, "handle"));
 		if (logger.isDebugEnabled()) {
-			StringBuilder sb = new StringBuilder();
-			for (String name : getInvokedMethods()) {
-				sb.append(" >> ").append(name);
-			}
-			logger.debug(sb);
+			logger.debug(String.join(" >> ", getInvokedMethods()));
 		}
 	}
 
 	private void assertInvokedBefore(String beforeMethod, String... afterMethods) {
 		List<String> actual = getInvokedMethods();
 		for (String afterMethod : afterMethods) {
-			assertTrue(beforeMethod + " should be before " + afterMethod + ". Actual order: " +
-					actual.toString(), actual.indexOf(beforeMethod) < actual.indexOf(afterMethod));
+			assertThat(actual.indexOf(beforeMethod) < actual.indexOf(afterMethod))
+				.as(beforeMethod + " should be before " + afterMethod + ". Actual order: " + actual.toString())
+				.isTrue();
 		}
 	}
 
@@ -321,13 +315,8 @@ public class ModelFactoryOrderingTests {
 	private static class C4 { }
 
 
-	private static final ReflectionUtils.MethodFilter METHOD_FILTER = new ReflectionUtils.MethodFilter() {
-
-		@Override
-		public boolean matches(Method method) {
-			return ((AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
-					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null));
-		}
-	};
+	private static final ReflectionUtils.MethodFilter METHOD_FILTER = method ->
+			((AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
+			(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null));
 
 }

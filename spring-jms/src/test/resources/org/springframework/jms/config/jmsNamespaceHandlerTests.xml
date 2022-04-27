@@ -2,8 +2,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:jms="http://www.springframework.org/schema/jms"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-				http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-4.2.xsd">
+		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+				http://www.springframework.org/schema/jms https://www.springframework.org/schema/jms/spring-jms-4.2.xsd">
 
 	<jms:listener-container factory-id="testJmsFactory"
 			connection-factory="testConnectionFactory" task-executor="testTaskExecutor"
@@ -68,7 +68,7 @@
 
 	<bean id="testMessageConverter" class="org.springframework.jms.support.converter.SimpleMessageConverter"/>
 
-	<bean id="testTransactionManager" class="org.springframework.tests.transaction.CallCountingTransactionManager"/>
+	<bean id="testTransactionManager" class="org.springframework.transaction.testfixture.CallCountingTransactionManager"/>
 
 	<bean id="testErrorHandler" class="org.springframework.jms.config.JmsNamespaceHandlerTests$TestErrorHandler"/>
 
@@ -76,9 +76,9 @@
 		<property name="interval" value="1000"/>
 	</bean>
 
-	<bean id="testBean1" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean1" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
-	<bean id="testBean2" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean2" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 	<bean id="testBean3" class="org.springframework.jms.config.JmsNamespaceHandlerTests$TestMessageListener"/>
 

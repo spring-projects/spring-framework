@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.web.context.request;
 
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -25,14 +26,14 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.multipart.MultipartRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -46,7 +47,7 @@ public class ServletWebRequestTests {
 	private ServletWebRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		servletRequest = new MockHttpServletRequest();
 		servletResponse = new MockHttpServletResponse();
@@ -60,42 +61,42 @@ public class ServletWebRequestTests {
 		servletRequest.addParameter("param2", "value2");
 		servletRequest.addParameter("param2", "value2a");
 
-		assertEquals("value1", request.getParameter("param1"));
-		assertEquals(1, request.getParameterValues("param1").length);
-		assertEquals("value1", request.getParameterValues("param1")[0]);
-		assertEquals("value2", request.getParameter("param2"));
-		assertEquals(2, request.getParameterValues("param2").length);
-		assertEquals("value2", request.getParameterValues("param2")[0]);
-		assertEquals("value2a", request.getParameterValues("param2")[1]);
+		assertThat(request.getParameter("param1")).isEqualTo("value1");
+		assertThat(request.getParameterValues("param1").length).isEqualTo(1);
+		assertThat(request.getParameterValues("param1")[0]).isEqualTo("value1");
+		assertThat(request.getParameter("param2")).isEqualTo("value2");
+		assertThat(request.getParameterValues("param2").length).isEqualTo(2);
+		assertThat(request.getParameterValues("param2")[0]).isEqualTo("value2");
+		assertThat(request.getParameterValues("param2")[1]).isEqualTo("value2a");
 
 		Map<String, String[]> paramMap = request.getParameterMap();
-		assertEquals(2, paramMap.size());
-		assertEquals(1, paramMap.get("param1").length);
-		assertEquals("value1", paramMap.get("param1")[0]);
-		assertEquals(2, paramMap.get("param2").length);
-		assertEquals("value2", paramMap.get("param2")[0]);
-		assertEquals("value2a", paramMap.get("param2")[1]);
+		assertThat(paramMap.size()).isEqualTo(2);
+		assertThat(paramMap.get("param1").length).isEqualTo(1);
+		assertThat(paramMap.get("param1")[0]).isEqualTo("value1");
+		assertThat(paramMap.get("param2").length).isEqualTo(2);
+		assertThat(paramMap.get("param2")[0]).isEqualTo("value2");
+		assertThat(paramMap.get("param2")[1]).isEqualTo("value2a");
 	}
 
 	@Test
 	public void locale() {
 		servletRequest.addPreferredLocale(Locale.UK);
 
-		assertEquals(Locale.UK, request.getLocale());
+		assertThat(request.getLocale()).isEqualTo(Locale.UK);
 	}
 
 	@Test
 	public void nativeRequest() {
-		assertSame(servletRequest, request.getNativeRequest());
-		assertSame(servletRequest, request.getNativeRequest(ServletRequest.class));
-		assertSame(servletRequest, request.getNativeRequest(HttpServletRequest.class));
-		assertSame(servletRequest, request.getNativeRequest(MockHttpServletRequest.class));
-		assertNull(request.getNativeRequest(MultipartRequest.class));
-		assertSame(servletResponse, request.getNativeResponse());
-		assertSame(servletResponse, request.getNativeResponse(ServletResponse.class));
-		assertSame(servletResponse, request.getNativeResponse(HttpServletResponse.class));
-		assertSame(servletResponse, request.getNativeResponse(MockHttpServletResponse.class));
-		assertNull(request.getNativeResponse(MultipartRequest.class));
+		assertThat(request.getNativeRequest()).isSameAs(servletRequest);
+		assertThat(request.getNativeRequest(ServletRequest.class)).isSameAs(servletRequest);
+		assertThat(request.getNativeRequest(HttpServletRequest.class)).isSameAs(servletRequest);
+		assertThat(request.getNativeRequest(MockHttpServletRequest.class)).isSameAs(servletRequest);
+		assertThat(request.getNativeRequest(MultipartRequest.class)).isNull();
+		assertThat(request.getNativeResponse()).isSameAs(servletResponse);
+		assertThat(request.getNativeResponse(ServletResponse.class)).isSameAs(servletResponse);
+		assertThat(request.getNativeResponse(HttpServletResponse.class)).isSameAs(servletResponse);
+		assertThat(request.getNativeResponse(MockHttpServletResponse.class)).isSameAs(servletResponse);
+		assertThat(request.getNativeResponse(MultipartRequest.class)).isNull();
 	}
 
 	@Test
@@ -103,16 +104,16 @@ public class ServletWebRequestTests {
 		HttpServletRequest decoratedRequest = new HttpServletRequestWrapper(servletRequest);
 		HttpServletResponse decoratedResponse = new HttpServletResponseWrapper(servletResponse);
 		ServletWebRequest request = new ServletWebRequest(decoratedRequest, decoratedResponse);
-		assertSame(decoratedRequest, request.getNativeRequest());
-		assertSame(decoratedRequest, request.getNativeRequest(ServletRequest.class));
-		assertSame(decoratedRequest, request.getNativeRequest(HttpServletRequest.class));
-		assertSame(servletRequest, request.getNativeRequest(MockHttpServletRequest.class));
-		assertNull(request.getNativeRequest(MultipartRequest.class));
-		assertSame(decoratedResponse, request.getNativeResponse());
-		assertSame(decoratedResponse, request.getNativeResponse(ServletResponse.class));
-		assertSame(decoratedResponse, request.getNativeResponse(HttpServletResponse.class));
-		assertSame(servletResponse, request.getNativeResponse(MockHttpServletResponse.class));
-		assertNull(request.getNativeResponse(MultipartRequest.class));
+		assertThat(request.getNativeRequest()).isSameAs(decoratedRequest);
+		assertThat(request.getNativeRequest(ServletRequest.class)).isSameAs(decoratedRequest);
+		assertThat(request.getNativeRequest(HttpServletRequest.class)).isSameAs(decoratedRequest);
+		assertThat(request.getNativeRequest(MockHttpServletRequest.class)).isSameAs(servletRequest);
+		assertThat(request.getNativeRequest(MultipartRequest.class)).isNull();
+		assertThat(request.getNativeResponse()).isSameAs(decoratedResponse);
+		assertThat(request.getNativeResponse(ServletResponse.class)).isSameAs(decoratedResponse);
+		assertThat(request.getNativeResponse(HttpServletResponse.class)).isSameAs(decoratedResponse);
+		assertThat(request.getNativeResponse(MockHttpServletResponse.class)).isSameAs(servletResponse);
+		assertThat(request.getNativeResponse(MultipartRequest.class)).isNull();
 	}
 
 }

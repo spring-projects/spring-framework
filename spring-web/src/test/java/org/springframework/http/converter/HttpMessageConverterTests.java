@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,15 +18,13 @@ package org.springframework.http.converter;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test-case for AbstractHttpMessageConverter.
@@ -42,9 +40,9 @@ public class HttpMessageConverterTests {
 		MediaType mediaType = new MediaType("foo", "bar");
 		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<>(mediaType);
 
-		assertTrue(converter.canRead(MyType.class, mediaType));
-		assertFalse(converter.canRead(MyType.class, new MediaType("foo", "*")));
-		assertFalse(converter.canRead(MyType.class, MediaType.ALL));
+		assertThat(converter.canRead(MyType.class, mediaType)).isTrue();
+		assertThat(converter.canRead(MyType.class, new MediaType("foo", "*"))).isFalse();
+		assertThat(converter.canRead(MyType.class, MediaType.ALL)).isFalse();
 	}
 
 	@Test
@@ -52,9 +50,9 @@ public class HttpMessageConverterTests {
 		MediaType mediaType = new MediaType("foo");
 		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<>(mediaType);
 
-		assertTrue(converter.canRead(MyType.class, new MediaType("foo", "bar")));
-		assertTrue(converter.canRead(MyType.class, new MediaType("foo", "*")));
-		assertFalse(converter.canRead(MyType.class, MediaType.ALL));
+		assertThat(converter.canRead(MyType.class, new MediaType("foo", "bar"))).isTrue();
+		assertThat(converter.canRead(MyType.class, new MediaType("foo", "*"))).isTrue();
+		assertThat(converter.canRead(MyType.class, MediaType.ALL)).isFalse();
 	}
 
 	@Test
@@ -62,9 +60,9 @@ public class HttpMessageConverterTests {
 		MediaType mediaType = new MediaType("foo", "bar");
 		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<>(mediaType);
 
-		assertTrue(converter.canWrite(MyType.class, mediaType));
-		assertTrue(converter.canWrite(MyType.class, new MediaType("foo", "*")));
-		assertTrue(converter.canWrite(MyType.class, MediaType.ALL));
+		assertThat(converter.canWrite(MyType.class, mediaType)).isTrue();
+		assertThat(converter.canWrite(MyType.class, new MediaType("foo", "*"))).isTrue();
+		assertThat(converter.canWrite(MyType.class, MediaType.ALL)).isTrue();
 	}
 
 	@Test
@@ -72,9 +70,9 @@ public class HttpMessageConverterTests {
 		MediaType mediaType = new MediaType("foo");
 		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<>(mediaType);
 
-		assertTrue(converter.canWrite(MyType.class, new MediaType("foo", "bar")));
-		assertTrue(converter.canWrite(MyType.class, new MediaType("foo", "*")));
-		assertTrue(converter.canWrite(MyType.class, MediaType.ALL));
+		assertThat(converter.canWrite(MyType.class, new MediaType("foo", "bar"))).isTrue();
+		assertThat(converter.canWrite(MyType.class, new MediaType("foo", "*"))).isTrue();
+		assertThat(converter.canWrite(MyType.class, MediaType.ALL)).isTrue();
 	}
 
 
@@ -92,14 +90,13 @@ public class HttpMessageConverterTests {
 		@Override
 		protected T readInternal(Class<? extends T> clazz, HttpInputMessage inputMessage)
 				throws IOException, HttpMessageNotReadableException {
-			fail("Not expected");
-			return null;
+			throw new AssertionError("Not expected");
 		}
 
 		@Override
 		protected void writeInternal(T t, HttpOutputMessage outputMessage)
 				throws IOException, HttpMessageNotWritableException {
-			fail("Not expected");
+			throw new AssertionError("Not expected");
 		}
 	}
 

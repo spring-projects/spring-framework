@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,12 +17,13 @@
 package org.springframework.format.number.money;
 
 import java.util.Locale;
+
 import javax.money.CurrencyUnit;
 import javax.money.MonetaryAmount;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -31,7 +32,7 @@ import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.DataBinder;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -42,12 +43,12 @@ public class MoneyFormattingTests {
 	private final FormattingConversionService conversionService = new DefaultFormattingConversionService();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		LocaleContextHolder.setLocale(null);
 	}
@@ -63,20 +64,20 @@ public class MoneyFormattingTests {
 		propertyValues.add("amount", "USD 10.50");
 		propertyValues.add("unit", "USD");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("USD10.50", binder.getBindingResult().getFieldValue("amount"));
-		assertEquals("USD", binder.getBindingResult().getFieldValue("unit"));
-		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
-		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("amount")).isEqualTo("USD10.50");
+		assertThat(binder.getBindingResult().getFieldValue("unit")).isEqualTo("USD");
+		assertThat(bean.getAmount().getNumber().doubleValue() == 10.5d).isTrue();
+		assertThat(bean.getAmount().getCurrency().getCurrencyCode()).isEqualTo("USD");
 
 		LocaleContextHolder.setLocale(Locale.CANADA);
 		binder.bind(propertyValues);
 		LocaleContextHolder.setLocale(Locale.US);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("USD10.50", binder.getBindingResult().getFieldValue("amount"));
-		assertEquals("USD", binder.getBindingResult().getFieldValue("unit"));
-		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
-		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("amount")).isEqualTo("USD10.50");
+		assertThat(binder.getBindingResult().getFieldValue("unit")).isEqualTo("USD");
+		assertThat(bean.getAmount().getNumber().doubleValue() == 10.5d).isTrue();
+		assertThat(bean.getAmount().getCurrency().getCurrencyCode()).isEqualTo("USD");
 	}
 
 	@Test
@@ -88,18 +89,18 @@ public class MoneyFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("amount", "$10.50");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("$10.50", binder.getBindingResult().getFieldValue("amount"));
-		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
-		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("amount")).isEqualTo("$10.50");
+		assertThat(bean.getAmount().getNumber().doubleValue() == 10.5d).isTrue();
+		assertThat(bean.getAmount().getCurrency().getCurrencyCode()).isEqualTo("USD");
 
 		LocaleContextHolder.setLocale(Locale.CANADA);
 		binder.bind(propertyValues);
 		LocaleContextHolder.setLocale(Locale.US);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("$10.50", binder.getBindingResult().getFieldValue("amount"));
-		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
-		assertEquals("CAD", bean.getAmount().getCurrency().getCurrencyCode());
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("amount")).isEqualTo("$10.50");
+		assertThat(bean.getAmount().getNumber().doubleValue() == 10.5d).isTrue();
+		assertThat(bean.getAmount().getCurrency().getCurrencyCode()).isEqualTo("CAD");
 	}
 
 	@Test
@@ -111,10 +112,10 @@ public class MoneyFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("amount", "10.50");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("10.5", binder.getBindingResult().getFieldValue("amount"));
-		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
-		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("amount")).isEqualTo("10.5");
+		assertThat(bean.getAmount().getNumber().doubleValue() == 10.5d).isTrue();
+		assertThat(bean.getAmount().getCurrency().getCurrencyCode()).isEqualTo("USD");
 	}
 
 	@Test
@@ -126,10 +127,10 @@ public class MoneyFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("amount", "10%");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("10%", binder.getBindingResult().getFieldValue("amount"));
-		assertTrue(bean.getAmount().getNumber().doubleValue() == 0.1d);
-		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("amount")).isEqualTo("10%");
+		assertThat(bean.getAmount().getNumber().doubleValue() == 0.1d).isTrue();
+		assertThat(bean.getAmount().getCurrency().getCurrencyCode()).isEqualTo("USD");
 	}
 
 	@Test
@@ -141,10 +142,10 @@ public class MoneyFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("amount", "010.500");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("010.500", binder.getBindingResult().getFieldValue("amount"));
-		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
-		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("amount")).isEqualTo("010.500");
+		assertThat(bean.getAmount().getNumber().doubleValue() == 10.5d).isTrue();
+		assertThat(bean.getAmount().getCurrency().getCurrencyCode()).isEqualTo("USD");
 	}
 
 	@Test
@@ -156,18 +157,18 @@ public class MoneyFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("amount", "USD 10.50");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("USD 010.500", binder.getBindingResult().getFieldValue("amount"));
-		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
-		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("amount")).isEqualTo("USD 010.500");
+		assertThat(bean.getAmount().getNumber().doubleValue() == 10.5d).isTrue();
+		assertThat(bean.getAmount().getCurrency().getCurrencyCode()).isEqualTo("USD");
 
 		LocaleContextHolder.setLocale(Locale.CANADA);
 		binder.bind(propertyValues);
 		LocaleContextHolder.setLocale(Locale.US);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("USD 010.500", binder.getBindingResult().getFieldValue("amount"));
-		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
-		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("amount")).isEqualTo("USD 010.500");
+		assertThat(bean.getAmount().getNumber().doubleValue() == 10.5d).isTrue();
+		assertThat(bean.getAmount().getCurrency().getCurrencyCode()).isEqualTo("USD");
 	}
 
 

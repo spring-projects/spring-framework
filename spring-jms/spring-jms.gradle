@@ -1,0 +1,19 @@
+description = "Spring JMS"
+
+dependencies {
+	api(project(":spring-beans"))
+	api(project(":spring-core"))
+	api(project(":spring-messaging"))
+	api(project(":spring-tx"))
+	compileOnly("javax.jms:javax.jms-api")
+	optional(project(":spring-aop"))
+	optional(project(":spring-context"))
+	optional(project(":spring-oxm"))
+	optional("javax.resource:javax.resource-api")
+	optional("javax.transaction:javax.transaction-api")
+	optional("com.fasterxml.jackson.core:jackson-databind")
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-tx")))
+	testImplementation("org.apache.activemq:activemq-broker")
+	testImplementation("javax.jms:javax.jms-api")
+}

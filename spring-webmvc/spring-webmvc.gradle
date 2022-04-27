@@ -1,0 +1,73 @@
+description = "Spring Web MVC"
+
+apply plugin: "kotlin"
+
+dependencies {
+	api(project(":spring-aop"))
+	api(project(":spring-beans"))
+	api(project(":spring-context"))
+	api(project(":spring-core"))
+	api(project(":spring-expression"))
+	api(project(":spring-web"))
+	compileOnly("javax.servlet:javax.servlet-api")
+	compileOnly("com.google.code.findbugs:findbugs")  // for groovy-templates
+	optional(project(":spring-context-support"))  // for FreeMarker support
+	optional(project(":spring-oxm"))
+	optional("javax.servlet.jsp:javax.servlet.jsp-api")
+	optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api")
+	optional("javax.el:javax.el-api")
+	optional("javax.xml.bind:jaxb-api")
+	optional("org.webjars:webjars-locator-core")
+	optional("com.rometools:rome")
+	optional("com.github.librepdf:openpdf")
+	optional("org.apache.poi:poi-ooxml")
+	optional("org.freemarker:freemarker")
+	optional("com.fasterxml.jackson.core:jackson-databind")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor")
+	optional("org.apache.tiles:tiles-api")
+	optional("org.apache.tiles:tiles-core")
+	optional("org.apache.tiles:tiles-servlet")
+	optional("org.apache.tiles:tiles-jsp")
+	optional("org.apache.tiles:tiles-el")
+	optional("org.apache.tiles:tiles-extras")
+	optional("org.codehaus.groovy:groovy-templates")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.reactivestreams:reactive-streams")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-context")))
+	testImplementation(testFixtures(project(":spring-web")))
+	testImplementation("javax.servlet:javax.servlet-api")
+	testImplementation("org.eclipse.jetty:jetty-servlet") {
+		exclude group: "javax.servlet", module: "javax.servlet"
+	}
+	testImplementation("org.eclipse.jetty:jetty-server") {
+		exclude group: "javax.servlet", module: "javax.servlet"
+	}
+	testImplementation("org.apache.httpcomponents:httpclient")
+	testImplementation("commons-fileupload:commons-fileupload")
+	testImplementation("commons-io:commons-io")
+	testImplementation("joda-time:joda-time")
+	testImplementation("org.mozilla:rhino")
+	testImplementation("org.dom4j:dom4j")
+	testImplementation("jaxen:jaxen")
+	testImplementation("org.xmlunit:xmlunit-assertj")
+	testImplementation("org.xmlunit:xmlunit-matchers")
+	testImplementation("org.hibernate:hibernate-validator")
+	testImplementation("javax.validation:validation-api")
+	testImplementation("io.projectreactor:reactor-core")
+	testImplementation("io.reactivex.rxjava3:rxjava")
+	testImplementation("org.jetbrains.kotlin:kotlin-script-runtime")
+	testRuntimeOnly("org.jetbrains.kotlin:kotlin-scripting-jsr223")
+	testRuntimeOnly("org.jruby:jruby")
+	testRuntimeOnly("org.python:jython-standalone")
+	testRuntimeOnly("org.webjars:underscorejs")
+	testRuntimeOnly("org.glassfish:javax.el")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
+	testRuntimeOnly("com.sun.activation:javax.activation")
+}

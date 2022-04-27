@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,14 +16,10 @@
 
 package org.springframework.test.context.junit4.rules;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.ClassRule;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
@@ -35,9 +31,6 @@ import org.springframework.test.context.junit4.statements.RunBeforeTestMethodCal
 import org.springframework.test.context.junit4.statements.RunPrepareTestInstanceCallbacks;
 import org.springframework.test.context.junit4.statements.SpringFailOnTimeout;
 import org.springframework.test.context.junit4.statements.SpringRepeat;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * {@code SpringMethodRule} is a custom JUnit 4 {@link MethodRule} that
@@ -61,7 +54,7 @@ import org.springframework.util.ReflectionUtils;
  * <pre><code> public class ExampleSpringIntegrationTest {
  *
  *    &#064;ClassRule
- *    public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+ *    public static final SpringClassRule springClassRule = new SpringClassRule();
  *
  *    &#064;Rule
  *    public final SpringMethodRule springMethodRule = new SpringMethodRule();
@@ -86,6 +79,10 @@ import org.springframework.util.ReflectionUtils;
  * <p><strong>NOTE:</strong> As of Spring Framework 4.3, this class requires JUnit 4.12 or higher.
  *
  * <p><strong>WARNING:</strong> Due to the shortcomings of JUnit rules, the
+ * {@code SpringMethodRule}
+ * {@linkplain org.springframework.test.context.TestExecutionListener#prepareTestInstance
+ * prepares the test instance} before {@code @Before} lifecycle methods instead of
+ * immediately after instantiation of the test class. In addition, the
  * {@code SpringMethodRule} does <strong>not</strong> support the
  * {@code beforeTestExecution()} and {@code afterTestExecution()} callbacks of the
  * {@link org.springframework.test.context.TestExecutionListener TestExecutionListener}
@@ -102,11 +99,6 @@ import org.springframework.util.ReflectionUtils;
 public class SpringMethodRule implements MethodRule {
 
 	private static final Log logger = LogFactory.getLog(SpringMethodRule.class);
-
-	static {
-		Assert.state(ClassUtils.isPresent("org.junit.internal.Throwables", SpringMethodRule.class.getClassLoader()),
-				"SpringMethodRule requires JUnit 4.12 or higher.");
-	}
 
 
 	/**
@@ -143,7 +135,6 @@ public class SpringMethodRule implements MethodRule {
 			logger.debug("Applying SpringMethodRule to test method [" + testMethod + "]");
 		}
 		Class<?> testClass = testInstance.getClass();
-		validateSpringClassRuleConfiguration(testClass);
 		TestContextManager testContextManager = SpringClassRule.getTestContextManager(testClass);
 
 		Statement statement = base;
@@ -182,8 +173,8 @@ public class SpringMethodRule implements MethodRule {
 	 * Wrap the supplied {@link Statement} with a {@code RunPrepareTestInstanceCallbacks} statement.
 	 * @see RunPrepareTestInstanceCallbacks
 	 */
-	private Statement withTestInstancePreparation(Statement next, Object testInstance,
-			TestContextManager testContextManager) {
+	private Statement withTestInstancePreparation(
+			Statement next, Object testInstance, TestContextManager testContextManager) {
 
 		return new RunPrepareTestInstanceCallbacks(next, testInstance, testContextManager);
 	}
@@ -214,34 +205,6 @@ public class SpringMethodRule implements MethodRule {
 	 */
 	private Statement withProfileValueCheck(Statement next, Method testMethod, Object testInstance) {
 		return new ProfileValueChecker(next, testInstance.getClass(), testMethod);
-	}
-
-
-	/**
-	 * Throw an {@link IllegalStateException} if the supplied {@code testClass}
-	 * does not declare a {@code public static final SpringClassRule} field
-	 * that is annotated with {@code @ClassRule}.
-	 */
-	private static SpringClassRule validateSpringClassRuleConfiguration(Class<?> testClass) {
-		Field ruleField = findSpringClassRuleField(testClass).orElseThrow(() ->
-				new IllegalStateException(String.format(
-					"Failed to find 'public static final SpringClassRule' field in test class [%s]. " +
-					"Consult the javadoc for SpringClassRule for details.", testClass.getName())));
-
-		Assert.state(ruleField.isAnnotationPresent(ClassRule.class), () -> String.format(
-				"SpringClassRule field [%s] must be annotated with JUnit's @ClassRule annotation. " +
-				"Consult the javadoc for SpringClassRule for details.", ruleField));
-
-		Object result = ReflectionUtils.getField(ruleField, null);
-		Assert.state(result instanceof SpringClassRule, "SpringClassRule field mismatch");
-		return (SpringClassRule) result;
-	}
-
-	private static Optional<Field> findSpringClassRuleField(Class<?> testClass) {
-		return Arrays.stream(testClass.getFields())
-				.filter(ReflectionUtils::isPublicStaticFinal)
-				.filter(field -> SpringClassRule.class.isAssignableFrom(field.getType()))
-				.findFirst();
 	}
 
 }

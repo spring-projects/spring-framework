@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
@@ -98,14 +99,15 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	public static final int VALIDATION_XSD = XmlValidationModeDetector.VALIDATION_XSD;
 
 
-	/** Constants instance for this class */
+	/** Constants instance for this class. */
 	private static final Constants constants = new Constants(XmlBeanDefinitionReader.class);
 
 	private int validationMode = VALIDATION_AUTO;
 
 	private boolean namespaceAware = false;
 
-	private Class<?> documentReaderClass = DefaultBeanDefinitionDocumentReader.class;
+	private Class<? extends BeanDefinitionDocumentReader> documentReaderClass =
+			DefaultBeanDefinitionDocumentReader.class;
 
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
@@ -126,7 +128,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	private final XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
 
 	private final ThreadLocal<Set<EncodedResource>> resourcesCurrentlyBeingLoaded =
-			new NamedThreadLocal<>("XML bean definition resources currently being loaded");
+			new NamedThreadLocal<Set<EncodedResource>>("XML bean definition resources currently being loaded"){
+				@Override
+				protected Set<EncodedResource> initialValue() {
+					return new HashSet<>(4);
+				}
+			};
 
 
 	/**
@@ -312,31 +319,23 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public int loadBeanDefinitions(EncodedResource encodedResource) throws BeanDefinitionStoreException {
 		Assert.notNull(encodedResource, "EncodedResource must not be null");
-		if (logger.isInfoEnabled()) {
-			logger.info("Loading XML bean definitions from " + encodedResource.getResource());
+		if (logger.isTraceEnabled()) {
+			logger.trace("Loading XML bean definitions from " + encodedResource);
 		}
 
 		Set<EncodedResource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
-		if (currentResources == null) {
-			currentResources = new HashSet<>(4);
-			this.resourcesCurrentlyBeingLoaded.set(currentResources);
-		}
+
 		if (!currentResources.add(encodedResource)) {
 			throw new BeanDefinitionStoreException(
 					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");
 		}
-		try {
-			InputStream inputStream = encodedResource.getResource().getInputStream();
-			try {
-				InputSource inputSource = new InputSource(inputStream);
-				if (encodedResource.getEncoding() != null) {
-					inputSource.setEncoding(encodedResource.getEncoding());
-				}
-				return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
+
+		try (InputStream inputStream = encodedResource.getResource().getInputStream()) {
+			InputSource inputSource = new InputSource(inputStream);
+			if (encodedResource.getEncoding() != null) {
+				inputSource.setEncoding(encodedResource.getEncoding());
 			}
-			finally {
-				inputStream.close();
-			}
+			return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
 		}
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException(
@@ -386,9 +385,14 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource)
 			throws BeanDefinitionStoreException {
+
 		try {
 			Document doc = doLoadDocument(inputSource, resource);
-			return registerBeanDefinitions(doc, resource);
+			int count = registerBeanDefinitions(doc, resource);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loaded " + count + " bean definitions from " + resource);
+			}
+			return count;
 		}
 		catch (BeanDefinitionStoreException ex) {
 			throw ex;
@@ -429,13 +433,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 				getValidationModeForResource(resource), isNamespaceAware());
 	}
 
-
 	/**
-	 * Gets the validation mode for the specified {@link Resource}. If no explicit
-	 * validation mode has been configured then the validation mode is
-	 * {@link #detectValidationMode detected}.
+	 * Determine the validation mode for the specified {@link Resource}.
+	 * If no explicit validation mode has been configured, then the validation
+	 * mode gets {@link #detectValidationMode detected} from the given resource.
 	 * <p>Override this method if you would like full control over the validation
 	 * mode, even when something other than {@link #VALIDATION_AUTO} was set.
+	 * @see #detectValidationMode
 	 */
 	protected int getValidationModeForResource(Resource resource) {
 		int validationModeToUse = getValidationMode();
@@ -453,7 +457,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Detects which kind of validation to perform on the XML file identified
+	 * Detect which kind of validation to perform on the XML file identified
 	 * by the supplied {@link Resource}. If the file has a {@code DOCTYPE}
 	 * definition then DTD validation is used otherwise XSD validation is assumed.
 	 * <p>Override this method if you would like to customize resolution
@@ -515,7 +519,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see #setDocumentReaderClass
 	 */
 	protected BeanDefinitionDocumentReader createBeanDefinitionDocumentReader() {
-		return BeanDefinitionDocumentReader.class.cast(BeanUtils.instantiateClass(this.documentReaderClass));
+		return BeanUtils.instantiateClass(this.documentReaderClass);
 	}
 
 	/**
@@ -539,7 +543,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Create the default implementation of {@link NamespaceHandlerResolver} used if none is specified.
-	 * Default implementation returns an instance of {@link DefaultNamespaceHandlerResolver}.
+	 * <p>The default implementation returns an instance of {@link DefaultNamespaceHandlerResolver}.
+	 * @see DefaultNamespaceHandlerResolver#DefaultNamespaceHandlerResolver(ClassLoader)
 	 */
 	protected NamespaceHandlerResolver createDefaultNamespaceHandlerResolver() {
 		ClassLoader cl = (getResourceLoader() != null ? getResourceLoader().getClassLoader() : getBeanClassLoader());

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,18 +18,21 @@ package org.springframework.mock.http.server.reactive;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.AbstractServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -54,10 +57,17 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 
 
 	public MockServerHttpResponse() {
-		super(new DefaultDataBufferFactory());
+		this(DefaultDataBufferFactory.sharedInstance);
+	}
+
+	public MockServerHttpResponse(DataBufferFactory dataBufferFactory) {
+		super(dataBufferFactory);
 		this.writeHandler = body -> {
+			// Avoid .then() that causes data buffers to be discarded and released
+			Sinks.Empty<Void> completion = Sinks.unsafe().empty();
 			this.body = body.cache();
-			return this.body.then();
+			this.body.subscribe(aVoid -> {}, completion::tryEmitError, completion::tryEmitEmpty); // Signals are serialized
+			return completion.asMono();
 		};
 	}
 
@@ -76,6 +86,11 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 		this.writeHandler = writeHandler;
 	}
 
+	@Override
+	public <T> T getNativeResponse() {
+		throw new IllegalStateException("This is a mock. No running server, no native response.");
+	}
+
 
 	@Override
 	protected void applyStatusCode() {
@@ -87,8 +102,11 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected void applyCookies() {
-		getCookies().values().stream().flatMap(Collection::stream)
-				.forEach(cookie -> getHeaders().add(HttpHeaders.SET_COOKIE, cookie.toString()));
+		for (List<ResponseCookie> cookies : getCookies().values()) {
+			for (ResponseCookie cookie : cookies) {
+				getHeaders().add(HttpHeaders.SET_COOKIE, cookie.toString());
+			}
+		}
 	}
 
 	@Override
@@ -124,20 +142,13 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 		Charset charset = Optional.ofNullable(getHeaders().getContentType()).map(MimeType::getCharset)
 				.orElse(StandardCharsets.UTF_8);
 
-		return getBody()
-				.reduce(bufferFactory().allocateBuffer(), (previous, current) -> {
-					previous.write(current);
-					DataBufferUtils.release(current);
-					return previous;
+		return DataBufferUtils.join(getBody())
+				.map(buffer -> {
+					String s = buffer.toString(charset);
+					DataBufferUtils.release(buffer);
+					return s;
 				})
-				.map(buffer -> bufferToString(buffer, charset));
-	}
-
-	private static String bufferToString(DataBuffer buffer, Charset charset) {
-		Assert.notNull(charset, "'charset' must not be null");
-		byte[] bytes = new byte[buffer.readableByteCount()];
-		buffer.read(bytes);
-		return new String(bytes, charset);
+				.defaultIfEmpty("");
 	}
 
 }

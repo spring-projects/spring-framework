@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,24 +18,23 @@ package org.springframework.test.context.cache;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.annotation.DirtiesContext.MethodMode.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.annotation.DirtiesContext.MethodMode.BEFORE_METHOD;
 
 /**
  * Integration test which verifies correct interaction between the
@@ -47,22 +46,11 @@ import static org.springframework.test.annotation.DirtiesContext.MethodMode.*;
  * @author Sam Brannen
  * @since 4.2
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class MethodLevelDirtiesContextTests {
+@SpringJUnitConfig
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class MethodLevelDirtiesContextTests {
 
 	private static final AtomicInteger contextCount = new AtomicInteger();
-
-
-	@Configuration
-	static class Config {
-
-		@Bean
-		Integer count() {
-			return contextCount.incrementAndGet();
-		}
-	}
 
 
 	@Autowired
@@ -73,39 +61,49 @@ public class MethodLevelDirtiesContextTests {
 
 
 	@Test
-	// test## prefix required for @FixMethodOrder.
-	public void test01() throws Exception {
+	@Order(1)
+	void basics() throws Exception {
 		performAssertions(1);
 	}
 
 	@Test
+	@Order(2)
 	@DirtiesContext(methodMode = BEFORE_METHOD)
-	// test## prefix required for @FixMethodOrder.
-	public void test02_dirtyContextBeforeTestMethod() throws Exception {
+	void dirtyContextBeforeTestMethod() throws Exception {
 		performAssertions(2);
 	}
 
 	@Test
+	@Order(3)
 	@DirtiesContext
-	// test## prefix required for @FixMethodOrder.
-	public void test03_dirtyContextAferTestMethod() throws Exception {
+	void dirtyContextAfterTestMethod() throws Exception {
 		performAssertions(2);
 	}
 
 	@Test
-	// test## prefix required for @FixMethodOrder.
-	public void test04() throws Exception {
+	@Order(4)
+	void backToBasics() throws Exception {
 		performAssertions(3);
 	}
 
 	private void performAssertions(int expectedContextCreationCount) throws Exception {
-		assertNotNull("context must not be null", this.context);
-		assertTrue("context must be active", this.context.isActive());
+		assertThat(this.context).as("context must not be null").isNotNull();
+		assertThat(this.context.isActive()).as("context must be active").isTrue();
 
-		assertNotNull("count must not be null", this.count);
-		assertEquals("count: ", expectedContextCreationCount, this.count.intValue());
+		assertThat(this.count).as("count must not be null").isNotNull();
+		assertThat(this.count.intValue()).as("count: ").isEqualTo(expectedContextCreationCount);
 
-		assertEquals("context creation count: ", expectedContextCreationCount, contextCount.get());
+		assertThat(contextCount.get()).as("context creation count: ").isEqualTo(expectedContextCreationCount);
+	}
+
+
+	@Configuration
+	static class Config {
+
+		@Bean
+		Integer count() {
+			return contextCount.incrementAndGet();
+		}
 	}
 
 }

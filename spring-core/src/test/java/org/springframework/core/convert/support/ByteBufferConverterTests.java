@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,13 +18,12 @@ package org.springframework.core.convert.support;
 
 import java.nio.ByteBuffer;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.converter.Converter;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link ByteBufferConverter}.
@@ -32,13 +31,13 @@ import static org.junit.Assert.*;
  * @author Phillip Webb
  * @author Juergen Hoeller
  */
-public class ByteBufferConverterTests {
+class ByteBufferConverterTests {
 
 	private GenericConversionService conversionService;
 
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		this.conversionService = new DefaultConversionService();
 		this.conversionService.addConverter(new ByteArrayToOtherTypeConverter());
 		this.conversionService.addConverter(new OtherTypeToByteArrayConverter());
@@ -46,49 +45,49 @@ public class ByteBufferConverterTests {
 
 
 	@Test
-	public void byteArrayToByteBuffer() throws Exception {
+	void byteArrayToByteBuffer() throws Exception {
 		byte[] bytes = new byte[] { 1, 2, 3 };
 		ByteBuffer convert = this.conversionService.convert(bytes, ByteBuffer.class);
-		assertThat(convert.array(), not(sameInstance(bytes)));
-		assertThat(convert.array(), equalTo(bytes));
+		assertThat(convert.array()).isNotSameAs(bytes);
+		assertThat(convert.array()).isEqualTo(bytes);
 	}
 
 	@Test
-	public void byteBufferToByteArray() throws Exception {
+	void byteBufferToByteArray() throws Exception {
 		byte[] bytes = new byte[] { 1, 2, 3 };
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 		byte[] convert = this.conversionService.convert(byteBuffer, byte[].class);
-		assertThat(convert, not(sameInstance(bytes)));
-		assertThat(convert, equalTo(bytes));
+		assertThat(convert).isNotSameAs(bytes);
+		assertThat(convert).isEqualTo(bytes);
 	}
 
 	@Test
-	public void byteBufferToOtherType() throws Exception {
+	void byteBufferToOtherType() throws Exception {
 		byte[] bytes = new byte[] { 1, 2, 3 };
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 		OtherType convert = this.conversionService.convert(byteBuffer, OtherType.class);
-		assertThat(convert.bytes, not(sameInstance(bytes)));
-		assertThat(convert.bytes, equalTo(bytes));
+		assertThat(convert.bytes).isNotSameAs(bytes);
+		assertThat(convert.bytes).isEqualTo(bytes);
 	}
 
 	@Test
-	public void otherTypeToByteBuffer() throws Exception {
+	void otherTypeToByteBuffer() throws Exception {
 		byte[] bytes = new byte[] { 1, 2, 3 };
 		OtherType otherType = new OtherType(bytes);
 		ByteBuffer convert = this.conversionService.convert(otherType, ByteBuffer.class);
-		assertThat(convert.array(), not(sameInstance(bytes)));
-		assertThat(convert.array(), equalTo(bytes));
+		assertThat(convert.array()).isNotSameAs(bytes);
+		assertThat(convert.array()).isEqualTo(bytes);
 	}
 
 	@Test
-	public void byteBufferToByteBuffer() throws Exception {
+	void byteBufferToByteBuffer() throws Exception {
 		byte[] bytes = new byte[] { 1, 2, 3 };
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 		ByteBuffer convert = this.conversionService.convert(byteBuffer, ByteBuffer.class);
-		assertThat(convert, not(sameInstance(byteBuffer.rewind())));
-		assertThat(convert, equalTo(byteBuffer.rewind()));
-		assertThat(convert, equalTo(ByteBuffer.wrap(bytes)));
-		assertThat(convert.array(), equalTo(bytes));
+		assertThat(convert).isNotSameAs(byteBuffer.rewind());
+		assertThat(convert).isEqualTo(byteBuffer.rewind());
+		assertThat(convert).isEqualTo(ByteBuffer.wrap(bytes));
+		assertThat(convert.array()).isEqualTo(bytes);
 	}
 
 
@@ -101,7 +100,6 @@ public class ByteBufferConverterTests {
 		}
 
 	}
-
 
 	private static class ByteArrayToOtherTypeConverter implements Converter<byte[], OtherType> {
 

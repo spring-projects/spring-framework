@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract {@link org.springframework.aop.TargetSource} implementation that
@@ -38,9 +39,10 @@ import org.springframework.aop.TargetSource;
  */
 public abstract class AbstractRefreshableTargetSource implements TargetSource, Refreshable {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	protected Object targetObject;
 
 	private long refreshCheckDelay = -1;
@@ -80,6 +82,7 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 	}
 
 	@Override
+	@Nullable
 	public final synchronized Object getTarget() {
 		if ((refreshCheckDelayElapsed() && requiresRefresh()) || this.targetObject == null) {
 			refresh();

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,12 +17,14 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.io.Writer;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Rob Harrop
@@ -38,7 +40,7 @@ public class PasswordInputTagTests extends InputTagTests {
 	public void passwordValueIsNotRenderedByDefault() throws Exception {
 		this.getTag().setPath("name");
 
-		assertEquals(Tag.SKIP_BODY, this.getTag().doStartTag());
+		assertThat(this.getTag().doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -56,7 +58,7 @@ public class PasswordInputTagTests extends InputTagTests {
 		this.getTag().setPath("name");
 		this.getPasswordTag().setShowPassword(true);
 
-		assertEquals(Tag.SKIP_BODY, this.getTag().doStartTag());
+		assertThat(this.getTag().doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -74,7 +76,7 @@ public class PasswordInputTagTests extends InputTagTests {
 		this.getTag().setPath("name");
 		this.getPasswordTag().setShowPassword(false);
 
-		assertEquals(Tag.SKIP_BODY, this.getTag().doStartTag());
+		assertThat(this.getTag().doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -87,13 +89,9 @@ public class PasswordInputTagTests extends InputTagTests {
 	@Test
 	@Override
 	public void dynamicTypeAttribute() throws JspException {
-		try {
-			this.getTag().setDynamicAttribute(null, "type", "email");
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException e) {
-			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.getTag().setDynamicAttribute(null, "type", "email"))
+			.withMessage("Attribute type=\"email\" is not allowed");
 	}
 
 	@Override

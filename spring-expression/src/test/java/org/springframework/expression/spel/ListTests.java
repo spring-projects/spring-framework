@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,13 +19,14 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.spel.ast.InlineList;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Test usage of inline lists.
@@ -145,19 +146,21 @@ public class ListTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expression = (SpelExpression) parser.parseExpression(expressionText);
 		SpelNode node = expression.getAST();
-		assertTrue(node instanceof InlineList);
+		boolean condition = node instanceof InlineList;
+		assertThat(condition).isTrue();
 		InlineList inlineList = (InlineList) node;
 		if (expectedToBeConstant) {
-			assertTrue(inlineList.isConstant());
+			assertThat(inlineList.isConstant()).isTrue();
 		}
 		else {
-			assertFalse(inlineList.isConstant());
+			assertThat(inlineList.isConstant()).isFalse();
 		}
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testInlineListWriting() {
 		// list should be unmodifiable
-		evaluate("{1, 2, 3, 4, 5}[0]=6", "[1, 2, 3, 4, 5]", unmodifiableClass);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				evaluate("{1, 2, 3, 4, 5}[0]=6", "[1, 2, 3, 4, 5]", unmodifiableClass));
 	}
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,9 +19,9 @@ package org.springframework.messaging.simp.broker;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -31,10 +31,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.ChannelInterceptorAdapter;
 import org.springframework.messaging.support.InterceptableChannel;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -49,7 +49,7 @@ import org.springframework.util.CollectionUtils;
 public abstract class AbstractBrokerMessageHandler
 		implements MessageHandler, ApplicationEventPublisherAware, SmartLifecycle {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = SimpLogging.forLogName(getClass());
 
 	private final SubscribableChannel clientInboundChannel;
 
@@ -60,9 +60,14 @@ public abstract class AbstractBrokerMessageHandler
 	private final Collection<String> destinationPrefixes;
 
 	@Nullable
+	private Predicate<String> userDestinationPredicate;
+
+	private boolean preservePublishOrder = false;
+
+	@Nullable
 	private ApplicationEventPublisher eventPublisher;
 
-	private AtomicBoolean brokerAvailable = new AtomicBoolean(false);
+	private AtomicBoolean brokerAvailable = new AtomicBoolean();
 
 	private final BrokerAvailabilityEvent availableEvent = new BrokerAvailabilityEvent(true, this);
 
@@ -70,7 +75,7 @@ public abstract class AbstractBrokerMessageHandler
 
 	private boolean autoStartup = true;
 
-	private volatile boolean running = false;
+	private volatile boolean running;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -124,8 +129,54 @@ public abstract class AbstractBrokerMessageHandler
 		return this.brokerChannel;
 	}
 
+	/**
+	 * Return destination prefixes prefixes to use to filter messages to forward
+	 * to the broker. Messages that have a destination and where the destination
+	 * doesn't match are ignored.
+	 * <p>By default this is not set.
+	 */
 	public Collection<String> getDestinationPrefixes() {
 		return this.destinationPrefixes;
+	}
+
+	/**
+	 * Configure a Predicate to identify messages with a user destination. When
+	 * no {@link #getDestinationPrefixes() destination prefixes} are configured,
+	 * this helps to recognize and skip user destination messages that need to
+	 * be pre-processed by the
+	 * {@link org.springframework.messaging.simp.user.UserDestinationMessageHandler}
+	 * before they reach the broker.
+	 * @param predicate the predicate to identify user messages with a non-null
+	 * destination as messages with a user destinations.
+	 * @since 5.3.4
+	 */
+	public void setUserDestinationPredicate(@Nullable Predicate<String> predicate) {
+		this.userDestinationPredicate = predicate;
+	}
+
+	/**
+	 * Whether the client must receive messages in the order of publication.
+	 * <p>By default messages sent to the {@code "clientOutboundChannel"} may
+	 * not be processed in the same order because the channel is backed by a
+	 * ThreadPoolExecutor that in turn does not guarantee processing in order.
+	 * <p>When this flag is set to {@code true} messages within the same session
+	 * will be sent to the {@code "clientOutboundChannel"} one at a time in
+	 * order to preserve the order of publication. Enable this only if needed
+	 * since there is some performance overhead to keep messages in order.
+	 * @param preservePublishOrder whether to publish in order
+	 * @since 5.1
+	 */
+	public void setPreservePublishOrder(boolean preservePublishOrder) {
+		OrderedMessageChannelDecorator.configureInterceptor(this.clientOutboundChannel, preservePublishOrder);
+		this.preservePublishOrder = preservePublishOrder;
+	}
+
+	/**
+	 * Whether to ensure messages are received in the order of publication.
+	 * @since 5.1
+	 */
+	public boolean isPreservePublishOrder() {
+		return this.preservePublishOrder;
 	}
 
 	@Override
@@ -147,18 +198,11 @@ public abstract class AbstractBrokerMessageHandler
 		return this.autoStartup;
 	}
 
-	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
-
 
 	@Override
 	public void start() {
 		synchronized (this.lifecycleMonitor) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Starting...");
-			}
+			logger.info("Starting...");
 			this.clientInboundChannel.subscribe(this);
 			this.brokerChannel.subscribe(this);
 			if (this.clientInboundChannel instanceof InterceptableChannel) {
@@ -176,9 +220,7 @@ public abstract class AbstractBrokerMessageHandler
 	@Override
 	public void stop() {
 		synchronized (this.lifecycleMonitor) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Stopping...");
-			}
+			logger.info("Stopping...");
 			stopInternal();
 			this.clientInboundChannel.unsubscribe(this);
 			this.brokerChannel.unsubscribe(this);
@@ -209,9 +251,7 @@ public abstract class AbstractBrokerMessageHandler
 	 */
 	@Override
 	public final boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
-		}
+		return this.running;
 	}
 
 	/**
@@ -244,9 +284,26 @@ public abstract class AbstractBrokerMessageHandler
 	protected abstract void handleMessageInternal(Message<?> message);
 
 
+	/**
+	 * Whether a message with the given destination should be processed. This is
+	 * the case if one of the following conditions is true:
+	 * <ol>
+	 * <li>The destination starts with one of the configured
+	 * {@link #getDestinationPrefixes() destination prefixes}.
+	 * <li>No prefixes are configured and the destination isn't matched
+	 * by the {@link #setUserDestinationPredicate(Predicate)
+	 * userDestinationPredicate}.
+	 * <li>The message has no destination.
+	 * </ol>
+	 * @param destination the destination to check
+	 * @return whether to process (true) or skip (false) the destination
+	 */
 	protected boolean checkDestinationPrefix(@Nullable String destination) {
-		if (destination == null || CollectionUtils.isEmpty(this.destinationPrefixes)) {
+		if (destination == null) {
 			return true;
+		}
+		if (CollectionUtils.isEmpty(this.destinationPrefixes)) {
+			return !isUserDestination(destination);
 		}
 		for (String prefix : this.destinationPrefixes) {
 			if (destination.startsWith(prefix)) {
@@ -254,6 +311,10 @@ public abstract class AbstractBrokerMessageHandler
 			}
 		}
 		return false;
+	}
+
+	private boolean isUserDestination(String destination) {
+		return (this.userDestinationPredicate != null && this.userDestinationPredicate.test(destination));
 	}
 
 	protected void publishBrokerAvailableEvent() {
@@ -276,11 +337,21 @@ public abstract class AbstractBrokerMessageHandler
 		}
 	}
 
+	/**
+	 * Get the MessageChannel to use for sending messages to clients, possibly
+	 * a per-session wrapper when {@code preservePublishOrder=true}.
+	 * @since 5.1
+	 */
+	protected MessageChannel getClientOutboundChannelForSession(String sessionId) {
+		return this.preservePublishOrder ?
+				new OrderedMessageChannelDecorator(getClientOutboundChannel(), logger) : getClientOutboundChannel();
+	}
+
 
 	/**
 	 * Detect unsent DISCONNECT messages and process them anyway.
 	 */
-	private class UnsentDisconnectChannelInterceptor extends ChannelInterceptorAdapter {
+	private class UnsentDisconnectChannelInterceptor implements ChannelInterceptor {
 
 		@Override
 		public void afterSendCompletion(

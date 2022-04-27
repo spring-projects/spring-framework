@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 import org.springframework.transaction.interceptor.DelegatingTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
@@ -40,6 +41,7 @@ import org.springframework.util.StringUtils;
 /**
  * Utility methods for working with transactions and data access related beans
  * within the <em>Spring TestContext Framework</em>.
+ *
  * <p>Mainly for internal use within the framework.
  *
  * @author Sam Brannen
@@ -47,8 +49,6 @@ import org.springframework.util.StringUtils;
  * @since 4.1
  */
 public abstract class TestContextTransactionUtils {
-
-	private static final Log logger = LogFactory.getLog(TestContextTransactionUtils.class);
 
 	/**
 	 * Default bean name for a {@link DataSource}: {@code "dataSource"}.
@@ -62,9 +62,8 @@ public abstract class TestContextTransactionUtils {
 	public static final String DEFAULT_TRANSACTION_MANAGER_NAME = "transactionManager";
 
 
-	private TestContextTransactionUtils() {
-		/* prevent instantiation */
-	}
+	private static final Log logger = LogFactory.getLog(TestContextTransactionUtils.class);
+
 
 	/**
 	 * Retrieve the {@link DataSource} to use for the supplied {@linkplain TestContext
@@ -80,10 +79,11 @@ public abstract class TestContextTransactionUtils {
 	 * <li>Attempt to look up the <em>primary</em> {@code DataSource} by type.
 	 * <li>Attempt to look up the {@code DataSource} by type and the
 	 * {@linkplain #DEFAULT_DATA_SOURCE_NAME default data source name}.
+	 * </ol>
 	 * @param testContext the test context for which the {@code DataSource}
 	 * should be retrieved; never {@code null}
-	 * @param name the name of the {@code DataSource} to retrieve; may be {@code null}
-	 * or <em>empty</em>
+	 * @param name the name of the {@code DataSource} to retrieve
+	 * (may be {@code null} or <em>empty</em>)
 	 * @return the {@code DataSource} to use, or {@code null} if not found
 	 * @throws BeansException if an error occurs while retrieving an explicitly
 	 * named {@code DataSource}
@@ -94,14 +94,14 @@ public abstract class TestContextTransactionUtils {
 		BeanFactory bf = testContext.getApplicationContext().getAutowireCapableBeanFactory();
 
 		try {
-			// look up by type and explicit name
+			// Look up by type and explicit name
 			if (StringUtils.hasText(name)) {
 				return bf.getBean(name, DataSource.class);
 			}
 		}
 		catch (BeansException ex) {
-			logger.error(
-				String.format("Failed to retrieve DataSource named '%s' for test context %s", name, testContext), ex);
+			logger.error(String.format("Failed to retrieve DataSource named '%s' for test context %s",
+					name, testContext), ex);
 			throw ex;
 		}
 
@@ -109,9 +109,9 @@ public abstract class TestContextTransactionUtils {
 			if (bf instanceof ListableBeanFactory) {
 				ListableBeanFactory lbf = (ListableBeanFactory) bf;
 
-				// look up single bean by type
-				Map<String, DataSource> dataSources = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf,
-					DataSource.class);
+				// Look up single bean by type
+				Map<String, DataSource> dataSources =
+						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, DataSource.class);
 				if (dataSources.size() == 1) {
 					return dataSources.values().iterator().next();
 				}
@@ -144,17 +144,18 @@ public abstract class TestContextTransactionUtils {
 	 * <li>Look up the transaction manager by type and explicit name, if the supplied
 	 * {@code name} is non-empty, throwing a {@link BeansException} if the named
 	 * transaction manager does not exist.
-	 * <li>Attempt to look up the single transaction manager by type.
-	 * <li>Attempt to look up the <em>primary</em> transaction manager by type.
 	 * <li>Attempt to look up the transaction manager via a
 	 * {@link TransactionManagementConfigurer}, if present.
+	 * <li>Attempt to look up the single transaction manager by type.
+	 * <li>Attempt to look up the <em>primary</em> transaction manager by type.
 	 * <li>Attempt to look up the transaction manager by type and the
 	 * {@linkplain #DEFAULT_TRANSACTION_MANAGER_NAME default transaction manager
 	 * name}.
+	 * </ol>
 	 * @param testContext the test context for which the transaction manager
 	 * should be retrieved; never {@code null}
-	 * @param name the name of the transaction manager to retrieve; may be
-	 * {@code null} or <em>empty</em>
+	 * @param name the name of the transaction manager to retrieve
+	 * (may be {@code null} or <em>empty</em>)
 	 * @return the transaction manager to use, or {@code null} if not found
 	 * @throws BeansException if an error occurs while retrieving an explicitly
 	 * named transaction manager
@@ -167,14 +168,14 @@ public abstract class TestContextTransactionUtils {
 		BeanFactory bf = testContext.getApplicationContext().getAutowireCapableBeanFactory();
 
 		try {
-			// look up by type and explicit name
+			// Look up by type and explicit name
 			if (StringUtils.hasText(name)) {
 				return bf.getBean(name, PlatformTransactionManager.class);
 			}
 		}
 		catch (BeansException ex) {
-			logger.error(String.format("Failed to retrieve transaction manager named '%s' for test context %s", name,
-				testContext), ex);
+			logger.error(String.format("Failed to retrieve transaction manager named '%s' for test context %s",
+					name, testContext), ex);
 			throw ex;
 		}
 
@@ -182,28 +183,32 @@ public abstract class TestContextTransactionUtils {
 			if (bf instanceof ListableBeanFactory) {
 				ListableBeanFactory lbf = (ListableBeanFactory) bf;
 
-				// look up single bean by type
-				Map<String, PlatformTransactionManager> txMgrs = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf,
-					PlatformTransactionManager.class);
+				// Look up single TransactionManagementConfigurer
+				Map<String, TransactionManagementConfigurer> configurers =
+						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, TransactionManagementConfigurer.class);
+				Assert.state(configurers.size() <= 1,
+						"Only one TransactionManagementConfigurer may exist in the ApplicationContext");
+				if (configurers.size() == 1) {
+					TransactionManager tm = configurers.values().iterator().next().annotationDrivenTransactionManager();
+					Assert.state(tm instanceof PlatformTransactionManager, () ->
+						"Transaction manager specified via TransactionManagementConfigurer " +
+						"is not a PlatformTransactionManager: " + tm);
+					return (PlatformTransactionManager) tm;
+				}
+
+				// Look up single bean by type
+				Map<String, PlatformTransactionManager> txMgrs =
+						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, PlatformTransactionManager.class);
 				if (txMgrs.size() == 1) {
 					return txMgrs.values().iterator().next();
 				}
 
 				try {
-					// look up single bean by type, with support for 'primary' beans
+					// Look up single bean by type, with support for 'primary' beans
 					return bf.getBean(PlatformTransactionManager.class);
 				}
 				catch (BeansException ex) {
 					logBeansException(testContext, ex, PlatformTransactionManager.class);
-				}
-
-				// look up single TransactionManagementConfigurer
-				Map<String, TransactionManagementConfigurer> configurers = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-					lbf, TransactionManagementConfigurer.class);
-				Assert.state(configurers.size() <= 1,
-						"Only one TransactionManagementConfigurer may exist in the ApplicationContext");
-				if (configurers.size() == 1) {
-					return configurers.values().iterator().next().annotationDrivenTransactionManager();
 				}
 			}
 
@@ -227,13 +232,13 @@ public abstract class TestContextTransactionUtils {
 	 * Create a delegating {@link TransactionAttribute} for the supplied target
 	 * {@link TransactionAttribute} and {@link TestContext}, using the names of
 	 * the test class and test method to build the name of the transaction.
-	 *
-	 * @param testContext the {@code TestContext} upon which to base the name; never {@code null}
-	 * @param targetAttribute the {@code TransactionAttribute} to delegate to; never {@code null}
+	 * @param testContext the {@code TestContext} upon which to base the name
+	 * @param targetAttribute the {@code TransactionAttribute} to delegate to
 	 * @return the delegating {@code TransactionAttribute}
 	 */
-	public static TransactionAttribute createDelegatingTransactionAttribute(TestContext testContext,
-			TransactionAttribute targetAttribute) {
+	public static TransactionAttribute createDelegatingTransactionAttribute(
+			TestContext testContext, TransactionAttribute targetAttribute) {
+
 		Assert.notNull(testContext, "TestContext must not be null");
 		Assert.notNull(targetAttribute, "Target TransactionAttribute must not be null");
 		return new TestContextTransactionAttribute(targetAttribute, testContext);
@@ -251,6 +256,7 @@ public abstract class TestContextTransactionUtils {
 		}
 
 		@Override
+		@Nullable
 		public String getName() {
 			return this.name;
 		}

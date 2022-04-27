@@ -1,0 +1,14 @@
+[[languages]]
+= Language Support
+:toc: left
+:toclevels: 4
+:tabsize: 4
+:docinfo1:
+
+include::languages/kotlin.adoc[leveloffset=+1]
+
+include::languages/groovy.adoc[leveloffset=+1]
+
+include::languages/dynamic-languages.adoc[leveloffset=+1]
+
+

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,40 +18,34 @@ package org.springframework.aop.aspectj;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class AspectJExpressionPointcutAdvisorTests {
-
-	private ITestBean testBean;
-
-	private CallCountingInterceptor interceptor;
-
-	@Before
-	public void setUp() {
-		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
-		testBean = (ITestBean) ctx.getBean("testBean");
-		interceptor = (CallCountingInterceptor) ctx.getBean("interceptor");
-	}
+class AspectJExpressionPointcutAdvisorTests {
 
 	@Test
-	public void testPointcutting() {
-		assertEquals("Count should be 0", 0, interceptor.getCount());
+	void pointcutting() {
+		ClassPathXmlApplicationContext ctx =
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+
+		ITestBean testBean = ctx.getBean("testBean", ITestBean.class);
+		CallCountingInterceptor interceptor = ctx.getBean("interceptor", CallCountingInterceptor.class);
+		assertThat(interceptor.getCount()).as("Count").isEqualTo(0);
 		testBean.getSpouses();
-		assertEquals("Count should be 1", 1, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Count").isEqualTo(1);
 		testBean.getSpouse();
-		assertEquals("Count should be 1", 1, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Count").isEqualTo(1);
+
+		ctx.close();
 	}
 
 }

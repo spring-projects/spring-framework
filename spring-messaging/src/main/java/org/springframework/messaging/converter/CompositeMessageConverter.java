@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -51,6 +51,7 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 
 
 	@Override
+	@Nullable
 	public Object fromMessage(Message<?> message, Class<?> targetClass) {
 		for (MessageConverter converter : getConverters()) {
 			Object result = converter.fromMessage(message, targetClass);
@@ -62,6 +63,7 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	}
 
 	@Override
+	@Nullable
 	public Object fromMessage(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		for (MessageConverter converter : getConverters()) {
 			Object result = (converter instanceof SmartMessageConverter ?
@@ -75,6 +77,7 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	}
 
 	@Override
+	@Nullable
 	public Message<?> toMessage(Object payload, @Nullable MessageHeaders headers) {
 		for (MessageConverter converter : getConverters()) {
 			Message<?> result = converter.toMessage(payload, headers);
@@ -86,6 +89,7 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	}
 
 	@Override
+	@Nullable
 	public Message<?> toMessage(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 		for (MessageConverter converter : getConverters()) {
 			Message<?> result = (converter instanceof SmartMessageConverter ?

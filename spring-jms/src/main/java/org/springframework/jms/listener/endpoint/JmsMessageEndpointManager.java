@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -104,7 +104,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * {@link #setActivationSpecConfig JmsActivationSpecConfig} objects.
 	 * <p>This factory is dependent on the concrete JMS provider, e.g. on ActiveMQ.
 	 * The default implementation simply guesses the ActivationSpec class name
-	 * from the provider's class name (e.g. "ActiveMQResourceAdapter" ->
+	 * from the provider's class name (e.g. "ActiveMQResourceAdapter" &rarr;
 	 * "ActiveMQActivationSpec" in the same package), and populates the
 	 * ActivationSpec properties as suggested by the JCA 1.5 specification
 	 * (plus a couple of autodetected vendor-specific properties).
@@ -191,6 +191,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	}
 
 	@Override
+	@Nullable
 	public MessageConverter getMessageConverter() {
 		JmsActivationSpecConfig config = getActivationSpecConfig();
 		if (config != null) {
@@ -200,6 +201,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	}
 
 	@Override
+	@Nullable
 	public DestinationResolver getDestinationResolver() {
 		if (this.activationSpecFactory instanceof StandardJmsActivationSpecFactory) {
 			return ((StandardJmsActivationSpecFactory) this.activationSpecFactory).getDestinationResolver();
@@ -226,6 +228,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	}
 
 	@Override
+	@Nullable
 	public QosSettings getReplyQosSettings() {
 		JmsActivationSpecConfig config = getActivationSpecConfig();
 		if (config != null) {

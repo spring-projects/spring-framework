@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,18 +16,23 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +42,7 @@ import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.FormEncodingType;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.util.KeyDataPair;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
 import org.springframework.beans.Mergeable;
@@ -44,6 +50,7 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.SmartRequestBuilder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -106,14 +113,16 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 
+	@Override
 	public MockHttpServletRequest buildRequest(ServletContext servletContext) {
 		Charset charset = getCharset();
 		String httpMethod = this.webRequest.getHttpMethod().name();
 		UriComponents uriComponents = uriComponents();
 		String path = uriComponents.getPath();
 
-		MockHttpServletRequest request = new HtmlUnitMockHttpServletRequest(
-				servletContext, httpMethod, (path != null ? path : ""));
+		MockHttpServletRequest request =
+				new HtmlUnitMockHttpServletRequest(servletContext, httpMethod, (path != null ? path : ""));
+
 		parent(request, this.parentBuilder);
 		String host = uriComponents.getHost();
 		request.setServerName(host != null ? host : "");  // needs to be first for additional headers
@@ -289,13 +298,11 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 		Cookie[] parentCookies = request.getCookies();
 		if (parentCookies != null) {
-			for (Cookie cookie : parentCookies) {
-				cookies.add(cookie);
-			}
+			Collections.addAll(cookies, parentCookies);
 		}
 
 		if (!ObjectUtils.isEmpty(cookies)) {
-			request.setCookies(cookies.toArray(new Cookie[cookies.size()]));
+			request.setCookies(cookies.toArray(new Cookie[0]));
 		}
 	}
 
@@ -364,7 +371,29 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			});
 		});
 		for (NameValuePair param : this.webRequest.getRequestParameters()) {
-			request.addParameter(param.getName(), param.getValue());
+			if (param instanceof KeyDataPair) {
+				KeyDataPair pair = (KeyDataPair) param;
+				File file = pair.getFile();
+				MockPart part;
+				if (file != null) {
+					part = new MockPart(pair.getName(), file.getName(), readAllBytes(file));
+				}
+				else {
+					// Support empty file upload OR file upload via setData().
+					// For an empty file upload, getValue() returns an empty string, and
+					// getData() returns null.
+					// For a file upload via setData(), getData() returns the file data, and
+					// getValue() returns the file name (if set) or an empty string.
+					part = new MockPart(pair.getName(), pair.getValue(), pair.getData());
+				}
+				MediaType mediaType = (pair.getMimeType() != null ? MediaType.valueOf(pair.getMimeType()) :
+						MediaType.APPLICATION_OCTET_STREAM);
+				part.getHeaders().setContentType(mediaType);
+				request.addPart(part);
+			}
+			else {
+				request.addParameter(param.getName(), param.getValue());
+			}
 		}
 	}
 
@@ -373,6 +402,15 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			return URLDecoder.decode(value, "UTF-8");
 		}
 		catch (UnsupportedEncodingException ex) {
+			throw new IllegalStateException(ex);
+		}
+	}
+
+	private byte[] readAllBytes(File file) {
+		try {
+			return Files.readAllBytes(file.toPath());
+		}
+		catch (IOException ex) {
 			throw new IllegalStateException(ex);
 		}
 	}
@@ -446,6 +484,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			super(servletContext, method, requestURI);
 		}
 
+		@Override
 		public HttpSession getSession(boolean create) {
 			HttpSession session = super.getSession(false);
 			if (session == null && create) {
@@ -460,14 +499,6 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 				session = newSession;
 			}
 			return session;
-		}
-
-		public HttpSession getSession() {
-			return super.getSession();
-		}
-
-		public void setSession(HttpSession session) {
-			super.setSession(session);
 		}
 	}
 
@@ -491,12 +522,13 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			this.request = request;
 		}
 
+		@Override
 		public void invalidate() {
 			super.invalidate();
 			synchronized (HtmlUnitRequestBuilder.this.sessions) {
 				HtmlUnitRequestBuilder.this.sessions.remove(getId());
 			}
-			removeSessionCookie(request, getId());
+			removeSessionCookie(this.request, getId());
 		}
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,15 +16,13 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.core.MethodParameter;
@@ -36,13 +34,18 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.ControllerAdviceBean;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.BDDMockito.given;
 
 /**
  * Unit tests for {@link RequestResponseBodyAdviceChain}.
@@ -65,7 +68,7 @@ public class RequestResponseBodyAdviceChainTests {
 	private ServerHttpResponse response;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.body = "body";
 		this.contentType = MediaType.TEXT_PLAIN;
@@ -80,7 +83,6 @@ public class RequestResponseBodyAdviceChainTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void requestBodyAdvice() throws IOException {
-
 		RequestBodyAdvice requestAdvice = Mockito.mock(RequestBodyAdvice.class);
 		ResponseBodyAdvice<String> responseAdvice = Mockito.mock(ResponseBodyAdvice.class);
 		List<Object> advice = Arrays.asList(requestAdvice, responseAdvice);
@@ -91,20 +93,19 @@ public class RequestResponseBodyAdviceChainTests {
 		given(requestAdvice.beforeBodyRead(eq(this.request), eq(this.paramType), eq(String.class),
 				eq(this.converterType))).willReturn(wrapped);
 
-		assertSame(wrapped, chain.beforeBodyRead(this.request, this.paramType, String.class, this.converterType));
+		assertThat(chain.beforeBodyRead(this.request, this.paramType, String.class, this.converterType)).isSameAs(wrapped);
 
 		String modified = "body++";
 		given(requestAdvice.afterBodyRead(eq(this.body), eq(this.request), eq(this.paramType),
 				eq(String.class), eq(this.converterType))).willReturn(modified);
 
-		assertEquals(modified, chain.afterBodyRead(this.body, this.request, this.paramType,
-				String.class, this.converterType));
+		assertThat(chain.afterBodyRead(this.body, this.request, this.paramType,
+				String.class, this.converterType)).isEqualTo(modified);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void responseBodyAdvice() {
-
 		RequestBodyAdvice requestAdvice = Mockito.mock(RequestBodyAdvice.class);
 		ResponseBodyAdvice<String> responseAdvice = Mockito.mock(ResponseBodyAdvice.class);
 		List<Object> advice = Arrays.asList(requestAdvice, responseAdvice);
@@ -118,31 +119,29 @@ public class RequestResponseBodyAdviceChainTests {
 		String actual = (String) chain.beforeBodyWrite(this.body, this.returnType, this.contentType,
 				this.converterType, this.request, this.response);
 
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
 	public void controllerAdvice() {
-
 		Object adviceBean = new ControllerAdviceBean(new MyControllerAdvice());
-		RequestResponseBodyAdviceChain chain = new RequestResponseBodyAdviceChain(Arrays.asList(adviceBean));
+		RequestResponseBodyAdviceChain chain = new RequestResponseBodyAdviceChain(Collections.singletonList(adviceBean));
 
 		String actual = (String) chain.beforeBodyWrite(this.body, this.returnType, this.contentType,
 				this.converterType, this.request, this.response);
 
-		assertEquals("body-MyControllerAdvice", actual);
+		assertThat(actual).isEqualTo("body-MyControllerAdvice");
 	}
 
 	@Test
 	public void controllerAdviceNotApplicable() {
-
 		Object adviceBean = new ControllerAdviceBean(new TargetedControllerAdvice());
-		RequestResponseBodyAdviceChain chain = new RequestResponseBodyAdviceChain(Arrays.asList(adviceBean));
+		RequestResponseBodyAdviceChain chain = new RequestResponseBodyAdviceChain(Collections.singletonList(adviceBean));
 
 		String actual = (String) chain.beforeBodyWrite(this.body, this.returnType, this.contentType,
 				this.converterType, this.request, this.response);
 
-		assertEquals(this.body, actual);
+		assertThat(actual).isEqualTo(this.body);
 	}
 
 
@@ -154,7 +153,6 @@ public class RequestResponseBodyAdviceChainTests {
 			return true;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public String beforeBodyWrite(String body, MethodParameter returnType,
 				MediaType contentType, Class<? extends HttpMessageConverter<?>> converterType,
@@ -164,6 +162,7 @@ public class RequestResponseBodyAdviceChainTests {
 		}
 	}
 
+
 	@ControllerAdvice(annotations = Controller.class)
 	private static class TargetedControllerAdvice implements ResponseBodyAdvice<String> {
 
@@ -172,7 +171,6 @@ public class RequestResponseBodyAdviceChainTests {
 			return true;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public String beforeBodyWrite(String body, MethodParameter returnType,
 				MediaType contentType, Class<? extends HttpMessageConverter<?>> converterType,
@@ -181,6 +179,7 @@ public class RequestResponseBodyAdviceChainTests {
 			return body + "-TargetedControllerAdvice";
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	@ResponseBody

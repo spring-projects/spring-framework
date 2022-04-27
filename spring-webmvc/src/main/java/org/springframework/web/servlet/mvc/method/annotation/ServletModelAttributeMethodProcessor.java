@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Collections;
 import java.util.Map;
+
 import javax.servlet.ServletRequest;
 
 import org.springframework.core.MethodParameter;
@@ -45,6 +46,7 @@ import org.springframework.web.servlet.HandlerMapping;
  * model attribute name and there is an appropriate type conversion strategy.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodProcessor {
@@ -68,19 +70,19 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * @see #createAttributeFromRequestValue
 	 */
 	@Override
-	protected final Object createAttribute(String attributeName, MethodParameter methodParam,
+	protected final Object createAttribute(String attributeName, MethodParameter parameter,
 			WebDataBinderFactory binderFactory, NativeWebRequest request) throws Exception {
 
 		String value = getRequestValueForAttribute(attributeName, request);
 		if (value != null) {
 			Object attribute = createAttributeFromRequestValue(
-					value, attributeName, methodParam, binderFactory, request);
+					value, attributeName, parameter, binderFactory, request);
 			if (attribute != null) {
 				return attribute;
 			}
 		}
 
-		return super.createAttribute(attributeName, methodParam, binderFactory, request);
+		return super.createAttribute(attributeName, parameter, binderFactory, request);
 	}
 
 	/**
@@ -106,8 +108,8 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	protected final Map<String, String> getUriTemplateVariables(NativeWebRequest request) {
+		@SuppressWarnings("unchecked")
 		Map<String, String> variables = (Map<String, String>) request.getAttribute(
 				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 		return (variables != null ? variables : Collections.emptyMap());
@@ -120,25 +122,24 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * {@link Converter} that can perform the conversion.
 	 * @param sourceValue the source value to create the model attribute from
 	 * @param attributeName the name of the attribute (never {@code null})
-	 * @param methodParam the method parameter
+	 * @param parameter the method parameter
 	 * @param binderFactory for creating WebDataBinder instance
 	 * @param request the current request
 	 * @return the created model attribute, or {@code null} if no suitable
 	 * conversion found
-	 * @throws Exception
 	 */
 	@Nullable
 	protected Object createAttributeFromRequestValue(String sourceValue, String attributeName,
-			MethodParameter methodParam, WebDataBinderFactory binderFactory, NativeWebRequest request)
+			MethodParameter parameter, WebDataBinderFactory binderFactory, NativeWebRequest request)
 			throws Exception {
 
 		DataBinder binder = binderFactory.createBinder(request, null, attributeName);
 		ConversionService conversionService = binder.getConversionService();
 		if (conversionService != null) {
 			TypeDescriptor source = TypeDescriptor.valueOf(String.class);
-			TypeDescriptor target = new TypeDescriptor(methodParam);
+			TypeDescriptor target = new TypeDescriptor(parameter);
 			if (conversionService.canConvert(source, target)) {
-				return binder.convertIfNecessary(sourceValue, methodParam.getParameterType(), methodParam);
+				return binder.convertIfNecessary(sourceValue, parameter.getParameterType(), parameter);
 			}
 		}
 		return null;
@@ -155,6 +156,25 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 		Assert.state(servletRequest != null, "No ServletRequest");
 		ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
 		servletBinder.bind(servletRequest);
+	}
+
+	@Override
+	@Nullable
+	public Object resolveConstructorArgument(String paramName, Class<?> paramType, NativeWebRequest request)
+			throws Exception {
+
+		Object value = super.resolveConstructorArgument(paramName, paramType, request);
+		if (value != null) {
+			return value;
+		}
+		ServletRequest servletRequest = request.getNativeRequest(ServletRequest.class);
+		if (servletRequest != null) {
+			String attr = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+			@SuppressWarnings("unchecked")
+			Map<String, String> uriVars = (Map<String, String>) servletRequest.getAttribute(attr);
+			return uriVars.get(paramName);
+		}
+		return null;
 	}
 
 }

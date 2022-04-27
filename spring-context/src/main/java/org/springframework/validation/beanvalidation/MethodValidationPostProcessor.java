@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.validation.beanvalidation;
 
 import java.lang.annotation.Annotation;
+
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
@@ -49,7 +50,7 @@ import org.springframework.validation.annotation.Validated;
  * inline constraint annotations. Validation groups can be specified through {@code @Validated}
  * as well. By default, JSR-303 will validate against its default group only.
  *
- * <p>As of Spring 5.0, this functionality requires a Bean Validation 1.1 provider.
+ * <p>As of Spring 5.0, this functionality requires a Bean Validation 1.1+ provider.
  *
  * @author Juergen Hoeller
  * @since 3.1

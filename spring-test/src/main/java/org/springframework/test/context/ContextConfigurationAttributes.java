@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -300,8 +300,8 @@ public class ContextConfigurationAttributes {
 	 * Get the name of the context hierarchy level that was declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
 	 * @return the name of the context hierarchy level or {@code null} if not applicable
-	 * @see ContextConfiguration#name()
 	 * @since 3.2.2
+	 * @see ContextConfiguration#name()
 	 */
 	@Nullable
 	public String getName() {
@@ -331,7 +331,7 @@ public class ContextConfigurationAttributes {
 	 * {@link #getContextLoaderClass() ContextLoader class}.
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
-	<bean id="optimizedTestBean" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="optimizedTestBean" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name" value="Optimized"/>
 	</bean>
 
-	<bean id="countingAdvice" class="org.springframework.tests.aop.advice.CountingBeforeAdvice"/>
+	<bean id="countingAdvice" class="org.springframework.aop.testfixture.advice.CountingBeforeAdvice"/>
 
 	<bean id="advisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
 		<property name="advice" ref="countingAdvice"/>

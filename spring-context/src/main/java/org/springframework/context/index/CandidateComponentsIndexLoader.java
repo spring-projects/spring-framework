@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * @author Stephane Nicoll
  * @since 5.0
  */
-public class CandidateComponentsIndexLoader {
+public final class CandidateComponentsIndexLoader {
 
 	/**
 	 * The location to look for components.
@@ -48,13 +48,13 @@ public class CandidateComponentsIndexLoader {
 	public static final String COMPONENTS_RESOURCE_LOCATION = "META-INF/spring.components";
 
 	/**
-	 * System property that instructs Spring to ignore the index, i.e.
+	 * System property that instructs Spring to ignore the components index, i.e.
 	 * to always return {@code null} from {@link #loadIndex(ClassLoader)}.
 	 * <p>The default is "false", allowing for regular use of the index. Switching this
 	 * flag to {@code true} fulfills a corner case scenario when an index is partially
 	 * available for some libraries (or use cases) but couldn't be built for the whole
 	 * application. In this case, the application context fallbacks to a regular
-	 * classpath arrangement (i.e. as no index was present at all).
+	 * classpath arrangement (i.e. as though no index were present at all).
 	 */
 	public static final String IGNORE_INDEX = "spring.index.ignore";
 
@@ -65,6 +65,10 @@ public class CandidateComponentsIndexLoader {
 
 	private static final ConcurrentMap<ClassLoader, CandidateComponentsIndex> cache =
 			new ConcurrentReferenceHashMap<>();
+
+
+	private CandidateComponentsIndexLoader() {
+	}
 
 
 	/**
@@ -103,7 +107,7 @@ public class CandidateComponentsIndexLoader {
 				result.add(properties);
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Loaded " + result.size() + "] index(es)");
+				logger.debug("Loaded " + result.size() + " index(es)");
 			}
 			int totalCount = result.stream().mapToInt(Properties::size).sum();
 			return (totalCount > 0 ? new CandidateComponentsIndex(result) : null);

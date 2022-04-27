@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,8 @@
 
 package org.springframework.web.util.pattern;
 
-import org.springframework.http.server.reactive.PathContainer.Element;
-import org.springframework.http.server.reactive.PathContainer.PathSegment;
+import org.springframework.http.server.PathContainer.Element;
+import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
@@ -50,7 +50,7 @@ class SingleCharWildcardedPathElement extends PathElement {
 		}
 		else {
 			this.text = new char[literalText.length];
-			for (int i = 0; i < len; i++) {
+			for (int i = 0; i < this.len; i++) {
 				this.text[i] = Character.toLowerCase(literalText[i]);
 			}
 		}
@@ -69,30 +69,29 @@ class SingleCharWildcardedPathElement extends PathElement {
 			return false;
 		}
 		String value = ((PathSegment)element).valueToMatch();
-		if (value.length() != len) {
+		if (value.length() != this.len) {
 			// Not enough data to match this path element
 			return false;
 		}
-		
-		char[] data = ((PathSegment)element).valueToMatchAsChars();
+
 		if (this.caseSensitive) {
-			for (int i = 0; i < len; i++) {
+			for (int i = 0; i < this.len; i++) {
 				char ch = this.text[i];
-				if ((ch != '?') && (ch != data[i])) {
+				if ((ch != '?') && (ch != value.charAt((i)))) {
 					return false;
 				}
 			}
 		}
 		else {
-			for (int i = 0; i < len; i++) {
+			for (int i = 0; i < this.len; i++) {
 				char ch = this.text[i];
 				// TODO revisit performance if doing a lot of case insensitive matching
-				if ((ch != '?') && (ch != Character.toLowerCase(data[i]))) {
+				if ((ch != '?') && (ch != Character.toLowerCase(value.charAt(i)))) {
 					return false;
 				}
 			}
 		}
-		
+
 		pathIndex++;
 		if (isNoMorePattern()) {
 			if (matchingContext.determineRemainingPath) {
@@ -104,16 +103,13 @@ class SingleCharWildcardedPathElement extends PathElement {
 					return true;
 				}
 				else {
-					return (matchingContext.isAllowOptionalTrailingSlash() &&
+					return (matchingContext.isMatchOptionalTrailingSeparator() &&
 							(pathIndex + 1) == matchingContext.pathLength &&
 							matchingContext.isSeparator(pathIndex));
 				}
 			}
 		}
 		else {
-			if (matchingContext.isMatchStartMatching && pathIndex == matchingContext.pathLength) {
-				return true;  // no more data but everything matched so far
-			}
 			return (this.next != null && this.next.matches(pathIndex, matchingContext));
 		}
 	}
@@ -125,17 +121,18 @@ class SingleCharWildcardedPathElement extends PathElement {
 
 	@Override
 	public int getNormalizedLength() {
-		return len;
+		return this.len;
 	}
 
-
-	public String toString() {
-		return "SingleCharWildcarded(" + String.valueOf(this.text) + ")";
-	}
-	
 	@Override
 	public char[] getChars() {
 		return this.text;
+	}
+
+
+	@Override
+	public String toString() {
+		return "SingleCharWildcarded(" + String.valueOf(this.text) + ")";
 	}
 
 }

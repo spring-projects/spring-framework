@@ -19,4 +19,7 @@ VALUES('Dilbert')
 
 
 INSERT INTO user VALUES('Dogbert')@@
+
+%% another custom single-line comment
+
 INSERT INTO user VALUES('Catbert')@@

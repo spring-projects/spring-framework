@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,8 +44,8 @@ import org.springframework.web.util.UriUtils;
  * URI template in which case the URI template variables will be replaced with
  * values from the model or with URI variables from the current request.
  *
- * <p>By default {@link HttpStatus#SEE_OTHER} is used but alternate status
- * codes may be via constructor or setters arguments.
+ * <p>By default {@link HttpStatus#SEE_OTHER} is used but alternate status codes
+ * may be supplied via constructor or setters arguments.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
@@ -56,9 +56,9 @@ public class RedirectView extends AbstractUrlBasedView {
 	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 
-	private boolean contextRelative = true;
-
 	private HttpStatus statusCode = HttpStatus.SEE_OTHER;
+
+	private boolean contextRelative = true;
 
 	private boolean propagateQuery = false;
 
@@ -74,7 +74,7 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	/**
 	 * Create a new {@code RedirectView} with the given redirect URL.
-	 * Status code {@link HttpStatus#SEE_OTHER} is used by default.
+	 * <p>Status code {@link HttpStatus#SEE_OTHER} is used by default.
 	 */
 	public RedirectView(String redirectUrl) {
 		super(redirectUrl);
@@ -90,22 +90,6 @@ public class RedirectView extends AbstractUrlBasedView {
 		setStatusCode(statusCode);
 	}
 
-
-	/**
-	 * Whether to interpret a given redirect URLs that starts with a slash ("/")
-	 * as relative to the current context path ({@code true}, the default) or to
-	 * the web server root ({@code false}).
-	 */
-	public void setContextRelative(boolean contextRelative) {
-		this.contextRelative = contextRelative;
-	}
-
-	/**
-	 * Whether to interpret URLs as relative to the current context path.
-	 */
-	public boolean isContextRelative() {
-		return this.contextRelative;
-	}
 
 	/**
 	 * Set an alternate redirect status code such as
@@ -125,6 +109,22 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * Whether to interpret a given redirect URL that starts with a slash ("/")
+	 * as relative to the current context path ({@code true}, the default) or
+	 * relative to the web server root ({@code false}).
+	 */
+	public void setContextRelative(boolean contextRelative) {
+		this.contextRelative = contextRelative;
+	}
+
+	/**
+	 * Whether to interpret URLs as relative to the current context path.
+	 */
+	public boolean isContextRelative() {
+		return this.contextRelative;
+	}
+
+	/**
 	 * Whether to append the query string of the current URL to the redirect URL
 	 * ({@code true}) or not ({@code false}, the default).
 	 */
@@ -141,10 +141,9 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	/**
 	 * Configure one or more hosts associated with the application.
-	 * All other hosts will be considered external hosts.
-	 * <p>In effect this provides a way turn off encoding via
-	 * {@link ServerHttpResponse#encodeUrl(String)} for URLs that have a
-	 * host and that host is not listed as a known host.
+	 * <p>All other hosts will be considered external hosts.
+	 * <p>In effect this provides a way turn off encoding for URLs that
+	 * have a host and that host is not listed as a known host.
 	 * <p>If not set (the default) all redirect URLs are encoded.
 	 * @param hosts one or more application hosts
 	 */
@@ -221,10 +220,9 @@ public class RedirectView extends AbstractUrlBasedView {
 		return (processor != null ? processor.processUrl(exchange, result) : result);
 	}
 
-	@SuppressWarnings("unchecked")
 	private Map<String, String> getCurrentUriVariables(ServerWebExchange exchange) {
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		return exchange.getAttributeOrDefault(name, Collections.<String, String>emptyMap());
+		return exchange.getAttributeOrDefault(name, Collections.emptyMap());
 	}
 
 	/**
@@ -245,13 +243,13 @@ public class RedirectView extends AbstractUrlBasedView {
 		while (found) {
 			String name = matcher.group(1);
 			Object value = (model.containsKey(name) ? model.get(name) : uriVariables.get(name));
-			Assert.notNull(value, "No value for URI variable '" + name + "'");
-			result.append(targetUrl.substring(endLastMatch, matcher.start()));
+			Assert.notNull(value, () -> "No value for URI variable '" + name + "'");
+			result.append(targetUrl, endLastMatch, matcher.start());
 			result.append(encodeUriVariable(value.toString()));
 			endLastMatch = matcher.end();
 			found = matcher.find();
 		}
-		result.append(targetUrl.substring(endLastMatch, targetUrl.length()));
+		result.append(targetUrl, endLastMatch, targetUrl.length());
 		return result;
 	}
 
@@ -269,7 +267,7 @@ public class RedirectView extends AbstractUrlBasedView {
 			return new StringBuilder(targetUrl);
 		}
 
-		int index = targetUrl.indexOf("#");
+		int index = targetUrl.indexOf('#');
 		String fragment = (index > -1 ? targetUrl.substring(index) : null);
 
 		StringBuilder result = new StringBuilder();
@@ -284,14 +282,14 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Send a redirect back to the HTTP client
+	 * Send a redirect back to the HTTP client.
 	 * @param targetUrl the target URL to redirect to
 	 * @param exchange current exchange
 	 */
 	protected Mono<Void> sendRedirect(String targetUrl, ServerWebExchange exchange) {
+		String transformedUrl = (isRemoteHost(targetUrl) ? targetUrl : exchange.transformUrl(targetUrl));
 		ServerHttpResponse response = exchange.getResponse();
-		String encodedURL = (isRemoteHost(targetUrl) ? targetUrl : response.encodeUrl(targetUrl));
-		response.getHeaders().setLocation(URI.create(encodedURL));
+		response.getHeaders().setLocation(URI.create(transformedUrl));
 		response.setStatusCode(getStatusCode());
 		return Mono.empty();
 	}
@@ -303,14 +301,14 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * property is configured and the target URL has a host that does not match.
 	 * @param targetUrl the target redirect URL
 	 * @return {@code true} the target URL has a remote host, {@code false} if it
-	 * the URL does not have a host or the "host" property is not configured.
+	 * the URL does not have a host or the "host" property is not configured
 	 */
 	protected boolean isRemoteHost(String targetUrl) {
 		if (ObjectUtils.isEmpty(this.hosts)) {
 			return false;
 		}
 		String targetHost = UriComponentsBuilder.fromUriString(targetUrl).build().getHost();
-		if (StringUtils.isEmpty(targetHost)) {
+		if (!StringUtils.hasLength(targetHost)) {
 			return false;
 		}
 		for (String host : this.hosts) {

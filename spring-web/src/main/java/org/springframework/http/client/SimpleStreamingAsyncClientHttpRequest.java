@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpHeaders;
@@ -30,13 +29,15 @@ import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
- * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
- * standard Java facilities to execute streaming requests. Created via the {@link
- * org.springframework.http.client.SimpleClientHttpRequestFactory}.
+ * {@link org.springframework.http.client.ClientHttpRequest} implementation
+ * that uses standard Java facilities to execute streaming requests. Created
+ * via the {@link org.springframework.http.client.SimpleClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
  * @since 3.0
  * @see org.springframework.http.client.SimpleClientHttpRequestFactory#createRequest
+ * @see org.springframework.http.client.support.AsyncHttpAccessor
+ * @see org.springframework.web.client.AsyncRestTemplate
  * @deprecated as of Spring 5.0, with no direct replacement
  */
 @Deprecated
@@ -84,7 +85,7 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 	protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
 		if (this.body == null) {
 			if (this.outputStreaming) {
-				int contentLength = (int) headers.getContentLength();
+				long contentLength = headers.getContentLength();
 				if (contentLength >= 0) {
 					this.connection.setFixedLengthStreamingMode(contentLength);
 				}
@@ -100,26 +101,23 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 	}
 
 	@Override
-	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
-		return this.taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
-			@Override
-			public ClientHttpResponse call() throws Exception {
-				try {
-					if (body != null) {
-						body.close();
-					}
-					else {
-						SimpleBufferingClientHttpRequest.addHeaders(connection, headers);
-						connection.connect();
-						// Immediately trigger the request in a no-output scenario as well
-						connection.getResponseCode();
-					}
+	protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers) throws IOException {
+		return this.taskExecutor.submitListenable(() -> {
+			try {
+				if (this.body != null) {
+					this.body.close();
 				}
-				catch (IOException ex) {
-					// ignore
+				else {
+					SimpleBufferingClientHttpRequest.addHeaders(this.connection, headers);
+					this.connection.connect();
+					// Immediately trigger the request in a no-output scenario as well
+					this.connection.getResponseCode();
 				}
-				return new SimpleClientHttpResponse(connection);
 			}
+			catch (IOException ex) {
+				// ignore
+			}
+			return new SimpleClientHttpResponse(this.connection);
 		});
 
 	}

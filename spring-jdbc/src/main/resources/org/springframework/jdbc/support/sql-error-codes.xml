@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <!--
 	- Default SQL error codes for well-known databases.
@@ -14,7 +14,7 @@
 	-->
 <beans>
 
-	<bean id="DB2" class="org.springframework.jdbc.support.SQLErrorCodes">
+	<bean id="DB2" name="Db2" class="org.springframework.jdbc.support.SQLErrorCodes">
 		<property name="databaseProductName">
 			<value>DB2*</value>
 		</property>
@@ -83,177 +83,12 @@
 		</property>
 	</bean>
 
-	<bean id="HSQL" class="org.springframework.jdbc.support.SQLErrorCodes">
-		<property name="databaseProductName">
-			<value>HSQL Database Engine</value>
-		</property>
-		<property name="badSqlGrammarCodes">
-			<value>-22,-28</value>
-		</property>
-		<property name="duplicateKeyCodes">
-			<value>-104</value>
-		</property>
-		<property name="dataIntegrityViolationCodes">
-			<value>-9</value>
-		</property>
-		<property name="dataAccessResourceFailureCodes">
-			<value>-80</value>
-		</property>
-	</bean>
-
-	<bean id="Informix" class="org.springframework.jdbc.support.SQLErrorCodes">
-		<property name="databaseProductName">
-			<value>Informix Dynamic Server</value>
-		</property>
-		<property name="badSqlGrammarCodes">
-			<value>-201,-217,-696</value>
-		</property>
-		<property name="duplicateKeyCodes">
-			<value>-239,-268,-6017</value>
-		</property>
-		<property name="dataIntegrityViolationCodes">
-			<value>-692,-11030</value>
-		</property>
-	</bean>
-
-	<bean id="MS-SQL" class="org.springframework.jdbc.support.SQLErrorCodes">
-		<property name="databaseProductName">
-			<value>Microsoft SQL Server</value>
-		</property>
-		<property name="badSqlGrammarCodes">
-			<value>156,170,207,208,209</value>
-		</property>
-		<property name="permissionDeniedCodes">
-			<value>229</value>
-		</property>
-		<property name="duplicateKeyCodes">
-			<value>2601,2627</value>
-		</property>
-		<property name="dataIntegrityViolationCodes">
-			<value>544,8114,8115</value>
-		</property>
-		<property name="dataAccessResourceFailureCodes">
-			<value>4060</value>
-		</property>
-		<property name="cannotAcquireLockCodes">
-			<value>1222</value>
-		</property>
-		<property name="deadlockLoserCodes">
-			<value>1205</value>
-		</property>
-	</bean>
-
-	<bean id="MySQL" class="org.springframework.jdbc.support.SQLErrorCodes">
-		<property name="badSqlGrammarCodes">
-			<value>1054,1064,1146</value>
-		</property>
-		<property name="duplicateKeyCodes">
-			<value>1062</value>
-		</property>
-		<property name="dataIntegrityViolationCodes">
-			<value>630,839,840,893,1169,1215,1216,1217,1364,1451,1452,1557</value>
-		</property>
-		<property name="dataAccessResourceFailureCodes">
-			<value>1</value>
-		</property>
-		<property name="cannotAcquireLockCodes">
-			<value>1205</value>
-		</property>
-		<property name="deadlockLoserCodes">
-			<value>1213</value>
-		</property>
-	</bean>
-
-	<bean id="Oracle" class="org.springframework.jdbc.support.SQLErrorCodes">
-		<property name="badSqlGrammarCodes">
-			<value>900,903,904,917,936,942,17006,6550</value>
-		</property>
-		<property name="invalidResultSetAccessCodes">
-			<value>17003</value>
-		</property>
-		<property name="duplicateKeyCodes">
-			<value>1</value>
-		</property>
-		<property name="dataIntegrityViolationCodes">
-			<value>1400,1722,2291,2292</value>
-		</property>
-		<property name="dataAccessResourceFailureCodes">
-			<value>17002,17447</value>
-		</property>
-		<property name="cannotAcquireLockCodes">
-			<value>54,30006</value>
-		</property>
-		<property name="cannotSerializeTransactionCodes">
-			<value>8177</value>
-		</property>
-		<property name="deadlockLoserCodes">
-			<value>60</value>
-		</property>
-	</bean>
-
-	<bean id="PostgreSQL" class="org.springframework.jdbc.support.SQLErrorCodes">
-		<property name="useSqlStateForTranslation">
-			<value>true</value>
-		</property>
-		<property name="badSqlGrammarCodes">
-			<value>03000,42000,42601,42602,42622,42804,42P01</value>
-		</property>
-		<property name="duplicateKeyCodes">
-			<value>23505</value>
-		</property>
-		<property name="dataIntegrityViolationCodes">
-			<value>23000,23502,23503,23514</value>
-		</property>
-		<property name="dataAccessResourceFailureCodes">
-			<value>53000,53100,53200,53300</value>
-		</property>
-		<property name="cannotAcquireLockCodes">
-			<value>55P03</value>
-		</property>
-		<property name="cannotSerializeTransactionCodes">
-			<value>40001</value>
-		</property>
-		<property name="deadlockLoserCodes">
-			<value>40P01</value>
-		</property>
-	</bean>
-
-	<bean id="Sybase" class="org.springframework.jdbc.support.SQLErrorCodes">
+	<!-- https://help.sap.com/saphelp_hanaplatform/helpdata/en/20/a78d3275191014b41bae7c4a46d835/content.htm -->
+	<bean id="HDB" name="Hana" class="org.springframework.jdbc.support.SQLErrorCodes">
 		<property name="databaseProductNames">
 			<list>
-				<value>Sybase SQL Server</value>
-				<value>SQL Server</value>
-				<value>Adaptive Server Enterprise</value>
-				<value>ASE</value> <!-- name as returned by jTDS driver -->
-				<value>sql server</value> <!-- name as returned by jTDS driver -->
-			</list>
-		</property>
-		<property name="badSqlGrammarCodes">
-			<value>101,102,103,104,105,106,107,108,109,110,111,112,113,116,120,121,123,207,208,213,257,512</value>
-		</property>
-		<property name="duplicateKeyCodes">
-			<value>2601,2615,2626</value>
-		</property>
-		<property name="dataIntegrityViolationCodes">
-			<value>233,511,515,530,546,547,2615,2714</value>
-		</property>
-		<property name="transientDataAccessResourceCodes">
-			<value>921,1105</value>
-		</property>
-		<property name="cannotAcquireLockCodes">
-			<value>12205</value>
-		</property>
-		<property name="deadlockLoserCodes">
-			<value>1205</value>
-		</property>
-	</bean>
-
-	<!-- http://help.sap.com/saphelp_hanaplatform/helpdata/en/20/a78d3275191014b41bae7c4a46d835/content.htm -->
-	<bean id="Hana" class="org.springframework.jdbc.support.SQLErrorCodes">
-		<property name="databaseProductNames">
-			<list>
+				<value>SAP HANA</value>
 				<value>SAP DB</value>
-				<value>HDB</value>
 			</list>
 		</property>
 		<property name="badSqlGrammarCodes">
@@ -290,5 +125,175 @@
 		</property>
 	</bean>
 
+	<bean id="HSQL" name="Hsql" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductName">
+			<value>HSQL Database Engine</value>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>-22,-28</value>
+		</property>
+		<property name="duplicateKeyCodes">
+			<value>-104</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>-9</value>
+		</property>
+		<property name="dataAccessResourceFailureCodes">
+			<value>-80</value>
+		</property>
+	</bean>
+
+	<bean id="Informix" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductName">
+			<value>Informix Dynamic Server</value>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>-201,-217,-696</value>
+		</property>
+		<property name="duplicateKeyCodes">
+			<value>-239,-268,-6017</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>-692,-11030</value>
+		</property>
+	</bean>
+
+	<bean id="MS-SQL" name="SqlServer" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductName">
+			<value>Microsoft SQL Server</value>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>156,170,207,208,209</value>
+		</property>
+		<property name="permissionDeniedCodes">
+			<value>229</value>
+		</property>
+		<property name="duplicateKeyCodes">
+			<value>2601,2627</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>544,8114,8115</value>
+		</property>
+		<property name="dataAccessResourceFailureCodes">
+			<value>4060</value>
+		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>1222</value>
+		</property>
+		<property name="deadlockLoserCodes">
+			<value>1205</value>
+		</property>
+	</bean>
+
+	<bean id="MySQL" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductNames">
+			<list>
+				<value>MySQL</value>
+				<value>MariaDB</value>
+			</list>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>1054,1064,1146</value>
+		</property>
+		<property name="duplicateKeyCodes">
+			<value>1062</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>630,839,840,893,1169,1215,1216,1217,1364,1451,1452,1557</value>
+		</property>
+		<property name="dataAccessResourceFailureCodes">
+			<value>1</value>
+		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>1205,3572</value>
+		</property>
+		<property name="deadlockLoserCodes">
+			<value>1213</value>
+		</property>
+	</bean>
+
+	<bean id="Oracle" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="badSqlGrammarCodes">
+			<value>900,903,904,917,936,942,17006,6550</value>
+		</property>
+		<property name="invalidResultSetAccessCodes">
+			<value>17003</value>
+		</property>
+		<property name="duplicateKeyCodes">
+			<value>1</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>1400,1722,2291,2292</value>
+		</property>
+		<property name="dataAccessResourceFailureCodes">
+			<value>17002,17447</value>
+		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>54,30006</value>
+		</property>
+		<property name="cannotSerializeTransactionCodes">
+			<value>8177</value>
+		</property>
+		<property name="deadlockLoserCodes">
+			<value>60</value>
+		</property>
+	</bean>
+
+	<bean id="PostgreSQL" name="Postgres" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="useSqlStateForTranslation">
+			<value>true</value>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>03000,42000,42601,42602,42622,42804,42P01</value>
+		</property>
+		<property name="duplicateKeyCodes">
+			<value>21000,23505</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>23000,23502,23503,23514</value>
+		</property>
+		<property name="dataAccessResourceFailureCodes">
+			<value>53000,53100,53200,53300</value>
+		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>55P03</value>
+		</property>
+		<property name="cannotSerializeTransactionCodes">
+			<value>40001</value>
+		</property>
+		<property name="deadlockLoserCodes">
+			<value>40P01</value>
+		</property>
+	</bean>
+
+	<bean id="Sybase" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductNames">
+			<list>
+				<value>Sybase SQL Server</value>
+				<value>Adaptive Server Enterprise</value>
+				<value>ASE</value>  <!-- name as returned by jTDS driver -->
+				<value>SQL Server</value>
+				<value>sql server</value>  <!-- name as returned by jTDS driver -->
+			</list>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>101,102,103,104,105,106,107,108,109,110,111,112,113,116,120,121,123,207,208,213,257,512</value>
+		</property>
+		<property name="duplicateKeyCodes">
+			<value>2601,2615,2626</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>233,511,515,530,546,547,2615,2714</value>
+		</property>
+		<property name="transientDataAccessResourceCodes">
+			<value>921,1105</value>
+		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>12205</value>
+		</property>
+		<property name="deadlockLoserCodes">
+			<value>1205</value>
+		</property>
+	</bean>
 
 </beans>

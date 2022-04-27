@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,10 +34,16 @@ public class BeanFactoryResolver implements BeanResolver {
 
 	private final BeanFactory beanFactory;
 
+
+	/**
+	 * Create a new {@link BeanFactoryResolver} for the given factory.
+	 * @param beanFactory the {@link BeanFactory} to resolve bean names against
+	 */
 	public BeanFactoryResolver(BeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
 		this.beanFactory = beanFactory;
 	}
+
 
 	@Override
 	public Object resolve(EvaluationContext context, String beanName) throws AccessException {

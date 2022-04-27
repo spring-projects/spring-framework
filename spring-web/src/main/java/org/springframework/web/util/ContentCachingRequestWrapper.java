@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -38,6 +39,11 @@ import org.springframework.lang.Nullable;
  * {@link javax.servlet.http.HttpServletRequest} wrapper that caches all content read from
  * the {@linkplain #getInputStream() input stream} and {@linkplain #getReader() reader},
  * and allows this content to be retrieved via a {@link #getContentAsByteArray() byte array}.
+ *
+ * <p>This class acts as an interceptor that only caches content as it is being
+ * read but otherwise does not cause content to be read. That means if the request
+ * content is not consumed, then the content is not cached, and cannot be
+ * retrieved via {@link #getContentAsByteArray()}.
  *
  * <p>Used e.g. by {@link org.springframework.web.filter.AbstractRequestLoggingFilter}.
  * Note: As of Spring Framework 5.0, this wrapper is built on the Servlet 3.1 API.
@@ -183,6 +189,10 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	/**
 	 * Return the cached request content as a byte array.
 	 * <p>The returned array will never be larger than the content cache limit.
+	 * <p><strong>Note:</strong> The byte array returned from this method
+	 * reflects the amount of content that has has been read at the time when it
+	 * is called. If the application does not read the content, this method
+	 * returns an empty array.
 	 * @see #ContentCachingRequestWrapper(HttpServletRequest, int)
 	 */
 	public byte[] getContentAsByteArray() {
@@ -226,6 +236,40 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 				}
 			}
 			return ch;
+		}
+
+		@Override
+		public int read(byte[] b) throws IOException {
+			int count = this.is.read(b);
+			writeToCache(b, 0, count);
+			return count;
+		}
+
+		private void writeToCache(final byte[] b, final int off, int count) {
+			if (!this.overflow && count > 0) {
+				if (contentCacheLimit != null &&
+						count + cachedContent.size() > contentCacheLimit) {
+					this.overflow = true;
+					cachedContent.write(b, off, contentCacheLimit - cachedContent.size());
+					handleContentOverflow(contentCacheLimit);
+					return;
+				}
+				cachedContent.write(b, off, count);
+			}
+		}
+
+		@Override
+		public int read(final byte[] b, final int off, final int len) throws IOException {
+			int count = this.is.read(b, off, len);
+			writeToCache(b, off, count);
+			return count;
+		}
+
+		@Override
+		public int readLine(final byte[] b, final int off, final int len) throws IOException {
+			int count = this.is.readLine(b, off, len);
+			writeToCache(b, off, count);
+			return count;
 		}
 
 		@Override

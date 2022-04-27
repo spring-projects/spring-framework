@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,7 @@ import java.util.Map;
 import org.springframework.lang.Nullable;
 
 /**
- * Java 5 enumeration of HTTP request methods. Intended for use
+ * Enumeration of HTTP request methods. Intended for use
  * with {@link org.springframework.http.client.ClientHttpRequest}
  * and {@link org.springframework.web.client.RestTemplate}.
  *
@@ -35,7 +35,7 @@ public enum HttpMethod {
 	GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE;
 
 
-	private static final Map<String, HttpMethod> mappings = new HashMap<>(8);
+	private static final Map<String, HttpMethod> mappings = new HashMap<>(16);
 
 	static {
 		for (HttpMethod httpMethod : values()) {
@@ -57,14 +57,13 @@ public enum HttpMethod {
 
 
 	/**
-	 * Determine whether this {@code HttpMethod} matches the given
-	 * method value.
-	 * @param method the method value as a String
+	 * Determine whether this {@code HttpMethod} matches the given method value.
+	 * @param method the HTTP method as a String
 	 * @return {@code true} if it matches, {@code false} otherwise
 	 * @since 4.2.4
 	 */
 	public boolean matches(String method) {
-		return (this == resolve(method));
+		return name().equals(method);
 	}
 
 }

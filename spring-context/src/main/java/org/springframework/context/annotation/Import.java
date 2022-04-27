@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates one or more {@link Configuration @Configuration} classes to import.
+ * Indicates one or more <em>component classes</em> to import &mdash; typically
+ * {@link Configuration @Configuration} classes.
  *
  * <p>Provides functionality equivalent to the {@code <import/>} element in Spring XML.
  * Allows for importing {@code @Configuration} classes, {@link ImportSelector} and
@@ -46,6 +47,7 @@ import java.lang.annotation.Target;
  * @since 3.0
  * @see Configuration
  * @see ImportSelector
+ * @see ImportBeanDefinitionRegistrar
  * @see ImportResource
  */
 @Target(ElementType.TYPE)
@@ -54,8 +56,8 @@ import java.lang.annotation.Target;
 public @interface Import {
 
 	/**
-	 * {@link Configuration}, {@link ImportSelector}, {@link ImportBeanDefinitionRegistrar}
-	 * or regular component classes to import.
+	 * {@link Configuration @Configuration}, {@link ImportSelector},
+	 * {@link ImportBeanDefinitionRegistrar}, or regular component classes to import.
 	 */
 	Class<?>[] value();
 

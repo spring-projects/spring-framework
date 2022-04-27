@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,9 +37,9 @@ import org.springframework.web.servlet.view.RedirectView;
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that
  * parses the following MVC namespace elements:
  * <ul>
- *	<li>{@code <view-controller>}
- *	<li>{@code <redirect-view-controller>}
- *	<li>{@code <status-controller>}
+ * <li>{@code <view-controller>}
+ * <li>{@code <redirect-view-controller>}
+ * <li>{@code <status-controller>}
  * </ul>
  *
  * <p>All elements result in the registration of a
@@ -56,7 +56,7 @@ import org.springframework.web.servlet.view.RedirectView;
 class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String HANDLER_MAPPING_BEAN_NAME =
-		"org.springframework.web.servlet.config.viewControllerHandlerMapping";
+			"org.springframework.web.servlet.config.viewControllerHandlerMapping";
 
 
 	@Override
@@ -76,29 +76,30 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 
 		HttpStatus statusCode = null;
 		if (element.hasAttribute("status-code")) {
-			int statusValue = Integer.valueOf(element.getAttribute("status-code"));
+			int statusValue = Integer.parseInt(element.getAttribute("status-code"));
 			statusCode = HttpStatus.valueOf(statusValue);
 		}
 
 		String name = element.getLocalName();
-		if (name.equals("view-controller")) {
-			if (element.hasAttribute("view-name")) {
-				controller.getPropertyValues().add("viewName", element.getAttribute("view-name"));
-			}
-			if (statusCode != null) {
+		switch (name) {
+			case "view-controller":
+				if (element.hasAttribute("view-name")) {
+					controller.getPropertyValues().add("viewName", element.getAttribute("view-name"));
+				}
+				if (statusCode != null) {
+					controller.getPropertyValues().add("statusCode", statusCode);
+				}
+				break;
+			case "redirect-view-controller":
+				controller.getPropertyValues().add("view", getRedirectView(element, statusCode, source));
+				break;
+			case "status-controller":
 				controller.getPropertyValues().add("statusCode", statusCode);
-			}
-		}
-		else if (name.equals("redirect-view-controller")) {
-			controller.getPropertyValues().add("view", getRedirectView(element, statusCode, source));
-		}
-		else if (name.equals("status-controller")) {
-			controller.getPropertyValues().add("statusCode", statusCode);
-			controller.getPropertyValues().add("statusOnly", true);
-		}
-		else {
-			// Should never happen...
-			throw new IllegalStateException("Unexpected tag name: " + name);
+				controller.getPropertyValues().add("statusOnly", true);
+				break;
+			default:
+				// Should never happen...
+				throw new IllegalStateException("Unexpected tag name: " + name);
 		}
 
 		Map<String, BeanDefinition> urlMap = (Map<String, BeanDefinition>) hm.getPropertyValues().get("urlMap");

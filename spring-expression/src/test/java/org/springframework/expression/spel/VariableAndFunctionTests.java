@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,17 +16,19 @@
 
 package org.springframework.expression.spel;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests the evaluation of expressions that access variables and functions (lambda/java).
  *
  * @author Andy Clement
+ * @author Sam Brannen
  */
 public class VariableAndFunctionTests extends AbstractExpressionTests {
 
@@ -57,16 +59,33 @@ public class VariableAndFunctionTests extends AbstractExpressionTests {
 
 	@Test
 	public void testCallVarargsFunction() {
-		evaluate("#varargsFunctionReverseStringsAndMerge('a','b','c')", "cba", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge('a')", "a", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge()", "", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge('b',25)", "25b", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge(25)", "25", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge2(1,'a','b','c')", "1cba", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge2(2,'a')", "2a", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge2(3)", "3", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge2(4,'b',25)", "425b", String.class);
-		evaluate("#varargsFunctionReverseStringsAndMerge2(5,25)", "525", String.class);
+		evaluate("#varargsFunction()", "[]", String.class);
+		evaluate("#varargsFunction(new String[0])", "[]", String.class);
+		evaluate("#varargsFunction('a')", "[a]", String.class);
+		evaluate("#varargsFunction('a','b','c')", "[a, b, c]", String.class);
+		// Conversion from int to String
+		evaluate("#varargsFunction(25)", "[25]", String.class);
+		evaluate("#varargsFunction('b',25)", "[b, 25]", String.class);
+		// Strings that contain a comma
+		evaluate("#varargsFunction('a,b')", "[a,b]", String.class);
+		evaluate("#varargsFunction('a', 'x,y', 'd')", "[a, x,y, d]", String.class);
+		// null values
+		evaluate("#varargsFunction(null)", "[null]", String.class);
+		evaluate("#varargsFunction('a',null,'b')", "[a, null, b]", String.class);
+
+		evaluate("#varargsFunction2(9)", "9-[]", String.class);
+		evaluate("#varargsFunction2(9, new String[0])", "9-[]", String.class);
+		evaluate("#varargsFunction2(9,'a')", "9-[a]", String.class);
+		evaluate("#varargsFunction2(9,'a','b','c')", "9-[a, b, c]", String.class);
+		// Conversion from int to String
+		evaluate("#varargsFunction2(9,25)", "9-[25]", String.class);
+		evaluate("#varargsFunction2(9,'b',25)", "9-[b, 25]", String.class);
+		// Strings that contain a comma:
+		evaluate("#varargsFunction2(9, 'a,b')", "9-[a,b]", String.class);
+		evaluate("#varargsFunction2(9, 'a', 'x,y', 'd')", "9-[a, x,y, d]", String.class);
+		// null values
+		evaluate("#varargsFunction2(9,null)", "9-[null]", String.class);
+		evaluate("#varargsFunction2(9,'a',null,'b')", "9-[a, null, b]", String.class);
 	}
 
 	@Test
@@ -74,18 +93,9 @@ public class VariableAndFunctionTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setVariable("notStatic", this.getClass().getMethod("nonStatic"));
-		try {
-			@SuppressWarnings("unused")
-			Object v = parser.parseRaw("#notStatic()").getValue(ctx);
-			fail("Should have failed with exception - cannot call non static method that way");
-		}
-		catch (SpelEvaluationException se) {
-			if (se.getMessageCode() != SpelMessage.FUNCTION_MUST_BE_STATIC) {
-				se.printStackTrace();
-				fail("Should have failed a message about the function needing to be static, not: "
-						+ se.getMessageCode());
-			}
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				parser.parseRaw("#notStatic()").getValue(ctx)).
+			satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.FUNCTION_MUST_BE_STATIC));
 	}
 
 

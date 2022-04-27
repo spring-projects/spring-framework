@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,12 +16,15 @@
 
 package org.springframework.web.socket.client.jetty;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
@@ -33,11 +36,14 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.adapter.jetty.Jetty10WebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.jetty.JettyWebSocketSession;
 import org.springframework.web.socket.adapter.jetty.WebSocketToJettyExtensionConfigAdapter;
@@ -59,12 +65,31 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class JettyWebSocketClient extends AbstractWebSocketClient implements Lifecycle {
 
-	private final org.eclipse.jetty.websocket.client.WebSocketClient client;
+	private static ClassLoader loader = JettyWebSocketClient.class.getClassLoader();
 
-	private final Object lifecycleMonitor = new Object();
+	private static final boolean jetty10Present;
+
+	private static final Method setHeadersMethod;
+
+	static {
+		jetty10Present = ClassUtils.isPresent(
+				"org.eclipse.jetty.websocket.client.JettyUpgradeListener", loader);
+		try {
+			setHeadersMethod = ClientUpgradeRequest.class.getMethod("setHeaders", Map.class);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("No compatible Jetty version found", ex);
+		}
+	}
+
+
+	private final org.eclipse.jetty.websocket.client.WebSocketClient client;
 
 	@Nullable
 	private AsyncListenableTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
+
+	private final UpgradeHelper upgradeHelper =
+			(jetty10Present ? new Jetty10UpgradeHelper() : new Jetty9UpgradeHelper());
 
 
 	/**
@@ -102,46 +127,32 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 		return this.taskExecutor;
 	}
 
-	@Override
-	public boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.client.isStarted();
-		}
-	}
 
 	@Override
 	public void start() {
-		synchronized (this.lifecycleMonitor) {
-			if (!isRunning()) {
-				try {
-					if (logger.isInfoEnabled()) {
-						logger.info("Starting Jetty WebSocketClient");
-					}
-					this.client.start();
-				}
-				catch (Exception ex) {
-					throw new IllegalStateException("Failed to start Jetty client", ex);
-				}
-			}
+		try {
+			this.client.start();
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("Failed to start Jetty WebSocketClient", ex);
 		}
 	}
 
 	@Override
 	public void stop() {
-		synchronized (this.lifecycleMonitor) {
-			if (isRunning()) {
-				try {
-					if (logger.isInfoEnabled()) {
-						logger.info("Stopping Jetty WebSocketClient");
-					}
-					this.client.stop();
-				}
-				catch (Exception ex) {
-					logger.error("Error stopping Jetty WebSocketClient", ex);
-				}
-			}
+		try {
+			this.client.stop();
+		}
+		catch (Exception ex) {
+			logger.error("Failed to stop Jetty WebSocketClient", ex);
 		}
 	}
+
+	@Override
+	public boolean isRunning() {
+		return this.client.isStarted();
+	}
+
 
 	@Override
 	public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
@@ -163,17 +174,16 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 			request.addExtensions(new WebSocketToJettyExtensionConfigAdapter(e));
 		}
 
-		for (String header : headers.keySet()) {
-			request.setHeader(header, headers.get(header));
-		}
+		// Jetty  9: setHeaders declared in UpgradeRequestAdapter base class
+		// Jetty 10: setHeaders declared in ClientUpgradeRequest
+		ReflectionUtils.invokeMethod(setHeadersMethod, request, headers);
 
 		Principal user = getUser();
-		final JettyWebSocketSession wsSession = new JettyWebSocketSession(attributes, user);
-		final JettyWebSocketHandlerAdapter listener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
+		JettyWebSocketSession wsSession = new JettyWebSocketSession(attributes, user);
 
 		Callable<WebSocketSession> connectTask = () -> {
-			Future<Session> future = client.connect(listener, uri, request);
-			future.get();
+			Future<Session> future = this.upgradeHelper.connect(this.client, uri, request, wsHandler, wsSession);
+			future.get(this.client.getConnectTimeout() + 2000, TimeUnit.MILLISECONDS);
 			return wsSession;
 		};
 
@@ -188,12 +198,63 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 	}
 
 	/**
-	 * @return the user to make available through {@link WebSocketSession#getPrincipal()};
-	 * 	by default this method returns {@code null}
+	 * Return the user to make available through {@link WebSocketSession#getPrincipal()}.
+	 * By default this method returns {@code null}
 	 */
 	@Nullable
 	protected Principal getUser() {
 		return null;
+	}
+
+
+	/**
+	 * Encapsulate incompatible changes between Jetty 9.4 and 10.
+	 */
+	private interface UpgradeHelper {
+
+		Future<Session> connect(WebSocketClient client, URI url, ClientUpgradeRequest request,
+				WebSocketHandler handler, JettyWebSocketSession session) throws IOException;
+	}
+
+
+	private static class Jetty9UpgradeHelper implements UpgradeHelper {
+
+		@Override
+		public Future<Session> connect(WebSocketClient client, URI url, ClientUpgradeRequest request,
+				WebSocketHandler handler, JettyWebSocketSession session) throws IOException {
+
+			JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(handler, session);
+			return client.connect(adapter, url, request);
+		}
+	}
+
+
+	private static class Jetty10UpgradeHelper implements UpgradeHelper {
+
+		// On Jetty 9 returns Future, on Jetty 10 returns CompletableFuture
+		private static final Method connectMethod;
+
+		static {
+			try {
+				Class<?> type = loader.loadClass("org.eclipse.jetty.websocket.client.WebSocketClient");
+				connectMethod = type.getMethod("connect", Object.class, URI.class, ClientUpgradeRequest.class);
+			}
+			catch (ClassNotFoundException | NoSuchMethodException ex) {
+				throw new IllegalStateException("No compatible Jetty version found", ex);
+			}
+		}
+
+		@Override
+		@SuppressWarnings({"ConstantConditions", "unchecked"})
+		public Future<Session> connect(WebSocketClient client, URI url, ClientUpgradeRequest request,
+				WebSocketHandler handler, JettyWebSocketSession session) {
+
+			Jetty10WebSocketHandlerAdapter adapter = new Jetty10WebSocketHandlerAdapter(handler, session);
+
+			// TODO: pass JettyUpgradeListener argument to set headers from HttpHeaders (like we do for Jetty 9)
+			//  which would require a JDK Proxy since it is new in Jetty 10
+			return (Future<Session>) ReflectionUtils.invokeMethod(connectMethod, client, adapter, url, request);
+		}
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -83,8 +83,8 @@ public interface Errors {
 	 * {@code pushNestedPath(String)} call.
 	 * <p>Using the nested path stack allows to set temporary nested paths
 	 * for subobjects without having to worry about a temporary path holder.
-	 * <p>For example: current path "spouse.", pushNestedPath("child") ->
-	 * result path "spouse.child."; popNestedPath() -> "spouse." again.
+	 * <p>For example: current path "spouse.", pushNestedPath("child") &rarr;
+	 * result path "spouse.child."; popNestedPath() &rarr; "spouse." again.
 	 * @param subPath the sub path to push onto the nested path stack
 	 * @see #popNestedPath
 	 */
@@ -172,7 +172,7 @@ public interface Errors {
 	/**
 	 * Add all errors from the given {@code Errors} instance to this
 	 * {@code Errors} instance.
-	 * <p>This is a onvenience method to avoid repeated {@code reject(..)}
+	 * <p>This is a convenience method to avoid repeated {@code reject(..)}
 	 * calls for merging an {@code Errors} instance into another
 	 * {@code Errors} instance.
 	 * <p>Note that the passed-in {@code Errors} instance is supposed
@@ -194,7 +194,7 @@ public interface Errors {
 
 	/**
 	 * Get all errors, both global and field ones.
-	 * @return List of {@link ObjectError} instances
+	 * @return a list of {@link ObjectError} instances
 	 */
 	List<ObjectError> getAllErrors();
 
@@ -214,7 +214,7 @@ public interface Errors {
 
 	/**
 	 * Get all global errors.
-	 * @return List of ObjectError instances
+	 * @return a list of {@link ObjectError} instances
 	 */
 	List<ObjectError> getGlobalErrors();
 

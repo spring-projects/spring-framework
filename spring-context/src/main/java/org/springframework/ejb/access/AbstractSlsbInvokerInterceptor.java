@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.ejb.access;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
 import javax.naming.Context;
 import javax.naming.NamingException;
 
@@ -139,7 +140,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	protected Method getCreateMethod(Object home) throws EjbAccessException {
 		try {
 			// Cache the EJB create() method that must be declared on the home interface.
-			return home.getClass().getMethod("create", (Class[]) null);
+			return home.getClass().getMethod("create");
 		}
 		catch (NoSuchMethodException ex) {
 			throw new EjbAccessException("EJB home [" + home + "] has no no-arg create() method");
@@ -183,7 +184,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 
 
 	/**
-	 * Prepares the thread context if necessar, and delegates to
+	 * Prepares the thread context if necessary, and delegates to
 	 * {@link #invokeInContext}.
 	 */
 	@Override

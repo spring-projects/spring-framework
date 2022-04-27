@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,20 +20,20 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Resolves the following method parameters:
+ * Argument resolver for headers. Resolves the following method parameters:
  * <ul>
- * <li>Parameters assignable to {@link Map} annotated with {@link Headers @Headers}
- * <li>Parameters of type {@link MessageHeaders}
- * <li>Parameters assignable to {@link MessageHeaderAccessor}
+ * <li>{@link Headers @Headers} {@link Map}
+ * <li>{@link MessageHeaders}
+ * <li>{@link MessageHeaderAccessor}
  * </ul>
  *
  * @author Rossen Stoyanchev
@@ -45,21 +45,19 @@ public class HeadersMethodArgumentResolver implements HandlerMethodArgumentResol
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
 		return ((parameter.hasParameterAnnotation(Headers.class) && Map.class.isAssignableFrom(paramType)) ||
-				MessageHeaders.class == paramType ||
-				MessageHeaderAccessor.class.isAssignableFrom(paramType));
+				MessageHeaders.class == paramType || MessageHeaderAccessor.class.isAssignableFrom(paramType));
 	}
 
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-
 		Class<?> paramType = parameter.getParameterType();
-
 		if (Map.class.isAssignableFrom(paramType)) {
 			return message.getHeaders();
 		}
 		else if (MessageHeaderAccessor.class == paramType) {
 			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
-			return (accessor != null ? accessor : new MessageHeaderAccessor(message));
+			return accessor != null ? accessor : new MessageHeaderAccessor(message);
 		}
 		else if (MessageHeaderAccessor.class.isAssignableFrom(paramType)) {
 			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
@@ -68,14 +66,16 @@ public class HeadersMethodArgumentResolver implements HandlerMethodArgumentResol
 			}
 			else {
 				Method method = ReflectionUtils.findMethod(paramType, "wrap", Message.class);
-				Assert.notNull(method, "Cannot create accessor of type " + paramType + " for message " +  message);
+				if (method == null) {
+					throw new IllegalStateException(
+							"Cannot create accessor of type " + paramType + " for message " + message);
+				}
 				return ReflectionUtils.invokeMethod(method, null, message);
 			}
 		}
 		else {
-			throw new IllegalStateException(
-					"Unexpected method parameter type " + paramType + "in method " + parameter.getMethod() + ". "
-					+ "@Headers method arguments must be assignable to java.util.Map.");
+			throw new IllegalStateException("Unexpected parameter of type " + paramType +
+					" in method " + parameter.getMethod() + ". ");
 		}
 	}
 

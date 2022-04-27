@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,14 @@
 
 package org.springframework.messaging.core;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link CachingDestinationResolverProxy}.
@@ -32,30 +36,32 @@ public class CachingDestinationResolverTests {
 	@Test
 	public void cachedDestination() {
 		@SuppressWarnings("unchecked")
-		DestinationResolver<String> destinationResolver = mock(DestinationResolver.class);
-		CachingDestinationResolverProxy<String> cachingDestinationResolver = new CachingDestinationResolverProxy<>(destinationResolver);
+		DestinationResolver<String> resolver = mock(DestinationResolver.class);
+		CachingDestinationResolverProxy<String> resolverProxy = new CachingDestinationResolverProxy<>(resolver);
 
-		given(destinationResolver.resolveDestination("abcd")).willReturn("dcba");
-		given(destinationResolver.resolveDestination("1234")).willReturn("4321");
+		given(resolver.resolveDestination("abcd")).willReturn("dcba");
+		given(resolver.resolveDestination("1234")).willReturn("4321");
 
-		assertEquals("dcba", cachingDestinationResolver.resolveDestination("abcd"));
-		assertEquals("4321", cachingDestinationResolver.resolveDestination("1234"));
-		assertEquals("4321", cachingDestinationResolver.resolveDestination("1234"));
-		assertEquals("dcba", cachingDestinationResolver.resolveDestination("abcd"));
+		assertThat(resolverProxy.resolveDestination("abcd")).isEqualTo("dcba");
+		assertThat(resolverProxy.resolveDestination("1234")).isEqualTo("4321");
+		assertThat(resolverProxy.resolveDestination("1234")).isEqualTo("4321");
+		assertThat(resolverProxy.resolveDestination("abcd")).isEqualTo("dcba");
 
-		verify(destinationResolver, times(1)).resolveDestination("abcd");
-		verify(destinationResolver, times(1)).resolveDestination("1234");
+		verify(resolver, times(1)).resolveDestination("abcd");
+		verify(resolver, times(1)).resolveDestination("1234");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void noTargetSet() {
-		CachingDestinationResolverProxy<String> cachingDestinationResolver = new CachingDestinationResolverProxy<>();
-		cachingDestinationResolver.afterPropertiesSet();
+		CachingDestinationResolverProxy<String> resolverProxy = new CachingDestinationResolverProxy<>();
+		assertThatIllegalArgumentException().isThrownBy(
+				resolverProxy::afterPropertiesSet);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void nullTargetThroughConstructor() {
-		new CachingDestinationResolverProxy<String>(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CachingDestinationResolverProxy<String>(null));
 	}
 
 }

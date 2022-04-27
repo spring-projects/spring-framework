@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.context.event;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
@@ -24,7 +24,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.support.StaticApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Fisher
@@ -40,12 +40,12 @@ public class LifecycleEventTests {
 		context.refresh();
 		LifecycleTestBean lifecycleBean = (LifecycleTestBean) context.getBean("lifecycle");
 		LifecycleListener listener = (LifecycleListener) context.getBean("listener");
-		assertFalse(lifecycleBean.isRunning());
-		assertEquals(0, listener.getStartedCount());
+		assertThat(lifecycleBean.isRunning()).isFalse();
+		assertThat(listener.getStartedCount()).isEqualTo(0);
 		context.start();
-		assertTrue(lifecycleBean.isRunning());
-		assertEquals(1, listener.getStartedCount());
-		assertSame(context, listener.getApplicationContext());
+		assertThat(lifecycleBean.isRunning()).isTrue();
+		assertThat(listener.getStartedCount()).isEqualTo(1);
+		assertThat(listener.getApplicationContext()).isSameAs(context);
 	}
 
 	@Test
@@ -56,14 +56,14 @@ public class LifecycleEventTests {
 		context.refresh();
 		LifecycleTestBean lifecycleBean = (LifecycleTestBean) context.getBean("lifecycle");
 		LifecycleListener listener = (LifecycleListener) context.getBean("listener");
-		assertFalse(lifecycleBean.isRunning());
+		assertThat(lifecycleBean.isRunning()).isFalse();
 		context.start();
-		assertTrue(lifecycleBean.isRunning());
-		assertEquals(0, listener.getStoppedCount());
+		assertThat(lifecycleBean.isRunning()).isTrue();
+		assertThat(listener.getStoppedCount()).isEqualTo(0);
 		context.stop();
-		assertFalse(lifecycleBean.isRunning());
-		assertEquals(1, listener.getStoppedCount());
-		assertSame(context, listener.getApplicationContext());
+		assertThat(lifecycleBean.isRunning()).isFalse();
+		assertThat(listener.getStoppedCount()).isEqualTo(1);
+		assertThat(listener.getApplicationContext()).isSameAs(context);
 	}
 
 

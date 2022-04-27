@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,123 +18,106 @@ package org.springframework.web.reactive.resource;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import reactor.core.publisher.Mono;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link AppCacheManifestTransformer}.
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
+@SuppressWarnings("deprecation")
 public class AppCacheManifestTransformerTests {
 
-	private AppCacheManifestTransformer transformer;
+	private static final Duration TIMEOUT = Duration.ofSeconds(5);
+
+
+	private final AppCacheManifestTransformer transformer = new AppCacheManifestTransformer();
 
 	private ResourceTransformerChain chain;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
-		ClassPathResource allowedLocation = new ClassPathResource("test/", getClass());
-		ResourceWebHandler resourceHandler = new ResourceWebHandler();
-		ResourceUrlProvider resourceUrlProvider = new ResourceUrlProvider();
-		resourceUrlProvider.registerHandlers(Collections.singletonMap("/static/**", resourceHandler));
-
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
-		PathResourceResolver pathResolver = new PathResourceResolver();
-		pathResolver.setAllowedLocations(allowedLocation);
-		List<ResourceResolver> resolvers = Arrays.asList(versionResolver, pathResolver);
+		List<ResourceResolver> resolvers = new ArrayList<>();
+		resolvers.add(versionResolver);
+		resolvers.add(new PathResourceResolver());
 		ResourceResolverChain resolverChain = new DefaultResourceResolverChain(resolvers);
 
-		CssLinkResourceTransformer cssLinkResourceTransformer = new CssLinkResourceTransformer();
-		cssLinkResourceTransformer.setResourceUrlProvider(resourceUrlProvider);
-		List<ResourceTransformer> transformers = Collections.singletonList(cssLinkResourceTransformer);
-		this.chain = new DefaultResourceTransformerChain(resolverChain, transformers);
-		this.transformer = new AppCacheManifestTransformer();
-		this.transformer.setResourceUrlProvider(resourceUrlProvider);
+		this.chain = new DefaultResourceTransformerChain(resolverChain, Collections.emptyList());
+		this.transformer.setResourceUrlProvider(createUrlProvider(resolvers));
+	}
 
-		resourceHandler.setResourceResolvers(resolvers);
-		resourceHandler.setResourceTransformers(transformers);
-		resourceHandler.setLocations(Collections.singletonList(allowedLocation));
+	private ResourceUrlProvider createUrlProvider(List<ResourceResolver> resolvers) {
+		ResourceWebHandler handler = new ResourceWebHandler();
+		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
+		handler.setResourceResolvers(resolvers);
+
+		ResourceUrlProvider urlProvider = new ResourceUrlProvider();
+		urlProvider.registerHandlers(Collections.singletonMap("/static/**", handler));
+		return urlProvider;
 	}
 
 
 	@Test
-	public void noTransformIfExtensionNoMatch() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("/static/foobar.file").toExchange();
-		this.chain = mock(ResourceTransformerChain.class);
-		Resource resource = mock(Resource.class);
-		given(resource.getFilename()).willReturn("foobar.file");
-		given(this.chain.transform(exchange, resource)).willReturn(Mono.just(resource));
+	public void noTransformIfExtensionDoesNotMatch() {
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/static/foo.css"));
+		Resource expected = getResource("foo.css");
+		Resource actual = this.transformer.transform(exchange, expected, this.chain).block(TIMEOUT);
 
-		Resource result = this.transformer.transform(exchange, resource, this.chain).block(Duration.ofMillis(5000));
-		assertEquals(resource, result);
+		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
-	public void syntaxErrorInManifest() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("/static/error.appcache").toExchange();
-		this.chain = mock(ResourceTransformerChain.class);
-		Resource resource = new ClassPathResource("test/error.appcache", getClass());
-		given(this.chain.transform(exchange, resource)).willReturn(Mono.just(resource));
+	public void syntaxErrorInManifest() {
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/static/error.appcache"));
+		Resource expected = getResource("error.appcache");
+		Resource actual = this.transformer.transform(exchange, expected, this.chain).block(TIMEOUT);
 
-		Resource result = this.transformer.transform(exchange, resource, this.chain).block(Duration.ofMillis(5000));
-		assertEquals(resource, result);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
 	public void transformManifest() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("/static/test.appcache").toExchange();
-		VersionResourceResolver versionResolver = new VersionResourceResolver();
-		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/static/test.appcache"));
+		Resource resource = getResource("test.appcache");
+		Resource actual = this.transformer.transform(exchange, resource, this.chain).block(TIMEOUT);
 
-		PathResourceResolver pathResolver = new PathResourceResolver();
-		pathResolver.setAllowedLocations(new ClassPathResource("test/", getClass()));
-
-		List<ResourceResolver> resolvers = Arrays.asList(versionResolver, pathResolver);
-		ResourceResolverChain resolverChain = new DefaultResourceResolverChain(resolvers);
-
-		List<ResourceTransformer> transformers = new ArrayList<>();
-		transformers.add(new CssLinkResourceTransformer());
-		this.chain = new DefaultResourceTransformerChain(resolverChain, transformers);
-
-		Resource resource = new ClassPathResource("test/test.appcache", getClass());
-		Resource result = this.transformer.transform(exchange, resource, this.chain).block(Duration.ofMillis(5000));
-		byte[] bytes = FileCopyUtils.copyToByteArray(result.getInputStream());
+		assertThat(actual).isNotNull();
+		byte[] bytes = FileCopyUtils.copyToByteArray(actual.getInputStream());
 		String content = new String(bytes, "UTF-8");
 
-		assertThat("should rewrite resource links", content,
-				Matchers.containsString("/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css"));
-		assertThat("should rewrite resource links", content,
-				Matchers.containsString("/static/bar-11e16cf79faee7ac698c805cf28248d2.css"));
-		assertThat("should rewrite resource links", content,
-				Matchers.containsString("/static/js/bar-bd508c62235b832d960298ca6c0b7645.js"));
+		assertThat(content).as("rewrite resource links")
+				.contains("/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css")
+				.contains("/static/bar-11e16cf79faee7ac698c805cf28248d2.css")
+				.contains("/static/js/bar-bd508c62235b832d960298ca6c0b7645.js");
 
-		assertThat("should not rewrite external resources", content,
-				Matchers.containsString("//example.org/style.css"));
-		assertThat("should not rewrite external resources", content,
-				Matchers.containsString("http://example.org/image.png"));
+		assertThat(content).as("not rewrite external resources")
+				.contains("//example.org/style.css")
+				.contains("https://example.org/image.png");
 
-		assertThat("should generate fingerprint", content,
-				Matchers.containsString("# Hash: 8eefc904df3bd46537fa7bdbbc5ab9fb"));
+		// Not the same hash as Spring MVC
+		// Hash is computed from links, and not from the linked content
+
+		assertThat(content).as("generate fingerprint")
+				.contains("# Hash: d4437f1d7ae9530ab3ae71d5375b46ff");
+	}
+
+	private Resource getResource(String filePath) {
+		return new ClassPathResource("test/" + filePath, getClass());
 	}
 
 }

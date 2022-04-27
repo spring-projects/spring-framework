@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@ package org.springframework.web.util.pattern;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.http.server.reactive.PathContainer.UrlPathSegment;
+import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.lang.Nullable;
 
 /**
@@ -35,10 +35,11 @@ class CaptureVariablePathElement extends PathElement {
 	private final String variableName;
 
 	@Nullable
-	private Pattern constraintPattern;
+	private final Pattern constraintPattern;
 
 
 	/**
+	 * Create a new {@link CaptureVariablePathElement} instance.
 	 * @param pos the position in the pattern of this capture element
 	 * @param captureDescriptor is of the form {AAAAA[:pattern]}
 	 */
@@ -54,6 +55,7 @@ class CaptureVariablePathElement extends PathElement {
 		if (colon == -1) {
 			// no constraint
 			this.variableName = new String(captureDescriptor, 1, captureDescriptor.length - 2);
+			this.constraintPattern = null;
 		}
 		else {
 			this.variableName = new String(captureDescriptor, 1, colon - 1);
@@ -82,8 +84,9 @@ class CaptureVariablePathElement extends PathElement {
 		}
 
 		if (this.constraintPattern != null) {
-			// TODO possible optimization - only regex match if rest of pattern matches? Benefit likely to vary pattern to pattern
-			Matcher matcher = constraintPattern.matcher(candidateCapture);
+			// TODO possible optimization - only regex match if rest of pattern matches?
+			// Benefit likely to vary pattern to pattern
+			Matcher matcher = this.constraintPattern.matcher(candidateCapture);
 			if (matcher.groupCount() != 0) {
 				throw new IllegalArgumentException(
 						"No capture groups allowed in the constraint regex: " + this.constraintPattern.pattern());
@@ -103,24 +106,22 @@ class CaptureVariablePathElement extends PathElement {
 			else {
 				// Needs to be at least one character #SPR15264
 				match = (pathIndex == matchingContext.pathLength);
-				if (!match && matchingContext.isAllowOptionalTrailingSlash()) {
+				if (!match && matchingContext.isMatchOptionalTrailingSeparator()) {
 					match = //(nextPos > candidateIndex) &&
-						    (pathIndex + 1) == matchingContext.pathLength && 
-						    matchingContext.isSeparator(pathIndex);
+							(pathIndex + 1) == matchingContext.pathLength &&
+							matchingContext.isSeparator(pathIndex);
 				}
 			}
 		}
 		else {
-			if (matchingContext.isMatchStartMatching && pathIndex == matchingContext.pathLength) {
-				match = true;  // no more data but matches up to this point
-			}
-			else if (this.next != null) {
+			if (this.next != null) {
 				match = this.next.matches(pathIndex, matchingContext);
 			}
 		}
 
 		if (match && matchingContext.extractingVariables) {
-			matchingContext.set(this.variableName, candidateCapture, ((UrlPathSegment)matchingContext.pathElements.get(pathIndex-1)).parameters());
+			matchingContext.set(this.variableName, candidateCapture,
+					((PathSegment)matchingContext.pathElements.get(pathIndex-1)).parameters());
 		}
 		return match;
 	}
@@ -132,6 +133,18 @@ class CaptureVariablePathElement extends PathElement {
 	@Override
 	public int getNormalizedLength() {
 		return 1;
+	}
+
+	@Override
+	public char[] getChars() {
+		StringBuilder sb = new StringBuilder();
+		sb.append('{');
+		sb.append(this.variableName);
+		if (this.constraintPattern != null) {
+			sb.append(':').append(this.constraintPattern.pattern());
+		}
+		sb.append('}');
+		return sb.toString().toCharArray();
 	}
 
 	@Override
@@ -150,20 +163,10 @@ class CaptureVariablePathElement extends PathElement {
 	}
 
 
+	@Override
 	public String toString() {
 		return "CaptureVariable({" + this.variableName +
 				(this.constraintPattern != null ? ":" + this.constraintPattern.pattern() : "") + "})";
-	}
-
-	public char[] getChars() {
-		StringBuilder b = new StringBuilder();
-		b.append("{");
-		b.append(this.variableName);
-		if (this.constraintPattern != null) {
-			b.append(":").append(this.constraintPattern.pattern());
-		}
-		b.append("}");
-		return b.toString().toCharArray();
 	}
 
 }

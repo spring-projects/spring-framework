@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,32 +18,33 @@ package org.springframework.context.support;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Scott Andrews
  * @author Juergen Hoeller
  */
-public class Spr7283Tests {
+class Spr7283Tests {
 
 	@Test
-	public void testListWithInconsistentElementType() {
+	void listWithInconsistentElementTypes() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("spr7283.xml", getClass());
 		List<?> list = ctx.getBean("list", List.class);
-		assertEquals(2, list.size());
-		assertTrue(list.get(0) instanceof A);
-		assertTrue(list.get(1) instanceof B);
+		assertThat(list).hasSize(2);
+		assertThat(list.get(0)).isInstanceOf(A.class);
+		assertThat(list.get(1)).isInstanceOf(B.class);
+		ctx.close();
 	}
 
 
-	public static class A {
-		public A() {}
+	static class A {
+		A() {}
 	}
 
-	public static class B {
-		public B() {}
+	static class B {
+		B() {}
 	}
 
 }

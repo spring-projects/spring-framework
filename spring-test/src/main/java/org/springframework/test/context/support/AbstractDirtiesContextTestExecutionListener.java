@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -96,7 +97,7 @@ public abstract class AbstractDirtiesContextTestExecutionListener extends Abstra
 		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
 		DirtiesContext methodAnn = AnnotatedElementUtils.findMergedAnnotation(testMethod, DirtiesContext.class);
-		DirtiesContext classAnn = AnnotatedElementUtils.findMergedAnnotation(testClass, DirtiesContext.class);
+		DirtiesContext classAnn = TestContextAnnotationUtils.findMergedAnnotation(testClass, DirtiesContext.class);
 		boolean methodAnnotated = (methodAnn != null);
 		boolean classAnnotated = (classAnn != null);
 		MethodMode methodMode = (methodAnnotated ? methodAnn.methodMode() : null);
@@ -133,7 +134,7 @@ public abstract class AbstractDirtiesContextTestExecutionListener extends Abstra
 		Class<?> testClass = testContext.getTestClass();
 		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
 
-		DirtiesContext dirtiesContext = AnnotatedElementUtils.findMergedAnnotation(testClass, DirtiesContext.class);
+		DirtiesContext dirtiesContext = TestContextAnnotationUtils.findMergedAnnotation(testClass, DirtiesContext.class);
 		boolean classAnnotated = (dirtiesContext != null);
 		ClassMode classMode = (classAnnotated ? dirtiesContext.classMode() : null);
 

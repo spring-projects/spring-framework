@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,7 +53,7 @@ public interface RowCallbackHandler {
 	 * A trivial implementation might simply count rows, while another
 	 * implementation might build an XML document.
 	 * @param rs the ResultSet to process (pre-initialized for the current row)
-	 * @throws SQLException if a SQLException is encountered getting
+	 * @throws SQLException if an SQLException is encountered getting
 	 * column values (that is, there's no need to catch SQLException)
 	 */
 	void processRow(ResultSet rs) throws SQLException;

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -88,8 +88,8 @@ public class EmbeddedDatabaseBuilder {
 	 * <p>Enabling this flag overrides any explicit name set via {@link #setName}.
 	 * @param flag {@code true} if a unique database name should be generated
 	 * @return {@code this}, to facilitate method chaining
-	 * @see #setName
 	 * @since 4.2
+	 * @see #setName
 	 */
 	public EmbeddedDatabaseBuilder generateUniqueName(boolean flag) {
 		this.databaseFactory.setGenerateUniqueDatabaseName(flag);
@@ -201,9 +201,22 @@ public class EmbeddedDatabaseBuilder {
 	 * @param commentPrefix the prefix for single-line comments
 	 * @return {@code this}, to facilitate method chaining
 	 * @since 4.0.3
+	 * @see #setCommentPrefixes(String...)
 	 */
 	public EmbeddedDatabaseBuilder setCommentPrefix(String commentPrefix) {
 		this.databasePopulator.setCommentPrefix(commentPrefix);
+		return this;
+	}
+
+	/**
+	 * Specify the prefixes that identify single-line comments within all SQL scripts.
+	 * <p>Defaults to {@code ["--"]}.
+	 * @param commentPrefixes the prefixes for single-line comments
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 5.2
+	 */
+	public EmbeddedDatabaseBuilder setCommentPrefixes(String... commentPrefixes) {
+		this.databasePopulator.setCommentPrefixes(commentPrefixes);
 		return this;
 	}
 

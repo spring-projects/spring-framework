@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.transaction.TransactionTestUtils.*;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
  * JUnit 4 based integration test which verifies support of Spring's
@@ -35,6 +35,7 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
  *
  * @author Sam Brannen
  * @since 2.5
+ * @see org.springframework.test.context.junit.jupiter.transaction.TimedTransactionalSpringExtensionTests
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration("transactionalTests-context.xml")
@@ -45,13 +46,13 @@ public class TimedTransactionalSpringRunnerTests {
 	@Timed(millis = 10000)
 	@Repeat(5)
 	public void transactionalWithSpringTimeout() {
-		assertInTransaction(true);
+		assertThatTransaction().isActive();
 	}
 
 	@Test(timeout = 10000)
 	@Repeat(5)
 	public void transactionalWithJUnitTimeout() {
-		assertInTransaction(true);
+		assertThatTransaction().isActive();
 	}
 
 	@Test
@@ -59,14 +60,14 @@ public class TimedTransactionalSpringRunnerTests {
 	@Timed(millis = 10000)
 	@Repeat(5)
 	public void notTransactionalWithSpringTimeout() {
-		assertInTransaction(false);
+		assertThatTransaction().isNotActive();
 	}
 
 	@Test(timeout = 10000)
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	@Repeat(5)
 	public void notTransactionalWithJUnitTimeout() {
-		assertInTransaction(false);
+		assertThatTransaction().isNotActive();
 	}
 
 }

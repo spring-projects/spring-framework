@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,8 +29,8 @@ import org.springframework.util.Assert;
  * fixed-rate or fixed-delay, and an initial delay value may also be configured.
  * The default initial delay is 0, and the default behavior is fixed-delay
  * (i.e. the interval between successive executions is measured from each
- * <emphasis>completion</emphasis> time). To measure the interval between the
- * scheduled <emphasis>start</emphasis> time of each execution instead, set the
+ * <i>completion</i> time). To measure the interval between the
+ * scheduled <i>start</i> time of each execution instead, set the
  * 'fixedRate' property to {@code true}.
  *
  * <p>Note that the TaskScheduler interface already defines methods for scheduling
@@ -50,9 +50,9 @@ public class PeriodicTrigger implements Trigger {
 
 	private final TimeUnit timeUnit;
 
-	private volatile long initialDelay = 0;
+	private volatile long initialDelay;
 
-	private volatile boolean fixedRate = false;
+	private volatile boolean fixedRate;
 
 
 	/**
@@ -75,12 +75,36 @@ public class PeriodicTrigger implements Trigger {
 
 
 	/**
+	 * Return this trigger's period.
+	 * @since 5.0.2
+	 */
+	public long getPeriod() {
+		return this.period;
+	}
+
+	/**
+	 * Return this trigger's time unit (milliseconds by default).
+	 * @since 5.0.2
+	 */
+	public TimeUnit getTimeUnit() {
+		return this.timeUnit;
+	}
+
+	/**
 	 * Specify the delay for the initial execution. It will be evaluated in
 	 * terms of this trigger's {@link TimeUnit}. If no time unit was explicitly
 	 * provided upon instantiation, the default is milliseconds.
 	 */
 	public void setInitialDelay(long initialDelay) {
 		this.initialDelay = this.timeUnit.toMillis(initialDelay);
+	}
+
+	/**
+	 * Return the initial delay, or 0 if none.
+	 * @since 5.0.2
+	 */
+	public long getInitialDelay() {
+		return this.initialDelay;
 	}
 
 	/**
@@ -92,6 +116,15 @@ public class PeriodicTrigger implements Trigger {
 		this.fixedRate = fixedRate;
 	}
 
+	/**
+	 * Return whether this trigger uses fixed rate ({@code true}) or
+	 * fixed delay ({@code false}) behavior.
+	 * @since 5.0.2
+	 */
+	public boolean isFixedRate() {
+		return this.fixedRate;
+	}
+
 
 	/**
 	 * Returns the time after which a task should run again.
@@ -101,7 +134,7 @@ public class PeriodicTrigger implements Trigger {
 		Date lastExecution = triggerContext.lastScheduledExecutionTime();
 		Date lastCompletion = triggerContext.lastCompletionTime();
 		if (lastExecution == null || lastCompletion == null) {
-			return new Date(System.currentTimeMillis() + this.initialDelay);
+			return new Date(triggerContext.getClock().millis() + this.initialDelay);
 		}
 		if (this.fixedRate) {
 			return new Date(lastExecution.getTime() + this.period);
@@ -111,16 +144,16 @@ public class PeriodicTrigger implements Trigger {
 
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof PeriodicTrigger)) {
+		if (!(other instanceof PeriodicTrigger)) {
 			return false;
 		}
-		PeriodicTrigger other = (PeriodicTrigger) obj;
-		return (this.fixedRate == other.fixedRate && this.initialDelay == other.initialDelay &&
-				this.period == other.period);
+		PeriodicTrigger otherTrigger = (PeriodicTrigger) other;
+		return (this.fixedRate == otherTrigger.fixedRate && this.initialDelay == otherTrigger.initialDelay &&
+				this.period == otherTrigger.period);
 	}
 
 	@Override

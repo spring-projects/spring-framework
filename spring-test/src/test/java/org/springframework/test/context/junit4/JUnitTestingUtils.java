@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,6 @@ package org.springframework.test.context.junit4;
 import java.lang.reflect.Constructor;
 
 import org.junit.experimental.ParallelComputer;
-import org.junit.jupiter.api.Assertions;
 import org.junit.runner.Computer;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
@@ -28,15 +27,10 @@ import org.junit.runner.notification.RunNotifier;
 
 import org.springframework.beans.BeanUtils;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 /**
  * Collection of utilities for testing the execution of JUnit 4 based tests.
- *
- * <p>Note that these utilities use {@link Assertions} from JUnit Jupiter,
- * but that should not result in any adverse side effects in terms of
- * proper test failure for failed assertions.
  *
  * @author Sam Brannen
  * @since 4.2
@@ -101,15 +95,18 @@ public class JUnitTestingUtils {
 			junit.run(testClass);
 		}
 
-		// @formatter:off
-		assertAll(
-			() -> assertEquals(expectedStartedCount, listener.getTestStartedCount(), "tests started for [" + testClass + "]"),
-			() -> assertEquals(expectedFailedCount, listener.getTestFailureCount(), "tests failed for [" + testClass + "]"),
-			() -> assertEquals(expectedFinishedCount, listener.getTestFinishedCount(), "tests finished for [" + testClass + "]"),
-			() -> assertEquals(expectedIgnoredCount, listener.getTestIgnoredCount(), "tests ignored for [" + testClass + "]"),
-			() -> assertEquals(expectedAssumptionFailedCount, listener.getTestAssumptionFailureCount(), "failed assumptions for [" + testClass + "]")
-		);
-		// @formatter:on
+		assertSoftly(softly -> {
+			softly.assertThat(listener.getTestStartedCount()).as("tests started for [%s]", testClass)
+				.isEqualTo(expectedStartedCount);
+			softly.assertThat(listener.getTestFailureCount()).as("tests failed for [%s]", testClass)
+				.isEqualTo(expectedFailedCount);
+			softly.assertThat(listener.getTestFinishedCount()).as("tests finished for [%s]", testClass)
+				.isEqualTo(expectedFinishedCount);
+			softly.assertThat(listener.getTestIgnoredCount()).as("tests ignored for [%s]", testClass)
+				.isEqualTo(expectedIgnoredCount);
+			softly.assertThat(listener.getTestAssumptionFailureCount()).as("failed assumptions for [%s]", testClass)
+				.isEqualTo(expectedAssumptionFailedCount);
+		});
 	}
 
 	/**
@@ -140,15 +137,13 @@ public class JUnitTestingUtils {
 		junit.addListener(listener);
 		junit.run(computer, testClasses);
 
-		// @formatter:off
-		assertAll(
-			() -> assertEquals(expectedStartedCount, listener.getTestStartedCount(), "tests started"),
-			() -> assertEquals(expectedFailedCount, listener.getTestFailureCount(), "tests failed"),
-			() -> assertEquals(expectedFinishedCount, listener.getTestFinishedCount(), "tests finished"),
-			() -> assertEquals(expectedIgnoredCount, listener.getTestIgnoredCount(), "tests ignored"),
-			() -> assertEquals(expectedAssumptionFailedCount, listener.getTestAssumptionFailureCount(), "failed assumptions")
-		);
-		// @formatter:on
+		assertSoftly(softly -> {
+			softly.assertThat(listener.getTestStartedCount()).as("tests started]").isEqualTo(expectedStartedCount);
+			softly.assertThat(listener.getTestFailureCount()).as("tests failed]").isEqualTo(expectedFailedCount);
+			softly.assertThat(listener.getTestFinishedCount()).as("tests finished]").isEqualTo(expectedFinishedCount);
+			softly.assertThat(listener.getTestIgnoredCount()).as("tests ignored]").isEqualTo(expectedIgnoredCount);
+			softly.assertThat(listener.getTestAssumptionFailureCount()).as("failed assumptions]").isEqualTo(expectedAssumptionFailedCount);
+		});
 	}
 
 }

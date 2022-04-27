@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,6 +63,7 @@ public final class ModelFactory {
 
 	private static final Log logger = LogFactory.getLog(ModelFactory.class);
 
+
 	private final List<ModelMethod> modelMethods = new ArrayList<>();
 
 	private final WebDataBinderFactory dataBinderFactory;
@@ -103,8 +104,8 @@ public final class ModelFactory {
 	 * @param handlerMethod the method for which the model is initialized
 	 * @throws Exception may arise from {@code @ModelAttribute} methods
 	 */
-	public void initModel(NativeWebRequest request, ModelAndViewContainer container,
-			HandlerMethod handlerMethod) throws Exception {
+	public void initModel(NativeWebRequest request, ModelAndViewContainer container, HandlerMethod handlerMethod)
+			throws Exception {
 
 		Map<String, ?> sessionAttributes = this.sessionAttributesHandler.retrieveAttributes(request);
 		container.mergeAttributes(sessionAttributes);
@@ -140,14 +141,22 @@ public final class ModelFactory {
 			}
 
 			Object returnValue = modelMethod.invokeForRequest(request, container);
-			if (!modelMethod.isVoid()){
-				String returnValueName = getNameForReturnValue(returnValue, modelMethod.getReturnType());
-				if (!ann.binding()) {
-					container.setBindingDisabled(returnValueName);
+			if (modelMethod.isVoid()) {
+				if (StringUtils.hasText(ann.value())) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Name in @ModelAttribute is ignored because method returns void: " +
+								modelMethod.getShortLogMessage());
+					}
 				}
-				if (!container.containsAttribute(returnValueName)) {
-					container.addAttribute(returnValueName, returnValue);
-				}
+				continue;
+			}
+
+			String returnValueName = getNameForReturnValue(returnValue, modelMethod.getReturnType());
+			if (!ann.binding()) {
+				container.setBindingDisabled(returnValueName);
+			}
+			if (!container.containsAttribute(returnValueName)) {
+				container.addAttribute(returnValueName, returnValue);
 			}
 		}
 	}
@@ -155,18 +164,11 @@ public final class ModelFactory {
 	private ModelMethod getNextModelMethod(ModelAndViewContainer container) {
 		for (ModelMethod modelMethod : this.modelMethods) {
 			if (modelMethod.checkDependencies(container)) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Selected @ModelAttribute method " + modelMethod);
-				}
 				this.modelMethods.remove(modelMethod);
 				return modelMethod;
 			}
 		}
 		ModelMethod modelMethod = this.modelMethods.get(0);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Selected @ModelAttribute method (not present: " +
-					modelMethod.getUnresolvedDependencies(container)+ ") " + modelMethod);
-		}
 		this.modelMethods.remove(modelMethod);
 		return modelMethod;
 	}
@@ -243,13 +245,12 @@ public final class ModelFactory {
 
 
 	/**
-	 * Derive the model attribute name for a method parameter based on:
-	 * <ol>
-	 * <li>the parameter {@code @ModelAttribute} annotation value
-	 * <li>the parameter type
-	 * </ol>
+	 * Derive the model attribute name for the given method parameter based on
+	 * a {@code @ModelAttribute} parameter annotation (if present) or falling
+	 * back on parameter type based conventions.
 	 * @param parameter a descriptor for the method parameter
-	 * @return the derived name (never {@code null} or empty String)
+	 * @return the derived name
+	 * @see Conventions#getVariableNameForParameter(MethodParameter)
 	 */
 	public static String getNameForParameter(MethodParameter parameter) {
 		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
@@ -258,7 +259,8 @@ public final class ModelFactory {
 	}
 
 	/**
-	 * Derive the model attribute name for the given return value based on:
+	 * Derive the model attribute name for the given return value. Results will be
+	 * based on:
 	 * <ol>
 	 * <li>the method {@code ModelAttribute} annotation value
 	 * <li>the declared return type if it is more specific than {@code Object}
@@ -309,16 +311,6 @@ public final class ModelFactory {
 				}
 			}
 			return true;
-		}
-
-		public List<String> getUnresolvedDependencies(ModelAndViewContainer mavContainer) {
-			List<String> result = new ArrayList<>(this.dependencies.size());
-			for (String name : this.dependencies) {
-				if (!mavContainer.containsAttribute(name)) {
-					result.add(name);
-				}
-			}
-			return result;
 		}
 
 		@Override

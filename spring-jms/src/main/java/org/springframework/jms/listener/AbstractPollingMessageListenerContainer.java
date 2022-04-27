@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,7 @@ import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.ResourceTransactionManager;
@@ -59,7 +60,7 @@ import org.springframework.util.Assert;
  * {@link org.springframework.transaction.PlatformTransactionManager} into the
  * {@link #setTransactionManager "transactionManager"} property. This will usually
  * be a {@link org.springframework.transaction.jta.JtaTransactionManager} in a
- * Java EE enviroment, in combination with a JTA-aware JMS ConnectionFactory
+ * Java EE environment, in combination with a JTA-aware JMS ConnectionFactory
  * obtained from JNDI (check your application server's documentation).
  *
  * <p>This base class does not assume any specific mechanism for asynchronous
@@ -248,7 +249,19 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 				rollbackOnException(this.transactionManager, status, ex);
 				throw ex;
 			}
-			this.transactionManager.commit(status);
+			try {
+				this.transactionManager.commit(status);
+			}
+			catch (TransactionException ex) {
+				// Propagate transaction system exceptions as infrastructure problems.
+				throw ex;
+			}
+			catch (RuntimeException ex) {
+				// Typically a late persistence exception from a listener-used resource
+				// -> handle it as listener exception, not as an infrastructure problem.
+				// E.g. a database locking failure should not lead to listener shutdown.
+				handleListenerException(ex);
+			}
 			return messageReceived;
 		}
 
@@ -469,11 +482,13 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	private class MessageListenerContainerResourceFactory implements ConnectionFactoryUtils.ResourceFactory {
 
 		@Override
+		@Nullable
 		public Connection getConnection(JmsResourceHolder holder) {
 			return AbstractPollingMessageListenerContainer.this.getConnection(holder);
 		}
 
 		@Override
+		@Nullable
 		public Session getSession(JmsResourceHolder holder) {
 			return AbstractPollingMessageListenerContainer.this.getSession(holder);
 		}

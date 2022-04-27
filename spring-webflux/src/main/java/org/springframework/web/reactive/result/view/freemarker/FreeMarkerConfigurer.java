@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,13 +40,11 @@ import org.springframework.util.Assert;
  * using {@link FreeMarkerView}. It exists purely to configure FreeMarker.
  * It is not meant to be referenced by application components but just internally
  * by {@code FreeMarkerView}. Implements {@link FreeMarkerConfig} to be found by
- * {@code FreeMarkerView} without depending on the bean name the configurer.
+ * {@code FreeMarkerView} without depending on the bean name of the configurer.
  *
  * <p>Note that you can also refer to a pre-configured FreeMarker Configuration
  * instance via the "configuration" property. This allows to share a FreeMarker
  * Configuration for web and email usage for example.
- *
- * <p>TODO: macros
  *
  * <p>This configurer registers a template loader for this package, allowing to
  * reference the "spring.ftl" macro library contained in this package:
@@ -86,7 +84,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 
 	/**
 	 * Initialize FreeMarkerConfigurationFactory's Configuration
-	 * if not overridden by a pre-configured FreeMarker Configuation.
+	 * if not overridden by a pre-configured FreeMarker Configuration.
 	 * <p>Sets up a ClassTemplateLoader to use for loading Spring macros.
 	 * @see #createConfiguration
 	 * @see #setConfiguration
@@ -105,7 +103,6 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	@Override
 	protected void postProcessTemplateLoaders(List<TemplateLoader> templateLoaders) {
 		templateLoaders.add(new ClassTemplateLoader(FreeMarkerConfigurer.class, ""));
-		logger.info("ClassTemplateLoader for Spring macros added to FreeMarker configuration");
 	}
 
 

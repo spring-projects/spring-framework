@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -79,6 +78,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	@Override
+	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		String basePackage = element.getAttribute(BASE_PACKAGE_ATTRIBUTE);
 		basePackage = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(basePackage);
@@ -96,7 +96,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	protected ClassPathBeanDefinitionScanner configureScanner(ParserContext parserContext, Element element) {
 		boolean useDefaultFilters = true;
 		if (element.hasAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE)) {
-			useDefaultFilters = Boolean.valueOf(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));
+			useDefaultFilters = Boolean.parseBoolean(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));
 		}
 
 		// Delegate bean definition registration to scanner class.
@@ -145,7 +145,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		// Register annotation config processors, if necessary.
 		boolean annotationConfig = true;
 		if (element.hasAttribute(ANNOTATION_CONFIG_ATTRIBUTE)) {
-			annotationConfig = Boolean.valueOf(element.getAttribute(ANNOTATION_CONFIG_ATTRIBUTE));
+			annotationConfig = Boolean.parseBoolean(element.getAttribute(ANNOTATION_CONFIG_ATTRIBUTE));
 		}
 		if (annotationConfig) {
 			Set<BeanDefinitionHolder> processorDefinitions =
@@ -215,6 +215,10 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 						scanner.addExcludeFilter(typeFilter);
 					}
 				}
+				catch (ClassNotFoundException ex) {
+					parserContext.getReaderContext().warning(
+							"Ignoring non-present type filter class: " + ex, parserContext.extractSource(element));
+				}
 				catch (Exception ex) {
 					parserContext.getReaderContext().error(
 							ex.getMessage(), parserContext.extractSource(element), ex.getCause());
@@ -224,39 +228,34 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected TypeFilter createTypeFilter(
-			Element element, @Nullable ClassLoader classLoader, ParserContext parserContext) {
+	protected TypeFilter createTypeFilter(Element element, @Nullable ClassLoader classLoader,
+			ParserContext parserContext) throws ClassNotFoundException {
 
 		String filterType = element.getAttribute(FILTER_TYPE_ATTRIBUTE);
 		String expression = element.getAttribute(FILTER_EXPRESSION_ATTRIBUTE);
 		expression = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(expression);
-		try {
-			if ("annotation".equals(filterType)) {
-				return new AnnotationTypeFilter((Class<Annotation>) ClassUtils.forName(expression, classLoader));
-			}
-			else if ("assignable".equals(filterType)) {
-				return new AssignableTypeFilter(ClassUtils.forName(expression, classLoader));
-			}
-			else if ("aspectj".equals(filterType)) {
-				return new AspectJTypeFilter(expression, classLoader);
-			}
-			else if ("regex".equals(filterType)) {
-				return new RegexPatternTypeFilter(Pattern.compile(expression));
-			}
-			else if ("custom".equals(filterType)) {
-				Class<?> filterClass = ClassUtils.forName(expression, classLoader);
-				if (!TypeFilter.class.isAssignableFrom(filterClass)) {
-					throw new IllegalArgumentException(
-							"Class is not assignable to [" + TypeFilter.class.getName() + "]: " + expression);
-				}
-				return (TypeFilter) BeanUtils.instantiateClass(filterClass);
-			}
-			else {
-				throw new IllegalArgumentException("Unsupported filter type: " + filterType);
-			}
+		if ("annotation".equals(filterType)) {
+			return new AnnotationTypeFilter((Class<Annotation>) ClassUtils.forName(expression, classLoader));
 		}
-		catch (ClassNotFoundException ex) {
-			throw new FatalBeanException("Type filter class not found: " + expression, ex);
+		else if ("assignable".equals(filterType)) {
+			return new AssignableTypeFilter(ClassUtils.forName(expression, classLoader));
+		}
+		else if ("aspectj".equals(filterType)) {
+			return new AspectJTypeFilter(expression, classLoader);
+		}
+		else if ("regex".equals(filterType)) {
+			return new RegexPatternTypeFilter(Pattern.compile(expression));
+		}
+		else if ("custom".equals(filterType)) {
+			Class<?> filterClass = ClassUtils.forName(expression, classLoader);
+			if (!TypeFilter.class.isAssignableFrom(filterClass)) {
+				throw new IllegalArgumentException(
+						"Class is not assignable to [" + TypeFilter.class.getName() + "]: " + expression);
+			}
+			return (TypeFilter) BeanUtils.instantiateClass(filterClass);
+		}
+		else {
+			throw new IllegalArgumentException("Unsupported filter type: " + filterType);
 		}
 	}
 

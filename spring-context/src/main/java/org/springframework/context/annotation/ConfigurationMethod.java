@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,8 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.core.type.MethodMetadata;
 
 /**
+ * Base class for a {@link Configuration @Configuration} class method.
+ *
  * @author Chris Beams
  * @since 3.1
  */
@@ -49,17 +51,8 @@ abstract class ConfigurationMethod {
 		return new Location(this.configurationClass.getResource(), this.metadata);
 	}
 
-	String getFullyQualifiedMethodName() {
-		return this.metadata.getDeclaringClassName() + "#" + this.metadata.getMethodName();
+	void validate(ProblemReporter problemReporter) {
 	}
-
-	static String getShortMethodName(String fullyQualifiedMethodName) {
-		return fullyQualifiedMethodName.substring(fullyQualifiedMethodName.indexOf('#') + 1);
-	}
-
-	public void validate(ProblemReporter problemReporter) {
-	}
-
 
 	@Override
 	public String toString() {

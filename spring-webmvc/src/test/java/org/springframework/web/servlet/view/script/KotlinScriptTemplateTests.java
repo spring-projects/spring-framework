@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,30 +19,29 @@ package org.springframework.web.servlet.view.script;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for Kotlin script templates running on Kotlin JSR-223 support.
  *
  * @author Sebastien Deleuze
  */
-@Ignore  // for JDK 9 compatibility
 public class KotlinScriptTemplateTests {
 
 	private WebApplicationContext webAppContext;
@@ -50,32 +49,29 @@ public class KotlinScriptTemplateTests {
 	private ServletContext servletContext;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.webAppContext = mock(WebApplicationContext.class);
 		this.servletContext = new MockServletContext();
 		this.servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.webAppContext);
 	}
 
-
 	@Test
 	public void renderTemplateWithFrenchLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
-		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/kotlin/template.kts",
-				model, Locale.FRENCH, ScriptTemplatingConfiguration.class);
-		assertEquals("<html><body>\n<p>Bonjour Foo</p>\n</body></html>",
-				response.getContentAsString());
+		String url = "org/springframework/web/servlet/view/script/kotlin/template.kts";
+		MockHttpServletResponse response = render(url, model, Locale.FRENCH, ScriptTemplatingConfiguration.class);
+		assertThat(response.getContentAsString()).isEqualTo("<html><body>\n<p>Bonjour Foo</p>\n</body></html>");
 	}
 
 	@Test
 	public void renderTemplateWithEnglishLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
-		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/kotlin/template.kts",
-				model, Locale.ENGLISH, ScriptTemplatingConfiguration.class);
-		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>",
-				response.getContentAsString());
+		String url = "org/springframework/web/servlet/view/script/kotlin/template.kts";
+		MockHttpServletResponse response = render(url, model, Locale.ENGLISH, ScriptTemplatingConfiguration.class);
+		assertThat(response.getContentAsString()).isEqualTo("<html><body>\n<p>Hello Foo</p>\n</body></html>");
 	}
 
 	@Test
@@ -85,14 +81,15 @@ public class KotlinScriptTemplateTests {
 		model.put("hello", "Hello");
 		model.put("foo", "Foo");
 		model.put("footer", "</body></html>");
-		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/kotlin/eval.kts",
+		MockHttpServletResponse response = render("org/springframework/web/servlet/view/script/kotlin/eval.kts",
 				model, Locale.ENGLISH, ScriptTemplatingConfigurationWithoutRenderFunction.class);
-		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>",
-				response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<html><body>\n<p>Hello Foo</p>\n</body></html>");
 	}
 
 
-	private MockHttpServletResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Locale locale, Class<?> configuration) throws Exception {
+	private MockHttpServletResponse render(String viewUrl, Map<String, Object> model,
+			Locale locale, Class<?> configuration) throws Exception {
+
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		MockHttpServletRequest request = new MockHttpServletRequest();

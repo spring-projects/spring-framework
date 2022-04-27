@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -70,6 +70,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 
 	@Override
+	@Nullable
 	public URI getUri() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getUri();
@@ -143,7 +144,8 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 	}
 
 	@Override
-	public <T> T getNativeSession(Class<T> requiredType) {
+	@Nullable
+	public <T> T getNativeSession(@Nullable Class<T> requiredType) {
 		return (this.webSocketSession instanceof NativeWebSocketSession ?
 				((NativeWebSocketSession) this.webSocketSession).getNativeSession(requiredType) : null);
 	}
@@ -164,7 +166,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 				scheduleHeartbeat();
 				this.openFrameSent = true;
 			}
-			catch (Throwable ex) {
+			catch (Exception ex) {
 				tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
 			}
 		}
@@ -177,14 +179,14 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 	public void handleMessage(TextMessage message, WebSocketSession wsSession) throws Exception {
 		String payload = message.getPayload();
-		if (StringUtils.isEmpty(payload)) {
+		if (!StringUtils.hasLength(payload)) {
 			return;
 		}
 		String[] messages;
 		try {
 			messages = getSockJsServiceConfig().getMessageCodec().decode(payload);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			logger.error("Broken data received. Terminating WebSocket connection abruptly", ex);
 			tryCloseWithSockJsTransportError(ex, CloseStatus.BAD_DATA);
 			return;

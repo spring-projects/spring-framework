@@ -1,0 +1,49 @@
+description = "Spring Context"
+
+apply plugin: "groovy"
+apply plugin: "kotlin"
+
+dependencies {
+	api(project(":spring-aop"))
+	api(project(":spring-beans"))
+	api(project(":spring-core"))
+	api(project(":spring-expression"))
+	optional(project(":spring-instrument"))
+	optional("javax.annotation:javax.annotation-api")
+	optional("javax.ejb:javax.ejb-api")
+	optional("javax.enterprise.concurrent:javax.enterprise.concurrent-api")
+	optional("javax.inject:javax.inject")
+	optional("javax.interceptor:javax.interceptor-api")
+	optional("javax.money:money-api")
+	// Overriding 2.0.1.Final due to Bean Validation 1.1 compatibility in LocalValidatorFactoryBean
+	optional("javax.validation:validation-api:1.1.0.Final")
+	optional("javax.xml.ws:jaxws-api")
+	optional("org.aspectj:aspectjweaver")
+	optional("org.codehaus.groovy:groovy")
+	optional("org.apache-extras.beanshell:bsh")
+	optional("joda-time:joda-time")
+	optional("org.hibernate:hibernate-validator:5.4.3.Final")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.reactivestreams:reactive-streams")
+	testImplementation(testFixtures(project(":spring-aop")))
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation("io.projectreactor:reactor-core")
+	testImplementation("org.codehaus.groovy:groovy-jsr223")
+	testImplementation("org.codehaus.groovy:groovy-test")
+	testImplementation("org.codehaus.groovy:groovy-xml")
+	testImplementation("org.apache.commons:commons-pool2")
+	testImplementation("org.awaitility:awaitility")
+	testImplementation("javax.inject:javax.inject-tck")
+	testRuntimeOnly("javax.xml.bind:jaxb-api")
+	testRuntimeOnly("org.glassfish:javax.el")
+	// Substitute for javax.management:jmxremote_optional:1.0.1_04 (not available on Maven Central)
+	testRuntimeOnly("org.glassfish.external:opendmk_jmxremote_optional_jar")
+	testRuntimeOnly("org.javamoney:moneta")
+	testRuntimeOnly("org.junit.vintage:junit-vintage-engine") // for @Inject TCK
+	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
+	testFixturesImplementation(testFixtures(project(":spring-beans")))
+	testFixturesImplementation("com.google.code.findbugs:jsr305")
+	testFixturesImplementation("org.assertj:assertj-core")
+}

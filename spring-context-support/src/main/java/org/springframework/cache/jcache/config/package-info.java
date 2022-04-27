@@ -6,4 +6,9 @@
  * <p>Provide an extension of the {@code CachingConfigurer} that exposes
  * the exception cache resolver to use, see {@code JCacheConfigurer}.
  */
+@NonNullApi
+@NonNullFields
 package org.springframework.cache.jcache.config;
+
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

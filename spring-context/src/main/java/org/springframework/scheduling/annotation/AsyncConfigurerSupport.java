@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.scheduling.annotation;
 import java.util.concurrent.Executor;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.lang.Nullable;
 
 /**
  * A convenience {@link AsyncConfigurer} that implements all methods
@@ -36,6 +37,7 @@ public class AsyncConfigurerSupport implements AsyncConfigurer {
 	}
 
 	@Override
+	@Nullable
 	public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
 		return null;
 	}

@@ -1,36 +1,43 @@
-= Spring Framework Reference Documentation
-The Spring Framework team and contributors https://github.com/spring-projects/spring-framework/graphs/contributors
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+:noheader:
+= Spring Framework Documentation
 
+[horizontal]
+<<overview.adoc#overview, Overview>> :: history, design philosophy, feedback,
+getting started.
+<<core.adoc#spring-core, Core>> :: IoC Container, Events, Resources, i18n,
+Validation, Data Binding, Type Conversion, SpEL, AOP.
+<<testing.adoc#testing, Testing>> :: Mock Objects, TestContext Framework,
+Spring MVC Test, WebTestClient.
+<<data-access.adoc#spring-data-tier, Data Access>> :: Transactions, DAO Support,
+JDBC, R2DBC, O/R Mapping, XML Marshalling.
+<<web.adoc#spring-web, Web Servlet>> :: Spring MVC, WebSocket, SockJS,
+STOMP Messaging.
+<<web-reactive.adoc#spring-webflux, Web Reactive>> :: Spring WebFlux, WebClient,
+WebSocket, RSocket.
+<<integration.adoc#spring-integration, Integration>> :: Remoting, JMS, JCA, JMX,
+Email, Tasks, Scheduling, Caching.
+<<languages.adoc#languages, Languages>> :: Kotlin, Groovy, Dynamic Languages.
+<<appendix.adoc#appendix, Appendix>> :: Spring properties.
+https://github.com/spring-projects/spring-framework/wiki[*Wiki*] :: What's New, Upgrade Notes, Supported Versions,
+and other cross-version information.
 
-The Spring Framework is a lightweight solution and a potential one-stop-shop for
-building your enterprise-ready applications. However, Spring is modular, allowing you to
-use only those parts that you need, without having to bring in the rest. You can use the
-IoC container, with any web framework on top, but you can also use only the
-<<data-access.adoc#orm-hibernate,Hibernate integration code>> or the
-<<data-access.adoc#jdbc-introduction,JDBC abstraction layer>>. The Spring Framework supports declarative
-transaction management, remote access to your logic through RMI or web services, and various
-options for persisting your data.
-It offers full-featured web frameworks such as <<web.adoc#mvc-introduction,Spring MVC>>
-and <<web.adoc#web-reactive, Spring WebFlux>>; and it enables you to
-integrate <<core.adoc#aop-introduction,AOP>> transparently into your software.
+ifdef::backend-html5[]
+NOTE: This documentation is also available as {docs-spring-framework}/reference/pdf/index.pdf[PDF].
+endif::[]
 
-This document is a reference guide to Spring Framework features. Questions on the
-Framework itself should be asked on StackOverflow (see https://spring.io/questions[]).
+ifdef::backend-pdf[]
+NOTE: This documentation is also available as {docs-spring-framework}/reference/html/index.html[HTML].
+endif::[]
 
-This reference document provides the following sections:
+Rod Johnson, Juergen Hoeller, Keith Donald, Colin Sampaleanu, Rob Harrop, Thomas Risberg,
+Alef Arendsen, Darren Davison, Dmitriy Kopylenko, Mark Pollack, Thierry Templier, Erwin
+Vervaet, Portia Tung, Ben Hale, Adrian Colyer, John Lewis, Costin Leau, Mark Fisher, Sam
+Brannen, Ramnivas Laddad, Arjen Poutsma, Chris Beams, Tareq Abedrabbo, Andy Clement, Dave
+Syer, Oliver Gierke, Rossen Stoyanchev, Phillip Webb, Rob Winch, Brian Clozel, Stephane
+Nicoll, Sebastien Deleuze, Jay Bryant, Mark Paluch
 
-* <<overview.adoc#spring-introduction,Overview of the Spring Framework>>
+Copyright © 2002 - 2022 Pivotal, Inc. All Rights Reserved.
 
-* <<core.adoc#spring-core,Core concepts such as IoC and AOP>>
-
-* <<testing.adoc#testing,Testing with Spring>>
-
-* <<data-access.adoc#spring-data-tier,Data access and transaction management>>
-
-* <<web.adoc#spring-web,Web frameworks>>
-
-* <<integration.adoc#spring-integration,Integration with other technologies>>
-
-* <<appendix.adoc#spring-appendices,Appendix>>
+Copies of this document may be made for your own use and for distribution to others,
+provided that you do not charge any fee for such copies and further provided that each
+copy contains this Copyright Notice, whether distributed in print or electronically.

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -118,6 +118,7 @@ public class DefaultContextCache implements ContextCache {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Nullable
 	public ApplicationContext get(MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
 		ApplicationContext context = this.contextMap.get(key);
@@ -142,11 +143,7 @@ public class DefaultContextCache implements ContextCache {
 		MergedContextConfiguration child = key;
 		MergedContextConfiguration parent = child.getParent();
 		while (parent != null) {
-			Set<MergedContextConfiguration> list = this.hierarchyMap.get(parent);
-			if (list == null) {
-				list = new HashSet<>();
-				this.hierarchyMap.put(parent, list);
-			}
+			Set<MergedContextConfiguration> list = this.hierarchyMap.computeIfAbsent(parent, k -> new HashSet<>());
 			list.add(child);
 			child = parent;
 			parent = child.getParent();
@@ -183,9 +180,9 @@ public class DefaultContextCache implements ContextCache {
 		}
 
 		// Remove empty entries from the hierarchy map.
-		for (MergedContextConfiguration currentKey : this.hierarchyMap.keySet()) {
-			if (this.hierarchyMap.get(currentKey).isEmpty()) {
-				this.hierarchyMap.remove(currentKey);
+		for (Map.Entry<MergedContextConfiguration, Set<MergedContextConfiguration>> entry : this.hierarchyMap.entrySet()) {
+			if (entry.getValue().isEmpty()) {
+				this.hierarchyMap.remove(entry.getKey());
 			}
 		}
 	}

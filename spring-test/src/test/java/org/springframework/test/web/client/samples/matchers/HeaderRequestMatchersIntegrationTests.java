@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,11 +17,12 @@
 package org.springframework.test.web.client.samples.matchers;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -31,9 +32,10 @@ import org.springframework.test.web.Person;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Examples of defining expectations on request headers.
@@ -50,7 +52,7 @@ public class HeaderRequestMatchersIntegrationTests {
 	private RestTemplate restTemplate;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
@@ -69,8 +71,7 @@ public class HeaderRequestMatchersIntegrationTests {
 			.andExpect(header("Accept", "application/json, application/*+json"))
 			.andRespond(withSuccess(RESPONSE_BODY, MediaType.APPLICATION_JSON));
 
-		this.restTemplate.getForObject(new URI("/person/1"), Person.class);
-		this.mockServer.verify();
+		executeAndVerify();
 	}
 
 	@Test
@@ -79,6 +80,10 @@ public class HeaderRequestMatchersIntegrationTests {
 			.andExpect(header("Accept", containsString("json")))
 			.andRespond(withSuccess(RESPONSE_BODY, MediaType.APPLICATION_JSON));
 
+		executeAndVerify();
+	}
+
+	private void executeAndVerify() throws URISyntaxException {
 		this.restTemplate.getForObject(new URI("/person/1"), Person.class);
 		this.mockServer.verify();
 	}

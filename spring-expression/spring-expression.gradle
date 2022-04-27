@@ -1,0 +1,10 @@
+description = "Spring Expression Language (SpEL)"
+
+apply plugin: "kotlin"
+
+dependencies {
+	api(project(":spring-core"))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation("org.jetbrains.kotlin:kotlin-reflect")
+	testImplementation("org.jetbrains.kotlin:kotlin-stdlib")
+}

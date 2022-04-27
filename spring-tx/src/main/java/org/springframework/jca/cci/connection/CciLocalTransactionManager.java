@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -61,7 +61,10 @@ import org.springframework.util.Assert;
  * @see ConnectionFactoryUtils#releaseConnection
  * @see TransactionAwareConnectionFactoryProxy
  * @see org.springframework.jca.cci.core.CciTemplate
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class CciLocalTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
@@ -80,7 +83,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 
 	/**
 	 * Create a new CciLocalTransactionManager instance.
-	 * @param connectionFactory CCI ConnectionFactory to manage local transactions for
+	 * @param connectionFactory the CCI ConnectionFactory to manage local transactions for
 	 */
 	public CciLocalTransactionManager(ConnectionFactory connectionFactory) {
 		setConnectionFactory(connectionFactory);

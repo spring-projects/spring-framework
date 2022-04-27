@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -39,35 +40,40 @@ import org.springframework.jdbc.support.JdbcUtils;
  *
  * <p>Example:
  *
- * <pre class="code">create table tab (id int unsigned not null primary key, text varchar(100));
+ * <pre class="code">
+ * create table tab (id int unsigned not null primary key, text varchar(100));
  * create table tab_sequence (value int not null);
  * insert into tab_sequence values(0);</pre>
  *
- * If "cacheSize" is set, the intermediate values are served without querying the
+ * <p>If {@code cacheSize} is set, the intermediate values are served without querying the
  * database. If the server or your application is stopped or crashes or a transaction
  * is rolled back, the unused values will never be served. The maximum hole size in
- * numbering is consequently the value of cacheSize.
+ * numbering is consequently the value of {@code cacheSize}.
  *
  * <p>It is possible to avoid acquiring a new connection for the incrementer by setting the
  * "useNewConnection" property to false. In this case you <i>MUST</i> use a non-transactional
  * storage engine like MYISAM when defining the incrementer table.
  *
+ * <p>As of Spring Framework 5.3.7, {@code MySQLMaxValueIncrementer} is compatible with
+ * <a href="https://dev.mysql.com/doc/refman/8.0/en/mysql-tips.html#safe-updates">MySQL safe updates mode</a>.
+ *
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer {
 
-	/** The SQL string for retrieving the new sequence value */
+	/** The SQL string for retrieving the new sequence value. */
 	private static final String VALUE_SQL = "select last_insert_id()";
 
-	/** The next id to serve */
+	/** The next id to serve. */
 	private long nextId = 0;
 
-	/** The max id to serve */
+	/** The max id to serve. */
 	private long maxId = 0;
 
-	/** Whether or not to use a new connection for the incrementer */
+	/** Whether or not to use a new connection for the incrementer. */
 	private boolean useNewConnection = true;
 
 
@@ -140,7 +146,7 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 				String columnName = getColumnName();
 				try {
 					stmt.executeUpdate("update " + getIncrementerName() + " set " + columnName +
-							" = last_insert_id(" + columnName + " + " + getCacheSize() + ")");
+							" = last_insert_id(" + columnName + " + " + getCacheSize() + ") limit 1");
 				}
 				catch (SQLException ex) {
 					throw new DataAccessResourceFailureException("Could not increment " + columnName + " for " +

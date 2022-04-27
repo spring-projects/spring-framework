@@ -1,0 +1,26 @@
+description = "Spring R2DBC"
+
+apply plugin: "kotlin"
+
+dependencies {
+	api(project(":spring-beans"))
+	api(project(":spring-core"))
+	api(project(":spring-tx"))
+	api("io.r2dbc:r2dbc-spi")
+	api("io.projectreactor:reactor-core")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-context")))
+	testImplementation("io.projectreactor:reactor-test")
+	testImplementation("io.r2dbc:r2dbc-h2")
+	testImplementation("com.h2database:h2:1.4.200") {
+		because("r2dbc-h2 does not yet support H2 2.0")
+	}
+	testImplementation("io.r2dbc:r2dbc-spi-test:0.8.1.RELEASE") {
+		exclude group: "org.springframework", module: "spring-jdbc"
+	}
+}

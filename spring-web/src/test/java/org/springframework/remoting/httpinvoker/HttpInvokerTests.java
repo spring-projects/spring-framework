@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,44 +28,46 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.aopalliance.intercept.MethodInvocation;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.support.DefaultRemoteInvocationExecutor;
 import org.springframework.remoting.support.RemoteInvocation;
-import org.springframework.remoting.support.RemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocationResult;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Juergen Hoeller
  * @since 09.08.2004
  */
-public class HttpInvokerTests {
+@SuppressWarnings("deprecation")
+class HttpInvokerTests {
 
 	@Test
-	public void httpInvokerProxyFactoryBeanAndServiceExporter() throws Throwable {
+	void httpInvokerProxyFactoryBeanAndServiceExporter() {
 		doTestHttpInvokerProxyFactoryBeanAndServiceExporter(false);
 	}
 
 	@Test
-	public void httpInvokerProxyFactoryBeanAndServiceExporterWithExplicitClassLoader() throws Throwable {
+	void httpInvokerProxyFactoryBeanAndServiceExporterWithExplicitClassLoader() {
 		doTestHttpInvokerProxyFactoryBeanAndServiceExporter(true);
 	}
 
-	private void doTestHttpInvokerProxyFactoryBeanAndServiceExporter(boolean explicitClassLoader) throws Throwable {
+	private void doTestHttpInvokerProxyFactoryBeanAndServiceExporter(boolean explicitClassLoader) {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
@@ -75,13 +77,13 @@ public class HttpInvokerTests {
 
 		HttpInvokerProxyFactoryBean pfb = new HttpInvokerProxyFactoryBean();
 		pfb.setServiceInterface(ITestBean.class);
-		pfb.setServiceUrl("http://myurl");
+		pfb.setServiceUrl("https://myurl");
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
 			@Override
 			protected RemoteInvocationResult doExecuteRequest(
 					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos) throws Exception {
-				assertEquals("http://myurl", config.getServiceUrl());
+				assertThat(config.getServiceUrl()).isEqualTo("https://myurl");
 				MockHttpServletRequest request = new MockHttpServletRequest();
 				MockHttpServletResponse response = new MockHttpServletResponse();
 				request.setContent(baos.toByteArray());
@@ -96,43 +98,33 @@ public class HttpInvokerTests {
 
 		pfb.afterPropertiesSet();
 		ITestBean proxy = (ITestBean) pfb.getObject();
-		assertEquals("myname", proxy.getName());
-		assertEquals(99, proxy.getAge());
+		assertThat(proxy.getName()).isEqualTo("myname");
+		assertThat(proxy.getAge()).isEqualTo(99);
 		proxy.setAge(50);
-		assertEquals(50, proxy.getAge());
+		assertThat(proxy.getAge()).isEqualTo(50);
 		proxy.setStringArray(new String[] {"str1", "str2"});
-		assertTrue(Arrays.equals(new String[] {"str1", "str2"}, proxy.getStringArray()));
+		assertThat(Arrays.equals(new String[] {"str1", "str2"}, proxy.getStringArray())).isTrue();
 		proxy.setSomeIntegerArray(new Integer[] {1, 2, 3});
-		assertTrue(Arrays.equals(new Integer[] {1, 2, 3}, proxy.getSomeIntegerArray()));
+		assertThat(Arrays.equals(new Integer[] {1, 2, 3}, proxy.getSomeIntegerArray())).isTrue();
 		proxy.setNestedIntegerArray(new Integer[][] {{1, 2, 3}, {4, 5, 6}});
 		Integer[][] integerArray = proxy.getNestedIntegerArray();
-		assertTrue(Arrays.equals(new Integer[] {1, 2, 3}, integerArray[0]));
-		assertTrue(Arrays.equals(new Integer[] {4, 5, 6}, integerArray[1]));
+		assertThat(Arrays.equals(new Integer[] {1, 2, 3}, integerArray[0])).isTrue();
+		assertThat(Arrays.equals(new Integer[] {4, 5, 6}, integerArray[1])).isTrue();
 		proxy.setSomeIntArray(new int[] {1, 2, 3});
-		assertTrue(Arrays.equals(new int[] {1, 2, 3}, proxy.getSomeIntArray()));
+		assertThat(Arrays.equals(new int[] {1, 2, 3}, proxy.getSomeIntArray())).isTrue();
 		proxy.setNestedIntArray(new int[][] {{1, 2, 3}, {4, 5, 6}});
 		int[][] intArray = proxy.getNestedIntArray();
-		assertTrue(Arrays.equals(new int[] {1, 2, 3}, intArray[0]));
-		assertTrue(Arrays.equals(new int[] {4, 5, 6}, intArray[1]));
+		assertThat(Arrays.equals(new int[] {1, 2, 3}, intArray[0])).isTrue();
+		assertThat(Arrays.equals(new int[] {4, 5, 6}, intArray[1])).isTrue();
 
-		try {
-			proxy.exceptional(new IllegalStateException());
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-		try {
-			proxy.exceptional(new IllegalAccessException());
-			fail("Should have thrown IllegalAccessException");
-		}
-		catch (IllegalAccessException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				proxy.exceptional(new IllegalStateException()));
+		assertThatExceptionOfType(IllegalAccessException.class).isThrownBy(() ->
+				proxy.exceptional(new IllegalAccessException()));
 	}
 
 	@Test
-	public void httpInvokerProxyFactoryBeanAndServiceExporterWithIOException() throws Exception {
+	void httpInvokerProxyFactoryBeanAndServiceExporterWithIOException() throws Exception {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
@@ -142,30 +134,19 @@ public class HttpInvokerTests {
 
 		HttpInvokerProxyFactoryBean pfb = new HttpInvokerProxyFactoryBean();
 		pfb.setServiceInterface(ITestBean.class);
-		pfb.setServiceUrl("http://myurl");
+		pfb.setServiceUrl("https://myurl");
 
-		pfb.setHttpInvokerRequestExecutor(new HttpInvokerRequestExecutor() {
-			@Override
-			public RemoteInvocationResult executeRequest(
-					HttpInvokerClientConfiguration config, RemoteInvocation invocation) throws IOException {
-				throw new IOException("argh");
-			}
-		});
+		pfb.setHttpInvokerRequestExecutor((config, invocation) -> { throw new IOException("argh"); });
 
 		pfb.afterPropertiesSet();
 		ITestBean proxy = (ITestBean) pfb.getObject();
-		try {
-			proxy.setAge(50);
-			fail("Should have thrown RemoteAccessException");
-		}
-		catch (RemoteAccessException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof IOException);
-		}
+		assertThatExceptionOfType(RemoteAccessException.class)
+			.isThrownBy(() -> proxy.setAge(50))
+			.withCauseInstanceOf(IOException.class);
 	}
 
 	@Test
-	public void httpInvokerProxyFactoryBeanAndServiceExporterWithGzipCompression() throws Throwable {
+	void httpInvokerProxyFactoryBeanAndServiceExporterWithGzipCompression() {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter() {
@@ -195,14 +176,14 @@ public class HttpInvokerTests {
 
 		HttpInvokerProxyFactoryBean pfb = new HttpInvokerProxyFactoryBean();
 		pfb.setServiceInterface(ITestBean.class);
-		pfb.setServiceUrl("http://myurl");
+		pfb.setServiceUrl("https://myurl");
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
 			@Override
 			protected RemoteInvocationResult doExecuteRequest(
 					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
 					throws IOException, ClassNotFoundException {
-				assertEquals("http://myurl", config.getServiceUrl());
+				assertThat(config.getServiceUrl()).isEqualTo("https://myurl");
 				MockHttpServletRequest request = new MockHttpServletRequest();
 				request.addHeader("Compression", "gzip");
 				MockHttpServletResponse response = new MockHttpServletResponse();
@@ -228,29 +209,19 @@ public class HttpInvokerTests {
 
 		pfb.afterPropertiesSet();
 		ITestBean proxy = (ITestBean) pfb.getObject();
-		assertEquals("myname", proxy.getName());
-		assertEquals(99, proxy.getAge());
+		assertThat(proxy.getName()).isEqualTo("myname");
+		assertThat(proxy.getAge()).isEqualTo(99);
 		proxy.setAge(50);
-		assertEquals(50, proxy.getAge());
+		assertThat(proxy.getAge()).isEqualTo(50);
 
-		try {
-			proxy.exceptional(new IllegalStateException());
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-		try {
-			proxy.exceptional(new IllegalAccessException());
-			fail("Should have thrown IllegalAccessException");
-		}
-		catch (IllegalAccessException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				proxy.exceptional(new IllegalStateException()));
+		assertThatExceptionOfType(IllegalAccessException.class).isThrownBy(() ->
+				proxy.exceptional(new IllegalAccessException()));
 	}
 
 	@Test
-	public void httpInvokerProxyFactoryBeanAndServiceExporterWithWrappedInvocations() throws Throwable {
+	void httpInvokerProxyFactoryBeanAndServiceExporterWithWrappedInvocations() {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter() {
@@ -276,13 +247,13 @@ public class HttpInvokerTests {
 
 		HttpInvokerProxyFactoryBean pfb = new HttpInvokerProxyFactoryBean();
 		pfb.setServiceInterface(ITestBean.class);
-		pfb.setServiceUrl("http://myurl");
+		pfb.setServiceUrl("https://myurl");
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
 			@Override
 			protected RemoteInvocationResult doExecuteRequest(
 					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos) throws Exception {
-				assertEquals("http://myurl", config.getServiceUrl());
+				assertThat(config.getServiceUrl()).isEqualTo("https://myurl");
 				MockHttpServletRequest request = new MockHttpServletRequest();
 				MockHttpServletResponse response = new MockHttpServletResponse();
 				request.setContent(baos.toByteArray());
@@ -308,29 +279,19 @@ public class HttpInvokerTests {
 
 		pfb.afterPropertiesSet();
 		ITestBean proxy = (ITestBean) pfb.getObject();
-		assertEquals("myname", proxy.getName());
-		assertEquals(99, proxy.getAge());
+		assertThat(proxy.getName()).isEqualTo("myname");
+		assertThat(proxy.getAge()).isEqualTo(99);
 		proxy.setAge(50);
-		assertEquals(50, proxy.getAge());
+		assertThat(proxy.getAge()).isEqualTo(50);
 
-		try {
-			proxy.exceptional(new IllegalStateException());
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-		try {
-			proxy.exceptional(new IllegalAccessException());
-			fail("Should have thrown IllegalAccessException");
-		}
-		catch (IllegalAccessException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				proxy.exceptional(new IllegalStateException()));
+		assertThatExceptionOfType(IllegalAccessException.class).isThrownBy(() ->
+				proxy.exceptional(new IllegalAccessException()));
 	}
 
 	@Test
-	public void httpInvokerProxyFactoryBeanAndServiceExporterWithInvocationAttributes() throws Exception {
+	void httpInvokerProxyFactoryBeanAndServiceExporterWithInvocationAttributes() {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
@@ -340,10 +301,10 @@ public class HttpInvokerTests {
 			@Override
 			public Object invoke(RemoteInvocation invocation, Object targetObject)
 					throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-				assertNotNull(invocation.getAttributes());
-				assertEquals(1, invocation.getAttributes().size());
-				assertEquals("myValue", invocation.getAttributes().get("myKey"));
-				assertEquals("myValue", invocation.getAttribute("myKey"));
+				assertThat(invocation.getAttributes()).isNotNull();
+				assertThat(invocation.getAttributes().size()).isEqualTo(1);
+				assertThat(invocation.getAttributes().get("myKey")).isEqualTo("myValue");
+				assertThat(invocation.getAttribute("myKey")).isEqualTo("myValue");
 				return super.invoke(invocation, targetObject);
 			}
 		});
@@ -351,32 +312,24 @@ public class HttpInvokerTests {
 
 		HttpInvokerProxyFactoryBean pfb = new HttpInvokerProxyFactoryBean();
 		pfb.setServiceInterface(ITestBean.class);
-		pfb.setServiceUrl("http://myurl");
-		pfb.setRemoteInvocationFactory(new RemoteInvocationFactory() {
-			@Override
-			public RemoteInvocation createRemoteInvocation(MethodInvocation methodInvocation) {
+		pfb.setServiceUrl("https://myurl");
+		pfb.setRemoteInvocationFactory(methodInvocation -> {
 				RemoteInvocation invocation = new RemoteInvocation(methodInvocation);
 				invocation.addAttribute("myKey", "myValue");
-				try {
-					invocation.addAttribute("myKey", "myValue");
-					fail("Should have thrown IllegalStateException");
-				}
-				catch (IllegalStateException ex) {
-					// expected: already defined
-				}
-				assertNotNull(invocation.getAttributes());
-				assertEquals(1, invocation.getAttributes().size());
-				assertEquals("myValue", invocation.getAttributes().get("myKey"));
-				assertEquals("myValue", invocation.getAttribute("myKey"));
+				assertThatIllegalStateException().isThrownBy(() ->
+						invocation.addAttribute("myKey", "myValue"));
+				assertThat(invocation.getAttributes()).isNotNull();
+				assertThat(invocation.getAttributes().size()).isEqualTo(1);
+				assertThat(invocation.getAttributes().get("myKey")).isEqualTo("myValue");
+				assertThat(invocation.getAttribute("myKey")).isEqualTo("myValue");
 				return invocation;
-			}
 		});
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
 			@Override
 			protected RemoteInvocationResult doExecuteRequest(
 					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos) throws Exception {
-				assertEquals("http://myurl", config.getServiceUrl());
+				assertThat(config.getServiceUrl()).isEqualTo("https://myurl");
 				MockHttpServletRequest request = new MockHttpServletRequest();
 				MockHttpServletResponse response = new MockHttpServletResponse();
 				request.setContent(baos.toByteArray());
@@ -388,12 +341,12 @@ public class HttpInvokerTests {
 
 		pfb.afterPropertiesSet();
 		ITestBean proxy = (ITestBean) pfb.getObject();
-		assertEquals("myname", proxy.getName());
-		assertEquals(99, proxy.getAge());
+		assertThat(proxy.getName()).isEqualTo("myname");
+		assertThat(proxy.getAge()).isEqualTo(99);
 	}
 
 	@Test
-	public void httpInvokerProxyFactoryBeanAndServiceExporterWithCustomInvocationObject() throws Exception {
+	void httpInvokerProxyFactoryBeanAndServiceExporterWithCustomInvocationObject() {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
@@ -403,9 +356,10 @@ public class HttpInvokerTests {
 			@Override
 			public Object invoke(RemoteInvocation invocation, Object targetObject)
 					throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-				assertTrue(invocation instanceof TestRemoteInvocation);
-				assertNull(invocation.getAttributes());
-				assertNull(invocation.getAttribute("myKey"));
+				boolean condition = invocation instanceof TestRemoteInvocation;
+				assertThat(condition).isTrue();
+				assertThat(invocation.getAttributes()).isNull();
+				assertThat(invocation.getAttribute("myKey")).isNull();
 				return super.invoke(invocation, targetObject);
 			}
 		});
@@ -413,22 +367,19 @@ public class HttpInvokerTests {
 
 		HttpInvokerProxyFactoryBean pfb = new HttpInvokerProxyFactoryBean();
 		pfb.setServiceInterface(ITestBean.class);
-		pfb.setServiceUrl("http://myurl");
-		pfb.setRemoteInvocationFactory(new RemoteInvocationFactory() {
-			@Override
-			public RemoteInvocation createRemoteInvocation(MethodInvocation methodInvocation) {
+		pfb.setServiceUrl("https://myurl");
+		pfb.setRemoteInvocationFactory(methodInvocation -> {
 				RemoteInvocation invocation = new TestRemoteInvocation(methodInvocation);
-				assertNull(invocation.getAttributes());
-				assertNull(invocation.getAttribute("myKey"));
+				assertThat(invocation.getAttributes()).isNull();
+				assertThat(invocation.getAttribute("myKey")).isNull();
 				return invocation;
-			}
 		});
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
 			@Override
 			protected RemoteInvocationResult doExecuteRequest(
 					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos) throws Exception {
-				assertEquals("http://myurl", config.getServiceUrl());
+				assertThat(config.getServiceUrl()).isEqualTo("https://myurl");
 				MockHttpServletRequest request = new MockHttpServletRequest();
 				MockHttpServletResponse response = new MockHttpServletResponse();
 				request.setContent(baos.toByteArray());
@@ -440,50 +391,39 @@ public class HttpInvokerTests {
 
 		pfb.afterPropertiesSet();
 		ITestBean proxy = (ITestBean) pfb.getObject();
-		assertEquals("myname", proxy.getName());
-		assertEquals(99, proxy.getAge());
+		assertThat(proxy.getName()).isEqualTo("myname");
+		assertThat(proxy.getAge()).isEqualTo(99);
 	}
 
 	@Test
-	public void httpInvokerWithSpecialLocalMethods() throws Exception {
-		String serviceUrl = "http://myurl";
+	void httpInvokerWithSpecialLocalMethods() {
+		String serviceUrl = "https://myurl";
 		HttpInvokerProxyFactoryBean pfb = new HttpInvokerProxyFactoryBean();
 		pfb.setServiceInterface(ITestBean.class);
 		pfb.setServiceUrl(serviceUrl);
 
-		pfb.setHttpInvokerRequestExecutor(new HttpInvokerRequestExecutor() {
-			@Override
-			public RemoteInvocationResult executeRequest(
-					HttpInvokerClientConfiguration config, RemoteInvocation invocation) throws IOException {
-				throw new IOException("argh");
-			}
-		});
+		pfb.setHttpInvokerRequestExecutor((config, invocation) -> { throw new IOException("argh"); });
 
 		pfb.afterPropertiesSet();
 		ITestBean proxy = (ITestBean) pfb.getObject();
 
 		// shouldn't go through to remote service
-		assertTrue(proxy.toString().indexOf("HTTP invoker") != -1);
-		assertTrue(proxy.toString().indexOf(serviceUrl) != -1);
-		assertEquals(proxy.hashCode(), proxy.hashCode());
-		assertTrue(proxy.equals(proxy));
+		assertThat(proxy.toString().contains("HTTP invoker")).isTrue();
+		assertThat(proxy.toString().contains(serviceUrl)).isTrue();
+		assertThat(proxy.hashCode()).isEqualTo(proxy.hashCode());
+		assertThat(proxy.equals(proxy)).isTrue();
 
 		// should go through
-		try {
-			proxy.setAge(50);
-			fail("Should have thrown RemoteAccessException");
-		}
-		catch (RemoteAccessException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof IOException);
-		}
+		assertThatExceptionOfType(RemoteAccessException.class)
+			.isThrownBy(() -> proxy.setAge(50))
+			.withCauseInstanceOf(IOException.class);
 	}
 
 
 	@SuppressWarnings("serial")
 	private static class TestRemoteInvocation extends RemoteInvocation {
 
-		public TestRemoteInvocation(MethodInvocation methodInvocation) {
+		TestRemoteInvocation(MethodInvocation methodInvocation) {
 			super(methodInvocation);
 		}
 	}
@@ -494,7 +434,7 @@ public class HttpInvokerTests {
 
 		private final RemoteInvocation remoteInvocation;
 
-		public TestRemoteInvocationWrapper(RemoteInvocation remoteInvocation) {
+		TestRemoteInvocationWrapper(RemoteInvocation remoteInvocation) {
 			this.remoteInvocation = remoteInvocation;
 		}
 	}
@@ -505,7 +445,7 @@ public class HttpInvokerTests {
 
 		private final RemoteInvocationResult remoteInvocationResult;
 
-		public TestRemoteInvocationResultWrapper(RemoteInvocationResult remoteInvocationResult) {
+		TestRemoteInvocationResultWrapper(RemoteInvocationResult remoteInvocationResult) {
 			this.remoteInvocationResult = remoteInvocationResult;
 		}
 	}

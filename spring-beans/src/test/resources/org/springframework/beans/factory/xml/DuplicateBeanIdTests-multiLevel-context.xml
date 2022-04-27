@@ -2,14 +2,14 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
-		http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+		https://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name" value="topLevel"/>
 	</bean>
 
 	<beans>
-		<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean">
+		<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean">
 			<property name="name" value="nested"/>
 		</bean>
 	</beans>

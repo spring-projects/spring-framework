@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,7 +41,7 @@ import org.springframework.core.annotation.AliasFor;
  * {@code @DisabledOnMac} annotation can be created as follows.
  *
  * <pre style="code">
- * {@literal @}Target({ ElementType.TYPE, ElementType.METHOD })
+ * {@literal @}Target({ElementType.TYPE, ElementType.METHOD})
  * {@literal @}Retention(RetentionPolicy.RUNTIME)
  * {@literal @}DisabledIf(
  *     expression = "#{systemProperties['os.name'].toLowerCase().contains('mac')}",
@@ -50,14 +50,25 @@ import org.springframework.core.annotation.AliasFor;
  * public {@literal @}interface DisabledOnMac {}
  * </pre>
  *
+ * <p>Please note that {@code @DisabledOnMac} is meant only as an example of what
+ * is possible. If you have that exact use case, please use the built-in
+ * {@link org.junit.jupiter.api.condition.DisabledOnOs @DisabledOnOs(MAC)} support
+ * in JUnit Jupiter.
+ *
+ * <p>Since JUnit 5.7, JUnit Jupiter also has a condition annotation named
+ * {@link org.junit.jupiter.api.condition.DisabledIf @DisabledIf}. Thus, if you
+ * wish to use Spring's {@code @DisabledIf} support make sure you import the
+ * annotation type from the correct package.
+ *
  * @author Sam Brannen
  * @author Tadaya Tsuyukubo
  * @since 5.0
  * @see SpringExtension
  * @see EnabledIf
  * @see org.junit.jupiter.api.Disabled
+ * @see org.junit.jupiter.api.condition.DisabledIf
  */
-@Target({ ElementType.TYPE, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @ExtendWith(DisabledIfCondition.class)
@@ -86,7 +97,7 @@ public @interface DisabledIf {
 	 * <pre style="code">@DisabledIf("#{systemProperties['os.name'].toLowerCase().contains('mac')}")</pre>
 	 * <li>Placeholder for a property available in the Spring
 	 * {@link org.springframework.core.env.Environment Environment} &mdash; for example:
-	 * <pre style="code">@DisabledIf("${smoke.tests.enabled}")</pre>
+	 * <pre style="code">@DisabledIf("${smoke.tests.disabled}")</pre>
 	 * <li>Text literal &mdash; for example:
 	 * <pre style="code">@DisabledIf("true")</pre>
 	 * </ul>

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -107,25 +107,23 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 	private class GenericMessageEndpoint extends AbstractMessageEndpoint implements MethodInterceptor {
 
 		@Override
+		@Nullable
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+			Throwable endpointEx = null;
 			boolean applyDeliveryCalls = !hasBeforeDeliveryBeenCalled();
 			if (applyDeliveryCalls) {
 				try {
 					beforeDelivery(null);
 				}
 				catch (ResourceException ex) {
-					if (ReflectionUtils.declaresException(methodInvocation.getMethod(), ex.getClass())) {
-						throw ex;
-					}
-					else {
-						throw new InternalResourceException(ex);
-					}
+					throw adaptExceptionIfNecessary(methodInvocation, ex);
 				}
 			}
 			try {
 				return methodInvocation.proceed();
 			}
 			catch (Throwable ex) {
+				endpointEx = ex;
 				onEndpointException(ex);
 				throw ex;
 			}
@@ -135,14 +133,20 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 						afterDelivery();
 					}
 					catch (ResourceException ex) {
-						if (ReflectionUtils.declaresException(methodInvocation.getMethod(), ex.getClass())) {
-							throw ex;
-						}
-						else {
-							throw new InternalResourceException(ex);
+						if (endpointEx == null) {
+							throw adaptExceptionIfNecessary(methodInvocation, ex);
 						}
 					}
 				}
+			}
+		}
+
+		private Exception adaptExceptionIfNecessary(MethodInvocation methodInvocation, ResourceException ex) {
+			if (ReflectionUtils.declaresException(methodInvocation.getMethod(), ex.getClass())) {
+				return ex;
+			}
+			else {
+				return new InternalResourceException(ex);
 			}
 		}
 
@@ -164,7 +168,7 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 	@SuppressWarnings("serial")
 	public static class InternalResourceException extends RuntimeException {
 
-		protected InternalResourceException(ResourceException cause) {
+		public InternalResourceException(ResourceException cause) {
 			super(cause);
 		}
 	}

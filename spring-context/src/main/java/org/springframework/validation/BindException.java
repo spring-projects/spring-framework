@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,7 +58,7 @@ public class BindException extends Exception implements BindingResult {
 
 	/**
 	 * Create a new BindException instance for a target bean.
-	 * @param target target bean to bind onto
+	 * @param target the target bean to bind onto
 	 * @param objectName the name of the target object
 	 * @see BeanPropertyBindingResult
 	 */
@@ -70,8 +70,6 @@ public class BindException extends Exception implements BindingResult {
 
 	/**
 	 * Return the BindingResult that this BindException wraps.
-	 * Will typically be a BeanPropertyBindingResult.
-	 * @see BeanPropertyBindingResult
 	 */
 	public final BindingResult getBindingResult() {
 		return this.bindingResult;
@@ -171,6 +169,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
+	@Nullable
 	public ObjectError getGlobalError() {
 		return this.bindingResult.getGlobalError();
 	}
@@ -191,6 +190,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError() {
 		return this.bindingResult.getFieldError();
 	}
@@ -211,21 +211,25 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError(String field) {
 		return this.bindingResult.getFieldError(field);
 	}
 
 	@Override
+	@Nullable
 	public Object getFieldValue(String field) {
 		return this.bindingResult.getFieldValue(field);
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getFieldType(String field) {
 		return this.bindingResult.getFieldType(field);
 	}
 
 	@Override
+	@Nullable
 	public Object getTarget() {
 		return this.bindingResult.getTarget();
 	}
@@ -236,6 +240,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
+	@Nullable
 	public Object getRawFieldValue(String field) {
 		return this.bindingResult.getRawFieldValue(field);
 	}
@@ -254,11 +259,6 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
-	public void addError(ObjectError error) {
-		this.bindingResult.addError(error);
-	}
-
-	@Override
 	public String[] resolveMessageCodes(String errorCode) {
 		return this.bindingResult.resolveMessageCodes(errorCode);
 	}
@@ -266,6 +266,16 @@ public class BindException extends Exception implements BindingResult {
 	@Override
 	public String[] resolveMessageCodes(String errorCode, String field) {
 		return this.bindingResult.resolveMessageCodes(errorCode, field);
+	}
+
+	@Override
+	public void addError(ObjectError error) {
+		this.bindingResult.addError(error);
+	}
+
+	@Override
+	public void recordFieldValue(String field, Class<?> type, @Nullable Object value) {
+		this.bindingResult.recordFieldValue(field, type, value);
 	}
 
 	@Override
@@ -288,7 +298,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || this.bindingResult.equals(other));
 	}
 

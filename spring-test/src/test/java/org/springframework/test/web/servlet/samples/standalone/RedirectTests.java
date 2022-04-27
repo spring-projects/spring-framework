@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,22 +18,27 @@ package org.springframework.test.web.servlet.samples.standalone;
 
 import javax.validation.Valid;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * Redirect scenarios including saving and retrieving flash attributes.
@@ -46,7 +51,7 @@ public class RedirectTests {
 	private MockMvc mockMvc;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.mockMvc = standaloneSetup(new PersonController()).build();
 	}
@@ -109,13 +114,13 @@ public class RedirectTests {
 	@Controller
 	private static class PersonController {
 
-		@RequestMapping(value="/persons/{name}", method=RequestMethod.GET)
+		@GetMapping("/persons/{name}")
 		public String getPerson(@PathVariable String name, Model model) {
 			model.addAttribute(new Person(name));
 			return "persons/index";
 		}
 
-		@RequestMapping(value="/persons", method=RequestMethod.POST)
+		@PostMapping("/persons")
 		public String save(@Valid Person person, Errors errors, RedirectAttributes redirectAttrs) {
 			if (errors.hasErrors()) {
 				return "persons/add";
@@ -125,7 +130,7 @@ public class RedirectTests {
 			return "redirect:/persons/{name}";
 		}
 
-		@RequestMapping(value="/people", method=RequestMethod.POST)
+		@PostMapping("/people")
 		public Object saveSpecial(@Valid Person person, Errors errors, RedirectAttributes redirectAttrs) {
 			if (errors.hasErrors()) {
 				return "persons/add";

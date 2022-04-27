@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,10 +30,14 @@ import org.springframework.lang.Nullable;
  */
 public class SpelParserConfiguration {
 
+	/** System property to configure the default compiler mode for SpEL expression parsers: {@value}. */
+	public static final String SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME = "spring.expression.compiler.mode";
+
+
 	private static final SpelCompilerMode defaultCompilerMode;
 
 	static {
-		String compilerMode = SpringProperties.getProperty("spring.expression.compiler.mode");
+		String compilerMode = SpringProperties.getProperty(SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME);
 		defaultCompilerMode = (compilerMode != null ?
 				SpelCompilerMode.valueOf(compilerMode.toUpperCase()) : SpelCompilerMode.OFF);
 	}
@@ -107,7 +111,7 @@ public class SpelParserConfiguration {
 
 
 	/**
-	 * Return the configuration mode for parsers using this configuration object.
+	 * Return the compiler mode for parsers using this configuration object.
 	 */
 	public SpelCompilerMode getCompilerMode() {
 		return this.compilerMode;

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.core.SmartClassLoader;
 import org.springframework.lang.Nullable;
 
 /**
@@ -63,7 +64,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		if (bean instanceof AopInfrastructureBean || this.advisor == null) {
+		if (this.advisor == null || bean instanceof AopInfrastructureBean) {
 			// Ignore AOP infrastructure such as scoped proxies.
 			return bean;
 		}
@@ -89,10 +90,16 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 			}
 			proxyFactory.addAdvisor(this.advisor);
 			customizeProxyFactory(proxyFactory);
-			return proxyFactory.getProxy(getProxyClassLoader());
+
+			// Use original ClassLoader if bean class not locally loaded in overriding class loader
+			ClassLoader classLoader = getProxyClassLoader();
+			if (classLoader instanceof SmartClassLoader && classLoader != bean.getClass().getClassLoader()) {
+				classLoader = ((SmartClassLoader) classLoader).getOriginalClassLoader();
+			}
+			return proxyFactory.getProxy(classLoader);
 		}
 
-		// No async proxy needed.
+		// No proxy needed.
 		return bean;
 	}
 
@@ -160,7 +167,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 	 * Subclasses may choose to implement this: for example,
 	 * to change the interfaces exposed.
 	 * <p>The default implementation is empty.
-	 * @param proxyFactory ProxyFactory that is already configured with
+	 * @param proxyFactory the ProxyFactory that is already configured with
 	 * target, advisor and interfaces and will be used to create the proxy
 	 * immediately after this method returns
 	 * @since 4.2.3

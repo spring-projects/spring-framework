@@ -1,0 +1,100 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+description = "Spring Core"
+
+apply plugin: "kotlin"
+
+// spring-core includes asm and repackages cglib, inlining both into the spring-core jar.
+// cglib itself depends on asm and is therefore further transformed by the ShadowJar task to
+// depend on org.springframework.asm; this avoids including two different copies of asm.
+def cglibVersion = "3.3.0"
+def objenesisVersion = "3.2"
+
+configurations {
+	cglib
+	objenesis
+}
+
+task cglibRepackJar(type: ShadowJar) {
+	archiveBaseName.set('spring-cglib-repack')
+	archiveVersion.set(cglibVersion)
+	configurations = [project.configurations.cglib]
+	relocate 'net.sf.cglib', 'org.springframework.cglib'
+	relocate 'org.objectweb.asm', 'org.springframework.asm'
+}
+
+task objenesisRepackJar(type: ShadowJar) {
+	archiveBaseName.set('spring-objenesis-repack')
+	archiveVersion.set(objenesisVersion)
+	configurations = [project.configurations.objenesis]
+	relocate 'org.objenesis', 'org.springframework.objenesis'
+}
+
+dependencies {
+	cglib("cglib:cglib:${cglibVersion}@jar")
+	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
+	api(files(cglibRepackJar))
+	api(files(objenesisRepackJar))
+	api(project(":spring-jcl"))
+	compileOnly("io.projectreactor.tools:blockhound")
+	optional("net.sf.jopt-simple:jopt-simple")
+	optional("org.aspectj:aspectjweaver")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	optional("io.projectreactor:reactor-core")
+	optional("io.reactivex:rxjava")
+	optional("io.reactivex:rxjava-reactive-streams")
+	optional("io.reactivex.rxjava2:rxjava")
+	optional("io.reactivex.rxjava3:rxjava")
+	optional("io.smallrye.reactive:mutiny")
+	optional("io.netty:netty-buffer")
+	testImplementation("javax.annotation:javax.annotation-api")
+	testImplementation("javax.xml.bind:jaxb-api")
+	testImplementation("com.google.code.findbugs:jsr305")
+	testImplementation("com.fasterxml.woodstox:woodstox-core")
+	testImplementation("org.xmlunit:xmlunit-assertj")
+	testImplementation("org.xmlunit:xmlunit-matchers")
+	testImplementation("io.projectreactor:reactor-test")
+	testImplementation("io.projectreactor.tools:blockhound")
+	testFixturesImplementation("com.google.code.findbugs:jsr305")
+	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
+	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
+	testFixturesImplementation("org.junit.jupiter:junit-jupiter-params")
+	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("org.xmlunit:xmlunit-assertj")
+	testFixturesImplementation("io.projectreactor:reactor-test")
+}
+
+jar {
+	reproducibleFileOrder = true
+	preserveFileTimestamps = false  // maybe not necessary here, but good for reproducibility
+	manifest.attributes["Dependencies"] = "jdk.unsupported"  // for WildFly (-> Objenesis 3.2)
+
+	// Inline repackaged cglib classes directly into spring-core jar
+	dependsOn cglibRepackJar
+	from(zipTree(cglibRepackJar.archivePath)) {
+		include "org/springframework/cglib/**"
+		exclude "org/springframework/cglib/beans/BeanMap.class"
+		exclude "org/springframework/cglib/beans/BeanMap\$*.class"
+		exclude "org/springframework/cglib/core/AbstractClassGenerator*.class"
+		exclude "org/springframework/cglib/core/AsmApi*.class"
+		exclude "org/springframework/cglib/core/KeyFactory.class"
+		exclude "org/springframework/cglib/core/KeyFactory\$*.class"
+		exclude "org/springframework/cglib/core/ReflectUtils*.class"
+		exclude "org/springframework/cglib/proxy/Enhancer*.class"
+		exclude "org/springframework/cglib/proxy/MethodProxy*.class"
+	}
+
+	dependsOn objenesisRepackJar
+	from(zipTree(objenesisRepackJar.archivePath)) {
+		include "org/springframework/objenesis/**"
+	}
+}
+
+test {
+	// Make sure the classes dir is used on the test classpath (required by ResourceTests).
+	// When test fixtures are involved, the JAR is used by default.
+	classpath = sourceSets.main.output.classesDirs + classpath - files(jar.archiveFile)
+}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,10 @@ package org.springframework.test.context;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.function.Function;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.core.AttributeAccessor;
 import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
@@ -38,8 +40,30 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
  *
  * @author Sam Brannen
  * @since 2.5
+ * @see TestContextManager
+ * @see TestExecutionListener
  */
+// Suppression required due to bug in javac in Java 8: presence of default method in a Serializable interface
+@SuppressWarnings("serial")
 public interface TestContext extends AttributeAccessor, Serializable {
+
+	/**
+	 * Determine if the {@linkplain ApplicationContext application context} for
+	 * this test context is known to be available.
+	 * <p>If this method returns {@code true}, a subsequent invocation of
+	 * {@link #getApplicationContext()} should succeed.
+	 * <p>The default implementation of this method always returns {@code false}.
+	 * Custom {@code TestContext} implementations are therefore highly encouraged
+	 * to override this method with a more meaningful implementation. Note that
+	 * the standard {@code TestContext} implementation in Spring overrides this
+	 * method appropriately.
+	 * @return {@code true} if the application context has already been loaded
+	 * @since 5.2
+	 * @see #getApplicationContext()
+	 */
+	default boolean hasApplicationContext() {
+		return false;
+	}
 
 	/**
 	 * Get the {@linkplain ApplicationContext application context} for this
@@ -47,11 +71,29 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * <p>Implementations of this method are responsible for loading the
 	 * application context if the corresponding context has not already been
 	 * loaded, potentially caching the context as well.
-	 * @return the application context
+	 * @return the application context (never {@code null})
 	 * @throws IllegalStateException if an error occurs while retrieving the
 	 * application context
+	 * @see #hasApplicationContext()
 	 */
 	ApplicationContext getApplicationContext();
+
+	/**
+	 * Publish the {@link ApplicationEvent} created by the given {@code eventFactory}
+	 * to the {@linkplain ApplicationContext application context} for this
+	 * test context.
+	 * <p>The {@code ApplicationEvent} will only be published if the application
+	 * context for this test context {@linkplain #hasApplicationContext() is available}.
+	 * @param eventFactory factory for lazy creation of the {@code ApplicationEvent}
+	 * @since 5.2
+	 * @see #hasApplicationContext()
+	 * @see #getApplicationContext()
+	 */
+	default void publishEvent(Function<TestContext, ? extends ApplicationEvent> eventFactory) {
+		if (hasApplicationContext()) {
+			getApplicationContext().publishEvent(eventFactory.apply(this));
+		}
+	}
 
 	/**
 	 * Get the {@linkplain Class test class} for this test context.
@@ -62,7 +104,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	/**
 	 * Get the current {@linkplain Object test instance} for this test context.
 	 * <p>Note: this is a mutable property.
-	 * @return the current test instance (may be {@code null})
+	 * @return the current test instance (never {@code null})
 	 * @see #updateState(Object, Method, Throwable)
 	 */
 	Object getTestInstance();
@@ -70,7 +112,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	/**
 	 * Get the current {@linkplain Method test method} for this test context.
 	 * <p>Note: this is a mutable property.
-	 * @return the current test method
+	 * @return the current test method (never {@code null})
 	 * @see #updateState(Object, Method, Throwable)
 	 */
 	Method getTestMethod();
@@ -99,6 +141,8 @@ public interface TestContext extends AttributeAccessor, Serializable {
 
 	/**
 	 * Update this test context to reflect the state of the currently executing test.
+	 * <p><strong>WARNING</strong>: This method should only be invoked by the
+	 * {@link TestContextManager}.
 	 * <p>Caution: concurrent invocations of this method might not be thread-safe,
 	 * depending on the underlying implementation.
 	 * @param testInstance the current test instance (may be {@code null})

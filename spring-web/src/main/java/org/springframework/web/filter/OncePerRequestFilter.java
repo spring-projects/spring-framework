@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,8 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -95,7 +97,15 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 		String alreadyFilteredAttributeName = getAlreadyFilteredAttributeName();
 		boolean hasAlreadyFilteredAttribute = request.getAttribute(alreadyFilteredAttributeName) != null;
 
-		if (hasAlreadyFilteredAttribute || skipDispatch(httpRequest) || shouldNotFilter(httpRequest)) {
+		if (skipDispatch(httpRequest) || shouldNotFilter(httpRequest)) {
+			// Proceed without invoking this filter...
+			filterChain.doFilter(request, response);
+		}
+		else if (hasAlreadyFilteredAttribute) {
+			if (DispatcherType.ERROR.equals(request.getDispatcherType())) {
+				doFilterNestedErrorDispatch(httpRequest, httpResponse, filterChain);
+				return;
+			}
 
 			// Proceed without invoking this filter...
 			filterChain.doFilter(request, response);
@@ -112,7 +122,6 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 			}
 		}
 	}
-
 
 	private boolean skipDispatch(HttpServletRequest request) {
 		if (isAsyncDispatch(request) && shouldNotFilterAsyncDispatch()) {
@@ -134,7 +143,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * @see WebAsyncManager#hasConcurrentResult()
 	 */
 	protected boolean isAsyncDispatch(HttpServletRequest request) {
-		return WebAsyncUtils.getAsyncManager(request).hasConcurrentResult();
+		return DispatcherType.ASYNC.equals(request.getDispatcherType());
 	}
 
 	/**
@@ -186,7 +195,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * setting up thread locals or to perform final processing at the very end.
 	 * <p>Note that although a filter can be mapped to handle specific dispatcher
 	 * types via {@code web.xml} or in Java through the {@code ServletContext},
-	 * servlet containers may enforce different defaults with regards to
+	 * servlet containers may enforce different defaults with respect to
 	 * dispatcher types. This flag enforces the design intent of the filter.
 	 * <p>The default return value is "true", which means the filter will not be
 	 * invoked during subsequent async dispatches. If "false", the filter will
@@ -220,5 +229,24 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	protected abstract void doFilterInternal(
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException;
+
+	/**
+	 * Typically an ERROR dispatch happens after the REQUEST dispatch completes,
+	 * and the filter chain starts anew. On some servers however the ERROR
+	 * dispatch may be nested within the REQUEST dispatch, e.g. as a result of
+	 * calling {@code sendError} on the response. In that case we are still in
+	 * the filter chain, on the same thread, but the request and response have
+	 * been switched to the original, unwrapped ones.
+	 * <p>Sub-classes may use this method to filter such nested ERROR dispatches
+	 * and re-apply wrapping on the request or response. {@code ThreadLocal}
+	 * context, if any, should still be active as we are still nested within
+	 * the filter chain.
+	 * @since 5.1.9
+	 */
+	protected void doFilterNestedErrorDispatch(HttpServletRequest request, HttpServletResponse response,
+			FilterChain filterChain) throws ServletException, IOException {
+
+		filterChain.doFilter(request, response);
+	}
 
 }

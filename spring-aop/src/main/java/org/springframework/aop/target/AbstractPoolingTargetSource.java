@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class for pooling {@link org.springframework.aop.TargetSource}
@@ -54,7 +55,7 @@ import org.springframework.beans.factory.DisposableBean;
 public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBasedTargetSource
 		implements PoolingConfig, DisposableBean {
 
-	/** The maximum size of the pool */
+	/** The maximum size of the pool. */
 	private int maxSize = -1;
 
 
@@ -100,6 +101,7 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 	 * APIs, so we're forgiving with our exception signature
 	 */
 	@Override
+	@Nullable
 	public abstract Object getTarget() throws Exception;
 
 	/**
@@ -114,7 +116,7 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 
 
 	/**
-	 * Return an IntroductionAdvisor that providing a mixin
+	 * Return an IntroductionAdvisor that provides a mixin
 	 * exposing statistics about the pool maintained by this object.
 	 */
 	public DefaultIntroductionAdvisor getPoolingConfigMixin() {

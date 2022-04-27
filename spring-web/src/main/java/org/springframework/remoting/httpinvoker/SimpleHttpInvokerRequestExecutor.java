@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,22 +28,22 @@ import java.util.zip.GZIPInputStream;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.remoting.support.RemoteInvocationResult;
-import org.springframework.util.StringUtils;
 
 /**
- * HttpInvokerRequestExecutor implementation that uses standard J2SE facilities
- * to execute POST requests, without support for HTTP authentication or
- * advanced configuration options.
+ * {@link org.springframework.remoting.httpinvoker.HttpInvokerRequestExecutor} implementation
+ * that uses standard Java facilities to execute POST requests, without support for HTTP
+ * authentication or advanced configuration options.
  *
- * <p>Designed for easy subclassing, customizing specific template methods.
- * However, consider {@code HttpComponentsHttpInvokerRequestExecutor} for
- * more sophisticated needs: The J2SE HttpURLConnection is rather limited
- * in its capabilities.
+ * <p>Designed for easy subclassing, customizing specific template methods. However,
+ * consider {@code HttpComponentsHttpInvokerRequestExecutor} for more sophisticated needs:
+ * The standard {@link HttpURLConnection} class is rather limited in its capabilities.
  *
  * @author Juergen Hoeller
  * @since 1.1
  * @see java.net.HttpURLConnection
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequestExecutor {
 
 	private int connectTimeout = -1;
@@ -73,7 +73,7 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 
 
 	/**
-	 * Execute the given request through a standard J2SE HttpURLConnection.
+	 * Execute the given request through a standard {@link HttpURLConnection}.
 	 * <p>This method implements the basic processing workflow:
 	 * The actual work happens in this class's template methods.
 	 * @see #openConnection
@@ -97,7 +97,7 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 	}
 
 	/**
-	 * Open an HttpURLConnection for the given remote invocation request.
+	 * Open an {@link HttpURLConnection} for the given remote invocation request.
 	 * @param config the HTTP invoker configuration that specifies the
 	 * target service
 	 * @return the HttpURLConnection for the given request
@@ -141,7 +141,7 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 		if (localeContext != null) {
 			Locale locale = localeContext.getLocale();
 			if (locale != null) {
-				connection.setRequestProperty(HTTP_HEADER_ACCEPT_LANGUAGE, StringUtils.toLanguageTag(locale));
+				connection.setRequestProperty(HTTP_HEADER_ACCEPT_LANGUAGE, locale.toLanguageTag());
 			}
 		}
 
@@ -171,7 +171,7 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 	}
 
 	/**
-	 * Validate the given response as contained in the HttpURLConnection object,
+	 * Validate the given response as contained in the {@link HttpURLConnection} object,
 	 * throwing an exception if it does not correspond to a successful HTTP response.
 	 * <p>Default implementation rejects any HTTP status code beyond 2xx, to avoid
 	 * parsing the response body and trying to deserialize from a corrupted stream.

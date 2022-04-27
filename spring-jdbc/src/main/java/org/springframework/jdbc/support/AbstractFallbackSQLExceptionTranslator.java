@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -35,7 +34,7 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExceptionTranslator {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Nullable
@@ -64,27 +63,23 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 	 * {@link #getFallbackTranslator() fallback translator} if necessary.
 	 */
 	@Override
-	public DataAccessException translate(@Nullable String task, @Nullable String sql, SQLException ex) {
+	@Nullable
+	public DataAccessException translate(String task, @Nullable String sql, SQLException ex) {
 		Assert.notNull(ex, "Cannot translate a null SQLException");
-		if (task == null) {
-			task = "";
-		}
-		if (sql == null) {
-			sql = "";
+
+		DataAccessException dae = doTranslate(task, sql, ex);
+		if (dae != null) {
+			// Specific exception match found.
+			return dae;
 		}
 
-		DataAccessException dex = doTranslate(task, sql, ex);
-		if (dex != null) {
-			// Specific exception match found.
-			return dex;
-		}
 		// Looking for a fallback...
 		SQLExceptionTranslator fallback = getFallbackTranslator();
 		if (fallback != null) {
 			return fallback.translate(task, sql, ex);
 		}
-		// We couldn't identify it more precisely.
-		return new UncategorizedSQLException(task, sql, ex);
+
+		return null;
 	}
 
 	/**
@@ -93,13 +88,13 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 	 * is allowed to return {@code null} to indicate that no exception match has
 	 * been found and that fallback translation should kick in.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem
+	 * @param sql the SQL query or update that caused the problem (if known)
 	 * @param ex the offending {@code SQLException}
 	 * @return the DataAccessException, wrapping the {@code SQLException};
 	 * or {@code null} if no exception match found
 	 */
 	@Nullable
-	protected abstract DataAccessException doTranslate(String task, String sql, SQLException ex);
+	protected abstract DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex);
 
 
 	/**
@@ -111,8 +106,8 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 	 * @param ex the offending {@code SQLException}
 	 * @return the message {@code String} to use
 	 */
-	protected String buildMessage(String task, String sql, SQLException ex) {
-		return task + "; SQL [" + sql + "]; " + ex.getMessage();
+	protected String buildMessage(String task, @Nullable String sql, SQLException ex) {
+		return task + "; " + (sql != null ? ("SQL [" + sql + "]; ") : "") + ex.getMessage();
 	}
 
 }

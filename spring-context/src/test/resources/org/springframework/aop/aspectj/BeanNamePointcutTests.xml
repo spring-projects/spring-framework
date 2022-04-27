@@ -2,8 +2,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:aop="http://www.springframework.org/schema/aop"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
 	<aop:config>
 		<aop:aspect id="beanNameMatchingTest" ref="counterAspect">
@@ -21,15 +21,15 @@
 		</aop:aspect>
 	</aop:config>
 
-	<bean id="tb1" name="testBean1" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="tb1" name="testBean1" class="org.springframework.beans.testfixture.beans.TestBean">
 		<qualifier value="myBean"/>
 	</bean>
 
-	<bean id="tb2" name="testBean2" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="tb2" name="testBean2" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
-	<bean id="testBeanContainingNestedBean" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="testBeanContainingNestedBean" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="doctor">
-			<bean class="org.springframework.tests.sample.beans.NestedTestBean"/>
+			<bean class="org.springframework.beans.testfixture.beans.NestedTestBean"/>
 		</property>
 	</bean>
 
@@ -55,9 +55,9 @@
 		<aop:advisor pointcut="bean(*This) and !bean(dont*)" advice-ref="testInterceptor"/>
 	</aop:config>
 
-	<bean id="interceptThis" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="interceptThis" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
-	<bean id="dontInterceptThis" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="dontInterceptThis" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 	<bean id="testInterceptor" class="org.springframework.aop.aspectj.BeanNamePointcutTests$TestInterceptor"/>
 

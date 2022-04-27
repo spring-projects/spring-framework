@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,11 +17,12 @@
 package org.springframework.validation;
 
 import java.io.Serializable;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EmptyStackException;
-import java.util.LinkedList;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
+import java.util.NoSuchElementException;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
@@ -40,7 +41,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 	private String nestedPath = "";
 
-	private final Stack<String> nestedPathStack = new Stack<>();
+	private final Deque<String> nestedPathStack = new ArrayDeque<>();
 
 
 	@Override
@@ -61,12 +62,12 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	@Override
-	public void popNestedPath() throws IllegalArgumentException {
+	public void popNestedPath() throws IllegalStateException {
 		try {
 			String formerNestedPath = this.nestedPathStack.pop();
 			doSetNestedPath(formerNestedPath);
 		}
-		catch (EmptyStackException ex) {
+		catch (NoSuchElementException ex) {
 			throw new IllegalStateException("Cannot pop nested path: no nested path on stack");
 		}
 	}
@@ -145,7 +146,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 	@Override
 	public List<ObjectError> getAllErrors() {
-		List<ObjectError> result = new LinkedList<>();
+		List<ObjectError> result = new ArrayList<>();
 		result.addAll(getGlobalErrors());
 		result.addAll(getFieldErrors());
 		return Collections.unmodifiableList(result);
@@ -162,6 +163,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	@Override
+	@Nullable
 	public ObjectError getGlobalError() {
 		List<ObjectError> globalErrors = getGlobalErrors();
 		return (!globalErrors.isEmpty() ? globalErrors.get(0) : null);
@@ -178,6 +180,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError() {
 		List<FieldError> fieldErrors = getFieldErrors();
 		return (!fieldErrors.isEmpty() ? fieldErrors.get(0) : null);
@@ -196,7 +199,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	@Override
 	public List<FieldError> getFieldErrors(String field) {
 		List<FieldError> fieldErrors = getFieldErrors();
-		List<FieldError> result = new LinkedList<>();
+		List<FieldError> result = new ArrayList<>();
 		String fixedField = fixedField(field);
 		for (FieldError error : fieldErrors) {
 			if (isMatchingFieldError(fixedField, error)) {
@@ -207,13 +210,14 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError(String field) {
 		List<FieldError> fieldErrors = getFieldErrors(field);
 		return (!fieldErrors.isEmpty() ? fieldErrors.get(0) : null);
 	}
 
-
 	@Override
+	@Nullable
 	public Class<?> getFieldType(String field) {
 		Object value = getFieldValue(field);
 		return (value != null ? value.getClass() : null);

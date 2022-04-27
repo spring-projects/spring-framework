@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,7 +33,7 @@ public class RestClientResponseException extends RestClientException {
 
 	private static final long serialVersionUID = -8803556342728481792L;
 
-	private static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
 	private final int rawStatusCode;
@@ -99,11 +99,22 @@ public class RestClientResponseException extends RestClientException {
 	}
 
 	/**
-	 * Return the response body as a string.
+	 * Return the response body converted to String. The charset used is that
+	 * of the response "Content-Type" or otherwise {@code "UTF-8"}.
 	 */
 	public String getResponseBodyAsString() {
+		return getResponseBodyAsString(DEFAULT_CHARSET);
+	}
+
+	/**
+	 * Return the response body converted to String. The charset used is that
+	 * of the response "Content-Type" or otherwise the one given.
+	 * @param fallbackCharset the charset to use on if the response doesn't specify.
+	 * @since 5.1.11
+	 */
+	public String getResponseBodyAsString(Charset fallbackCharset) {
 		if (this.responseCharset == null) {
-			return new String(this.responseBody, DEFAULT_CHARSET);
+			return new String(this.responseBody, fallbackCharset);
 		}
 		try {
 			return new String(this.responseBody, this.responseCharset);

@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:tx="http://www.springframework.org/schema/tx"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop-2.5.xsd http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
 	<tx:annotation-driven proxy-target-class="true" order="0"/>
 
@@ -12,11 +12,11 @@
 
 	<bean id="txCheckingInterceptor" class="org.springframework.transaction.config.AnnotationDrivenTests$TransactionCheckingInterceptor"/>
 
-	<bean id="transactionManager1" class="org.springframework.tests.transaction.CallCountingTransactionManager">
+	<bean id="transactionManager1" class="org.springframework.transaction.testfixture.CallCountingTransactionManager">
 		<qualifier value="synch"/>
 	</bean>
 
-	<bean id="transactionManager2" class="org.springframework.tests.transaction.CallCountingTransactionManager">
+	<bean id="transactionManager2" class="org.springframework.transaction.testfixture.CallCountingTransactionManager">
 		<property name="transactionSynchronizationName" value="SYNCHRONIZATION_NEVER"/>
 		<qualifier value="noSynch"/>
 	</bean>

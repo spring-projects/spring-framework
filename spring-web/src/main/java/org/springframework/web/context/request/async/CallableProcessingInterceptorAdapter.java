@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,48 +32,28 @@ import org.springframework.web.context.request.NativeWebRequest;
 @Deprecated
 public abstract class CallableProcessingInterceptorAdapter implements CallableProcessingInterceptor {
 
-	/**
-	 * This implementation is empty.
-	 */
 	@Override
 	public <T> void beforeConcurrentHandling(NativeWebRequest request, Callable<T> task) throws Exception {
 	}
 
-	/**
-	 * This implementation is empty.
-	 */
 	@Override
 	public <T> void preProcess(NativeWebRequest request, Callable<T> task) throws Exception {
 	}
 
-	/**
-	 * This implementation is empty.
-	 */
 	@Override
 	public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object concurrentResult) throws Exception {
 	}
 
-	/**
-	 * This implementation always returns
-	 * {@link CallableProcessingInterceptor#RESULT_NONE RESULT_NONE}.
-	 */
 	@Override
 	public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
 		return RESULT_NONE;
 	}
 
-	/**
-	 * This implementation always returns
-	 * {@link CallableProcessingInterceptor#RESULT_NONE RESULT_NONE}.
-	 */
 	@Override
 	public <T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) throws Exception {
 		return RESULT_NONE;
 	}
 
-	/**
-	 * This implementation is empty.
-	 */
 	@Override
 	public <T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception {
 	}

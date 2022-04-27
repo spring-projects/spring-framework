@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,11 +43,14 @@ import org.springframework.lang.Nullable;
  *
  * <pre class="code">
  * Assert.notNull(clazz, "The class must not be null");
- * Assert.isTrue(i > 0, "The value must be greater than zero");</pre>
+ * Assert.isTrue(i &gt; 0, "The value must be greater than zero");</pre>
  *
- * <p>Mainly for internal use within the framework; consider
- * <a href="http://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
- * for a more comprehensive suite of {@code String} utilities.
+ * <p>Mainly for internal use within the framework; for a more comprehensive suite
+ * of assertion utilities consider {@code org.apache.commons.lang3.Validate} from
+ * <a href="https://commons.apache.org/proper/commons-lang/">Apache Commons Lang</a>,
+ * Google Guava's
+ * <a href="https://github.com/google/guava/wiki/PreconditionsExplained">Preconditions</a>,
+ * or similar third-party libraries.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -80,8 +83,8 @@ public abstract class Assert {
 	 * <p>Call {@link #isTrue} if you wish to throw an {@code IllegalArgumentException}
 	 * on an assertion failure.
 	 * <pre class="code">
-	 * Assert.state(id == null,
-	 *     () -&gt; "ID for " + entity.getName() + " must not already be initialized");
+	 * Assert.state(entity.getId() == null,
+	 *     () -&gt; "ID for entity " + entity.getName() + " must not already be initialized");
 	 * </pre>
 	 * @param expression a boolean expression
 	 * @param messageSupplier a supplier for the exception message to use if the
@@ -96,6 +99,8 @@ public abstract class Assert {
 	}
 
 	/**
+	 * Assert a boolean expression, throwing an {@code IllegalStateException}
+	 * if the expression evaluates to {@code false}.
 	 * @deprecated as of 4.3.7, in favor of {@link #state(boolean, String)}
 	 */
 	@Deprecated
@@ -136,6 +141,8 @@ public abstract class Assert {
 	}
 
 	/**
+	 * Assert a boolean expression, throwing an {@code IllegalArgumentException}
+	 * if the expression evaluates to {@code false}.
 	 * @deprecated as of 4.3.7, in favor of {@link #isTrue(boolean, String)}
 	 */
 	@Deprecated
@@ -174,6 +181,7 @@ public abstract class Assert {
 	}
 
 	/**
+	 * Assert that an object is {@code null}.
 	 * @deprecated as of 4.3.7, in favor of {@link #isNull(Object, String)}
 	 */
 	@Deprecated
@@ -197,7 +205,8 @@ public abstract class Assert {
 	/**
 	 * Assert that an object is not {@code null}.
 	 * <pre class="code">
-	 * Assert.notNull(clazz, () -&gt; "The class '" + clazz.getName() + "' must not be null");
+	 * Assert.notNull(entity.getId(),
+	 *     () -&gt; "ID for entity " + entity.getName() + " must not be null");
 	 * </pre>
 	 * @param object the object to check
 	 * @param messageSupplier a supplier for the exception message to use if the
@@ -212,6 +221,7 @@ public abstract class Assert {
 	}
 
 	/**
+	 * Assert that an object is not {@code null}.
 	 * @deprecated as of 4.3.7, in favor of {@link #notNull(Object, String)}
 	 */
 	@Deprecated
@@ -225,8 +235,8 @@ public abstract class Assert {
 	 * <pre class="code">Assert.hasLength(name, "Name must not be empty");</pre>
 	 * @param text the String to check
 	 * @param message the exception message to use if the assertion fails
-	 * @see StringUtils#hasLength
 	 * @throws IllegalArgumentException if the text is empty
+	 * @see StringUtils#hasLength
 	 */
 	public static void hasLength(@Nullable String text, String message) {
 		if (!StringUtils.hasLength(text)) {
@@ -238,14 +248,15 @@ public abstract class Assert {
 	 * Assert that the given String is not empty; that is,
 	 * it must not be {@code null} and not the empty String.
 	 * <pre class="code">
-	 * Assert.hasLength(name, () -&gt; "Name for account '" + account.getId() + "' must not be empty");
+	 * Assert.hasLength(account.getName(),
+	 *     () -&gt; "Name for account '" + account.getId() + "' must not be empty");
 	 * </pre>
 	 * @param text the String to check
 	 * @param messageSupplier a supplier for the exception message to use if the
 	 * assertion fails
-	 * @see StringUtils#hasLength
 	 * @throws IllegalArgumentException if the text is empty
 	 * @since 5.0
+	 * @see StringUtils#hasLength
 	 */
 	public static void hasLength(@Nullable String text, Supplier<String> messageSupplier) {
 		if (!StringUtils.hasLength(text)) {
@@ -254,6 +265,8 @@ public abstract class Assert {
 	}
 
 	/**
+	 * Assert that the given String is not empty; that is,
+	 * it must not be {@code null} and not the empty String.
 	 * @deprecated as of 4.3.7, in favor of {@link #hasLength(String, String)}
 	 */
 	@Deprecated
@@ -268,8 +281,8 @@ public abstract class Assert {
 	 * <pre class="code">Assert.hasText(name, "'name' must not be empty");</pre>
 	 * @param text the String to check
 	 * @param message the exception message to use if the assertion fails
-	 * @see StringUtils#hasText
 	 * @throws IllegalArgumentException if the text does not contain valid text content
+	 * @see StringUtils#hasText
 	 */
 	public static void hasText(@Nullable String text, String message) {
 		if (!StringUtils.hasText(text)) {
@@ -281,14 +294,15 @@ public abstract class Assert {
 	 * Assert that the given String contains valid text content; that is, it must not
 	 * be {@code null} and must contain at least one non-whitespace character.
 	 * <pre class="code">
-	 * Assert.hasText(name, () -&gt; "Name for account '" + account.getId() + "' must not be empty");
+	 * Assert.hasText(account.getName(),
+	 *     () -&gt; "Name for account '" + account.getId() + "' must not be empty");
 	 * </pre>
 	 * @param text the String to check
 	 * @param messageSupplier a supplier for the exception message to use if the
 	 * assertion fails
-	 * @see StringUtils#hasText
 	 * @throws IllegalArgumentException if the text does not contain valid text content
 	 * @since 5.0
+	 * @see StringUtils#hasText
 	 */
 	public static void hasText(@Nullable String text, Supplier<String> messageSupplier) {
 		if (!StringUtils.hasText(text)) {
@@ -297,6 +311,8 @@ public abstract class Assert {
 	}
 
 	/**
+	 * Assert that the given String contains valid text content; that is, it must not
+	 * be {@code null} and must contain at least one non-whitespace character.
 	 * @deprecated as of 4.3.7, in favor of {@link #hasText(String, String)}
 	 */
 	@Deprecated
@@ -340,6 +356,7 @@ public abstract class Assert {
 	}
 
 	/**
+	 * Assert that the given text does not contain the given substring.
 	 * @deprecated as of 4.3.7, in favor of {@link #doesNotContain(String, String, String)}
 	 */
 	@Deprecated
@@ -381,6 +398,8 @@ public abstract class Assert {
 	}
 
 	/**
+	 * Assert that an array contains elements; that is, it must not be
+	 * {@code null} and must contain at least one element.
 	 * @deprecated as of 4.3.7, in favor of {@link #notEmpty(Object[], String)}
 	 */
 	@Deprecated
@@ -429,6 +448,7 @@ public abstract class Assert {
 	}
 
 	/**
+	 * Assert that an array contains no {@code null} elements.
 	 * @deprecated as of 4.3.7, in favor of {@link #noNullElements(Object[], String)}
 	 */
 	@Deprecated
@@ -471,12 +491,55 @@ public abstract class Assert {
 	}
 
 	/**
+	 * Assert that a collection contains elements; that is, it must not be
+	 * {@code null} and must contain at least one element.
 	 * @deprecated as of 4.3.7, in favor of {@link #notEmpty(Collection, String)}
 	 */
 	@Deprecated
 	public static void notEmpty(@Nullable Collection<?> collection) {
 		notEmpty(collection,
 				"[Assertion failed] - this collection must not be empty: it must contain at least 1 element");
+	}
+
+	/**
+	 * Assert that a collection contains no {@code null} elements.
+	 * <p>Note: Does not complain if the collection is empty!
+	 * <pre class="code">Assert.noNullElements(collection, "Collection must contain non-null elements");</pre>
+	 * @param collection the collection to check
+	 * @param message the exception message to use if the assertion fails
+	 * @throws IllegalArgumentException if the collection contains a {@code null} element
+	 * @since 5.2
+	 */
+	public static void noNullElements(@Nullable Collection<?> collection, String message) {
+		if (collection != null) {
+			for (Object element : collection) {
+				if (element == null) {
+					throw new IllegalArgumentException(message);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Assert that a collection contains no {@code null} elements.
+	 * <p>Note: Does not complain if the collection is empty!
+	 * <pre class="code">
+	 * Assert.noNullElements(collection, () -&gt; "Collection " + collectionName + " must contain non-null elements");
+	 * </pre>
+	 * @param collection the collection to check
+	 * @param messageSupplier a supplier for the exception message to use if the
+	 * assertion fails
+	 * @throws IllegalArgumentException if the collection contains a {@code null} element
+	 * @since 5.2
+	 */
+	public static void noNullElements(@Nullable Collection<?> collection, Supplier<String> messageSupplier) {
+		if (collection != null) {
+			for (Object element : collection) {
+				if (element == null) {
+					throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+				}
+			}
+		}
 	}
 
 	/**
@@ -512,6 +575,8 @@ public abstract class Assert {
 	}
 
 	/**
+	 * Assert that a Map contains entries; that is, it must not be {@code null}
+	 * and must contain at least one entry.
 	 * @deprecated as of 4.3.7, in favor of {@link #notEmpty(Map, String)}
 	 */
 	@Deprecated

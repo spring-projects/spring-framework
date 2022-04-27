@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,16 +44,16 @@ import org.springframework.util.Assert;
  */
 public abstract class TagUtils {
 
-	/** Constant identifying the page scope */
+	/** Constant identifying the page scope. */
 	public static final String SCOPE_PAGE = "page";
 
-	/** Constant identifying the request scope */
+	/** Constant identifying the request scope. */
 	public static final String SCOPE_REQUEST = "request";
 
-	/** Constant identifying the session scope */
+	/** Constant identifying the session scope. */
 	public static final String SCOPE_SESSION = "session";
 
-	/** Constant identifying the application scope */
+	/** Constant identifying the application scope. */
 	public static final String SCOPE_APPLICATION = "application";
 
 
@@ -125,11 +125,14 @@ public abstract class TagUtils {
 	 * type-assignable to the {@link Tag} class
 	 * @see #hasAncestorOfType(javax.servlet.jsp.tagext.Tag, Class)
 	 */
-	public static void assertHasAncestorOfType(Tag tag, Class<?> ancestorTagClass, String tagName, String ancestorTagName) {
+	public static void assertHasAncestorOfType(Tag tag, Class<?> ancestorTagClass, String tagName,
+			String ancestorTagName) {
+
 		Assert.hasText(tagName, "'tagName' must not be empty");
 		Assert.hasText(ancestorTagName, "'ancestorTagName' must not be empty");
 		if (!TagUtils.hasAncestorOfType(tag, ancestorTagClass)) {
-			throw new IllegalStateException("The '" + tagName + "' tag can only be used inside a valid '" + ancestorTagName + "' tag.");
+			throw new IllegalStateException("The '" + tagName +
+					"' tag can only be used inside a valid '" + ancestorTagName + "' tag.");
 		}
 	}
 

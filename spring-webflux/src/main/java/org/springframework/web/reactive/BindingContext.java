@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,15 +16,25 @@
 
 package org.springframework.web.reactive;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
+
+import reactor.core.publisher.Mono;
+
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.support.BindingAwareConcurrentModel;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
+import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Context to assist with processing a request and binding it onto Objects.
+ * Context to assist with binding request data onto Objects and provide access
+ * to a shared {@link Model} with controller-specific attributes.
  *
  * <p>Provides  methods to create a {@link WebExchangeDataBinder} for a specific
  * target, command Object to apply data binding and validation to, or without a
@@ -33,6 +43,7 @@ import org.springframework.web.server.ServerWebExchange;
  * <p>Container for the default model for the request.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  */
 public class BindingContext {
@@ -74,9 +85,10 @@ public class BindingContext {
 	 * @param target the object to create a data binder for
 	 * @param name the name of the target object
 	 * @return the created data binder
+	 * @throws ServerErrorException if {@code @InitBinder} method invocation fails
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, @Nullable Object target, String name) {
-		WebExchangeDataBinder dataBinder = new WebExchangeDataBinder(target, name);
+		WebExchangeDataBinder dataBinder = new ExtendedWebExchangeDataBinder(target, name);
 		if (this.initializer != null) {
 			this.initializer.initBinder(dataBinder);
 		}
@@ -85,6 +97,7 @@ public class BindingContext {
 
 	/**
 	 * Initialize the data binder instance for the given exchange.
+	 * @throws ServerErrorException if {@code @InitBinder} method invocation fails
 	 */
 	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder binder, ServerWebExchange exchange) {
 		return binder;
@@ -96,9 +109,40 @@ public class BindingContext {
 	 * @param exchange the current exchange
 	 * @param name the name of the target object
 	 * @return the created data binder
+	 * @throws ServerErrorException if {@code @InitBinder} method invocation fails
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, String name) {
 		return createDataBinder(exchange, null, name);
+	}
+
+
+	/**
+	 * Extended variant of {@link WebExchangeDataBinder}, adding path variables.
+	 */
+	private static class ExtendedWebExchangeDataBinder extends WebExchangeDataBinder {
+
+		public ExtendedWebExchangeDataBinder(@Nullable Object target, String objectName) {
+			super(target, objectName);
+		}
+
+		@Override
+		public Mono<Map<String, Object>> getValuesToBind(ServerWebExchange exchange) {
+			Map<String, String> vars = exchange.getAttributeOrDefault(
+					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Collections.emptyMap());
+			MultiValueMap<String, String> queryParams = exchange.getRequest().getQueryParams();
+			Mono<MultiValueMap<String, String>> formData = exchange.getFormData();
+			Mono<MultiValueMap<String, Part>> multipartData = exchange.getMultipartData();
+
+			return Mono.zip(Mono.just(vars), Mono.just(queryParams), formData, multipartData)
+					.map(tuple -> {
+						Map<String, Object> result = new TreeMap<>();
+						tuple.getT1().forEach(result::put);
+						tuple.getT2().forEach((key, values) -> addBindValue(result, key, values));
+						tuple.getT3().forEach((key, values) -> addBindValue(result, key, values));
+						tuple.getT4().forEach((key, values) -> addBindValue(result, key, values));
+						return result;
+					});
+		}
 	}
 
 }

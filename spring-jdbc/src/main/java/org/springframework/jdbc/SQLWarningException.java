@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
 /**
  * Exception thrown when we're not ignoring {@link java.sql.SQLWarning SQLWarnings}.
  *
- * <p>If a SQLWarning is reported, the operation completed, so we will need
+ * <p>If an SQLWarning is reported, the operation completed, so we will need
  * to explicitly roll it back if we're not happy when looking at the warning.
  * We might choose to ignore (and log) the warning, or to wrap and throw it
  * in the shape of this SQLWarningException instead.

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,8 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,7 +47,10 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.core.SmartClassLoader;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -83,6 +86,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Sam Brannen
  * @since 13.10.2003
  * @see #setInterceptorNames
  * @see #getAdvicesAndAdvisorsForBean
@@ -108,10 +112,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	protected static final Object[] PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS = new Object[0];
 
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Default is global AdvisorAdapterRegistry */
+	/** Default is global AdvisorAdapterRegistry. */
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
 	/**
@@ -120,7 +124,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	private boolean freezeProxy = false;
 
-	/** Default is no common interceptors */
+	/** Default is no common interceptors. */
 	private String[] interceptorNames = new String[0];
 
 	private boolean applyCommonInterceptorsFirst = true;
@@ -133,7 +137,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	private final Set<String> targetSourcedBeans = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
-	private final Set<Object> earlyProxyReferences = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+	private final Map<Object, Object> earlyProxyReferences = new ConcurrentHashMap<>(16);
 
 	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<>(16);
 
@@ -218,6 +222,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 
 	@Override
+	@Nullable
 	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 		if (this.proxyTypes.isEmpty()) {
 			return null;
@@ -227,21 +232,20 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	@Override
-	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeansException {
+	@Nullable
+	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) {
 		return null;
 	}
 
 	@Override
-	public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
+	public Object getEarlyBeanReference(Object bean, String beanName) {
 		Object cacheKey = getCacheKey(bean.getClass(), beanName);
-		if (!this.earlyProxyReferences.contains(cacheKey)) {
-			this.earlyProxyReferences.add(cacheKey);
-		}
+		this.earlyProxyReferences.put(cacheKey, bean);
 		return wrapIfNecessary(bean, beanName, cacheKey);
 	}
 
 	@Override
-	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
 		if (!StringUtils.hasLength(beanName) || !this.targetSourcedBeans.contains(beanName)) {
@@ -272,20 +276,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	@Override
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
-		return true;
-	}
-
-	@Override
-	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
-
-		return pvs;
-	}
-
-	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName) {
-		return bean;
+	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
+		return pvs;  // skip postProcessPropertyValues
 	}
 
 	/**
@@ -294,10 +286,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @see #getAdvicesAndAdvisorsForBean
 	 */
 	@Override
-	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) throws BeansException {
+	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
 		if (bean != null) {
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
-			if (!this.earlyProxyReferences.contains(cacheKey)) {
+			if (this.earlyProxyReferences.remove(cacheKey) != bean) {
 				return wrapIfNecessary(bean, beanName, cacheKey);
 			}
 		}
@@ -385,14 +377,17 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	/**
 	 * Subclasses should override this method to return {@code true} if the
 	 * given bean should not be considered for auto-proxying by this post-processor.
-	 * <p>Sometimes we need to be able to avoid this happening if it will lead to
-	 * a circular reference. This implementation returns {@code false}.
+	 * <p>Sometimes we need to be able to avoid this happening, e.g. if it will lead to
+	 * a circular reference or if the existing target instance needs to be preserved.
+	 * This implementation returns {@code false} unless the bean name indicates an
+	 * "original instance" according to {@code AutowireCapableBeanFactory} conventions.
 	 * @param beanClass the class of the bean
 	 * @param beanName the name of the bean
 	 * @return whether to skip the given bean
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#ORIGINAL_INSTANCE_SUFFIX
 	 */
 	protected boolean shouldSkip(Class<?> beanClass, String beanName) {
-		return false;
+		return AutoProxyUtils.isOriginalInstance(beanName, beanClass);
 	}
 
 	/**
@@ -414,9 +409,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 				TargetSource ts = tsc.getTargetSource(beanClass, beanName);
 				if (ts != null) {
 					// Found a matching TargetSource.
-					if (logger.isDebugEnabled()) {
-						logger.debug("TargetSourceCreator [" + tsc +
-								" found custom TargetSource for bean with name '" + beanName + "'");
+					if (logger.isTraceEnabled()) {
+						logger.trace("TargetSourceCreator [" + tsc +
+								"] found custom TargetSource for bean with name '" + beanName + "'");
 					}
 					return ts;
 				}
@@ -448,7 +443,17 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.copyFrom(this);
 
-		if (!proxyFactory.isProxyTargetClass()) {
+		if (proxyFactory.isProxyTargetClass()) {
+			// Explicit handling of JDK proxy targets and lambdas (for introduction advice scenarios)
+			if (Proxy.isProxyClass(beanClass) || ClassUtils.isLambdaClass(beanClass)) {
+				// Must allow for introductions; can't just set interfaces to the proxy's interfaces only.
+				for (Class<?> ifc : beanClass.getInterfaces()) {
+					proxyFactory.addInterface(ifc);
+				}
+			}
+		}
+		else {
+			// No proxyTargetClass flag enforced, let's apply our default checks...
 			if (shouldProxyTargetClass(beanClass, beanName)) {
 				proxyFactory.setProxyTargetClass(true);
 			}
@@ -467,7 +472,12 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			proxyFactory.setPreFiltered(true);
 		}
 
-		return proxyFactory.getProxy(getProxyClassLoader());
+		// Use original ClassLoader if bean class not locally loaded in overriding class loader
+		ClassLoader classLoader = getProxyClassLoader();
+		if (classLoader instanceof SmartClassLoader && classLoader != beanClass.getClassLoader()) {
+			classLoader = ((SmartClassLoader) classLoader).getOriginalClassLoader();
+		}
+		return proxyFactory.getProxy(classLoader);
 	}
 
 	/**
@@ -512,7 +522,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 		List<Object> allInterceptors = new ArrayList<>();
 		if (specificInterceptors != null) {
-			allInterceptors.addAll(Arrays.asList(specificInterceptors));
+			if (specificInterceptors.length > 0) {
+				// specificInterceptors may equal PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
+				allInterceptors.addAll(Arrays.asList(specificInterceptors));
+			}
 			if (commonInterceptors.length > 0) {
 				if (this.applyCommonInterceptorsFirst) {
 					allInterceptors.addAll(0, Arrays.asList(commonInterceptors));
@@ -522,10 +535,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 				}
 			}
 		}
-		if (logger.isDebugEnabled()) {
+		if (logger.isTraceEnabled()) {
 			int nrOfCommonInterceptors = commonInterceptors.length;
 			int nrOfSpecificInterceptors = (specificInterceptors != null ? specificInterceptors.length : 0);
-			logger.debug("Creating implicit proxy for bean '" + beanName + "' with " + nrOfCommonInterceptors +
+			logger.trace("Creating implicit proxy for bean '" + beanName + "' with " + nrOfCommonInterceptors +
 					" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
 		}
 
@@ -541,23 +554,24 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @see #setInterceptorNames
 	 */
 	private Advisor[] resolveInterceptorNames() {
-		ConfigurableBeanFactory cbf = (this.beanFactory instanceof ConfigurableBeanFactory ?
-				(ConfigurableBeanFactory) this.beanFactory : null);
+		BeanFactory bf = this.beanFactory;
+		ConfigurableBeanFactory cbf = (bf instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory) bf : null);
 		List<Advisor> advisors = new ArrayList<>();
 		for (String beanName : this.interceptorNames) {
 			if (cbf == null || !cbf.isCurrentlyInCreation(beanName)) {
-				Object next = this.beanFactory.getBean(beanName);
+				Assert.state(bf != null, "BeanFactory required for resolving interceptor names");
+				Object next = bf.getBean(beanName);
 				advisors.add(this.advisorAdapterRegistry.wrap(next));
 			}
 		}
-		return advisors.toArray(new Advisor[advisors.size()]);
+		return advisors.toArray(new Advisor[0]);
 	}
 
 	/**
 	 * Subclasses may choose to implement this: for example,
 	 * to change the interfaces exposed.
 	 * <p>The default implementation is empty.
-	 * @param proxyFactory ProxyFactory that is already configured with
+	 * @param proxyFactory a ProxyFactory that is already configured with
 	 * TargetSource and interfaces and will be used to create the proxy
 	 * immediately after this method returns
 	 */

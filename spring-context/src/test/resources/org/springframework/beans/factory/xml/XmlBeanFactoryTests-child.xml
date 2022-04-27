@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -8,13 +8,13 @@
 		<!-- age should inherit value of 1 from parent -->
 	</bean>
 
-	<bean id="inheritsWithDifferentClass" class="org.springframework.tests.sample.beans.DerivedTestBean"
+	<bean id="inheritsWithDifferentClass" class="org.springframework.beans.testfixture.beans.DerivedTestBean"
 			parent="inheritedTestBean" init-method="initialize">
 		<property name="name"><value>override</value></property>
 		<!-- age should inherit value of 1 from parent -->
 	</bean>
 
-	<bean id="inheritsWithClass" class="org.springframework.tests.sample.beans.DerivedTestBean"
+	<bean id="inheritsWithClass" class="org.springframework.beans.testfixture.beans.DerivedTestBean"
 			parent="inheritedTestBeanWithoutClass" init-method="initialize">
 		<property name="name"><value>override</value></property>
 		<!-- age should inherit value of 1 from parent -->
@@ -42,7 +42,7 @@
 
 	<bean id="bogusParent" parent="bogus" scope="prototype"/>
 
-	<bean id="indexedTestBean" class="org.springframework.tests.sample.beans.IndexedTestBean">
+	<bean id="indexedTestBean" class="org.springframework.beans.testfixture.beans.IndexedTestBean">
 		<property name="array[0].name"><value>myname</value></property>
 	</bean>
 

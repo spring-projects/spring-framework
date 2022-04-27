@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,13 +19,14 @@ package org.springframework.web.reactive.function.client;
 import org.springframework.core.NestedRuntimeException;
 
 /**
- * Exception published by {@link WebClient} in case of errors.
-  *
+ * Abstract base class for exception published by {@link WebClient} in case of errors.
+ *
  * @author Arjen Poutsma
  * @since 5.0
  */
-@SuppressWarnings("serial")
-public class WebClientException extends NestedRuntimeException {
+public abstract class WebClientException extends NestedRuntimeException {
+
+	private static final long serialVersionUID = 472776714118912855L;
 
 	/**
 	 * Construct a new instance of {@code WebClientException} with the given message.

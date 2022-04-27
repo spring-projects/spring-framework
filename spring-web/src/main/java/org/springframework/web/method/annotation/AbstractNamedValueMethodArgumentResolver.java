@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.web.method.annotation;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.ServletException;
 
 import org.springframework.beans.ConversionNotSupportedException;
@@ -78,6 +79,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	}
 
 	/**
+	 * Create a new {@link AbstractNamedValueMethodArgumentResolver} instance.
 	 * @param beanFactory a bean factory to use for resolving ${...} placeholder
 	 * and #{...} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
@@ -90,13 +92,14 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 
 	@Override
+	@Nullable
 	public final Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 		MethodParameter nestedParameter = parameter.nestedIfOptional();
 
-		Object resolvedName = resolveStringValue(namedValueInfo.name);
+		Object resolvedName = resolveEmbeddedValuesAndExpressions(namedValueInfo.name);
 		if (resolvedName == null) {
 			throw new IllegalArgumentException(
 					"Specified name must not resolve to null: [" + namedValueInfo.name + "]");
@@ -105,7 +108,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		Object arg = resolveName(resolvedName.toString(), nestedParameter, webRequest);
 		if (arg == null) {
 			if (namedValueInfo.defaultValue != null) {
-				arg = resolveStringValue(namedValueInfo.defaultValue);
+				arg = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
 			}
 			else if (namedValueInfo.required && !nestedParameter.isOptional()) {
 				handleMissingValue(namedValueInfo.name, nestedParameter, webRequest);
@@ -113,7 +116,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			arg = handleNullValue(namedValueInfo.name, arg, nestedParameter.getNestedParameterType());
 		}
 		else if ("".equals(arg) && namedValueInfo.defaultValue != null) {
-			arg = resolveStringValue(namedValueInfo.defaultValue);
+			arg = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
 		}
 
 		if (binderFactory != null) {
@@ -128,7 +131,11 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			catch (TypeMismatchException ex) {
 				throw new MethodArgumentTypeMismatchException(arg, ex.getRequiredType(),
 						namedValueInfo.name, parameter, ex.getCause());
-
+			}
+			// Check for null value after conversion of incoming argument value
+			if (arg == null && namedValueInfo.defaultValue == null &&
+					namedValueInfo.required && !nestedParameter.isOptional()) {
+				handleMissingValueAfterConversion(namedValueInfo.name, nestedParameter, webRequest);
 			}
 		}
 
@@ -167,8 +174,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			name = parameter.getParameterName();
 			if (name == null) {
 				throw new IllegalArgumentException(
-						"Name for argument type [" + parameter.getNestedParameterType().getName() +
-						"] not available, and parameter name information not found in class file either.");
+						"Name for argument of type [" + parameter.getNestedParameterType().getName() +
+						"] not specified, and parameter name information not found in class file either.");
 			}
 		}
 		String defaultValue = (ValueConstants.DEFAULT_NONE.equals(info.defaultValue) ? null : info.defaultValue);
@@ -180,13 +187,13 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * potentially containing placeholders and expressions.
 	 */
 	@Nullable
-	private Object resolveStringValue(String value) {
-		if (this.configurableBeanFactory == null) {
+	private Object resolveEmbeddedValuesAndExpressions(String value) {
+		if (this.configurableBeanFactory == null || this.expressionContext == null) {
 			return value;
 		}
 		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(value);
 		BeanExpressionResolver exprResolver = this.configurableBeanFactory.getBeanExpressionResolver();
-		if (exprResolver == null || this.expressionContext == null) {
+		if (exprResolver == null) {
 			return value;
 		}
 		return exprResolver.evaluate(placeholdersResolved, this.expressionContext);
@@ -228,6 +235,19 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletException {
 		throw new ServletRequestBindingException("Missing argument '" + name +
 				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
+	}
+
+	/**
+	 * Invoked when a named value is present but becomes {@code null} after conversion.
+	 * @param name the name for the value
+	 * @param parameter the method parameter
+	 * @param request the current request
+	 * @since 5.3.6
+	 */
+	protected void handleMissingValueAfterConversion(String name, MethodParameter parameter, NativeWebRequest request)
+			throws Exception {
+
+		handleMissingValue(name, parameter, request);
 	}
 
 	/**

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,8 +26,9 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.annotation.AbstractWebArgumentResolverAdapter;
 
 /**
- * A Servlet-specific {@link org.springframework.web.method.annotation.AbstractWebArgumentResolverAdapter} that creates a
- * {@link NativeWebRequest} from {@link ServletRequestAttributes}.
+ * A Servlet-specific
+ * {@link org.springframework.web.method.annotation.AbstractWebArgumentResolverAdapter}
+ * that creates a {@link NativeWebRequest} from {@link ServletRequestAttributes}.
  *
  * <p><strong>Note:</strong> This class is provided for backwards compatibility.
  * However it is recommended to re-write a {@code WebArgumentResolver} as

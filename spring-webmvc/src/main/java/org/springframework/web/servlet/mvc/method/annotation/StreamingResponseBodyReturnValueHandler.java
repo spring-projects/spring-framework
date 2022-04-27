@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,13 +51,14 @@ public class StreamingResponseBodyReturnValueHandler implements HandlerMethodRet
 			return true;
 		}
 		else if (ResponseEntity.class.isAssignableFrom(returnType.getParameterType())) {
-			Class<?> bodyType = ResolvableType.forMethodParameter(returnType).getGeneric(0).resolve();
+			Class<?> bodyType = ResolvableType.forMethodParameter(returnType).getGeneric().resolve();
 			return (bodyType != null && StreamingResponseBody.class.isAssignableFrom(bodyType));
 		}
 		return false;
 	}
 
 	@Override
+	@SuppressWarnings("resource")
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
@@ -107,6 +109,7 @@ public class StreamingResponseBodyReturnValueHandler implements HandlerMethodRet
 		@Override
 		public Void call() throws Exception {
 			this.streamingBody.writeTo(this.outputStream);
+			this.outputStream.flush();
 			return null;
 		}
 	}

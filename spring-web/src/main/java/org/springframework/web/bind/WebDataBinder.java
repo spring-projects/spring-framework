@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +33,15 @@ import org.springframework.web.multipart.MultipartFile;
  * to JavaBean objects. Designed for web environments, but not dependent on
  * the Servlet API; serves as base class for more specific DataBinder variants,
  * such as {@link org.springframework.web.bind.ServletRequestDataBinder}.
+ *
+ * <p><strong>WARNING</strong>: Data binding can lead to security issues by exposing
+ * parts of the object graph that are not meant to be accessed or modified by
+ * external clients. Therefore the design and use of data binding should be considered
+ * carefully with regard to security. For more details, please refer to the dedicated
+ * sections on data binding for
+ * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-initbinder-model-design">Spring Web MVC</a> and
+ * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html#webflux-ann-initbinder-model-design">Spring WebFlux</a>
+ * in the reference manual.
  *
  * <p>Includes support for field markers which address a common problem with
  * HTML checkboxes and select options: detecting that a field was part of
@@ -194,6 +203,7 @@ public class WebDataBinder extends DataBinder {
 	protected void doBind(MutablePropertyValues mpvs) {
 		checkFieldDefaults(mpvs);
 		checkFieldMarkers(mpvs);
+		adaptEmptyArrayIndices(mpvs);
 		super.doBind(mpvs);
 	}
 
@@ -206,8 +216,8 @@ public class WebDataBinder extends DataBinder {
 	 * @see #getFieldDefaultPrefix
 	 */
 	protected void checkFieldDefaults(MutablePropertyValues mpvs) {
-		if (getFieldDefaultPrefix() != null) {
-			String fieldDefaultPrefix = getFieldDefaultPrefix();
+		String fieldDefaultPrefix = getFieldDefaultPrefix();
+		if (fieldDefaultPrefix != null) {
 			PropertyValue[] pvArray = mpvs.getPropertyValues();
 			for (PropertyValue pv : pvArray) {
 				if (pv.getName().startsWith(fieldDefaultPrefix)) {
@@ -233,8 +243,8 @@ public class WebDataBinder extends DataBinder {
 	 * @see #getEmptyValue(String, Class)
 	 */
 	protected void checkFieldMarkers(MutablePropertyValues mpvs) {
-		if (getFieldMarkerPrefix() != null) {
-			String fieldMarkerPrefix = getFieldMarkerPrefix();
+		String fieldMarkerPrefix = getFieldMarkerPrefix();
+		if (fieldMarkerPrefix != null) {
 			PropertyValue[] pvArray = mpvs.getPropertyValues();
 			for (PropertyValue pv : pvArray) {
 				if (pv.getName().startsWith(fieldMarkerPrefix)) {
@@ -250,8 +260,42 @@ public class WebDataBinder extends DataBinder {
 	}
 
 	/**
+	 * Check for property values with names that end on {@code "[]"}. This is
+	 * used by some clients for array syntax without an explicit index value.
+	 * If such values are found, drop the brackets to adapt to the expected way
+	 * of expressing the same for data binding purposes.
+	 * @param mpvs the property values to be bound (can be modified)
+	 * @since 5.3
+	 */
+	protected void adaptEmptyArrayIndices(MutablePropertyValues mpvs) {
+		for (PropertyValue pv : mpvs.getPropertyValues()) {
+			String name = pv.getName();
+			if (name.endsWith("[]")) {
+				String field = name.substring(0, name.length() - 2);
+				if (getPropertyAccessor().isWritableProperty(field) && !mpvs.contains(field)) {
+					mpvs.add(field, pv.getValue());
+				}
+				mpvs.removePropertyValue(pv);
+			}
+		}
+	}
+
+	/**
 	 * Determine an empty value for the specified field.
-	 * <p>Default implementation returns:
+	 * <p>The default implementation delegates to {@link #getEmptyValue(Class)}
+	 * if the field type is known, otherwise falls back to {@code null}.
+	 * @param field the name of the field
+	 * @param fieldType the type of the field
+	 * @return the empty value (for most fields: {@code null})
+	 */
+	@Nullable
+	protected Object getEmptyValue(String field, @Nullable Class<?> fieldType) {
+		return (fieldType != null ? getEmptyValue(fieldType) : null);
+	}
+
+	/**
+	 * Determine an empty value for the specified field.
+	 * <p>The default implementation returns:
 	 * <ul>
 	 * <li>{@code Boolean.FALSE} for boolean fields
 	 * <li>an empty array for array types
@@ -259,50 +303,50 @@ public class WebDataBinder extends DataBinder {
 	 * <li>Map implementations for Map types
 	 * <li>else, {@code null} is used as default
 	 * </ul>
-	 * @param field the name of the field
 	 * @param fieldType the type of the field
-	 * @return the empty value (for most fields: null)
+	 * @return the empty value (for most fields: {@code null})
+	 * @since 5.0
 	 */
 	@Nullable
-	protected Object getEmptyValue(String field, @Nullable Class<?> fieldType) {
-		if (fieldType != null) {
-			try {
-				if (boolean.class == fieldType || Boolean.class == fieldType) {
-					// Special handling of boolean property.
-					return Boolean.FALSE;
-				}
-				else if (fieldType.isArray()) {
-					// Special handling of array property.
-					return Array.newInstance(fieldType.getComponentType(), 0);
-				}
-				else if (Collection.class.isAssignableFrom(fieldType)) {
-					return CollectionFactory.createCollection(fieldType, 0);
-				}
-				else if (Map.class.isAssignableFrom(fieldType)) {
-					return CollectionFactory.createMap(fieldType, 0);
-				}
-			} catch (IllegalArgumentException exc) {
-				return null;
+	public Object getEmptyValue(Class<?> fieldType) {
+		try {
+			if (boolean.class == fieldType || Boolean.class == fieldType) {
+				// Special handling of boolean property.
+				return Boolean.FALSE;
+			}
+			else if (fieldType.isArray()) {
+				// Special handling of array property.
+				return Array.newInstance(fieldType.getComponentType(), 0);
+			}
+			else if (Collection.class.isAssignableFrom(fieldType)) {
+				return CollectionFactory.createCollection(fieldType, 0);
+			}
+			else if (Map.class.isAssignableFrom(fieldType)) {
+				return CollectionFactory.createMap(fieldType, 0);
 			}
 		}
-		// Default value: try null.
+		catch (IllegalArgumentException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to create default value - falling back to null: " + ex.getMessage());
+			}
+		}
+		// Default value: null.
 		return null;
 	}
 
+
 	/**
 	 * Bind all multipart files contained in the given request, if any
-	 * (in case of a multipart request).
+	 * (in case of a multipart request). To be called by subclasses.
 	 * <p>Multipart files will only be added to the property values if they
 	 * are not empty or if we're configured to bind empty multipart files too.
-	 * @param multipartFiles Map of field name String to MultipartFile object
+	 * @param multipartFiles a Map of field name String to MultipartFile object
 	 * @param mpvs the property values to be bound (can be modified)
 	 * @see org.springframework.web.multipart.MultipartFile
 	 * @see #setBindEmptyMultipartFiles
 	 */
 	protected void bindMultipart(Map<String, List<MultipartFile>> multipartFiles, MutablePropertyValues mpvs) {
-		for (Map.Entry<String, List<MultipartFile>> entry : multipartFiles.entrySet()) {
-			String key = entry.getKey();
-			List<MultipartFile> values = entry.getValue();
+		multipartFiles.forEach((key, values) -> {
 			if (values.size() == 1) {
 				MultipartFile value = values.get(0);
 				if (isBindEmptyMultipartFiles() || !value.isEmpty()) {
@@ -312,7 +356,7 @@ public class WebDataBinder extends DataBinder {
 			else {
 				mpvs.add(key, values);
 			}
-		}
+		});
 	}
 
 }

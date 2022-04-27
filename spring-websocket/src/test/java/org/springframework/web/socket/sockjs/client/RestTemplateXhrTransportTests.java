@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,8 +26,7 @@ import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.http.HttpHeaders;
@@ -57,7 +56,12 @@ import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
-import static org.mockito.BDDMockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * Unit tests for {@link RestTemplateXhrTransport}.
@@ -68,13 +72,7 @@ public class RestTemplateXhrTransportTests {
 
 	private static final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
 
-	private WebSocketHandler webSocketHandler;
-
-
-	@Before
-	public void setup() throws Exception {
-		this.webSocketHandler = mock(WebSocketHandler.class);
-	}
+	private final WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
 
 
 	@Test
@@ -180,7 +178,7 @@ public class RestTemplateXhrTransportTests {
 		RestTemplateXhrTransport transport = new RestTemplateXhrTransport(restTemplate);
 		transport.setTaskExecutor(new SyncTaskExecutor());
 
-		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("http://example.com"));
+		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("https://example.com"));
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("h-foo", "h-bar");
 		TransportRequest request = new DefaultTransportRequest(urlInfo, headers, headers,
@@ -192,7 +190,7 @@ public class RestTemplateXhrTransportTests {
 	private ClientHttpResponse response(HttpStatus status, String body) throws IOException {
 		ClientHttpResponse response = mock(ClientHttpResponse.class);
 		InputStream inputStream = getInputStream(body);
-		given(response.getStatusCode()).willReturn(status);
+		given(response.getRawStatusCode()).willReturn(status.value());
 		given(response.getBody()).willReturn(inputStream);
 		return response;
 	}
@@ -214,7 +212,9 @@ public class RestTemplateXhrTransportTests {
 		}
 
 		@Override
-		public <T> T execute(URI url, HttpMethod method, @Nullable RequestCallback callback, @Nullable ResponseExtractor<T> extractor) throws RestClientException {
+		public <T> T execute(URI url, HttpMethod method, @Nullable RequestCallback callback,
+				@Nullable ResponseExtractor<T> extractor) throws RestClientException {
+
 			try {
 				extractor.extractData(this.responses.remove());
 			}

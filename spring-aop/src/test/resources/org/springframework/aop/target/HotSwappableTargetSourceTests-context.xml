@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
 	<!-- Simple target -->
-	<bean id="target1" class="org.springframework.tests.sample.beans.SideEffectBean">
+	<bean id="target1" class="org.springframework.beans.testfixture.beans.SideEffectBean">
 		<property name="count"><value>10</value></property>
 	</bean>
 
-	<bean id="target2" class="org.springframework.tests.sample.beans.SideEffectBean" scope="singleton">
+	<bean id="target2" class="org.springframework.beans.testfixture.beans.SideEffectBean" scope="singleton">
 		<property name="count"><value>20</value></property>
 	</bean>
 

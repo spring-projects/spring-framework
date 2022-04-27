@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Collection;
 import java.util.Collections;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
@@ -110,6 +111,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	 * holder, return the same holder instance.
 	 */
 	@Override
+	@Nullable
 	public RequestConditionHolder getMatchingCondition(HttpServletRequest request) {
 		if (this.condition == null) {
 			return this;

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,8 +24,9 @@ import java.util.Map;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
-import org.springframework.web.servlet.handler.AbstractHandlerMapping;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.util.pattern.PathPattern;
 
 /**
  * Assists with the registration of simple automated controllers pre-configured
@@ -37,34 +38,54 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
  */
 public class ViewControllerRegistry {
 
+	@Nullable
+	private ApplicationContext applicationContext;
+
 	private final List<ViewControllerRegistration> registrations = new ArrayList<>(4);
 
 	private final List<RedirectViewControllerRegistration> redirectRegistrations = new ArrayList<>(10);
 
 	private int order = 1;
 
-	@Nullable
-	private ApplicationContext applicationContext;
+
+	/**
+	 * Class constructor with {@link ApplicationContext}.
+	 * @since 4.3.12
+	 */
+	public ViewControllerRegistry(@Nullable ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
 
 
 	/**
-	 * Map a view controller to the given URL path (or pattern) in order to render
-	 * a response with a pre-configured status code and view.
-	 * <p>Patterns like {@code "/admin/**"} or {@code "/articles/{articlename:\\w+}"}
-	 * are allowed. See {@link org.springframework.util.AntPathMatcher} for more details on the
-	 * syntax.
+	 * Map a URL path or pattern to a view controller to render a response with
+	 * the configured status code and view.
+	 * <p>Patterns such as {@code "/admin/**"} or {@code "/articles/{articlename:\\w+}"}
+	 * are supported. For pattern syntax see {@link PathPattern} when parsed
+	 * patterns are {@link PathMatchConfigurer#setPatternParser enabled} or
+	 * {@link AntPathMatcher} otherwise. The syntax is largely the same with
+	 * {@link PathPattern} more tailored for web usage and more efficient.
+	 * <p><strong>Note:</strong> If an {@code @RequestMapping} method is mapped
+	 * to a URL for any HTTP method then a view controller cannot handle the
+	 * same URL. For this reason it is recommended to avoid splitting URL
+	 * handling across an annotated controller and a view controller.
 	 */
-	public ViewControllerRegistration addViewController(String urlPath) {
-		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);
+	public ViewControllerRegistration addViewController(String urlPathOrPattern) {
+		ViewControllerRegistration registration = new ViewControllerRegistration(urlPathOrPattern);
 		registration.setApplicationContext(this.applicationContext);
 		this.registrations.add(registration);
 		return registration;
 	}
 
 	/**
-	 * Map a view controller to the given URL path (or pattern) in order to redirect
-	 * to another URL. By default the redirect URL is expected to be relative to
-	 * the current ServletContext, i.e. as relative to the web application root.
+	 * Map a view controller to the given URL path or pattern in order to redirect
+	 * to another URL.
+	 * <p>For pattern syntax see {@link PathPattern} when parsed patterns
+	 * are {@link PathMatchConfigurer#setPatternParser enabled} or
+	 * {@link AntPathMatcher} otherwise. The syntax is largely the same with
+	 * {@link PathPattern} more tailored for web usage and more efficient.
+	 * <p>By default the redirect URL is expected to be relative to the current
+	 * ServletContext, i.e. as relative to the web application root.
 	 * @since 4.1
 	 */
 	public RedirectViewControllerRegistration addRedirectViewController(String urlPath, String redirectUrl) {
@@ -77,6 +98,10 @@ public class ViewControllerRegistry {
 	/**
 	 * Map a simple controller to the given URL path (or pattern) in order to
 	 * set the response status to the given code without rendering a body.
+	 * <p>For pattern syntax see {@link PathPattern} when parsed patterns
+	 * are {@link PathMatchConfigurer#setPatternParser enabled} or
+	 * {@link AntPathMatcher} otherwise. The syntax is largely the same with
+	 * {@link PathPattern} more tailored for web usage and more efficient.
 	 * @since 4.1
 	 */
 	public void addStatusController(String urlPath, HttpStatus statusCode) {
@@ -97,20 +122,18 @@ public class ViewControllerRegistry {
 		this.order = order;
 	}
 
-	protected void setApplicationContext(@Nullable ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-
 
 	/**
 	 * Return the {@code HandlerMapping} that contains the registered view
 	 * controller mappings, or {@code null} for no registrations.
+	 * @since 4.3.12
 	 */
 	@Nullable
-	protected AbstractHandlerMapping getHandlerMapping() {
+	protected SimpleUrlHandlerMapping buildHandlerMapping() {
 		if (this.registrations.isEmpty() && this.redirectRegistrations.isEmpty()) {
 			return null;
 		}
+
 		Map<String, Object> urlMap = new LinkedHashMap<>();
 		for (ViewControllerRegistration registration : this.registrations) {
 			urlMap.put(registration.getUrlPath(), registration.getViewController());
@@ -118,10 +141,8 @@ public class ViewControllerRegistry {
 		for (RedirectViewControllerRegistration registration : this.redirectRegistrations) {
 			urlMap.put(registration.getUrlPath(), registration.getViewController());
 		}
-		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
-		handlerMapping.setOrder(this.order);
-		handlerMapping.setUrlMap(urlMap);
-		return handlerMapping;
+
+		return new SimpleUrlHandlerMapping(urlMap, this.order);
 	}
 
 }

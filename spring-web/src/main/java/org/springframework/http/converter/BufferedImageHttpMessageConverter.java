@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
@@ -44,6 +45,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -100,7 +102,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	 * @throws IllegalArgumentException if the given content type is not supported by the Java Image I/O API
 	 */
 	public void setDefaultContentType(@Nullable MediaType defaultContentType) {
-		if (defaultContentType!= null) {
+		if (defaultContentType != null) {
 			Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByMIMEType(defaultContentType.toString());
 			if (!imageWriters.hasNext()) {
 				throw new IllegalArgumentException(
@@ -150,7 +152,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 	private boolean isWritable(@Nullable MediaType mediaType) {
-		if (mediaType == null || MediaType.ALL.equals(mediaType)) {
+		if (mediaType == null || MediaType.ALL.equalsTypeAndSubtype(mediaType)) {
 			return true;
 		}
 		Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByMIMEType(mediaType.toString());
@@ -168,11 +170,13 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 		ImageInputStream imageInputStream = null;
 		ImageReader imageReader = null;
+		// We cannot use try-with-resources here for the ImageInputStream, since we have
+		// custom handling of the close() method in a finally-block.
 		try {
 			imageInputStream = createImageInputStream(inputMessage.getBody());
 			MediaType contentType = inputMessage.getHeaders().getContentType();
 			if (contentType == null) {
-				throw new HttpMessageNotReadableException("No Content-Type header");
+				throw new HttpMessageNotReadableException("No Content-Type header", inputMessage);
 			}
 			Iterator<ImageReader> imageReaders = ImageIO.getImageReadersByMIMEType(contentType.toString());
 			if (imageReaders.hasNext()) {
@@ -184,7 +188,8 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 			}
 			else {
 				throw new HttpMessageNotReadableException(
-						"Could not find javax.imageio.ImageReader for Content-Type [" + contentType + "]");
+						"Could not find javax.imageio.ImageReader for Content-Type [" + contentType + "]",
+						inputMessage);
 			}
 		}
 		finally {
@@ -203,8 +208,9 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 	private ImageInputStream createImageInputStream(InputStream is) throws IOException {
+		is = StreamUtils.nonClosing(is);
 		if (this.cacheDir != null) {
-			return new FileCacheImageInputStream(is, cacheDir);
+			return new FileCacheImageInputStream(is, this.cacheDir);
 		}
 		else {
 			return new MemoryCacheImageInputStream(is);
@@ -221,12 +227,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
 			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
-			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
-				@Override
-				public void writeTo(OutputStream outputStream) throws IOException {
-					writeInternal(image, selectedContentType, outputStream);
-				}
-			});
+			streamingOutputMessage.setBody(outputStream -> writeInternal(image, selectedContentType, outputStream));
 		}
 		else {
 			writeInternal(image, selectedContentType, outputMessage.getBody());

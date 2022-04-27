@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,20 +16,22 @@
 
 package org.springframework.http.converter.xml;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLInputFactory;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
@@ -37,7 +39,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test fixture for {@link Jaxb2CollectionHttpMessageConverter}.
@@ -57,12 +63,9 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 	private Type typeSetType;
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
-
-	@Before
-	public void setUp() {
+	@BeforeEach
+	public void setup() {
 		converter = new Jaxb2CollectionHttpMessageConverter<Collection<Object>>();
 		rootElementListType = new ParameterizedTypeReference<List<RootElement>>() {}.getType();
 		rootElementSetType = new ParameterizedTypeReference<Set<RootElement>>() {}.getType();
@@ -72,58 +75,60 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 
 	@Test
-	public void canRead() throws Exception {
-		assertTrue(converter.canRead(rootElementListType, null, null));
-		assertTrue(converter.canRead(rootElementSetType, null, null));
-		assertTrue(converter.canRead(typeSetType, null, null));
+	public void canRead() {
+		assertThat(converter.canRead(rootElementListType, null, null)).isTrue();
+		assertThat(converter.canRead(rootElementSetType, null, null)).isTrue();
+		assertThat(converter.canRead(typeSetType, null, null)).isTrue();
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void readXmlRootElementList() throws Exception {
 		String content = "<list><rootElement><type s=\"1\"/></rootElement><rootElement><type s=\"2\"/></rootElement></list>";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		InputStream inputStream = spy(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		List<RootElement> result = (List<RootElement>) converter.read(rootElementListType, null, inputMessage);
 
-		assertEquals("Invalid result", 2, result.size());
-		assertEquals("Invalid result", "1", result.get(0).type.s);
-		assertEquals("Invalid result", "2", result.get(1).type.s);
+		assertThat(result.size()).as("Invalid result").isEqualTo(2);
+		assertThat(result.get(0).type.s).as("Invalid result").isEqualTo("1");
+		assertThat(result.get(1).type.s).as("Invalid result").isEqualTo("2");
+		verify(inputStream, never()).close();
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void readXmlRootElementSet() throws Exception {
 		String content = "<set><rootElement><type s=\"1\"/></rootElement><rootElement><type s=\"2\"/></rootElement></set>";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
 		Set<RootElement> result = (Set<RootElement>) converter.read(rootElementSetType, null, inputMessage);
 
-		assertEquals("Invalid result", 2, result.size());
-		assertTrue("Invalid result", result.contains(new RootElement("1")));
-		assertTrue("Invalid result", result.contains(new RootElement("2")));
+		assertThat(result.size()).as("Invalid result").isEqualTo(2);
+		assertThat(result.contains(new RootElement("1"))).as("Invalid result").isTrue();
+		assertThat(result.contains(new RootElement("2"))).as("Invalid result").isTrue();
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void readXmlTypeList() throws Exception {
 		String content = "<list><foo s=\"1\"/><bar s=\"2\"/></list>";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
 		List<TestType> result = (List<TestType>) converter.read(typeListType, null, inputMessage);
 
-		assertEquals("Invalid result", 2, result.size());
-		assertEquals("Invalid result", "1", result.get(0).s);
-		assertEquals("Invalid result", "2", result.get(1).s);
+		assertThat(result.size()).as("Invalid result").isEqualTo(2);
+		assertThat(result.get(0).s).as("Invalid result").isEqualTo("1");
+		assertThat(result.get(1).s).as("Invalid result").isEqualTo("2");
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void readXmlTypeSet() throws Exception {
 		String content = "<set><foo s=\"1\"/><bar s=\"2\"/></set>";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
 		Set<TestType> result = (Set<TestType>) converter.read(typeSetType, null, inputMessage);
 
-		assertEquals("Invalid result", 2, result.size());
-		assertTrue("Invalid result", result.contains(new TestType("1")));
-		assertTrue("Invalid result", result.contains(new TestType("2")));
+		assertThat(result.size()).as("Invalid result").isEqualTo(2);
+		assertThat(result.contains(new TestType("1"))).as("Invalid result").isTrue();
+		assertThat(result.contains(new TestType("2"))).as("Invalid result").isTrue();
 	}
 
 	@Test
@@ -134,7 +139,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 				"  <!ELEMENT external ANY >\n" +
 				"  <!ENTITY ext SYSTEM \"" + external.getURI() + "\" >]>" +
 				"  <list><rootElement><type s=\"1\"/><external>&ext;</external></rootElement></list>";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
 
 		converter = new Jaxb2CollectionHttpMessageConverter<Collection<Object>>() {
 			@Override
@@ -147,8 +152,8 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 		try {
 			Collection<RootElement> result = converter.read(rootElementListType, null, inputMessage);
-			assertEquals(1, result.size());
-			assertEquals("", result.iterator().next().external);
+			assertThat(result.size()).isEqualTo(1);
+			assertThat(result.iterator().next().external).isEqualTo("");
 		}
 		catch (HttpMessageNotReadableException ex) {
 			// Some parsers raise an exception
@@ -163,7 +168,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 				"  <!ELEMENT external ANY >\n" +
 				"  <!ENTITY ext SYSTEM \"" + external.getURI() + "\" >]>" +
 				"  <list><rootElement><type s=\"1\"/><external>&ext;</external></rootElement></list>";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
 
 		Jaxb2CollectionHttpMessageConverter<?> c = new Jaxb2CollectionHttpMessageConverter<Collection<Object>>() {
 			@Override
@@ -175,8 +180,8 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		};
 
 		Collection<RootElement> result = c.read(rootElementListType, null, inputMessage);
-		assertEquals(1, result.size());
-		assertEquals("Foo Bar", result.iterator().next().external);
+		assertThat(result.size()).isEqualTo(1);
+		assertThat(result.iterator().next().external).isEqualTo("Foo Bar");
 	}
 
 	@Test
@@ -198,10 +203,10 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 				" <!ENTITY lol9 \"&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;\">\n" +
 				"]>\n" +
 				"<list><rootElement><external>&lol9;</external></rootElement></list>";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
-		this.thrown.expect(HttpMessageNotReadableException.class);
-		this.thrown.expectMessage("\"lol9\"");
-		this.converter.read(this.rootElementListType, null, inputMessage);
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
+		assertThatExceptionOfType(HttpMessageNotReadableException.class)
+				.isThrownBy(() -> this.converter.read(this.rootElementListType, null, inputMessage))
+				.withMessageContaining("\"lol9\"");
 	}
 
 

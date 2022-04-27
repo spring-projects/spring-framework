@@ -1,0 +1,29 @@
+description = "Spring WebSocket"
+
+dependencies {
+	api(project(":spring-context"))
+	api(project(":spring-core"))
+	api(project(":spring-web"))
+	optional(project(":spring-messaging"))
+	optional(project(":spring-webmvc"))
+	optional("javax.servlet:javax.servlet-api")
+	optional("javax.websocket:javax.websocket-api")
+	optional("org.apache.tomcat:tomcat-websocket")
+	optional("org.glassfish.tyrus:tyrus-container-servlet")
+	optional("org.eclipse.jetty:jetty-webapp") {
+		exclude group: "javax.servlet", module: "javax.servlet"
+	}
+	optional("org.eclipse.jetty.websocket:websocket-server") {
+		exclude group: "javax.servlet", module: "javax.servlet"
+	}
+	optional("org.eclipse.jetty.websocket:websocket-client")
+	optional("org.eclipse.jetty:jetty-client")
+	optional("io.undertow:undertow-servlet")
+	optional("io.undertow:undertow-websockets-jsr")
+	optional("com.fasterxml.jackson.core:jackson-databind")
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-web")))
+	testImplementation("org.apache.tomcat.embed:tomcat-embed-core")
+	testImplementation("org.apache.tomcat.embed:tomcat-embed-websocket")
+	testImplementation("io.projectreactor.netty:reactor-netty-http")
+}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,7 @@ import java.net.URL;
 
 import com.gargoylesoftware.htmlunit.WebRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Abstract base class for testing {@link WebRequestMatcher} implementations.
@@ -29,14 +29,14 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @since 4.2
  */
-public class AbstractWebRequestMatcherTests {
+abstract class AbstractWebRequestMatcherTests {
 
 	protected void assertMatches(WebRequestMatcher matcher, String url) throws MalformedURLException {
-		assertTrue(matcher.matches(new WebRequest(new URL(url))));
+		assertThat(matcher.matches(new WebRequest(new URL(url)))).isTrue();
 	}
 
 	protected void assertDoesNotMatch(WebRequestMatcher matcher, String url) throws MalformedURLException {
-		assertFalse(matcher.matches(new WebRequest(new URL(url))));
+		assertThat(matcher.matches(new WebRequest(new URL(url)))).isFalse();
 	}
 
 }

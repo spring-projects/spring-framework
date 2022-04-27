@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,15 @@
 
 package org.springframework.core.type;
 
+import java.lang.annotation.Annotation;
 import java.util.Map;
 
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotation.Adapt;
+import org.springframework.core.annotation.MergedAnnotationCollectors;
+import org.springframework.core.annotation.MergedAnnotationPredicates;
+import org.springframework.core.annotation.MergedAnnotationSelectors;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
@@ -39,6 +46,14 @@ import org.springframework.util.MultiValueMap;
 public interface AnnotatedTypeMetadata {
 
 	/**
+	 * Return annotation details based on the direct annotations of the
+	 * underlying element.
+	 * @return merged annotations based on the direct annotations
+	 * @since 5.2
+	 */
+	MergedAnnotations getAnnotations();
+
+	/**
 	 * Determine whether the underlying element has an annotation or meta-annotation
 	 * of the given type defined.
 	 * <p>If this method returns {@code true}, then
@@ -47,7 +62,9 @@ public interface AnnotatedTypeMetadata {
 	 * type to look for
 	 * @return whether a matching annotation is defined
 	 */
-	boolean isAnnotated(String annotationName);
+	default boolean isAnnotated(String annotationName) {
+		return getAnnotations().isPresent(annotationName);
+	}
 
 	/**
 	 * Retrieve the attributes of the annotation of the given type, if any (i.e. if
@@ -60,7 +77,9 @@ public interface AnnotatedTypeMetadata {
 	 * {@code null} if no matching annotation is defined.
 	 */
 	@Nullable
-	Map<String, Object> getAnnotationAttributes(String annotationName);
+	default Map<String, Object> getAnnotationAttributes(String annotationName) {
+		return getAnnotationAttributes(annotationName, false);
+	}
 
 	/**
 	 * Retrieve the attributes of the annotation of the given type, if any (i.e. if
@@ -76,7 +95,16 @@ public interface AnnotatedTypeMetadata {
 	 * {@code null} if no matching annotation is defined.
 	 */
 	@Nullable
-	Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString);
+	default Map<String, Object> getAnnotationAttributes(String annotationName,
+			boolean classValuesAsString) {
+
+		MergedAnnotation<Annotation> annotation = getAnnotations().get(annotationName,
+				null, MergedAnnotationSelectors.firstDirectlyDeclared());
+		if (!annotation.isPresent()) {
+			return null;
+		}
+		return annotation.asAnnotationAttributes(Adapt.values(classValuesAsString, true));
+	}
 
 	/**
 	 * Retrieve all attributes of all annotations of the given type, if any (i.e. if
@@ -90,7 +118,9 @@ public interface AnnotatedTypeMetadata {
 	 * @see #getAllAnnotationAttributes(String, boolean)
 	 */
 	@Nullable
-	MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName);
+	default MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName) {
+		return getAllAnnotationAttributes(annotationName, false);
+	}
 
 	/**
 	 * Retrieve all attributes of all annotations of the given type, if any (i.e. if
@@ -105,6 +135,15 @@ public interface AnnotatedTypeMetadata {
 	 * @see #getAllAnnotationAttributes(String)
 	 */
 	@Nullable
-	MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString);
+	default MultiValueMap<String, Object> getAllAnnotationAttributes(
+			String annotationName, boolean classValuesAsString) {
+
+		Adapt[] adaptations = Adapt.values(classValuesAsString, true);
+		return getAnnotations().stream(annotationName)
+				.filter(MergedAnnotationPredicates.unique(MergedAnnotation::getMetaTypes))
+				.map(MergedAnnotation::withNonMergedAttributes)
+				.collect(MergedAnnotationCollectors.toMultiValueMap(map ->
+						map.isEmpty() ? null : map, adaptations));
+	}
 
 }

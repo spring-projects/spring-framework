@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -45,9 +46,9 @@ import org.springframework.util.Assert;
  * @since 11.12.2003
  * @see BeanDefinitionReaderUtils
  */
-public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable, BeanDefinitionReader {
+public abstract class AbstractBeanDefinitionReader implements BeanDefinitionReader, EnvironmentCapable {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final BeanDefinitionRegistry registry;
@@ -60,7 +61,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 
 	private Environment environment;
 
-	private BeanNameGenerator beanNameGenerator = new DefaultBeanNameGenerator();
+	private BeanNameGenerator beanNameGenerator = DefaultBeanNameGenerator.INSTANCE;
 
 
 	/**
@@ -102,6 +103,14 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	}
 
 
+	/**
+	 * Return the bean factory to register the bean definitions with.
+	 * <p>The factory is exposed through the BeanDefinitionRegistry interface,
+	 * encapsulating the methods that are relevant for bean definition handling.
+	 * @deprecated as of Spring Framework 5.3.15 in favor of {@link #getRegistry()},
+	 * to be removed in Spring Framework 6.0
+	 */
+	@Deprecated
 	public final BeanDefinitionRegistry getBeanFactory() {
 		return this.registry;
 	}
@@ -170,7 +179,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * <p>Default is a {@link DefaultBeanNameGenerator}.
 	 */
 	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
-		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new DefaultBeanNameGenerator());
+		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : DefaultBeanNameGenerator.INSTANCE);
 	}
 
 	@Override
@@ -182,11 +191,11 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	@Override
 	public int loadBeanDefinitions(Resource... resources) throws BeanDefinitionStoreException {
 		Assert.notNull(resources, "Resource array must not be null");
-		int counter = 0;
+		int count = 0;
 		for (Resource resource : resources) {
-			counter += loadBeanDefinitions(resource);
+			count += loadBeanDefinitions(resource);
 		}
-		return counter;
+		return count;
 	}
 
 	@Override
@@ -213,23 +222,21 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		ResourceLoader resourceLoader = getResourceLoader();
 		if (resourceLoader == null) {
 			throw new BeanDefinitionStoreException(
-					"Cannot import bean definitions from location [" + location + "]: no ResourceLoader available");
+					"Cannot load bean definitions from location [" + location + "]: no ResourceLoader available");
 		}
 
 		if (resourceLoader instanceof ResourcePatternResolver) {
 			// Resource pattern matching available.
 			try {
 				Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);
-				int loadCount = loadBeanDefinitions(resources);
+				int count = loadBeanDefinitions(resources);
 				if (actualResources != null) {
-					for (Resource resource : resources) {
-						actualResources.add(resource);
-					}
+					Collections.addAll(actualResources, resources);
 				}
-				if (logger.isDebugEnabled()) {
-					logger.debug("Loaded " + loadCount + " bean definitions from location pattern [" + location + "]");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Loaded " + count + " bean definitions from location pattern [" + location + "]");
 				}
-				return loadCount;
+				return count;
 			}
 			catch (IOException ex) {
 				throw new BeanDefinitionStoreException(
@@ -239,25 +246,25 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		else {
 			// Can only load single resources by absolute URL.
 			Resource resource = resourceLoader.getResource(location);
-			int loadCount = loadBeanDefinitions(resource);
+			int count = loadBeanDefinitions(resource);
 			if (actualResources != null) {
 				actualResources.add(resource);
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Loaded " + loadCount + " bean definitions from location [" + location + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Loaded " + count + " bean definitions from location [" + location + "]");
 			}
-			return loadCount;
+			return count;
 		}
 	}
 
 	@Override
 	public int loadBeanDefinitions(String... locations) throws BeanDefinitionStoreException {
 		Assert.notNull(locations, "Location array must not be null");
-		int counter = 0;
+		int count = 0;
 		for (String location : locations) {
-			counter += loadBeanDefinitions(location);
+			count += loadBeanDefinitions(location);
 		}
-		return counter;
+		return count;
 	}
 
 }

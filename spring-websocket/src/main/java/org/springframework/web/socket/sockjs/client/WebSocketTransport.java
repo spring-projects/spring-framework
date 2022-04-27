@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,7 +52,7 @@ public class WebSocketTransport implements Transport, Lifecycle {
 
 	private final WebSocketClient webSocketClient;
 
-	private volatile boolean running = false;
+	private volatile boolean running;
 
 
 	public WebSocketTransport(WebSocketClient webSocketClient) {
@@ -145,7 +145,7 @@ public class WebSocketTransport implements Transport, Lifecycle {
 
 		private final WebSocketClientSockJsSession sockJsSession;
 
-		private final AtomicBoolean connected = new AtomicBoolean(false);
+		private final AtomicBoolean connected = new AtomicBoolean();
 
 		public ClientSockJsWebSocketHandler(WebSocketClientSockJsSession session) {
 			Assert.notNull(session, "Session must not be null");

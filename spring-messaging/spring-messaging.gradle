@@ -1,0 +1,41 @@
+description = "Spring Messaging"
+
+apply plugin: "kotlin"
+apply plugin: "kotlinx-serialization"
+
+dependencies {
+	api(project(":spring-beans"))
+	api(project(":spring-core"))
+	optional(project(":spring-context"))
+	optional(project(":spring-oxm"))
+	optional("io.projectreactor.netty:reactor-netty-http")
+	optional("io.rsocket:rsocket-core")
+	optional("io.rsocket:rsocket-transport-netty")
+	optional("com.fasterxml.jackson.core:jackson-databind")
+	optional("com.google.code.gson:gson")
+	optional("javax.json.bind:javax.json.bind-api")
+	optional("javax.xml.bind:jaxb-api")
+	optional("com.google.protobuf:protobuf-java-util")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	optional("org.jetbrains.kotlinx:kotlinx-serialization-json")
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation("javax.inject:javax.inject-tck")
+	testImplementation("javax.servlet:javax.servlet-api")
+	testImplementation("javax.validation:validation-api")
+	testImplementation("com.thoughtworks.xstream:xstream")
+	testImplementation("org.apache.activemq:activemq-broker")
+	testImplementation("org.apache.activemq:activemq-kahadb-store")
+	testImplementation("org.apache.activemq:activemq-stomp")
+	testImplementation("io.projectreactor:reactor-test")
+	testImplementation("io.reactivex.rxjava3:rxjava")
+	testImplementation("org.jetbrains.kotlin:kotlin-reflect")
+	testImplementation("org.jetbrains.kotlin:kotlin-stdlib")
+	testImplementation("org.xmlunit:xmlunit-assertj")
+	testImplementation("org.xmlunit:xmlunit-matchers")
+	testRuntimeOnly("com.sun.activation:javax.activation")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
+	testRuntimeOnly("javax.json:javax.json-api")
+	testRuntimeOnly("org.apache.johnzon:johnzon-jsonb")
+	testRuntimeOnly(project(":spring-context"))
+}

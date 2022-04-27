@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
@@ -42,10 +43,10 @@ public class MockMultipartFile implements MultipartFile {
 
 	private final String name;
 
-	private String originalFilename;
+	private final String originalFilename;
 
 	@Nullable
-	private String contentType;
+	private final String contentType;
 
 	private final byte[] content;
 
@@ -79,7 +80,7 @@ public class MockMultipartFile implements MultipartFile {
 	public MockMultipartFile(
 			String name, @Nullable String originalFilename, @Nullable String contentType, @Nullable byte[] content) {
 
-		Assert.hasLength(name, "Name must not be null");
+		Assert.hasLength(name, "Name must not be empty");
 		this.name = name;
 		this.originalFilename = (originalFilename != null ? originalFilename : "");
 		this.contentType = contentType;
@@ -101,12 +102,14 @@ public class MockMultipartFile implements MultipartFile {
 		this(name, originalFilename, contentType, FileCopyUtils.copyToByteArray(contentStream));
 	}
 
+
 	@Override
 	public String getName() {
 		return this.name;
 	}
 
 	@Override
+	@NonNull
 	public String getOriginalFilename() {
 		return this.originalFilename;
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.accept;
 
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 
 import org.springframework.core.io.Resource;
@@ -33,7 +34,11 @@ import org.springframework.web.context.request.NativeWebRequest;
  *
  * @author Rossen Stoyanchev
  * @since 3.2
+ * @deprecated as of 5.2.4. See class-level note in
+ * {@link ContentNegotiationManagerFactoryBean} on the deprecation of path
+ * extension config options.
  */
+@Deprecated
 public class ServletPathExtensionContentNegotiationStrategy extends PathExtensionContentNegotiationStrategy {
 
 	private final ServletContext servletContext;
@@ -67,6 +72,7 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 	 * {@link org.springframework.http.MediaTypeFactory} lookup.
 	 */
 	@Override
+	@Nullable
 	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension)
 			throws HttpMediaTypeNotAcceptableException {
 
@@ -89,7 +95,7 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 	 * {@link PathExtensionContentNegotiationStrategy#getMediaTypeForResource}
 	 * with the ability to also look up through the ServletContext.
 	 * @param resource the resource to look up
-	 * @return the MediaType for the extension or {@code null}.
+	 * @return the MediaType for the extension, or {@code null} if none found
 	 * @since 4.3
 	 */
 	@Override

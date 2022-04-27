@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,14 +17,11 @@
 package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.AopInvocationException;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Test for SPR-4675. A null value returned from around advice is very hard to debug if
@@ -34,10 +31,7 @@ import static org.junit.Assert.*;
  */
 public class NullPrimitiveTests {
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
-	static interface Foo {
+	interface Foo {
 		int getValue();
 	}
 
@@ -53,18 +47,13 @@ public class NullPrimitiveTests {
 
 		SimpleFoo target = new SimpleFoo();
 		ProxyFactory factory = new ProxyFactory(target);
-		factory.addAdvice(new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				return null;
-			}
-		});
+		factory.addAdvice((MethodInterceptor) invocation -> null);
 
 		Foo foo = (Foo) factory.getProxy();
 
-		thrown.expect(AopInvocationException.class);
-		thrown.expectMessage("Foo.getValue()");
-		assertEquals(0, foo.getValue());
+		assertThatExceptionOfType(AopInvocationException.class).isThrownBy(() ->
+				foo.getValue())
+			.withMessageContaining("Foo.getValue()");
 	}
 
 	public static class Bar {
@@ -78,18 +67,13 @@ public class NullPrimitiveTests {
 
 		Bar target = new Bar();
 		ProxyFactory factory = new ProxyFactory(target);
-		factory.addAdvice(new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				return null;
-			}
-		});
+		factory.addAdvice((MethodInterceptor) invocation -> null);
 
 		Bar bar = (Bar) factory.getProxy();
 
-		thrown.expect(AopInvocationException.class);
-		thrown.expectMessage("Bar.getValue()");
-		assertEquals(0, bar.getValue());
+		assertThatExceptionOfType(AopInvocationException.class).isThrownBy(() ->
+				bar.getValue())
+			.withMessageContaining("Bar.getValue()");
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,8 +44,8 @@ public class VariableReference extends SpelNodeImpl {
 	private final String name;
 
 
-	public VariableReference(String variableName, int pos) {
-		super(pos);
+	public VariableReference(String variableName, int startPos, int endPos) {
+		super(startPos, endPos);
 		this.name = variableName;
 	}
 
@@ -78,7 +78,7 @@ public class VariableReference extends SpelNodeImpl {
 		if (value == null || !Modifier.isPublic(value.getClass().getModifiers())) {
 			// If the type is not public then when generateCode produces a checkcast to it
 			// then an IllegalAccessError will occur.
-			// If resorting to Object isn't sufficient, the hierarchy could be traversed for 
+			// If resorting to Object isn't sufficient, the hierarchy could be traversed for
 			// the first public type.
 			this.exitTypeDescriptor = "Ljava/lang/Object";
 		}
@@ -104,8 +104,27 @@ public class VariableReference extends SpelNodeImpl {
 		return !(this.name.equals(THIS) || this.name.equals(ROOT));
 	}
 
+	@Override
+	public boolean isCompilable() {
+		return (this.exitTypeDescriptor != null);
+	}
 
-	class VariableRef implements ValueRef {
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		if (this.name.equals(ROOT)) {
+			mv.visitVarInsn(ALOAD,1);
+		}
+		else {
+			mv.visitVarInsn(ALOAD, 2);
+			mv.visitLdcInsn(this.name);
+			mv.visitMethodInsn(INVOKEINTERFACE, "org/springframework/expression/EvaluationContext", "lookupVariable", "(Ljava/lang/String;)Ljava/lang/Object;",true);
+		}
+		CodeFlow.insertCheckCast(mv, this.exitTypeDescriptor);
+		cf.pushDescriptor(this.exitTypeDescriptor);
+	}
+
+
+	private static class VariableRef implements ValueRef {
 
 		private final String name;
 
@@ -113,14 +132,11 @@ public class VariableReference extends SpelNodeImpl {
 
 		private final EvaluationContext evaluationContext;
 
-
-		public VariableRef(String name, TypedValue value,
-				EvaluationContext evaluationContext) {
+		public VariableRef(String name, TypedValue value, EvaluationContext evaluationContext) {
 			this.name = name;
 			this.value = value;
 			this.evaluationContext = evaluationContext;
 		}
-
 
 		@Override
 		public TypedValue getValue() {
@@ -137,25 +153,5 @@ public class VariableReference extends SpelNodeImpl {
 			return true;
 		}
 	}
-
-	@Override
-	public boolean isCompilable() {
-		return this.exitTypeDescriptor!=null;
-	}
-	
-	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow cf) {
-		if (this.name.equals(ROOT)) {
-			mv.visitVarInsn(ALOAD,1);
-		}
-		else {
-			mv.visitVarInsn(ALOAD, 2);
-			mv.visitLdcInsn(name);
-			mv.visitMethodInsn(INVOKEINTERFACE, "org/springframework/expression/EvaluationContext", "lookupVariable", "(Ljava/lang/String;)Ljava/lang/Object;",true);
-		}
-		CodeFlow.insertCheckCast(mv, this.exitTypeDescriptor);
-		cf.pushDescriptor(this.exitTypeDescriptor);
-	}
-
 
 }

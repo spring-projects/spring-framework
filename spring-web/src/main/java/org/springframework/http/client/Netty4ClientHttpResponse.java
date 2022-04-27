@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,7 +33,8 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @since 4.1.2
- * @deprecated as of Spring 5.0, in favor of {@link org.springframework.http.client.reactive.ReactorClientHttpConnector}
+ * @deprecated as of Spring 5.0, in favor of
+ * {@link org.springframework.http.client.reactive.ReactorClientHttpConnector}
  */
 @Deprecated
 class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
@@ -59,13 +60,11 @@ class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public int getRawStatusCode() throws IOException {
 		return this.nettyResponse.getStatus().code();
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public String getStatusText() throws IOException {
 		return this.nettyResponse.getStatus().reasonPhrase();
 	}

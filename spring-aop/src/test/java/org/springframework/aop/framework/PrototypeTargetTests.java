@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,14 +18,14 @@ package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Juergen Hoeller
@@ -35,6 +35,7 @@ import static org.springframework.tests.TestResourceUtils.*;
 public class PrototypeTargetTests {
 
 	private static final Resource CONTEXT = qualifiedResource(PrototypeTargetTests.class, "context.xml");
+
 
 	@Test
 	public void testPrototypeProxyWithPrototypeTarget() {
@@ -46,8 +47,8 @@ public class PrototypeTargetTests {
 			tb.doSomething();
 		}
 		TestInterceptor interceptor = (TestInterceptor) bf.getBean("testInterceptor");
-		assertEquals(10, TestBeanImpl.constructionCount);
-		assertEquals(10, interceptor.invocationCount);
+		assertThat(TestBeanImpl.constructionCount).isEqualTo(10);
+		assertThat(interceptor.invocationCount).isEqualTo(10);
 	}
 
 	@Test
@@ -60,16 +61,19 @@ public class PrototypeTargetTests {
 			tb.doSomething();
 		}
 		TestInterceptor interceptor = (TestInterceptor) bf.getBean("testInterceptor");
-		assertEquals(1, TestBeanImpl.constructionCount);
-		assertEquals(10, interceptor.invocationCount);
+		assertThat(TestBeanImpl.constructionCount).isEqualTo(1);
+		assertThat(interceptor.invocationCount).isEqualTo(10);
 	}
 
-	public static interface TestBean {
-		public void doSomething();
+
+	public interface TestBean {
+
+		void doSomething();
 	}
 
 
 	public static class TestBeanImpl implements TestBean {
+
 		private static int constructionCount = 0;
 
 		public TestBeanImpl() {
@@ -83,6 +87,7 @@ public class PrototypeTargetTests {
 
 
 	public static class TestInterceptor implements MethodInterceptor {
+
 		private int invocationCount = 0;
 
 		@Override

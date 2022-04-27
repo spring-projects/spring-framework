@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,13 +19,11 @@ package org.springframework.test.context.transaction;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
@@ -36,9 +34,12 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.transaction.annotation.Propagation.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 
 /**
  * Unit tests for {@link TransactionalTestExecutionListener}.
@@ -46,12 +47,11 @@ import static org.springframework.transaction.annotation.Propagation.*;
  * @author Sam Brannen
  * @since 4.0
  */
-public class TransactionalTestExecutionListenerTests {
+class TransactionalTestExecutionListenerTests {
 
 	private final PlatformTransactionManager tm = mock(PlatformTransactionManager.class);
 
 	private final TransactionalTestExecutionListener listener = new TransactionalTestExecutionListener() {
-
 		@Override
 		protected PlatformTransactionManager getTransactionManager(TestContext testContext, String qualifier) {
 			return tm;
@@ -60,8 +60,147 @@ public class TransactionalTestExecutionListenerTests {
 
 	private final TestContext testContext = mock(TestContext.class);
 
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
+
+	@AfterEach
+	void cleanUpThreadLocalStateForSubsequentTestClassesInSuite() {
+		TransactionContextHolder.removeCurrentTransactionContext();
+	}
+
+
+	@Test  // SPR-13895
+	void transactionalTestWithoutTransactionManager() throws Exception {
+		TransactionalTestExecutionListener listener = new TransactionalTestExecutionListener() {
+			@Override
+			protected PlatformTransactionManager getTransactionManager(TestContext testContext, String qualifier) {
+				return null;
+			}
+		};
+
+		Class<? extends Invocable> clazz = TransactionalDeclaredOnClassLocallyTestCase.class;
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		Invocable instance = BeanUtils.instantiateClass(clazz);
+		given(testContext.getTestInstance()).willReturn(instance);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
+
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
+		TransactionContextHolder.removeCurrentTransactionContext();
+
+		assertThatIllegalStateException().isThrownBy(() ->
+				listener.beforeTestMethod(testContext))
+			.withMessageStartingWith("Failed to retrieve PlatformTransactionManager for @Transactional test");
+	}
+
+	@Test
+	void beforeTestMethodWithTransactionalDeclaredOnClassLocally() throws Exception {
+		assertBeforeTestMethodWithTransactionalTestMethod(TransactionalDeclaredOnClassLocallyTestCase.class);
+	}
+
+	@Test
+	void beforeTestMethodWithTransactionalDeclaredOnClassViaMetaAnnotation() throws Exception {
+		assertBeforeTestMethodWithTransactionalTestMethod(TransactionalDeclaredOnClassViaMetaAnnotationTestCase.class);
+	}
+
+	@Test
+	void beforeTestMethodWithTransactionalDeclaredOnClassViaMetaAnnotationWithOverride() throws Exception {
+		// Note: not actually invoked within a transaction since the test class is
+		// annotated with @MetaTxWithOverride(propagation = NOT_SUPPORTED)
+		assertBeforeTestMethodWithTransactionalTestMethod(
+				TransactionalDeclaredOnClassViaMetaAnnotationWithOverrideTestCase.class, false);
+	}
+
+	@Test
+	void beforeTestMethodWithTransactionalDeclaredOnMethodViaMetaAnnotationWithOverride() throws Exception {
+		// Note: not actually invoked within a transaction since the method is
+		// annotated with @MetaTxWithOverride(propagation = NOT_SUPPORTED)
+		assertBeforeTestMethodWithTransactionalTestMethod(
+				TransactionalDeclaredOnMethodViaMetaAnnotationWithOverrideTestCase.class, false);
+		assertBeforeTestMethodWithNonTransactionalTestMethod(TransactionalDeclaredOnMethodViaMetaAnnotationWithOverrideTestCase.class);
+	}
+
+	@Test
+	void beforeTestMethodWithTransactionalDeclaredOnMethodLocally() throws Exception {
+		assertBeforeTestMethod(TransactionalDeclaredOnMethodLocallyTestCase.class);
+	}
+
+	@Test
+	void beforeTestMethodWithTransactionalDeclaredOnMethodViaMetaAnnotation() throws Exception {
+		assertBeforeTestMethod(TransactionalDeclaredOnMethodViaMetaAnnotationTestCase.class);
+	}
+
+	@Test
+	void beforeTestMethodWithBeforeTransactionDeclaredLocally() throws Exception {
+		assertBeforeTestMethod(BeforeTransactionDeclaredLocallyTestCase.class);
+	}
+
+	@Test
+	void beforeTestMethodWithBeforeTransactionDeclaredViaMetaAnnotation() throws Exception {
+		assertBeforeTestMethod(BeforeTransactionDeclaredViaMetaAnnotationTestCase.class);
+	}
+
+	@Test
+	void afterTestMethodWithAfterTransactionDeclaredLocally() throws Exception {
+		assertAfterTestMethod(AfterTransactionDeclaredLocallyTestCase.class);
+	}
+
+	@Test
+	void afterTestMethodWithAfterTransactionDeclaredViaMetaAnnotation() throws Exception {
+		assertAfterTestMethod(AfterTransactionDeclaredViaMetaAnnotationTestCase.class);
+	}
+
+	@Test
+	void beforeTestMethodWithBeforeTransactionDeclaredAsInterfaceDefaultMethod() throws Exception {
+		assertBeforeTestMethod(BeforeTransactionDeclaredAsInterfaceDefaultMethodTestCase.class);
+	}
+
+	@Test
+	void afterTestMethodWithAfterTransactionDeclaredAsInterfaceDefaultMethod() throws Exception {
+		assertAfterTestMethod(AfterTransactionDeclaredAsInterfaceDefaultMethodTestCase.class);
+	}
+
+	@Test
+	void isRollbackWithMissingRollback() throws Exception {
+		assertIsRollback(MissingRollbackTestCase.class, true);
+	}
+
+	@Test
+	void isRollbackWithEmptyMethodLevelRollback() throws Exception {
+		assertIsRollback(EmptyMethodLevelRollbackTestCase.class, true);
+	}
+
+	@Test
+	void isRollbackWithMethodLevelRollbackWithExplicitValue() throws Exception {
+		assertIsRollback(MethodLevelRollbackWithExplicitValueTestCase.class, false);
+	}
+
+	@Test
+	void isRollbackWithMethodLevelRollbackViaMetaAnnotation() throws Exception {
+		assertIsRollback(MethodLevelRollbackViaMetaAnnotationTestCase.class, false);
+	}
+
+	@Test
+	void isRollbackWithEmptyClassLevelRollback() throws Exception {
+		assertIsRollback(EmptyClassLevelRollbackTestCase.class, true);
+	}
+
+	@Test
+	void isRollbackWithClassLevelRollbackWithExplicitValue() throws Exception {
+		assertIsRollback(ClassLevelRollbackWithExplicitValueTestCase.class, false);
+	}
+
+	@Test
+	void isRollbackWithClassLevelRollbackViaMetaAnnotation() throws Exception {
+		assertIsRollback(ClassLevelRollbackViaMetaAnnotationTestCase.class, false);
+	}
+
+	@Test
+	void isRollbackWithClassLevelRollbackWithExplicitValueOnTestInterface() throws Exception {
+		assertIsRollback(ClassLevelRollbackWithExplicitValueOnTestInterfaceTestCase.class, false);
+	}
+
+	@Test
+	void isRollbackWithClassLevelRollbackViaMetaAnnotationOnTestInterface() throws Exception {
+		assertIsRollback(ClassLevelRollbackViaMetaAnnotationOnTestInterfaceTestCase.class, false);
+	}
 
 
 	private void assertBeforeTestMethod(Class<? extends Invocable> clazz) throws Exception {
@@ -75,28 +214,28 @@ public class TransactionalTestExecutionListenerTests {
 
 	private void assertBeforeTestMethodWithTransactionalTestMethod(Class<? extends Invocable> clazz, boolean invokedInTx)
 			throws Exception {
+
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
+		Invocable instance = BeanUtils.instantiateClass(clazz);
 		given(testContext.getTestInstance()).willReturn(instance);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
 
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
-		assertEquals(invokedInTx, instance.invoked());
+		assertThat(instance.invoked()).isEqualTo(invokedInTx);
 	}
 
-	private void assertBeforeTestMethodWithNonTransactionalTestMethod(Class<? extends Invocable> clazz)
-			throws Exception {
+	private void assertBeforeTestMethodWithNonTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
+		Invocable instance = BeanUtils.instantiateClass(clazz);
 		given(testContext.getTestInstance()).willReturn(instance);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
 
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 	}
 
 	private void assertAfterTestMethod(Class<? extends Invocable> clazz) throws Exception {
@@ -106,194 +245,42 @@ public class TransactionalTestExecutionListenerTests {
 
 	private void assertAfterTestMethodWithTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
+		Invocable instance = BeanUtils.instantiateClass(clazz);
 		given(testContext.getTestInstance()).willReturn(instance);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
-
 		given(tm.getTransaction(BDDMockito.any(TransactionDefinition.class))).willReturn(new SimpleTransactionStatus());
 
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 		listener.afterTestMethod(testContext);
-		assertTrue("callback should have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should have been invoked").isTrue();
 	}
 
 	private void assertAfterTestMethodWithNonTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
+		Invocable instance = BeanUtils.instantiateClass(clazz);
 		given(testContext.getTestInstance()).willReturn(instance);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
 
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
 		listener.afterTestMethod(testContext);
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 	}
 
-	private void assertIsRollback(Class<?> clazz, boolean rollback) throws NoSuchMethodException, Exception {
+	private void assertIsRollback(Class<?> clazz, boolean rollback) throws Exception {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("test"));
-		assertEquals(rollback, listener.isRollback(testContext));
+		assertThat(listener.isRollback(testContext)).isEqualTo(rollback);
 	}
 
-	@After
-	public void cleanUpThreadLocalStateForSubsequentTestClassesInSuite() {
-		TransactionContextHolder.removeCurrentTransactionContext();
-	}
-
-	/**
-	 * SPR-13895
-	 */
-	@Test
-	public void transactionalTestWithoutTransactionManager() throws Exception {
-		TransactionalTestExecutionListener listener = new TransactionalTestExecutionListener() {
-
-			protected PlatformTransactionManager getTransactionManager(TestContext testContext, String qualifier) {
-				return null;
-			}
-		};
-
-		Class<? extends Invocable> clazz = TransactionalDeclaredOnClassLocallyTestCase.class;
-
-		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
-		given(testContext.getTestInstance()).willReturn(instance);
-		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
-
-		assertFalse("callback should not have been invoked", instance.invoked());
-		TransactionContextHolder.removeCurrentTransactionContext();
-
-		try {
-			listener.beforeTestMethod(testContext);
-			fail("Should have thrown an IllegalStateException");
-		}
-		catch (IllegalStateException e) {
-			assertTrue(e.getMessage().startsWith(
-				"Failed to retrieve PlatformTransactionManager for @Transactional test for test context"));
-		}
-	}
-
-	@Test
-	public void beforeTestMethodWithTransactionalDeclaredOnClassLocally() throws Exception {
-		assertBeforeTestMethodWithTransactionalTestMethod(TransactionalDeclaredOnClassLocallyTestCase.class);
-	}
-
-	@Test
-	public void beforeTestMethodWithTransactionalDeclaredOnClassViaMetaAnnotation() throws Exception {
-		assertBeforeTestMethodWithTransactionalTestMethod(TransactionalDeclaredOnClassViaMetaAnnotationTestCase.class);
-	}
-
-	@Test
-	public void beforeTestMethodWithTransactionalDeclaredOnClassViaMetaAnnotationWithOverride() throws Exception {
-		// Note: not actually invoked within a transaction since the test class is
-		// annotated with @MetaTxWithOverride(propagation = NOT_SUPPORTED)
-		assertBeforeTestMethodWithTransactionalTestMethod(
-			TransactionalDeclaredOnClassViaMetaAnnotationWithOverrideTestCase.class, false);
-	}
-
-	@Test
-	public void beforeTestMethodWithTransactionalDeclaredOnMethodViaMetaAnnotationWithOverride() throws Exception {
-		// Note: not actually invoked within a transaction since the method is
-		// annotated with @MetaTxWithOverride(propagation = NOT_SUPPORTED)
-		assertBeforeTestMethodWithTransactionalTestMethod(
-			TransactionalDeclaredOnMethodViaMetaAnnotationWithOverrideTestCase.class, false);
-		assertBeforeTestMethodWithNonTransactionalTestMethod(TransactionalDeclaredOnMethodViaMetaAnnotationWithOverrideTestCase.class);
-	}
-
-	@Test
-	public void beforeTestMethodWithTransactionalDeclaredOnMethodLocally() throws Exception {
-		assertBeforeTestMethod(TransactionalDeclaredOnMethodLocallyTestCase.class);
-	}
-
-	@Test
-	public void beforeTestMethodWithTransactionalDeclaredOnMethodViaMetaAnnotation() throws Exception {
-		assertBeforeTestMethod(TransactionalDeclaredOnMethodViaMetaAnnotationTestCase.class);
-	}
-
-	@Test
-	public void beforeTestMethodWithBeforeTransactionDeclaredLocally() throws Exception {
-		assertBeforeTestMethod(BeforeTransactionDeclaredLocallyTestCase.class);
-	}
-
-	@Test
-	public void beforeTestMethodWithBeforeTransactionDeclaredViaMetaAnnotation() throws Exception {
-		assertBeforeTestMethod(BeforeTransactionDeclaredViaMetaAnnotationTestCase.class);
-	}
-
-	@Test
-	public void afterTestMethodWithAfterTransactionDeclaredLocally() throws Exception {
-		assertAfterTestMethod(AfterTransactionDeclaredLocallyTestCase.class);
-	}
-
-	@Test
-	public void afterTestMethodWithAfterTransactionDeclaredViaMetaAnnotation() throws Exception {
-		assertAfterTestMethod(AfterTransactionDeclaredViaMetaAnnotationTestCase.class);
-	}
-
-	@Test
-	public void beforeTestMethodWithBeforeTransactionDeclaredAsInterfaceDefaultMethod() throws Exception {
-		assertBeforeTestMethod(BeforeTransactionDeclaredAsInterfaceDefaultMethodTestCase.class);
-	}
-
-	@Test
-	public void afterTestMethodWithAfterTransactionDeclaredAsInterfaceDefaultMethod() throws Exception {
-		assertAfterTestMethod(AfterTransactionDeclaredAsInterfaceDefaultMethodTestCase.class);
-	}
-
-	@Test
-	public void isRollbackWithMissingRollback() throws Exception {
-		assertIsRollback(MissingRollbackTestCase.class, true);
-	}
-
-	@Test
-	public void isRollbackWithEmptyMethodLevelRollback() throws Exception {
-		assertIsRollback(EmptyMethodLevelRollbackTestCase.class, true);
-	}
-
-	@Test
-	public void isRollbackWithMethodLevelRollbackWithExplicitValue() throws Exception {
-		assertIsRollback(MethodLevelRollbackWithExplicitValueTestCase.class, false);
-	}
-
-	@Test
-	public void isRollbackWithMethodLevelRollbackViaMetaAnnotation() throws Exception {
-		assertIsRollback(MethodLevelRollbackViaMetaAnnotationTestCase.class, false);
-	}
-
-	@Test
-	public void isRollbackWithEmptyClassLevelRollback() throws Exception {
-		assertIsRollback(EmptyClassLevelRollbackTestCase.class, true);
-	}
-
-	@Test
-	public void isRollbackWithClassLevelRollbackWithExplicitValue() throws Exception {
-		assertIsRollback(ClassLevelRollbackWithExplicitValueTestCase.class, false);
-	}
-
-	@Test
-	public void isRollbackWithClassLevelRollbackViaMetaAnnotation() throws Exception {
-		assertIsRollback(ClassLevelRollbackViaMetaAnnotationTestCase.class, false);
-	}
-
-	@Test
-	public void isRollbackWithClassLevelRollbackWithExplicitValueOnTestInterface() throws Exception {
-		assertIsRollback(ClassLevelRollbackWithExplicitValueOnTestInterfaceTestCase.class, false);
-	}
-
-	@Test
-	public void isRollbackWithClassLevelRollbackViaMetaAnnotationOnTestInterface() throws Exception {
-		assertIsRollback(ClassLevelRollbackViaMetaAnnotationOnTestInterfaceTestCase.class, false);
-	}
-
-
-	// -------------------------------------------------------------------------
 
 	@Transactional
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaTransactional {
+	private @interface MetaTransactional {
 	}
 
 	@Transactional
@@ -308,12 +295,12 @@ public class TransactionalTestExecutionListenerTests {
 
 	@BeforeTransaction
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaBeforeTransaction {
+	private @interface MetaBeforeTransaction {
 	}
 
 	@AfterTransaction
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaAfterTransaction {
+	private @interface MetaAfterTransaction {
 	}
 
 	private interface Invocable {
@@ -348,7 +335,6 @@ public class TransactionalTestExecutionListenerTests {
 		}
 
 		public void transactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -361,11 +347,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -378,7 +362,6 @@ public class TransactionalTestExecutionListenerTests {
 		}
 
 		public void transactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -391,11 +374,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@MetaTransactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -408,7 +389,6 @@ public class TransactionalTestExecutionListenerTests {
 		}
 
 		public void transactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -421,11 +401,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@MetaTxWithOverride(propagation = NOT_SUPPORTED)
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -438,11 +416,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -455,11 +431,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -472,11 +446,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -489,11 +461,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -518,11 +488,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -531,11 +499,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 

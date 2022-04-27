@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,12 +26,11 @@ import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@link LocaleContextResolver} implementation that always returns
- * a fixed default locale and optionally time zone.
- * Default is the current JVM's default locale.
+ * {@link LocaleContextResolver} implementation that always returns a fixed locale
+ * and optionally time zone. Default is the current JVM's default locale.
  *
- * <p>Note: Does not support {@code setLocale(Context)}, as the fixed
- * locale and time zone cannot be changed.
+ * <p>Note: Does not support {@link #setLocaleContext}, as the fixed locale and
+ * time zone cannot be changed.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -71,6 +70,7 @@ public class FixedLocaleContextResolver implements LocaleContextResolver {
 		this.timeZone = timeZone;
 	}
 
+
 	@Override
 	public LocaleContext resolveLocaleContext(ServerWebExchange exchange) {
 		return new TimeZoneAwareLocaleContext() {
@@ -79,6 +79,7 @@ public class FixedLocaleContextResolver implements LocaleContextResolver {
 				return locale;
 			}
 			@Override
+			@Nullable
 			public TimeZone getTimeZone() {
 				return timeZone;
 			}
@@ -87,7 +88,8 @@ public class FixedLocaleContextResolver implements LocaleContextResolver {
 
 	@Override
 	public void setLocaleContext(ServerWebExchange exchange, @Nullable LocaleContext localeContext) {
-		throw new UnsupportedOperationException("Cannot change fixed locale - use a different locale context resolution strategy");
+		throw new UnsupportedOperationException(
+				"Cannot change fixed locale - use a different locale context resolution strategy");
 	}
 
 }

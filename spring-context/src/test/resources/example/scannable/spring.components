@@ -7,3 +7,4 @@ example.scannable.ScopedProxyTestBean=example.scannable.FooService
 example.scannable.StubFooDao=org.springframework.stereotype.Component
 example.scannable.NamedStubDao=org.springframework.stereotype.Component
 example.scannable.ServiceInvocationCounter=org.springframework.stereotype.Component
+example.scannable.sub.BarComponent=org.springframework.stereotype.Component

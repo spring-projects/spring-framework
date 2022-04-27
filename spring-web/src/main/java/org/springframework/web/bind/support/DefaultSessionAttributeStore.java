@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,7 @@ import org.springframework.web.context.request.WebRequest;
 
 /**
  * Default implementation of the {@link SessionAttributeStore} interface,
- * storing the attributes in the WebRequest session (i.e. HttpSession
- * or PortletSession).
+ * storing the attributes in the WebRequest session (i.e. HttpSession).
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -57,6 +56,7 @@ public class DefaultSessionAttributeStore implements SessionAttributeStore {
 	}
 
 	@Override
+	@Nullable
 	public Object retrieveAttribute(WebRequest request, String attributeName) {
 		Assert.notNull(request, "WebRequest must not be null");
 		Assert.notNull(attributeName, "Attribute name must not be null");

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.http.codec.multipart;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +25,7 @@ import org.springframework.http.HttpHeaders;
 /**
  * Representation for a part in a "multipart/form-data" request.
  *
- * <p>The origin of a multipart request may a browser form in which case each
+ * <p>The origin of a multipart request may be a browser form in which case each
  * part is either a {@link FormFieldPart} or a {@link FilePart}.
  *
  * <p>Multipart requests may also be used outside of a browser for data of any
@@ -56,5 +57,14 @@ public interface Part {
 	 * more easily via {@link FormFieldPart#value()}.
 	 */
 	Flux<DataBuffer> content();
+
+	/**
+	 * Return a mono that, when subscribed to, deletes the underlying storage
+	 * for this part.
+	 * @since 5.3.13
+	 */
+	default Mono<Void> delete() {
+		return Mono.empty();
+	}
 
 }

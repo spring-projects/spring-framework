@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,9 +24,9 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
@@ -46,7 +46,6 @@ import com.thoughtworks.xstream.converters.SingleValueConverter;
 import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.core.ClassLoaderReference;
 import com.thoughtworks.xstream.core.DefaultConverterLookup;
-import com.thoughtworks.xstream.core.util.CompositeClassLoader;
 import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
@@ -57,6 +56,7 @@ import com.thoughtworks.xstream.io.xml.DomReader;
 import com.thoughtworks.xstream.io.xml.DomWriter;
 import com.thoughtworks.xstream.io.xml.QNameMap;
 import com.thoughtworks.xstream.io.xml.SaxWriter;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 import com.thoughtworks.xstream.io.xml.StaxReader;
 import com.thoughtworks.xstream.io.xml.StaxWriter;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
@@ -64,6 +64,8 @@ import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 import com.thoughtworks.xstream.mapper.Mapper;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
+import com.thoughtworks.xstream.security.ForbiddenClassException;
+import com.thoughtworks.xstream.security.TypePermission;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -81,8 +83,10 @@ import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.oxm.support.AbstractMarshaller;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.function.SingletonSupplier;
 import org.springframework.util.xml.StaxUtils;
 
 /**
@@ -105,13 +109,14 @@ import org.springframework.util.xml.StaxUtils;
  * Therefore, it has limited namespace support. As such, it is rather unsuitable for
  * usage within Web Services.
  *
- * <p>This marshaller requires XStream 1.4.5 or higher, as of Spring 4.3.
+ * <p>This marshaller requires XStream 1.4.7 or higher, as of Spring 5.2.17.
  * Note that {@link XStream} construction has been reworked in 4.0, with the
  * stream driver and the class loader getting passed into XStream itself now.
  *
  * @author Peter Meijer
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLoaderAware, InitializingBean {
@@ -143,6 +148,9 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 
 	@Nullable
 	private ConverterMatcher[] converters;
+
+	@Nullable
+	private TypePermission[] typePermissions;
 
 	@Nullable
 	private MarshallingStrategy marshallingStrategy;
@@ -183,10 +191,10 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	@Nullable
 	private Class<?>[] supportedClasses;
 
-	private ClassLoader beanClassLoader = new CompositeClassLoader();
-
 	@Nullable
-	private XStream xstream;
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+
+	private final SingletonSupplier<XStream> xstream = SingletonSupplier.of(this::buildXStream);
 
 
 	/**
@@ -264,6 +272,20 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	 */
 	public void setConverters(ConverterMatcher... converters) {
 		this.converters = converters;
+	}
+
+	/**
+	 * Set XStream type permissions such as
+	 * {@link com.thoughtworks.xstream.security.AnyTypePermission},
+	 * {@link com.thoughtworks.xstream.security.ExplicitTypePermission} etc,
+	 * as an alternative to overriding the {@link #customizeXStream} method.
+	 * <p>Note: As of XStream 1.4.18, the default type permissions are
+	 * restricted to well-known core JDK types. For any custom types,
+	 * explicit type permissions need to be registered.
+	 * @since 5.2.17
+	 */
+	public void setTypePermissions(TypePermission... typePermissions) {
+		this.typePermissions = typePermissions;
 	}
 
 	/**
@@ -405,12 +427,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 
 	@Override
 	public void afterPropertiesSet() {
-		this.xstream = buildXStream();
+		// no-op due to use of SingletonSupplier for the XStream field
 	}
 
 	/**
 	 * Build the native XStream delegate to be used by this marshaller,
-	 * delegating to {@link #constructXStream()}, {@link #configureXStream}
+	 * delegating to {@link #constructXStream}, {@link #configureXStream},
 	 * and {@link #customizeXStream}.
 	 */
 	protected XStream buildXStream() {
@@ -474,6 +496,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 				else {
 					throw new IllegalArgumentException("Invalid ConverterMatcher [" + this.converters[i] + "]");
 				}
+			}
+		}
+
+		if (this.typePermissions != null) {
+			for (TypePermission permission : this.typePermissions) {
+				xstream.addPermission(permission);
 			}
 		}
 
@@ -582,7 +610,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	}
 
 	private Map<String, Class<?>> toClassMap(Map<String, ?> map) throws ClassNotFoundException {
-		Map<String, Class<?>> result = new LinkedHashMap<>(map.size());
+		Map<String, Class<?>> result = CollectionUtils.newLinkedHashMap(map.size());
 		for (Map.Entry<String, ?> entry : map.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();
@@ -615,12 +643,11 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	 * <p><b>NOTE: This method has been marked as final as of Spring 4.0.</b>
 	 * It can be used to access the fully configured XStream for marshalling
 	 * but not configuration purposes anymore.
+	 * <p>As of Spring Framework 5.1.16, creation of the {@link XStream} instance
+	 * returned by this method is thread safe.
 	 */
 	public final XStream getXStream() {
-		if (this.xstream == null) {
-			this.xstream = buildXStream();
-		}
-		return this.xstream;
+		return this.xstream.obtain();
 	}
 
 
@@ -670,7 +697,14 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	@Override
 	protected void marshalXmlStreamWriter(Object graph, XMLStreamWriter streamWriter) throws XmlMappingException {
 		try {
-			doMarshal(graph, new StaxWriter(new QNameMap(), streamWriter, this.nameCoder), null);
+			StaxWriter writer;
+			if (this.streamDriver instanceof StaxDriver) {
+				writer = ((StaxDriver) this.streamDriver).createStaxWriter(streamWriter);
+			}
+			else {
+				writer = new StaxWriter(new QNameMap(), streamWriter, this.nameCoder);
+			}
+			doMarshal(graph, writer, null);
 		}
 		catch (XMLStreamException ex) {
 			throw convertXStreamException(ex, true);
@@ -767,7 +801,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		else {
 			throw new IllegalArgumentException("DOMSource contains neither Document nor Element");
 		}
-        return doUnmarshal(streamReader, null);
+		return doUnmarshal(streamReader, null);
 	}
 
 	@Override
@@ -783,7 +817,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 
 	@Override
 	protected Object unmarshalXmlStreamReader(XMLStreamReader streamReader) throws XmlMappingException {
-        return doUnmarshal(new StaxReader(new QNameMap(), streamReader, this.nameCoder), null);
+		return doUnmarshal(new StaxReader(new QNameMap(), streamReader, this.nameCoder), null);
 	}
 
 	@Override
@@ -800,12 +834,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	}
 
 	public Object unmarshalInputStream(InputStream inputStream, @Nullable DataHolder dataHolder) throws XmlMappingException, IOException {
-        if (this.streamDriver != null) {
-            return doUnmarshal(this.streamDriver.createReader(inputStream), dataHolder);
-        }
-        else {
-		    return unmarshalReader(new InputStreamReader(inputStream, this.encoding), dataHolder);
-        }
+		if (this.streamDriver != null) {
+			return doUnmarshal(this.streamDriver.createReader(inputStream), dataHolder);
+		}
+		else {
+			return unmarshalReader(new InputStreamReader(inputStream, this.encoding), dataHolder);
+		}
 	}
 
 	@Override
@@ -817,33 +851,33 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		return doUnmarshal(getDefaultDriver().createReader(reader), dataHolder);
 	}
 
-    /**
-     * Unmarshals the given graph to the given XStream HierarchicalStreamWriter.
-     * Converts exceptions using {@link #convertXStreamException}.
-     */
-    private Object doUnmarshal(HierarchicalStreamReader streamReader, @Nullable DataHolder dataHolder) {
-        try {
-            return getXStream().unmarshal(streamReader, null, dataHolder);
-        }
-        catch (Exception ex) {
-            throw convertXStreamException(ex, false);
-        }
-    }
+	/**
+	 * Unmarshals the given graph to the given XStream HierarchicalStreamWriter.
+	 * Converts exceptions using {@link #convertXStreamException}.
+	 */
+	private Object doUnmarshal(HierarchicalStreamReader streamReader, @Nullable DataHolder dataHolder) {
+		try {
+			return getXStream().unmarshal(streamReader, null, dataHolder);
+		}
+		catch (Exception ex) {
+			throw convertXStreamException(ex, false);
+		}
+	}
 
 
-    /**
-     * Convert the given XStream exception to an appropriate exception from the
-     * {@code org.springframework.oxm} hierarchy.
-     * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
-     * unmarshalling, since XStream itself does not make this distinction in its exception hierarchy.
-     * @param ex XStream exception that occurred
-     * @param marshalling indicates whether the exception occurs during marshalling ({@code true}),
-     * or unmarshalling ({@code false})
-     * @return the corresponding {@code XmlMappingException}
-     */
+	/**
+	 * Convert the given XStream exception to an appropriate exception from the
+	 * {@code org.springframework.oxm} hierarchy.
+	 * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
+	 * unmarshalling, since XStream itself does not make this distinction in its exception hierarchy.
+	 * @param ex the XStream exception that occurred
+	 * @param marshalling indicates whether the exception occurs during marshalling ({@code true}),
+	 * or unmarshalling ({@code false})
+	 * @return the corresponding {@code XmlMappingException}
+	 */
 	protected XmlMappingException convertXStreamException(Exception ex, boolean marshalling) {
 		if (ex instanceof StreamException || ex instanceof CannotResolveClassException ||
-				ex instanceof ConversionException) {
+				ex instanceof ForbiddenClassException || ex instanceof ConversionException) {
 			if (marshalling) {
 				return new MarshallingFailureException("XStream marshalling exception",  ex);
 			}

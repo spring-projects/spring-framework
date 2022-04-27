@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="scheduler1" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="quartzProperties">
+			<props>
+				<prop key="org.quartz.scheduler.instanceName">quartz1</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="scheduler2" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="quartzProperties">
+			<props>
+				<prop key="org.quartz.scheduler.instanceName">quartz2</prop>
+			</props>
+		</property>
+	</bean>
+
+</beans>

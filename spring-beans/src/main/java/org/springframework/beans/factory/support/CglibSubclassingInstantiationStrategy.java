@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,8 +26,7 @@ import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.cglib.core.ClassGenerator;
-import org.springframework.cglib.core.DefaultGeneratorStrategy;
+import org.springframework.cglib.core.ClassLoaderAwareGeneratorStrategy;
 import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.CallbackFilter;
@@ -36,6 +35,7 @@ import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -79,7 +79,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 
 	@Override
 	protected Object instantiateWithMethodInjection(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
-			@Nullable Constructor<?> ctor, @Nullable Object... args) {
+			@Nullable Constructor<?> ctor, Object... args) {
 
 		// Must generate CGLIB subclass...
 		return new CglibSubclassCreator(bd, owner).instantiate(ctor, args);
@@ -113,7 +113,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 * Ignored if the {@code ctor} parameter is {@code null}.
 		 * @return new instance of the dynamically generated subclass
 		 */
-		public Object instantiate(@Nullable Constructor<?> ctor, @Nullable Object... args) {
+		public Object instantiate(@Nullable Constructor<?> ctor, Object... args) {
 			Class<?> subclass = createEnhancedSubclass(this.beanDefinition);
 			Object instance;
 			if (ctor == null) {
@@ -175,61 +175,14 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		}
 
 		@Override
-		public boolean equals(Object other) {
-			return (getClass() == other.getClass() &&
+		public boolean equals(@Nullable Object other) {
+			return (other != null && getClass() == other.getClass() &&
 					this.beanDefinition.equals(((CglibIdentitySupport) other).beanDefinition));
 		}
 
 		@Override
 		public int hashCode() {
 			return this.beanDefinition.hashCode();
-		}
-	}
-
-
-	/**
-	 * CGLIB GeneratorStrategy variant which exposes the application ClassLoader
-	 * as thread context ClassLoader for the time of class generation
-	 * (in order for ASM to pick it up when doing common superclass resolution).
-	 */
-	private static class ClassLoaderAwareGeneratorStrategy extends DefaultGeneratorStrategy {
-
-		@Nullable
-		private final ClassLoader classLoader;
-
-		public ClassLoaderAwareGeneratorStrategy(@Nullable ClassLoader classLoader) {
-			this.classLoader = classLoader;
-		}
-
-		@Override
-		public byte[] generate(ClassGenerator cg) throws Exception {
-			if (this.classLoader == null) {
-				return super.generate(cg);
-			}
-
-			Thread currentThread = Thread.currentThread();
-			ClassLoader threadContextClassLoader;
-			try {
-				threadContextClassLoader = currentThread.getContextClassLoader();
-			}
-			catch (Throwable ex) {
-				// Cannot access thread context ClassLoader - falling back...
-				return super.generate(cg);
-			}
-
-			boolean overrideClassLoader = !this.classLoader.equals(threadContextClassLoader);
-			if (overrideClassLoader) {
-				currentThread.setContextClassLoader(this.classLoader);
-			}
-			try {
-				return super.generate(cg);
-			}
-			finally {
-				if (overrideClassLoader) {
-					// Reset original thread context ClassLoader.
-					currentThread.setContextClassLoader(threadContextClassLoader);
-				}
-			}
 		}
 	}
 
@@ -249,7 +202,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		public int accept(Method method) {
 			MethodOverride methodOverride = getBeanDefinition().getMethodOverrides().getOverride(method);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Override for '" + method.getName() + "' is [" + methodOverride + "]");
+				logger.trace("MethodOverride for " + method + ": " + methodOverride);
 			}
 			if (methodOverride == null) {
 				return PASSTHROUGH;
@@ -286,12 +239,16 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			Assert.state(lo != null, "LookupOverride not found");
 			Object[] argsToUse = (args.length > 0 ? args : null);  // if no-arg, don't insist on args at all
 			if (StringUtils.hasText(lo.getBeanName())) {
-				return (argsToUse != null ? this.owner.getBean(lo.getBeanName(), argsToUse) :
+				Object bean = (argsToUse != null ? this.owner.getBean(lo.getBeanName(), argsToUse) :
 						this.owner.getBean(lo.getBeanName()));
+				// Detect package-protected NullBean instance through equals(null) check
+				return (bean.equals(null) ? null : bean);
 			}
 			else {
-				return (argsToUse != null ? this.owner.getBean(method.getReturnType(), argsToUse) :
-						this.owner.getBean(method.getReturnType()));
+				// Find target bean matching the (potentially generic) method return type
+				ResolvableType genericReturnType = ResolvableType.forMethodReturnType(method);
+				return (argsToUse != null ? this.owner.getBeanProvider(genericReturnType).getObject(argsToUse) :
+						this.owner.getBeanProvider(genericReturnType).getObject());
 			}
 		}
 	}

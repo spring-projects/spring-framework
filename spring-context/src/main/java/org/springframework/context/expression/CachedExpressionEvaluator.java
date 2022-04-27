@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -74,7 +75,7 @@ public abstract class CachedExpressionEvaluator {
 
 	/**
 	 * Return the {@link Expression} for the specified SpEL value
-	 * <p>Parse the expression if it hasn't been already.
+	 * <p>{@link #parseExpression(String) Parse the expression} if it hasn't been already.
 	 * @param cache the cache to use
 	 * @param elementKey the element on which the expression is defined
 	 * @param expression the expression to parse
@@ -85,10 +86,19 @@ public abstract class CachedExpressionEvaluator {
 		ExpressionKey expressionKey = createKey(elementKey, expression);
 		Expression expr = cache.get(expressionKey);
 		if (expr == null) {
-			expr = getParser().parseExpression(expression);
+			expr = parseExpression(expression);
 			cache.put(expressionKey, expr);
 		}
 		return expr;
+	}
+
+	/**
+	 * Parse the specified {@code expression}.
+	 * @param expression the expression to parse
+	 * @since 5.3.13
+	 */
+	protected Expression parseExpression(String expression) {
+		return getParser().parseExpression(expression);
 	}
 
 	private ExpressionKey createKey(AnnotatedElementKey elementKey, String expression) {
@@ -96,6 +106,9 @@ public abstract class CachedExpressionEvaluator {
 	}
 
 
+	/**
+	 * An expression key.
+	 */
 	protected static class ExpressionKey implements Comparable<ExpressionKey> {
 
 		private final AnnotatedElementKey element;
@@ -110,7 +123,7 @@ public abstract class CachedExpressionEvaluator {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

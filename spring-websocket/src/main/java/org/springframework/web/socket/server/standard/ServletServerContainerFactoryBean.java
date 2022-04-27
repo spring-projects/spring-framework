@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -66,7 +66,7 @@ public class ServletServerContainerFactoryBean
 	private ServerContainer serverContainer;
 
 
-	public void setAsyncSendTimeout(long timeoutInMillis) {
+	public void setAsyncSendTimeout(Long timeoutInMillis) {
 		this.asyncSendTimeout = timeoutInMillis;
 	}
 
@@ -75,7 +75,7 @@ public class ServletServerContainerFactoryBean
 		return this.asyncSendTimeout;
 	}
 
-	public void setMaxSessionIdleTimeout(long timeoutInMillis) {
+	public void setMaxSessionIdleTimeout(Long timeoutInMillis) {
 		this.maxSessionIdleTimeout = timeoutInMillis;
 	}
 
@@ -84,7 +84,7 @@ public class ServletServerContainerFactoryBean
 		return this.maxSessionIdleTimeout;
 	}
 
-	public void setMaxTextMessageBufferSize(int bufferSize) {
+	public void setMaxTextMessageBufferSize(Integer bufferSize) {
 		this.maxTextMessageBufferSize = bufferSize;
 	}
 
@@ -93,7 +93,7 @@ public class ServletServerContainerFactoryBean
 		return this.maxTextMessageBufferSize;
 	}
 
-	public void setMaxBinaryMessageBufferSize(int bufferSize) {
+	public void setMaxBinaryMessageBufferSize(Integer bufferSize) {
 		this.maxBinaryMessageBufferSize = bufferSize;
 	}
 
@@ -133,6 +133,7 @@ public class ServletServerContainerFactoryBean
 
 
 	@Override
+	@Nullable
 	public ServerContainer getObject() {
 		return this.serverContainer;
 	}

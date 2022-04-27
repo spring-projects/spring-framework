@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,8 +24,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>Supported by Spring's own FrameworkServlet (through a specific
  * ServletRequestHandledEvent subclass), but can also be raised by any
- * other web component. Used, for example, by Spring's out-of-the-box
- * PerformanceMonitorListener.
+ * other web component.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -37,18 +36,18 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class RequestHandledEvent extends ApplicationEvent {
 
-	/** Session id that applied to the request, if any */
+	/** Session id that applied to the request, if any. */
 	@Nullable
 	private String sessionId;
 
-	/** Usually the UserPrincipal */
+	/** Usually the UserPrincipal. */
 	@Nullable
 	private String userName;
 
-	/** Request processing time */
+	/** Request processing time. */
 	private final long processingTimeMillis;
 
-	/** Cause of failure, if any */
+	/** Cause of failure, if any. */
 	@Nullable
 	private Throwable failureCause;
 
@@ -61,7 +60,9 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * request, if any (usually the UserPrincipal)
 	 * @param processingTimeMillis the processing time of the request in milliseconds
 	 */
-	public RequestHandledEvent(Object source, @Nullable String sessionId, @Nullable String userName, long processingTimeMillis) {
+	public RequestHandledEvent(Object source, @Nullable String sessionId, @Nullable String userName,
+			long processingTimeMillis) {
+
 		super(source);
 		this.sessionId = sessionId;
 		this.userName = userName;
@@ -77,8 +78,8 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * @param processingTimeMillis the processing time of the request in milliseconds
 	 * @param failureCause the cause of failure, if any
 	 */
-	public RequestHandledEvent(
-			Object source, @Nullable String sessionId, @Nullable String userName, long processingTimeMillis, @Nullable Throwable failureCause) {
+	public RequestHandledEvent(Object source, @Nullable String sessionId, @Nullable String userName,
+			long processingTimeMillis, @Nullable Throwable failureCause) {
 
 		this(source, sessionId, userName, processingTimeMillis);
 		this.failureCause = failureCause;

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,24 +30,21 @@ import org.springframework.scheduling.config.TaskManagementConfigUtils;
  *
  * @author Chris Beams
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 3.1
  * @see EnableAsync
  * @see org.springframework.scheduling.annotation.AsyncConfigurationSelector
  * @see org.springframework.scheduling.annotation.ProxyAsyncConfiguration
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class AspectJAsyncConfiguration extends AbstractAsyncConfiguration {
 
 	@Bean(name = TaskManagementConfigUtils.ASYNC_EXECUTION_ASPECT_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public AnnotationAsyncExecutionAspect asyncAdvisor() {
 		AnnotationAsyncExecutionAspect asyncAspect = AnnotationAsyncExecutionAspect.aspectOf();
-		if (this.executor != null) {
-			asyncAspect.setExecutor(this.executor);
-		}
-		if (this.exceptionHandler != null) {
-			asyncAspect.setExceptionHandler(this.exceptionHandler);
-		}
+		asyncAspect.configure(this.executor, this.exceptionHandler);
 		return asyncAspect;
 	}
 

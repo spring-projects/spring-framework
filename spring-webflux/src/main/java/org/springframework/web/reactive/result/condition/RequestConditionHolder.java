@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,12 +38,13 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public final class RequestConditionHolder extends AbstractRequestCondition<RequestConditionHolder> {
 
+	@Nullable
 	private final RequestCondition<Object> condition;
 
 
 	/**
 	 * Create a new holder to wrap the given request condition.
-	 * @param requestCondition the condition to hold, may be {@code null}
+	 * @param requestCondition the condition to hold (may be {@code null})
 	 */
 	@SuppressWarnings("unchecked")
 	public RequestConditionHolder(@Nullable RequestCondition<?> requestCondition) {
@@ -86,20 +87,9 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 			return this;
 		}
 		else {
-			assertEqualConditionTypes(other);
+			assertEqualConditionTypes(this.condition, other.condition);
 			RequestCondition<?> combined = (RequestCondition<?>) this.condition.combine(other.condition);
 			return new RequestConditionHolder(combined);
-		}
-	}
-
-	/**
-	 * Ensure the held request conditions are of the same type.
-	 */
-	private void assertEqualConditionTypes(RequestConditionHolder other) {
-		Class<?> clazz = this.condition.getClass();
-		Class<?> otherClazz = other.condition.getClass();
-		if (!clazz.equals(otherClazz)) {
-			throw new ClassCastException("Incompatible request conditions: " + clazz + " and " + otherClazz);
 		}
 	}
 
@@ -134,8 +124,19 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 			return -1;
 		}
 		else {
-			assertEqualConditionTypes(other);
+			assertEqualConditionTypes(this.condition, other.condition);
 			return this.condition.compareTo(other.condition, exchange);
+		}
+	}
+
+	/**
+	 * Ensure the held request conditions are of the same type.
+	 */
+	private void assertEqualConditionTypes(RequestCondition<?> cond1, RequestCondition<?> cond2) {
+		Class<?> clazz = cond1.getClass();
+		Class<?> otherClazz = cond2.getClass();
+		if (!clazz.equals(otherClazz)) {
+			throw new ClassCastException("Incompatible request conditions: " + clazz + " vs " + otherClazz);
 		}
 	}
 

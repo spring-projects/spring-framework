@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,17 +47,17 @@ import org.springframework.util.ClassUtils;
  * which uses this class to call a static initialization method:
  *
  * <pre class="code">
- * &lt;bean id="myObject" class="org.springframework.beans.factory.config.MethodInvokingBean">
- *   &lt;property name="staticMethod" value="com.whatever.MyClass.init"/>
- * &lt;/bean></pre>
+ * &lt;bean id="myObject" class="org.springframework.beans.factory.config.MethodInvokingBean"&gt;
+ *   &lt;property name="staticMethod" value="com.whatever.MyClass.init"/&gt;
+ * &lt;/bean&gt;</pre>
  *
  * <p>An example of calling an instance method to start some server bean:
  *
  * <pre class="code">
- * &lt;bean id="myStarter" class="org.springframework.beans.factory.config.MethodInvokingBean">
- *   &lt;property name="targetObject" ref="myServer"/>
- *   &lt;property name="targetMethod" value="start"/>
- * &lt;/bean></pre>
+ * &lt;bean id="myStarter" class="org.springframework.beans.factory.config.MethodInvokingBean"&gt;
+ *   &lt;property name="targetObject" ref="myServer"/&gt;
+ *   &lt;property name="targetMethod" value="start"/&gt;
+ * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
  * @since 4.0.3

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,7 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -40,7 +41,11 @@ import org.springframework.util.ObjectUtils;
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 4.0
+ * @deprecated As of Spring Framework 5.2, this class and related classes in this
+ * package have been replaced by {@link SimpleAnnotationMetadataReadingVisitor}
+ * and related classes for internal use within the framework.
  */
+@Deprecated
 abstract class AnnotationReadingVisitorUtils {
 
 	public static AnnotationAttributes convertClassValues(Object annotatedElement,
@@ -124,7 +129,7 @@ abstract class AnnotationReadingVisitorUtils {
 
 		// Get the unmerged list of attributes for the target annotation.
 		List<AnnotationAttributes> attributesList = attributesMap.get(annotationName);
-		if (attributesList == null || attributesList.isEmpty()) {
+		if (CollectionUtils.isEmpty(attributesList)) {
 			return null;
 		}
 

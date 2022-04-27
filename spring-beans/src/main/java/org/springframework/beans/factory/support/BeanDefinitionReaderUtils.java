@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  * @see PropertiesBeanDefinitionReader
  * @see org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader
  */
-public class BeanDefinitionReaderUtils {
+public abstract class BeanDefinitionReaderUtils {
 
 	/**
 	 * Separator for generated bean names. If a class name or parent name is not
@@ -118,19 +118,33 @@ public class BeanDefinitionReaderUtils {
 					"'class' nor 'parent' nor 'factory-bean' - can't generate bean name");
 		}
 
-		String id = generatedBeanName;
 		if (isInnerBean) {
 			// Inner bean: generate identity hashcode suffix.
-			id = generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(definition);
+			return generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(definition);
 		}
-		else {
-			// Top-level bean: use plain class name.
-			// Increase counter until the id is unique.
-			int counter = -1;
-			while (counter == -1 || registry.containsBeanDefinition(id)) {
-				counter++;
-				id = generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + counter;
-			}
+
+		// Top-level bean: use plain class name with unique suffix if necessary.
+		return uniqueBeanName(generatedBeanName, registry);
+	}
+
+	/**
+	 * Turn the given bean name into a unique bean name for the given bean factory,
+	 * appending a unique counter as suffix if necessary.
+	 * @param beanName the original bean name
+	 * @param registry the bean factory that the definition is going to be
+	 * registered with (to check for existing bean names)
+	 * @return the unique bean name to use
+	 * @since 5.1
+	 */
+	public static String uniqueBeanName(String beanName, BeanDefinitionRegistry registry) {
+		String id = beanName;
+		int counter = -1;
+
+		// Increase counter until the id is unique.
+		String prefix = beanName + GENERATED_BEAN_NAME_SEPARATOR;
+		while (counter == -1 || registry.containsBeanDefinition(id)) {
+			counter++;
+			id = prefix + counter;
 		}
 		return id;
 	}

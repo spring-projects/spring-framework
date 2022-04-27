@@ -3,6 +3,8 @@
  * Contains generic DataAccessExceptions related to O/R Mapping.
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.orm;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.jca.cci.core;
 
 import java.sql.SQLException;
+
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -35,12 +36,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.jca.cci.CannotCreateRecordException;
-import org.springframework.jca.cci.CciOperationNotSupportedException;
-import org.springframework.jca.cci.InvalidResultSetAccessException;
-import org.springframework.jca.cci.RecordTypeNotSupportedException;
-import org.springframework.jca.cci.connection.ConnectionFactoryUtils;
-import org.springframework.jca.cci.connection.NotSupportedRecordFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -67,7 +62,10 @@ import org.springframework.util.Assert;
  * @since 1.2
  * @see RecordCreator
  * @see RecordExtractor
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 public class CciTemplate implements CciOperations {
 
 	private final Log logger = LogFactory.getLog(getClass());
@@ -93,7 +91,7 @@ public class CciTemplate implements CciOperations {
 	/**
 	 * Construct a new CciTemplate, given a ConnectionFactory to obtain Connections from.
 	 * Note: This will trigger eager initialization of the exception translator.
-	 * @param connectionFactory JCA ConnectionFactory to obtain Connections from
+	 * @param connectionFactory the JCA ConnectionFactory to obtain Connections from
 	 */
 	public CciTemplate(ConnectionFactory connectionFactory) {
 		setConnectionFactory(connectionFactory);
@@ -103,7 +101,7 @@ public class CciTemplate implements CciOperations {
 	/**
 	 * Construct a new CciTemplate, given a ConnectionFactory to obtain Connections from.
 	 * Note: This will trigger eager initialization of the exception translator.
-	 * @param connectionFactory JCA ConnectionFactory to obtain Connections from
+	 * @param connectionFactory the JCA ConnectionFactory to obtain Connections from
 	 * @param connectionSpec the CCI ConnectionSpec to obtain Connections for
 	 * (may be {@code null})
 	 */
@@ -204,28 +202,34 @@ public class CciTemplate implements CciOperations {
 
 
 	@Override
+	@Nullable
 	public <T> T execute(ConnectionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 		ConnectionFactory connectionFactory = obtainConnectionFactory();
-		Connection con = ConnectionFactoryUtils.getConnection(connectionFactory, getConnectionSpec());
+		Connection con = org.springframework.jca.cci.connection.ConnectionFactoryUtils.getConnection(
+				connectionFactory, getConnectionSpec());
 		try {
 			return action.doInConnection(con, connectionFactory);
 		}
 		catch (NotSupportedException ex) {
-			throw new CciOperationNotSupportedException("CCI operation not supported by connector", ex);
+			throw new org.springframework.jca.cci.CciOperationNotSupportedException(
+					"CCI operation not supported by connector", ex);
 		}
 		catch (ResourceException ex) {
 			throw new DataAccessResourceFailureException("CCI operation failed", ex);
 		}
 		catch (SQLException ex) {
-			throw new InvalidResultSetAccessException("Parsing of CCI ResultSet failed", ex);
+			throw new org.springframework.jca.cci.InvalidResultSetAccessException(
+					"Parsing of CCI ResultSet failed", ex);
 		}
 		finally {
-			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
+			org.springframework.jca.cci.connection.ConnectionFactoryUtils.releaseConnection(
+					con, getConnectionFactory());
 		}
 	}
 
 	@Override
+	@Nullable
 	public <T> T execute(final InteractionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 		return execute((ConnectionCallback<T>) (connection, connectionFactory) -> {
@@ -240,6 +244,7 @@ public class CciTemplate implements CciOperations {
 	}
 
 	@Override
+	@Nullable
 	public Record execute(InteractionSpec spec, Record inputRecord) throws DataAccessException {
 		return doExecute(spec, inputRecord, null, new SimpleRecordExtractor());
 	}
@@ -325,10 +330,12 @@ public class CciTemplate implements CciOperations {
 			return recordFactory.createIndexedRecord(name);
 		}
 		catch (NotSupportedException ex) {
-			throw new RecordTypeNotSupportedException("Creation of indexed Record not supported by connector", ex);
+			throw new org.springframework.jca.cci.RecordTypeNotSupportedException(
+					"Creation of indexed Record not supported by connector", ex);
 		}
 		catch (ResourceException ex) {
-			throw new CannotCreateRecordException("Creation of indexed Record failed", ex);
+			throw new org.springframework.jca.cci.CannotCreateRecordException(
+					"Creation of indexed Record failed", ex);
 		}
 	}
 
@@ -346,10 +353,12 @@ public class CciTemplate implements CciOperations {
 			return recordFactory.createMappedRecord(name);
 		}
 		catch (NotSupportedException ex) {
-			throw new RecordTypeNotSupportedException("Creation of mapped Record not supported by connector", ex);
+			throw new org.springframework.jca.cci.RecordTypeNotSupportedException(
+					"Creation of mapped Record not supported by connector", ex);
 		}
 		catch (ResourceException ex) {
-			throw new CannotCreateRecordException("Creation of mapped Record failed", ex);
+			throw new org.springframework.jca.cci.CannotCreateRecordException(
+					"Creation of mapped Record failed", ex);
 		}
 	}
 
@@ -368,11 +377,12 @@ public class CciTemplate implements CciOperations {
 			return recordCreator.createRecord(recordFactory);
 		}
 		catch (NotSupportedException ex) {
-			throw new RecordTypeNotSupportedException(
+			throw new org.springframework.jca.cci.RecordTypeNotSupportedException(
 					"Creation of the desired Record type not supported by connector", ex);
 		}
 		catch (ResourceException ex) {
-			throw new CannotCreateRecordException("Creation of the desired Record failed", ex);
+			throw new org.springframework.jca.cci.CannotCreateRecordException(
+					"Creation of the desired Record failed", ex);
 		}
 	}
 
@@ -392,7 +402,7 @@ public class CciTemplate implements CciOperations {
 			return connectionFactory.getRecordFactory();
 		}
 		catch (NotSupportedException ex) {
-			return new NotSupportedRecordFactory();
+			return new org.springframework.jca.cci.connection.NotSupportedRecordFactory();
 		}
 	}
 

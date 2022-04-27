@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,7 +31,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 /**
  * Enables Spring's scheduled task execution capability, similar to
  * functionality found in Spring's {@code <task:*>} XML namespace. To be used
- * on @{@link Configuration} classes as follows:
+ * on {@link Configuration @Configuration} classes as follows:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -41,8 +41,8 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *     // various &#064;Bean definitions
  * }</pre>
  *
- * This enables detection of @{@link Scheduled} annotations on any Spring-managed
- * bean in the container. For example, given a class {@code MyTask}
+ * <p>This enables detection of {@link Scheduled @Scheduled} annotations on any
+ * Spring-managed bean in the container. For example, given a class {@code MyTask}:
  *
  * <pre class="code">
  * package com.myco.tasks;
@@ -55,7 +55,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *     }
  * }</pre>
  *
- * the following configuration would ensure that {@code MyTask.work()} is called
+ * <p>the following configuration would ensure that {@code MyTask.work()} is called
  * once every 1000 ms:
  *
  * <pre class="code">
@@ -69,7 +69,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *     }
  * }</pre>
  *
- * Alternatively, if {@code MyTask} were annotated with {@code @Component}, the
+ * <p>Alternatively, if {@code MyTask} were annotated with {@code @Component}, the
  * following configuration would ensure that its {@code @Scheduled} method is
  * invoked at the desired interval:
  *
@@ -80,7 +80,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * public class AppConfig {
  * }</pre>
  *
- * Methods annotated with {@code @Scheduled} may even be declared directly within
+ * <p>Methods annotated with {@code @Scheduled} may even be declared directly within
  * {@code @Configuration} classes:
  *
  * <pre class="code">
@@ -94,7 +94,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *     }
  * }</pre>
  *
- * <p>By default, will be searching for an associated scheduler definition: either
+ * <p>By default, Spring will search for an associated scheduler definition: either
  * a unique {@link org.springframework.scheduling.TaskScheduler} bean in the context,
  * or a {@code TaskScheduler} bean named "taskScheduler" otherwise; the same lookup
  * will also be performed for a {@link java.util.concurrent.ScheduledExecutorService}
@@ -141,11 +141,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
  *         taskRegistrar.setScheduler(taskScheduler());
  *         taskRegistrar.addTriggerTask(
- *             new Runnable() {
- *                 public void run() {
- *                     myTask().work();
- *                 }
- *             },
+ *             () -&gt; myTask().work(),
  *             new CustomTrigger()
  *         );
  *     }
@@ -165,27 +161,32 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * configuration:
  *
  * <pre class="code">
- * {@code
- * <beans>
+ * &lt;beans&gt;
  *
- *     <task:annotation-driven scheduler="taskScheduler"/>
+ *     &lt;task:annotation-driven scheduler="taskScheduler"/&gt;
  *
- *     <task:scheduler id="taskScheduler" pool-size="42"/>
+ *     &lt;task:scheduler id="taskScheduler" pool-size="42"/&gt;
  *
- *     <task:scheduled-tasks scheduler="taskScheduler">
- *         <task:scheduled ref="myTask" method="work" fixed-rate="1000"/>
- *     </task:scheduled-tasks>
+ *     &lt;task:scheduled-tasks scheduler="taskScheduler"&gt;
+ *         &lt;task:scheduled ref="myTask" method="work" fixed-rate="1000"/&gt;
+ *     &lt;/task:scheduled-tasks&gt;
  *
- *     <bean id="myTask" class="com.foo.MyTask"/>
+ *     &lt;bean id="myTask" class="com.foo.MyTask"/&gt;
  *
- * </beans>
- * }</pre>
+ * &lt;/beans&gt;
+ * </pre>
  *
- * The examples are equivalent save that in XML a <em>fixed-rate</em> period is used
+ * <p>The examples are equivalent save that in XML a <em>fixed-rate</em> period is used
  * instead of a custom <em>{@code Trigger}</em> implementation; this is because the
  * {@code task:} namespace {@code scheduled} cannot easily expose such support. This is
  * but one demonstration how the code-based approach allows for maximum configurability
- * through direct access to actual componentry.<p>
+ * through direct access to actual componentry.
+ *
+ * <p><b>Note: {@code @EnableScheduling} applies to its local application context only,
+ * allowing for selective scheduling of beans at different levels.</b> Please redeclare
+ * {@code @EnableScheduling} in each individual context, e.g. the common root web
+ * application context and any separate {@code DispatcherServlet} application contexts,
+ * if you need to apply its behavior at multiple levels.
  *
  * @author Chris Beams
  * @author Juergen Hoeller

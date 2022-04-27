@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,6 @@ public class GenericGroovyXmlContextLoader extends GenericXmlContextLoader {
 	 * Load bean definitions into the supplied {@link GenericApplicationContext context}
 	 * from the locations in the supplied {@code MergedContextConfiguration} using a
 	 * {@link GroovyBeanDefinitionReader}.
-	 *
 	 * @param context the context into which the bean definitions should be loaded
 	 * @param mergedConfig the merged context configuration
 	 * @see org.springframework.test.context.support.AbstractGenericContextLoader#loadBeanDefinitions
@@ -50,7 +49,7 @@ public class GenericGroovyXmlContextLoader extends GenericXmlContextLoader {
 	}
 
 	/**
-	 * Returns {@code "-context.xml" and "Context.groovy"} in order to
+	 * Returns {@code "-context.xml"} and {@code "Context.groovy"} in order to
 	 * support detection of a default XML config file or Groovy script.
 	 */
 	@Override
@@ -62,13 +61,13 @@ public class GenericGroovyXmlContextLoader extends GenericXmlContextLoader {
 	 * {@code GenericGroovyXmlContextLoader} supports both Groovy and XML
 	 * resource types for detection of defaults. Consequently, this method
 	 * is not supported.
+	 * @throws UnsupportedOperationException in this implementation
 	 * @see #getResourceSuffixes()
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	protected String getResourceSuffix() {
 		throw new UnsupportedOperationException(
-			"GenericGroovyXmlContextLoader does not support the getResourceSuffix() method");
+				"GenericGroovyXmlContextLoader does not support the getResourceSuffix() method");
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,11 +26,15 @@ import org.springframework.util.Assert;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see BeanDefinition#getPropertyValues()
- * @see org.springframework.beans.factory.BeanFactory#getBean
+ * @see org.springframework.beans.factory.BeanFactory#getBean(String)
+ * @see org.springframework.beans.factory.BeanFactory#getBean(Class)
  */
 public class RuntimeBeanReference implements BeanReference {
 
 	private final String beanName;
+
+	@Nullable
+	private final Class<?> beanType;
 
 	private final boolean toParent;
 
@@ -39,9 +43,7 @@ public class RuntimeBeanReference implements BeanReference {
 
 
 	/**
-	 * Create a new RuntimeBeanReference to the given bean name,
-	 * without explicitly marking it as reference to a bean in
-	 * the parent factory.
+	 * Create a new RuntimeBeanReference to the given bean name.
 	 * @param beanName name of the target bean
 	 */
 	public RuntimeBeanReference(String beanName) {
@@ -50,27 +52,64 @@ public class RuntimeBeanReference implements BeanReference {
 
 	/**
 	 * Create a new RuntimeBeanReference to the given bean name,
-	 * with the option to mark it as reference to a bean in
-	 * the parent factory.
+	 * with the option to mark it as reference to a bean in the parent factory.
 	 * @param beanName name of the target bean
-	 * @param toParent whether this is an explicit reference to
-	 * a bean in the parent factory
+	 * @param toParent whether this is an explicit reference to a bean in the
+	 * parent factory
 	 */
 	public RuntimeBeanReference(String beanName, boolean toParent) {
 		Assert.hasText(beanName, "'beanName' must not be empty");
 		this.beanName = beanName;
+		this.beanType = null;
+		this.toParent = toParent;
+	}
+
+	/**
+	 * Create a new RuntimeBeanReference to a bean of the given type.
+	 * @param beanType type of the target bean
+	 * @since 5.2
+	 */
+	public RuntimeBeanReference(Class<?> beanType) {
+		this(beanType, false);
+	}
+
+	/**
+	 * Create a new RuntimeBeanReference to a bean of the given type,
+	 * with the option to mark it as reference to a bean in the parent factory.
+	 * @param beanType type of the target bean
+	 * @param toParent whether this is an explicit reference to a bean in the
+	 * parent factory
+	 * @since 5.2
+	 */
+	public RuntimeBeanReference(Class<?> beanType, boolean toParent) {
+		Assert.notNull(beanType, "'beanType' must not be empty");
+		this.beanName = beanType.getName();
+		this.beanType = beanType;
 		this.toParent = toParent;
 	}
 
 
+	/**
+	 * Return the requested bean name, or the fully-qualified type name
+	 * in case of by-type resolution.
+	 * @see #getBeanType()
+	 */
 	@Override
 	public String getBeanName() {
 		return this.beanName;
 	}
 
 	/**
-	 * Return whether this is an explicit reference to a bean
-	 * in the parent factory.
+	 * Return the requested bean type if resolution by type is demanded.
+	 * @since 5.2
+	 */
+	@Nullable
+	public Class<?> getBeanType() {
+		return this.beanType;
+	}
+
+	/**
+	 * Return whether this is an explicit reference to a bean in the parent factory.
 	 */
 	public boolean isToParent() {
 		return this.toParent;
@@ -92,7 +131,7 @@ public class RuntimeBeanReference implements BeanReference {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -100,7 +139,8 @@ public class RuntimeBeanReference implements BeanReference {
 			return false;
 		}
 		RuntimeBeanReference that = (RuntimeBeanReference) other;
-		return (this.beanName.equals(that.beanName) && this.toParent == that.toParent);
+		return (this.beanName.equals(that.beanName) && this.beanType == that.beanType &&
+				this.toParent == that.toParent);
 	}
 
 	@Override

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,38 +18,35 @@ package org.springframework.web.reactive.socket;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 
-import org.apache.tomcat.websocket.WsContainerProvider;
-import org.apache.tomcat.websocket.WsWebSocketContainer;
 import org.apache.tomcat.websocket.server.WsContextListener;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.xnio.OptionMap;
 import org.xnio.Xnio;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple3;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
-import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
-import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
-import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
-import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
-import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
+import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
-import org.springframework.web.reactive.socket.client.RxNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.TomcatWebSocketClient;
 import org.springframework.web.reactive.socket.client.UndertowWebSocketClient;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
@@ -59,11 +56,15 @@ import org.springframework.web.reactive.socket.server.support.HandshakeWebSocket
 import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.server.upgrade.JettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
-import org.springframework.web.reactive.socket.server.upgrade.RxNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
-
-import static org.junit.Assume.*;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 /**
  * Base class for WebSocket integration tests. Sub-classes must implement
@@ -71,69 +72,63 @@ import static org.junit.Assume.*;
  * handler mappings to {@code WebSocketHandler}'s.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-@RunWith(Parameterized.class)
 @SuppressWarnings({"unused", "WeakerAccess"})
-public abstract class AbstractWebSocketIntegrationTests {
+abstract class AbstractWebSocketIntegrationTests {
 
 	private static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@ParameterizedTest(name = "[{index}] client[{0}], server[{1}]")
+	@MethodSource("arguments")
+	@interface ParameterizedWebSocketTest {
+	}
 
-	protected int port;
+	static Stream<Object[]> arguments() throws IOException {
 
-	@Parameter(0)
-	public WebSocketClient client;
+		WebSocketClient[] clients = new WebSocketClient[] {
+				new TomcatWebSocketClient(),
+				new JettyWebSocketClient(),
+				new ReactorNettyWebSocketClient(),
+				new UndertowWebSocketClient(Xnio.getInstance().createWorker(OptionMap.EMPTY))
+		};
 
-	@Parameter(1)
-	public HttpServer server;
+		Map<HttpServer, Class<?>> servers = new LinkedHashMap<>();
+		servers.put(new TomcatHttpServer(TMP_DIR.getAbsolutePath(), WsContextListener.class), TomcatConfig.class);
+		servers.put(new JettyHttpServer(), JettyConfig.class);
+		servers.put(new ReactorHttpServer(), ReactorNettyConfig.class);
+		servers.put(new UndertowHttpServer(), UndertowConfig.class);
 
-	@Parameter(2)
-	public Class<?> serverConfigClass;
+		// Try each client once against each server..
 
+		Flux<WebSocketClient> f1 = Flux.fromArray(clients)
+				.concatMap(c -> Mono.just(c).repeat(servers.size() - 1));
 
-	@Parameters(name = "client[{0}] - server [{1}]")
-	public static Object[][] arguments() throws IOException {
+		Flux<Map.Entry<HttpServer, Class<?>>> f2 = Flux.fromIterable(servers.entrySet())
+				.repeat(clients.length - 1)
+				.share();
 
-		Flux<? extends WebSocketClient> clients = Flux.concat(
-				Flux.just(new TomcatWebSocketClient(new WsWebSocketContainer())).repeat(5),
-				Flux.just(new JettyWebSocketClient()).repeat(5),
-				Flux.just(new ReactorNettyWebSocketClient()).repeat(5),
-				Flux.just(new RxNettyWebSocketClient()).repeat(5),
-				Flux.just(new UndertowWebSocketClient(Xnio.getInstance().createWorker(OptionMap.EMPTY))).repeat(5));
-
-		Flux<? extends HttpServer> servers = Flux.just(
-				new TomcatHttpServer(TMP_DIR.getAbsolutePath(), WsContextListener.class),
-				new JettyHttpServer(),
-				new ReactorHttpServer(),
-				new RxNettyHttpServer(),
-				new UndertowHttpServer()).repeat(5);
-
-		Flux<? extends Class<?>> configs = Flux.just(
-				TomcatConfig.class,
-				JettyConfig.class,
-				ReactorNettyConfig.class,
-				RxNettyConfig.class,
-				UndertowConfig.class).repeat(5);
-
-		return Flux.zip(clients, servers, configs)
+		return Flux.zip(f1, f2.map(Map.Entry::getKey), f2.map(Map.Entry::getValue))
 				.map(Tuple3::toArray)
-				.collectList()
-				.block()
-				.toArray(new Object[25][2]);
+				.toStream();
 	}
 
 
-	@Before
-	public void setup() throws Exception {
-		// TODO
-		// Caused by: java.io.IOException: Upgrade responses cannot have a transfer coding
-		// at org.xnio.http.HttpUpgrade$HttpUpgradeState.handleUpgrade(HttpUpgrade.java:490)
-		// at org.xnio.http.HttpUpgrade$HttpUpgradeState.access$1200(HttpUpgrade.java:165)
-		// at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:461)
-		// at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:400)
-		// at org.xnio.ChannelListeners.invokeChannelListener(ChannelListeners.java:92)
+	protected WebSocketClient client;
 
-		assumeFalse(this.client instanceof UndertowWebSocketClient && this.server instanceof RxNettyHttpServer);
+	protected HttpServer server;
+
+	protected Class<?> serverConfigClass;
+
+	protected int port;
+
+
+	protected void startServer(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
+		this.client = client;
+		this.server = server;
+		this.serverConfigClass = serverConfigClass;
 
 		this.server.setHandler(createHttpHandler());
 		this.server.afterPropertiesSet();
@@ -147,8 +142,8 @@ public abstract class AbstractWebSocketIntegrationTests {
 		}
 	}
 
-	@After
-	public void stop() throws Exception {
+	@AfterEach
+	void stopServer() {
 		if (this.client instanceof Lifecycle) {
 			((Lifecycle) this.client).stop();
 		}
@@ -157,15 +152,13 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 
 	private HttpHandler createHttpHandler() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(DispatcherConfig.class, this.serverConfigClass);
-		context.register(getWebConfigClass());
-		context.refresh();
-		return DispatcherHandler.toHttpHandler(context);
+		ApplicationContext context = new AnnotationConfigApplicationContext(
+				DispatcherConfig.class, this.serverConfigClass, getWebConfigClass());
+		return WebHttpHandlerBuilder.applicationContext(context).build();
 	}
 
-	protected URI getUrl(String path) throws URISyntaxException {
-		return new URI("ws://localhost:" + this.port + path);
+	protected URI getUrl(String path) {
+		return URI.create("ws://localhost:" + this.port + path);
 	}
 
 	protected abstract Class<?> getWebConfigClass();
@@ -173,6 +166,11 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 	@Configuration
 	static class DispatcherConfig {
+
+		@Bean
+		public WebFilter contextFilter() {
+			return new ServerWebExchangeContextFilter();
+		}
 
 		@Bean
 		public DispatcherHandler webHandler() {
@@ -203,16 +201,6 @@ public abstract class AbstractWebSocketIntegrationTests {
 		@Override
 		protected RequestUpgradeStrategy getUpgradeStrategy() {
 			return new ReactorNettyRequestUpgradeStrategy();
-		}
-	}
-
-
-	@Configuration
-	static class RxNettyConfig extends AbstractHandlerAdapterConfig {
-
-		@Override
-		protected RequestUpgradeStrategy getUpgradeStrategy() {
-			return new RxNettyRequestUpgradeStrategy();
 		}
 	}
 
