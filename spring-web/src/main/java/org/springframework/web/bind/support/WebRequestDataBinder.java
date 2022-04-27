@@ -108,7 +108,8 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 * HTTP parameters: i.e. "uploadedFile" to an "uploadedFile" bean property,
 	 * invoking a "setUploadedFile" setter method.
 	 * <p>The type of the target property for a multipart file can be Part, MultipartFile,
-	 * byte[], or String. The latter two receive the contents of the uploaded file;
+	 * byte[], or String. The Part binding is only supported when the request
+	 * is not a MultipartRequest. The latter two receive the contents of the uploaded file;
 	 * all metadata like original file name, content type, etc are lost in those cases.
 	 * @param request the request with parameters to bind (can be multipart)
 	 * @see org.springframework.web.multipart.MultipartRequest

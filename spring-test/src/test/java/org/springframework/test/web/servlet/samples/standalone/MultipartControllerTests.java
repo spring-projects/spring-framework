@@ -39,6 +39,9 @@ import org.springframework.mock.web.MockPart;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.ui.Model;
+import org.springframework.util.StreamUtils;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -56,6 +59,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 /**
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Jaebin Joo
  */
 public class MultipartControllerTests {
 
@@ -225,7 +229,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithServletParts() throws Exception {
+	public void multipartRequestWithParts_resolvesMultipartFileArguments() throws Exception {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		MockPart filePart = new MockPart("file", "orig", fileContent);
 
@@ -238,6 +242,50 @@ public class MultipartControllerTests {
 				.andExpect(status().isFound())
 				.andExpect(model().attribute("fileContent", fileContent))
 				.andExpect(model().attribute("jsonContent", Collections.singletonMap("name", "yeeeah")));
+	}
+
+	@Test
+	public void multipartRequestWithParts_resolvesPartArguments() throws Exception {
+		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
+		MockPart filePart = new MockPart("file", "orig", fileContent);
+
+		byte[] json = "{\"name\":\"yeeeah\"}".getBytes(StandardCharsets.UTF_8);
+		MockPart jsonPart = new MockPart("json", json);
+		jsonPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+		standaloneSetup(new MultipartController()).build()
+				.perform(multipart("/part").part(filePart).part(jsonPart))
+				.andExpect(status().isFound())
+				.andExpect(model().attribute("fileContent", fileContent))
+				.andExpect(model().attribute("jsonContent", Collections.singletonMap("name", "yeeeah")));
+	}
+
+	@Test
+	public void multipartRequestWithParts_resolvesMultipartFileProperties() throws Exception {
+		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
+		MockPart filePart = new MockPart("file", "orig", fileContent);
+
+		standaloneSetup(new MultipartController()).build()
+				.perform(multipart("/multipartfileproperty").part(filePart))
+				.andExpect(status().isFound())
+				.andExpect(model().attribute("fileContent", fileContent));
+	}
+
+	@Test
+	public void multipartRequestWithParts_cannotResolvePartProperties() throws Exception {
+		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
+		MockPart filePart = new MockPart("file", "orig", fileContent);
+
+		Exception exception = standaloneSetup(new MultipartController()).build()
+				.perform(multipart("/partproperty").part(filePart))
+				.andExpect(status().is4xxClientError())
+				.andReturn()
+				.getResolvedException();
+
+		assertThat(exception).isNotNull();
+		assertThat(exception).isInstanceOf(BindException.class);
+		assertThat(((BindException) exception).getFieldError("file"))
+				.as("MultipartRequest would not bind Part properties.").isNotNull();
 	}
 
 	@Test  // SPR-13317
@@ -343,10 +391,13 @@ public class MultipartControllerTests {
 		}
 
 		@RequestMapping(value = "/part", method = RequestMethod.POST)
-		public String processPart(@RequestParam Part part,
+		public String processPart(@RequestPart Part file,
 				@RequestPart Map<String, String> json, Model model) throws IOException {
 
-			model.addAttribute("fileContent", part.getInputStream());
+			if (file != null) {
+				byte[] content = StreamUtils.copyToByteArray(file.getInputStream());
+				model.addAttribute("fileContent", content);
+			}
 			model.addAttribute("jsonContent", json);
 
 			return "redirect:/index";
@@ -357,8 +408,60 @@ public class MultipartControllerTests {
 			model.addAttribute("json", json);
 			return "redirect:/index";
 		}
+
+		@RequestMapping(value = "/multipartfileproperty", method = RequestMethod.POST)
+		public String processMultipartFileBean(MultipartFileBean multipartFileBean, Model model, BindingResult bindingResult)
+				throws IOException {
+
+			if (!bindingResult.hasErrors()) {
+				MultipartFile file = multipartFileBean.getFile();
+				if (file != null) {
+					model.addAttribute("fileContent", file.getBytes());
+				}
+			}
+			return "redirect:/index";
+		}
+
+		@RequestMapping(value = "/partproperty", method = RequestMethod.POST)
+		public String processPartBean(PartBean partBean, Model model, BindingResult bindingResult)
+				throws IOException {
+
+			if (!bindingResult.hasErrors()) {
+				Part file = partBean.getFile();
+				if (file != null) {
+					byte[] content = StreamUtils.copyToByteArray(file.getInputStream());
+					model.addAttribute("fileContent", content);
+				}
+			}
+			return "redirect:/index";
+		}
 	}
 
+	private static class MultipartFileBean {
+
+		private MultipartFile file;
+
+		public MultipartFile getFile() {
+			return file;
+		}
+
+		public void setFile(MultipartFile file) {
+			this.file = file;
+		}
+	}
+
+	private static class PartBean {
+
+		private Part file;
+
+		public Part getFile() {
+			return file;
+		}
+
+		public void setFile(Part file) {
+			this.file = file;
+		}
+	}
 
 	private static class RequestWrappingFilter extends OncePerRequestFilter {
 
