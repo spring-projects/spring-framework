@@ -66,7 +66,7 @@ public class PathVariableArgumentResolver implements HttpServiceArgumentResolver
 		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
 			if (argument != null) {
 				Assert.isInstanceOf(Map.class, argument);
-				((Map<String, ?>) argument).forEach((key, value) ->
+				((Map<Object, ?>) argument).forEach((key, value) ->
 						addUriParameter(key, value, annotation.required(), requestValues));
 			}
 		}
@@ -81,7 +81,10 @@ public class PathVariableArgumentResolver implements HttpServiceArgumentResolver
 	}
 
 	private void addUriParameter(
-			String name, @Nullable Object value, boolean required, HttpRequestValues.Builder requestValues) {
+			Object name, @Nullable Object value, boolean required, HttpRequestValues.Builder requestValues) {
+
+		String stringName = this.conversionService.convert(name, String.class);
+		Assert.notNull(stringName, "Missing path variable name");
 
 		if (value instanceof Optional) {
 			value = ((Optional<?>) value).orElse(null);
@@ -92,15 +95,15 @@ public class PathVariableArgumentResolver implements HttpServiceArgumentResolver
 		}
 
 		if (value == null) {
-			Assert.isTrue(!required, "Missing required path variable '" + name + "'");
+			Assert.isTrue(!required, "Missing required path variable '" + stringName + "'");
 			return;
 		}
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Resolved path variable '" + name + "' to " + value);
+			logger.trace("Resolved path variable '" + stringName + "' to " + value);
 		}
 
-		requestValues.setUriVariable(name, (String) value);
+		requestValues.setUriVariable(stringName, (String) value);
 	}
 
 }
