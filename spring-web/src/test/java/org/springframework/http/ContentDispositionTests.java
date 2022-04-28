@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,6 +89,18 @@ class ContentDispositionTests {
 	@Test // gh-26463
 	void parseBase64EncodedShiftJISFilename() {
 		String input = "attachment; filename=\"=?SHIFT_JIS?B?k/qWe4zqLmNzdg==?=\"";
+		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
+	}
+
+	@Test
+	void parseQuotedPrintableFilename() {
+		String input = "attachment; filename=\"=?UTF-8?Q?=E6=97=A5=E6=9C=AC=E8=AA=9E.csv?=\"";
+		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
+	}
+
+	@Test
+	void parseQuotedPrintableShiftJISFilename() {
+		String input = "attachment; filename=\"=?SHIFT_JIS?Q?=93=FA=96{=8C=EA.csv?=\"";
 		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
 	}
 
