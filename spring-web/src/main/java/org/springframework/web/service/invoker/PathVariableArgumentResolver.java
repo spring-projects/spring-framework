@@ -63,28 +63,28 @@ public class PathVariableArgumentResolver implements HttpServiceArgumentResolver
 			return false;
 		}
 
-		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
+		Class<?> parameterType = parameter.getParameterType();
+		boolean required = (annotation.required() && !Optional.class.isAssignableFrom(parameterType));
+
+		if (Map.class.isAssignableFrom(parameterType)) {
 			if (argument != null) {
 				Assert.isInstanceOf(Map.class, argument);
-				((Map<Object, ?>) argument).forEach((key, value) ->
-						addUriParameter(key, value, annotation.required(), requestValues));
+				((Map<String, ?>) argument).forEach((key, value) ->
+						addUriParameter(key, value, required, requestValues));
 			}
 		}
 		else {
 			String name = StringUtils.hasText(annotation.value()) ? annotation.value() : annotation.name();
 			name = StringUtils.hasText(name) ? name : parameter.getParameterName();
 			Assert.notNull(name, "Failed to determine path variable name for parameter: " + parameter);
-			addUriParameter(name, argument, annotation.required(), requestValues);
+			addUriParameter(name, argument, required, requestValues);
 		}
 
 		return true;
 	}
 
 	private void addUriParameter(
-			Object name, @Nullable Object value, boolean required, HttpRequestValues.Builder requestValues) {
-
-		String stringName = this.conversionService.convert(name, String.class);
-		Assert.notNull(stringName, "Missing path variable name");
+			String name, @Nullable Object value, boolean required, HttpRequestValues.Builder requestValues) {
 
 		if (value instanceof Optional) {
 			value = ((Optional<?>) value).orElse(null);
@@ -95,15 +95,15 @@ public class PathVariableArgumentResolver implements HttpServiceArgumentResolver
 		}
 
 		if (value == null) {
-			Assert.isTrue(!required, "Missing required path variable '" + stringName + "'");
+			Assert.isTrue(!required, "Missing required path variable '" + name + "'");
 			return;
 		}
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Resolved path variable '" + stringName + "' to " + value);
+			logger.trace("Resolved path variable '" + name + "' to " + value);
 		}
 
-		requestValues.setUriVariable(stringName, (String) value);
+		requestValues.setUriVariable(name, (String) value);
 	}
 
 }

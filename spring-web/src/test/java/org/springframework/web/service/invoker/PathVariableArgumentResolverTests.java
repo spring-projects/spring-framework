@@ -135,12 +135,6 @@ class PathVariableArgumentResolverTests {
 				.isThrownBy(() -> this.service.executeOptionalValueMap(Map.of("id", Optional.empty())));
 	}
 
-	@Test
-	void shouldResolvePathVariableNameFromObjectMapKey() {
-		this.service.executeValueMapWithObjectKey(Map.of(Boolean.TRUE, "true"));
-		assertPathVariable("true", "true");
-	}
-
 	@SuppressWarnings("SameParameterValue")
 	private void assertPathVariable(String name, @Nullable String expectedValue) {
 		assertThat(getActualUriVariables().get(name)).isEqualTo(expectedValue);
@@ -183,9 +177,6 @@ class PathVariableArgumentResolverTests {
 
 		@GetExchange
 		void executeValueMap(@Nullable @PathVariable Map<String, String> map);
-
-		@GetExchange
-		void executeValueMapWithObjectKey(@Nullable @PathVariable Map<Object, String> map);
 
 		@GetExchange
 		void executeOptionalValueMap(@PathVariable Map<String, Optional<String>> map);

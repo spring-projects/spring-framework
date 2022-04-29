@@ -187,9 +187,9 @@ public final class HttpServiceProxyFactory {
 
 		private List<HttpServiceArgumentResolver> initArgumentResolvers(ConversionService conversionService) {
 			List<HttpServiceArgumentResolver> resolvers = new ArrayList<>(this.customResolvers);
-			resolvers.add(new HttpMethodArgumentResolver());
-			resolvers.add(new PathVariableArgumentResolver(conversionService));
 			resolvers.add(new RequestHeaderArgumentResolver(conversionService));
+			resolvers.add(new PathVariableArgumentResolver(conversionService));
+			resolvers.add(new HttpMethodArgumentResolver());
 			return resolvers;
 		}
 
