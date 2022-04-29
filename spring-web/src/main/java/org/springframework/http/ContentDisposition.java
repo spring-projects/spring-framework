@@ -53,7 +53,7 @@ public final class ContentDisposition {
 			Pattern.compile("=\\?([0-9a-zA-Z-_]+)\\?B\\?([+/0-9a-zA-Z]+=*)\\?=");
 
 	private final static Pattern QUOTED_PRINTABLE_ENCODED_PATTERN =
-			Pattern.compile("=\\?([0-9a-zA-Z-_]+)\\?Q\\?(\\p{Print}+)\\?=");
+			Pattern.compile("=\\?([0-9a-zA-Z-_]+)\\?Q\\?([!->@-~]+)\\?="); // Printable ASCII other than "?" or SPACE
 
 	private static final String INVALID_HEADER_FIELD_PARAMETER_FORMAT =
 			"Invalid header field parameter format (as defined in RFC 5987)";
@@ -375,16 +375,29 @@ public final class ContentDisposition {
 					if (value.startsWith("=?") ) {
 						Matcher matcher = BASE64_ENCODED_PATTERN.matcher(value);
 						if (matcher.find()) {
-							charset = Charset.forName(matcher.group(1));
-							String encodedValue = matcher.group(2);
-							filename = new String(Base64.getDecoder().decode(encodedValue), charset);
+							Base64.Decoder decoder = Base64.getDecoder();
+							StringBuilder builder = new StringBuilder();
+							do {
+								charset = Charset.forName(matcher.group(1));
+								byte[] decoded = decoder.decode(matcher.group(2));
+								builder.append(new String(decoded, charset));
+							}
+							while (matcher.find());
+
+							filename = builder.toString();
 						}
 						else {
 							matcher = QUOTED_PRINTABLE_ENCODED_PATTERN.matcher(value);
 							if (matcher.find()) {
-								charset = Charset.forName(matcher.group(1));
-								String encodedValue = matcher.group(2);
-								filename = decodeQuotedPrintableFilename(encodedValue, charset);
+								StringBuilder builder = new StringBuilder();
+								do {
+									charset = Charset.forName(matcher.group(1));
+									String decoded = decodeQuotedPrintableFilename(matcher.group(2), charset);
+									builder.append(decoded);
+								}
+								while (matcher.find());
+
+								filename = builder.toString();
 							}
 							else {
 								filename = value;
