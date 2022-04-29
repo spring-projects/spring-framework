@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -221,6 +221,30 @@ class StompBrokerRelayMessageHandlerTests {
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 		verify(handler).handleMessage(captor.capture());
 		assertThat(captor.getValue()).isSameAs(message);
+	}
+
+	@Test
+	void alreadyConnected() {
+
+		this.brokerRelay.start();
+
+		Message<byte[]> connect = connectMessage("sess1", "joe");
+		this.brokerRelay.handleMessage(connect);
+
+		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+
+		StompHeaderAccessor headers1 = this.tcpClient.getSentHeaders(0);
+		assertThat(headers1.getCommand()).isEqualTo(StompCommand.CONNECT);
+		assertThat(headers1.getSessionId()).isEqualTo(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID);
+
+		StompHeaderAccessor headers2 = this.tcpClient.getSentHeaders(1);
+		assertThat(headers2.getCommand()).isEqualTo(StompCommand.CONNECT);
+		assertThat(headers2.getSessionId()).isEqualTo("sess1");
+
+		this.brokerRelay.handleMessage(connect);
+
+		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+		assertThat(this.outboundChannel.getMessages()).isEmpty();
 	}
 
 	private Message<byte[]> connectMessage(String sessionId, String user) {
