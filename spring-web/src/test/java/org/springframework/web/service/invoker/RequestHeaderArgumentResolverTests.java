@@ -23,8 +23,8 @@ import java.util.Optional;
 import org.apache.groovy.util.Maps;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.service.annotation.GetExchange;
 
@@ -57,42 +57,24 @@ class RequestHeaderArgumentResolverTests {
 	}
 
 	@Test
-	void namedHeader() {
-		this.service.executeNamed("test");
-		assertRequestHeaders("id", "test");
-	}
-
-	@Test
 	void listHeader() {
-		this.service.execute(List.of("test1", Boolean.TRUE, "test3"));
+		this.service.executeList(List.of("test1", Boolean.TRUE, "test3"));
 		assertRequestHeaders("multiValueHeader", "test1", "true", "test3");
 	}
 
 	@Test
 	void arrayHeader() {
-		this.service.execute("test1", Boolean.FALSE, "test3");
+		this.service.executeArray("test1", Boolean.FALSE, "test3");
 		assertRequestHeaders("multiValueHeader", "test1", "false", "test3");
 	}
 
 	@Test
-	void mapHeader() {
-		this.service.executeMap(Maps.of("header1", "true", "header2", "false"));
-		assertRequestHeaders("header1", "true");
-		assertRequestHeaders("header2", "false");
-	}
-
-	@Test
-	void mapHeaderNull() {
-		this.service.executeMap(null);
-		assertThat(getActualHeaders()).isEmpty();
-	}
-
-	@Test
-	void mapWithOptional() {
-		this.service.executeOptionalMapValue(Map.of("id", Optional.of("test")));
+	void namedHeader() {
+		this.service.executeNamed("test");
 		assertRequestHeaders("id", "test");
 	}
 
+	@SuppressWarnings("ConstantConditions")
 	@Test
 	void nullHeaderRequired() {
 		assertThatIllegalArgumentException().isThrownBy(() -> this.service.executeString(null));
@@ -101,18 +83,23 @@ class RequestHeaderArgumentResolverTests {
 	@Test
 	void nullHeaderNotRequired() {
 		this.service.executeNotRequired(null);
-		assertThat(getActualHeaders().get("id")).isNull();
+		assertRequestHeaders("id");
 	}
 
+	@Test
+	void nullHeaderWithDefaultValue() {
+		this.service.executeWithDefaultValue(null);
+		assertRequestHeaders("id", "default");
+	}
 
 	@Test
-	void optional() {
+	void optionalStringHeader() {
 		this.service.executeOptional(Optional.of("test"));
 		assertRequestHeaders("id", "test");
 	}
 
 	@Test
-	void optionalWithConversion() {
+	void optionalObjectHeader() {
 		this.service.executeOptional(Optional.of(Boolean.TRUE));
 		assertRequestHeaders("id", "true");
 	}
@@ -120,27 +107,41 @@ class RequestHeaderArgumentResolverTests {
 	@Test
 	void optionalEmpty() {
 		this.service.executeOptional(Optional.empty());
-		assertThat(getActualHeaders().get("id")).isNull();
+		assertRequestHeaders("id");
 	}
 
 	@Test
-	void defaultValueWithNull() {
-		this.service.executeWithDefaultValue(null);
-		assertRequestHeaders("id", "default");
-	}
-
-	@Test
-	void defaultValueWithOptional() {
+	void optionalEmpthyWithDefaultValue() {
 		this.service.executeOptionalWithDefaultValue(Optional.empty());
 		assertRequestHeaders("id", "default");
 	}
 
-	private void assertRequestHeaders(String key, String... values) {
-		assertThat(getActualHeaders().get(key)).containsOnly(values);
+	@Test
+	void mapOfHeaders() {
+		this.service.executeMap(Maps.of("header1", "true", "header2", "false"));
+		assertRequestHeaders("header1", "true");
+		assertRequestHeaders("header2", "false");
 	}
 
-	private HttpHeaders getActualHeaders() {
-		return this.clientAdapter.getRequestValues().getHeaders();
+	@Test
+	void mapOfHeadersIsNull() {
+		assertThatIllegalArgumentException().isThrownBy(() -> this.service.executeMap(null));
+	}
+
+	@Test
+	void mapOfHeadersHasOptionalValue() {
+		this.service.executeMapWithOptionalValue(Map.of("id", Optional.of("test")));
+		assertRequestHeaders("id", "test");
+	}
+
+	private void assertRequestHeaders(String key, String... values) {
+		List<String> actualValues = this.clientAdapter.getRequestValues().getHeaders().get(key);
+		if (ObjectUtils.isEmpty(values)) {
+			assertThat(actualValues).isNull();
+		}
+		else {
+			assertThat(actualValues).containsOnly(values);
+		}
 	}
 
 
@@ -148,37 +149,37 @@ class RequestHeaderArgumentResolverTests {
 	private interface Service {
 
 		@GetExchange
-		void executeString(@Nullable @RequestHeader String id);
+		void executeString(@RequestHeader String id);
 
 		@GetExchange
 		void execute(@RequestHeader Object id);
 
 		@GetExchange
+		void executeList(@RequestHeader List<Object> multiValueHeader);
+
+		@GetExchange
+		void executeArray(@RequestHeader Object... multiValueHeader);
+
+		@GetExchange
 		void executeNamed(@RequestHeader(name = "id") String employeeId);
-
-		@GetExchange
-		void execute(@RequestHeader List<Object> multiValueHeader);
-
-		@GetExchange
-		void execute(@RequestHeader Object... multiValueHeader);
-
-		@GetExchange
-		void executeMap(@Nullable @RequestHeader Map<String, String> id);
-
-		@GetExchange
-		void executeOptionalMapValue(@RequestHeader Map<String, Optional<String>> headers);
 
 		@GetExchange
 		void executeNotRequired(@Nullable @RequestHeader(required = false) String id);
 
 		@GetExchange
-		void executeOptional(@RequestHeader Optional<Object> id);
-
-		@GetExchange
 		void executeWithDefaultValue(@Nullable @RequestHeader(defaultValue = "default") String id);
 
 		@GetExchange
+		void executeOptional(@RequestHeader Optional<Object> id);
+
+		@GetExchange
 		void executeOptionalWithDefaultValue(@RequestHeader(defaultValue = "default") Optional<Object> id);
+
+		@GetExchange
+		void executeMap(@Nullable @RequestHeader Map<String, String> id);
+
+		@GetExchange
+		void executeMapWithOptionalValue(@RequestHeader Map<String, Optional<String>> headers);
 
 	}
 

@@ -42,106 +42,86 @@ class PathVariableArgumentResolverTests {
 
 
 	@Test
-	void shouldResolvePathVariableWithNameFromParameter() {
+	void stringVariable() {
 		this.service.execute("test");
 		assertPathVariable("id", "test");
 	}
 
 	@Test
-	void shouldResolvePathVariableWithNameFromAnnotationName() {
-		this.service.executeNamed("test");
-		assertPathVariable("id", "test");
-	}
-
-	@Test
-	void shouldResolvePathVariableNameFromValue() {
-		this.service.executeNamedWithValue("test");
-		assertPathVariable("id", "test");
-	}
-
-	@Test
-	void shouldOverrideNameIfValuePresentInAnnotation() {
-		this.service.executeValueNamed("test");
-		assertPathVariable("id", "test");
-	}
-
-	@Test
-	void shouldResolvePathVariableWithConversion() {
+	void objectVariable() {
 		this.service.execute(Boolean.TRUE);
 		assertPathVariable("id", "true");
 	}
 
 	@Test
-	void shouldResolvePathVariableFromOptionalArgumentWithConversion() {
-		this.service.executeOptional(Optional.of(Boolean.TRUE));
-		assertPathVariable("id", "true");
+	void namedVariable() {
+		this.service.executeNamed("test");
+		assertPathVariable("id", "test");
+	}
+
+	@SuppressWarnings("ConstantConditions")
+	@Test
+	void nullVariableRequired() {
+		assertThatIllegalArgumentException().isThrownBy(() -> this.service.execute(null));
 	}
 
 	@Test
-	void shouldResolvePathVariableFromOptionalArgument() {
+	void nullVariableNotRequired() {
+		this.service.executeNotRequired(null);
+		assertPathVariable("id", null);
+	}
+
+	@Test
+	void optionalStringVariable() {
 		this.service.execute(Optional.of("test"));
 		assertPathVariable("id", "test");
 	}
 
 	@Test
-	void shouldThrowExceptionForNull() {
-		assertThatIllegalArgumentException().isThrownBy(() -> this.service.executeNamedWithValue(null));
+	void optionalObjectVariable() {
+		this.service.executeOptional(Optional.of(Boolean.TRUE));
+		assertPathVariable("id", "true");
 	}
 
 	@Test
-	void shouldThrowExceptionForEmptyOptional() {
+	void optionalEmpty() {
+		this.service.executeOptional(Optional.empty());
+		assertPathVariable("id", null);
+	}
+
+	@Test
+	void optionalEmptyOnObjectArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() -> this.service.execute(Optional.empty()));
 	}
 
 	@Test
-	void shouldIgnoreNullWithConversionServiceWhenNotRequired() {
-		this.service.executeNotRequired(null);
-		assertThat(getActualUriVariables().get("id")).isNull();
-	}
-
-	@Test
-	void shouldIgnoreNullWhenNotRequired() {
-		this.service.executeNotRequired(null);
-		assertPathVariable("id", null);
-	}
-
-	@Test
-	void shouldIgnoreEmptyOptionalWhenNotRequired() {
-		this.service.executeOptionalNotRequired(Optional.empty());
-		assertPathVariable("id", null);
-	}
-
-	@Test
-	void shouldResolvePathVariablesFromMap() {
-		this.service.executeValueMap(Map.of("id", "test"));
+	void mapOfVariables() {
+		this.service.executeMap(Map.of("id", "test"));
 		assertPathVariable("id", "test");
 	}
 
 	@Test
-	void shouldResolvePathVariableFromOptionalMapValue() {
-		this.service.executeOptionalValueMap(Map.of("id", Optional.of("test")));
+	void mapOfVariablesIsNull() {
+		assertThatIllegalArgumentException().isThrownBy(() -> this.service.executeMap(null));
+	}
+
+	@Test
+	void mapOfVariablesHasOptionalValue() {
+		this.service.executeMapWithOptionalValue(Map.of("id", Optional.of("test")));
 		assertPathVariable("id", "test");
 	}
 
-	@Test
-	void shouldIgnoreNullMapValue() {
-		this.service.executeValueMap(null);
-		assertThat(getActualUriVariables()).isEmpty();
-	}
 
 	@Test
-	void shouldThrowExceptionForEmptyOptionalMapValue() {
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.service.executeOptionalValueMap(Map.of("id", Optional.empty())));
+	void mapOfVariablesHasOptionalEmpty() {
+		this.service.executeMapWithOptionalValue(Map.of("id", Optional.empty()));
+		assertPathVariable("id", null);
 	}
 
 	@SuppressWarnings("SameParameterValue")
 	private void assertPathVariable(String name, @Nullable String expectedValue) {
-		assertThat(getActualUriVariables().get(name)).isEqualTo(expectedValue);
-	}
-
-	private Map<String, String> getActualUriVariables() {
-		return this.clientAdapter.getRequestValues().getUriVariables();
+		assertThat(this.clientAdapter.getRequestValues().getUriVariables().get(name))
+				.isEqualTo(expectedValue);
 	}
 
 
@@ -152,34 +132,22 @@ class PathVariableArgumentResolverTests {
 		void execute(@PathVariable String id);
 
 		@GetExchange
+		void execute(@PathVariable Object id);
+
+		@GetExchange
+		void executeNamed(@PathVariable(name = "id") String employeeId);
+
+		@GetExchange
 		void executeNotRequired(@Nullable @PathVariable(required = false) String id);
 
 		@GetExchange
 		void executeOptional(@PathVariable Optional<Boolean> id);
 
 		@GetExchange
-		void executeOptionalNotRequired(@PathVariable(required = false) Optional<String> id);
+		void executeMap(@Nullable @PathVariable Map<String, String> map);
 
 		@GetExchange
-		void executeNamedWithValue(@Nullable @PathVariable(name = "test", value = "id") String employeeId);
-
-		@GetExchange
-		void executeNamed(@PathVariable(name = "id") String employeeId);
-
-		@GetExchange
-		void executeValueNamed(@PathVariable("id") String employeeId);
-
-		@GetExchange
-		void execute(@PathVariable Object id);
-
-		@GetExchange
-		void execute(@PathVariable Boolean id);
-
-		@GetExchange
-		void executeValueMap(@Nullable @PathVariable Map<String, String> map);
-
-		@GetExchange
-		void executeOptionalValueMap(@PathVariable Map<String, Optional<String>> map);
+		void executeMapWithOptionalValue(@PathVariable Map<String, Optional<String>> map);
 	}
 
 }

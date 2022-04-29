@@ -16,22 +16,9 @@
 
 package org.springframework.web.service.invoker;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.ValueConstants;
 
 
 /**
@@ -49,100 +36,36 @@ import org.springframework.web.bind.annotation.ValueConstants;
  * <p>Individual header values may be Strings or Objects to be converted to
  * String values through the configured {@link ConversionService}.
  *
+ * <p>If the value is required but {@code null}, {@link IllegalArgumentException}
+ * is raised. The value is not required if:
+ * <ul>
+ * <li>{@link RequestHeader#required()} is set to {@code false}
+ * <li>{@link RequestHeader#defaultValue()} provides a fallback value
+ * <li>The argument is declared as {@link java.util.Optional}
+ * </ul>
+ *
  * @author Olga Maciaszek-Sharma
+ * @author Rossen Stoyanchev
  * @since 6.0
  */
-public class RequestHeaderArgumentResolver implements HttpServiceArgumentResolver {
-
-	private static final Log logger = LogFactory.getLog(RequestHeaderArgumentResolver.class);
-
-	private final ConversionService conversionService;
+public class RequestHeaderArgumentResolver extends AbstractNamedValueArgumentResolver {
 
 
 	public RequestHeaderArgumentResolver(ConversionService conversionService) {
-		Assert.notNull(conversionService, "ConversionService is required");
-		this.conversionService = conversionService;
+		super(conversionService);
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public boolean resolve(
-			@Nullable Object argument, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
-
+	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		RequestHeader annot = parameter.getParameterAnnotation(RequestHeader.class);
-		if (annot == null) {
-			return false;
-		}
-
-		Class<?> parameterType = parameter.getParameterType();
-		boolean required = (annot.required() && !Optional.class.isAssignableFrom(parameterType));
-		Object defaultValue = (ValueConstants.DEFAULT_NONE.equals(annot.defaultValue()) ? null : annot.defaultValue());
-
-		if (Map.class.isAssignableFrom(parameterType)) {
-			if (argument != null) {
-				Assert.isInstanceOf(Map.class, argument);
-				((Map<String, ?>) argument).forEach((key, value) ->
-						addHeader(key, value, false, defaultValue, requestValues));
-			}
-		}
-		else {
-			String name = StringUtils.hasText(annot.value()) ? annot.value() : annot.name();
-			name = StringUtils.hasText(name) ? name : parameter.getParameterName();
-			Assert.notNull(name, "Failed to determine request header name for parameter: " + parameter);
-			addHeader(name, argument, required, defaultValue, requestValues);
-		}
-
-		return true;
+		return (annot == null ? null :
+				new NamedValueInfo(annot.name(), annot.required(), annot.defaultValue(), "request header", true));
 	}
 
-	private void addHeader(
-			String name, @Nullable Object value, boolean required, @Nullable Object defaultValue,
-			HttpRequestValues.Builder requestValues) {
-
-		value = (ObjectUtils.isArray(value) ? Arrays.asList((Object[]) value) : value);
-		if (value instanceof Collection<?> elements) {
-			boolean hasValue = false;
-			for (Object element : elements) {
-				if (element != null) {
-					hasValue = true;
-					addHeaderValue(name, element, false, requestValues);
-				}
-			}
-			if (hasValue) {
-				return;
-			}
-			value = null;
-		}
-
-		if (value instanceof Optional<?> optionalValue) {
-			value = optionalValue.orElse(null);
-		}
-
-		if (value == null && defaultValue != null) {
-			value = defaultValue;
-		}
-
-		addHeaderValue(name, value, required, requestValues);
-	}
-
-	private void addHeaderValue(
-			String name, @Nullable Object value, boolean required, HttpRequestValues.Builder requestValues) {
-
-		if (!(value instanceof String)) {
-			value = this.conversionService.convert(value, String.class);
-		}
-
-		if (value == null) {
-			Assert.isTrue(!required, "Missing required header '" + name + "'");
-			return;
-		}
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Resolved header '" + name + ":" + value + "'");
-			}
-
-		requestValues.addHeader(name, (String) value);
+	@Override
+	protected void addRequestValue(String name, String value, HttpRequestValues.Builder requestValues) {
+		requestValues.addHeader(name, value);
 	}
 
 }

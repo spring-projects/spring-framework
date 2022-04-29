@@ -34,6 +34,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -86,7 +87,7 @@ final class HttpServiceMethod {
 		DefaultParameterNameDiscoverer nameDiscoverer = new DefaultParameterNameDiscoverer();
 		MethodParameter[] parameters = new MethodParameter[count];
 		for (int i = 0; i < count; i++) {
-			parameters[i] = new MethodParameter(method, i);
+			parameters[i] = new SynthesizingMethodParameter(method, i);
 			parameters[i].initParameterNameDiscovery(nameDiscoverer);
 		}
 		return parameters;
