@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -306,6 +306,12 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		else if (SimpMessageType.CONNECT.equals(messageType)) {
 			logMessage(message);
 			if (sessionId != null) {
+				if (this.sessions.get(sessionId) != null) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Ignoring CONNECT in session " + sessionId + ". Already connected.");
+					}
+					return;
+				}
 				long[] heartbeatIn = SimpMessageHeaderAccessor.getHeartbeat(headers);
 				long[] heartbeatOut = getHeartbeatValue();
 				Principal user = SimpMessageHeaderAccessor.getUser(headers);
