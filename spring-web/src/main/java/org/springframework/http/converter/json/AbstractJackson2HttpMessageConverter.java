@@ -59,6 +59,7 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -380,6 +381,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				Class<?> deserializationView = mappingJacksonInputMessage.getDeserializationView();
 				if (deserializationView != null) {
 					ObjectReader objectReader = objectMapper.readerWithView(deserializationView).forType(javaType);
+					objectReader = customizeReader(objectReader, javaType);
 					if (isUnicode) {
 						return objectReader.readValue(inputStream);
 					}
@@ -389,12 +391,15 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 					}
 				}
 			}
+
+			ObjectReader objectReader = objectMapper.reader().forType(javaType);
+			objectReader = customizeReader(objectReader, javaType);
 			if (isUnicode) {
-				return objectMapper.readValue(inputStream, javaType);
+				return objectReader.readValue(inputStream);
 			}
 			else {
 				Reader reader = new InputStreamReader(inputStream, charset);
-				return objectMapper.readValue(reader, javaType);
+				return objectReader.readValue(reader);
 			}
 		}
 		catch (InvalidDefinitionException ex) {
@@ -403,6 +408,16 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex, inputMessage);
 		}
+	}
+
+	/**
+	 * Provides the ability for subclasses to customize the {@link ObjectReader} for deserialization.
+	 * @param reader the {@link ObjectReader} available for customization
+	 * @param javaType the specified type to deserialize to
+	 * @return the customized {@link ObjectReader}
+	 */
+	protected ObjectReader customizeReader(@NonNull ObjectReader reader, JavaType javaType) {
+		return reader;
 	}
 
 	/**
@@ -465,6 +480,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 					config.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
 				objectWriter = objectWriter.with(this.ssePrettyPrinter);
 			}
+			objectWriter = customizeWriter(objectWriter, javaType, contentType);
 			objectWriter.writeValue(generator, value);
 
 			writeSuffix(generator, object);
@@ -476,6 +492,18 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getOriginalMessage(), ex);
 		}
+	}
+
+	/**
+	 * Provides the ability for subclasses to customize the {@link ObjectWriter} for serialization.
+	 * @param writer the {@link ObjectWriter} available for customization
+	 * @param javaType the specified type to serialize from
+	 * @param contentType the output content type
+	 * @return the customized {@link ObjectWriter}
+	 */
+	protected ObjectWriter customizeWriter(@NonNull ObjectWriter writer, @Nullable JavaType javaType,
+			@Nullable MediaType contentType) {
+		return writer;
 	}
 
 	/**
