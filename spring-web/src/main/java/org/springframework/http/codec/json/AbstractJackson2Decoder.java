@@ -46,6 +46,7 @@ import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.codec.HttpMessageDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -126,7 +127,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 		ObjectMapper mapper = selectObjectMapper(elementType, mimeType);
 		if (mapper == null) {
-			throw new IllegalStateException("No ObjectMapper for " + elementType);
+			return Flux.error(new IllegalStateException("No ObjectMapper for " + elementType));
 		}
 
 		boolean forceUseOfBigDecimal = mapper.isEnabled(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
@@ -138,20 +139,22 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(processed, mapper.getFactory(), mapper,
 				true, forceUseOfBigDecimal, getMaxInMemorySize());
 
-		ObjectReader reader = getObjectReader(mapper, elementType, hints);
+		ObjectReader objectReader = getObjectReader(mapper, elementType, hints);
 
-		return tokens.handle((tokenBuffer, sink) -> {
-			try {
-				Object value = reader.readValue(tokenBuffer.asParser(mapper));
-				logValue(value, hints);
-				if (value != null) {
-					sink.next(value);
-				}
-			}
-			catch (IOException ex) {
-				sink.error(processException(ex));
-			}
-		});
+		return customizeReaderFromStream(objectReader, mimeType, elementType, hints)
+				.flatMapMany(reader -> tokens.handle((tokenBuffer, sink) -> {
+						try {
+							Object value = reader.readValue(tokenBuffer.asParser(mapper));
+							logValue(value, hints);
+							if (value != null) {
+								sink.next(value);
+							}
+						}
+						catch (IOException ex) {
+							sink.error(processException(ex));
+						}
+					})
+				);
 	}
 
 	/**
@@ -174,22 +177,37 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	@Override
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
-
 		return DataBufferUtils.join(input, this.maxInMemorySize)
-				.flatMap(dataBuffer -> Mono.justOrEmpty(decode(dataBuffer, elementType, mimeType, hints)));
+				.flatMap(dataBuffer -> {
+							try {
+								ObjectReader objectReader = getObjectReader(elementType, mimeType, hints);
+								return customizeReaderFromStream(objectReader, mimeType, elementType, hints)
+										.flatMap(reader -> {
+											try {
+												return Mono.justOrEmpty(decode(dataBuffer, reader, hints));
+											}
+											catch (DecodingException ex) {
+												return Mono.error(ex);
+											}
+										});
+							}
+							catch (IllegalStateException ex) {
+								return Mono.error(ex);
+							}
+						});
 	}
 
 	@Override
 	public Object decode(DataBuffer dataBuffer, ResolvableType targetType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
+		ObjectReader reader = getObjectReader(targetType, mimeType, hints);
+		reader = customizeReader(reader, mimeType, targetType, hints);
+		return decode(dataBuffer, reader, hints);
+	}
 
-		ObjectMapper mapper = selectObjectMapper(targetType, mimeType);
-		if (mapper == null) {
-			throw new IllegalStateException("No ObjectMapper for " + targetType);
-		}
-
+	private Object decode(@NonNull DataBuffer dataBuffer, @NonNull ObjectReader objectReader,
+			@Nullable Map<String, Object> hints) throws DecodingException {
 		try {
-			ObjectReader objectReader = getObjectReader(mapper, targetType, hints);
 			Object value = objectReader.readValue(dataBuffer.asInputStream());
 			logValue(value, hints);
 			return value;
@@ -200,6 +218,15 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		finally {
 			DataBufferUtils.release(dataBuffer);
 		}
+	}
+
+	private ObjectReader getObjectReader(ResolvableType targetType, @Nullable MimeType mimeType,
+			@Nullable Map<String, Object> hints) {
+		ObjectMapper mapper = selectObjectMapper(targetType, mimeType);
+		if (mapper == null) {
+			throw new IllegalStateException("No ObjectMapper for " + targetType);
+		}
+		return getObjectReader(mapper, targetType, hints);
 	}
 
 	private ObjectReader getObjectReader(
@@ -215,6 +242,32 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		return jsonView != null ?
 				mapper.readerWithView(jsonView).forType(javaType) :
 				mapper.readerFor(javaType);
+	}
+
+	/**
+	 * Provides the ability for subclasses to customize the {@link ObjectReader} for deserialization from a stream.
+	 * @param reader the {@link ObjectReader} available for customization
+	 * @param mimeType the MIME type associated with the input stream
+	 * @param elementType the expected type of elements in the output stream
+	 * @param hints additional information about how to do encode
+	 * @return the customized {@link ObjectReader}
+	 */
+	protected Mono<ObjectReader> customizeReaderFromStream(@NonNull ObjectReader reader, @Nullable MimeType mimeType,
+			ResolvableType elementType, @Nullable Map<String, Object> hints) {
+		return Mono.just(customizeReader(reader, mimeType, elementType, hints));
+	}
+
+	/**
+	 * Provides the ability for subclasses to customize the {@link ObjectReader} for deserialization.
+	 * @param reader the {@link ObjectReader} available for customization
+	 * @param mimeType the MIME type associated with the input stream
+	 * @param elementType the expected type of elements in the output stream
+	 * @param hints additional information about how to do encode
+	 * @return the customized {@link ObjectReader}
+	 */
+	protected ObjectReader customizeReader(@NonNull ObjectReader reader, @Nullable MimeType mimeType,
+			ResolvableType elementType, @Nullable Map<String, Object> hints) {
+		return reader;
 	}
 
 	@Nullable

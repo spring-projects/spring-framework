@@ -27,8 +27,12 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
@@ -528,6 +532,39 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(contentType);
 	}
 
+	@Test
+	public void readWithCustomized() throws IOException {
+		MappingJackson2HttpMessageConverterWithCustomization customizedConverter =
+				new MappingJackson2HttpMessageConverterWithCustomization();
+		String body = "{\"property\":\"Value1\"}";
+		MockHttpInputMessage inputMessage1 = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
+		MockHttpInputMessage inputMessage2 = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
+		inputMessage1.getHeaders().setContentType(new MediaType("application", "json"));
+		inputMessage2.getHeaders().setContentType(new MediaType("application", "json"));
+
+		assertThatExceptionOfType(HttpMessageNotReadableException.class)
+				.isThrownBy(() -> converter.read(MyCustomizedBean.class, inputMessage1));
+
+		MyCustomizedBean customizedResult = (MyCustomizedBean) customizedConverter.read(MyCustomizedBean.class, inputMessage2);
+		assertThat(customizedResult.getProperty()).isEqualTo(MyCustomEnum.VAL1);
+	}
+
+	@Test
+	public void writeWithCustomized() throws IOException {
+		MappingJackson2HttpMessageConverterWithCustomization customizedConverter =
+				new MappingJackson2HttpMessageConverterWithCustomization();
+		MockHttpOutputMessage outputMessage1 = new MockHttpOutputMessage();
+		MockHttpOutputMessage outputMessage2 = new MockHttpOutputMessage();
+		MyCustomizedBean body = new MyCustomizedBean();
+		body.setProperty(MyCustomEnum.VAL2);
+		converter.write(body, null, outputMessage1);
+		customizedConverter.write(body, null, outputMessage2);
+		String result1 = outputMessage1.getBodyAsString(StandardCharsets.UTF_8);
+		assertThat(result1.contains("\"property\":\"VAL2\"")).isTrue();
+		String result2 = outputMessage2.getBodyAsString(StandardCharsets.UTF_8);
+		assertThat(result2.contains("\"property\":\"Value2\"")).isTrue();
+	}
+
 
 	interface MyInterface {
 
@@ -537,7 +574,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 
-	public static class MyBase implements MyInterface{
+	public static class MyBase implements MyInterface {
 
 		private String string;
 
@@ -710,6 +747,42 @@ public class MappingJackson2HttpMessageConverterTests {
 
 		public String getProperty2() {
 			return property2;
+		}
+	}
+
+	public static class MyCustomizedBean {
+
+		private MyCustomEnum property;
+
+		public MyCustomEnum getProperty() {
+			return property;
+		}
+
+		public void setProperty(MyCustomEnum property) {
+			this.property = property;
+		}
+	}
+
+	public enum MyCustomEnum {
+		VAL1,
+		VAL2;
+
+		@Override
+		public String toString() {
+			return this == VAL1 ? "Value1" : "Value2";
+		}
+	}
+
+	private static class MappingJackson2HttpMessageConverterWithCustomization extends MappingJackson2HttpMessageConverter {
+
+		@Override
+		protected ObjectReader customizeReader(ObjectReader reader, JavaType javaType) {
+			return reader.with(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
+		}
+
+		@Override
+		protected ObjectWriter customizeWriter(ObjectWriter writer, JavaType javaType, MediaType contentType) {
+			return writer.with(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
 		}
 	}
 
