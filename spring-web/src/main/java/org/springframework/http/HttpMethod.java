@@ -17,7 +17,7 @@
 package org.springframework.http;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -86,9 +86,9 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	 */
 	public static final HttpMethod TRACE = new HttpMethod("TRACE");
 
-	private static final HttpMethod[] values = new HttpMethod[] { GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE };
+	private static final List<HttpMethod> values = List.of(GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE);
 
-	private static final Map<String, HttpMethod> mappings = Arrays.stream(values)
+	private static final Map<String, HttpMethod> mappings = values.stream()
 			.collect(Collectors.toUnmodifiableMap(HttpMethod::name, Function.identity()));
 
 
@@ -109,9 +109,7 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	 * in WebDav.
 	 */
 	public static HttpMethod[] values() {
-		HttpMethod[] copy = new HttpMethod[values.length];
-		System.arraycopy(values, 0, copy, 0, values.length);
-		return copy;
+		return values.toArray(HttpMethod[]::new);
 	}
 
 	/**
