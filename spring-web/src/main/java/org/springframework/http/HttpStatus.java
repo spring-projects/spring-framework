@@ -16,6 +16,11 @@
 
 package org.springframework.http;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.springframework.lang.Nullable;
 
 /**
@@ -415,13 +420,8 @@ public enum HttpStatus implements HttpStatusCode {
 	 */
 	NETWORK_AUTHENTICATION_REQUIRED(511, Series.SERVER_ERROR, "Network Authentication Required");
 
-
-	private static final HttpStatus[] VALUES;
-
-	static {
-		VALUES = values();
-	}
-
+	private static final Map<Integer, HttpStatus> HTTP_STATUSES = Arrays.stream(HttpStatus.values())
+		.collect(Collectors.toUnmodifiableMap(HttpStatus::value, Function.identity()));
 
 	private final int value;
 
@@ -517,15 +517,8 @@ public enum HttpStatus implements HttpStatusCode {
 	 */
 	@Nullable
 	public static HttpStatus resolve(int statusCode) {
-		// Use cached VALUES instead of values() to prevent array allocation.
-		for (HttpStatus status : VALUES) {
-			if (status.value == statusCode) {
-				return status;
-			}
-		}
-		return null;
+		return HTTP_STATUSES.get(statusCode);
 	}
-
 
 	/**
 	 * Enumeration of HTTP status series.
@@ -538,6 +531,9 @@ public enum HttpStatus implements HttpStatusCode {
 		REDIRECTION(3),
 		CLIENT_ERROR(4),
 		SERVER_ERROR(5);
+
+		private static final Map<Integer, Series> SERIES = Arrays.stream(Series.values())
+			.collect(Collectors.toUnmodifiableMap(Series::value, Function.identity()));
 
 		private final int value;
 
@@ -586,12 +582,7 @@ public enum HttpStatus implements HttpStatusCode {
 		@Nullable
 		public static Series resolve(int statusCode) {
 			int seriesCode = statusCode / 100;
-			for (Series series : values()) {
-				if (series.value == seriesCode) {
-					return series;
-				}
-			}
-			return null;
+			return SERIES.get(seriesCode);
 		}
 	}
 
