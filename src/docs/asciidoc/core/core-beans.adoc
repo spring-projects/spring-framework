@@ -11155,7 +11155,7 @@ by other application modules on the same machine.
 
 
 [[beans-beanfactory]]
-== The `BeanFactory`
+== `BeanFactory`
 
 The `BeanFactory` API provides the underlying basis for Spring's IoC functionality.
 Its specific contracts are mostly used in integration with other parts of Spring and
