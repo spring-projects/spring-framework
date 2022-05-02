@@ -18,55 +18,58 @@ package org.springframework.web.service.invoker;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
- * {@link HttpServiceArgumentResolver} for {@link RequestHeader @RequestHeader}
+ * {@link HttpServiceArgumentResolver} for {@link RequestParam @RequestParam}
  * annotated arguments.
+ *
+ * <p>When {@code "content-type"} is set to
+ * {@code "application/x-www-form-urlencoded"}, request parameters are encoded
+ * in the request body. Otherwise, they are added as URL query parameters.
  *
  * <p>The argument may be:
  * <ul>
  * <li>{@code Map<String, ?>} or
- * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, ?&gt;}
- * with multiple headers and value(s).
- * <li>{@code Collection} or an array of header values.
- * <li>An individual header value.
+ * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, ?&gt;} with
+ * multiple request parameter and value(s).
+ * <li>{@code Collection} or an array of request parameters.
+ * <li>An individual request parameter.
  * </ul>
  *
- * <p>Individual header values may be Strings or Objects to be converted to
+ * <p>Individual request parameters may be Strings or Objects to be converted to
  * String values through the configured {@link ConversionService}.
  *
  * <p>If the value is required but {@code null}, {@link IllegalArgumentException}
  * is raised. The value is not required if:
  * <ul>
- * <li>{@link RequestHeader#required()} is set to {@code false}
- * <li>{@link RequestHeader#defaultValue()} provides a fallback value
+ * <li>{@link RequestParam#required()} is set to {@code false}
+ * <li>{@link RequestParam#defaultValue()} provides a fallback value
  * <li>The argument is declared as {@link java.util.Optional}
  * </ul>
  *
- * @author Olga Maciaszek-Sharma
  * @author Rossen Stoyanchev
  * @since 6.0
  */
-public class RequestHeaderArgumentResolver extends AbstractNamedValueArgumentResolver {
+public class RequestParamArgumentResolver extends AbstractNamedValueArgumentResolver {
 
 
-	public RequestHeaderArgumentResolver(ConversionService conversionService) {
+	public RequestParamArgumentResolver(ConversionService conversionService) {
 		super(conversionService);
 	}
 
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		RequestHeader annot = parameter.getParameterAnnotation(RequestHeader.class);
+		RequestParam annot = parameter.getParameterAnnotation(RequestParam.class);
 		return (annot == null ? null :
-				new NamedValueInfo(annot.name(), annot.required(), annot.defaultValue(), "request header", true));
+				new NamedValueInfo(annot.name(), annot.required(), annot.defaultValue(), "request parameter", true));
 	}
 
 	@Override
 	protected void addRequestValue(String name, String value, HttpRequestValues.Builder requestValues) {
-		requestValues.addHeader(name, value);
+		requestValues.addRequestParameter(name, value);
 	}
 
 }
