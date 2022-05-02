@@ -138,7 +138,7 @@ public enum HttpStatus implements HttpStatusCode {
 	 * @deprecated in favor of {@link #FOUND} which will be returned from {@code HttpStatus.valueOf(302)}
 	 */
 	@Deprecated
-	MOVED_TEMPORARILY(302, Series.REDIRECTION, "Moved Temporarily"),
+	MOVED_TEMPORARILY(302, Series.REDIRECTION, "Moved Temporarily", true),
 	/**
 	 * {@code 303 See Other}.
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-6.4.4">HTTP/1.1: Semantics and Content, section 6.4.4</a>
@@ -251,7 +251,7 @@ public enum HttpStatus implements HttpStatusCode {
 	 * returned from {@code HttpStatus.valueOf(413)}
 	 */
 	@Deprecated
-	REQUEST_ENTITY_TOO_LARGE(413, Series.CLIENT_ERROR, "Request Entity Too Large"),
+	REQUEST_ENTITY_TOO_LARGE(413, Series.CLIENT_ERROR, "Request Entity Too Large", true),
 	/**
 	 * {@code 414 URI Too Long}.
 	 * @since 4.1
@@ -265,7 +265,7 @@ public enum HttpStatus implements HttpStatusCode {
 	 * @deprecated in favor of {@link #URI_TOO_LONG} which will be returned from {@code HttpStatus.valueOf(414)}
 	 */
 	@Deprecated
-	REQUEST_URI_TOO_LONG(414, Series.CLIENT_ERROR, "Request-URI Too Long"),
+	REQUEST_URI_TOO_LONG(414, Series.CLIENT_ERROR, "Request-URI Too Long", true),
 	/**
 	 * {@code 415 Unsupported Media Type}.
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-6.5.13">
@@ -420,7 +420,9 @@ public enum HttpStatus implements HttpStatusCode {
 	 */
 	NETWORK_AUTHENTICATION_REQUIRED(511, Series.SERVER_ERROR, "Network Authentication Required");
 
-	private static final Map<Integer, HttpStatus> HTTP_STATUSES = Arrays.stream(HttpStatus.values())
+	private static final Map<Integer, HttpStatus> HTTP_STATUSES = Arrays
+		.stream(HttpStatus.values())
+		.filter(value -> !value.duplicated)
 		.collect(Collectors.toUnmodifiableMap(HttpStatus::value, Function.identity()));
 
 	private final int value;
@@ -429,12 +431,18 @@ public enum HttpStatus implements HttpStatusCode {
 
 	private final String reasonPhrase;
 
+	private final boolean duplicated;
+
 	HttpStatus(int value, Series series, String reasonPhrase) {
+		this(value, series, reasonPhrase, false);
+	}
+
+	HttpStatus(int value, Series series, String reasonPhrase, boolean duplicated) {
 		this.value = value;
 		this.series = series;
 		this.reasonPhrase = reasonPhrase;
+		this.duplicated = duplicated;
 	}
-
 
 	@Override
 	public int value() {
