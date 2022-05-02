@@ -214,6 +214,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				}
 				beforeSingletonCreation(beanName);
 				boolean newSingleton = false;
+				// 如果suppressedExceptions为空，则初始化
 				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
 				if (recordSuppressedExceptions) {
 					this.suppressedExceptions = new LinkedHashSet<>();
@@ -329,6 +330,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
+	 * <p>判断beanName是否需要作创建中检查（通过inCreationCheckExclusions判断）
+	 * <ul>
+	 *	<li>否。正常返回
+	 *	<li>是。将beanName加入singletonsCurrentlyInCreation，添加成功正常返回，添加失败抛异常BeanCurrentlyInCreationException
+	 * </ul>
 	 * Callback before singleton creation.
 	 * <p>The default implementation register the singleton as currently in creation.
 	 * @param beanName the name of the singleton about to be created
@@ -341,7 +347,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
-	 * Callback after singleton creation.
+	 * <p>和beforeSingletonCreation相对应，将beanName从singletonsCurrentlyInCreation移出
+	 * <p>Callback after singleton creation.
 	 * <p>The default implementation marks the singleton as not in creation anymore.
 	 * @param beanName the name of the singleton that has been created
 	 * @see #isSingletonCurrentlyInCreation
