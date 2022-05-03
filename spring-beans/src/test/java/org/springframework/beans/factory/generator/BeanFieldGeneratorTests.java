@@ -71,6 +71,7 @@ class BeanFieldGeneratorTests {
 
 		public String one;
 
+		@SuppressWarnings("unused")
 		private int two;
 
 	}
