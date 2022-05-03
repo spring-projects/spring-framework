@@ -24,6 +24,10 @@ anchors:
     username: ((docker-hub-username))
     password: ((docker-hub-password))
     tag: ((milestone))
+  registry-mirror-vars: &registry-mirror-vars
+    registry-mirror-host: ((registry-mirror-host))
+    registry-mirror-username: ((registry-mirror-username))
+    registry-mirror-password: ((registry-mirror-password))
   slack-fail-params: &slack-fail-params
     text: >
       :concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>
@@ -154,13 +158,20 @@ resources:
 jobs:
 - name: build-ci-images
   plan:
-  - get: ci-images-git-repo
-    trigger: true
-  - in_parallel:
+    - get: git-repo
+    - get: ci-images-git-repo
+      trigger: true
+    - task: build-ci-image
+      privileged: true
+      file: git-repo/ci/tasks/build-ci-image.yml
+      output_mapping:
+        image: ci-image
+      vars:
+        ci-image-name: ci-image
+        <<: *registry-mirror-vars
     - put: ci-image
       params:
-        build: ci-images-git-repo/ci/images
-        dockerfile: ci-images-git-repo/ci/images/ci-image/Dockerfile
+        image: ci-image/image.tar
 - name: build
   serial: true
   public: true
