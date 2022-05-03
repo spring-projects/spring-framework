@@ -12,7 +12,7 @@ anchors:
     SONATYPE_USERNAME: ((sonatype-username))
     SONATYPE_PASSWORD: ((sonatype-password))
     SONATYPE_URL: ((sonatype-url))
-    SONATYPE_STAGING_PROFILE_ID: ((sonatype-staging-profile-id))
+    SONATYPE_STAGING_PROFILE: ((sonatype-staging-profile))
   artifactory-task-params: &artifactory-task-params
     ARTIFACTORY_SERVER: ((artifactory-server))
     ARTIFACTORY_USERNAME: ((artifactory-username))
@@ -85,7 +85,7 @@ resources:
     branch: ((branch))
     paths: ["ci/images/*"]
 - name: ci-image
-  type: docker-image
+  type: registry-image
   icon: docker
   source:
     <<: *docker-resource-source
@@ -309,7 +309,6 @@ jobs:
         download_artifacts: false
         save_build_info: true
     - task: promote
-      image: ci-image
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: M
@@ -354,7 +353,6 @@ jobs:
         download_artifacts: false
         save_build_info: true
     - task: promote
-      image: ci-image
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: RC
@@ -399,7 +397,6 @@ jobs:
         download_artifacts: true
         save_build_info: true
     - task: promote
-      image: ci-image
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: RELEASE

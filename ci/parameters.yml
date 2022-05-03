@@ -1,5 +1,6 @@
 github-repo: "https://github.com/spring-projects/spring-framework.git"
 github-repo-name: "spring-projects/spring-framework"
+sonatype-staging-profile: "org.springframework"
 docker-hub-organization: "springci"
 artifactory-server: "https://repo.spring.io"
 branch: "main"
