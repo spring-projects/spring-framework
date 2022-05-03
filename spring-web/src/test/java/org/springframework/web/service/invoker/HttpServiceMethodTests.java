@@ -16,7 +16,6 @@
 
 package org.springframework.web.service.invoker;
 
-
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
@@ -40,12 +39,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_CBOR_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-
 /**
  * Tests for {@link HttpServiceMethod} with a test {@link TestHttpClientAdapter}
  * that stubs the client invocations.
  *
- * <p>The tests do not create nor invoke {@code HttpServiceMethod} directly but
+ * <p>The tests do not create or invoke {@code HttpServiceMethod} directly but
  * rather use {@link HttpServiceProxyFactory} to create a service proxy in order to
  * use a strongly typed interface without the need for class casts.
  *

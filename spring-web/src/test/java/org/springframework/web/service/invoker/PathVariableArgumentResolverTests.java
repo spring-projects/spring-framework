@@ -24,7 +24,6 @@ import org.springframework.web.service.annotation.GetExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * Tests for {@link PathVariableArgumentResolver}.
  * <p>For base class functionality, see {@link NamedValueArgumentResolverTests}.

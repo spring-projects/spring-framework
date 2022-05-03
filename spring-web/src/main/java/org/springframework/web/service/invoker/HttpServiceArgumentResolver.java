@@ -20,7 +20,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.web.service.annotation.HttpExchange;
 
-
 /**
  * Resolve an argument from an {@link HttpExchange @HttpExchange}-annotated method
  * to one or more HTTP request values.

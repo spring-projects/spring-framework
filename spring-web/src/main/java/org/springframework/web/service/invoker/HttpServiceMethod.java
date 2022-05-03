@@ -16,7 +16,6 @@
 
 package org.springframework.web.service.invoker;
 
-
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Arrays;
@@ -45,10 +44,9 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.service.annotation.HttpExchange;
 
-
 /**
  * Implements the invocation of an {@link HttpExchange @HttpExchange}-annotated,
- * {@link HttpServiceProxyFactory#createClient(Class) HTTP Service proxy} method
+ * {@link HttpServiceProxyFactory#createClient(Class) HTTP service proxy} method
  * by delegating to an {@link HttpClientAdapter} to perform actual requests.
  *
  * @author Rossen Stoyanchev
@@ -128,8 +126,8 @@ final class HttpServiceMethod {
 
 
 	/**
-	 * Factory for an {@link HttpRequestValues} with values extracted from
-	 * the type and method-level {@link HttpExchange @HttpRequest} annotations.
+	 * Factory for {@link HttpRequestValues} with values extracted from the type
+	 * and method-level {@link HttpExchange @HttpRequest} annotations.
 	 */
 	private record HttpRequestValuesInitializer(
 			HttpMethod httpMethod, @Nullable String url,
@@ -254,7 +252,7 @@ final class HttpServiceMethod {
 
 	/**
 	 * Function to execute a request, obtain a response, and adapt to the expected
-	 * return type blocking if necessary.
+	 * return type, blocking if necessary.
 	 */
 	private record ResponseFunction(
 			Function<HttpRequestValues, Publisher<?>> responseFunction,
@@ -288,7 +286,7 @@ final class HttpServiceMethod {
 
 
 		/**
-		 * Create the {@code ResponseFunction} that matches method return type.
+		 * Create the {@code ResponseFunction} that matches the method's return type.
 		 */
 		public static ResponseFunction create(
 				HttpClientAdapter client, Method method, ReactiveAdapterRegistry reactiveRegistry,

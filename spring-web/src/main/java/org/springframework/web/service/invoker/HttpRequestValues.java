@@ -16,7 +16,6 @@
 
 package org.springframework.web.service.invoker;
 
-
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -41,7 +40,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
-
 
 /**
  * Container for HTTP request values extracted from an
@@ -121,7 +119,7 @@ public final class HttpRequestValues {
 
 	/**
 	 * Return the URL template for the request, if set.
-	 * <p>This is mutually exclusive with a {@link #getUri() full URL}.
+	 * <p>This is mutually exclusive with a {@linkplain #getUri() full URL}.
 	 * One of the two has a value but not both.
 	 */
 	@Nullable
@@ -171,7 +169,7 @@ public final class HttpRequestValues {
 	}
 
 	/**
-	 * Return the element type for a {@link #getBody() Publisher body}.
+	 * Return the element type for a {@linkplain #getBody() Publisher body}.
 	 */
 	@Nullable
 	public ParameterizedTypeReference<?> getBodyElementType() {
@@ -237,7 +235,8 @@ public final class HttpRequestValues {
 		/**
 		 * Set the request URL as a full URL.
 		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@link #setUriTemplate(String)}.
+		 * {@linkplain #setUriTemplate(String) URI template} or
+		 * {@linkplain #setUriVariable(String, String) URI variables}.
 		 */
 		public Builder setUri(URI uri) {
 			this.uri = uri;
@@ -249,7 +248,7 @@ public final class HttpRequestValues {
 		/**
 		 * Set the request URL as a String template.
 		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@link #setUri(URI) full URI}.
+		 * {@linkplain #setUri(URI) full URI}.
 		 */
 		public Builder setUriTemplate(String uriTemplate) {
 			this.uriTemplate = uriTemplate;
@@ -260,7 +259,7 @@ public final class HttpRequestValues {
 		/**
 		 * Add a URI variable name-value pair.
 		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@link #setUri(URI) full URI}.
+		 * {@linkplain #setUri(URI) full URI}.
 		 */
 		public Builder setUriVariable(String name, String value) {
 			this.uriVars = (this.uriVars != null ? this.uriVars : new LinkedHashMap<>());
@@ -268,7 +267,6 @@ public final class HttpRequestValues {
 			this.uri = null;
 			return this;
 		}
-
 
 		/**
 		 * Set the media types for the request {@code Accept} header.
@@ -330,7 +328,7 @@ public final class HttpRequestValues {
 		/**
 		 * Set the request body as a concrete value to be serialized.
 		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@link #setBody(Publisher, ParameterizedTypeReference) body Publisher}.
+		 * {@linkplain #setBody(Publisher, ParameterizedTypeReference) body Publisher}.
 		 */
 		public void setBodyValue(Object bodyValue) {
 			this.bodyValue = bodyValue;
@@ -341,7 +339,7 @@ public final class HttpRequestValues {
 		/**
 		 * Set the request body as a concrete value to be serialized.
 		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@link #setBodyValue(Object) body value}.
+		 * {@linkplain #setBodyValue(Object) body value}.
 		 */
 		public <T, P extends Publisher<T>> void setBody(P body, ParameterizedTypeReference<T> elementTye) {
 			this.body = body;

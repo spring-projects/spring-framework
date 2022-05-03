@@ -26,9 +26,8 @@ import org.springframework.web.service.annotation.GetExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
- * Unit tests for {@link RequestHeaderArgumentResolver}.
+ * Unit tests for {@link CookieValueArgumentResolver}.
  * <p>For base class functionality, see {@link NamedValueArgumentResolverTests}.
  *
  * @author Rossen Stoyanchev

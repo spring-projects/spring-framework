@@ -32,7 +32,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.ValueConstants;
 
-
 /**
  * Base class for arguments that resolve to a named request value such as a
  * request header, path variable, cookie, and others.
@@ -52,7 +51,7 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 	/**
 	 * Create an instance.
 	 * @param conversionService the {@link ConversionService} to use to format
-	 * Object to String values.
+	 * Object to String values
 	 */
 	protected AbstractNamedValueArgumentResolver(ConversionService conversionService) {
 		Assert.notNull(conversionService, "ConversionService is required");

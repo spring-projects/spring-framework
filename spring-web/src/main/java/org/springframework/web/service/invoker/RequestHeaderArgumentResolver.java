@@ -20,7 +20,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-
 /**
  * {@link HttpServiceArgumentResolver} for {@link RequestHeader @RequestHeader}
  * annotated arguments.

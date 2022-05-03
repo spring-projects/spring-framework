@@ -26,14 +26,13 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.service.invoker.UrlArgumentResolver;
 
-
 /**
  * Annotation that declares an HTTP service method as an HTTP endpoint defined
  * through attributes of the annotation and method argument values.
  *
- * <p>The annotation may only be used at the type level for example to specify
- * a base URL path. At the method level, use one of the HTTP method specific,
- * shortcut annotations, each of which is <em>meta-annotated</em> with
+ * <p>The annotation may only be used at the type level &mdash; for example to
+ * specify a base URL path. At the method level, use one of the HTTP method
+ * specific, shortcut annotations, each of which is <em>meta-annotated</em> with
  * {@link HttpExchange}:
  * <ul>
  * <li>{@link GetExchange}
@@ -46,7 +45,7 @@ import org.springframework.web.service.invoker.UrlArgumentResolver;
  * </ul>
  *
  * <p>Supported method arguments:
- * <table>
+ * <table border="1">
  * <tr>
  * <th>Method Argument</th>
  * <th>Description</th>
@@ -54,14 +53,14 @@ import org.springframework.web.service.invoker.UrlArgumentResolver;
  * </tr>
  * <tr>
  * <td>{@link java.net.URI URI}</td>
- * <td>Dynamically set the URL for the request, overriding the annotation
+ * <td>Dynamically set the URL for the request, overriding the annotation's
  * {@link #url()} attribute</td>
  * <td>{@link UrlArgumentResolver
  * HttpUrlArgumentResolver}</td>
  * </tr>
  * <tr>
  * <td>{@link org.springframework.http.HttpMethod HttpMethod}</td>
- * <td>Dynamically set the HTTP method for the request, overriding the annotation
+ * <td>Dynamically set the HTTP method for the request, overriding the annotation's
  * {@link #method()} attribute</td>
  * <td>{@link org.springframework.web.service.invoker.HttpMethodArgumentResolver
  * HttpMethodArgumentResolver}</td>

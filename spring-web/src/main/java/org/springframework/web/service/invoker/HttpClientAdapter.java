@@ -23,10 +23,9 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
-
 /**
  * Contract to abstract the underlying HTTP client and decouple it from the
- * {@link HttpServiceProxyFactory#createClient(Class) HTTP Service proxy}.
+ * {@linkplain HttpServiceProxyFactory#createClient(Class) HTTP service proxy}.
  *
  * @author Rossen Stoyanchev
  * @since 6.0

@@ -20,13 +20,12 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.web.bind.annotation.PathVariable;
 
-
 /**
  * {@link HttpServiceArgumentResolver} for {@link PathVariable @PathVariable}
  * annotated arguments.
  *
  * <p>The argument may be a single variable value or a {@code Map} with multiple
- * variable and values. Each value may be a String or an Object to be converted
+ * variables and values. Each value may be a String or an Object to be converted
  * to a String through the configured {@link ConversionService}.
  *
  * <p>If the value is required but {@code null}, {@link IllegalArgumentException}

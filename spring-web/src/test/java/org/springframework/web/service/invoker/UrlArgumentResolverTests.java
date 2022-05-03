@@ -25,7 +25,6 @@ import org.springframework.web.service.annotation.GetExchange;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
-
 /**
  * Unit tests for {@link UrlArgumentResolver}.
  *

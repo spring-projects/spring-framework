@@ -26,7 +26,6 @@ import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * {@link HttpClientAdapter} with stubbed responses.
  *

@@ -26,7 +26,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 /**
  * {@link HttpServiceArgumentResolver} for {@link RequestBody @RequestBody}
  * annotated arguments.

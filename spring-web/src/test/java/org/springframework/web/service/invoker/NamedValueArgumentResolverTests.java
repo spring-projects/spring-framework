@@ -41,7 +41,6 @@ import org.springframework.web.service.annotation.GetExchange;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-
 /**
  * Unit tests for {@link AbstractNamedValueArgumentResolver} through a
  * {@link TestValue @TestValue} annotation and {@link TestNamedValueArgumentResolver}.
@@ -230,7 +229,7 @@ class NamedValueArgumentResolverTests {
 	@Target(ElementType.PARAMETER)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	public @interface TestValue {
+	@interface TestValue {
 
 		@AliasFor("name")
 		String value() default "";

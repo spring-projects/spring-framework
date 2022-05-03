@@ -21,10 +21,9 @@ import java.net.URI;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 
-
 /**
  * {@link HttpServiceArgumentResolver} that resolves the URL for the request
- * from an {@link URI} argument.
+ * from a {@link URI} argument.
  *
  * @author Rossen Stoyanchev
  * @since 6.0

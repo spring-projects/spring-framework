@@ -16,7 +16,6 @@
 
 package org.springframework.web.service.invoker;
 
-
 import java.net.URI;
 
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 /**
  * Unit tests for {@link HttpRequestValues}.

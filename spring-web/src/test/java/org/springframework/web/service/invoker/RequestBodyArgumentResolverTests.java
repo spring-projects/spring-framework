@@ -30,7 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
-
 /**
  * Unit tests for {@link RequestBodyArgumentResolver}.
  *
@@ -63,6 +62,7 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void singleBody() {
 		String bodyValue = "bodyValue";
 		this.service.executeSingle(Single.just(bodyValue));
