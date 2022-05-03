@@ -19,29 +19,32 @@ package org.springframework.web.service.invoker;
 import java.net.URI;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 
 
 /**
- * {@link HttpServiceArgumentResolver} that resolves the target
- * request's URL from an {@link HttpMethod} argument.
+ * {@link HttpServiceArgumentResolver} that resolves the URL for the request
+ * from an {@link URI} argument.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
  */
-public class HttpUrlArgumentResolver implements HttpServiceArgumentResolver {
+public class UrlArgumentResolver implements HttpServiceArgumentResolver {
 
 	@Override
 	public boolean resolve(
 			@Nullable Object argument, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
-		if (argument instanceof URI uri) {
-			requestValues.setUri(uri);
+		if (!parameter.getParameterType().equals(URI.class)) {
+			return false;
+		}
+
+		if (argument != null) {
+			requestValues.setUri((URI) argument);
 			return true;
 		}
 
-		return false;
+		return true;
 	}
 
 }

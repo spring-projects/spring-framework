@@ -22,6 +22,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.service.annotation.GetExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 
 /**
@@ -44,14 +45,18 @@ public class HttpMethodArgumentResolverTests {
 	}
 
 	@Test
-	void ignoreOtherArgumentTypes() {
-		this.service.execute("test");
-		assertThat(getActualMethod()).isEqualTo(HttpMethod.GET);
+	void notHttpMethod() {
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.service.executeNotHttpMethod("test"))
+				.withMessage("Could not resolve parameter [0] in " +
+						"public abstract void org.springframework.web.service.invoker." +
+						"HttpMethodArgumentResolverTests$Service.executeNotHttpMethod(java.lang.String): " +
+						"No suitable resolver");
 	}
 
 	@Test
 	void ignoreNull() {
-		this.service.execute((HttpMethod) null);
+		this.service.execute(null);
 		assertThat(getActualMethod()).isEqualTo(HttpMethod.GET);
 	}
 
@@ -66,7 +71,7 @@ public class HttpMethodArgumentResolverTests {
 		void execute(HttpMethod method);
 
 		@GetExchange
-		void execute(String test);
+		void executeNotHttpMethod(String test);
 
 	}
 

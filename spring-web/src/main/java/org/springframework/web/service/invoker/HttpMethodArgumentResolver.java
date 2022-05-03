@@ -40,15 +40,19 @@ public class HttpMethodArgumentResolver implements HttpServiceArgumentResolver {
 	public boolean resolve(
 			@Nullable Object argument, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
-		if (argument instanceof HttpMethod httpMethod) {
+		if (!parameter.getParameterType().equals(HttpMethod.class)) {
+			return false;
+		}
+
+		if (argument != null) {
+			HttpMethod httpMethod = (HttpMethod) argument;
+			requestValues.setHttpMethod(httpMethod);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Resolved HTTP method to: " + httpMethod.name());
 			}
-			requestValues.setHttpMethod(httpMethod);
-			return true;
 		}
 
-		return false;
+		return true;
 	}
 
 }

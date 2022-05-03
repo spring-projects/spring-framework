@@ -23,14 +23,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.service.annotation.GetExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 
 /**
- * Unit tests for {@link HttpUrlArgumentResolver}.
+ * Unit tests for {@link UrlArgumentResolver}.
  *
  * @author Rossen Stoyanchev
  */
-public class HttpUrlArgumentResolverTests {
+public class UrlArgumentResolverTests {
 
 	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
@@ -46,6 +47,22 @@ public class HttpUrlArgumentResolverTests {
 		assertThat(getRequestValues().getUriTemplate()).isNull();
 	}
 
+	@Test
+	void notUrl() {
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.service.executeNotUri("test"))
+				.withMessage("Could not resolve parameter [0] in " +
+						"public abstract void org.springframework.web.service.invoker." +
+						"UrlArgumentResolverTests$Service.executeNotUri(java.lang.String): " +
+						"No suitable resolver");
+	}
+
+	@Test
+	void ignoreNull() {
+		this.service.execute(null);
+		assertThat(getRequestValues().getUri()).isNull();
+	}
+
 	private HttpRequestValues getRequestValues() {
 		return this.client.getRequestValues();
 	}
@@ -56,6 +73,8 @@ public class HttpUrlArgumentResolverTests {
 		@GetExchange("/path")
 		void execute(URI uri);
 
+		@GetExchange
+		void executeNotUri(String other);
 	}
 
 }

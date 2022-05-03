@@ -343,7 +343,7 @@ public final class HttpRequestValues {
 		 * <p>This is mutually exclusive with, and resets any previously set
 		 * {@link #setBodyValue(Object) body value}.
 		 */
-		public <T, P extends Publisher<T>> void setBody(Publisher<P> body, ParameterizedTypeReference<?> elementTye) {
+		public <T, P extends Publisher<T>> void setBody(P body, ParameterizedTypeReference<T> elementTye) {
 			this.body = body;
 			this.bodyElementType = elementTye;
 			this.bodyValue = null;

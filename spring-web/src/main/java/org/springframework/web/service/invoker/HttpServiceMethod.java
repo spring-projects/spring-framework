@@ -110,12 +110,20 @@ final class HttpServiceMethod {
 		Assert.isTrue(arguments.length == this.parameters.length, "Method argument mismatch");
 		for (int i = 0; i < arguments.length; i++) {
 			Object value = arguments[i];
+			boolean resolved = false;
 			for (HttpServiceArgumentResolver resolver : this.argumentResolvers) {
 				if (resolver.resolve(value, this.parameters[i], requestValues)) {
+					resolved = true;
 					break;
 				}
 			}
+			Assert.state(resolved, formatArgumentError(this.parameters[i], "No suitable resolver"));
 		}
+	}
+
+	private static String formatArgumentError(MethodParameter param, String message) {
+		return "Could not resolve parameter [" + param.getParameterIndex() + "] in " +
+				param.getExecutable().toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
 	}
 
 
