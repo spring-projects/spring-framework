@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.aopalliance.intercept;
 
 import java.lang.reflect.AccessibleObject;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 /**
  * This interface represents a generic runtime joinpoint (in the AOP
@@ -65,7 +65,7 @@ public interface Joinpoint {
 	 * <p>The static part is an accessible object on which a chain of
 	 * interceptors are installed.
 	 */
-	@Nonnull
+	@NonNull
 	AccessibleObject getStaticPart();
 
 }

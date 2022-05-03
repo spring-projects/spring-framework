@@ -18,14 +18,14 @@ package org.springframework.aot.test.generator.file;
 
 import java.io.StringReader;
 
-import javax.annotation.Nullable;
-
 import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.JavaClass;
 import com.thoughtworks.qdox.model.JavaPackage;
 import com.thoughtworks.qdox.model.JavaSource;
 import org.assertj.core.api.AssertProvider;
 import org.assertj.core.util.Strings;
+
+import org.springframework.lang.Nullable;
 
 /**
  * {@link DynamicFile} that holds Java source code and provides

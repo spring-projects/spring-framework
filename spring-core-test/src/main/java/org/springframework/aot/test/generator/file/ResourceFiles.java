@@ -19,7 +19,8 @@ package org.springframework.aot.test.generator.file;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
+import org.springframework.lang.Nullable;
+
 
 /**
  * An immutable collection of {@link ResourceFile} instances.

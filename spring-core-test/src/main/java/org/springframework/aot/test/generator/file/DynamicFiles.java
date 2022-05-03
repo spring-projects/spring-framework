@@ -23,7 +23,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
+import org.springframework.lang.Nullable;
+
 
 /**
  * Internal class used by {@link SourceFiles} and {@link ResourceFiles} to
