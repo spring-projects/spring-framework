@@ -16,16 +16,10 @@
 
 package org.springframework.web.service.invoker;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.PostExchange;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,58 +28,31 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Unit tests for {@link RequestParamArgumentResolver}.
  *
+ * <p>Additional tests for this resolver:
+ * <ul>
+ * <li>Base class functionality in {@link NamedValueArgumentResolverTests}
+ * <li>Form data vs query params in {@link HttpRequestValuesTests}
+ * </ul>
+ *
  * @author Rossen Stoyanchev
  */
 public class RequestParamArgumentResolverTests {
 
-	private final TestHttpClientAdapter clientAdapter = new TestHttpClientAdapter();
+	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
-	private final Service service = this.clientAdapter.createService(Service.class);
+	private final Service service = HttpServiceProxyFactory.builder(this.client).build().createClient(Service.class);
 
+
+	// Base class functionality should be tested in NamedValueArgumentResolverTests.
+	// Form data vs query params tested in HttpRequestValuesTests.
 
 	@Test
-	void formData() {
+	void requestParam() {
 		this.service.postForm("value 1", "value 2");
 
-		Object body = this.clientAdapter.getRequestValues().getBodyValue();
+		Object body = this.client.getRequestValues().getBodyValue();
 		assertThat(body).isNotNull().isInstanceOf(byte[].class);
 		assertThat(new String((byte[]) body, UTF_8)).isEqualTo("param1=value+1&param2=value+2");
-	}
-
-	@Test
-	void uriTemplate() {
-		this.service.search("1st value", Arrays.asList("2nd value A", "2nd value B"));
-
-		HttpRequestValues requestValues = this.clientAdapter.getRequestValues();
-
-		assertThat(requestValues.getUriTemplate())
-				.isEqualTo("/path?" +
-						"{queryParam0}={queryParam0[0]}&" +
-						"{queryParam1}={queryParam1[0]}&" +
-						"{queryParam1}={queryParam1[1]}");
-
-		assertThat(requestValues.getUriVariables())
-				.containsOnlyKeys("queryParam0", "queryParam1", "queryParam0[0]", "queryParam1[0]", "queryParam1[1]")
-				.containsEntry("queryParam0", "param1")
-				.containsEntry("queryParam1", "param2")
-				.containsEntry("queryParam0[0]", "1st value")
-				.containsEntry("queryParam1[0]", "2nd value A")
-				.containsEntry("queryParam1[1]", "2nd value B");
-
-		URI uri = UriComponentsBuilder.fromUriString(requestValues.getUriTemplate())
-				.encode().build(requestValues.getUriVariables());
-
-		assertThat(uri.toString())
-				.isEqualTo("/path?param1=1st%20value&param2=2nd%20value%20A&param2=2nd%20value%20B");
-	}
-
-	@Test
-	void uri() {
-		URI baseUrl = URI.create("http://localhost:8080/path");
-		this.service.searchWithDynamicUri(baseUrl, "1st value", Arrays.asList("2nd value A", "2nd value B"));
-
-		assertThat(this.clientAdapter.getRequestValues().getUri().toString())
-				.isEqualTo(baseUrl + "?param1=1st%20value&param2=2nd%20value%20A&param2=2nd%20value%20B");
 	}
 
 
@@ -94,11 +61,6 @@ public class RequestParamArgumentResolverTests {
 		@PostExchange(contentType = "application/x-www-form-urlencoded")
 		void postForm(@RequestParam String param1, @RequestParam String param2);
 
-		@GetExchange("/path")
-		void search(@RequestParam String param1, @RequestParam List<String> param2);
-
-		@GetExchange
-		void searchWithDynamicUri(URI uri, @RequestParam String param1, @RequestParam List<String> param2);
 	}
 
 }

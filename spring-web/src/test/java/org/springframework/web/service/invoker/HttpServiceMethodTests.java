@@ -58,10 +58,12 @@ public class HttpServiceMethodTests {
 
 	private final TestHttpClientAdapter clientAdapter = new TestHttpClientAdapter();
 
+	private final HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.clientAdapter).build();
+
 
 	@Test
 	void reactorService() {
-		ReactorService service = this.clientAdapter.createService(ReactorService.class);
+		ReactorService service = this.proxyFactory.createClient(ReactorService.class);
 
 		Mono<Void> voidMono = service.execute();
 		StepVerifier.create(voidMono).verifyComplete();
@@ -94,7 +96,7 @@ public class HttpServiceMethodTests {
 
 	@Test
 	void rxJavaService() {
-		RxJavaService service = this.clientAdapter.createService(RxJavaService.class);
+		RxJavaService service = this.proxyFactory.createClient(RxJavaService.class);
 		Completable completable = service.execute();
 		assertThat(completable).isNotNull();
 
@@ -121,7 +123,7 @@ public class HttpServiceMethodTests {
 	@Test
 	void blockingService() {
 
-		BlockingService service = this.clientAdapter.createService(BlockingService.class);
+		BlockingService service = this.proxyFactory.createClient(BlockingService.class);
 
 		service.execute();
 
@@ -141,7 +143,7 @@ public class HttpServiceMethodTests {
 	@Test
 	void methodAnnotatedService() {
 
-		MethodLevelAnnotatedService service = this.clientAdapter.createService(MethodLevelAnnotatedService.class);
+		MethodLevelAnnotatedService service = this.proxyFactory.createClient(MethodLevelAnnotatedService.class);
 
 		service.performGet();
 
@@ -163,7 +165,7 @@ public class HttpServiceMethodTests {
 	@Test
 	void typeAndMethodAnnotatedService() {
 
-		MethodLevelAnnotatedService service = this.clientAdapter.createService(TypeAndMethodLevelAnnotatedService.class);
+		MethodLevelAnnotatedService service = this.proxyFactory.createClient(TypeAndMethodLevelAnnotatedService.class);
 
 		service.performGet();
 

@@ -19,7 +19,6 @@ package org.springframework.web.service.invoker;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.web.service.annotation.GetExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,40 +28,35 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link HttpMethodArgumentResolver}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Rossen Stoyanchev
  */
 public class HttpMethodArgumentResolverTests {
 
-	private final TestHttpClientAdapter clientAdapter = new TestHttpClientAdapter();
+	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
-	private final Service service = this.clientAdapter.createService(Service.class);
+	private final Service service = HttpServiceProxyFactory.builder(this.client).build().createClient(Service.class);
 
 
 	@Test
-	void shouldResolveRequestMethodFromArgument() {
-		this.service.execute(HttpMethod.GET);
-		assertThat(getActualMethod()).isEqualTo(HttpMethod.GET);
+	void requestMethodOverride() {
+		this.service.execute(HttpMethod.POST);
+		assertThat(getActualMethod()).isEqualTo(HttpMethod.POST);
 	}
 
 	@Test
-	void shouldIgnoreArgumentsNotMatchingType() {
+	void ignoreOtherArgumentTypes() {
 		this.service.execute("test");
 		assertThat(getActualMethod()).isEqualTo(HttpMethod.GET);
 	}
 
 	@Test
-	void shouldOverrideMethodAnnotation() {
-		this.service.executeGet(HttpMethod.POST);
-		assertThat(getActualMethod()).isEqualTo(HttpMethod.POST);
-	}
-
-	@Test
-	void shouldIgnoreNullValue() {
-		this.service.executeForNull(null);
+	void ignoreNull() {
+		this.service.execute((HttpMethod) null);
 		assertThat(getActualMethod()).isEqualTo(HttpMethod.GET);
 	}
 
 	private HttpMethod getActualMethod() {
-		return this.clientAdapter.getRequestValues().getHttpMethod();
+		return this.client.getRequestValues().getHttpMethod();
 	}
 
 
@@ -72,16 +66,8 @@ public class HttpMethodArgumentResolverTests {
 		void execute(HttpMethod method);
 
 		@GetExchange
-		void executeGet(HttpMethod method);
-
-		@GetExchange
 		void execute(String test);
 
-		@GetExchange
-		void execute(HttpMethod firstMethod, HttpMethod secondMethod);
-
-		@GetExchange
-		void executeForNull(@Nullable HttpMethod method);
 	}
 
 }

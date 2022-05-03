@@ -46,15 +46,6 @@ class TestHttpClientAdapter implements HttpClientAdapter {
 	private ParameterizedTypeReference<?> bodyType;
 
 
-	/**
-	 * Create the proxy for the give service type.
-	 */
-	public <S> S createService(Class<S> serviceType) {
-		HttpServiceProxyFactory factory = HttpServiceProxyFactory.builder(this).build();
-		return factory.createClient(serviceType);
-	}
-
-
 	public String getInvokedMethodName() {
 		assertThat(this.invokedMethodName).isNotNull();
 		return this.invokedMethodName;

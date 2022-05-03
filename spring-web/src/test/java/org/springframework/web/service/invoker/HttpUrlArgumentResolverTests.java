@@ -32,9 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class HttpUrlArgumentResolverTests {
 
-	private final TestHttpClientAdapter clientAdapter = new TestHttpClientAdapter();
+	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
-	private final Service service = this.clientAdapter.createService(Service.class);
+	private final Service service = HttpServiceProxyFactory.builder(this.client).build().createClient(Service.class);
 
 
 	@Test
@@ -47,7 +47,7 @@ public class HttpUrlArgumentResolverTests {
 	}
 
 	private HttpRequestValues getRequestValues() {
-		return this.clientAdapter.getRequestValues();
+		return this.client.getRequestValues();
 	}
 
 

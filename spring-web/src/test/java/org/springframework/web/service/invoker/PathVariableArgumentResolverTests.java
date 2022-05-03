@@ -16,9 +16,6 @@
 
 package org.springframework.web.service.invoker;
 
-import java.util.Map;
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
@@ -26,128 +23,42 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.service.annotation.GetExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 
 /**
  * Tests for {@link PathVariableArgumentResolver}.
+ * <p>For base class functionality, see {@link NamedValueArgumentResolverTests}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Rossen Stoyanchev
  */
 class PathVariableArgumentResolverTests {
 
-	private final TestHttpClientAdapter clientAdapter = new TestHttpClientAdapter();
+	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
-	private final Service service = this.clientAdapter.createService(Service.class);
+	private final Service service = HttpServiceProxyFactory.builder(this.client).build().createClient(Service.class);
 
+
+	// Base class functionality should be tested in NamedValueArgumentResolverTests.
 
 	@Test
-	void stringVariable() {
+	void pathVariable() {
 		this.service.execute("test");
 		assertPathVariable("id", "test");
 	}
 
-	@Test
-	void objectVariable() {
-		this.service.execute(Boolean.TRUE);
-		assertPathVariable("id", "true");
-	}
-
-	@Test
-	void namedVariable() {
-		this.service.executeNamed("test");
-		assertPathVariable("id", "test");
-	}
-
-	@SuppressWarnings("ConstantConditions")
-	@Test
-	void nullVariableRequired() {
-		assertThatIllegalArgumentException().isThrownBy(() -> this.service.execute(null));
-	}
-
-	@Test
-	void nullVariableNotRequired() {
-		this.service.executeNotRequired(null);
-		assertPathVariable("id", null);
-	}
-
-	@Test
-	void optionalStringVariable() {
-		this.service.execute(Optional.of("test"));
-		assertPathVariable("id", "test");
-	}
-
-	@Test
-	void optionalObjectVariable() {
-		this.service.executeOptional(Optional.of(Boolean.TRUE));
-		assertPathVariable("id", "true");
-	}
-
-	@Test
-	void optionalEmpty() {
-		this.service.executeOptional(Optional.empty());
-		assertPathVariable("id", null);
-	}
-
-	@Test
-	void optionalEmptyOnObjectArgument() {
-		assertThatIllegalArgumentException().isThrownBy(() -> this.service.execute(Optional.empty()));
-	}
-
-	@Test
-	void mapOfVariables() {
-		this.service.executeMap(Map.of("id", "test"));
-		assertPathVariable("id", "test");
-	}
-
-	@Test
-	void mapOfVariablesIsNull() {
-		assertThatIllegalArgumentException().isThrownBy(() -> this.service.executeMap(null));
-	}
-
-	@Test
-	void mapOfVariablesHasOptionalValue() {
-		this.service.executeMapWithOptionalValue(Map.of("id", Optional.of("test")));
-		assertPathVariable("id", "test");
-	}
-
-
-	@Test
-	void mapOfVariablesHasOptionalEmpty() {
-		this.service.executeMapWithOptionalValue(Map.of("id", Optional.empty()));
-		assertPathVariable("id", null);
-	}
-
 	@SuppressWarnings("SameParameterValue")
 	private void assertPathVariable(String name, @Nullable String expectedValue) {
-		assertThat(this.clientAdapter.getRequestValues().getUriVariables().get(name))
+		assertThat(this.client.getRequestValues().getUriVariables().get(name))
 				.isEqualTo(expectedValue);
 	}
 
 
-	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private interface Service {
 
 		@GetExchange
 		void execute(@PathVariable String id);
 
-		@GetExchange
-		void execute(@PathVariable Object id);
-
-		@GetExchange
-		void executeNamed(@PathVariable(name = "id") String employeeId);
-
-		@GetExchange
-		void executeNotRequired(@Nullable @PathVariable(required = false) String id);
-
-		@GetExchange
-		void executeOptional(@PathVariable Optional<Boolean> id);
-
-		@GetExchange
-		void executeMap(@Nullable @PathVariable Map<String, String> map);
-
-		@GetExchange
-		void executeMapWithOptionalValue(@PathVariable Map<String, Optional<String>> map);
 	}
 
 }
