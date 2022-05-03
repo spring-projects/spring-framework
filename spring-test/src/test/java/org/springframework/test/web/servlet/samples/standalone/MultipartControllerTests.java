@@ -387,6 +387,7 @@ public class MultipartControllerTests {
 			return file;
 		}
 
+		@SuppressWarnings("unused")
 		public void setFile(MultipartFile file) {
 			this.file = file;
 		}
