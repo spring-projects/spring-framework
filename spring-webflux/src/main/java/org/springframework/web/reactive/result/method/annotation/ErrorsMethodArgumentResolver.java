@@ -86,7 +86,7 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 				"Either declare the @ModelAttribute without an async wrapper type or " +
 				"handle a WebExchangeBindException error signal through the async type.");
 
-		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
+		ModelAttribute ann = attributeParam.getParameterAnnotation(ModelAttribute.class);
 		String name = (ann != null && StringUtils.hasText(ann.value()) ?
 				ann.value() : Conventions.getVariableNameForParameter(attributeParam));
 		Object errors = context.getModel().asMap().get(BindingResult.MODEL_KEY_PREFIX + name);
