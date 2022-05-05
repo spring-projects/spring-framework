@@ -66,6 +66,15 @@ public class ByteVector {
   }
 
   /**
+   * Returns the actual number of bytes in this vector.
+   *
+   * @return the actual number of bytes in this vector.
+   */
+  public int size() {
+    return length;
+  }
+
+  /**
    * Puts a byte into this byte vector. The byte vector is automatically enlarged if necessary.
    *
    * @param byteValue a byte.
