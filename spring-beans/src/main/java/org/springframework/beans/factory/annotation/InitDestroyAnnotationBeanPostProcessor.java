@@ -42,8 +42,6 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
-import org.springframework.beans.factory.generator.AotContributingBeanPostProcessor;
-import org.springframework.beans.factory.generator.BeanInstantiationContribution;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -87,8 +85,7 @@ import org.springframework.util.ReflectionUtils;
  */
 @SuppressWarnings("serial")
 public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareBeanPostProcessor,
-		MergedBeanDefinitionPostProcessor, AotContributingBeanPostProcessor, BeanRegistrationAotProcessor,
-		PriorityOrdered, Serializable {
+		MergedBeanDefinitionPostProcessor, BeanRegistrationAotProcessor, PriorityOrdered, Serializable {
 
 	private final transient LifecycleMetadata emptyLifecycleMetadata =
 			new LifecycleMetadata(Object.class, Collections.emptyList(), Collections.emptyList()) {
@@ -157,22 +154,6 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		findInjectionMetadata(beanDefinition, beanType);
-	}
-
-	@Override
-	public BeanInstantiationContribution contribute(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-		LifecycleMetadata metadata = findInjectionMetadata(beanDefinition, beanType);
-		if (!CollectionUtils.isEmpty(metadata.initMethods)) {
-			String[] initMethodNames = safeMerge(
-					beanDefinition.getInitMethodNames(), metadata.initMethods);
-			beanDefinition.setInitMethodNames(initMethodNames);
-		}
-		if (!CollectionUtils.isEmpty(metadata.destroyMethods)) {
-			String[] destroyMethodNames = safeMerge(
-					beanDefinition.getDestroyMethodNames(), metadata.destroyMethods);
-			beanDefinition.setDestroyMethodNames(destroyMethodNames);
-		}
-		return null;
 	}
 
 	@Override

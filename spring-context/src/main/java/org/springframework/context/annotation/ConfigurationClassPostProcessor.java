@@ -51,9 +51,6 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
-import org.springframework.beans.factory.generator.AotContributingBeanFactoryPostProcessor;
-import org.springframework.beans.factory.generator.BeanFactoryContribution;
-import org.springframework.beans.factory.generator.BeanFactoryInitialization;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -81,7 +78,6 @@ import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.javapoet.CodeBlock.Builder;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.lang.Nullable;
@@ -108,8 +104,8 @@ import org.springframework.util.ClassUtils;
  * @since 3.0
  */
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
-		AotContributingBeanFactoryPostProcessor, BeanFactoryInitializationAotProcessor, PriorityOrdered,
-		ResourceLoaderAware, ApplicationStartupAware, BeanClassLoaderAware, EnvironmentAware {
+		BeanFactoryInitializationAotProcessor, PriorityOrdered, ResourceLoaderAware, ApplicationStartupAware,
+		BeanClassLoaderAware, EnvironmentAware {
 
 	/**
 	 * A {@code BeanNameGenerator} using fully qualified class names as default bean names.
@@ -290,14 +286,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	@Override
-	public BeanFactoryContribution contribute(ConfigurableListableBeanFactory beanFactory) {
-		return (beanFactory.containsBean(IMPORT_REGISTRY_BEAN_NAME)
-				? new ImportAwareBeanFactoryConfiguration(beanFactory) : null);
-	}
-
-	@Override
 	public BeanFactoryInitializationAotContribution processAheadOfTime(
 			ConfigurableListableBeanFactory beanFactory) {
+
 		return (beanFactory.containsBean(IMPORT_REGISTRY_BEAN_NAME)
 				? new AotContribution(beanFactory) : null);
 	}
@@ -518,56 +509,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	}
 
-	private static final class ImportAwareBeanFactoryConfiguration implements BeanFactoryContribution {
-
-		private final ConfigurableListableBeanFactory beanFactory;
-
-		private ImportAwareBeanFactoryConfiguration(ConfigurableListableBeanFactory beanFactory) {
-			this.beanFactory = beanFactory;
-		}
-
-
-		@Override
-		public void applyTo(BeanFactoryInitialization initialization) {
-			Map<String, String> mappings = buildImportAwareMappings();
-			if (!mappings.isEmpty()) {
-				MethodSpec method = initialization.generatedTypeContext().getMainGeneratedType()
-						.addMethod(beanPostProcessorMethod(mappings));
-				initialization.contribute(code -> code.addStatement("beanFactory.addBeanPostProcessor($N())", method));
-				ResourceHints resourceHints = initialization.generatedTypeContext().runtimeHints().resources();
-				mappings.forEach((target, importedFrom) -> resourceHints.registerType(
-						TypeReference.of(importedFrom)));
-			}
-		}
-
-		private MethodSpec.Builder beanPostProcessorMethod(Map<String, String> mappings) {
-			Builder code = CodeBlock.builder();
-			code.addStatement("$T mappings = new $T<>()", ParameterizedTypeName.get(
-					Map.class, String.class, String.class), HashMap.class);
-			mappings.forEach((key, value) -> code.addStatement("mappings.put($S, $S)", key, value));
-			code.addStatement("return new $T($L)", ImportAwareAotBeanPostProcessor.class, "mappings");
-			return MethodSpec.methodBuilder("createImportAwareBeanPostProcessor")
-					.returns(ImportAwareAotBeanPostProcessor.class)
-					.addModifiers(Modifier.PRIVATE).addCode(code.build());
-		}
-
-		private Map<String, String> buildImportAwareMappings() {
-			ImportRegistry ir = this.beanFactory.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
-			Map<String, String> mappings = new LinkedHashMap<>();
-			for (String name : this.beanFactory.getBeanDefinitionNames()) {
-				Class<?> beanType = this.beanFactory.getType(name);
-				if (beanType != null && ImportAware.class.isAssignableFrom(beanType)) {
-					String type = ClassUtils.getUserClass(beanType).getName();
-					AnnotationMetadata importingClassMetadata = ir.getImportingClassFor(type);
-					if (importingClassMetadata != null) {
-						mappings.put(type, importingClassMetadata.getClassName());
-					}
-				}
-			}
-			return mappings;
-		}
-
-	}
 
 	private class AotContribution implements BeanFactoryInitializationAotContribution {
 

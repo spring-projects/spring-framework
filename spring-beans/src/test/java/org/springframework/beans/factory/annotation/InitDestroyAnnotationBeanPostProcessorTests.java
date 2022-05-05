@@ -18,7 +18,6 @@ package org.springframework.beans.factory.annotation;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.generator.BeanInstantiationContribution;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -26,11 +25,8 @@ import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.D
 import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.Init;
 import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.InitDestroyBean;
 import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.MultiInitDestroyBean;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for {@link InitDestroyAnnotationBeanPostProcessor}.
@@ -41,60 +37,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 class InitDestroyAnnotationBeanPostProcessorTests {
 
 	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-
-	@Test
-	void contributeWithNoCallbackDoesNotMutateRootBeanDefinition() {
-		RootBeanDefinition beanDefinition = mock(RootBeanDefinition.class);
-		assertThat(createAotBeanPostProcessor().contribute(
-				beanDefinition, String.class, "test")).isNull();
-		verifyNoInteractions(beanDefinition);
-	}
-
-	@Test
-	void contributeWithInitDestroyCallback() {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(InitDestroyBean.class);
-		assertThat(createContribution(beanDefinition)).isNull();
-		assertThat(beanDefinition.getInitMethodNames()).containsExactly("initMethod");
-		assertThat(beanDefinition.getDestroyMethodNames()).containsExactly("destroyMethod");
-	}
-
-	@Test
-	void contributeWithInitDestroyCallbackRetainCustomMethods() {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(InitDestroyBean.class);
-		beanDefinition.setInitMethodName("customInitMethod");
-		beanDefinition.setDestroyMethodNames("customDestroyMethod");
-		assertThat(createContribution(beanDefinition)).isNull();
-		assertThat(beanDefinition.getInitMethodNames())
-				.containsExactly("customInitMethod", "initMethod");
-		assertThat(beanDefinition.getDestroyMethodNames())
-				.containsExactly("customDestroyMethod", "destroyMethod");
-	}
-
-	@Test
-	void contributeWithInitDestroyCallbackFilterDuplicates() {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(InitDestroyBean.class);
-		beanDefinition.setInitMethodName("initMethod");
-		beanDefinition.setDestroyMethodNames("destroyMethod");
-		assertThat(createContribution(beanDefinition)).isNull();
-		assertThat(beanDefinition.getInitMethodNames()).containsExactly("initMethod");
-		assertThat(beanDefinition.getDestroyMethodNames()).containsExactly("destroyMethod");
-	}
-
-	@Test
-	void contributeWithMultipleInitDestroyCallbacks() {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(MultiInitDestroyBean.class);
-		assertThat(createContribution(beanDefinition)).isNull();
-		assertThat(beanDefinition.getInitMethodNames())
-				.containsExactly("initMethod", "anotherInitMethod");
-		assertThat(beanDefinition.getDestroyMethodNames())
-				.containsExactly("anotherDestroyMethod", "destroyMethod");
-	}
-
-	@Nullable
-	private BeanInstantiationContribution createContribution(RootBeanDefinition beanDefinition) {
-		InitDestroyAnnotationBeanPostProcessor bpp = createAotBeanPostProcessor();
-		return bpp.contribute(beanDefinition, beanDefinition.getResolvableType().toClass(), "test");
-	}
 
 	@Test
 	void processAheadOfTimeWhenNoCallbackDoesNotMutateRootBeanDefinition() {

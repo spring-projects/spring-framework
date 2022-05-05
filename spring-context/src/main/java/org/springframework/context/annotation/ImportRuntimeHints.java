@@ -26,7 +26,7 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
 
 /**
  * Indicates that one or more {@link RuntimeHintsRegistrar} implementations should be processed.
- * <p>Unlike declaring {@link RuntimeHintsRegistrar} as {@code spring.factories},
+ * <p>Unlike declaring {@link RuntimeHintsRegistrar} as {@code spring/aot.factories},
  * {@code @ImportRuntimeHints} allows for more flexible use cases where registrations are only
  * processed if the annotated configuration class or bean method is considered by the
  * application context.
