@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.aopalliance.intercept;
 
-import org.springframework.lang.NonNull;
+import javax.annotation.Nonnull;
 
 /**
  * Intercepts the construction of a new object.
@@ -56,7 +56,7 @@ public interface ConstructorInterceptor extends Interceptor  {
 	 * @throws Throwable if the interceptors or the target object
 	 * throws an exception
 	 */
-	@NonNull
+	@Nonnull
 	Object construct(ConstructorInvocation invocation) throws Throwable;
 
 }
