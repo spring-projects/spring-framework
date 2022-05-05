@@ -28,7 +28,7 @@ configure(allprojects) { project ->
 	dependencyManagement {
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.6"
-			mavenBom "io.netty:netty-bom:4.1.75.Final"
+			mavenBom "io.netty:netty-bom:4.1.76.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.18"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR13"
 			mavenBom "io.rsocket:rsocket-bom:1.1.2"
@@ -198,7 +198,7 @@ configure(allprojects) { project ->
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '4.4.0') {
+			dependencySet(group: 'org.mockito', version: '4.5.1') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
@@ -206,10 +206,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.12.1"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.60.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.61.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.60.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.61.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
