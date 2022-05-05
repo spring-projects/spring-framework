@@ -81,6 +81,21 @@ class ErrorsMethodArgumentResolverTests {
 		assertThat(actual).isSameAs(bindingResult);
 	}
 
+	@Test
+	void resolveOnBindingResultAndModelAttributeWithCustomValue() {
+		BindingResult bindingResult = createBindingResult(new Foo(), "custom");
+		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "custom", bindingResult);
+
+		ResolvableMethod testMethod = ResolvableMethod.on(getClass())
+				.named("handleWithModelAttributeValue").build();
+
+		MethodParameter parameter = testMethod.arg(Errors.class);
+		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+				.block(Duration.ofMillis(5000));
+
+		assertThat(actual).isSameAs(bindingResult);
+	}
+
 	private BindingResult createBindingResult(Foo target, String name) {
 		DataBinder binder = this.bindingContext.createDataBinder(this.exchange, target, name);
 		return binder.getBindingResult();
@@ -92,6 +107,21 @@ class ErrorsMethodArgumentResolverTests {
 		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", Mono.just(bindingResult));
 
 		MethodParameter parameter = this.testMethod.arg(Errors.class);
+		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+				.block(Duration.ofMillis(5000));
+
+		assertThat(actual).isSameAs(bindingResult);
+	}
+
+	@Test
+	void resolveWithMonoOnBindingResultAndModelAttributeWithCustomValue() {
+		BindingResult bindingResult = createBindingResult(new Foo(), "custom");
+		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "custom", Mono.just(bindingResult));
+
+		ResolvableMethod testMethod = ResolvableMethod.on(getClass())
+				.named("handleWithModelAttributeValue").build();
+
+		MethodParameter parameter = testMethod.arg(Errors.class);
 		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
 				.block(Duration.ofMillis(5000));
 
@@ -150,4 +180,13 @@ class ErrorsMethodArgumentResolverTests {
 			String string) {
 	}
 
+	@SuppressWarnings("unused")
+	void handleWithModelAttributeValue(
+			@ModelAttribute("custom") Foo foo,
+			Errors errors,
+			@ModelAttribute Mono<Foo> fooMono,
+			BindingResult bindingResult,
+			Mono<Errors> errorsMono,
+			String string) {
+	}
 }
