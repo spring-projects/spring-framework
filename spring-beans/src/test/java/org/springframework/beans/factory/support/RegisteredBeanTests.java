@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -113,21 +114,22 @@ class RegisteredBeanTests {
 	}
 
 	@Test
-	void getBeanClassWhenSingletonReturnsBeanClass() {
-		RegisteredBean registeredBean = RegisteredBean.of(this.beanFactory, "sb");
-		assertThat(registeredBean.getBeanClass()).isEqualTo(TestBean.class);
-	}
-
-	@Test
 	void getBeanTypeReturnsBeanType() {
 		RegisteredBean registeredBean = RegisteredBean.of(this.beanFactory, "bd");
 		assertThat(registeredBean.getBeanType().toClass()).isEqualTo(TestBean.class);
 	}
 
 	@Test
-	void getBeanTypeWhenSingletonReturnsBeanType() {
-		RegisteredBean registeredBean = RegisteredBean.of(this.beanFactory, "sb");
-		assertThat(registeredBean.getBeanType().toClass()).isEqualTo(TestBean.class);
+	void getBeanTypeWhenHasInstanceBackedByLambdaDoesNotReturnLambdaType() {
+		this.beanFactory.registerBeanDefinition("bfpp", new RootBeanDefinition(
+				BeanFactoryPostProcessor.class, RegisteredBeanTests::getBeanFactoryPostProcessorLambda));
+		this.beanFactory.getBean("bfpp");
+		RegisteredBean registeredBean = RegisteredBean.of(this.beanFactory, "bfpp");
+		assertThat(registeredBean.getBeanType().toClass()).isEqualTo(BeanFactoryPostProcessor.class);
+	}
+
+	static BeanFactoryPostProcessor getBeanFactoryPostProcessorLambda() {
+		return bf -> {};
 	}
 
 	@Test

@@ -158,9 +158,6 @@ public final class RegisteredBean {
 	 * @return the bean class
 	 */
 	public Class<?> getBeanClass() {
-		if (this.beanFactory.containsSingleton(getBeanName())) {
-			return this.beanFactory.getSingleton(getBeanName()).getClass();
-		}
 		return ClassUtils.getUserClass(getBeanType().toClass());
 	}
 
@@ -169,10 +166,6 @@ public final class RegisteredBean {
 	 * @return the bean type
 	 */
 	public ResolvableType getBeanType() {
-		if (this.beanFactory.containsSingleton(getBeanName())) {
-			return ResolvableType
-					.forInstance(this.beanFactory.getSingleton(getBeanName()));
-		}
 		return getMergedBeanDefinition().getResolvableType();
 	}
 
