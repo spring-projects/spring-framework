@@ -46,12 +46,9 @@ class FileSystemGeneratedFilesTests {
 		generatedFiles.addResourceFile("META-INF/test", "test");
 		generatedFiles.addClassFile("com/example/TestProxy.class",
 				new ByteArrayResource("!".getBytes(StandardCharsets.UTF_8)));
-		assertThat(this.root.resolve("sources/com/example/Test.java")).content()
-				.isEqualTo("{}");
-		assertThat(this.root.resolve("resources/META-INF/test")).content()
-				.isEqualTo("test");
-		assertThat(this.root.resolve("classes/com/example/TestProxy.class")).content()
-				.isEqualTo("!");
+		assertThat(this.root.resolve("sources/com/example/Test.java")).content().isEqualTo("{}");
+		assertThat(this.root.resolve("resources/META-INF/test")).content().isEqualTo("test");
+		assertThat(this.root.resolve("classes/com/example/TestProxy.class")).content().isEqualTo("!");
 	}
 
 	@Test
@@ -62,12 +59,9 @@ class FileSystemGeneratedFilesTests {
 		generatedFiles.addResourceFile("META-INF/test", "test");
 		generatedFiles.addClassFile("com/example/TestProxy.class",
 				new ByteArrayResource("!".getBytes(StandardCharsets.UTF_8)));
-		assertThat(this.root.resolve("the-SOURCE/com/example/Test.java")).content()
-				.isEqualTo("{}");
-		assertThat(this.root.resolve("the-RESOURCE/META-INF/test")).content()
-				.isEqualTo("test");
-		assertThat(this.root.resolve("the-CLASS/com/example/TestProxy.class")).content()
-				.isEqualTo("!");
+		assertThat(this.root.resolve("the-SOURCE/com/example/Test.java")).content().isEqualTo("{}");
+		assertThat(this.root.resolve("the-RESOURCE/META-INF/test")).content().isEqualTo("test");
+		assertThat(this.root.resolve("the-CLASS/com/example/TestProxy.class")).content().isEqualTo("!");
 	}
 
 	@Test
@@ -80,17 +74,15 @@ class FileSystemGeneratedFilesTests {
 	@Test
 	void createWhenRootsIsNullThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(
-						() -> new FileSystemGeneratedFiles((Function<Kind, Path>) null))
+				.isThrownBy(() -> new FileSystemGeneratedFiles((Function<Kind, Path>) null))
 				.withMessage("'roots' must not be null");
 	}
 
 	@Test
 	void createWhenRootsResultsInNullThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(
-						() -> new FileSystemGeneratedFiles(kind -> (kind != Kind.CLASS)
-								? this.root.resolve(kind.toString()) : null))
+				.isThrownBy(() -> new FileSystemGeneratedFiles(kind -> (kind != Kind.CLASS) ?
+								this.root.resolve(kind.toString()) : null))
 				.withMessage("'roots' must return a value for all file kinds");
 	}
 
@@ -102,8 +94,7 @@ class FileSystemGeneratedFilesTests {
 		assertPathMustBeRelative(generatedFiles, "test/../../test");
 	}
 
-	private void assertPathMustBeRelative(FileSystemGeneratedFiles generatedFiles,
-			String path) {
+	private void assertPathMustBeRelative(FileSystemGeneratedFiles generatedFiles, String path) {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> generatedFiles.addResourceFile(path, "test"))
 				.withMessage("'path' must be relative");
