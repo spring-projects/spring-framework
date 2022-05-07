@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,12 +82,11 @@ class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test
-	void resolveOnBindingResultAndModelAttributeWithCustomValue() {
+	void resolveOnBindingResultAndModelAttributeWithCustomName() {
 		BindingResult bindingResult = createBindingResult(new Foo(), "custom");
 		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "custom", bindingResult);
 
-		ResolvableMethod testMethod = ResolvableMethod.on(getClass())
-				.named("handleWithModelAttributeValue").build();
+		ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handleWithCustomModelAttributeName").build();
 
 		MethodParameter parameter = testMethod.arg(Errors.class);
 		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
@@ -114,12 +113,11 @@ class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test
-	void resolveWithMonoOnBindingResultAndModelAttributeWithCustomValue() {
+	void resolveWithMonoOnBindingResultAndModelAttributeWithCustomName() {
 		BindingResult bindingResult = createBindingResult(new Foo(), "custom");
 		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "custom", Mono.just(bindingResult));
 
-		ResolvableMethod testMethod = ResolvableMethod.on(getClass())
-				.named("handleWithModelAttributeValue").build();
+		ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handleWithCustomModelAttributeName").build();
 
 		MethodParameter parameter = testMethod.arg(Errors.class);
 		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
@@ -181,7 +179,7 @@ class ErrorsMethodArgumentResolverTests {
 	}
 
 	@SuppressWarnings("unused")
-	void handleWithModelAttributeValue(
+	void handleWithCustomModelAttributeName(
 			@ModelAttribute("custom") Foo foo,
 			Errors errors,
 			@ModelAttribute Mono<Foo> fooMono,
@@ -189,4 +187,5 @@ class ErrorsMethodArgumentResolverTests {
 			Mono<Errors> errorsMono,
 			String string) {
 	}
+
 }
