@@ -180,7 +180,7 @@ class ErrorsMethodArgumentResolverTests {
 
 	@SuppressWarnings("unused")
 	void handleWithCustomModelAttributeName(
-			@ModelAttribute("custom") Foo foo,
+			@ModelAttribute(name = "custom") Foo foo,
 			Errors errors,
 			@ModelAttribute Mono<Foo> fooMono,
 			BindingResult bindingResult,
