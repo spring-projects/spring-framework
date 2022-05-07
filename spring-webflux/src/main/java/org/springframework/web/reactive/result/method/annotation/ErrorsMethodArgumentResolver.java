@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Resolve {@link Errors} or {@link BindingResult} method arguments.
- * An {@code Errors} argument is expected to appear immediately after the
+ *
+ * <p>An {@code Errors} argument is expected to appear immediately after the
  * model attribute in the method signature.
  *
  * @author Rossen Stoyanchev
@@ -86,7 +87,7 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 				"Either declare the @ModelAttribute without an async wrapper type or " +
 				"handle a WebExchangeBindException error signal through the async type.");
 
-		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
+		ModelAttribute ann = attributeParam.getParameterAnnotation(ModelAttribute.class);
 		String name = (ann != null && StringUtils.hasText(ann.value()) ?
 				ann.value() : Conventions.getVariableNameForParameter(attributeParam));
 		Object errors = context.getModel().asMap().get(BindingResult.MODEL_KEY_PREFIX + name);
