@@ -22,6 +22,7 @@ import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -38,6 +39,7 @@ import org.springframework.web.server.ServerWebExchange;
  * model attribute in the method signature.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverSupport {
@@ -79,7 +81,7 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 				"Errors argument must be declared immediately after a model attribute argument");
 
 		int index = parameter.getParameterIndex() - 1;
-		MethodParameter attributeParam = MethodParameter.forExecutable(parameter.getExecutable(), index);
+		MethodParameter attributeParam = SynthesizingMethodParameter.forExecutable(parameter.getExecutable(), index);
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(attributeParam.getParameterType());
 
 		Assert.state(adapter == null, "An @ModelAttribute and an Errors/BindingResult argument " +
@@ -88,8 +90,8 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 				"handle a WebExchangeBindException error signal through the async type.");
 
 		ModelAttribute ann = attributeParam.getParameterAnnotation(ModelAttribute.class);
-		String name = (ann != null && StringUtils.hasText(ann.value()) ?
-				ann.value() : Conventions.getVariableNameForParameter(attributeParam));
+		String name = (ann != null && StringUtils.hasText(ann.name()) ? ann.name() :
+				Conventions.getVariableNameForParameter(attributeParam));
 		Object errors = context.getModel().asMap().get(BindingResult.MODEL_KEY_PREFIX + name);
 
 		Assert.state(errors != null, () -> "An Errors/BindingResult argument is expected " +
