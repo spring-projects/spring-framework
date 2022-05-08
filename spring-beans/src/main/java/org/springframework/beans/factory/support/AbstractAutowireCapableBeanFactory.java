@@ -79,6 +79,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodCallback;
 import org.springframework.util.StringUtils;
+import org.springframework.util.function.ThrowingSupplier;
 
 /**
  * Abstract bean factory superclass that implements default bean creation,
@@ -1199,19 +1200,40 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Obtain a bean instance from the given supplier.
-	 * @param instanceSupplier the configured supplier
+	 * @param supplier the configured supplier
 	 * @param beanName the corresponding bean name
 	 * @return a BeanWrapper for the new instance
 	 * @since 5.0
 	 * @see #getObjectForBeanInstance
 	 */
-	protected BeanWrapper obtainFromSupplier(Supplier<?> instanceSupplier, String beanName) {
-		Object instance;
+	protected BeanWrapper obtainFromSupplier(Supplier<?> supplier, String beanName) {
+		Object instance = obtainInstanceFromSupplier(supplier, beanName);
+		if (instance == null) {
+			instance = new NullBean();
+		}
+		BeanWrapper bw = new BeanWrapperImpl(instance);
+		initBeanWrapper(bw);
+		return bw;
+	}
 
+	private Object obtainInstanceFromSupplier(Supplier<?> supplier, String beanName) {
 		String outerBean = this.currentlyCreatedBean.get();
 		this.currentlyCreatedBean.set(beanName);
 		try {
-			instance = instanceSupplier.get();
+			if (supplier instanceof InstanceSupplier<?> instanceSupplier) {
+				return instanceSupplier.get(RegisteredBean.of(this, beanName));
+			}
+			if (supplier instanceof ThrowingSupplier<?> throwableSupplier) {
+				return throwableSupplier.getWithException();
+			}
+			return supplier.get();
+		}
+		catch (Throwable ex) {
+			if (ex instanceof BeansException beansException) {
+				throw beansException;
+			}
+			throw new BeanCreationException(beanName,
+					"Instantiation of supplied bean failed", ex);
 		}
 		finally {
 			if (outerBean != null) {
@@ -1221,13 +1243,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				this.currentlyCreatedBean.remove();
 			}
 		}
-
-		if (instance == null) {
-			instance = new NullBean();
-		}
-		BeanWrapper bw = new BeanWrapperImpl(instance);
-		initBeanWrapper(bw);
-		return bw;
 	}
 
 	/**

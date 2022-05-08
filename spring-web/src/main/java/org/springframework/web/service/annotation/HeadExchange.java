@@ -24,7 +24,6 @@ import java.lang.annotation.Target;
 
 import org.springframework.core.annotation.AliasFor;
 
-
 /**
  * Shortcut for {@link HttpExchange} for HTTP HEAD requests.
  *

@@ -16,7 +16,6 @@
 
 package org.springframework.web.service.invoker;
 
-
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
@@ -40,12 +39,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_CBOR_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-
 /**
  * Tests for {@link HttpServiceMethod} with a test {@link TestHttpClientAdapter}
  * that stubs the client invocations.
  *
- * <p>The tests do not create nor invoke {@code HttpServiceMethod} directly but
+ * <p>The tests do not create or invoke {@code HttpServiceMethod} directly but
  * rather use {@link HttpServiceProxyFactory} to create a service proxy in order to
  * use a strongly typed interface without the need for class casts.
  *
@@ -58,10 +56,12 @@ public class HttpServiceMethodTests {
 
 	private final TestHttpClientAdapter clientAdapter = new TestHttpClientAdapter();
 
+	private final HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.clientAdapter).build();
+
 
 	@Test
 	void reactorService() {
-		ReactorService service = this.clientAdapter.createService(ReactorService.class);
+		ReactorService service = this.proxyFactory.createClient(ReactorService.class);
 
 		Mono<Void> voidMono = service.execute();
 		StepVerifier.create(voidMono).verifyComplete();
@@ -94,7 +94,7 @@ public class HttpServiceMethodTests {
 
 	@Test
 	void rxJavaService() {
-		RxJavaService service = this.clientAdapter.createService(RxJavaService.class);
+		RxJavaService service = this.proxyFactory.createClient(RxJavaService.class);
 		Completable completable = service.execute();
 		assertThat(completable).isNotNull();
 
@@ -121,7 +121,7 @@ public class HttpServiceMethodTests {
 	@Test
 	void blockingService() {
 
-		BlockingService service = this.clientAdapter.createService(BlockingService.class);
+		BlockingService service = this.proxyFactory.createClient(BlockingService.class);
 
 		service.execute();
 
@@ -141,7 +141,7 @@ public class HttpServiceMethodTests {
 	@Test
 	void methodAnnotatedService() {
 
-		MethodLevelAnnotatedService service = this.clientAdapter.createService(MethodLevelAnnotatedService.class);
+		MethodLevelAnnotatedService service = this.proxyFactory.createClient(MethodLevelAnnotatedService.class);
 
 		service.performGet();
 
@@ -163,7 +163,7 @@ public class HttpServiceMethodTests {
 	@Test
 	void typeAndMethodAnnotatedService() {
 
-		MethodLevelAnnotatedService service = this.clientAdapter.createService(TypeAndMethodLevelAnnotatedService.class);
+		MethodLevelAnnotatedService service = this.proxyFactory.createClient(TypeAndMethodLevelAnnotatedService.class);
 
 		service.performGet();
 

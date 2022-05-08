@@ -16,91 +16,47 @@
 
 package org.springframework.web.service.invoker;
 
-import java.util.Map;
-import java.util.Optional;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 
-
 /**
- * An implementation of {@link HttpServiceArgumentResolver} that resolves
- * request path variables based on method arguments annotated
- * with {@link  PathVariable}. {@code null} values are allowed only
- * if {@link PathVariable#required()} is {@code true}.
+ * {@link HttpServiceArgumentResolver} for {@link PathVariable @PathVariable}
+ * annotated arguments.
+ *
+ * <p>The argument may be a single variable value or a {@code Map} with multiple
+ * variables and values. Each value may be a String or an Object to be converted
+ * to a String through the configured {@link ConversionService}.
+ *
+ * <p>If the value is required but {@code null}, {@link IllegalArgumentException}
+ * is raised. The value is not required if:
+ * <ul>
+ * <li>{@link PathVariable#required()} is set to {@code false}
+ * <li>The argument is declared as {@link java.util.Optional}
+ * </ul>
  *
  * @author Olga Maciaszek-Sharma
+ * @author Rossen Stoyanchev
  * @since 6.0
  */
-public class PathVariableArgumentResolver implements HttpServiceArgumentResolver {
-
-	private static final Log logger = LogFactory.getLog(PathVariableArgumentResolver.class);
-
-
-	private final ConversionService conversionService;
+public class PathVariableArgumentResolver extends AbstractNamedValueArgumentResolver {
 
 
 	public PathVariableArgumentResolver(ConversionService conversionService) {
-		Assert.notNull(conversionService, "ConversionService is required");
-		this.conversionService = conversionService;
+		super(conversionService);
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public boolean resolve(
-			@Nullable Object argument, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
-
-		PathVariable annotation = parameter.getParameterAnnotation(PathVariable.class);
-		if (annotation == null) {
-			return false;
-		}
-
-		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
-			if (argument != null) {
-				Assert.isInstanceOf(Map.class, argument);
-				((Map<String, ?>) argument).forEach((key, value) ->
-						addUriParameter(key, value, annotation.required(), requestValues));
-			}
-		}
-		else {
-			String name = StringUtils.hasText(annotation.value()) ? annotation.value() : annotation.name();
-			name = StringUtils.hasText(name) ? name : parameter.getParameterName();
-			Assert.notNull(name, "Failed to determine path variable name for parameter: " + parameter);
-			addUriParameter(name, argument, annotation.required(), requestValues);
-		}
-
-		return true;
+	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
+		PathVariable annot = parameter.getParameterAnnotation(PathVariable.class);
+		return (annot == null ? null :
+				new NamedValueInfo(annot.name(), annot.required(), null, "path variable", false));
 	}
 
-	private void addUriParameter(
-			String name, @Nullable Object value, boolean required, HttpRequestValues.Builder requestValues) {
-
-		if (value instanceof Optional) {
-			value = ((Optional<?>) value).orElse(null);
-		}
-
-		if (!(value instanceof String)) {
-			value = this.conversionService.convert(value, String.class);
-		}
-
-		if (value == null) {
-			Assert.isTrue(!required, "Missing required path variable '" + name + "'");
-			return;
-		}
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Resolved path variable '" + name + "' to " + value);
-		}
-
-		requestValues.setUriVariable(name, (String) value);
+	@Override
+	protected void addRequestValue(String name, String value, HttpRequestValues.Builder requestValues) {
+		requestValues.setUriVariable(name, value);
 	}
 
 }

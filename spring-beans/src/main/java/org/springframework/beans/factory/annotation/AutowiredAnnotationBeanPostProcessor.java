@@ -35,12 +35,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aot.generator.CodeContribution;
+import org.springframework.aot.generate.AccessVisibility;
+import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
+import org.springframework.aot.hint.FieldHint;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
@@ -52,15 +58,15 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
-import org.springframework.beans.factory.annotation.InjectionMetadata.InjectedElement;
+import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
+import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
+import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
-import org.springframework.beans.factory.generator.AotContributingBeanPostProcessor;
-import org.springframework.beans.factory.generator.BeanInstantiationContribution;
-import org.springframework.beans.factory.generator.InjectionGenerator;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
@@ -70,6 +76,11 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.javapoet.ClassName;
+import org.springframework.javapoet.CodeBlock;
+import org.springframework.javapoet.JavaFile;
+import org.springframework.javapoet.MethodSpec;
+import org.springframework.javapoet.TypeSpec;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -134,13 +145,14 @@ import org.springframework.util.StringUtils;
  * @author Stephane Nicoll
  * @author Sebastien Deleuze
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 2.5
  * @see #setAutowiredAnnotationType
  * @see Autowired
  * @see Value
  */
 public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
-		MergedBeanDefinitionPostProcessor, AotContributingBeanPostProcessor, PriorityOrdered, BeanFactoryAware {
+		MergedBeanDefinitionPostProcessor, BeanRegistrationAotProcessor, PriorityOrdered, BeanFactoryAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -268,12 +280,22 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	}
 
 	@Override
-	public BeanInstantiationContribution contribute(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-		InjectionMetadata metadata = findInjectionMetadata(beanName, beanType, beanDefinition);
-		Collection<InjectedElement> injectedElements = metadata.getInjectedElements();
-		return (!ObjectUtils.isEmpty(injectedElements)
-				? new AutowiredAnnotationBeanInstantiationContribution(injectedElements)
-				: null);
+	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+		Class<?> beanClass = registeredBean.getBeanClass();
+		String beanName = registeredBean.getBeanName();
+		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
+		InjectionMetadata metadata = findInjectionMetadata(beanName, beanClass, beanDefinition);
+		Collection<AutowiredElement> autowiredElements = getAutowiredElements(metadata);
+		if (!ObjectUtils.isEmpty(autowiredElements)) {
+			return new AotContribution(beanClass, autowiredElements);
+		}
+		return null;
+	}
+
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private Collection<AutowiredElement> getAutowiredElements(InjectionMetadata metadata) {
+		return (Collection) metadata.getInjectedElements();
 	}
 
 	private InjectionMetadata findInjectionMetadata(String beanName, Class<?> beanType, RootBeanDefinition beanDefinition) {
@@ -465,7 +487,6 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 	}
 
-
 	private InjectionMetadata findAutowiringMetadata(String beanName, Class<?> clazz, @Nullable PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
@@ -631,11 +652,24 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 
 	/**
+	 * Base class representing injection information.
+	 */
+	private abstract class AutowiredElement extends InjectionMetadata.InjectedElement {
+
+		protected final boolean required;
+
+		protected AutowiredElement(Member member, PropertyDescriptor pd, boolean required) {
+			super(member, pd);
+			this.required = required;
+		}
+
+	}
+
+
+	/**
 	 * Class representing injection information about an annotated field.
 	 */
-	private class AutowiredFieldElement extends InjectionMetadata.InjectedElement {
-
-		private final boolean required;
+	private class AutowiredFieldElement extends AutowiredElement {
 
 		private volatile boolean cached;
 
@@ -643,8 +677,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		private volatile Object cachedFieldValue;
 
 		public AutowiredFieldElement(Field field, boolean required) {
-			super(field, null);
-			this.required = required;
+			super(field, null, required);
 		}
 
 		@Override
@@ -710,9 +743,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	/**
 	 * Class representing injection information about an annotated method.
 	 */
-	private class AutowiredMethodElement extends InjectionMetadata.InjectedElement {
-
-		private final boolean required;
+	private class AutowiredMethodElement extends AutowiredElement {
 
 		private volatile boolean cached;
 
@@ -720,8 +751,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		private volatile Object[] cachedMethodArguments;
 
 		public AutowiredMethodElement(Method method, boolean required, @Nullable PropertyDescriptor pd) {
-			super(method, pd);
-			this.required = required;
+			super(method, pd, required);
 		}
 
 		@Override
@@ -821,52 +851,6 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 	}
 
-	private static final class AutowiredAnnotationBeanInstantiationContribution implements BeanInstantiationContribution {
-
-		private final Collection<InjectedElement> injectedElements;
-
-		private final InjectionGenerator generator;
-
-		AutowiredAnnotationBeanInstantiationContribution(Collection<InjectedElement> injectedElements) {
-			this.injectedElements = injectedElements;
-			this.generator = new InjectionGenerator();
-		}
-
-		@Override
-		public void applyTo(CodeContribution contribution) {
-			this.injectedElements.forEach(element -> {
-				boolean isRequired = isRequired(element);
-				Member member = element.getMember();
-				analyzeMember(contribution, member);
-				contribution.statements().addStatement(this.generator.generateInjection(member, isRequired));
-			});
-		}
-
-		private boolean isRequired(InjectedElement element) {
-			if (element instanceof AutowiredMethodElement injectedMethod) {
-				return injectedMethod.required;
-			}
-			else if (element instanceof AutowiredFieldElement injectedField) {
-				return injectedField.required;
-			}
-			return true;
-		}
-
-		private void analyzeMember(CodeContribution contribution, Member member) {
-			if (member instanceof Method method) {
-				contribution.runtimeHints().reflection().registerMethod(method,
-						hint -> hint.setModes(ExecutableMode.INTROSPECT));
-				contribution.protectedAccess().analyze(member,
-						this.generator.getProtectedAccessInjectionOptions(member));
-			}
-			else if (member instanceof Field field) {
-				contribution.runtimeHints().reflection().registerField(field);
-				contribution.protectedAccess().analyze(member,
-						this.generator.getProtectedAccessInjectionOptions(member));
-			}
-		}
-
-	}
 
 	/**
 	 * DependencyDescriptor variant with a pre-resolved target bean name.
@@ -888,6 +872,148 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		public Object resolveShortcut(BeanFactory beanFactory) {
 			return beanFactory.getBean(this.shortcut, this.requiredType);
 		}
+	}
+
+
+	/**
+	 * {@link BeanRegistrationAotContribution} to autowire fields and methods.
+	 */
+	private class AotContribution implements BeanRegistrationAotContribution {
+
+		private static final String APPLY_METHOD = "apply";
+
+		private static final String REGISTERED_BEAN_PARAMETER = "registeredBean";
+
+		private static final String INSTANCE_PARAMETER = "instance";
+
+		private static final Consumer<ExecutableHint.Builder> INTROSPECT = builder -> builder
+				.withMode(ExecutableMode.INTROSPECT);
+
+		private static final Consumer<FieldHint.Builder> ALLOW_WRITE = builder -> builder
+				.allowWrite(true);
+
+
+		private final Class<?> target;
+
+		private final Collection<AutowiredElement> autowiredElements;
+
+
+		AotContribution(Class<?> target, Collection<AutowiredElement> autowiredElements) {
+			this.target = target;
+			this.autowiredElements = autowiredElements;
+		}
+
+
+		@Override
+		public void applyTo(GenerationContext generationContext,
+				BeanRegistrationCode beanRegistrationCode) {
+
+			ClassName className = generationContext.getClassNameGenerator()
+					.generateClassName(this.target, "Autowiring");
+			TypeSpec.Builder classBuilder = TypeSpec.classBuilder(className);
+			classBuilder.addJavadoc("Autowiring for {@link $T}.", this.target);
+			classBuilder.addModifiers(javax.lang.model.element.Modifier.PUBLIC);
+			classBuilder.addMethod(generateMethod(generationContext.getRuntimeHints()));
+			JavaFile javaFile = JavaFile
+					.builder(className.packageName(), classBuilder.build()).build();
+			generationContext.getGeneratedFiles().addSourceFile(javaFile);
+			beanRegistrationCode.addInstancePostProcessor(
+					MethodReference.ofStatic(className, APPLY_METHOD));
+		}
+
+		private MethodSpec generateMethod(RuntimeHints hints) {
+			MethodSpec.Builder builder = MethodSpec.methodBuilder(APPLY_METHOD);
+			builder.addJavadoc("Apply the autowiring.");
+			builder.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
+					javax.lang.model.element.Modifier.STATIC);
+			builder.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
+			builder.addParameter(this.target, INSTANCE_PARAMETER);
+			builder.returns(this.target);
+			builder.addCode(generateMethodCode(hints));
+			return builder.build();
+		}
+
+		private CodeBlock generateMethodCode(RuntimeHints hints) {
+			CodeBlock.Builder builder = CodeBlock.builder();
+			for (AutowiredElement autowiredElement : this.autowiredElements) {
+				builder.addStatement(
+						generateMethodStatementForElement(autowiredElement, hints));
+			}
+			builder.addStatement("return $L", INSTANCE_PARAMETER);
+			return builder.build();
+		}
+
+		private CodeBlock generateMethodStatementForElement(
+				AutowiredElement autowiredElement, RuntimeHints hints) {
+
+			Member member = autowiredElement.getMember();
+			boolean required = autowiredElement.required;
+			if (member instanceof Field field) {
+				return generateMethodStatementForField(field, required, hints);
+			}
+			if (member instanceof Method method) {
+				return generateMethodStatementForMethod(method, required, hints);
+			}
+			throw new IllegalStateException(
+					"Unsupported member type " + member.getClass().getName());
+		}
+
+		private CodeBlock generateMethodStatementForField(Field field, boolean required,
+				RuntimeHints hints) {
+
+			CodeBlock resolver = CodeBlock.of("$T.$L($S)",
+					AutowiredFieldValueResolver.class,
+					(!required) ? "forField" : "forRequiredField", field.getName());
+			AccessVisibility visibility = AccessVisibility.forMember(field);
+			if (visibility == AccessVisibility.PRIVATE
+					|| visibility == AccessVisibility.PROTECTED) {
+				hints.reflection().registerField(field, ALLOW_WRITE);
+				return CodeBlock.of("$L.resolveAndSet($L, $L)", resolver,
+						REGISTERED_BEAN_PARAMETER, INSTANCE_PARAMETER);
+			}
+			return CodeBlock.of("$L.$L = $L.resolve($L)", INSTANCE_PARAMETER,
+					field.getName(), resolver, REGISTERED_BEAN_PARAMETER);
+		}
+
+		private CodeBlock generateMethodStatementForMethod(Method method,
+				boolean required, RuntimeHints hints) {
+
+			CodeBlock.Builder builder = CodeBlock.builder();
+			builder.add("$T.$L", AutowiredMethodArgumentsResolver.class,
+					(!required) ? "forMethod" : "forRequiredMethod");
+			builder.add("($S", method.getName());
+			if (method.getParameterCount() > 0) {
+				builder.add(", $L",
+						generateParameterTypesCode(method.getParameterTypes()));
+			}
+			builder.add(")");
+			AccessVisibility visibility = AccessVisibility.forMember(method);
+			if (visibility == AccessVisibility.PRIVATE
+					|| visibility == AccessVisibility.PROTECTED) {
+				hints.reflection().registerMethod(method);
+				builder.add(".resolveAndInvoke($L, $L)", REGISTERED_BEAN_PARAMETER,
+						INSTANCE_PARAMETER);
+			}
+			else {
+				hints.reflection().registerMethod(method, INTROSPECT);
+				CodeBlock arguments = new AutowiredArgumentsCodeGenerator(this.target,
+						method).generateCode(method.getParameterTypes());
+				CodeBlock injectionCode = CodeBlock.of("args -> $L.$L($L)",
+						INSTANCE_PARAMETER, method.getName(), arguments);
+				builder.add(".resolve($L, $L)", REGISTERED_BEAN_PARAMETER, injectionCode);
+			}
+			return builder.build();
+		}
+
+		private CodeBlock generateParameterTypesCode(Class<?>[] parameterTypes) {
+			CodeBlock.Builder builder = CodeBlock.builder();
+			for (int i = 0; i < parameterTypes.length; i++) {
+				builder.add(i != 0 ? ", " : "");
+				builder.add("$T.class", parameterTypes[i]);
+			}
+			return builder.build();
+		}
+
 	}
 
 }

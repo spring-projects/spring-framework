@@ -1,3 +1,0 @@
-org.springframework.beans.factory.generator.AotContributingBeanFactoryPostProcessor= \
-org.springframework.context.generator.ApplicationContextAotGeneratorTests.NoOpAotContributingBeanFactoryPostProcessor, \
-org.springframework.context.generator.ApplicationContextAotGeneratorTests.TextAotContributingBeanFactoryPostProcessor

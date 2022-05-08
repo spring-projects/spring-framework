@@ -24,15 +24,15 @@ import java.lang.annotation.Target;
 
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.web.bind.annotation.Mapping;
-
+import org.springframework.web.service.invoker.UrlArgumentResolver;
 
 /**
  * Annotation that declares an HTTP service method as an HTTP endpoint defined
  * through attributes of the annotation and method argument values.
  *
- * <p>The annotation may only be used at the type level for example to specify
- * a base URL path. At the method level, use one of the HTTP method specific,
- * shortcut annotations, each of which is <em>meta-annotated</em> with
+ * <p>The annotation may only be used at the type level &mdash; for example to
+ * specify a base URL path. At the method level, use one of the HTTP method
+ * specific, shortcut annotations, each of which is <em>meta-annotated</em> with
  * {@link HttpExchange}:
  * <ul>
  * <li>{@link GetExchange}
@@ -45,20 +45,56 @@ import org.springframework.web.bind.annotation.Mapping;
  * </ul>
  *
  * <p>Supported method arguments:
- * <table>
+ * <table border="1">
  * <tr>
  * <th>Method Argument</th>
  * <th>Description</th>
+ * <th>Resolver</th>
  * </tr>
  * <tr>
- * <td>{@link org.springframework.http.HttpMethod}</td>
- * <td>Set the HTTP method for the request, overriding the annotation
- * {@link #method()} attribute value</td>
+ * <td>{@link java.net.URI URI}</td>
+ * <td>Dynamically set the URL for the request, overriding the annotation's
+ * {@link #url()} attribute</td>
+ * <td>{@link UrlArgumentResolver
+ * HttpUrlArgumentResolver}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link org.springframework.http.HttpMethod HttpMethod}</td>
+ * <td>Dynamically set the HTTP method for the request, overriding the annotation's
+ * {@link #method()} attribute</td>
+ * <td>{@link org.springframework.web.service.invoker.HttpMethodArgumentResolver
+ * HttpMethodArgumentResolver}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link org.springframework.web.bind.annotation.RequestHeader @RequestHeader}</td>
+ * <td>Add a request header</td>
+ * <td>{@link org.springframework.web.service.invoker.RequestHeaderArgumentResolver
+ * RequestHeaderArgumentResolver}</td>
  * </tr>
  * <tr>
  * <td>{@link org.springframework.web.bind.annotation.PathVariable @PathVariable}</td>
- * <td>Provide a path variable to expand the URI template with. This may be an
- * individual value or a Map of values.</td>
+ * <td>Add a path variable for the URI template</td>
+ * <td>{@link org.springframework.web.service.invoker.PathVariableArgumentResolver
+ * PathVariableArgumentResolver}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link org.springframework.web.bind.annotation.RequestBody @RequestBody}</td>
+ * <td>Set the body of the request</td>
+ * <td>{@link org.springframework.web.service.invoker.RequestBodyArgumentResolver
+ * RequestBodyArgumentResolver}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link org.springframework.web.bind.annotation.RequestParam @RequestParam}</td>
+ * <td>Add a request parameter, either form data if {@code "Content-Type"} is
+ * {@code "application/x-www-form-urlencoded"} or query params otherwise</td>
+ * <td>{@link org.springframework.web.service.invoker.RequestParamArgumentResolver
+ * RequestParamArgumentResolver}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link org.springframework.web.bind.annotation.CookieValue @CookieValue}</td>
+ * <td>Add a cookie</td>
+ * <td>{@link org.springframework.web.service.invoker.CookieValueArgumentResolver
+ * CookieValueArgumentResolver}</td>
  * </tr>
  * </table>
  *

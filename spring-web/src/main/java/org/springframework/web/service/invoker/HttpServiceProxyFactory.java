@@ -37,7 +37,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.service.annotation.HttpExchange;
 
-
 /**
  * Factory for creating a client proxy given an HTTP service interface with
  * {@link HttpExchange @HttpExchange} methods.
@@ -69,7 +68,7 @@ public final class HttpServiceProxyFactory {
 
 	/**
 	 * Return a proxy that implements the given HTTP service interface to perform
-	 * HTTP requests and retrieves responses through an HTTP client.
+	 * HTTP requests and retrieve responses through an HTTP client.
 	 * @param serviceType the HTTP service to create a proxy for
 	 * @param <S> the HTTP service type
 	 * @return the created proxy
@@ -147,7 +146,7 @@ public final class HttpServiceProxyFactory {
 
 		/**
 		 * Set the {@link ReactiveAdapterRegistry} to use to support different
-		 * asynchronous types for HTTP Service method return values.
+		 * asynchronous types for HTTP service method return values.
 		 * <p>By default this is {@link ReactiveAdapterRegistry#getSharedInstance()}.
 		 * @return the same builder instance
 		 */
@@ -157,7 +156,7 @@ public final class HttpServiceProxyFactory {
 		}
 
 		/**
-		 * Configure how long to wait for a response for an HTTP Service method
+		 * Configure how long to wait for a response for an HTTP service method
 		 * with a synchronous (blocking) method signature.
 		 * <p>By default this is 5 seconds.
 		 * @param blockTimeout the timeout value
@@ -187,8 +186,13 @@ public final class HttpServiceProxyFactory {
 
 		private List<HttpServiceArgumentResolver> initArgumentResolvers(ConversionService conversionService) {
 			List<HttpServiceArgumentResolver> resolvers = new ArrayList<>(this.customResolvers);
-			resolvers.add(new HttpMethodArgumentResolver());
+			resolvers.add(new RequestHeaderArgumentResolver(conversionService));
+			resolvers.add(new RequestBodyArgumentResolver(this.reactiveAdapterRegistry));
 			resolvers.add(new PathVariableArgumentResolver(conversionService));
+			resolvers.add(new RequestParamArgumentResolver(conversionService));
+			resolvers.add(new CookieValueArgumentResolver(conversionService));
+			resolvers.add(new UrlArgumentResolver());
+			resolvers.add(new HttpMethodArgumentResolver());
 			return resolvers;
 		}
 

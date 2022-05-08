@@ -16,12 +16,15 @@
 
 package org.springframework.web.service.invoker;
 
-
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
@@ -29,12 +32,14 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
+import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Container for HTTP request values extracted from an
@@ -75,21 +80,20 @@ public final class HttpRequestValues {
 	private final ParameterizedTypeReference<?> bodyElementType;
 
 
-	private HttpRequestValues(HttpMethod httpMethod, @Nullable URI uri,
-			@Nullable String uriTemplate, @Nullable Map<String, String> uriVariables,
-			@Nullable HttpHeaders headers, @Nullable MultiValueMap<String, String> cookies,
+	private HttpRequestValues(HttpMethod httpMethod,
+			@Nullable URI uri, @Nullable String uriTemplate, Map<String, String> uriVariables,
+			HttpHeaders headers, MultiValueMap<String, String> cookies,
 			@Nullable Object bodyValue,
-			@Nullable Publisher<?> body,
-			@Nullable ParameterizedTypeReference<?> bodyElementType) {
+			@Nullable Publisher<?> body, @Nullable ParameterizedTypeReference<?> bodyElementType) {
 
-		Assert.isTrue(uri == null || uriTemplate == null, "Expected either URI or URI template, not both");
+		Assert.isTrue(uri != null || uriTemplate != null, "Neither URI nor URI template");
 
 		this.httpMethod = httpMethod;
 		this.uri = uri;
-		this.uriTemplate = (uri != null || uriTemplate != null ? uriTemplate : "");
-		this.uriVariables = (uriVariables != null ? uriVariables : Collections.emptyMap());
-		this.headers = (headers != null ? headers : HttpHeaders.EMPTY);
-		this.cookies = (cookies != null ? cookies : EMPTY_COOKIES_MAP);
+		this.uriTemplate = uriTemplate;
+		this.uriVariables = uriVariables;
+		this.headers = headers;
+		this.cookies = cookies;
 		this.bodyValue = bodyValue;
 		this.body = body;
 		this.bodyElementType = bodyElementType;
@@ -115,7 +119,7 @@ public final class HttpRequestValues {
 
 	/**
 	 * Return the URL template for the request, if set.
-	 * <p>This is mutually exclusive with a {@link #getUri() full URL}.
+	 * <p>This is mutually exclusive with a {@linkplain #getUri() full URL}.
 	 * One of the two has a value but not both.
 	 */
 	@Nullable
@@ -165,7 +169,7 @@ public final class HttpRequestValues {
 	}
 
 	/**
-	 * Return the element type for a {@link #getBody() Publisher body}.
+	 * Return the element type for a {@linkplain #getBody() Publisher body}.
 	 */
 	@Nullable
 	public ParameterizedTypeReference<?> getBodyElementType() {
@@ -183,6 +187,8 @@ public final class HttpRequestValues {
 	 */
 	public final static class Builder {
 
+		private static final Function<MultiValueMap<String, String>, byte[]> FORM_DATA_SERIALIZER = new FormDataSerializer();
+
 		private HttpMethod httpMethod;
 
 		@Nullable
@@ -192,13 +198,16 @@ public final class HttpRequestValues {
 		private String uriTemplate;
 
 		@Nullable
-		private Map<String, String> uriVariables;
+		private Map<String, String> uriVars;
 
 		@Nullable
 		private HttpHeaders headers;
 
 		@Nullable
 		private MultiValueMap<String, String> cookies;
+
+		@Nullable
+		private MultiValueMap<String, String> requestParams;
 
 		@Nullable
 		private Object bodyValue;
@@ -226,18 +235,20 @@ public final class HttpRequestValues {
 		/**
 		 * Set the request URL as a full URL.
 		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@link #setUriTemplate(String)}.
+		 * {@linkplain #setUriTemplate(String) URI template} or
+		 * {@linkplain #setUriVariable(String, String) URI variables}.
 		 */
 		public Builder setUri(URI uri) {
 			this.uri = uri;
 			this.uriTemplate = null;
+			this.uriVars = null;
 			return this;
 		}
 
 		/**
 		 * Set the request URL as a String template.
 		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@link #setUri(URI) full URI}.
+		 * {@linkplain #setUri(URI) full URI}.
 		 */
 		public Builder setUriTemplate(String uriTemplate) {
 			this.uriTemplate = uriTemplate;
@@ -248,15 +259,14 @@ public final class HttpRequestValues {
 		/**
 		 * Add a URI variable name-value pair.
 		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@link #setUri(URI) full URI}.
+		 * {@linkplain #setUri(URI) full URI}.
 		 */
 		public Builder setUriVariable(String name, String value) {
-			this.uriVariables = (this.uriVariables != null ? this.uriVariables : new LinkedHashMap<>());
-			this.uriVariables.put(name, value);
+			this.uriVars = (this.uriVars != null ? this.uriVars : new LinkedHashMap<>());
+			this.uriVars.put(name, value);
 			this.uri = null;
 			return this;
 		}
-
 
 		/**
 		 * Set the media types for the request {@code Accept} header.
@@ -301,9 +311,24 @@ public final class HttpRequestValues {
 		}
 
 		/**
+		 * Add the given request parameter name and values.
+		 * <p>When {@code "content-type"} is set to
+		 * {@code "application/x-www-form-urlencoded"}, request parameters are
+		 * encoded in the request body. Otherwise, they are added as URL query
+		 * parameters.
+		 */
+		public Builder addRequestParameter(String name, String... values) {
+			this.requestParams = (this.requestParams != null ? this.requestParams : new LinkedMultiValueMap<>());
+			for (String value : values) {
+				this.requestParams.add(name, value);
+			}
+			return this;
+		}
+
+		/**
 		 * Set the request body as a concrete value to be serialized.
 		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@link #setBody(Publisher, ParameterizedTypeReference) body Publisher}.
+		 * {@linkplain #setBody(Publisher, ParameterizedTypeReference) body Publisher}.
 		 */
 		public void setBodyValue(Object bodyValue) {
 			this.bodyValue = bodyValue;
@@ -314,9 +339,9 @@ public final class HttpRequestValues {
 		/**
 		 * Set the request body as a concrete value to be serialized.
 		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@link #setBodyValue(Object) body value}.
+		 * {@linkplain #setBodyValue(Object) body value}.
 		 */
-		public <T, P extends Publisher<T>> void setBody(Publisher<P> body, ParameterizedTypeReference<?> elementTye) {
+		public <T, P extends Publisher<T>> void setBody(P body, ParameterizedTypeReference<T> elementTye) {
 			this.body = body;
 			this.bodyElementType = elementTye;
 			this.bodyValue = null;
@@ -326,10 +351,76 @@ public final class HttpRequestValues {
 		 * Builder the {@link HttpRequestValues} instance.
 		 */
 		public HttpRequestValues build() {
+
+			URI uri = this.uri;
+			String uriTemplate = (this.uriTemplate != null || uri != null ? this.uriTemplate : "");
+			Map<String, String> uriVars = (this.uriVars != null ? new HashMap<>(this.uriVars) : Collections.emptyMap());
+
+			Object bodyValue = this.bodyValue;
+
+			if (!CollectionUtils.isEmpty(this.requestParams)) {
+
+				boolean isFormData = (this.headers != null &&
+						MediaType.APPLICATION_FORM_URLENCODED.equals(this.headers.getContentType()));
+
+				if (isFormData) {
+					Assert.isTrue(bodyValue == null && this.body == null, "Expected body or request params, not both");
+					bodyValue = FORM_DATA_SERIALIZER.apply(this.requestParams);
+				}
+				else if (uri != null) {
+					uri = UriComponentsBuilder.fromUri(uri)
+							.queryParams(UriUtils.encodeQueryParams(this.requestParams))
+							.build(true)
+							.toUri();
+				}
+				else {
+					uriVars = (uriVars.isEmpty() ? new HashMap<>() : uriVars);
+					uriTemplate = appendQueryParams(uriTemplate, uriVars, this.requestParams);
+				}
+			}
+
+			HttpHeaders headers = HttpHeaders.EMPTY;
+			if (this.headers != null) {
+				headers = new HttpHeaders();
+				headers.putAll(this.headers);
+			}
+
+			MultiValueMap<String, String> cookies = (this.cookies != null ?
+					new LinkedMultiValueMap<>(this.cookies) : EMPTY_COOKIES_MAP);
+
 			return new HttpRequestValues(
-					this.httpMethod, this.uri, this.uriTemplate, this.uriVariables,
-					this.headers, this.cookies,
-					this.bodyValue, this.body, this.bodyElementType);
+					this.httpMethod, uri, uriTemplate, uriVars, headers, cookies, bodyValue,
+					this.body, this.bodyElementType);
+		}
+
+		private String appendQueryParams(
+				String uriTemplate, Map<String, String> uriVars, MultiValueMap<String, String> requestParams) {
+
+			UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(uriTemplate);
+			int i = 0;
+			for (Map.Entry<String, List<String>> entry : requestParams.entrySet()) {
+				String nameVar = "queryParam" + i;
+				uriVars.put(nameVar, entry.getKey());
+				for (int j = 0; j < entry.getValue().size(); j++) {
+					String valueVar = nameVar + "[" + j + "]";
+					uriVars.put(valueVar, entry.getValue().get(j));
+					uriComponentsBuilder.queryParam("{" + nameVar + "}", "{" + valueVar + "}");
+				}
+				i++;
+			}
+			return uriComponentsBuilder.build().toUriString();
+		}
+
+	}
+
+
+	private static class FormDataSerializer
+			extends FormHttpMessageWriter implements Function<MultiValueMap<String, String>, byte[]> {
+
+		@Override
+		public byte[] apply(MultiValueMap<String, String> requestParams) {
+			Charset charset = StandardCharsets.UTF_8;
+			return serializeForm(requestParams, charset).getBytes(charset);
 		}
 
 	}

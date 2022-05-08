@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -532,6 +532,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			this.applicationEventMulticaster.addApplicationListener(listener);
 		}
 		this.applicationListeners.add(listener);
+	}
+
+	@Override
+	public void removeApplicationListener(ApplicationListener<?> listener) {
+		Assert.notNull(listener, "ApplicationListener must not be null");
+		if (this.applicationEventMulticaster != null) {
+			this.applicationEventMulticaster.removeApplicationListener(listener);
+		}
+		this.applicationListeners.remove(listener);
 	}
 
 	/**

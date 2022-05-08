@@ -18,6 +18,9 @@ package org.springframework.aot.test.generator.compile;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.test.generator.file.ResourceFiles;
+import org.springframework.aot.test.generator.file.SourceFiles;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -31,8 +34,8 @@ class CompilationExceptionTests {
 
 	@Test
 	void getMessageReturnsMessage() {
-		CompilationException exception = new CompilationException("message");
-		assertThat(exception).hasMessage("message");
+		CompilationException exception = new CompilationException("message", SourceFiles.none(), ResourceFiles.none());
+		assertThat(exception).hasMessageContaining("message");
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,20 @@ class ErrorsMethodArgumentResolverTests {
 		assertThat(actual).isSameAs(bindingResult);
 	}
 
+	@Test
+	void resolveOnBindingResultAndModelAttributeWithCustomName() {
+		BindingResult bindingResult = createBindingResult(new Foo(), "custom");
+		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "custom", bindingResult);
+
+		ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handleWithCustomModelAttributeName").build();
+
+		MethodParameter parameter = testMethod.arg(Errors.class);
+		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+				.block(Duration.ofMillis(5000));
+
+		assertThat(actual).isSameAs(bindingResult);
+	}
+
 	private BindingResult createBindingResult(Foo target, String name) {
 		DataBinder binder = this.bindingContext.createDataBinder(this.exchange, target, name);
 		return binder.getBindingResult();
@@ -92,6 +106,20 @@ class ErrorsMethodArgumentResolverTests {
 		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", Mono.just(bindingResult));
 
 		MethodParameter parameter = this.testMethod.arg(Errors.class);
+		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+				.block(Duration.ofMillis(5000));
+
+		assertThat(actual).isSameAs(bindingResult);
+	}
+
+	@Test
+	void resolveWithMonoOnBindingResultAndModelAttributeWithCustomName() {
+		BindingResult bindingResult = createBindingResult(new Foo(), "custom");
+		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "custom", Mono.just(bindingResult));
+
+		ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handleWithCustomModelAttributeName").build();
+
+		MethodParameter parameter = testMethod.arg(Errors.class);
 		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
 				.block(Duration.ofMillis(5000));
 
@@ -143,6 +171,16 @@ class ErrorsMethodArgumentResolverTests {
 	@SuppressWarnings("unused")
 	void handle(
 			@ModelAttribute Foo foo,
+			Errors errors,
+			@ModelAttribute Mono<Foo> fooMono,
+			BindingResult bindingResult,
+			Mono<Errors> errorsMono,
+			String string) {
+	}
+
+	@SuppressWarnings("unused")
+	void handleWithCustomModelAttributeName(
+			@ModelAttribute(name = "custom") Foo foo,
 			Errors errors,
 			@ModelAttribute Mono<Foo> fooMono,
 			BindingResult bindingResult,

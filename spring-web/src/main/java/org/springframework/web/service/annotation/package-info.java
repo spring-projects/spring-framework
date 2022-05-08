@@ -1,5 +1,5 @@
 /**
- * Annotations to declare HTTP service, request methods.
+ * Annotations for declaring HTTP service request methods.
  */
 @NonNullApi
 @NonNullFields

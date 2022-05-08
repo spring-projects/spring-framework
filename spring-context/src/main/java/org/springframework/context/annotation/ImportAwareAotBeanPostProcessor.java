@@ -39,10 +39,12 @@ public final class ImportAwareAotBeanPostProcessor implements BeanPostProcessor 
 
 	private final Map<String, String> importsMapping;
 
+
 	public ImportAwareAotBeanPostProcessor(Map<String, String> importsMapping) {
 		this.metadataReaderFactory = new CachingMetadataReaderFactory();
 		this.importsMapping = Map.copyOf(importsMapping);
 	}
+
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {

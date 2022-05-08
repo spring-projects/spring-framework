@@ -44,6 +44,11 @@ public class DynamicFileAssert<A extends DynamicFileAssert<A, F>, F extends Dyna
 		return this.myself;
 	}
 
+	public A doesNotContain(CharSequence... values) {
+		assertThat(this.actual.getContent()).doesNotContain(values);
+		return this.myself;
+	}
+
 	public A isEqualTo(@Nullable Object expected) {
 		if (expected instanceof DynamicFile) {
 			return super.isEqualTo(expected);

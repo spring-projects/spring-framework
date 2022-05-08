@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -33,10 +34,12 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Resolve {@link Errors} or {@link BindingResult} method arguments.
- * An {@code Errors} argument is expected to appear immediately after the
+ *
+ * <p>An {@code Errors} argument is expected to appear immediately after the
  * model attribute in the method signature.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverSupport {
@@ -78,7 +81,7 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 				"Errors argument must be declared immediately after a model attribute argument");
 
 		int index = parameter.getParameterIndex() - 1;
-		MethodParameter attributeParam = MethodParameter.forExecutable(parameter.getExecutable(), index);
+		MethodParameter attributeParam = SynthesizingMethodParameter.forExecutable(parameter.getExecutable(), index);
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(attributeParam.getParameterType());
 
 		Assert.state(adapter == null, "An @ModelAttribute and an Errors/BindingResult argument " +
@@ -86,9 +89,9 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 				"Either declare the @ModelAttribute without an async wrapper type or " +
 				"handle a WebExchangeBindException error signal through the async type.");
 
-		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
-		String name = (ann != null && StringUtils.hasText(ann.value()) ?
-				ann.value() : Conventions.getVariableNameForParameter(attributeParam));
+		ModelAttribute ann = attributeParam.getParameterAnnotation(ModelAttribute.class);
+		String name = (ann != null && StringUtils.hasText(ann.name()) ? ann.name() :
+				Conventions.getVariableNameForParameter(attributeParam));
 		Object errors = context.getModel().asMap().get(BindingResult.MODEL_KEY_PREFIX + name);
 
 		Assert.state(errors != null, () -> "An Errors/BindingResult argument is expected " +

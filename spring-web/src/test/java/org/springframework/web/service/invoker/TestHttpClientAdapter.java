@@ -26,7 +26,6 @@ import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * {@link HttpClientAdapter} with stubbed responses.
  *
@@ -44,15 +43,6 @@ class TestHttpClientAdapter implements HttpClientAdapter {
 
 	@Nullable
 	private ParameterizedTypeReference<?> bodyType;
-
-
-	/**
-	 * Create the proxy for the give service type.
-	 */
-	public <S> S createService(Class<S> serviceType) {
-		HttpServiceProxyFactory factory = HttpServiceProxyFactory.builder(this).build();
-		return factory.createClient(serviceType);
-	}
 
 
 	public String getInvokedMethodName() {

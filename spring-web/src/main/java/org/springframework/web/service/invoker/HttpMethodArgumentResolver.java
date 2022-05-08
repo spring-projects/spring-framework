@@ -23,7 +23,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 
-
 /**
  * {@link HttpServiceArgumentResolver} that resolves the target
  * request's HTTP method from an {@link HttpMethod} argument.
@@ -40,15 +39,19 @@ public class HttpMethodArgumentResolver implements HttpServiceArgumentResolver {
 	public boolean resolve(
 			@Nullable Object argument, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
-		if (argument instanceof HttpMethod httpMethod) {
+		if (!parameter.getParameterType().equals(HttpMethod.class)) {
+			return false;
+		}
+
+		if (argument != null) {
+			HttpMethod httpMethod = (HttpMethod) argument;
+			requestValues.setHttpMethod(httpMethod);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Resolved HTTP method to: " + httpMethod.name());
 			}
-			requestValues.setHttpMethod(httpMethod);
-			return true;
 		}
 
-		return false;
+		return true;
 	}
 
 }
