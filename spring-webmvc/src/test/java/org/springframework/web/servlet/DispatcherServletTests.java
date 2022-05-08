@@ -511,14 +511,18 @@ public class DispatcherServletTests {
 		complexDispatcherServlet.setNamespace("test");
 		complexDispatcherServlet.init(new MockServletConfig(getServletContext(), "complex"));
 
+        // only ServletHandlerAdapter with bean name "handlerAdapter" detected
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/servlet.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
 		assertThat(response.getContentAsString()).isEqualTo("body");
 
+        // SimpleControllerHandlerAdapter not detected
 		request = new MockHttpServletRequest(getServletContext(), "GET", "/form.do");
 		response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
+        assertThat(response.getForwardedUrl()).as("forwarded to failed").isEqualTo("failed0.jsp");
+        assertThat(request.getAttribute("exception").getClass().equals(ServletException.class)).as("Exception exposed").isTrue();
 	}
 
 	@Test
