@@ -31,7 +31,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.server.ServerWebInputException;
 
-
 /**
  * {@link ServerWebInputException} subclass that indicates a data binding or
  * validation failure.
@@ -54,13 +53,12 @@ public class WebExchangeBindException extends ServerWebInputException implements
 
 	/**
 	 * Return the BindingResult that this BindException wraps.
-	 * Will typically be a BeanPropertyBindingResult.
+	 * <p>Will typically be a BeanPropertyBindingResult.
 	 * @see BeanPropertyBindingResult
 	 */
 	public final BindingResult getBindingResult() {
 		return this.bindingResult;
 	}
-
 
 	@Override
 	public String getObjectName() {
@@ -86,7 +84,6 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	public void popNestedPath() throws IllegalStateException {
 		this.bindingResult.popNestedPath();
 	}
-
 
 	@Override
 	public void reject(String errorCode) {
@@ -124,7 +121,6 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	public void addAllErrors(Errors errors) {
 		this.bindingResult.addAllErrors(errors);
 	}
-
 
 	@Override
 	public boolean hasErrors() {
@@ -275,7 +271,6 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	public String[] getSuppressedFields() {
 		return this.bindingResult.getSuppressedFields();
 	}
-
 
 	/**
 	 * Returns diagnostic information about the errors held in this object.
