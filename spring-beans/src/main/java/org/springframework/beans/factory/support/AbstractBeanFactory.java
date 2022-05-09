@@ -587,7 +587,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// Attempt to predict the bean type
 		Class<?> predictedType = null;
 
-		// We're looking for a regular reference but we're a factory bean that has
+		// We're looking for a regular reference, but we're a factory bean that has
 		// a decorated bean definition. The target bean should be the same type
 		// as FactoryBean would ultimately return.
 		if (!isFactoryDereference && dbd != null && isFactoryBean(beanName, mbd)) {
@@ -625,7 +625,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 		else if (isFactoryDereference) {
 			// Special case: A SmartInstantiationAwareBeanPostProcessor returned a non-FactoryBean
-			// type but we nevertheless are being asked to dereference a FactoryBean...
+			// type, but we nevertheless are being asked to dereference a FactoryBean...
 			// Let's check the original bean class and proceed with it if it is a FactoryBean.
 			predictedType = predictBeanType(beanName, mbd, FactoryBean.class);
 			if (predictedType == null || !FactoryBean.class.isAssignableFrom(predictedType)) {
