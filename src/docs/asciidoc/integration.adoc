@@ -12,19 +12,34 @@ a number of technologies.
 
 
 [[rest-client-access]]
-== REST Endpoints
+== REST Clients
 
-The Spring Framework provides two choices for making calls to REST endpoints:
+The Spring Framework provides the following choices for making calls to REST endpoints:
 
-* <<rest-resttemplate>>: The original Spring REST client with a synchronous, template
-method API.
-* <<web-reactive.adoc#webflux-client, WebClient>>: a non-blocking, reactive alternative
-that supports both synchronous and asynchronous as well as streaming scenarios.
+* <<rest-webclient>> - non-blocking, reactive client w fluent API.
+* <<rest-resttemplate>> - synchronous client with template method API.
+* <<rest-http-interface>> - annotated interface with generated, dynamic proxy implementation.
 
-NOTE: As of 5.0 the `RestTemplate` is in maintenance mode, with only minor requests for
-changes and bugs to be accepted going forward. Please, consider using the
-<<web-reactive.adoc#webflux-client, WebClient>> which offers a more modern API and
-supports sync, async, and streaming scenarios.
+
+[[rest-webclient]]
+=== `WebClient`
+
+`WebClient` is a non-blocking, reactive client to perform HTTP requests. It was
+introduced in 5.0 and offers an alternative to the `RestTemplate`, with support for
+synchronous, asynchronous, and streaming scenarios.
+
+`WebClient` supports the following:
+
+* Non-blocking I/O.
+* Reactive Streams back pressure.
+* High concurrency with fewer hardware resources.
+* Functional-style, fluent API that takes advantage of Java 8 lambdas.
+* Synchronous and asynchronous interactions.
+* Streaming up to or streaming down from a server.
+
+See <<web-reactive.adoc#webflux-client, WebClient>> for more details.
+
+
 
 
 [[rest-resttemplate]]
@@ -33,6 +48,10 @@ supports sync, async, and streaming scenarios.
 The `RestTemplate` provides a higher level API over HTTP client libraries. It makes it
 easy to invoke REST endpoints in a single line. It exposes the following groups of
 overloaded methods:
+
+NOTE: `RestTemplate` is in maintenance mode, with only requests for minor
+changes and bugs to be accepted. Please, consider using the
+<<web-reactive.adoc#webflux-client, WebClient>> instead.
 
 [[rest-overview-of-resttemplate-methods-tbl]]
 .RestTemplate methods
@@ -342,6 +361,151 @@ If the `MultiValueMap` contains at least one non-`String` value, the `Content-Ty
 to `multipart/form-data` by the `FormHttpMessageConverter`. If the `MultiValueMap` has
 `String` values the `Content-Type` is defaulted to `application/x-www-form-urlencoded`.
 If necessary the `Content-Type` may also be set explicitly.
+
+
+[[rest-http-interface]]
+=== HTTP Interface
+
+The Spring Frameworks lets you define an HTTP service as a Java interface with annotated
+methods for HTTP exchanges. You can then generate a proxy that implements this interface
+and performs the exchanges. This helps to simplify HTTP remote access which often
+involves a facade that wraps the details of using the underlying HTTP client.
+
+To start, declare an interface with annotated, HTTP exchange methods:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	interface RepositoryService {
+
+		@GetExchange("/repos/{owner}/{repo}")
+		Repository getRepository(@PathVariable String owner, @PathVariable String repo);
+
+		// more HTTP exchange methods...
+
+	}
+----
+
+Now you create a proxy for the interface that performs the declared exchanges through
+the `WebClient`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	WebClient client = WebClient.builder()
+			.baseUrl("https://api.github.com/")
+			.build();
+
+	HttpServiceProxyFactory proxyFactory = 
+			HttpServiceProxyFactory.builder(new WebClientAdapter(client)).build();
+
+	RepositoryService service = proxyFactory.createClient(RepositoryService.class);
+----
+
+An HTTP service interface can declare common attributes at the type level:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@HttpExchange(url = "/repos/{owner}/{repo}", accept = "application/vnd.github.v3+json")
+	interface RepositoryService {
+
+		@GetExchange
+		Repository getRepository(@PathVariable String owner, @PathVariable String repo);
+
+		@PatchExchange(contentType = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+		void updateRepository(@PathVariable String owner, @PathVariable String repo,
+				@RequestParam String name, @RequestParam String description, @RequestParam String homepage);
+
+	}
+----
+
+
+[[rest-http-interface-method-parameters]]
+==== Method Parameters
+
+Annotated, HTTP exchange methods support flexible method signatures with the following
+method parameters:
+
+[cols="1,2", options="header"]
+|===
+| Controller method argument | Description
+
+| `URI`
+| Dynamically set the URL for the request, overriding the annotation's `url` attribute.
+
+| `HttpMethod`
+| Dynamically set the HTTP method for the request, overriding the annotation's `method` attribute
+
+| `@RequestHeader`
+| Add a request header or mutliple headers. The argument may be a `Map<String, ?>` or
+  `MultiValueMap<String, ?>` with multiple headers, a `Collection<?>` of values, or an
+  individual value. Type conversion is supported for non-String values.
+
+| `@PathVariable`
+| Add a variable for expand a placeholder in the request URL. The argument may be a
+  `Map<String, ?>` with multiple variables, or an individual value. Type conversion
+  is supported for non-String values.
+
+| `@RequestBody`
+| Provide the body of the request either as an Object to be serialized, or a
+  Reactive Streams `Publisher` such as `Mono`, `Flux`, or any other async type supported
+  through the configured `ReactiveAdapterRegistry`.
+
+| `@RequestParam`
+| Add a request parameter or mutliple parameters. The argument may be a `Map<String, ?>`
+  or `MultiValueMap<String, ?>` with multiple parameters, a `Collection<?>` of values, or
+  an individual value. Type conversion is supported for non-String values.
+  
+  When `"content-type"` is set to `"application/x-www-form-urlencoded"`, request
+  parameters are encoded in the request body. Otherwise, they are added as URL query
+  parameters.
+
+| `@CookieValue`
+| Add a cookie or mutliple cookies. The argument may be a `Map<String, ?>` or
+  `MultiValueMap<String, ?>` with multiple cookies, a `Collection<?>` of values, or an
+  individual value. Type conversion is supported for non-String values.
+
+|===
+
+
+[[rest-http-interface-return-values]]
+==== Return Values
+
+Annotated, HTTP exchange methods support the following return values:
+
+[cols="1,2", options="header"]
+|===
+| Controller method return value | Description
+
+| `void`, `Mono<Void>`
+| Perform the given request, and release the response content, if any.
+
+| `HttpHeaders`, `Mono<HttpHeaders>`
+| Perform the given request, release the response content, if any, and return the
+  response headers.
+
+| `<T>`, `Mono<T>`
+| Perform the given request and decode the response content to the declared return type.
+
+| `<T>`, `Flux<T>`
+| Perform the given request and decode the response content to a stream of the declared
+  element type.
+
+| `ResponseEntity<Void>`, `Mono<ResponseEntity<Void>>`
+| Perform the given request, and release the response content, if any, and return a
+  `ResponseEntity` with the status and headers.
+
+| `ResponseEntity<T>`, `Mono<ResponseEntity<T>>`
+| Perform the given request, decode the response content to the declared return type, and
+  return a `ResponseEntity` with the status, headers, and the decoded body.
+
+| `Mono<ResponseEntity<Flux<T>>`
+| Perform the given request, decode the response content to a stream of the declared
+  element type, and return a `ResponseEntity` with the status, headers, and the decoded
+  response body stream.
+
+|===
+
+TIP: You can also use any other async or reactive types registered in the
+`ReactiveAdapterRegistry`.
 
 
 
