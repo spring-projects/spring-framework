@@ -70,7 +70,7 @@ class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test
-	void resolve() {
+	void resolveWithInferredModelAttributeName() {
 		BindingResult bindingResult = createBindingResult(new Foo(), "foo");
 		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", bindingResult);
 
@@ -82,11 +82,11 @@ class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test
-	void resolveOnBindingResultAndModelAttributeWithCustomName() {
+	void resolveWithCustomModelAttributeNameConfiguredViaValueAttribute() {
 		BindingResult bindingResult = createBindingResult(new Foo(), "custom");
 		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "custom", bindingResult);
 
-		ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handleWithCustomModelAttributeName").build();
+		ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handleWithCustomModelAttributeNameViaValueAttribute").build();
 
 		MethodParameter parameter = testMethod.arg(Errors.class);
 		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
@@ -95,9 +95,18 @@ class ErrorsMethodArgumentResolverTests {
 		assertThat(actual).isSameAs(bindingResult);
 	}
 
-	private BindingResult createBindingResult(Foo target, String name) {
-		DataBinder binder = this.bindingContext.createDataBinder(this.exchange, target, name);
-		return binder.getBindingResult();
+	@Test
+	void resolveWithCustomModelAttributeNameConfiguredViaNameAttribute() {
+		BindingResult bindingResult = createBindingResult(new Foo(), "custom");
+		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "custom", bindingResult);
+
+		ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handleWithCustomModelAttributeNameViaNameAttribute").build();
+
+		MethodParameter parameter = testMethod.arg(Errors.class);
+		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+				.block(Duration.ofMillis(5000));
+
+		assertThat(actual).isSameAs(bindingResult);
 	}
 
 	@Test
@@ -113,11 +122,11 @@ class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test
-	void resolveWithMonoOnBindingResultAndModelAttributeWithCustomName() {
+	void resolveWithMonoAndCustomModelAttributeNameConfiguredViaValueAttribute() {
 		BindingResult bindingResult = createBindingResult(new Foo(), "custom");
 		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "custom", Mono.just(bindingResult));
 
-		ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handleWithCustomModelAttributeName").build();
+		ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handleWithCustomModelAttributeNameViaValueAttribute").build();
 
 		MethodParameter parameter = testMethod.arg(Errors.class);
 		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
@@ -144,6 +153,11 @@ class ErrorsMethodArgumentResolverTests {
 						.block(Duration.ofMillis(5000)))
 			.withMessageContaining("An Errors/BindingResult argument is expected " +
 					"immediately after the @ModelAttribute argument");
+	}
+
+	private BindingResult createBindingResult(Foo target, String name) {
+		DataBinder binder = this.bindingContext.createDataBinder(this.exchange, target, name);
+		return binder.getBindingResult();
 	}
 
 
@@ -179,13 +193,15 @@ class ErrorsMethodArgumentResolverTests {
 	}
 
 	@SuppressWarnings("unused")
-	void handleWithCustomModelAttributeName(
+	void handleWithCustomModelAttributeNameViaValueAttribute(
+			@ModelAttribute("custom") Foo foo,
+			Errors errors) {
+	}
+
+	@SuppressWarnings("unused")
+	void handleWithCustomModelAttributeNameViaNameAttribute(
 			@ModelAttribute(name = "custom") Foo foo,
-			Errors errors,
-			@ModelAttribute Mono<Foo> fooMono,
-			BindingResult bindingResult,
-			Mono<Errors> errorsMono,
-			String string) {
+			Errors errors) {
 	}
 
 }
