@@ -82,7 +82,7 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	}
 
 
-	private class DefaultCallback implements WebSocketConnectionCallback {
+	private static class DefaultCallback implements WebSocketConnectionCallback {
 
 		private final HandshakeInfo handshakeInfo;
 

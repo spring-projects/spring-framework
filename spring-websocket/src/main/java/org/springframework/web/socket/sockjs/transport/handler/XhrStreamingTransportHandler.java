@@ -75,7 +75,7 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 	}
 
 
-	private class XhrStreamingSockJsSession extends StreamingSockJsSession {
+	private static class XhrStreamingSockJsSession extends StreamingSockJsSession {
 
 		public XhrStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
 				WebSocketHandler wsHandler, Map<String, Object> attributes) {

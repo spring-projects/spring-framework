@@ -88,7 +88,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 	}
 
 
-	private class HandlerResultSubscriber implements Subscriber<Void> {
+	private static class HandlerResultSubscriber implements Subscriber<Void> {
 
 		private final HttpServerExchange exchange;
 
