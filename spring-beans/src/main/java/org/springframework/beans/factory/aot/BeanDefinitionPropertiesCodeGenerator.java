@@ -16,16 +16,28 @@
 
 package org.springframework.beans.factory.aot;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.springframework.aot.generate.MethodGenerator;
+import org.springframework.aot.hint.ExecutableHint;
+import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.beans.BeanInfoFactory;
+import org.springframework.beans.ExtendedBeanInfoFactory;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -36,6 +48,7 @@ import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.CodeBlock.Builder;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -69,6 +82,9 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 	private static final String BEAN_DEFINITION_VARIABLE = BeanRegistrationCodeFragments.BEAN_DEFINITION_VARIABLE;
 
+	private static final	Consumer<ExecutableHint.Builder> INVOKE_HINT = hint -> hint.withMode(ExecutableMode.INVOKE);
+
+	private static final BeanInfoFactory beanInfoFactory = new ExtendedBeanInfoFactory();
 
 	private final RuntimeHints hints;
 
@@ -125,14 +141,14 @@ class BeanDefinitionPropertiesCodeGenerator {
 			AbstractBeanDefinition beanDefinition, String[] methodNames, String format) {
 
 		if (!ObjectUtils.isEmpty(methodNames)) {
-			Class<?> beanUserClass = ClassUtils
+			Class<?> beanType = ClassUtils
 					.getUserClass(beanDefinition.getResolvableType().toClass());
 			Builder arguments = CodeBlock.builder();
 			for (int i = 0; i < methodNames.length; i++) {
 				String methodName = methodNames[i];
 				if (!AbstractBeanDefinition.INFER_METHOD.equals(methodName)) {
 					arguments.add((i != 0) ? ", $S" : "$S", methodName);
-					addInitDestroyHint(beanUserClass, methodName);
+					addInitDestroyHint(beanType, methodName);
 				}
 			}
 			builder.addStatement(format, BEAN_DEFINITION_VARIABLE, arguments.build());
@@ -181,8 +197,52 @@ class BeanDefinitionPropertiesCodeGenerator {
 				builder.addStatement("$L.getPropertyValues().addPropertyValue($S, $L)",
 						BEAN_DEFINITION_VARIABLE, propertyValue.getName(), code);
 			}
+			Class<?> beanType = ClassUtils
+					.getUserClass(beanDefinition.getResolvableType().toClass());
+			BeanInfo beanInfo = (beanType != Object.class) ? getBeanInfo(beanType) : null;
+			if (beanInfo != null) {
+				Map<String, Method> writeMethods = getWriteMethods(beanInfo);
+				for (PropertyValue propertyValue : propertyValues) {
+					Method writeMethod = writeMethods.get(propertyValue.getName());
+					if (writeMethod != null) {
+						this.hints.reflection().registerMethod(writeMethod, INVOKE_HINT);
+					}
+				}
+			}
 		}
 	}
+
+	@Nullable
+	private BeanInfo getBeanInfo(Class<?> beanType) {
+		try {
+			BeanInfo beanInfo = beanInfoFactory.getBeanInfo(beanType);
+			if (beanInfo != null) {
+				return beanInfo;
+			}
+			return Introspector.getBeanInfo(beanType, Introspector.IGNORE_ALL_BEANINFO);
+		}
+		catch (IntrospectionException ex) {
+			return null;
+		}
+	}
+
+	private Map<String, Method> getWriteMethods(BeanInfo beanInfo) {
+		Map<String, Method> writeMethods = new HashMap<>();
+		for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
+			writeMethods.put(propertyDescriptor.getName(),
+					propertyDescriptor.getWriteMethod());
+		}
+		return Collections.unmodifiableMap(writeMethods);
+	}
+
+	@Nullable
+	private Method findWriteMethod(BeanInfo beanInfo, String propertyName) {
+		return Arrays.stream(beanInfo.getPropertyDescriptors())
+				.filter(pd -> propertyName.equals(pd.getName()))
+				.map(java.beans.PropertyDescriptor::getWriteMethod)
+				.filter(Objects::nonNull).findFirst().orElse(null);
+	}
+
 
 	private void addAttributes(CodeBlock.Builder builder, BeanDefinition beanDefinition) {
 		String[] attributeNames = beanDefinition.attributeNames();
