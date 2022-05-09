@@ -16,11 +16,10 @@
 
 package org.springframework.util;
 
-import java.io.UnsupportedEncodingException;
-
 import jakarta.xml.bind.DatatypeConverter;
 import org.junit.jupiter.api.Test;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -29,19 +28,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class Base64UtilsTests {
 
+
 	@Test
-	void encode() throws UnsupportedEncodingException {
+	void encode() {
 		byte[] bytes = new byte[]
 				{-0x4f, 0xa, -0x73, -0x4f, 0x64, -0x20, 0x75, 0x41, 0x5, -0x49, -0x57, -0x65, -0x19, 0x2e, 0x3f, -0x1b};
 		assertThat(Base64Utils.decode(Base64Utils.encode(bytes))).isEqualTo(bytes);
 
-		bytes = "Hello World".getBytes("UTF-8");
+		bytes = "Hello World".getBytes(UTF_8);
 		assertThat(Base64Utils.decode(Base64Utils.encode(bytes))).isEqualTo(bytes);
 
-		bytes = "Hello World\r\nSecond Line".getBytes("UTF-8");
+		bytes = "Hello World\r\nSecond Line".getBytes(UTF_8);
 		assertThat(Base64Utils.decode(Base64Utils.encode(bytes))).isEqualTo(bytes);
 
-		bytes = "Hello World\r\nSecond Line\r\n".getBytes("UTF-8");
+		bytes = "Hello World\r\nSecond Line\r\n".getBytes(UTF_8);
 		assertThat(Base64Utils.decode(Base64Utils.encode(bytes))).isEqualTo(bytes);
 
 		bytes = new byte[] { (byte) 0xfb, (byte) 0xf0 };
@@ -53,24 +53,24 @@ class Base64UtilsTests {
 	}
 
 	@Test
-	void encodeToStringWithJdk8VsJaxb() throws UnsupportedEncodingException {
+	void encodeToStringWithJdk8VsJaxb() {
 		byte[] bytes = new byte[]
 				{-0x4f, 0xa, -0x73, -0x4f, 0x64, -0x20, 0x75, 0x41, 0x5, -0x49, -0x57, -0x65, -0x19, 0x2e, 0x3f, -0x1b};
 		assertThat(DatatypeConverter.printBase64Binary(bytes)).isEqualTo(Base64Utils.encodeToString(bytes));
 		assertThat(Base64Utils.decodeFromString(Base64Utils.encodeToString(bytes))).isEqualTo(bytes);
 		assertThat(DatatypeConverter.parseBase64Binary(DatatypeConverter.printBase64Binary(bytes))).isEqualTo(bytes);
 
-		bytes = "Hello World".getBytes("UTF-8");
+		bytes = "Hello World".getBytes(UTF_8);
 		assertThat(DatatypeConverter.printBase64Binary(bytes)).isEqualTo(Base64Utils.encodeToString(bytes));
 		assertThat(Base64Utils.decodeFromString(Base64Utils.encodeToString(bytes))).isEqualTo(bytes);
 		assertThat(DatatypeConverter.parseBase64Binary(DatatypeConverter.printBase64Binary(bytes))).isEqualTo(bytes);
 
-		bytes = "Hello World\r\nSecond Line".getBytes("UTF-8");
+		bytes = "Hello World\r\nSecond Line".getBytes(UTF_8);
 		assertThat(DatatypeConverter.printBase64Binary(bytes)).isEqualTo(Base64Utils.encodeToString(bytes));
 		assertThat(Base64Utils.decodeFromString(Base64Utils.encodeToString(bytes))).isEqualTo(bytes);
 		assertThat(DatatypeConverter.parseBase64Binary(DatatypeConverter.printBase64Binary(bytes))).isEqualTo(bytes);
 
-		bytes = "Hello World\r\nSecond Line\r\n".getBytes("UTF-8");
+		bytes = "Hello World\r\nSecond Line\r\n".getBytes(UTF_8);
 		assertThat(DatatypeConverter.printBase64Binary(bytes)).isEqualTo(Base64Utils.encodeToString(bytes));
 		assertThat(Base64Utils.decodeFromString(Base64Utils.encodeToString(bytes))).isEqualTo(bytes);
 		assertThat(DatatypeConverter.parseBase64Binary(DatatypeConverter.printBase64Binary(bytes))).isEqualTo(bytes);
@@ -84,6 +84,18 @@ class Base64UtilsTests {
 
 		assertThat(Base64Utils.encodeToUrlSafeString(bytes)).isEqualTo("-_A=");
 		assertThat(Base64Utils.decodeFromUrlSafeString(Base64Utils.encodeToUrlSafeString(bytes))).isEqualTo(bytes);
+	}
+	@Test
+	void emptyInputs() {
+		assertThat(Base64Utils.encode(new byte[0])).isEmpty();
+		assertThat(Base64Utils.encodeToString(new byte[0])).isEmpty();
+		assertThat(Base64Utils.encodeUrlSafe(new byte[0])).isEmpty();
+		assertThat(Base64Utils.encodeToUrlSafeString(new byte[0])).isEmpty();
+
+		assertThat(Base64Utils.decode(new byte[0])).isEmpty();
+		assertThat(Base64Utils.decodeFromString("")).isEmpty();
+		assertThat(Base64Utils.decodeUrlSafe(new byte[0])).isEmpty();
+		assertThat(Base64Utils.decodeFromUrlSafeString("")).isEmpty();
 	}
 
 }

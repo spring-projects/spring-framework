@@ -16,8 +16,6 @@
 
 package org.springframework.util;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
@@ -31,9 +29,6 @@ import java.util.Base64;
  * @see java.util.Base64
  */
 public abstract class Base64Utils {
-
-	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-
 
 	/**
 	 * Base64-encode the given byte array.
@@ -96,7 +91,7 @@ public abstract class Base64Utils {
 		if (src.length == 0) {
 			return "";
 		}
-		return new String(encode(src), DEFAULT_CHARSET);
+		return Base64.getEncoder().encodeToString(src);
 	}
 
 	/**
@@ -108,7 +103,7 @@ public abstract class Base64Utils {
 		if (src.isEmpty()) {
 			return new byte[0];
 		}
-		return decode(src.getBytes(DEFAULT_CHARSET));
+		return Base64.getDecoder().decode(src);
 	}
 
 	/**
@@ -118,7 +113,7 @@ public abstract class Base64Utils {
 	 * @return the encoded byte array as a UTF-8 String
 	 */
 	public static String encodeToUrlSafeString(byte[] src) {
-		return new String(encodeUrlSafe(src), DEFAULT_CHARSET);
+		return Base64.getUrlEncoder().encodeToString(src);
 	}
 
 	/**
@@ -128,7 +123,7 @@ public abstract class Base64Utils {
 	 * @return the original byte array
 	 */
 	public static byte[] decodeFromUrlSafeString(String src) {
-		return decodeUrlSafe(src.getBytes(DEFAULT_CHARSET));
+		return Base64.getUrlDecoder().decode(src);
 	}
 
 }
