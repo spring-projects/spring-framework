@@ -1023,9 +1023,9 @@ To connect from a browser, for SockJS, you can use the
 https://github.com/sockjs/sockjs-client[`sockjs-client`]. For STOMP, many applications have
 used the https://github.com/jmesnil/stomp-websocket[jmesnil/stomp-websocket] library
 (also known as stomp.js), which is feature-complete and has been used in production for
-years but is no longer maintained. At present the
-https://github.com/JSteunou/webstomp-client[JSteunou/webstomp-client] is the most
-actively maintained and evolving successor of that library. The following example code
+years but is no longer maintained. The
+https://github.com/JSteunou/webstomp-client[JSteunou/webstomp-client] was the most
+actively maintained and evolving successor of that library until 2018. The following example code
 is based on it:
 
 [source,javascript,indent=0,subs="verbatim,quotes"]
