@@ -232,7 +232,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	}
 
 
-	private class FileNameVersionedResource extends AbstractResource implements HttpResource {
+	private static class FileNameVersionedResource extends AbstractResource implements HttpResource {
 
 		private final Resource original;
 

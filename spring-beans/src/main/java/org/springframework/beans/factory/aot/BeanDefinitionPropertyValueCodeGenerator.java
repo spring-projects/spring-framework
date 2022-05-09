@@ -119,7 +119,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	/**
 	 * {@link Delegate} for {@code primitive} types.
 	 */
-	private class PrimitiveDelegate implements Delegate {
+	private static class PrimitiveDelegate implements Delegate {
 
 		private static final Map<Character, String> CHAR_ESCAPES;
 
@@ -177,7 +177,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	/**
 	 * {@link Delegate} for {@link String} types.
 	 */
-	private class StringDelegate implements Delegate {
+	private static class StringDelegate implements Delegate {
 
 		@Override
 		@Nullable
@@ -194,7 +194,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	/**
 	 * {@link Delegate} for {@link Enum} types.
 	 */
-	private class EnumDelegate implements Delegate {
+	private static class EnumDelegate implements Delegate {
 
 		@Override
 		@Nullable
@@ -212,7 +212,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	/**
 	 * {@link Delegate} for {@link Class} types.
 	 */
-	private class ClassDelegate implements Delegate {
+	private static class ClassDelegate implements Delegate {
 
 		@Override
 		@Nullable
@@ -229,7 +229,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	/**
 	 * {@link Delegate} for {@link ResolvableType} types.
 	 */
-	private class ResolvableTypeDelegate implements Delegate {
+	private static class ResolvableTypeDelegate implements Delegate {
 
 		@Override
 		@Nullable
@@ -512,7 +512,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	/**
 	 * {@link Delegate} for {@link BeanReference} types.
 	 */
-	private class BeanReferenceDelegate implements Delegate {
+	private static class BeanReferenceDelegate implements Delegate {
 
 		@Override
 		@Nullable

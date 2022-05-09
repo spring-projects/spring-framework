@@ -20,14 +20,14 @@ import org.springframework.core.env.Environment;
 
 public class InnerComponentConfiguration {
 
-	public class NoDependencyComponent {
+	public static class NoDependencyComponent {
 
 		public NoDependencyComponent() {
 
 		}
 	}
 
-	public class EnvironmentAwareComponent {
+	public static class EnvironmentAwareComponent {
 
 		public EnvironmentAwareComponent(Environment environment) {
 

@@ -654,7 +654,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	/**
 	 * Base class representing injection information.
 	 */
-	private abstract class AutowiredElement extends InjectionMetadata.InjectedElement {
+	private abstract static class AutowiredElement extends InjectionMetadata.InjectedElement {
 
 		protected final boolean required;
 
