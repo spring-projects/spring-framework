@@ -169,7 +169,7 @@ public @interface ContextConfiguration {
 	Class<? extends ApplicationContextInitializer<?>>[] initializers() default {};
 
 	/**
-	 * Whether or not {@linkplain #locations resource locations} or
+	 * Whether {@linkplain #locations resource locations} or
 	 * {@linkplain #classes <em>component classes</em>} from test superclasses
 	 * should be <em>inherited</em>.
 	 * <p>The default value is {@code true}. This means that an annotated test
@@ -224,7 +224,7 @@ public @interface ContextConfiguration {
 	boolean inheritLocations() default true;
 
 	/**
-	 * Whether or not {@linkplain #initializers context initializers} from test
+	 * Whether {@linkplain #initializers context initializers} from test
 	 * superclasses should be <em>inherited</em>.
 	 * <p>The default value is {@code true}. This means that an annotated test
 	 * class will <em>inherit</em> the application context initializers defined
