@@ -804,11 +804,11 @@ public abstract class StringUtils {
 
 	/**
 	 * Parse the given {@code String} value into a {@link Locale}, accepting
-	 * the {@link Locale#toString} format as well as BCP 47 language tags.
+	 * the {@link Locale#toString} format as well as BCP 47 language tags as
+	 * specified by {@link Locale#forLanguageTag}.
 	 * @param localeValue the locale value: following either {@code Locale's}
 	 * {@code toString()} format ("en", "en_UK", etc), also accepting spaces as
 	 * separators (as an alternative to underscores), or BCP 47 (e.g. "en-UK")
-	 * as specified by {@link Locale#forLanguageTag} on Java 7+
 	 * @return a corresponding {@code Locale} instance, or {@code null} if none
 	 * @throws IllegalArgumentException in case of an invalid locale specification
 	 * @since 5.0.4
