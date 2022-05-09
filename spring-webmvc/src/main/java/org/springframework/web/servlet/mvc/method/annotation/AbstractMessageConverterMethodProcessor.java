@@ -19,8 +19,10 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -44,6 +46,7 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -92,6 +95,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 
 	private final ContentNegotiationManager contentNegotiationManager;
+
+	private final List<MediaType> problemMediaTypes =
+			Arrays.asList(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_PROBLEM_XML);
 
 	private final Set<String> safeExtensions = new HashSet<>();
 
@@ -227,21 +233,22 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				}
 				throw ex;
 			}
-			List<MediaType> producibleTypes = getProducibleMediaTypes(request, valueType, targetType);
 
+			List<MediaType> producibleTypes = getProducibleMediaTypes(request, valueType, targetType);
 			if (body != null && producibleTypes.isEmpty()) {
 				throw new HttpMessageNotWritableException(
 						"No converter found for return value of type: " + valueType);
 			}
-			List<MediaType> mediaTypesToUse = new ArrayList<>();
-			for (MediaType requestedType : acceptableTypes) {
-				for (MediaType producibleType : producibleTypes) {
-					if (requestedType.isCompatibleWith(producibleType)) {
-						mediaTypesToUse.add(getMostSpecificMediaType(requestedType, producibleType));
-					}
-				}
+
+			List<MediaType> compatibleMediaTypes = new ArrayList<>();
+			determineCompatibleMediaTypes(acceptableTypes, producibleTypes, compatibleMediaTypes);
+
+			// Fall back on RFC 7807 format for ProblemDetail
+			if (compatibleMediaTypes.isEmpty() && ProblemDetail.class.isAssignableFrom(valueType)) {
+				determineCompatibleMediaTypes(this.problemMediaTypes, producibleTypes, compatibleMediaTypes);
 			}
-			if (mediaTypesToUse.isEmpty()) {
+
+			if (compatibleMediaTypes.isEmpty()) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("No match for " + acceptableTypes + ", supported: " + producibleTypes);
 				}
@@ -251,9 +258,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				return;
 			}
 
-			MimeTypeUtils.sortBySpecificity(mediaTypesToUse);
+			MimeTypeUtils.sortBySpecificity(compatibleMediaTypes);
 
-			for (MediaType mediaType : mediaTypesToUse) {
+			for (MediaType mediaType : compatibleMediaTypes) {
 				if (mediaType.isConcrete()) {
 					selectedMediaType = mediaType;
 					break;
@@ -374,7 +381,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			return new ArrayList<>(mediaTypes);
 		}
-		List<MediaType> result = new ArrayList<>();
+		Set<MediaType> result = new LinkedHashSet<>();
 		for (HttpMessageConverter<?> converter : this.messageConverters) {
 			if (converter instanceof GenericHttpMessageConverter && targetType != null) {
 				if (((GenericHttpMessageConverter<?>) converter).canWrite(targetType, valueClass, null)) {
@@ -385,13 +392,25 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				result.addAll(converter.getSupportedMediaTypes(valueClass));
 			}
 		}
-		return (result.isEmpty() ? Collections.singletonList(MediaType.ALL) : result);
+		return (result.isEmpty() ? Collections.singletonList(MediaType.ALL) : new ArrayList<>(result));
 	}
 
 	private List<MediaType> getAcceptableMediaTypes(HttpServletRequest request)
 			throws HttpMediaTypeNotAcceptableException {
 
 		return this.contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request));
+	}
+
+	private void determineCompatibleMediaTypes(
+			List<MediaType> acceptableTypes, List<MediaType> producibleTypes, List<MediaType> mediaTypesToUse) {
+
+		for (MediaType requestedType : acceptableTypes) {
+			for (MediaType producibleType : producibleTypes) {
+				if (requestedType.isCompatibleWith(producibleType)) {
+					mediaTypesToUse.add(getMostSpecificMediaType(requestedType, producibleType));
+				}
+			}
+		}
 	}
 
 	/**

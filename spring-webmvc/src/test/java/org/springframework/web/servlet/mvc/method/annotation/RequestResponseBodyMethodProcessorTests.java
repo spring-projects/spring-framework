@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -391,6 +392,48 @@ public class RequestResponseBodyMethodProcessorTests {
 				"  \"id\" : 12," + NEWLINE_SYSTEM_PROPERTY +
 				"  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY +
 				"}");
+	}
+
+	@Test
+	void problemDetailDefaultMediaType() throws Exception {
+		testProblemDetailMediaType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+	}
+
+	@Test
+	void problemDetailWhenJsonRequested() throws Exception {
+		this.servletRequest.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
+		testProblemDetailMediaType(MediaType.APPLICATION_JSON_VALUE);
+	}
+
+	@Test
+	void problemDetailWhenNoMatchingMediaTypeRequested() throws Exception {
+		this.servletRequest.addHeader("Accept", MediaType.APPLICATION_PDF_VALUE);
+		testProblemDetailMediaType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+	}
+
+	private void testProblemDetailMediaType(String expectedContentType) throws Exception {
+
+		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+
+		this.servletRequest.setRequestURI("/path");
+
+		RequestResponseBodyMethodProcessor processor =
+				new RequestResponseBodyMethodProcessor(
+						Collections.singletonList(new MappingJackson2HttpMessageConverter()));
+
+		MethodParameter returnType =
+				new MethodParameter(getClass().getDeclaredMethod("handleAndReturnProblemDetail"), -1);
+
+		processor.handleReturnValue(problemDetail, returnType, this.container, this.request);
+
+		assertThat(this.servletResponse.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		assertThat(this.servletResponse.getContentType()).isEqualTo(expectedContentType);
+		assertThat(this.servletResponse.getContentAsString()).isEqualTo(
+				"{\"type\":\"about:blank\"," +
+						"\"title\":\"Bad Request\"," +
+						"\"status\":400," +
+						"\"detail\":null," +
+						"\"instance\":\"/path\"}");
 	}
 
 	@Test // SPR-13135
@@ -803,6 +846,10 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	Resource getImage() {
+		return null;
+	}
+
+	ProblemDetail handleAndReturnProblemDetail() {
 		return null;
 	}
 

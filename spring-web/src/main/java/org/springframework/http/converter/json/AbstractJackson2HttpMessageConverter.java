@@ -53,6 +53,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.AbstractGenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -92,6 +93,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 
+	private List<MediaType> problemDetailMediaTypes = Collections.singletonList(MediaType.APPLICATION_PROBLEM_JSON);
+
 	protected ObjectMapper defaultObjectMapper;
 
 	@Nullable
@@ -121,6 +124,19 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
 	}
 
+
+	@Override
+	public void setSupportedMediaTypes(List<MediaType> supportedMediaTypes) {
+		this.problemDetailMediaTypes = initProblemDetailMediaTypes(supportedMediaTypes);
+		super.setSupportedMediaTypes(supportedMediaTypes);
+	}
+
+	private List<MediaType> initProblemDetailMediaTypes(List<MediaType> supportedMediaTypes) {
+		List<MediaType> mediaTypes = new ArrayList<>();
+		mediaTypes.add(MediaType.APPLICATION_PROBLEM_JSON);
+		mediaTypes.addAll(supportedMediaTypes);
+		return Collections.unmodifiableList(mediaTypes);
+	}
 
 	/**
 	 * Configure the main {@code ObjectMapper} to use for Object conversion.
@@ -198,7 +214,11 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				result.addAll(entry.getValue().keySet());
 			}
 		}
-		return (CollectionUtils.isEmpty(result) ? getSupportedMediaTypes() : result);
+		if (!CollectionUtils.isEmpty(result)) {
+			return result;
+		}
+		return (ProblemDetail.class.isAssignableFrom(clazz) ?
+				this.problemDetailMediaTypes : getSupportedMediaTypes());
 	}
 
 	private Map<Class<?>, Map<MediaType, ObjectMapper>> getObjectMapperRegistrations() {
