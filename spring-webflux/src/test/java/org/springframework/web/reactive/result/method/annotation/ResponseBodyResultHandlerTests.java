@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,6 +162,7 @@ public class ResponseBodyResultHandlerTests {
 		return new HandlerResult(handlerMethod, returnValue, handlerMethod.getReturnType());
 	}
 
+	@SuppressWarnings("SameParameterValue")
 	private void assertResponseBody(MockServerWebExchange exchange, @Nullable String responseBody) {
 		StepVerifier.create(exchange.getResponse().getBody())
 				.consumeNextWith(buf -> assertThat(buf.toString(UTF_8)).isEqualTo(responseBody))
@@ -171,7 +172,7 @@ public class ResponseBodyResultHandlerTests {
 
 
 	@RestController
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "ConstantConditions"})
 	private static class TestRestController {
 
 		public Mono<Void> handleToMonoVoid() { return null;}
@@ -200,7 +201,7 @@ public class ResponseBodyResultHandlerTests {
 
 
 	@Controller
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "ConstantConditions"})
 	private static class TestController {
 
 		@ResponseBody
