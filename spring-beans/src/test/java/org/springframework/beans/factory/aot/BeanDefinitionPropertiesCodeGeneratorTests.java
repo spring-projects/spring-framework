@@ -225,7 +225,8 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		this.beanDefinition.setInitMethodName("i1");
 		testCompiledResult((actual, compiled) -> assertThat(actual.getInitMethodNames())
 				.containsExactly("i1"));
-		assertHasMethodInvokeHints("i1");
+		String[] methodNames = { "i1" };
+		assertHasMethodInvokeHints(InitDestroyBean.class, methodNames);
 	}
 
 	@Test
@@ -234,7 +235,8 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		this.beanDefinition.setInitMethodNames("i1", "i2");
 		testCompiledResult((actual, compiled) -> assertThat(actual.getInitMethodNames())
 				.containsExactly("i1", "i2"));
-		assertHasMethodInvokeHints("i1", "i2");
+		String[] methodNames = { "i1", "i2" };
+		assertHasMethodInvokeHints(InitDestroyBean.class, methodNames);
 	}
 
 	@Test
@@ -244,7 +246,8 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		testCompiledResult(
 				(actual, compiled) -> assertThat(actual.getDestroyMethodNames())
 						.containsExactly("d1"));
-		assertHasMethodInvokeHints("d1");
+		String[] methodNames = { "d1" };
+		assertHasMethodInvokeHints(InitDestroyBean.class, methodNames);
 	}
 
 	@Test
@@ -254,20 +257,20 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		testCompiledResult(
 				(actual, compiled) -> assertThat(actual.getDestroyMethodNames())
 						.containsExactly("d1", "d2"));
-		assertHasMethodInvokeHints("d1", "d2");
+		String[] methodNames = { "d1", "d2" };
+		assertHasMethodInvokeHints(InitDestroyBean.class, methodNames);
 	}
 
-	private void assertHasMethodInvokeHints(String... methodNames) {
-		assertThat(hints.reflection().getTypeHint(InitDestroyBean.class))
-				.satisfies(typeHint -> {
-					for (String methodName : methodNames) {
-						assertThat(typeHint.methods()).anySatisfy(methodHint -> {
-							assertThat(methodHint.getName()).isEqualTo(methodName);
-							assertThat(methodHint.getModes())
-									.containsExactly(ExecutableMode.INVOKE);
-						});
-					}
+	private void assertHasMethodInvokeHints(Class<?> beanType, String... methodNames) {
+		assertThat(this.hints.reflection().getTypeHint(beanType)).satisfies(typeHint -> {
+			for (String methodName : methodNames) {
+				assertThat(typeHint.methods()).anySatisfy(methodHint -> {
+					assertThat(methodHint.getName()).isEqualTo(methodName);
+					assertThat(methodHint.getModes())
+							.containsExactly(ExecutableMode.INVOKE);
 				});
+			}
+		});
 	}
 
 	@Test
@@ -289,12 +292,15 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 	@Test
 	void propertyValuesWhenValues() {
+		this.beanDefinition.setTargetType(PropertyValuesBean.class);
 		this.beanDefinition.getPropertyValues().add("test", String.class);
 		this.beanDefinition.getPropertyValues().add("spring", "framework");
 		testCompiledResult((actual, compiled) -> {
 			assertThat(actual.getPropertyValues().get("test")).isEqualTo(String.class);
 			assertThat(actual.getPropertyValues().get("spring")).isEqualTo("framework");
 		});
+		String[] methodNames = { "setTest", "setSpring" };
+		assertHasMethodInvokeHints(PropertyValuesBean.class, methodNames);
 	}
 
 	@Test
@@ -434,6 +440,30 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		}
 
 		void d2() {
+		}
+
+	}
+
+	static class PropertyValuesBean {
+
+		private Class<?> test;
+
+		private String spring;
+
+		public Class<?> getTest() {
+			return this.test;
+		}
+
+		public void setTest(Class<?> test) {
+			this.test = test;
+		}
+
+		public String getSpring() {
+			return this.spring;
+		}
+
+		public void setSpring(String spring) {
+			this.spring = spring;
 		}
 
 	}
