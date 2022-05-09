@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -43,7 +44,9 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.NotAcceptableStatusException;
+import org.springframework.web.server.UnsatisfiedRequestParameterException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.testfixture.method.ResolvableMethod;
 
@@ -285,6 +288,29 @@ public class ErrorResponseExceptionTests {
 
 		assertStatus(ex, HttpStatus.NOT_ACCEPTABLE);
 		assertDetail(ex, "Could not parse Accept header.");
+		assertThat(ex.getHeaders()).isEmpty();
+	}
+
+	@Test
+	void missingRequestValueException() {
+
+		ErrorResponse ex = new MissingRequestValueException(
+				"foo", String.class, "header", this.methodParameter);
+
+		assertStatus(ex, HttpStatus.BAD_REQUEST);
+		assertDetail(ex, "Required header 'foo' is not present.");
+		assertThat(ex.getHeaders()).isEmpty();
+	}
+
+	@Test
+	void unsatisfiedRequestParameterException() {
+
+		ErrorResponse ex = new UnsatisfiedRequestParameterException(
+				Arrays.asList("foo=bar", "bar=baz"),
+				new LinkedMultiValueMap<>(Collections.singletonMap("q", Arrays.asList("1", "2"))));
+
+		assertStatus(ex, HttpStatus.BAD_REQUEST);
+		assertDetail(ex, "Invalid request parameters.");
 		assertThat(ex.getHeaders()).isEmpty();
 	}
 

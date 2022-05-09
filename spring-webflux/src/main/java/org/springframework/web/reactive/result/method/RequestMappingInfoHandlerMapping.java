@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.server.UnsatisfiedRequestParameterException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.util.pattern.PathPattern;
 
@@ -190,7 +191,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			catch (InvalidMediaTypeException ex) {
 				throw new UnsupportedMediaTypeStatusException(ex.getMessage());
 			}
-			throw new UnsupportedMediaTypeStatusException(contentType, new ArrayList<>(mediaTypes), exchange.getRequest().getMethod());
+			throw new UnsupportedMediaTypeStatusException(
+					contentType, new ArrayList<>(mediaTypes), exchange.getRequest().getMethod());
 		}
 
 		if (helper.hasProducesMismatch()) {
@@ -199,9 +201,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 
 		if (helper.hasParamsMismatch()) {
-			throw new ServerWebInputException(
-					"Expected parameters: " + helper.getParamConditions() +
-							", actual query parameters: " + request.getQueryParams());
+			throw new UnsatisfiedRequestParameterException(
+					helper.getParamConditions().stream().map(Object::toString).toList(),
+					request.getQueryParams());
 		}
 
 		return null;
@@ -217,10 +219,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 
 		public PartialMatchHelper(Set<RequestMappingInfo> infos, ServerWebExchange exchange) {
-			this.partialMatches.addAll(infos.stream().
-					filter(info -> info.getPatternsCondition().getMatchingCondition(exchange) != null).
-					map(info -> new PartialMatch(info, exchange)).
-					collect(Collectors.toList()));
+			this.partialMatches.addAll(infos.stream()
+					.filter(info -> info.getPatternsCondition().getMatchingCondition(exchange) != null)
+					.map(info -> new PartialMatch(info, exchange)).toList());
 		}
 
 
@@ -235,42 +236,38 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * Any partial matches for "methods"?
 		 */
 		public boolean hasMethodsMismatch() {
-			return this.partialMatches.stream().
-					noneMatch(PartialMatch::hasMethodsMatch);
+			return this.partialMatches.stream().noneMatch(PartialMatch::hasMethodsMatch);
 		}
 
 		/**
 		 * Any partial matches for "methods" and "consumes"?
 		 */
 		public boolean hasConsumesMismatch() {
-			return this.partialMatches.stream().
-					noneMatch(PartialMatch::hasConsumesMatch);
+			return this.partialMatches.stream().noneMatch(PartialMatch::hasConsumesMatch);
 		}
 
 		/**
 		 * Any partial matches for "methods", "consumes", and "produces"?
 		 */
 		public boolean hasProducesMismatch() {
-			return this.partialMatches.stream().
-					noneMatch(PartialMatch::hasProducesMatch);
+			return this.partialMatches.stream().noneMatch(PartialMatch::hasProducesMatch);
 		}
 
 		/**
 		 * Any partial matches for "methods", "consumes", "produces", and "params"?
 		 */
 		public boolean hasParamsMismatch() {
-			return this.partialMatches.stream().
-					noneMatch(PartialMatch::hasParamsMatch);
+			return this.partialMatches.stream().noneMatch(PartialMatch::hasParamsMatch);
 		}
 
 		/**
 		 * Return declared HTTP methods.
 		 */
 		public Set<HttpMethod> getAllowedMethods() {
-			return this.partialMatches.stream().
-					flatMap(m -> m.getInfo().getMethodsCondition().getMethods().stream()).
-					map(requestMethod -> HttpMethod.valueOf(requestMethod.name())).
-					collect(Collectors.toSet());
+			return this.partialMatches.stream()
+					.flatMap(m -> m.getInfo().getMethodsCondition().getMethods().stream())
+					.map(requestMethod -> HttpMethod.valueOf(requestMethod.name()))
+					.collect(Collectors.toSet());
 		}
 
 		/**
@@ -278,9 +275,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * match the "methods" condition.
 		 */
 		public Set<MediaType> getConsumableMediaTypes() {
-			return this.partialMatches.stream().filter(PartialMatch::hasMethodsMatch).
-					flatMap(m -> m.getInfo().getConsumesCondition().getConsumableMediaTypes().stream()).
-					collect(Collectors.toCollection(LinkedHashSet::new));
+			return this.partialMatches.stream()
+					.filter(PartialMatch::hasMethodsMatch)
+					.flatMap(m -> m.getInfo().getConsumesCondition().getConsumableMediaTypes().stream())
+					.collect(Collectors.toCollection(LinkedHashSet::new));
 		}
 
 		/**
@@ -288,9 +286,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * match the "methods" and "consumes" conditions.
 		 */
 		public Set<MediaType> getProducibleMediaTypes() {
-			return this.partialMatches.stream().filter(PartialMatch::hasConsumesMatch).
-					flatMap(m -> m.getInfo().getProducesCondition().getProducibleMediaTypes().stream()).
-					collect(Collectors.toCollection(LinkedHashSet::new));
+			return this.partialMatches.stream()
+					.filter(PartialMatch::hasConsumesMatch)
+					.flatMap(m -> m.getInfo().getProducesCondition().getProducibleMediaTypes().stream())
+					.collect(Collectors.toCollection(LinkedHashSet::new));
 		}
 
 		/**
@@ -298,9 +297,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * match the "methods", "consumes", and "params" conditions.
 		 */
 		public List<Set<NameValueExpression<String>>> getParamConditions() {
-			return this.partialMatches.stream().filter(PartialMatch::hasProducesMatch).
-					map(match -> match.getInfo().getParamsCondition().getExpressions()).
-					collect(Collectors.toList());
+			return this.partialMatches.stream()
+					.filter(PartialMatch::hasProducesMatch)
+					.map(match -> match.getInfo().getParamsCondition().getExpressions())
+					.collect(Collectors.toList());
 		}
 
 		/**
