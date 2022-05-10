@@ -149,8 +149,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	 */
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
-		if (applicationContext instanceof ConfigurableApplicationContext) {
-			this.applicationContext = (ConfigurableApplicationContext) applicationContext;
+		if (applicationContext instanceof ConfigurableApplicationContext cac) {
+			this.applicationContext = cac;
 		}
 	}
 
