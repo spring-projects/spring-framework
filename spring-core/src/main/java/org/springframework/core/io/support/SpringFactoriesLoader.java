@@ -217,7 +217,9 @@ public class SpringFactoriesLoader {
 	}
 
 	@Nullable
-	protected <T> T instantiateFactory(String implementationName, Class<T> type, @Nullable ArgumentResolver argumentResolver, FailureHandler failureHandler) {
+	protected <T> T instantiateFactory(String implementationName, Class<T> type,
+			@Nullable ArgumentResolver argumentResolver, FailureHandler failureHandler) {
+
 		try {
 			Class<?> factoryImplementationClass = ClassUtils.forName(implementationName, this.classLoader);
 			Assert.isTrue(type.isAssignableFrom(factoryImplementationClass),
@@ -333,7 +335,7 @@ public class SpringFactoriesLoader {
 		return loader;
 	}
 
-	private static Map<String, List<String>> loadFactoriesResource(ClassLoader classLoader, String resourceLocation) {
+	static Map<String, List<String>> loadFactoriesResource(ClassLoader classLoader, String resourceLocation) {
 		Map<String, List<String>> result = new LinkedHashMap<>();
 		try {
 			Enumeration<URL> urls = classLoader.getResources(resourceLocation);
