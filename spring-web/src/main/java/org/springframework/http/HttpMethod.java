@@ -109,7 +109,9 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	 * in WebDav.
 	 */
 	public static HttpMethod[] values() {
-		return values.clone();
+		HttpMethod[] copy = new HttpMethod[values.length];
+		System.arraycopy(values, 0, copy, 0, values.length);
+		return copy;
 	}
 
 	/**
