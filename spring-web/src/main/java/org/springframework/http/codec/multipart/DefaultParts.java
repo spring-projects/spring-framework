@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,12 +100,11 @@ abstract class DefaultParts {
 
 
 	/**
-	 * Abstract base class.
+	 * Abstract base class for {@link Part} implementations.
 	 */
 	private static abstract class AbstractPart implements Part {
 
 		private final HttpHeaders headers;
-
 
 		protected AbstractPart(HttpHeaders headers) {
 			Assert.notNull(headers, "HttpHeaders is required");
@@ -118,7 +117,6 @@ abstract class DefaultParts {
 			Assert.state(name != null, "No name available");
 			return name;
 		}
-
 
 		@Override
 		public HttpHeaders headers() {
@@ -172,7 +170,6 @@ abstract class DefaultParts {
 
 		protected final Content content;
 
-
 		public DefaultPart(HttpHeaders headers, Content content) {
 			super(headers);
 			this.content = content;
@@ -198,7 +195,6 @@ abstract class DefaultParts {
 				return "DefaultPart";
 			}
 		}
-
 	}
 
 
@@ -213,7 +209,7 @@ abstract class DefaultParts {
 
 		@Override
 		public String filename() {
-			String filename = this.headers().getContentDisposition().getFilename();
+			String filename = headers().getContentDisposition().getFilename();
 			Assert.state(filename != null, "No filename found");
 			return filename;
 		}
@@ -235,7 +231,6 @@ abstract class DefaultParts {
 				return "DefaultFilePart{(" + filename + ")}";
 			}
 		}
-
 	}
 
 
@@ -249,8 +244,8 @@ abstract class DefaultParts {
 		Mono<Void> transferTo(Path dest);
 
 		Mono<Void> delete();
-
 	}
+
 
 	/**
 	 * {@code Content} implementation based on a flux of data buffers.
@@ -259,11 +254,9 @@ abstract class DefaultParts {
 
 		private final Flux<DataBuffer> content;
 
-
 		public FluxContent(Flux<DataBuffer> content) {
 			this.content = content;
 		}
-
 
 		@Override
 		public Flux<DataBuffer> content() {
@@ -279,7 +272,6 @@ abstract class DefaultParts {
 		public Mono<Void> delete() {
 			return Mono.empty();
 		}
-
 	}
 
 
@@ -292,12 +284,10 @@ abstract class DefaultParts {
 
 		private final Scheduler scheduler;
 
-
 		public FileContent(Path file, Scheduler scheduler) {
 			this.file = file;
 			this.scheduler = scheduler;
 		}
-
 
 		@Override
 		public Flux<DataBuffer> content() {
