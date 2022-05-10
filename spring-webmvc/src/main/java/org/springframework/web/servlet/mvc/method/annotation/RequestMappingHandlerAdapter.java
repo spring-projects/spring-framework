@@ -549,8 +549,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (beanFactory instanceof ConfigurableBeanFactory bf) {
-			this.beanFactory = bf;
+		if (beanFactory instanceof ConfigurableBeanFactory cbf) {
+			this.beanFactory = cbf;
 		}
 	}
 
