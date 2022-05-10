@@ -119,16 +119,15 @@ public class WebClientResponseException extends WebClientException {
 			@Nullable HttpRequest request) {
 
 		this(message, HttpStatusCode.valueOf(statusCode), statusText, headers, responseBody, charset, request);
-
-
 	}
+
 	/**
 	 * Constructor with a prepared message.
 	 * @since 6.0
 	 */
-	public WebClientResponseException(String message, HttpStatusCode statusCode, String statusText,
-			@Nullable HttpHeaders headers, @Nullable byte[] responseBody, @Nullable Charset charset,
-			@Nullable HttpRequest request) {
+	public WebClientResponseException(
+			String message, HttpStatusCode statusCode, String statusText, @Nullable HttpHeaders headers,
+			@Nullable byte[] responseBody, @Nullable Charset charset, @Nullable HttpRequest request) {
 
 		super(message);
 
