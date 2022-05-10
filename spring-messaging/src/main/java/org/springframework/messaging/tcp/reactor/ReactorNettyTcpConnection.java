@@ -18,7 +18,7 @@ package org.springframework.messaging.tcp.reactor;
 
 import io.netty.buffer.ByteBuf;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.netty.NettyInbound;
 import reactor.netty.NettyOutbound;
 
@@ -42,16 +42,16 @@ public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 
 	private final ReactorNettyCodec<P> codec;
 
-	private final MonoProcessor<Void> closeProcessor;
+	private final Sinks.Empty<Void> completionSink;
 
 
 	public ReactorNettyTcpConnection(NettyInbound inbound, NettyOutbound outbound,
-			ReactorNettyCodec<P> codec, MonoProcessor<Void> closeProcessor) {
+			ReactorNettyCodec<P> codec, Sinks.Empty<Void> completionSink) {
 
 		this.inbound = inbound;
 		this.outbound = outbound;
 		this.codec = codec;
-		this.closeProcessor = closeProcessor;
+		this.completionSink = completionSink;
 	}
 
 
@@ -75,7 +75,8 @@ public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 
 	@Override
 	public void close() {
-		this.closeProcessor.onComplete();
+		// Ignore result: concurrent attempts to complete are ok
+		this.completionSink.tryEmitEmpty();
 	}
 
 }

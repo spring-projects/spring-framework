@@ -36,7 +36,6 @@ public interface BindMarkers {
 
 	/**
 	 * Create a new {@link BindMarker}.
-	 * @return a new {@link BindMarker}
 	 */
 	BindMarker next();
 

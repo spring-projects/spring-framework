@@ -130,6 +130,7 @@ class AntPathMatcherTests {
 		assertThat(pathMatcher.match("", "")).isTrue();
 
 		assertThat(pathMatcher.match("/{bla}.*", "/testing.html")).isTrue();
+		assertThat(pathMatcher.match("/{bla}", "//x\ny")).isTrue();
 	}
 
 	@Test
@@ -703,4 +704,11 @@ class AntPathMatcherTests {
 		assertThat(pathMatcher.isPattern(null)).isFalse();
 	}
 
+	@Test // gh-27506
+	void consistentMatchWithWildcardsAndTrailingSlash() {
+		assertThat(pathMatcher.match("/*/foo", "/en/foo")).isTrue();
+		assertThat(pathMatcher.match("/*/foo", "/en/foo/")).isFalse();
+		assertThat(pathMatcher.match("/**/foo", "/en/foo")).isTrue();
+		assertThat(pathMatcher.match("/**/foo", "/en/foo/")).isFalse();
+	}
 }

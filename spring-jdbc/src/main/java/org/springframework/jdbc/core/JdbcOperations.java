@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,22 +22,21 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.lang.Nullable;
 
 /**
  * Interface specifying a basic set of JDBC operations.
- * Implemented by {@link JdbcTemplate}. Not often used directly, but a useful
+ *
+ * <p>Implemented by {@link JdbcTemplate}. Not often used directly, but a useful
  * option to enhance testability, as it can easily be mocked or stubbed.
  *
  * <p>Alternatively, the standard JDBC infrastructure can be mocked.
  * However, mocking this interface constitutes significantly less work.
  * As an alternative to a mock objects approach to testing data access code,
- * consider the powerful integration testing support provided in the
- * {@code org.springframework.test} package, shipped in
- * {@code spring-test.jar}.
+ * consider the powerful integration testing support provided via the <em>Spring
+ * TestContext Framework</em>, in the {@code spring-test} artifact.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -160,8 +159,8 @@ public interface JdbcOperations {
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the single mapped object (may be {@code null} if the given
 	 * {@link RowMapper} returned {@code} null)
-	 * @throws IncorrectResultSizeDataAccessException if the query does not
-	 * return exactly one row
+	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
+	 * if the query does not return exactly one row
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForObject(String, RowMapper, Object...)
 	 */
@@ -180,8 +179,10 @@ public interface JdbcOperations {
 	 * @param sql the SQL query to execute
 	 * @param requiredType the type that the result object is expected to match
 	 * @return the result object of the required type, or {@code null} in case of SQL NULL
-	 * @throws IncorrectResultSizeDataAccessException if the query does not return
-	 * exactly one row, or does not return exactly one column in that row
+	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
+	 * if the query does not return exactly one row
+	 * @throws org.springframework.jdbc.IncorrectResultSetColumnCountException
+	 * if the query does not return a row containing a single column
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForObject(String, Class, Object...)
 	 */
@@ -198,8 +199,8 @@ public interface JdbcOperations {
 	 * mapped to a Map (one entry for each column, using the column name as the key).
 	 * @param sql the SQL query to execute
 	 * @return the result Map (one entry per column, with column name as key)
-	 * @throws IncorrectResultSizeDataAccessException if the query does not
-	 * return exactly one row
+	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
+	 * if the query does not return exactly one row
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForMap(String, Object...)
 	 * @see ColumnMapRowMapper
@@ -603,8 +604,8 @@ public interface JdbcOperations {
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the single mapped object (may be {@code null} if the given
 	 * {@link RowMapper} returned {@code} null)
-	 * @throws IncorrectResultSizeDataAccessException if the query does not
-	 * return exactly one row
+	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
+	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
 	@Nullable
@@ -623,8 +624,8 @@ public interface JdbcOperations {
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the single mapped object (may be {@code null} if the given
 	 * {@link RowMapper} returned {@code} null)
-	 * @throws IncorrectResultSizeDataAccessException if the query does not
-	 * return exactly one row
+	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
+	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
 	 * @deprecated as of 5.3, in favor of {@link #queryForObject(String, RowMapper, Object...)}
 	 */
@@ -644,8 +645,8 @@ public interface JdbcOperations {
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @return the single mapped object (may be {@code null} if the given
 	 * {@link RowMapper} returned {@code} null)
-	 * @throws IncorrectResultSizeDataAccessException if the query does not
-	 * return exactly one row
+	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
+	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
 	 * @since 3.0.1
 	 */
@@ -663,8 +664,10 @@ public interface JdbcOperations {
 	 * (constants from {@code java.sql.Types})
 	 * @param requiredType the type that the result object is expected to match
 	 * @return the result object of the required type, or {@code null} in case of SQL NULL
-	 * @throws IncorrectResultSizeDataAccessException if the query does not return
-	 * exactly one row, or does not return exactly one column in that row
+	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
+	 * if the query does not return exactly one row
+	 * @throws org.springframework.jdbc.IncorrectResultSetColumnCountException
+	 * if the query does not return a row containing a single column
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForObject(String, Class)
 	 * @see java.sql.Types
@@ -685,8 +688,10 @@ public interface JdbcOperations {
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @param requiredType the type that the result object is expected to match
 	 * @return the result object of the required type, or {@code null} in case of SQL NULL
-	 * @throws IncorrectResultSizeDataAccessException if the query does not return
-	 * exactly one row, or does not return exactly one column in that row
+	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
+	 * if the query does not return exactly one row
+	 * @throws org.springframework.jdbc.IncorrectResultSetColumnCountException
+	 * if the query does not return a row containing a single column
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForObject(String, Class)
 	 * @deprecated as of 5.3, in favor of {@link #queryForObject(String, Class, Object...)}
@@ -707,8 +712,10 @@ public interface JdbcOperations {
 	 * may also contain {@link SqlParameterValue} objects which indicate not
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @return the result object of the required type, or {@code null} in case of SQL NULL
-	 * @throws IncorrectResultSizeDataAccessException if the query does not return
-	 * exactly one row, or does not return exactly one column in that row
+	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
+	 * if the query does not return exactly one row
+	 * @throws org.springframework.jdbc.IncorrectResultSetColumnCountException
+	 * if the query does not return a row containing a single column
 	 * @throws DataAccessException if the query fails
 	 * @since 3.0.1
 	 * @see #queryForObject(String, Class)
@@ -726,8 +733,8 @@ public interface JdbcOperations {
 	 * @param argTypes the SQL types of the arguments
 	 * (constants from {@code java.sql.Types})
 	 * @return the result Map (one entry per column, with column name as key)
-	 * @throws IncorrectResultSizeDataAccessException if the query does not
-	 * return exactly one row
+	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
+	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForMap(String)
 	 * @see ColumnMapRowMapper
@@ -750,8 +757,8 @@ public interface JdbcOperations {
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @return the result Map (one entry for each column, using the
 	 * column name as the key)
-	 * @throws IncorrectResultSizeDataAccessException if the query does not
-	 * return exactly one row
+	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
+	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForMap(String)
 	 * @see ColumnMapRowMapper

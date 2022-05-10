@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,23 +21,20 @@ import org.w3c.dom.Element;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.transaction.jta.JtaTransactionManager;
 
 /**
- * Parser for the &lt;tx:jta-transaction-manager/&gt; XML configuration element,
- * autodetecting WebLogic and WebSphere servers and exposing the corresponding
- * {@link org.springframework.transaction.jta.JtaTransactionManager} subclass.
+ * Parser for the &lt;tx:jta-transaction-manager/&gt; XML configuration element.
  *
  * @author Juergen Hoeller
  * @author Christian Dupuis
  * @since 2.5
- * @see org.springframework.transaction.jta.WebLogicJtaTransactionManager
- * @see org.springframework.transaction.jta.WebSphereUowTransactionManager
  */
 public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser  {
 
 	@Override
-	protected String getBeanClassName(Element element) {
-		return JtaTransactionManagerFactoryBean.resolveJtaTransactionManagerClassName();
+	protected Class<?> getBeanClass(Element element) {
+		return JtaTransactionManager.class;
 	}
 
 	@Override

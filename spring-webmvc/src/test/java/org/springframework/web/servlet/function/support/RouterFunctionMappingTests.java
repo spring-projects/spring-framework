@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
@@ -36,43 +37,42 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
+ * @author Brian Clozel
  */
 class RouterFunctionMappingTests {
-
-	private final MockHttpServletRequest request = new MockHttpServletRequest("GET", "/match");
 
 	private List<HttpMessageConverter<?>> messageConverters = Collections.emptyList();
 
 	@Test
-	public void normal() throws Exception {
+	void normal() throws Exception {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Optional.of(handlerFunction);
 
 		RouterFunctionMapping mapping = new RouterFunctionMapping(routerFunction);
 		mapping.setMessageConverters(this.messageConverters);
-		ServletRequestPathUtils.parseAndCache(this.request);
 
-		HandlerExecutionChain result = mapping.getHandler(this.request);
+		MockHttpServletRequest request = createTestRequest("/match");
+		HandlerExecutionChain result = mapping.getHandler(request);
 
 		assertThat(result).isNotNull();
 		assertThat(result.getHandler()).isSameAs(handlerFunction);
 	}
 
 	@Test
-	public void noMatch() throws Exception {
+	void noMatch() throws Exception {
 		RouterFunction<ServerResponse> routerFunction = request -> Optional.empty();
 
 		RouterFunctionMapping mapping = new RouterFunctionMapping(routerFunction);
 		mapping.setMessageConverters(this.messageConverters);
-		ServletRequestPathUtils.parseAndCache(this.request);
 
-		HandlerExecutionChain result = mapping.getHandler(this.request);
+		MockHttpServletRequest request = createTestRequest("/match");
+		HandlerExecutionChain result = mapping.getHandler(request);
 
 		assertThat(result).isNull();
 	}
 
 	@Test
-	public void changeParser() throws Exception {
+	void changeParser() throws Exception {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = RouterFunctions.route()
 				.GET("/foo", handlerFunction)
@@ -86,13 +86,35 @@ class RouterFunctionMappingTests {
 		mapping.setPatternParser(patternParser);
 		mapping.afterPropertiesSet();
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/FOO");
-		ServletRequestPathUtils.parseAndCache(request);
-
+		MockHttpServletRequest request = createTestRequest("/FOO");
 		HandlerExecutionChain result = mapping.getHandler(request);
 
 		assertThat(result).isNotNull();
 		assertThat(result.getHandler()).isSameAs(handlerFunction);
+	}
+
+	@Test
+	void mappedRequestShouldHoldAttributes() throws Exception {
+		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
+		RouterFunction<ServerResponse> routerFunction = RouterFunctions.route()
+				.GET("/match", handlerFunction)
+				.build();
+
+		RouterFunctionMapping mapping = new RouterFunctionMapping(routerFunction);
+		mapping.setMessageConverters(this.messageConverters);
+
+		MockHttpServletRequest request = createTestRequest("/match");
+		HandlerExecutionChain result = mapping.getHandler(request);
+
+		assertThat(result).isNotNull();
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/match");
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(handlerFunction);
+	}
+
+	private MockHttpServletRequest createTestRequest(String path) {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", path);
+		ServletRequestPathUtils.parseAndCache(request);
+		return request;
 	}
 
 }

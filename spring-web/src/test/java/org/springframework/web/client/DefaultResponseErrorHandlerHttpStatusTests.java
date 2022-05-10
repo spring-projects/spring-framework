@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.web.client;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.http.HttpHeaders;
@@ -27,6 +30,8 @@ import org.springframework.http.client.ClientHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.http.HttpStatus.BAD_GATEWAY;
@@ -61,44 +66,50 @@ class DefaultResponseErrorHandlerHttpStatusTests {
 	@DisplayName("hasError() returns true")
 	@MethodSource("errorCodes")
 	void hasErrorTrue(HttpStatus httpStatus) throws Exception {
-		given(this.response.getRawStatusCode()).willReturn(httpStatus.value());
+		given(this.response.getStatusCode()).willReturn(httpStatus);
 		assertThat(this.handler.hasError(this.response)).isTrue();
 	}
 
-	@ParameterizedTest(name = "[{index}] error: [{0}], exception: [{1}]")
+	@ParameterizedTest(name = "[{index}] error: {0}, exception: {1}")
 	@DisplayName("handleError() throws an exception")
 	@MethodSource("errorCodes")
 	void handleErrorException(HttpStatus httpStatus, Class<? extends Throwable> expectedExceptionClass) throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(this.response.getRawStatusCode()).willReturn(httpStatus.value());
+		given(this.response.getStatusCode()).willReturn(httpStatus);
 		given(this.response.getHeaders()).willReturn(headers);
 
 		assertThatExceptionOfType(expectedExceptionClass).isThrownBy(() -> this.handler.handleError(this.response));
 	}
 
-	static Object[][] errorCodes() {
-		return new Object[][]{
+	static Stream<Arguments> errorCodes() {
+		return Stream.of(
 			// 4xx
-			{BAD_REQUEST, HttpClientErrorException.BadRequest.class},
-			{UNAUTHORIZED, HttpClientErrorException.Unauthorized.class},
-			{FORBIDDEN, HttpClientErrorException.Forbidden.class},
-			{NOT_FOUND, HttpClientErrorException.NotFound.class},
-			{METHOD_NOT_ALLOWED, HttpClientErrorException.MethodNotAllowed.class},
-			{NOT_ACCEPTABLE, HttpClientErrorException.NotAcceptable.class},
-			{CONFLICT, HttpClientErrorException.Conflict.class},
-			{TOO_MANY_REQUESTS, HttpClientErrorException.TooManyRequests.class},
-			{UNPROCESSABLE_ENTITY, HttpClientErrorException.UnprocessableEntity.class},
-			{I_AM_A_TEAPOT, HttpClientErrorException.class},
+			args(BAD_REQUEST, HttpClientErrorException.BadRequest.class),
+			args(UNAUTHORIZED, HttpClientErrorException.Unauthorized.class),
+			args(FORBIDDEN, HttpClientErrorException.Forbidden.class),
+			args(NOT_FOUND, HttpClientErrorException.NotFound.class),
+			args(METHOD_NOT_ALLOWED, HttpClientErrorException.MethodNotAllowed.class),
+			args(NOT_ACCEPTABLE, HttpClientErrorException.NotAcceptable.class),
+			args(CONFLICT, HttpClientErrorException.Conflict.class),
+			args(TOO_MANY_REQUESTS, HttpClientErrorException.TooManyRequests.class),
+			args(UNPROCESSABLE_ENTITY, HttpClientErrorException.UnprocessableEntity.class),
+			args(I_AM_A_TEAPOT, HttpClientErrorException.class),
 			// 5xx
-			{INTERNAL_SERVER_ERROR, HttpServerErrorException.InternalServerError.class},
-			{NOT_IMPLEMENTED, HttpServerErrorException.NotImplemented.class},
-			{BAD_GATEWAY, HttpServerErrorException.BadGateway.class},
-			{SERVICE_UNAVAILABLE, HttpServerErrorException.ServiceUnavailable.class},
-			{GATEWAY_TIMEOUT, HttpServerErrorException.GatewayTimeout.class},
-			{HTTP_VERSION_NOT_SUPPORTED, HttpServerErrorException.class}
-		};
+			args(INTERNAL_SERVER_ERROR, HttpServerErrorException.InternalServerError.class),
+			args(NOT_IMPLEMENTED, HttpServerErrorException.NotImplemented.class),
+			args(BAD_GATEWAY, HttpServerErrorException.BadGateway.class),
+			args(SERVICE_UNAVAILABLE, HttpServerErrorException.ServiceUnavailable.class),
+			args(GATEWAY_TIMEOUT, HttpServerErrorException.GatewayTimeout.class),
+			args(HTTP_VERSION_NOT_SUPPORTED, HttpServerErrorException.class)
+		);
+	}
+
+	private static Arguments args(HttpStatus httpStatus, Class<? extends Throwable> exceptionType) {
+		return arguments(
+				named(String.valueOf(httpStatus.value()), httpStatus),
+				named(exceptionType.getSimpleName(), exceptionType));
 	}
 
 }

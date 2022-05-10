@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ServletWebArgumentR
 import org.springframework.web.util.UrlPathHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
 
 /**
  * Test fixture for the configuration in mvc-config-annotation-driven.xml.
@@ -73,7 +74,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 				((ConfigurableWebBindingInitializer) initializer).getMessageCodesResolver();
 		assertThat(resolver).isNotNull();
 		assertThat(resolver.getClass()).isEqualTo(TestMessageCodesResolver.class);
-		assertThat(new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect")).isEqualTo(false);
+		assertThat(new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect")).asInstanceOf(BOOLEAN).isFalse();
 	}
 
 	@Test

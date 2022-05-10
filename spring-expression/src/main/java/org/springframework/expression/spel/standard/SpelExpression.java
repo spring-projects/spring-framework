@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.util.Assert;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class SpelExpression implements Expression {
@@ -71,11 +72,11 @@ public class SpelExpression implements Expression {
 
 	// Count of many times as the expression been interpreted - can trigger compilation
 	// when certain limit reached
-	private final AtomicInteger interpretedCount = new AtomicInteger(0);
+	private final AtomicInteger interpretedCount = new AtomicInteger();
 
 	// The number of times compilation was attempted and failed - enables us to eventually
 	// give up trying to compile it when it just doesn't seem to be possible.
-	private final AtomicInteger failedAttempts = new AtomicInteger(0);
+	private final AtomicInteger failedAttempts = new AtomicInteger();
 
 
 	/**
@@ -522,17 +523,34 @@ public class SpelExpression implements Expression {
 				// Compiled by another thread before this thread got into the sync block
 				return true;
 			}
-			SpelCompiler compiler = SpelCompiler.getCompiler(this.configuration.getCompilerClassLoader());
-			compiledAst = compiler.compile(this.ast);
-			if (compiledAst != null) {
-				// Successfully compiled
-				this.compiledAst = compiledAst;
-				return true;
+			try {
+				SpelCompiler compiler = SpelCompiler.getCompiler(this.configuration.getCompilerClassLoader());
+				compiledAst = compiler.compile(this.ast);
+				if (compiledAst != null) {
+					// Successfully compiled
+					this.compiledAst = compiledAst;
+					return true;
+				}
+				else {
+					// Failed to compile
+					this.failedAttempts.incrementAndGet();
+					return false;
+				}
 			}
-			else {
+			catch (Exception ex) {
 				// Failed to compile
 				this.failedAttempts.incrementAndGet();
-				return false;
+
+				// If running in mixed mode, revert to interpreted
+				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
+					this.compiledAst = null;
+					this.interpretedCount.set(0);
+					return false;
+				}
+				else {
+					// Running in SpelCompilerMode.immediate mode - propagate exception to caller
+					throw new SpelEvaluationException(ex, SpelMessage.EXCEPTION_COMPILING_EXPRESSION);
+				}
 			}
 		}
 	}

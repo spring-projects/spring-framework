@@ -16,8 +16,7 @@
 
 package org.springframework.test.web.servlet.samples.client.standalone;
 
-import javax.validation.constraints.NotNull;
-
+import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;

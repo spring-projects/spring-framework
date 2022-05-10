@@ -56,7 +56,6 @@ public class MapConnectionFactoryLookup implements ConnectionFactoryLookup {
 
 	/**
 	 * Create a new instance of the {@link MapConnectionFactoryLookup} class.
-	 *
 	 * @param connectionFactoryName the name under which the supplied {@link ConnectionFactory} is to be added
 	 * @param connectionFactory the {@link ConnectionFactory} to be added
 	 */

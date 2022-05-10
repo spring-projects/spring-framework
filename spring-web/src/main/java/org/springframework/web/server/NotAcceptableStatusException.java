@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.web.server;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -43,39 +43,43 @@ public class NotAcceptableStatusException extends ResponseStatusException {
 	public NotAcceptableStatusException(String reason) {
 		super(HttpStatus.NOT_ACCEPTABLE, reason);
 		this.supportedMediaTypes = Collections.emptyList();
+		getBody().setDetail("Could not parse Accept header.");
 	}
 
 	/**
 	 * Constructor for when the requested Content-Type is not supported.
 	 */
-	public NotAcceptableStatusException(List<MediaType> supportedMediaTypes) {
+	public NotAcceptableStatusException(List<MediaType> mediaTypes) {
 		super(HttpStatus.NOT_ACCEPTABLE, "Could not find acceptable representation");
-		this.supportedMediaTypes = Collections.unmodifiableList(supportedMediaTypes);
+		this.supportedMediaTypes = Collections.unmodifiableList(mediaTypes);
+		getBody().setDetail("Acceptable representations: " +
+				mediaTypes.stream().map(MediaType::toString).collect(Collectors.joining(", ", "'", "'")) + ".");
 	}
 
 
 	/**
-	 * Return a Map with an "Accept" header.
-	 * @since 5.1.11
-	 */
-	@SuppressWarnings("deprecation")
-	@Override
-	public Map<String, String> getHeaders() {
-		return getResponseHeaders().toSingleValueMap();
-	}
-
-	/**
-	 * Return HttpHeaders with an "Accept" header, or an empty instance.
-	 * @since 5.1.13
+	 * Return HttpHeaders with an "Accept" header that documents the supported
+	 * media types, if available, or an empty instance otherwise.
 	 */
 	@Override
-	public HttpHeaders getResponseHeaders() {
+	public HttpHeaders getHeaders() {
 		if (CollectionUtils.isEmpty(this.supportedMediaTypes)) {
 			return HttpHeaders.EMPTY;
 		}
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(this.supportedMediaTypes);
 		return headers;
+	}
+
+	/**
+	 * Delegates to {@link #getHeaders()}.
+	 * @since 5.1.13
+	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}
+	 */
+	@Deprecated
+	@Override
+	public HttpHeaders getResponseHeaders() {
+		return getHeaders();
 	}
 
 	/**

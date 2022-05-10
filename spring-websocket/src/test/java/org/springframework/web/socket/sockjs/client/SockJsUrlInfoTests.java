@@ -48,28 +48,28 @@ class SockJsUrlInfoTests {
 	}
 
 	@ParameterizedTest
-	@CsvSource( {
-		"http, http",
-		"https, https",
-		"ws, http",
-		"wss, https",
-	})
+	@CsvSource(textBlock = """
+		http, http
+		https, https
+		ws, http
+		wss, https
+	""")
 	void infoUrl(String scheme, String expectedScheme) throws Exception {
 		SockJsUrlInfo info = new SockJsUrlInfo(new URI(scheme + "://example.com"));
 		assertThat(info.getInfoUrl()).isEqualTo(new URI(expectedScheme + "://example.com/info"));
 	}
 
 	@ParameterizedTest
-	@CsvSource( {
-		"http, http, XHR_STREAMING",
-		"http, ws, WEBSOCKET",
-		"https, https, XHR_STREAMING",
-		"https, wss, WEBSOCKET",
-		"ws, http, XHR_STREAMING",
-		"ws, ws, WEBSOCKET",
-		"wss, https, XHR_STREAMING",
-		"wss, wss, WEBSOCKET"
-	})
+	@CsvSource(textBlock = """
+		http, http, XHR_STREAMING
+		http, ws, WEBSOCKET
+		https, https, XHR_STREAMING
+		https, wss, WEBSOCKET
+		ws, http, XHR_STREAMING
+		ws, ws, WEBSOCKET
+		wss, https, XHR_STREAMING
+		wss, wss, WEBSOCKET
+	""")
 	void transportUrl(String scheme, String expectedScheme, TransportType transportType) throws Exception {
 		SockJsUrlInfo info = new SockJsUrlInfo(new URI(scheme + "://example.com"));
 		String serverId = info.getServerId();

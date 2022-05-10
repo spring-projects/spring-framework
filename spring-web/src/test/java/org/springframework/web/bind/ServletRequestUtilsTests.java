@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class ServletRequestUtilsTests {
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredIntParameter(request, "param2"));
 
-		assertThat(ServletRequestUtils.getIntParameter(request, "param3")).isEqualTo(null);
+		assertThat(ServletRequestUtils.getIntParameter(request, "param3")).isNull();
 		assertThat(ServletRequestUtils.getIntParameter(request, "param3", 6)).isEqualTo(6);
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredIntParameter(request, "param3"));
@@ -66,7 +66,7 @@ class ServletRequestUtilsTests {
 
 		int[] array = new int[] {1, 2, 3};
 		int[] values = ServletRequestUtils.getRequiredIntParameters(request, "param");
-		assertThat(3).isEqualTo(values.length);
+		assertThat(values).hasSize(3);
 		for (int i = 0; i < array.length; i++) {
 			assertThat(array[i]).isEqualTo(values[i]);
 		}
@@ -81,7 +81,7 @@ class ServletRequestUtilsTests {
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
 
-		assertThat(ServletRequestUtils.getLongParameter(request, "param1")).isEqualTo(new Long(5L));
+		assertThat(ServletRequestUtils.getLongParameter(request, "param1")).isEqualTo(Long.valueOf(5L));
 		assertThat(ServletRequestUtils.getLongParameter(request, "param1", 6L)).isEqualTo(5L);
 		assertThat(ServletRequestUtils.getRequiredIntParameter(request, "param1")).isEqualTo(5L);
 
@@ -89,7 +89,7 @@ class ServletRequestUtilsTests {
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredLongParameter(request, "param2"));
 
-		assertThat(ServletRequestUtils.getLongParameter(request, "param3")).isEqualTo(null);
+		assertThat(ServletRequestUtils.getLongParameter(request, "param3")).isNull();
 		assertThat(ServletRequestUtils.getLongParameter(request, "param3", 6L)).isEqualTo(6L);
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredLongParameter(request, "param3"));
@@ -128,7 +128,7 @@ class ServletRequestUtilsTests {
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
 
-		assertThat(ServletRequestUtils.getFloatParameter(request, "param1").equals(new Float(5.5f))).isTrue();
+		assertThat(ServletRequestUtils.getFloatParameter(request, "param1")).isEqualTo(Float.valueOf(5.5f));
 		assertThat(ServletRequestUtils.getFloatParameter(request, "param1", 6.5f) == 5.5f).isTrue();
 		assertThat(ServletRequestUtils.getRequiredFloatParameter(request, "param1") == 5.5f).isTrue();
 
@@ -136,7 +136,7 @@ class ServletRequestUtilsTests {
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredFloatParameter(request, "param2"));
 
-		assertThat(ServletRequestUtils.getFloatParameter(request, "param3") == null).isTrue();
+		assertThat(ServletRequestUtils.getFloatParameter(request, "param3")).isNull();
 		assertThat(ServletRequestUtils.getFloatParameter(request, "param3", 6.5f) == 6.5f).isTrue();
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredFloatParameter(request, "param3"));
@@ -166,7 +166,7 @@ class ServletRequestUtilsTests {
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
 
-		assertThat(ServletRequestUtils.getDoubleParameter(request, "param1").equals(new Double(5.5))).isTrue();
+		assertThat(ServletRequestUtils.getDoubleParameter(request, "param1")).isEqualTo(Double.valueOf(5.5));
 		assertThat(ServletRequestUtils.getDoubleParameter(request, "param1", 6.5) == 5.5).isTrue();
 		assertThat(ServletRequestUtils.getRequiredDoubleParameter(request, "param1") == 5.5).isTrue();
 
@@ -174,7 +174,7 @@ class ServletRequestUtilsTests {
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredDoubleParameter(request, "param2"));
 
-		assertThat(ServletRequestUtils.getDoubleParameter(request, "param3") == null).isTrue();
+		assertThat(ServletRequestUtils.getDoubleParameter(request, "param3")).isNull();
 		assertThat(ServletRequestUtils.getDoubleParameter(request, "param3", 6.5) == 6.5).isTrue();
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredDoubleParameter(request, "param3"));
@@ -212,7 +212,7 @@ class ServletRequestUtilsTests {
 		assertThat(ServletRequestUtils.getBooleanParameter(request, "param2", true)).isFalse();
 		assertThat(ServletRequestUtils.getRequiredBooleanParameter(request, "param2")).isFalse();
 
-		assertThat(ServletRequestUtils.getBooleanParameter(request, "param3") == null).isTrue();
+		assertThat(ServletRequestUtils.getBooleanParameter(request, "param3")).isNull();
 		assertThat(ServletRequestUtils.getBooleanParameter(request, "param3", true)).isTrue();
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredBooleanParameter(request, "param3"));
@@ -235,14 +235,14 @@ class ServletRequestUtilsTests {
 
 		boolean[] array = new boolean[] {true, true, false, true, false};
 		boolean[] values = ServletRequestUtils.getRequiredBooleanParameters(request, "param");
-		assertThat(array.length).isEqualTo(values.length);
+		assertThat(array).hasSameSizeAs(values);
 		for (int i = 0; i < array.length; i++) {
 			assertThat(array[i]).isEqualTo(values[i]);
 		}
 
 		array = new boolean[] {false, true, false};
 		values = ServletRequestUtils.getRequiredBooleanParameters(request, "param2");
-		assertThat(array.length).isEqualTo(values.length);
+		assertThat(array).hasSameSizeAs(values);
 		for (int i = 0; i < array.length; i++) {
 			assertThat(array[i]).isEqualTo(values[i]);
 		}

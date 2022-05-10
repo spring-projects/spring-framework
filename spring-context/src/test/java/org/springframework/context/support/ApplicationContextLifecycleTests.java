@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Fisher
  * @author Chris Beams
  */
-public class ApplicationContextLifecycleTests {
+class ApplicationContextLifecycleTests {
 
 	@Test
-	public void testBeansStart() {
+	void beansStart() {
 		AbstractApplicationContext context = new ClassPathXmlApplicationContext("lifecycleTests.xml", getClass());
 		context.start();
 		LifecycleTestBean bean1 = (LifecycleTestBean) context.getBean("bean1");
@@ -39,10 +39,11 @@ public class ApplicationContextLifecycleTests {
 		assertThat(bean2.isRunning()).as(error).isTrue();
 		assertThat(bean3.isRunning()).as(error).isTrue();
 		assertThat(bean4.isRunning()).as(error).isTrue();
+		context.close();
 	}
 
 	@Test
-	public void testBeansStop() {
+	void beansStop() {
 		AbstractApplicationContext context = new ClassPathXmlApplicationContext("lifecycleTests.xml", getClass());
 		context.start();
 		LifecycleTestBean bean1 = (LifecycleTestBean) context.getBean("bean1");
@@ -60,10 +61,11 @@ public class ApplicationContextLifecycleTests {
 		assertThat(bean2.isRunning()).as(stopError).isFalse();
 		assertThat(bean3.isRunning()).as(stopError).isFalse();
 		assertThat(bean4.isRunning()).as(stopError).isFalse();
+		context.close();
 	}
 
 	@Test
-	public void testStartOrder() {
+	void startOrder() {
 		AbstractApplicationContext context = new ClassPathXmlApplicationContext("lifecycleTests.xml", getClass());
 		context.start();
 		LifecycleTestBean bean1 = (LifecycleTestBean) context.getBean("bean1");
@@ -79,10 +81,11 @@ public class ApplicationContextLifecycleTests {
 		assertThat(bean2.getStartOrder() > bean1.getStartOrder()).as(orderError).isTrue();
 		assertThat(bean3.getStartOrder() > bean2.getStartOrder()).as(orderError).isTrue();
 		assertThat(bean4.getStartOrder() > bean2.getStartOrder()).as(orderError).isTrue();
+		context.close();
 	}
 
 	@Test
-	public void testStopOrder() {
+	void stopOrder() {
 		AbstractApplicationContext context = new ClassPathXmlApplicationContext("lifecycleTests.xml", getClass());
 		context.start();
 		context.stop();
@@ -99,6 +102,7 @@ public class ApplicationContextLifecycleTests {
 		assertThat(bean2.getStopOrder() < bean1.getStopOrder()).as(orderError).isTrue();
 		assertThat(bean3.getStopOrder() < bean2.getStopOrder()).as(orderError).isTrue();
 		assertThat(bean4.getStopOrder() < bean2.getStopOrder()).as(orderError).isTrue();
+		context.close();
 	}
 
 }

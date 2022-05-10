@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.PathContainer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -117,6 +118,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	@Override
+	@Nullable
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
 		request.removeAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		try {
@@ -244,7 +246,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		if (helper.hasMethodsMismatch()) {
 			Set<String> methods = helper.getAllowedMethods();
 			if (HttpMethod.OPTIONS.matches(request.getMethod())) {
-				HttpOptionsHandler handler = new HttpOptionsHandler(methods);
+				Set<MediaType> mediaTypes = helper.getConsumablePatchMediaTypes();
+				HttpOptionsHandler handler = new HttpOptionsHandler(methods, mediaTypes);
 				return new HandlerMethod(handler, HTTP_OPTIONS_HANDLE_METHOD);
 			}
 			throw new HttpRequestMethodNotSupportedException(request.getMethod(), methods);
@@ -261,7 +264,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 					throw new HttpMediaTypeNotSupportedException(ex.getMessage());
 				}
 			}
-			throw new HttpMediaTypeNotSupportedException(contentType, new ArrayList<>(mediaTypes));
+			throw new HttpMediaTypeNotSupportedException(
+					contentType, new ArrayList<>(mediaTypes), HttpMethod.valueOf(request.getMethod()));
 		}
 
 		if (helper.hasProducesMismatch()) {
@@ -411,6 +415,21 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			return result;
 		}
 
+		/**
+		 * Return declared "consumable" types but only among those that have
+		 * PATCH specified, or that have no methods at all.
+		 */
+		public Set<MediaType> getConsumablePatchMediaTypes() {
+			Set<MediaType> result = new LinkedHashSet<>();
+			for (PartialMatch match : this.partialMatches) {
+				Set<RequestMethod> methods = match.getInfo().getMethodsCondition().getMethods();
+				if (methods.isEmpty() || methods.contains(RequestMethod.PATCH)) {
+					result.addAll(match.getInfo().getConsumesCondition().getConsumableMediaTypes());
+				}
+			}
+			return result;
+		}
+
 
 		/**
 		 * Container for a RequestMappingInfo that matches the URL path at least.
@@ -475,8 +494,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		private final HttpHeaders headers = new HttpHeaders();
 
-		public HttpOptionsHandler(Set<String> declaredMethods) {
+		public HttpOptionsHandler(Set<String> declaredMethods, Set<MediaType> acceptPatch) {
 			this.headers.setAllow(initAllowedHttpMethods(declaredMethods));
+			this.headers.setAcceptPatch(new ArrayList<>(acceptPatch));
 		}
 
 		private static Set<HttpMethod> initAllowedHttpMethods(Set<String> declaredMethods) {

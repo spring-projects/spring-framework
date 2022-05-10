@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,8 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.server.ServerWebInputException;
 
 /**
- * A specialization of {@link ServerWebInputException} thrown when after data
- * binding and validation failure. Implements {@link BindingResult} (and its
- * super-interface {@link Errors}) to allow for direct analysis of binding and
- * validation errors.
+ * {@link ServerWebInputException} subclass that indicates a data binding or
+ * validation failure.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -49,18 +47,18 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	public WebExchangeBindException(MethodParameter parameter, BindingResult bindingResult) {
 		super("Validation failure", parameter);
 		this.bindingResult = bindingResult;
+		getBody().setDetail("Invalid request content.");
 	}
 
 
 	/**
 	 * Return the BindingResult that this BindException wraps.
-	 * Will typically be a BeanPropertyBindingResult.
+	 * <p>Will typically be a BeanPropertyBindingResult.
 	 * @see BeanPropertyBindingResult
 	 */
 	public final BindingResult getBindingResult() {
 		return this.bindingResult;
 	}
-
 
 	@Override
 	public String getObjectName() {
@@ -86,7 +84,6 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	public void popNestedPath() throws IllegalStateException {
 		this.bindingResult.popNestedPath();
 	}
-
 
 	@Override
 	public void reject(String errorCode) {
@@ -124,7 +121,6 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	public void addAllErrors(Errors errors) {
 		this.bindingResult.addAllErrors(errors);
 	}
-
 
 	@Override
 	public boolean hasErrors() {
@@ -276,7 +272,6 @@ public class WebExchangeBindException extends ServerWebInputException implements
 		return this.bindingResult.getSuppressedFields();
 	}
 
-
 	/**
 	 * Returns diagnostic information about the errors held in this object.
 	 */
@@ -289,7 +284,7 @@ public class WebExchangeBindException extends ServerWebInputException implements
 				.append(parameter.getExecutable().toGenericString())
 				.append(", with ").append(this.bindingResult.getErrorCount()).append(" error(s): ");
 		for (ObjectError error : this.bindingResult.getAllErrors()) {
-			sb.append("[").append(error).append("] ");
+			sb.append('[').append(error).append("] ");
 		}
 		return sb.toString();
 	}

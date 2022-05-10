@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,21 +51,20 @@ import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 
 /**
  * {@link FactoryBean} that creates a Hibernate {@link SessionFactory}. This is the usual
  * way to set up a shared Hibernate SessionFactory in a Spring application context; the
  * SessionFactory can then be passed to data access objects via dependency injection.
  *
- * <p>Compatible with Hibernate 5.2/5.3/5.4, as of Spring 5.3.
+ * <p>Compatible with Hibernate 5.5/5.6, as of Spring 6.0.
  * This Hibernate-specific {@code LocalSessionFactoryBean} can be an immediate alternative
- * to {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean} for common
- * JPA purposes: In particular with Hibernate 5.3/5.4, the Hibernate {@code SessionFactory}
- * will natively expose the JPA {@code EntityManagerFactory} interface as well, and
- * Hibernate {@code BeanContainer} integration will be registered out of the box.
- * In combination with {@link HibernateTransactionManager}, this naturally allows for
- * mixing JPA access code with native Hibernate access code within the same transaction.
+ * to {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean} for
+ * common JPA purposes: The Hibernate {@code SessionFactory} will natively expose the JPA
+ * {@code EntityManagerFactory} interface as well, and Hibernate {@code BeanContainer}
+ * integration will be registered out of the box. In combination with
+ * {@link HibernateTransactionManager}, this naturally allows for mixing JPA access code
+ * with native Hibernate access code within the same transaction.
  *
  * @author Juergen Hoeller
  * @since 4.2
@@ -281,7 +280,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	/**
 	 * Set the Spring {@link org.springframework.transaction.jta.JtaTransactionManager}
-	 * or the JTA {@link javax.transaction.TransactionManager} to be used with Hibernate,
+	 * or the JTA {@link jakarta.transaction.TransactionManager} to be used with Hibernate,
 	 * if any. Implicitly sets up {@code JtaPlatform}.
 	 * @see LocalSessionFactoryBuilder#setJtaTransactionManager
 	 */
@@ -343,8 +342,8 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	/**
 	 * Specify custom type filters for Spring-based scanning for entity classes.
 	 * <p>Default is to search all specified packages for classes annotated with
-	 * {@code @javax.persistence.Entity}, {@code @javax.persistence.Embeddable}
-	 * or {@code @javax.persistence.MappedSuperclass}.
+	 * {@code @jakarta.persistence.Entity}, {@code @jakarta.persistence.Embeddable}
+	 * or {@code @jakarta.persistence.MappedSuperclass}.
 	 * @see #setPackagesToScan
 	 */
 	public void setEntityTypeFilters(TypeFilter... entityTypeFilters) {
@@ -469,17 +468,14 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	/**
 	 * Accept the containing {@link BeanFactory}, registering corresponding Hibernate
 	 * {@link org.hibernate.resource.beans.container.spi.BeanContainer} integration for
-	 * it if possible. This requires a Spring {@link ConfigurableListableBeanFactory}
-	 * and Hibernate 5.3 or higher on the classpath.
+	 * it if possible. This requires a Spring {@link ConfigurableListableBeanFactory}.
 	 * @since 5.1
 	 * @see SpringBeanContainer
 	 * @see LocalSessionFactoryBuilder#setBeanContainer
 	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (beanFactory instanceof ConfigurableListableBeanFactory &&
-				ClassUtils.isPresent("org.hibernate.resource.beans.container.spi.BeanContainer",
-						getClass().getClassLoader())) {
+		if (beanFactory instanceof ConfigurableListableBeanFactory) {
 			this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 		}
 	}

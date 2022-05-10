@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class BeanWrapperEnumTests {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnum", null);
-		assertThat(gb.getCustomEnum()).isEqualTo(null);
+		assertThat(gb.getCustomEnum()).isNull();
 	}
 
 	@Test
@@ -54,7 +54,7 @@ public class BeanWrapperEnumTests {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnum", "");
-		assertThat(gb.getCustomEnum()).isEqualTo(null);
+		assertThat(gb.getCustomEnum()).isNull();
 	}
 
 	@Test

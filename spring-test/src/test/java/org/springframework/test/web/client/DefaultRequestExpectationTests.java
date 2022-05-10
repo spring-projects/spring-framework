@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.mock.http.client.MockClientHttpRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.ExpectedCount.twice;
@@ -44,15 +44,15 @@ public class DefaultRequestExpectationTests {
 	@Test
 	public void match() throws Exception {
 		RequestExpectation expectation = new DefaultRequestExpectation(once(), requestTo("/foo"));
-		expectation.match(createRequest(GET, "/foo"));
+		expectation.match(createRequest());
 	}
 
 	@Test
-	public void matchWithFailedExpectation() throws Exception {
+	public void matchWithFailedExpectation() {
 		RequestExpectation expectation = new DefaultRequestExpectation(once(), requestTo("/foo"));
 		expectation.andExpect(method(POST));
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				expectation.match(createRequest(GET, "/foo")))
+				expectation.match(createRequest()))
 			.withMessageContaining("Unexpected HttpMethod expected:<POST> but was:<GET>");
 	}
 
@@ -81,10 +81,9 @@ public class DefaultRequestExpectationTests {
 	}
 
 
-	@SuppressWarnings("deprecation")
-	private ClientHttpRequest createRequest(HttpMethod method, String url) {
+	private ClientHttpRequest createRequest() {
 		try {
-			return new org.springframework.mock.http.client.MockAsyncClientHttpRequest(method,  new URI(url));
+			return new MockClientHttpRequest(HttpMethod.GET,  new URI("/foo"));
 		}
 		catch (URISyntaxException ex) {
 			throw new IllegalStateException(ex);

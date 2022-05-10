@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,41 @@
 
 package org.springframework.web.multipart.support;
 
-import javax.servlet.ServletException;
-
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.multipart.MultipartResolver;
 
 /**
- * Raised when the part of a "multipart/form-data" request identified by its
- * name cannot be found.
- *
- * <p>This may be because the request is not a multipart/form-data request,
- * because the part is not present in the request, or because the web
- * application is not configured correctly for processing  multipart requests,
- * e.g. no {@link MultipartResolver}.
+ * Signals the part of a "multipart/form-data" request, identified by name
+ * could not be found. This may be because the request is not a multipart
+ * request, or a part with that name is not present, or because the application
+ * is not configured correctly for processing multipart requests, e.g. there
+ * is no {@link MultipartResolver}.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 @SuppressWarnings("serial")
-public class MissingServletRequestPartException extends ServletException {
+public class MissingServletRequestPartException extends ServletRequestBindingException {
 
-	private final String partName;
+	private final String requestPartName;
 
 
-	public MissingServletRequestPartException(String partName) {
-		super("Required request part '" + partName + "' is not present");
-		this.partName = partName;
+	/**
+	 * Constructor for MissingServletRequestPartException.
+	 * @param requestPartName the name of the missing part of the multipart request
+	 */
+	public MissingServletRequestPartException(String requestPartName) {
+		super("Required part '" + requestPartName + "' is not present.");
+		this.requestPartName = requestPartName;
+		getBody().setDetail(getMessage());
 	}
 
 
+	/**
+	 * Return the name of the offending part of the multipart request.
+	 */
 	public String getRequestPartName() {
-		return this.partName;
+		return this.requestPartName;
 	}
 
 }

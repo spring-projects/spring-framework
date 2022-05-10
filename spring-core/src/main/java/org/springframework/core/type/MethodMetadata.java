@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.core.type;
 
 /**
  * Interface that defines abstract access to the annotations of a specific
- * class, in a form that does not require that class to be loaded yet.
+ * method, in a form that does not require that method's class to be loaded yet.
  *
  * @author Juergen Hoeller
  * @author Mark Pollack
@@ -32,42 +32,42 @@ package org.springframework.core.type;
 public interface MethodMetadata extends AnnotatedTypeMetadata {
 
 	/**
-	 * Return the name of the method.
+	 * Get the name of the underlying method.
 	 */
 	String getMethodName();
 
 	/**
-	 * Return the fully-qualified name of the class that declares this method.
+	 * Get the fully-qualified name of the class that declares the underlying method.
 	 */
 	String getDeclaringClassName();
 
 	/**
-	 * Return the fully-qualified name of this method's declared return type.
+	 * Get the fully-qualified name of the underlying method's declared return type.
 	 * @since 4.2
 	 */
 	String getReturnTypeName();
 
 	/**
-	 * Return whether the underlying method is effectively abstract:
-	 * i.e. marked as abstract on a class or declared as a regular,
+	 * Determine whether the underlying method is effectively abstract:
+	 * i.e. marked as abstract in a class or declared as a regular,
 	 * non-default method in an interface.
 	 * @since 4.2
 	 */
 	boolean isAbstract();
 
 	/**
-	 * Return whether the underlying method is declared as 'static'.
+	 * Determine whether the underlying method is declared as 'static'.
 	 */
 	boolean isStatic();
 
 	/**
-	 * Return whether the underlying method is marked as 'final'.
+	 * Determine whether the underlying method is marked as 'final'.
 	 */
 	boolean isFinal();
 
 	/**
-	 * Return whether the underlying method is overridable,
-	 * i.e. not marked as static, final or private.
+	 * Determine whether the underlying method is overridable,
+	 * i.e. not marked as static, final, or private.
 	 */
 	boolean isOverridable();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.web.servlet.i18n;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.SimpleLocaleContext;
@@ -314,9 +314,9 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	/**
 	 * Render the given locale as a text value for inclusion in a cookie.
 	 * <p>The default implementation calls {@link Locale#toString()}
-	 * or JDK 7's {@link Locale#toLanguageTag()}, depending on the
+	 * or {@link Locale#toLanguageTag()}, depending on the
 	 * {@link #setLanguageTagCompliant "languageTagCompliant"} configuration property.
-	 * @param locale the locale to stringify
+	 * @param locale the locale to convert to a string
 	 * @return a String representation for the given locale
 	 * @since 4.3
 	 * @see #isLanguageTagCompliant()
@@ -333,7 +333,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * @param request the request to resolve the locale for
 	 * @return the default locale (never {@code null})
 	 * @see #setDefaultLocale
-	 * @see javax.servlet.http.HttpServletRequest#getLocale()
+	 * @see jakarta.servlet.http.HttpServletRequest#getLocale()
 	 */
 	protected Locale determineDefaultLocale(HttpServletRequest request) {
 		Locale defaultLocale = getDefaultLocale();

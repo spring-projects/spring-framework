@@ -27,8 +27,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -70,6 +70,30 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertThat(response.getContentAsString()).isEqualTo("test-42-7");
+	}
+
+	@PathPatternsParameterizedTest // gh-25864
+	void literalMappingWithPathParams(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(MultipleUriTemplateController.class, usePathPatterns);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/data");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getStatus()).isEqualTo(200);
+		assertThat(response.getContentAsString()).isEqualTo("test");
+
+		if (!usePathPatterns) {
+			request = new MockHttpServletRequest("GET", "/data;foo=bar");
+			response = new MockHttpServletResponse();
+			getServlet().service(request, response);
+			assertThat(response.getStatus()).isEqualTo(404);
+		}
+
+		request = new MockHttpServletRequest("GET", "/data;jsessionid=123");
+		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getStatus()).isEqualTo(200);
+		assertThat(response.getContentAsString()).isEqualTo("test");
 	}
 
 	@PathPatternsParameterizedTest
@@ -379,6 +403,10 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 			writer.write("test-" + hotel + "-q" + qHotel + "-" + booking + "-" + other + "-q" + qOther);
 		}
 
+		@RequestMapping("/data")
+		void handleWithLiteralMapping(Writer writer) throws IOException {
+			writer.write("test");
+		}
 	}
 
 	@Controller

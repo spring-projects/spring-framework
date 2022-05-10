@@ -18,8 +18,6 @@ package org.springframework.beans.factory.support;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.testfixture.beans.DerivedTestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 
@@ -40,12 +38,7 @@ public class DefaultSingletonBeanRegistryTests {
 		beanRegistry.registerSingleton("tb", tb);
 		assertThat(beanRegistry.getSingleton("tb")).isSameAs(tb);
 
-		TestBean tb2 = (TestBean) beanRegistry.getSingleton("tb2", new ObjectFactory<Object>() {
-			@Override
-			public Object getObject() throws BeansException {
-				return new TestBean();
-			}
-		});
+		TestBean tb2 = (TestBean) beanRegistry.getSingleton("tb2", () -> new TestBean());
 		assertThat(beanRegistry.getSingleton("tb2")).isSameAs(tb2);
 
 		assertThat(beanRegistry.getSingleton("tb")).isSameAs(tb);

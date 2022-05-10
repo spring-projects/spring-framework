@@ -18,11 +18,10 @@ package org.springframework.context.annotation;
 
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
@@ -215,12 +214,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("testBean4", tbd);
 
 		bf.registerResolvableDependency(BeanFactory.class, bf);
-		bf.registerResolvableDependency(INestedTestBean.class, new ObjectFactory<Object>() {
-			@Override
-			public Object getObject() throws BeansException {
-				return new NestedTestBean();
-			}
-		});
+		bf.registerResolvableDependency(INestedTestBean.class, (ObjectFactory<Object>) () -> new NestedTestBean());
 
 		@SuppressWarnings("deprecation")
 		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer ppc = new org.springframework.beans.factory.config.PropertyPlaceholderConfigurer();

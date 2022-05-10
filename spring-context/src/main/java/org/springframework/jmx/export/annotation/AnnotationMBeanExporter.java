@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.jmx.export.naming.MetadataNamingStrategy;
 
 /**
  * Convenient subclass of Spring's standard {@link MBeanExporter},
- * activating Java 5 annotation usage for JMX exposure of Spring beans:
+ * activating annotation usage for JMX exposure of Spring beans:
  * {@link ManagedResource}, {@link ManagedAttribute}, {@link ManagedOperation}, etc.
  *
  * <p>Sets a {@link MetadataNamingStrategy} and a {@link MetadataMBeanInfoAssembler}

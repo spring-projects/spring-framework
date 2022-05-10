@@ -21,12 +21,12 @@ package org.springframework.jms;
  *
  * @author Mark Pollack
  * @since 1.1
- * @see javax.jms.JMSSecurityException
+ * @see jakarta.jms.JMSSecurityException
  */
 @SuppressWarnings("serial")
 public class JmsSecurityException extends JmsException {
 
-	public JmsSecurityException(javax.jms.JMSSecurityException cause) {
+	public JmsSecurityException(jakarta.jms.JMSSecurityException cause) {
 		super(cause);
 	}
 

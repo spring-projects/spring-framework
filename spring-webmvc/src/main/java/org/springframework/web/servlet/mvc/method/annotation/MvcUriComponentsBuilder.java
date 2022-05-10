@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -97,7 +96,9 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class MvcUriComponentsBuilder {
 
-	/** Well-known name for the {@link CompositeUriComponentsContributor} object in the bean factory. */
+	/**
+	 * Well-known name for the {@link CompositeUriComponentsContributor} object in the bean factory.
+	 */
 	public static final String MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME = "mvcUriComponentsContributor";
 
 
@@ -351,7 +352,6 @@ public class MvcUriComponentsBuilder {
 	 * </pre>
 	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
 	 * and "X-Forwarded-*" headers if found. See class-level docs.
-	 *
 	 * @param controllerType the target controller
 	 */
 	public static <T> T on(Class<T> controllerType) {
@@ -412,7 +412,7 @@ public class MvcUriComponentsBuilder {
 	 * A JSP can prepare a URL to the controller method as follows:
 	 *
 	 * <pre class="code">
-	 * <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
+	 * &lt;%@ taglib uri="http://www.springframework.org/tags" prefix="s" %&gt;
 	 *
 	 * &lt;a href="${s:mvcUrl('PC#getPerson').arg(0,"123").build()}"&gt;Get Person&lt;/a&gt;
 	 * </pre>
@@ -421,7 +421,6 @@ public class MvcUriComponentsBuilder {
 	 *
 	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
 	 * and "X-Forwarded-*" headers if found. See class-level docs.
-	 *
 	 * @param mappingName the mapping name
 	 * @return a builder to prepare the URI String
 	 * @throws IllegalArgumentException if the mapping name is not found or
@@ -716,7 +715,7 @@ public class MvcUriComponentsBuilder {
 
 		@Override
 		@Nullable
-		public Object intercept(Object obj, Method method, Object[] args, @Nullable MethodProxy proxy) {
+		public Object intercept(@Nullable Object obj, Method method, Object[] args, @Nullable MethodProxy proxy) {
 			switch (method.getName()) {
 				case "getControllerType": return this.controllerType;
 				case "getControllerMethod": return this.controllerMethod;

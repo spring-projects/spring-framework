@@ -28,7 +28,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
@@ -126,15 +125,15 @@ class RSocketServerToClientIntegrationTests {
 	static class ServerController {
 
 		// Must be initialized by @Test method...
-		volatile MonoProcessor<Void> result;
+		volatile Sinks.Empty<Void> resultSink;
 
 
 		void reset() {
-			this.result = MonoProcessor.fromSink(Sinks.one());
+			this.resultSink = Sinks.empty();
 		}
 
 		void await(Duration duration) {
-			this.result.block(duration);
+			this.resultSink.asMono().block(duration);
 		}
 
 
@@ -201,10 +200,12 @@ class RSocketServerToClientIntegrationTests {
 
 		private void runTest(Runnable testEcho) {
 			Mono.fromRunnable(testEcho)
-					.doOnError(ex -> result.onError(ex))
-					.doOnSuccess(o -> result.onComplete())
 					.subscribeOn(Schedulers.boundedElastic()) // StepVerifier will block
-					.subscribe();
+					.subscribe(
+							aVoid -> {},
+							ex -> resultSink.tryEmitError(ex), // Ignore result: signals cannot compete
+							() -> resultSink.tryEmitEmpty()
+					);
 		}
 
 		@MessageMapping("fnf")
@@ -219,7 +220,7 @@ class RSocketServerToClientIntegrationTests {
 
 		@MessageMapping("receive")
 		void receive(String payload) {
-			this.fireForgetPayloads.tryEmitNext(payload);
+			this.fireForgetPayloads.emitNext(payload, Sinks.EmitFailureHandler.FAIL_FAST);
 		}
 
 		@MessageMapping("echo")

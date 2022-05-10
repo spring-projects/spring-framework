@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -285,12 +285,10 @@ public abstract class JdbcUtils {
 		if (obj != null) {
 			className = obj.getClass().getName();
 		}
-		if (obj instanceof Blob) {
-			Blob blob = (Blob) obj;
+		if (obj instanceof Blob blob) {
 			obj = blob.getBytes(1, (int) blob.length());
 		}
-		else if (obj instanceof Clob) {
-			Clob clob = (Clob) obj;
+		else if (obj instanceof Clob clob) {
 			obj = clob.getSubString(1, (int) clob.length());
 		}
 		else if ("oracle.sql.TIMESTAMP".equals(className) || "oracle.sql.TIMESTAMPTZ".equals(className)) {

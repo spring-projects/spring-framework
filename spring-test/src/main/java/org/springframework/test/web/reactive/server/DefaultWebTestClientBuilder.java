@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,8 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	private static final boolean httpComponentsClientPresent;
 
+	private static final boolean webFluxPresent;
+
 	static {
 		ClassLoader loader = DefaultWebTestClientBuilder.class.getClassLoader();
 		reactorClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
@@ -64,6 +66,8 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		httpComponentsClientPresent =
 				ClassUtils.isPresent("org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient", loader) &&
 						ClassUtils.isPresent("org.apache.hc.core5.reactive.ReactiveDataConsumer", loader);
+		webFluxPresent = ClassUtils.isPresent(
+				"org.springframework.web.reactive.function.client.ExchangeFunction", loader);
 	}
 
 
@@ -87,6 +91,8 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	@Nullable
 	private List<ExchangeFilterFunction> filters;
+
+	private Consumer<EntityExchangeResult<?>> entityResultConsumer = result -> {};
 
 	@Nullable
 	private ExchangeStrategies strategies;
@@ -119,6 +125,10 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		Assert.isTrue(httpHandlerBuilder == null || connector == null,
 				"Expected WebHttpHandlerBuilder or ClientHttpConnector but not both.");
 
+		// Helpful message especially for MockMvcWebTestClient users
+		Assert.state(webFluxPresent,
+				"To use WebTestClient, please add spring-webflux to the test classpath.");
+
 		this.connector = connector;
 		this.httpHandlerBuilder = (httpHandlerBuilder != null ? httpHandlerBuilder.clone() : null);
 	}
@@ -141,6 +151,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		this.defaultCookies = (other.defaultCookies != null ?
 				new LinkedMultiValueMap<>(other.defaultCookies) : null);
 		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
+		this.entityResultConsumer = other.entityResultConsumer;
 		this.strategies = other.strategies;
 		this.strategiesConfigurers = (other.strategiesConfigurers != null ?
 				new ArrayList<>(other.strategiesConfigurers) : null);
@@ -199,7 +210,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	@Override
 	public WebTestClient.Builder filter(ExchangeFilterFunction filter) {
-		Assert.notNull(filter, "ExchangeFilterFunction must not be null");
+		Assert.notNull(filter, "ExchangeFilterFunction is required");
 		initFilters().add(filter);
 		return this;
 	}
@@ -215,6 +226,13 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 			this.filters = new ArrayList<>();
 		}
 		return this.filters;
+	}
+
+	@Override
+	public WebTestClient.Builder entityExchangeResultConsumer(Consumer<EntityExchangeResult<?>> entityResultConsumer) {
+		Assert.notNull(entityResultConsumer, "`entityResultConsumer` is required");
+		this.entityResultConsumer = this.entityResultConsumer.andThen(entityResultConsumer);
+		return this;
 	}
 
 	@Override
@@ -279,7 +297,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		return new DefaultWebTestClient(connectorToUse, exchangeFactory, initUriBuilderFactory(),
 				this.defaultHeaders != null ? HttpHeaders.readOnlyHttpHeaders(this.defaultHeaders) : null,
 				this.defaultCookies != null ? CollectionUtils.unmodifiableMultiValueMap(this.defaultCookies) : null,
-				this.responseTimeout, new DefaultWebTestClientBuilder(this));
+				this.entityResultConsumer, this.responseTimeout, new DefaultWebTestClientBuilder(this));
 	}
 
 	private static ClientHttpConnector initConnector() {

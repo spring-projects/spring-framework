@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,17 @@ public class RequestMappingHandlerMappingTests {
 		return Stream.of(Arguments.of(mapping1, wac1), Arguments.of(mapping2, wac2));
 	}
 
+	@Test
+	void builderConfiguration() {
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+		mapping.setApplicationContext(new StaticWebApplicationContext());
+
+		RequestMappingInfo.BuilderConfiguration config = mapping.getBuilderConfiguration();
+		assertThat(config).isNotNull();
+
+		mapping.afterPropertiesSet();
+		assertThat(mapping.getBuilderConfiguration()).isNotNull().isNotSameAs(config);
+	}
 
 	@Test
 	@SuppressWarnings("deprecation")
@@ -88,7 +99,8 @@ public class RequestMappingHandlerMappingTests {
 		handlerMapping.setApplicationContext(new StaticWebApplicationContext());
 
 		Map<String, MediaType> fileExtensions = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		org.springframework.web.accept.PathExtensionContentNegotiationStrategy strategy = new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(fileExtensions);
+		org.springframework.web.accept.PathExtensionContentNegotiationStrategy strategy =
+				new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(fileExtensions);
 		ContentNegotiationManager manager = new ContentNegotiationManager(strategy);
 
 		handlerMapping.setContentNegotiationManager(manager);
@@ -104,7 +116,8 @@ public class RequestMappingHandlerMappingTests {
 	@SuppressWarnings("deprecation")
 	void useRegisteredSuffixPatternMatchInitialization() {
 		Map<String, MediaType> fileExtensions = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		org.springframework.web.accept.PathExtensionContentNegotiationStrategy strategy = new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(fileExtensions);
+		org.springframework.web.accept.PathExtensionContentNegotiationStrategy strategy =
+				new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(fileExtensions);
 		ContentNegotiationManager manager = new ContentNegotiationManager(strategy);
 
 		final Set<String> extensions = new HashSet<>();

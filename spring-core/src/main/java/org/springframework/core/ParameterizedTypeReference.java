@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public abstract class ParameterizedTypeReference<T> {
 	 * @since 4.3.12
 	 */
 	public static <T> ParameterizedTypeReference<T> forType(Type type) {
-		return new ParameterizedTypeReference<T>(type) {
+		return new ParameterizedTypeReference<>(type) {
 		};
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,17 @@ public interface SmartApplicationListener extends ApplicationListener<Applicatio
 	@Override
 	default int getOrder() {
 		return LOWEST_PRECEDENCE;
+	}
+
+	/**
+	 * Return an optional identifier for the listener.
+	 * <p>The default value is an empty String.
+	 * @since 5.3.5
+	 * @see EventListener#id
+	 * @see ApplicationEventMulticaster#removeApplicationListeners
+	 */
+	default String getListenerId() {
+		return "";
 	}
 
 }

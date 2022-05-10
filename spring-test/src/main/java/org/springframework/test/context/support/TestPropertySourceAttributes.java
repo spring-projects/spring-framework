@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.log.LogMessage;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -52,8 +53,6 @@ class TestPropertySourceAttributes {
 	private static final Log logger = LogFactory.getLog(TestPropertySourceAttributes.class);
 
 
-	private final int aggregateIndex;
-
 	private final Class<?> declaringClass;
 
 	private final MergedAnnotation<?> rootAnnotation;
@@ -68,76 +67,63 @@ class TestPropertySourceAttributes {
 
 
 	TestPropertySourceAttributes(MergedAnnotation<TestPropertySource> annotation) {
-		this.aggregateIndex = annotation.getAggregateIndex();
 		this.declaringClass = declaringClass(annotation);
 		this.rootAnnotation = annotation.getRoot();
 		this.inheritLocations = annotation.getBoolean("inheritLocations");
 		this.inheritProperties = annotation.getBoolean("inheritProperties");
-		mergePropertiesAndLocations(annotation);
-	}
-
-
-	/**
-	 * Determine if the annotation represented by this
-	 * {@code TestPropertySourceAttributes} instance can be merged with the
-	 * supplied {@code annotation}.
-	 * <p>This method effectively checks that two annotations are declared at
-	 * the same level in the type hierarchy (i.e., have the same
-	 * {@linkplain MergedAnnotation#getAggregateIndex() aggregate index}).
-	 * @since 5.2
-	 * @see #mergeWith(MergedAnnotation)
-	 */
-	boolean canMergeWith(MergedAnnotation<TestPropertySource> annotation) {
-		return annotation.getAggregateIndex() == this.aggregateIndex;
+		addPropertiesAndLocationsFrom(annotation);
 	}
 
 	/**
 	 * Merge this {@code TestPropertySourceAttributes} instance with the
-	 * supplied {@code annotation}, asserting that the two sets of test property
-	 * source attributes have identical values for the
+	 * supplied {@code TestPropertySourceAttributes}, asserting that the two sets
+	 * of test property source attributes have identical values for the
 	 * {@link TestPropertySource#inheritLocations} and
 	 * {@link TestPropertySource#inheritProperties} flags and that the two
 	 * underlying annotations were declared on the same class.
-	 * <p>This method should only be invoked if {@link #canMergeWith(MergedAnnotation)}
-	 * returns {@code true}.
 	 * @since 5.2
-	 * @see #canMergeWith(MergedAnnotation)
 	 */
-	void mergeWith(MergedAnnotation<TestPropertySource> annotation) {
-		Class<?> source = declaringClass(annotation);
-		Assert.state(source == this.declaringClass,
+	void mergeWith(TestPropertySourceAttributes attributes) {
+		Assert.state(attributes.declaringClass == this.declaringClass,
 				() -> "Detected @TestPropertySource declarations within an aggregate index "
 						+ "with different sources: " + this.declaringClass.getName() + " and "
-						+ source.getName());
+						+ attributes.declaringClass.getName());
 		logger.trace(LogMessage.format("Retrieved %s for declaring class [%s].",
-				annotation, this.declaringClass.getName()));
-		assertSameBooleanAttribute(this.inheritLocations, annotation, "inheritLocations");
-		assertSameBooleanAttribute(this.inheritProperties, annotation, "inheritProperties");
-		mergePropertiesAndLocations(annotation);
+				attributes, this.declaringClass.getName()));
+		assertSameBooleanAttribute(this.inheritLocations, attributes.inheritLocations,
+				"inheritLocations", attributes);
+		assertSameBooleanAttribute(this.inheritProperties, attributes.inheritProperties,
+				"inheritProperties", attributes);
+		mergePropertiesAndLocationsFrom(attributes);
 	}
 
-	private void assertSameBooleanAttribute(boolean expected, MergedAnnotation<TestPropertySource> annotation,
-			String attribute) {
+	private void assertSameBooleanAttribute(boolean expected, boolean actual,
+			String attributeName, TestPropertySourceAttributes that) {
 
-		Assert.isTrue(expected == annotation.getBoolean(attribute), () -> String.format(
+		Assert.isTrue(expected == actual, () -> String.format(
 				"@%s on %s and @%s on %s must declare the same value for '%s' as other " +
 				"directly present or meta-present @TestPropertySource annotations",
 			this.rootAnnotation.getType().getSimpleName(), this.declaringClass.getSimpleName(),
-			annotation.getRoot().getType().getSimpleName(), declaringClass(annotation).getSimpleName(),
-			attribute));
+			that.rootAnnotation.getType().getSimpleName(), that.declaringClass.getSimpleName(),
+			attributeName));
 	}
 
-	private void mergePropertiesAndLocations(MergedAnnotation<TestPropertySource> annotation) {
-		String[] locations = annotation.getStringArray("locations");
-		String[] properties = annotation.getStringArray("properties");
-		// If the meta-distance is positive, that means the annotation is
-		// meta-present and should therefore have lower priority than directly
-		// present annotations (i.e., it should be prepended to the list instead
-		// of appended). This follows the rule of last-one-wins for overriding
-		// properties.
-		boolean prepend = annotation.getDistance() > 0;
+	private void addPropertiesAndLocationsFrom(MergedAnnotation<TestPropertySource> mergedAnnotation) {
+		String[] locations = mergedAnnotation.getStringArray("locations");
+		String[] properties = mergedAnnotation.getStringArray("properties");
+		addPropertiesAndLocations(locations, properties, declaringClass(mergedAnnotation), false);
+	}
+
+	private void mergePropertiesAndLocationsFrom(TestPropertySourceAttributes attributes) {
+		addPropertiesAndLocations(attributes.getLocations(), attributes.getProperties(),
+				attributes.getDeclaringClass(), true);
+	}
+
+	private void addPropertiesAndLocations(String[] locations, String[] properties,
+			Class<?> declaringClass, boolean prepend) {
+
 		if (ObjectUtils.isEmpty(locations) && ObjectUtils.isEmpty(properties)) {
-			addAll(prepend, this.locations, detectDefaultPropertiesFile(annotation));
+			addAll(prepend, this.locations, detectDefaultPropertiesFile(declaringClass));
 		}
 		else {
 			addAll(prepend, this.locations, locations);
@@ -158,8 +144,7 @@ class TestPropertySourceAttributes {
 		list.addAll((prepend ? 0 : list.size()), Arrays.asList(elements));
 	}
 
-	private String detectDefaultPropertiesFile(MergedAnnotation<TestPropertySource> annotation) {
-		Class<?> testClass = declaringClass(annotation);
+	private String detectDefaultPropertiesFile(Class<?> testClass) {
 		String resourcePath = ClassUtils.convertClassNameToResourcePath(testClass.getName()) + ".properties";
 		ClassPathResource classPathResource = new ClassPathResource(resourcePath);
 		if (!classPathResource.exists()) {
@@ -228,6 +213,45 @@ class TestPropertySourceAttributes {
 	 */
 	boolean isInheritProperties() {
 		return this.inheritProperties;
+	}
+
+	boolean isEmpty() {
+		return (this.locations.isEmpty() && this.properties.isEmpty());
+	}
+
+	@Override
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (other == null || other.getClass() != getClass()) {
+			return false;
+		}
+
+		TestPropertySourceAttributes that = (TestPropertySourceAttributes) other;
+		if (!this.locations.equals(that.locations)) {
+			return false;
+		}
+		if (!this.properties.equals(that.properties)) {
+			return false;
+		}
+		if (this.inheritLocations != that.inheritLocations) {
+			return false;
+		}
+		if (this.inheritProperties != that.inheritProperties) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = this.locations.hashCode();
+		result = 31 * result + this.properties.hashCode();
+		result = 31 * result + (this.inheritLocations ? 1231 : 1237);
+		result = 31 * result + (this.inheritProperties ? 1231 : 1237);
+		return result;
 	}
 
 	/**

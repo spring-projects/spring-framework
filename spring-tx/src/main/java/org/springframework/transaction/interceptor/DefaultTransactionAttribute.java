@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -231,7 +231,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	protected final StringBuilder getAttributeDescription() {
 		StringBuilder result = getDefinitionDescription();
 		if (StringUtils.hasText(this.qualifier)) {
-			result.append("; '").append(this.qualifier).append("'");
+			result.append("; '").append(this.qualifier).append('\'');
 		}
 		if (!this.labels.isEmpty()) {
 			result.append("; ").append(this.labels);

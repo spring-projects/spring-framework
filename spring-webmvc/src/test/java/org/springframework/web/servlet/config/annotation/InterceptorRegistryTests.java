@@ -182,8 +182,7 @@ public class InterceptorRegistryTests {
 		PathMatcher pathMatcher = new AntPathMatcher();
 		List<HandlerInterceptor> result = new ArrayList<>();
 		for (Object interceptor : this.registry.getInterceptors()) {
-			if (interceptor instanceof MappedInterceptor) {
-				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
+			if (interceptor instanceof MappedInterceptor mappedInterceptor) {
 				if (mappedInterceptor.matches(lookupPath, pathMatcher)) {
 					result.add(mappedInterceptor.getInterceptor());
 				}

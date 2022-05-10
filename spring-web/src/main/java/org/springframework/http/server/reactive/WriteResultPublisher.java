@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,8 @@ class WriteResultPublisher implements Publisher<Void> {
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
+	private final Runnable cancelTask;
+
 	@Nullable
 	private volatile Subscriber<? super Void> subscriber;
 
@@ -61,7 +63,8 @@ class WriteResultPublisher implements Publisher<Void> {
 	private final String logPrefix;
 
 
-	public WriteResultPublisher(String logPrefix) {
+	public WriteResultPublisher(String logPrefix, Runnable cancelTask) {
+		this.cancelTask = cancelTask;
 		this.logPrefix = logPrefix;
 	}
 
@@ -69,7 +72,7 @@ class WriteResultPublisher implements Publisher<Void> {
 	@Override
 	public final void subscribe(Subscriber<? super Void> subscriber) {
 		if (rsWriteResultLogger.isTraceEnabled()) {
-			rsWriteResultLogger.trace(this.logPrefix + this.state + " subscribe: " + subscriber);
+			rsWriteResultLogger.trace(this.logPrefix + "got subscriber " + subscriber);
 		}
 		this.state.get().subscribe(this, subscriber);
 	}
@@ -78,20 +81,22 @@ class WriteResultPublisher implements Publisher<Void> {
 	 * Invoke this to delegate a completion signal to the subscriber.
 	 */
 	public void publishComplete() {
+		State state = this.state.get();
 		if (rsWriteResultLogger.isTraceEnabled()) {
-			rsWriteResultLogger.trace(this.logPrefix + this.state + " publishComplete");
+			rsWriteResultLogger.trace(this.logPrefix + "completed [" + state + "]");
 		}
-		this.state.get().publishComplete(this);
+		state.publishComplete(this);
 	}
 
 	/**
 	 * Invoke this to delegate an error signal to the subscriber.
 	 */
 	public void publishError(Throwable t) {
+		State state = this.state.get();
 		if (rsWriteResultLogger.isTraceEnabled()) {
-			rsWriteResultLogger.trace(this.logPrefix + this.state + " publishError: " + t);
+			rsWriteResultLogger.trace(this.logPrefix + "failed: " + t + " [" + state + "]");
 		}
-		this.state.get().publishError(this, t);
+		state.publishError(this, t);
 	}
 
 	private boolean changeState(State oldState, State newState) {
@@ -114,20 +119,22 @@ class WriteResultPublisher implements Publisher<Void> {
 		@Override
 		public final void request(long n) {
 			if (rsWriteResultLogger.isTraceEnabled()) {
-				rsWriteResultLogger.trace(this.publisher.logPrefix + state() + " request: " + n);
+				rsWriteResultLogger.trace(this.publisher.logPrefix +
+						"request " + (n != Long.MAX_VALUE ? n : "Long.MAX_VALUE"));
 			}
-			state().request(this.publisher, n);
+			getState().request(this.publisher, n);
 		}
 
 		@Override
 		public final void cancel() {
+			State state = getState();
 			if (rsWriteResultLogger.isTraceEnabled()) {
-				rsWriteResultLogger.trace(this.publisher.logPrefix + state() + " cancel");
+				rsWriteResultLogger.trace(this.publisher.logPrefix + "cancel [" + state + "]");
 			}
-			state().cancel(this.publisher);
+			state.cancel(this.publisher);
 		}
 
-		private State state() {
+		private State getState() {
 			return this.publisher.state.get();
 		}
 	}
@@ -161,11 +168,11 @@ class WriteResultPublisher implements Publisher<Void> {
 					publisher.changeState(SUBSCRIBING, SUBSCRIBED);
 					// Now safe to check "beforeSubscribed" flags, they won't change once in NO_DEMAND
 					if (publisher.completedBeforeSubscribed) {
-						publisher.publishComplete();
+						publisher.state.get().publishComplete(publisher);
 					}
-					Throwable publisherError = publisher.errorBeforeSubscribed;
-					if (publisherError != null) {
-						publisher.publishError(publisherError);
+					Throwable ex = publisher.errorBeforeSubscribed;
+					if (ex != null) {
+						publisher.state.get().publishError(publisher, ex);
 					}
 				}
 				else {
@@ -175,14 +182,14 @@ class WriteResultPublisher implements Publisher<Void> {
 			@Override
 			void publishComplete(WriteResultPublisher publisher) {
 				publisher.completedBeforeSubscribed = true;
-				if(State.SUBSCRIBED.equals(publisher.state.get())) {
+				if(State.SUBSCRIBED == publisher.state.get()) {
 					publisher.state.get().publishComplete(publisher);
 				}
 			}
 			@Override
 			void publishError(WriteResultPublisher publisher, Throwable ex) {
 				publisher.errorBeforeSubscribed = ex;
-				if(State.SUBSCRIBED.equals(publisher.state.get())) {
+				if(State.SUBSCRIBED == publisher.state.get()) {
 					publisher.state.get().publishError(publisher, ex);
 				}
 			}
@@ -196,14 +203,14 @@ class WriteResultPublisher implements Publisher<Void> {
 			@Override
 			void publishComplete(WriteResultPublisher publisher) {
 				publisher.completedBeforeSubscribed = true;
-				if(State.SUBSCRIBED.equals(publisher.state.get())) {
+				if(State.SUBSCRIBED == publisher.state.get()) {
 					publisher.state.get().publishComplete(publisher);
 				}
 			}
 			@Override
 			void publishError(WriteResultPublisher publisher, Throwable ex) {
 				publisher.errorBeforeSubscribed = ex;
-				if(State.SUBSCRIBED.equals(publisher.state.get())) {
+				if(State.SUBSCRIBED == publisher.state.get()) {
 					publisher.state.get().publishError(publisher, ex);
 				}
 			}
@@ -244,7 +251,10 @@ class WriteResultPublisher implements Publisher<Void> {
 		}
 
 		void cancel(WriteResultPublisher publisher) {
-			if (!publisher.changeState(this, COMPLETED)) {
+			if (publisher.changeState(this, COMPLETED)) {
+				publisher.cancelTask.run();
+			}
+			else {
 				publisher.state.get().cancel(publisher);
 			}
 		}

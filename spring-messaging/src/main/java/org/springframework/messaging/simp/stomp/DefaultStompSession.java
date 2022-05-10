@@ -45,6 +45,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.Assert;
 import org.springframework.util.IdGenerator;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -131,6 +132,13 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	@Override
 	public String getSessionId() {
 		return this.sessionId;
+	}
+
+	@Override
+	public StompHeaderAccessor getConnectHeaders() {
+		StompHeaderAccessor accessor = createHeaderAccessor(StompCommand.CONNECT);
+		accessor.addNativeHeaders(this.connectHeaders);
+		return accessor;
 	}
 
 	/**
@@ -256,7 +264,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	private Message<byte[]> createMessage(StompHeaderAccessor accessor, @Nullable Object payload) {
 		accessor.updateSimpMessageHeadersFromStompHeaders();
 		Message<byte[]> message;
-		if (isEmpty(payload)) {
+		if (ObjectUtils.isEmpty(payload)) {
 			message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 		}
 		else {
@@ -269,11 +277,6 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			}
 		}
 		return message;
-	}
-
-	private boolean isEmpty(@Nullable Object payload) {
-		return payload == null || StringUtils.isEmpty(payload) ||
-				(payload instanceof byte[] && ((byte[]) payload).length == 0);
 	}
 
 	private void execute(Message<byte[]> message) {

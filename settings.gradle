@@ -1,13 +1,14 @@
 pluginManagement {
 	repositories {
+		mavenCentral()
 		gradlePluginPortal()
-		maven { url 'https://repo.spring.io/plugins-release' }
+		maven { url "https://repo.spring.io/release" }
 	}
 }
 
 plugins {
-	id "com.gradle.enterprise" version "3.2"
-	id "io.spring.gradle-enterprise-conventions" version "0.0.2"
+	id "com.gradle.enterprise" version "3.9"
+	id "io.spring.ge.conventions" version "0.0.9"
 }
 
 include "spring-aop"
@@ -17,8 +18,7 @@ include "spring-context"
 include "spring-context-indexer"
 include "spring-context-support"
 include "spring-core"
-include "kotlin-coroutines"
-project(':kotlin-coroutines').projectDir = file('spring-core/kotlin-coroutines')
+include "spring-core-test"
 include "spring-expression"
 include "spring-instrument"
 include "spring-jcl"
@@ -45,19 +45,13 @@ rootProject.children.each {project ->
 settings.gradle.projectsLoaded {
 	gradleEnterprise {
 		buildScan {
-			if (settings.gradle.rootProject.hasProperty('customJavaHome')) {
-				value("Custom JAVA_HOME", settings.gradle.rootProject.getProperty('customJavaHome'))
-			}
-			if (settings.gradle.rootProject.hasProperty('customJavaSourceVersion')) {
-				value("Custom Java Source Version", settings.gradle.rootProject.getProperty('customJavaSourceVersion'))
-			}
 			File buildDir = settings.gradle.rootProject.getBuildDir()
 			buildDir.mkdirs()
 			new File(buildDir, "build-scan-uri.txt").text = "(build scan not generated)"
 			buildScanPublished { scan ->
 				if (buildDir.exists()) {
 					new File(buildDir, "build-scan-uri.txt").text = "${scan.buildScanUri}\n"
-				} 
+				}
 			}
 		}
 	}

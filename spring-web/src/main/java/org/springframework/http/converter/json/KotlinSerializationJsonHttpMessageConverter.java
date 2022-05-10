@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,15 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.SerializationException;
 import kotlinx.serialization.SerializersKt;
+import kotlinx.serialization.descriptors.PolymorphicKind;
+import kotlinx.serialization.descriptors.SerialDescriptor;
 import kotlinx.serialization.json.Json;
 
 import org.springframework.core.GenericTypeResolver;
@@ -43,7 +47,9 @@ import org.springframework.util.StreamUtils;
  * that can read and write JSON using
  * <a href="https://github.com/Kotlin/kotlinx.serialization">kotlinx.serialization</a>.
  *
- * <p>This converter can be used to bind {@code @Serializable} Kotlin classes.
+ * <p>This converter can be used to bind {@code @Serializable} Kotlin classes,
+ * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphic serialization</a>
+ * is not supported.
  * It supports {@code application/json} and {@code application/*+json} with
  * various character sets, {@code UTF-8} being the default.
  *
@@ -82,6 +88,28 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractGeneric
 		try {
 			serializer(clazz);
 			return true;
+		}
+		catch (Exception ex) {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean canRead(Type type, @Nullable Class<?> contextClass, @Nullable MediaType mediaType) {
+		try {
+			serializer(GenericTypeResolver.resolveType(type, contextClass));
+			return canRead(mediaType);
+		}
+		catch (Exception ex) {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean canWrite(@Nullable Type type, Class<?> clazz, @Nullable MediaType mediaType) {
+		try {
+			serializer(type != null ? GenericTypeResolver.resolveType(type, clazz) : clazz);
+			return canWrite(mediaType);
 		}
 		catch (Exception ex) {
 			return false;
@@ -151,6 +179,7 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractGeneric
 	 * Tries to find a serializer that can marshall or unmarshall instances of the given type
 	 * using kotlinx.serialization. If no serializer can be found, an exception is thrown.
 	 * <p>Resolved serializers are cached and cached results are returned on successive calls.
+	 * TODO Avoid relying on throwing exception when https://github.com/Kotlin/kotlinx.serialization/pull/1164 is fixed
 	 * @param type the type to find a serializer for
 	 * @return a resolved serializer for the given type
 	 * @throws RuntimeException if no serializer supporting the given type can be found
@@ -159,9 +188,26 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractGeneric
 		KSerializer<Object> serializer = serializerCache.get(type);
 		if (serializer == null) {
 			serializer = SerializersKt.serializer(type);
+			if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
+				throw new UnsupportedOperationException("Open polymorphic serialization is not supported yet");
+			}
 			serializerCache.put(type, serializer);
 		}
 		return serializer;
+	}
+
+	private boolean hasPolymorphism(SerialDescriptor descriptor, Set<String> alreadyProcessed) {
+		alreadyProcessed.add(descriptor.getSerialName());
+		if (descriptor.getKind().equals(PolymorphicKind.OPEN.INSTANCE)) {
+			return true;
+		}
+		for (int i = 0 ; i < descriptor.getElementsCount() ; i++) {
+			SerialDescriptor elementDescriptor = descriptor.getElementDescriptor(i);
+			if (!alreadyProcessed.contains(elementDescriptor.getSerialName()) && hasPolymorphism(elementDescriptor, alreadyProcessed)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

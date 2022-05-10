@@ -32,7 +32,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.core.MethodParameter;
@@ -109,12 +108,18 @@ public class ReactiveTypeHandlerTests {
 	public void deferredResultSubscriberWithOneValue() throws Exception {
 
 		// Mono
-		MonoProcessor<String> mono = MonoProcessor.fromSink(Sinks.one());
-		testDeferredResultSubscriber(mono, Mono.class, forClass(String.class), () -> mono.onNext("foo"), "foo");
+		Sinks.One<String> sink = Sinks.one();
+		testDeferredResultSubscriber(
+				sink.asMono(), Mono.class, forClass(String.class),
+				() -> sink.emitValue("foo", Sinks.EmitFailureHandler.FAIL_FAST),
+				"foo");
 
 		// Mono empty
-		MonoProcessor<String> monoEmpty = MonoProcessor.fromSink(Sinks.one());
-		testDeferredResultSubscriber(monoEmpty, Mono.class, forClass(String.class), monoEmpty::onComplete, null);
+		Sinks.One<String> emptySink = Sinks.one();
+		testDeferredResultSubscriber(
+				emptySink.asMono(), Mono.class, forClass(String.class),
+				() -> emptySink.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST),
+				null);
 
 		// RxJava Single
 		AtomicReference<SingleEmitter<String>> ref2 = new AtomicReference<>();
@@ -125,8 +130,10 @@ public class ReactiveTypeHandlerTests {
 
 	@Test
 	public void deferredResultSubscriberWithNoValues() throws Exception {
-		MonoProcessor<String> monoEmpty = MonoProcessor.fromSink(Sinks.one());
-		testDeferredResultSubscriber(monoEmpty, Mono.class, forClass(String.class), monoEmpty::onComplete, null);
+		Sinks.One<String> sink = Sinks.one();
+		testDeferredResultSubscriber(sink.asMono(), Mono.class, forClass(String.class),
+				() -> sink.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST),
+				null);
 	}
 
 	@Test
@@ -152,8 +159,9 @@ public class ReactiveTypeHandlerTests {
 		IllegalStateException ex = new IllegalStateException();
 
 		// Mono
-		MonoProcessor<String> mono = MonoProcessor.fromSink(Sinks.one());
-		testDeferredResultSubscriber(mono, Mono.class, forClass(String.class), () -> mono.onError(ex), ex);
+		Sinks.One<String> sink = Sinks.one();
+		testDeferredResultSubscriber(sink.asMono(), Mono.class, forClass(String.class),
+				() -> sink.emitError(ex, Sinks.EmitFailureHandler.FAIL_FAST), ex);
 
 		// RxJava Single
 		AtomicReference<SingleEmitter<String>> ref2 = new AtomicReference<>();

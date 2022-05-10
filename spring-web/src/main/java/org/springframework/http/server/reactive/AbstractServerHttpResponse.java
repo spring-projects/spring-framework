@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.http.server.reactive;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import org.apache.commons.logging.Log;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,8 +31,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpLogging;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -59,13 +58,11 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 */
 	private enum State {NEW, COMMITTING, COMMIT_ACTION_FAILED, COMMITTED}
 
-	protected final Log logger = HttpLogging.forLogName(getClass());
-
 
 	private final DataBufferFactory dataBufferFactory;
 
 	@Nullable
-	private Integer statusCode;
+	private HttpStatusCode statusCode;
 
 	private final HttpHeaders headers;
 
@@ -98,62 +95,32 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public boolean setStatusCode(@Nullable HttpStatus status) {
+	public boolean setStatusCode(@Nullable HttpStatusCode status) {
 		if (this.state.get() == State.COMMITTED) {
 			return false;
 		}
 		else {
-			this.statusCode = (status != null ? status.value() : null);
+			this.statusCode = status;
 			return true;
 		}
 	}
 
 	@Override
 	@Nullable
-	public HttpStatus getStatusCode() {
-		return (this.statusCode != null ? HttpStatus.resolve(this.statusCode) : null);
+	public HttpStatusCode getStatusCode() {
+		return this.statusCode;
 	}
 
 	@Override
 	public boolean setRawStatusCode(@Nullable Integer statusCode) {
-		if (this.state.get() == State.COMMITTED) {
-			return false;
-		}
-		else {
-			this.statusCode = statusCode;
-			return true;
-		}
+		return setStatusCode(statusCode != null ? HttpStatusCode.valueOf(statusCode) : null);
 	}
 
 	@Override
 	@Nullable
+	@Deprecated
 	public Integer getRawStatusCode() {
-		return this.statusCode;
-	}
-
-	/**
-	 * Set the HTTP status code of the response.
-	 * @param statusCode the HTTP status as an integer value
-	 * @since 5.0.1
-	 * @deprecated as of 5.2.4 in favor of {@link ServerHttpResponse#setRawStatusCode(Integer)}.
-	 */
-	@Deprecated
-	public void setStatusCodeValue(@Nullable Integer statusCode) {
-		if (this.state.get() != State.COMMITTED) {
-			this.statusCode = statusCode;
-		}
-	}
-
-	/**
-	 * Return the HTTP status code of the response.
-	 * @return the HTTP status as an integer value
-	 * @since 5.0.1
-	 * @deprecated as of 5.2.4 in favor of {@link ServerHttpResponse#getRawStatusCode()}.
-	 */
-	@Nullable
-	@Deprecated
-	public Integer getStatusCodeValue() {
-		return this.statusCode;
+		return this.statusCode != null ? this.statusCode.value() : null;
 	}
 
 	@Override
@@ -215,10 +182,29 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		// We must resolve value first however, for a chance to handle potential error.
 		if (body instanceof Mono) {
 			return ((Mono<? extends DataBuffer>) body)
-					.flatMap(buffer -> doCommit(() ->
-							writeWithInternal(Mono.fromCallable(() -> buffer)
-									.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release))))
-					.doOnError(t -> getHeaders().clearContentHeaders());
+					.flatMap(buffer -> {
+						touchDataBuffer(buffer);
+						AtomicBoolean subscribed = new AtomicBoolean();
+						return doCommit(
+								() -> {
+									try {
+										return writeWithInternal(Mono.fromCallable(() -> buffer)
+												.doOnSubscribe(s -> subscribed.set(true))
+												.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+									}
+									catch (Throwable ex) {
+										return Mono.error(ex);
+									}
+								})
+								.doOnError(ex -> DataBufferUtils.release(buffer))
+								.doOnCancel(() -> {
+									if (!subscribed.get()) {
+										DataBufferUtils.release(buffer);
+									}
+								});
+					})
+					.doOnError(t -> getHeaders().clearContentHeaders())
+					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 		}
 		else {
 			return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeWithInternal(inner)))
@@ -319,5 +305,14 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * This method is called once only.
 	 */
 	protected abstract void applyCookies();
+
+	/**
+	 * Allow sub-classes to associate a hint with the data buffer if it is a
+	 * pooled buffer and supports leak tracking.
+	 * @param buffer the buffer to attach a hint to
+	 * @since 5.3.2
+	 */
+	protected void touchDataBuffer(DataBuffer buffer) {
+	}
 
 }

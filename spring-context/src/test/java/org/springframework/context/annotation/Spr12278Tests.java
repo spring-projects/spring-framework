@@ -74,6 +74,7 @@ public class Spr12278Tests {
 		private final String autowiredName;
 
 		// No @Autowired - implicit wiring
+		@SuppressWarnings("unused")
 		public SingleConstructorComponent(String autowiredName) {
 			this.autowiredName = autowiredName;
 		}
@@ -88,11 +89,13 @@ public class Spr12278Tests {
 			this.name = name;
 		}
 
+		@SuppressWarnings("unused")
 		public TwoConstructorsComponent() {
 			this("fallback");
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class TwoSpecificConstructorsComponent {
 
 		private final Integer counter;

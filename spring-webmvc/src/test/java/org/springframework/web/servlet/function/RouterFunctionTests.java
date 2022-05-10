@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.servlet.handler.PathPatternsTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.servlet.function.RequestPredicates.GET;
 
 /**
  * @author Arjen Poutsma
@@ -109,7 +110,29 @@ class RouterFunctionTests {
 	}
 
 
+	@Test
+	public void attributes() {
+		RouterFunction<ServerResponse> route = RouterFunctions.route(
+				GET("/atts/1"), request -> ServerResponse.ok().build())
+				.withAttribute("foo", "bar")
+				.withAttribute("baz", "qux")
+				.and(RouterFunctions.route(GET("/atts/2"), request -> ServerResponse.ok().build())
+				.withAttributes(atts -> {
+					atts.put("foo", "bar");
+					atts.put("baz", "qux");
+				}));
+
+		AttributesTestVisitor visitor = new AttributesTestVisitor();
+		route.accept(visitor);
+		assertThat(visitor.visitCount()).isEqualTo(2);
+	}
+
+
+
 	private ServerResponse handlerMethod(ServerRequest request) {
 		return ServerResponse.ok().body("42");
 	}
+
+
+
 }

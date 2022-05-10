@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,33 +40,34 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Dmitriy Kopylenko
  * @author Chris Beams
  */
-public class AdvisorAdapterRegistrationTests {
+class AdvisorAdapterRegistrationTests {
 
 	@BeforeEach
 	@AfterEach
-	public void resetGlobalAdvisorAdapterRegistry() {
+	void resetGlobalAdvisorAdapterRegistry() {
 		GlobalAdvisorAdapterRegistry.reset();
 	}
 
 	@Test
-	public void testAdvisorAdapterRegistrationManagerNotPresentInContext() {
+	void advisorAdapterRegistrationManagerNotPresentInContext() {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-without-bpp.xml", getClass());
 		ITestBean tb = (ITestBean) ctx.getBean("testBean");
 		// just invoke any method to see if advice fired
-		assertThatExceptionOfType(UnknownAdviceTypeException.class).isThrownBy(
-				tb::getName);
+		assertThatExceptionOfType(UnknownAdviceTypeException.class).isThrownBy(tb::getName);
 		assertThat(getAdviceImpl(tb).getInvocationCounter()).isZero();
+		ctx.close();
 	}
 
 	@Test
-	public void testAdvisorAdapterRegistrationManagerPresentInContext() {
+	void advisorAdapterRegistrationManagerPresentInContext() {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-with-bpp.xml", getClass());
 		ITestBean tb = (ITestBean) ctx.getBean("testBean");
 		// just invoke any method to see if advice fired
 		tb.getName();
 		getAdviceImpl(tb).getInvocationCounter();
+		ctx.close();
 	}
 
 	private SimpleBeforeAdviceImpl getAdviceImpl(ITestBean tb) {

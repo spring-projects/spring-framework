@@ -16,8 +16,7 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;

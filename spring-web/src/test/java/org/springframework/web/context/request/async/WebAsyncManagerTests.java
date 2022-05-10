@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ package org.springframework.web.context.request.async;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -381,6 +380,7 @@ public class WebAsyncManagerTests {
 	private static class SyncTaskExecutor extends SimpleAsyncTaskExecutor {
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void execute(Runnable task, long startTimeout) {
 			task.run();
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class CorsRegistryTests {
 		assertThat(config.getAllowedMethods()).isEqualTo(Collections.singletonList("DELETE"));
 		assertThat(config.getAllowedHeaders()).isEqualTo(Arrays.asList("header1", "header2"));
 		assertThat(config.getExposedHeaders()).isEqualTo(Arrays.asList("header3", "header4"));
-		assertThat(config.getAllowCredentials()).isEqualTo(false);
+		assertThat(config.getAllowCredentials()).isFalse();
 		assertThat(config.getMaxAge()).isEqualTo(Long.valueOf(3600));
 	}
 
@@ -71,6 +71,26 @@ public class CorsRegistryTests {
 		assertThat(config.getAllowedOrigins())
 				.as("Globally origins=\"*\" and allowCredentials=true should be possible")
 				.containsExactly("*");
+	}
+
+	@Test
+	void combine() {
+		CorsConfiguration otherConfig = new CorsConfiguration();
+		otherConfig.addAllowedOrigin("http://localhost:3000");
+		otherConfig.addAllowedMethod("*");
+		otherConfig.applyPermitDefaultValues();
+
+		this.registry.addMapping("/api/**").combine(otherConfig);
+
+		Map<String, CorsConfiguration> configs = this.registry.getCorsConfigurations();
+		assertThat(configs.size()).isEqualTo(1);
+		CorsConfiguration config = configs.get("/api/**");
+		assertThat(config.getAllowedOrigins()).isEqualTo(Collections.singletonList("http://localhost:3000"));
+		assertThat(config.getAllowedMethods()).isEqualTo(Collections.singletonList("*"));
+		assertThat(config.getAllowedHeaders()).isEqualTo(Collections.singletonList("*"));
+		assertThat(config.getExposedHeaders()).isEmpty();
+		assertThat(config.getAllowCredentials()).isNull();
+		assertThat(config.getMaxAge()).isEqualTo(Long.valueOf(1800));
 	}
 
 }

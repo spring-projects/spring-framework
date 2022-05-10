@@ -226,19 +226,46 @@ public class NativeMessageHeaderAccessorTests {
 
 	@Test // gh-25821
 	void copyImmutableToMutable() {
-		NativeMessageHeaderAccessor source = new NativeMessageHeaderAccessor();
-		source.addNativeHeader("foo", "bar");
-		Message<String> message = MessageBuilder.createMessage("payload", source.getMessageHeaders());
+		NativeMessageHeaderAccessor sourceAccessor = new NativeMessageHeaderAccessor();
+		sourceAccessor.addNativeHeader("foo", "bar");
+		Message<String> source = MessageBuilder.createMessage("payload", sourceAccessor.getMessageHeaders());
 
-		NativeMessageHeaderAccessor target = new NativeMessageHeaderAccessor();
-		target.copyHeaders(message.getHeaders());
-		target.setLeaveMutable(true);
-		message = MessageBuilder.createMessage(message.getPayload(), target.getMessageHeaders());
+		NativeMessageHeaderAccessor targetAccessor = new NativeMessageHeaderAccessor();
+		targetAccessor.copyHeaders(source.getHeaders());
+		targetAccessor.setLeaveMutable(true);
+		Message<?> target = MessageBuilder.createMessage(source.getPayload(), targetAccessor.getMessageHeaders());
 
-		MessageHeaderAccessor accessor = MessageHeaderAccessor.getMutableAccessor(message);
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.getMutableAccessor(target);
 		assertThat(accessor.isMutable());
 		((NativeMessageHeaderAccessor) accessor).addNativeHeader("foo", "baz");
 		assertThat(((NativeMessageHeaderAccessor) accessor).getNativeHeader("foo")).containsExactly("bar", "baz");
 	}
 
+	@Test // gh-25821
+	void copyIfAbsentImmutableToMutable() {
+		NativeMessageHeaderAccessor sourceAccessor = new NativeMessageHeaderAccessor();
+		sourceAccessor.addNativeHeader("foo", "bar");
+		Message<String> source = MessageBuilder.createMessage("payload", sourceAccessor.getMessageHeaders());
+
+		MessageHeaderAccessor targetAccessor = new NativeMessageHeaderAccessor();
+		targetAccessor.copyHeadersIfAbsent(source.getHeaders());
+		targetAccessor.setLeaveMutable(true);
+		Message<?> target = MessageBuilder.createMessage(source.getPayload(), targetAccessor.getMessageHeaders());
+
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.getMutableAccessor(target);
+		assertThat(accessor.isMutable());
+		((NativeMessageHeaderAccessor) accessor).addNativeHeader("foo", "baz");
+		assertThat(((NativeMessageHeaderAccessor) accessor).getNativeHeader("foo")).containsExactly("bar", "baz");
+	}
+
+	@Test // gh-26155
+	void copySelf() {
+		NativeMessageHeaderAccessor accessor = new NativeMessageHeaderAccessor();
+		accessor.addNativeHeader("foo", "bar");
+		accessor.setHeader("otherHeader", "otherHeaderValue");
+		accessor.setLeaveMutable(true);
+
+		// Does not fail with ConcurrentModificationException
+		accessor.copyHeaders(accessor.getMessageHeaders());
+	}
 }

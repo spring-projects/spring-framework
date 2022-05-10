@@ -131,12 +131,6 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>DEPRECATED: Use "modelAttribute" instead.</description>
-			<name>commandName</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
 			<description>HTML Required Attribute</description>
 			<name>action</name>
 			<required>false</required>

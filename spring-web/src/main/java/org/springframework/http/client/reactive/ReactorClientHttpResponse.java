@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,14 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 
 /**
  * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client.
@@ -50,6 +52,11 @@ import org.springframework.util.MultiValueMap;
  * @see reactor.netty.http.client.HttpClient
  */
 class ReactorClientHttpResponse implements ClientHttpResponse {
+
+	/** Reactor Netty 1.0.5+. */
+	static final boolean reactorNettyRequestChannelOperationsIdPresent = ClassUtils.isPresent(
+			"reactor.netty.ChannelOperationsId", ReactorClientHttpResponse.class.getClassLoader());
+
 
 	private static final Log logger = LogFactory.getLog(ReactorClientHttpResponse.class);
 
@@ -62,9 +69,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	private final NettyDataBufferFactory bufferFactory;
 
 	// 0 - not subscribed, 1 - subscribed, 2 - cancelled via connector (before subscribe)
-	private final AtomicInteger state = new AtomicInteger(0);
-
-	private final String logPrefix;
+	private final AtomicInteger state = new AtomicInteger();
 
 
 	/**
@@ -78,7 +83,6 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 		this.inbound = connection.inbound();
 		this.bufferFactory = new NettyDataBufferFactory(connection.outbound().alloc());
-		this.logPrefix = (logger.isDebugEnabled() ? "[" + connection.channel().id().asShortText() + "] " : "");
 	}
 
 	/**
@@ -92,9 +96,20 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 		this.inbound = inbound;
 		this.bufferFactory = new NettyDataBufferFactory(alloc);
-		this.logPrefix = "";
 	}
 
+
+	@Override
+	public String getId() {
+		String id = null;
+		if (reactorNettyRequestChannelOperationsIdPresent) {
+			id = ChannelOperationsIdHelper.getId(this.response);
+		}
+		if (id == null && this.response instanceof Connection connection) {
+			id = connection.channel().id().asShortText();
+		}
+		return (id != null ? id : ObjectUtils.getIdentityHexString(this));
+	}
 
 	@Override
 	public Flux<DataBuffer> getBody() {
@@ -120,11 +135,12 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
-	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(getRawStatusCode());
+	public HttpStatusCode getStatusCode() {
+		return HttpStatusCode.valueOf(this.response.status().code());
 	}
 
 	@Override
+	@Deprecated
 	public int getRawStatusCode() {
 		return this.response.status().code();
 	}
@@ -148,8 +164,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Nullable
 	private static String getSameSite(Cookie cookie) {
-		if (cookie instanceof DefaultCookie) {
-			DefaultCookie defaultCookie = (DefaultCookie) cookie;
+		if (cookie instanceof DefaultCookie defaultCookie) {
 			if (defaultCookie.sameSite() != null) {
 				return defaultCookie.sameSite().name();
 			}
@@ -167,7 +182,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	void releaseAfterCancel(HttpMethod method) {
 		if (mayHaveBody(method) && this.state.compareAndSet(0, 2)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(this.logPrefix + "Releasing body, not yet subscribed.");
+				logger.debug("[" + getId() + "]" + "Releasing body, not yet subscribed.");
 			}
 			this.inbound.receive().doOnNext(byteBuf -> {}).subscribe(byteBuf -> {}, ex -> {});
 		}
@@ -184,6 +199,18 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 		return "ReactorClientHttpResponse{" +
 				"request=[" + this.response.method().name() + " " + this.response.uri() + "]," +
 				"status=" + getRawStatusCode() + '}';
+	}
+
+
+	private static class ChannelOperationsIdHelper {
+
+		@Nullable
+		public static String getId(HttpClientResponse response) {
+			if (response instanceof reactor.netty.ChannelOperationsId id) {
+				return (logger.isDebugEnabled() ? id.asLongText() : id.asShortText());
+			}
+			return null;
+		}
 	}
 
 }

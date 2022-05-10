@@ -18,10 +18,9 @@ package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-
-import reactor.core.publisher.MonoProcessor;
-import reactor.core.publisher.Sinks;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -102,22 +101,26 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 	public HandlerResult invokeForHandlerResult(ServerWebExchange exchange,
 			BindingContext bindingContext, Object... providedArgs) {
 
-		MonoProcessor<HandlerResult> processor = MonoProcessor.fromSink(Sinks.one());
-		this.delegate.invoke(exchange, bindingContext, providedArgs).subscribeWith(processor);
+		CompletableFuture<HandlerResult> future =
+				this.delegate.invoke(exchange, bindingContext, providedArgs).toFuture();
 
-		if (processor.isTerminated()) {
-			Throwable ex = processor.getError();
-			if (ex != null) {
-				throw (ex instanceof ServerErrorException ? (ServerErrorException) ex :
-						new ServerErrorException("Failed to invoke: " + getShortLogMessage(), getMethod(), ex));
-			}
-			return processor.peek();
-		}
-		else {
-			// Should never happen...
+		if (!future.isDone()) {
 			throw new IllegalStateException(
 					"SyncInvocableHandlerMethod should have completed synchronously.");
 		}
+
+		Throwable failure;
+		try {
+			return future.get();
+		}
+		catch (ExecutionException ex) {
+			failure = ex.getCause();
+		}
+		catch (InterruptedException ex) {
+			failure = ex;
+		}
+		throw (new ServerErrorException(
+				"Failed to invoke: " + getShortLogMessage(), getMethod(), failure));
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,16 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -527,7 +528,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * same active logical session. However, this is not guaranteed across
 	 * different servlet containers; the only 100% safe way is a session mutex.
 	 * @see org.springframework.web.util.HttpSessionMutexListener
-	 * @see org.springframework.web.util.WebUtils#getSessionMutex(javax.servlet.http.HttpSession)
+	 * @see org.springframework.web.util.WebUtils#getSessionMutex(jakarta.servlet.http.HttpSession)
 	 */
 	public void setSynchronizeOnSession(boolean synchronizeOnSession) {
 		this.synchronizeOnSession = synchronizeOnSession;
@@ -548,8 +549,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (beanFactory instanceof ConfigurableBeanFactory) {
-			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+		if (beanFactory instanceof ConfigurableBeanFactory cbf) {
+			this.beanFactory = cbf;
 		}
 	}
 
@@ -670,6 +671,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		resolvers.add(new ErrorsMethodArgumentResolver());
 		resolvers.add(new SessionStatusMethodArgumentResolver());
 		resolvers.add(new UriComponentsBuilderMethodArgumentResolver());
+		if (KotlinDetector.isKotlinPresent()) {
+			resolvers.add(new ContinuationHandlerMethodArgumentResolver());
+		}
 
 		// Custom arguments
 		if (getCustomArgumentResolvers() != null) {
@@ -677,6 +681,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 
 		// Catch-all
+		resolvers.add(new PrincipalMethodArgumentResolver());
 		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), true));
 		resolvers.add(new ServletModelAttributeMethodProcessor(true));
 
@@ -711,6 +716,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 
 		// Catch-all
+		resolvers.add(new PrincipalMethodArgumentResolver());
 		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), true));
 
 		return resolvers;
@@ -820,6 +826,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * and return {@code null} if the result of that call is {@code true}.
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	protected long getLastModifiedInternal(HttpServletRequest request, HandlerMethod handlerMethod) {
 		return -1;
 	}
@@ -1003,8 +1010,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		if (!mavContainer.isViewReference()) {
 			mav.setView((View) mavContainer.getView());
 		}
-		if (model instanceof RedirectAttributes) {
-			Map<String, ?> flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
+		if (model instanceof RedirectAttributes redirectAttributes) {
+			Map<String, ?> flashAttributes = redirectAttributes.getFlashAttributes();
 			HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 			if (request != null) {
 				RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);

@@ -44,12 +44,10 @@ public class PathPatternParser {
 	/**
 	 * Whether a {@link PathPattern} produced by this parser should
 	 * automatically match request paths with a trailing slash.
-	 *
 	 * <p>If set to {@code true} a {@code PathPattern} without a trailing slash
 	 * will also match request paths with a trailing slash. If set to
 	 * {@code false} a {@code PathPattern} will only match request paths with
 	 * a trailing slash.
-	 *
 	 * <p>The default is {@code true}.
 	 */
 	public void setMatchOptionalTrailingSeparator(boolean matchOptionalTrailingSeparator) {

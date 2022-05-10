@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1186,8 +1186,7 @@ public class BeanDefinitionParserDelegate {
 			Element valueEle = null;
 			for (int j = 0; j < entrySubNodes.getLength(); j++) {
 				Node node = entrySubNodes.item(j);
-				if (node instanceof Element) {
-					Element candidateEle = (Element) node;
+				if (node instanceof Element candidateEle) {
 					if (nodeNameEquals(candidateEle, KEY_ELEMENT)) {
 						if (keyEle != null) {
 							error("<entry> element is only allowed to contain one <key> sub-element", entryEle);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 package org.springframework.web.servlet.view;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.util.ServletRequestPathUtils;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * {@link RequestToViewNameTranslator} that simply transforms the URI of
@@ -122,56 +121,14 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 		this.stripExtension = stripExtension;
 	}
 
-	/**
-	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
-	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
-	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
-	 */
-	@Deprecated
-	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
-	}
-
-	/**
-	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
-	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
-	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
-	 */
-	@Deprecated
-	public void setUrlDecode(boolean urlDecode) {
-	}
-
-	/**
-	 * Set if ";" (semicolon) content should be stripped from the request URI.
-	 * @see org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
-	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
-	 */
-	@Deprecated
-	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
-	}
-
-	/**
-	 * Set the {@link org.springframework.web.util.UrlPathHelper} to use for
-	 * the resolution of lookup paths.
-	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
-	 * or to share common UrlPathHelper settings across multiple web components.
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
-	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
-	 */
-	@Deprecated
-	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
-	}
-
 
 	/**
 	 * Translates the request URI of the incoming {@link HttpServletRequest}
 	 * into the view name based on the configured parameters.
-	 * @see ServletRequestPathUtils#getCachedPath(ServletRequest)
-	 * @see #transformPath
 	 * @throws IllegalArgumentException if neither a parsed RequestPath, nor a
 	 * String lookupPath have been resolved and cached as a request attribute.
+	 * @see ServletRequestPathUtils#getCachedPath(ServletRequest)
+	 * @see #transformPath
 	 */
 	@Override
 	public String getViewName(HttpServletRequest request) {

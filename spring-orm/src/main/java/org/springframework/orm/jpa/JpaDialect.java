@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.orm.jpa;
 
 import java.sql.SQLException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
 
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.datasource.ConnectionHandle;
@@ -28,7 +28,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * SPI strategy that encapsulates certain functionality that standard JPA 2.1 does
+ * SPI strategy that encapsulates certain functionality that standard JPA 3.0 does
  * not offer, such as access to the underlying JDBC Connection. This strategy is
  * mainly intended for standalone usage of a JPA provider; most of its functionality
  * is not relevant when running with JTA transactions.
@@ -73,11 +73,11 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @return an arbitrary object that holds transaction data, if any
 	 * (to be passed into {@link #cleanupTransaction}). May implement the
 	 * {@link org.springframework.transaction.SavepointManager} interface.
-	 * @throws javax.persistence.PersistenceException if thrown by JPA methods
+	 * @throws jakarta.persistence.PersistenceException if thrown by JPA methods
 	 * @throws java.sql.SQLException if thrown by JDBC methods
 	 * @throws org.springframework.transaction.TransactionException in case of invalid arguments
 	 * @see #cleanupTransaction
-	 * @see javax.persistence.EntityTransaction#begin
+	 * @see jakarta.persistence.EntityTransaction#begin
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#prepareConnectionForTransaction
 	 */
 	@Nullable
@@ -100,7 +100,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @param name the name of the transaction (if any)
 	 * @return an arbitrary object that holds transaction data, if any
 	 * (to be passed into cleanupTransaction)
-	 * @throws javax.persistence.PersistenceException if thrown by JPA methods
+	 * @throws jakarta.persistence.PersistenceException if thrown by JPA methods
 	 * @see #cleanupTransaction
 	 */
 	@Nullable
@@ -143,7 +143,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @param readOnly whether the Connection is only needed for read-only purposes
 	 * @return a handle for the Connection, to be passed into {@code releaseJdbcConnection},
 	 * or {@code null} if no JDBC Connection can be retrieved
-	 * @throws javax.persistence.PersistenceException if thrown by JPA methods
+	 * @throws jakarta.persistence.PersistenceException if thrown by JPA methods
 	 * @throws java.sql.SQLException if thrown by JDBC methods
 	 * @see #releaseJdbcConnection
 	 * @see org.springframework.jdbc.datasource.ConnectionHandle#getConnection
@@ -163,7 +163,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * transaction completes or when the EntityManager is closed.
 	 * @param conHandle the JDBC Connection handle to release
 	 * @param entityManager the current JPA EntityManager
-	 * @throws javax.persistence.PersistenceException if thrown by JPA methods
+	 * @throws jakarta.persistence.PersistenceException if thrown by JPA methods
 	 * @throws java.sql.SQLException if thrown by JDBC methods
 	 * @see #getJdbcConnection
 	 */

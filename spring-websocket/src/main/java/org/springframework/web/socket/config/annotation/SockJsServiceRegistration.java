@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,8 @@ public class SockJsServiceRegistration {
 
 	private final List<String> allowedOrigins = new ArrayList<>();
 
+	private final List<String> allowedOriginPatterns = new ArrayList<>();
+
 	@Nullable
 	private Boolean suppressCors;
 
@@ -104,7 +106,7 @@ public class SockJsServiceRegistration {
 	 * also be set to point to a URL served by the application.
 	 * <p>Note that it's possible to specify a relative URL in which case the URL
 	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
-	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then the
+	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then
 	 * the relative URL must start with "../../" to traverse up to the location
 	 * above the SockJS mapping. In case of a prefix-based Servlet mapping one more
 	 * traversal may be needed.
@@ -233,6 +235,18 @@ public class SockJsServiceRegistration {
 	}
 
 	/**
+	 * Configure allowed {@code Origin} pattern header values.
+	 * @since 5.3.2
+	 */
+	protected SockJsServiceRegistration setAllowedOriginPatterns(String... allowedOriginPatterns) {
+		this.allowedOriginPatterns.clear();
+		if (!ObjectUtils.isEmpty(allowedOriginPatterns)) {
+			this.allowedOriginPatterns.addAll(Arrays.asList(allowedOriginPatterns));
+		}
+		return this;
+	}
+
+	/**
 	 * This option can be used to disable automatic addition of CORS headers for
 	 * SockJS requests.
 	 * <p>The default value is "false".
@@ -284,6 +298,7 @@ public class SockJsServiceRegistration {
 			service.setSuppressCors(this.suppressCors);
 		}
 		service.setAllowedOrigins(this.allowedOrigins);
+		service.setAllowedOriginPatterns(this.allowedOriginPatterns);
 
 		if (this.messageCodec != null) {
 			service.setMessageCodec(this.messageCodec);

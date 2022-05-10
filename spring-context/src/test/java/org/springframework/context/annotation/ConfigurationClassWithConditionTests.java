@@ -291,7 +291,9 @@ public class ConfigurationClassWithConditionTests {
 	static class ImportsNotCreated {
 
 		static {
-			if (true) throw new RuntimeException();
+			if (true) {
+				throw new RuntimeException();
+			}
 		}
 	}
 
@@ -299,14 +301,18 @@ public class ConfigurationClassWithConditionTests {
 	static class ConfigurationNotCreated {
 
 		static {
-			if (true) throw new RuntimeException();
+			if (true) {
+				throw new RuntimeException();
+			}
 		}
 	}
 
 	static class RegistrarNotCreated implements ImportBeanDefinitionRegistrar {
 
 		static {
-			if (true) throw new RuntimeException();
+			if (true) {
+				throw new RuntimeException();
+			}
 		}
 
 		@Override
@@ -318,7 +324,9 @@ public class ConfigurationClassWithConditionTests {
 	static class ImportSelectorNotCreated implements ImportSelector {
 
 		static {
-			if (true) throw new RuntimeException();
+			if (true) {
+				throw new RuntimeException();
+			}
 		}
 
 		@Override

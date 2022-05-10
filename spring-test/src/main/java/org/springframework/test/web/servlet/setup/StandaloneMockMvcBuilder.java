@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -130,14 +130,14 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	@Nullable
 	private PathPatternParser patternParser;
 
-	private boolean useSuffixPatternMatch = true;
+	private boolean useSuffixPatternMatch = false;
 
 	private boolean useTrailingSlashPatternMatch = true;
 
 	@Nullable
 	private Boolean removeSemicolonContent;
 
-	private Map<String, String> placeholderValues = new HashMap<>();
+	private final Map<String, String> placeholderValues = new HashMap<>();
 
 	private Supplier<RequestMappingHandlerMapping> handlerMappingFactory = RequestMappingHandlerMapping::new;
 
@@ -324,7 +324,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
-	 * <p>The default value is {@code true}.
+	 * <p>The default value is {@code false}.
 	 * @deprecated as of 5.2.4. See class-level note in
 	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
 	 * config options.

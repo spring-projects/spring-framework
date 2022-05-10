@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -232,12 +231,10 @@ class RestTemplateTests {
 	void requestAvoidsDuplicateAcceptHeaderValues() throws Exception {
 		HttpMessageConverter<?> firstConverter = mock(HttpMessageConverter.class);
 		given(firstConverter.canRead(any(), any())).willReturn(true);
-		given(firstConverter.getSupportedMediaTypes())
-				.willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(firstConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		HttpMessageConverter<?> secondConverter = mock(HttpMessageConverter.class);
 		given(secondConverter.canRead(any(), any())).willReturn(true);
-		given(secondConverter.getSupportedMediaTypes())
-				.willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(secondConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 
 		HttpHeaders requestHeaders = new HttpHeaders();
 		mockSentRequest(GET, "https://example.com/", requestHeaders);
@@ -582,7 +579,7 @@ class RestTemplateTests {
 		mockSentRequest(OPTIONS, "https://example.com");
 		mockResponseStatus(HttpStatus.OK);
 		HttpHeaders responseHeaders = new HttpHeaders();
-		EnumSet<HttpMethod> expected = EnumSet.of(GET, POST);
+		Set<HttpMethod> expected = Set.of(GET, POST);
 		responseHeaders.setAllow(expected);
 		given(response.getHeaders()).willReturn(responseHeaders);
 
@@ -649,9 +646,9 @@ class RestTemplateTests {
 	void exchangeParameterizedType() throws Exception {
 		GenericHttpMessageConverter converter = mock(GenericHttpMessageConverter.class);
 		template.setMessageConverters(Collections.<HttpMessageConverter<?>>singletonList(converter));
-		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<List<Integer>>() {};
+		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<>() {};
 		given(converter.canRead(intList.getType(), null, null)).willReturn(true);
-		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(converter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		given(converter.canWrite(String.class, String.class, null)).willReturn(true);
 
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -759,6 +756,7 @@ class RestTemplateTests {
 		given(request.getHeaders()).willReturn(requestHeaders);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void mockResponseStatus(HttpStatus responseStatus) throws Exception {
 		given(request.execute()).willReturn(response);
 		given(errorHandler.hasError(response)).willReturn(responseStatus.isError());
@@ -774,8 +772,7 @@ class RestTemplateTests {
 	private void mockHttpMessageConverter(MediaType mediaType, Class<?> type) {
 		given(converter.canRead(type, null)).willReturn(true);
 		given(converter.canRead(type, mediaType)).willReturn(true);
-		given(converter.getSupportedMediaTypes())
-				.willReturn(Collections.singletonList(mediaType));
+		given(converter.getSupportedMediaTypes(type)).willReturn(Collections.singletonList(mediaType));
 		given(converter.canRead(type, mediaType)).willReturn(true);
 		given(converter.canWrite(type, null)).willReturn(true);
 		given(converter.canWrite(type, mediaType)).willReturn(true);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,9 @@ public class PathMatchConfigurer {
 	private PathMatcher pathMatcher;
 
 	@Nullable
+	private PathPatternParser defaultPatternParser;
+
+	@Nullable
 	private UrlPathHelper defaultUrlPathHelper;
 
 	@Nullable
@@ -117,7 +120,7 @@ public class PathMatchConfigurer {
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
-	 * <p>By default this is set to {@code true}.
+	 * <p>By default this is set to {@code false}.
 	 * <p><strong>Note:</strong> This property is mutually exclusive with and
 	 * ignored when {@link #setPatternParser(PathPatternParser)} is set.
 	 * @deprecated as of 5.2.4. See class-level note in
@@ -226,7 +229,7 @@ public class PathMatchConfigurer {
 	}
 
 	/**
-	 * Return the configure UrlPathHelper instance or a default (shared) instance.
+	 * Return the configured UrlPathHelper or a default, shared instance otherwise.
 	 * @since 5.3
 	 */
 	protected UrlPathHelper getUrlPathHelperOrDefault() {
@@ -240,7 +243,7 @@ public class PathMatchConfigurer {
 	}
 
 	/**
-	 * Return the configure PathMatcher instance or a default (shared) instance.
+	 * Return the configured PathMatcher or a default, shared instance otherwise.
 	 * @since 5.3
 	 */
 	protected PathMatcher getPathMatcherOrDefault() {
@@ -253,4 +256,17 @@ public class PathMatchConfigurer {
 		return this.defaultPathMatcher;
 	}
 
+	/**
+	 * Return the configured PathPatternParser or a default, shared instance otherwise.
+	 * @since 5.3.4
+	 */
+	public PathPatternParser getPatternParserOrDefault() {
+		if (this.patternParser != null) {
+			return this.patternParser;
+		}
+		if (this.defaultPatternParser == null) {
+			this.defaultPatternParser = new PathPatternParser();
+		}
+		return this.defaultPatternParser;
+	}
 }

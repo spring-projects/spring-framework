@@ -17,6 +17,7 @@
 package org.springframework.core;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -72,6 +73,20 @@ public abstract class KotlinDetector {
 	 */
 	public static boolean isKotlinType(Class<?> clazz) {
 		return (kotlinMetadata != null && clazz.getDeclaredAnnotation(kotlinMetadata) != null);
+	}
+
+	/**
+	 * Return {@code true} if the method is a suspending function.
+	 * @since 5.3
+	 */
+	public static boolean isSuspendingFunction(Method method) {
+		if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+			Class<?>[] types = method.getParameterTypes();
+			if (types.length > 0 && "kotlin.coroutines.Continuation".equals(types[types.length - 1].getName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

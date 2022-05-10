@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.Lifecycle;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
@@ -67,13 +68,12 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  * @see org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy
  * @see org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy
  * @see org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy
- * @see org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy
  */
 public abstract class AbstractHandshakeHandler implements HandshakeHandler, Lifecycle {
 
-	private static final boolean jettyWsPresent;
-
 	private static final boolean tomcatWsPresent;
+
+	private static final boolean jettyWsPresent;
 
 	private static final boolean undertowWsPresent;
 
@@ -85,10 +85,10 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 
 	static {
 		ClassLoader classLoader = AbstractHandshakeHandler.class.getClassLoader();
-		jettyWsPresent = ClassUtils.isPresent(
-				"org.eclipse.jetty.websocket.server.WebSocketServerFactory", classLoader);
 		tomcatWsPresent = ClassUtils.isPresent(
 				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
+		jettyWsPresent = ClassUtils.isPresent(
+				"org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer", classLoader);
 		undertowWsPresent = ClassUtils.isPresent(
 				"io.undertow.websockets.jsr.ServerWebSocketContainer", classLoader);
 		glassfishWsPresent = ClassUtils.isPresent(
@@ -97,7 +97,6 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 				"weblogic.websocket.tyrus.TyrusServletWriter", classLoader);
 		websphereWsPresent = ClassUtils.isPresent(
 				"com.ibm.websphere.wsoc.WsWsocServerContainer", classLoader);
-
 	}
 
 
@@ -293,7 +292,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 
 	protected void handleInvalidUpgradeHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 		if (logger.isErrorEnabled()) {
-			logger.error("Handshake failed due to invalid Upgrade header: " + request.getHeaders().getUpgrade());
+			logger.error(LogFormatUtils.formatValue(
+					"Handshake failed due to invalid Upgrade header: " + request.getHeaders().getUpgrade(), -1, true));
 		}
 		response.setStatusCode(HttpStatus.BAD_REQUEST);
 		response.getBody().write("Can \"Upgrade\" only to \"WebSocket\".".getBytes(StandardCharsets.UTF_8));
@@ -301,7 +301,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 
 	protected void handleInvalidConnectHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 		if (logger.isErrorEnabled()) {
-			logger.error("Handshake failed due to invalid Connection header " + request.getHeaders().getConnection());
+			logger.error(LogFormatUtils.formatValue(
+					"Handshake failed due to invalid Connection header" + request.getHeaders().getConnection(), -1, true));
 		}
 		response.setStatusCode(HttpStatus.BAD_REQUEST);
 		response.getBody().write("\"Connection\" must be \"upgrade\".".getBytes(StandardCharsets.UTF_8));
@@ -325,8 +326,9 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	protected void handleWebSocketVersionNotSupported(ServerHttpRequest request, ServerHttpResponse response) {
 		if (logger.isErrorEnabled()) {
 			String version = request.getHeaders().getFirst("Sec-WebSocket-Version");
-			logger.error("Handshake failed due to unsupported WebSocket version: " + version +
-					". Supported versions: " + Arrays.toString(getSupportedVersions()));
+			logger.error(LogFormatUtils.formatValue(
+					"Handshake failed due to unsupported WebSocket version: " + version +
+							". Supported versions: " + Arrays.toString(getSupportedVersions()), -1, true));
 		}
 		response.setStatusCode(HttpStatus.UPGRADE_REQUIRED);
 		response.getHeaders().set(WebSocketHttpHeaders.SEC_WEBSOCKET_VERSION,

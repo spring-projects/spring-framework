@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -422,16 +422,19 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 			}
 			if (editor == null) {
 				// Find editor for superclass or interface.
-				for (Iterator<Class<?>> it = this.customEditors.keySet().iterator(); it.hasNext() && editor == null;) {
-					Class<?> key = it.next();
+				for (Map.Entry<Class<?>, PropertyEditor> entry : this.customEditors.entrySet()) {
+					Class<?> key = entry.getKey();
 					if (key.isAssignableFrom(requiredType)) {
-						editor = this.customEditors.get(key);
+						editor = entry.getValue();
 						// Cache editor for search type, to avoid the overhead
 						// of repeated assignable-from checks.
 						if (this.customEditorCache == null) {
 							this.customEditorCache = new HashMap<>();
 						}
 						this.customEditorCache.put(requiredType, editor);
+						if (editor != null) {
+							break;
+						}
 					}
 				}
 			}

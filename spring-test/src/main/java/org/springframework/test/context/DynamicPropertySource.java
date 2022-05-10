@@ -39,7 +39,19 @@ import java.lang.annotation.Target;
  * {@code PropertySources}. Values are dynamic and provided via a
  * {@link java.util.function.Supplier} which is only invoked when the property
  * is resolved. Typically, method references are used to supply values, as in the
- * following example.
+ * example below.
+ *
+ * <p>As of Spring Framework 5.3.2, dynamic properties from methods annotated with
+ * {@code @DynamicPropertySource} will be <em>inherited</em> from enclosing test
+ * classes, analogous to inheritance from superclasses and interfaces. See
+ * {@link NestedTestConfiguration @NestedTestConfiguration} for details.
+ *
+ * <p><strong>NOTE</strong>: if you use {@code @DynamicPropertySource} in a base
+ * class and discover that tests in subclasses fail because the dynamic properties
+ * change between subclasses, you may need to annotate your base class with
+ * {@link org.springframework.test.annotation.DirtiesContext @DirtiesContext} to
+ * ensure that each subclass gets its own {@code ApplicationContext} with the
+ * correct dynamic properties.
  *
  * <h3>Precedence</h3>
  * <p>Dynamic properties have higher precedence than those loaded from
@@ -77,6 +89,7 @@ import java.lang.annotation.Target;
  * @see ContextConfiguration
  * @see TestPropertySource
  * @see org.springframework.core.env.PropertySource
+ * @see org.springframework.test.annotation.DirtiesContext
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

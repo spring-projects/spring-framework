@@ -190,7 +190,7 @@ public class RestTemplateXhrTransportTests {
 	private ClientHttpResponse response(HttpStatus status, String body) throws IOException {
 		ClientHttpResponse response = mock(ClientHttpResponse.class);
 		InputStream inputStream = getInputStream(body);
-		given(response.getRawStatusCode()).willReturn(status.value());
+		given(response.getStatusCode()).willReturn(status);
 		given(response.getBody()).willReturn(inputStream);
 		return response;
 	}

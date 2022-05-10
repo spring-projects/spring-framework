@@ -16,11 +16,11 @@
 
 package org.springframework.web.servlet.mvc;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.lang.Nullable;
@@ -157,9 +157,9 @@ public class ServletForwardingController extends AbstractController implements B
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return {@code true} for include, {@code false} for forward
-	 * @see javax.servlet.RequestDispatcher#forward
-	 * @see javax.servlet.RequestDispatcher#include
-	 * @see javax.servlet.ServletResponse#isCommitted
+	 * @see jakarta.servlet.RequestDispatcher#forward
+	 * @see jakarta.servlet.RequestDispatcher#include
+	 * @see jakarta.servlet.ServletResponse#isCommitted
 	 * @see org.springframework.web.util.WebUtils#isIncludeRequest
 	 */
 	protected boolean useInclude(HttpServletRequest request, HttpServletResponse response) {

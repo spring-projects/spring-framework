@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.server.PathContainer;
@@ -80,9 +80,9 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 
 	private PathMatcher pathMatcher = defaultPathMatcher;
 
-	private Map<PathPattern, Integer> cacheMappings = new HashMap<>();
+	private final Map<PathPattern, Integer> cacheMappings = new HashMap<>();
 
-	private Map<PathPattern, CacheControl> cacheControlMappings = new HashMap<>();
+	private final Map<PathPattern, CacheControl> cacheControlMappings = new HashMap<>();
 
 
 	/**
@@ -215,8 +215,8 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 		}
 
 		if (!ObjectUtils.isEmpty(this.cacheControlMappings)) {
-			CacheControl control = (path instanceof PathContainer ?
-					lookupCacheControl((PathContainer) path) : lookupCacheControl((String) path));
+			CacheControl control = (path instanceof PathContainer pathContainer ?
+					lookupCacheControl(pathContainer) : lookupCacheControl((String) path));
 			if (control != null) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Applying " + control);
@@ -227,8 +227,8 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 		}
 
 		if (!ObjectUtils.isEmpty(this.cacheMappings)) {
-			Integer cacheSeconds = (path instanceof PathContainer ?
-					lookupCacheSeconds((PathContainer) path) : lookupCacheSeconds((String) path));
+			Integer cacheSeconds = (path instanceof PathContainer pathContainer ?
+					lookupCacheSeconds(pathContainer) : lookupCacheSeconds((String) path));
 			if (cacheSeconds != null) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Applying cacheSeconds " + cacheSeconds);

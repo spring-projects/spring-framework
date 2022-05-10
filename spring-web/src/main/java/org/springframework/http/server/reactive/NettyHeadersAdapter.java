@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,9 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public void add(String key, @Nullable String value) {
-		this.headers.add(key, value);
+		if (value != null) {
+			this.headers.add(key, value);
+		}
 	}
 
 	@Override
@@ -71,7 +73,9 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public void set(String key, @Nullable String value) {
-		this.headers.set(key, value);
+		if (value != null) {
+			this.headers.set(key, value);
+		}
 	}
 
 	@Override
@@ -103,7 +107,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String && this.headers.contains((String) key));
+		return (key instanceof String headerName && this.headers.contains(headerName));
 	}
 
 	@Override
@@ -133,9 +137,9 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 	@Nullable
 	@Override
 	public List<String> remove(Object key) {
-		if (key instanceof String) {
-			List<String> previousValues = this.headers.getAll((String) key);
-			this.headers.remove((String) key);
+		if (key instanceof String headerName) {
+			List<String> previousValues = this.headers.getAll(headerName);
+			this.headers.remove(headerName);
 			return previousValues;
 		}
 		return null;
@@ -143,7 +147,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public void putAll(Map<? extends String, ? extends List<String>> map) {
-		map.forEach(this.headers::add);
+		map.forEach(this.headers::set);
 	}
 
 	@Override
@@ -153,7 +157,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Set<String> keySet() {
-		return this.headers.names();
+		return new HeaderNames();
 	}
 
 	@Override
@@ -164,7 +168,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
-		return new AbstractSet<Entry<String, List<String>>>() {
+		return new AbstractSet<>() {
 			@Override
 			public Iterator<Entry<String, List<String>>> iterator() {
 				return new EntryIterator();
@@ -186,7 +190,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
-		private Iterator<String> names = headers.names().iterator();
+		private final Iterator<String> names = headers.names().iterator();
 
 		@Override
 		public boolean hasNext() {
@@ -223,6 +227,53 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 			List<String> previousValues = headers.getAll(this.key);
 			headers.set(this.key, value);
 			return previousValues;
+		}
+	}
+
+	private class HeaderNames extends AbstractSet<String> {
+
+		@Override
+		public Iterator<String> iterator() {
+			return new HeaderNamesIterator(headers.names().iterator());
+		}
+
+		@Override
+		public int size() {
+			return headers.names().size();
+		}
+	}
+
+	private final class HeaderNamesIterator implements Iterator<String> {
+
+		private final Iterator<String> iterator;
+
+		@Nullable
+		private String currentName;
+
+		private HeaderNamesIterator(Iterator<String> iterator) {
+			this.iterator = iterator;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return this.iterator.hasNext();
+		}
+
+		@Override
+		public String next() {
+			this.currentName = this.iterator.next();
+			return this.currentName;
+		}
+
+		@Override
+		public void remove() {
+			if (this.currentName == null) {
+				throw new IllegalStateException("No current Header in iterator");
+			}
+			if (!headers.contains(this.currentName)) {
+				throw new IllegalStateException("Header not present: " + this.currentName);
+			}
+			headers.remove(this.currentName);
 		}
 	}
 

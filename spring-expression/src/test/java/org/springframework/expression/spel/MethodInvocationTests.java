@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Andy Clement
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 public class MethodInvocationTests extends AbstractExpressionTests {
 
@@ -233,26 +234,77 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 
 	@Test
 	public void testVarargsInvocation01() {
-		// Calling 'public int aVarargsMethod(String... strings)'
-		//evaluate("aVarargsMethod('a','b','c')", 3, Integer.class);
-		//evaluate("aVarargsMethod('a')", 1, Integer.class);
-		evaluate("aVarargsMethod()", 0, Integer.class);
-		evaluate("aVarargsMethod(1,2,3)", 3, Integer.class); // all need converting to strings
-		evaluate("aVarargsMethod(1)", 1, Integer.class); // needs string conversion
-		evaluate("aVarargsMethod(1,'a',3.0d)", 3, Integer.class); // first and last need conversion
-		// evaluate("aVarargsMethod(new String[]{'a','b','c'})", 3, Integer.class);
+		// Calling 'public String aVarargsMethod(String... strings)'
+		evaluate("aVarargsMethod('a','b','c')", "[a, b, c]", String.class);
+		evaluate("aVarargsMethod('a')", "[a]", String.class);
+		evaluate("aVarargsMethod()", "[]", String.class);
+		evaluate("aVarargsMethod(1,2,3)", "[1, 2, 3]", String.class); // all need converting to strings
+		evaluate("aVarargsMethod(1)", "[1]", String.class); // needs string conversion
+		evaluate("aVarargsMethod(1,'a',3.0d)", "[1, a, 3.0]", String.class); // first and last need conversion
+		evaluate("aVarargsMethod(new String[]{'a','b','c'})", "[a, b, c]", String.class);
+		evaluate("aVarargsMethod(new String[]{})", "[]", String.class);
+		evaluate("aVarargsMethod(null)", "[null]", String.class);
+		evaluate("aVarargsMethod(null,'a')", "[null, a]", String.class);
+		evaluate("aVarargsMethod('a',null,'b')", "[a, null, b]", String.class);
 	}
 
 	@Test
 	public void testVarargsInvocation02() {
-		// Calling 'public int aVarargsMethod2(int i, String... strings)' - returns int+length_of_strings
-		evaluate("aVarargsMethod2(5,'a','b','c')", 8, Integer.class);
-		evaluate("aVarargsMethod2(2,'a')", 3, Integer.class);
-		evaluate("aVarargsMethod2(4)", 4, Integer.class);
-		evaluate("aVarargsMethod2(8,2,3)", 10, Integer.class);
-		evaluate("aVarargsMethod2(9)", 9, Integer.class);
-		evaluate("aVarargsMethod2(2,'a',3.0d)", 4, Integer.class);
-		// evaluate("aVarargsMethod2(8,new String[]{'a','b','c'})", 11, Integer.class);
+		// Calling 'public String aVarargsMethod2(int i, String... strings)'
+		evaluate("aVarargsMethod2(5,'a','b','c')", "5-[a, b, c]", String.class);
+		evaluate("aVarargsMethod2(2,'a')", "2-[a]", String.class);
+		evaluate("aVarargsMethod2(4)", "4-[]", String.class);
+		evaluate("aVarargsMethod2(8,2,3)", "8-[2, 3]", String.class);
+		evaluate("aVarargsMethod2(2,'a',3.0d)", "2-[a, 3.0]", String.class);
+		evaluate("aVarargsMethod2(8,new String[]{'a','b','c'})", "8-[a, b, c]", String.class);
+		evaluate("aVarargsMethod2(8,new String[]{})", "8-[]", String.class);
+		evaluate("aVarargsMethod2(8,null)", "8-[null]", String.class);
+		evaluate("aVarargsMethod2(8,null,'a')", "8-[null, a]", String.class);
+		evaluate("aVarargsMethod2(8,'a',null,'b')", "8-[a, null, b]", String.class);
+	}
+
+	@Test
+	public void testVarargsInvocation03() {
+		// Calling 'public int aVarargsMethod3(String str1, String... strings)' - returns all strings concatenated with "-"
+
+		// No conversion necessary
+		evaluate("aVarargsMethod3('x')", "x", String.class);
+		evaluate("aVarargsMethod3('x', 'a')", "x-a", String.class);
+		evaluate("aVarargsMethod3('x', 'a', 'b', 'c')", "x-a-b-c", String.class);
+
+		// Conversion necessary
+		evaluate("aVarargsMethod3(9)", "9", String.class);
+		evaluate("aVarargsMethod3(8,2,3)", "8-2-3", String.class);
+		evaluate("aVarargsMethod3('2','a',3.0d)", "2-a-3.0", String.class);
+		evaluate("aVarargsMethod3('8',new String[]{'a','b','c'})", "8-a-b-c", String.class);
+
+		// Individual string contains a comma with multiple varargs arguments
+		evaluate("aVarargsMethod3('foo', ',', 'baz')", "foo-,-baz", String.class);
+		evaluate("aVarargsMethod3('foo', 'bar', ',baz')", "foo-bar-,baz", String.class);
+		evaluate("aVarargsMethod3('foo', 'bar,', 'baz')", "foo-bar,-baz", String.class);
+
+		// Individual string contains a comma with single varargs argument.
+		// Reproduces https://github.com/spring-projects/spring-framework/issues/27582
+		evaluate("aVarargsMethod3('foo', ',')", "foo-,", String.class);
+		evaluate("aVarargsMethod3('foo', ',bar')", "foo-,bar", String.class);
+		evaluate("aVarargsMethod3('foo', 'bar,')", "foo-bar,", String.class);
+		evaluate("aVarargsMethod3('foo', 'bar,baz')", "foo-bar,baz", String.class);
+	}
+
+	@Test
+	public void testVarargsOptionalInvocation() {
+		// Calling 'public String optionalVarargsMethod(Optional<String>... values)'
+		evaluate("optionalVarargsMethod()", "[]", String.class);
+		evaluate("optionalVarargsMethod(new String[0])", "[]", String.class);
+		evaluate("optionalVarargsMethod('a')", "[Optional[a]]", String.class);
+		evaluate("optionalVarargsMethod('a','b','c')", "[Optional[a], Optional[b], Optional[c]]", String.class);
+		evaluate("optionalVarargsMethod(9)", "[Optional[9]]", String.class);
+		evaluate("optionalVarargsMethod(2,3)", "[Optional[2], Optional[3]]", String.class);
+		evaluate("optionalVarargsMethod('a',3.0d)", "[Optional[a], Optional[3.0]]", String.class);
+		evaluate("optionalVarargsMethod(new String[]{'a','b','c'})", "[Optional[a], Optional[b], Optional[c]]", String.class);
+		evaluate("optionalVarargsMethod(null)", "[Optional.empty]", String.class);
+		evaluate("optionalVarargsMethod(null,'a')", "[Optional.empty, Optional[a]]", String.class);
+		evaluate("optionalVarargsMethod('a',null,'b')", "[Optional[a], Optional.empty, Optional[b]]", String.class);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -54,8 +57,10 @@ import org.springframework.util.MultiValueMap;
  */
 public class ExchangeResult {
 
+	private static final Log logger = LogFactory.getLog(ExchangeResult.class);
+
 	private static final List<MediaType> PRINTABLE_MEDIA_TYPES = Arrays.asList(
-			MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.parseMediaType("application/*+json"), MediaType.APPLICATION_XML,
 			MediaType.parseMediaType("text/*"), MediaType.APPLICATION_FORM_URLENCODED);
 
 
@@ -73,7 +78,10 @@ public class ExchangeResult {
 	private final String uriTemplate;
 
 	@Nullable
-	final Object mockServerResult;
+	private final Object mockServerResult;
+
+	/** Ensure single logging, e.g. for expectAll. */
+	private boolean diagnosticsLogged;
 
 
 	/**
@@ -117,6 +125,7 @@ public class ExchangeResult {
 		this.timeout = other.timeout;
 		this.uriTemplate = other.uriTemplate;
 		this.mockServerResult = other.mockServerResult;
+		this.diagnosticsLogged = other.diagnosticsLogged;
 	}
 
 
@@ -162,17 +171,18 @@ public class ExchangeResult {
 
 
 	/**
-	 * Return the HTTP status code as an {@link HttpStatus} enum value.
+	 * Return the HTTP status code as an {@link HttpStatusCode} value.
 	 */
-	public HttpStatus getStatus() {
+	public HttpStatusCode getStatus() {
 		return this.response.getStatusCode();
 	}
 
 	/**
-	 * Return the HTTP status code (potentially non-standard and not resolvable
-	 * through the {@link HttpStatus} enum) as an integer.
+	 * Return the HTTP status code as an integer.
 	 * @since 5.1.10
+	 * @deprecated as of 6.0, in favor of {@link #getStatus()}
 	 */
+	@Deprecated
 	public int getRawStatusCode() {
 		return this.response.getRawStatusCode();
 	}
@@ -214,16 +224,20 @@ public class ExchangeResult {
 	}
 
 	/**
-	 * Execute the given Runnable, catch any {@link AssertionError}, decorate
-	 * with {@code AssertionError} containing diagnostic information about the
-	 * request and response, and then re-throw.
+	 * Execute the given Runnable, catch any {@link AssertionError}, log details
+	 * about the request and response at ERROR level under the class log
+	 * category, and after that re-throw the error.
 	 */
 	public void assertWithDiagnostics(Runnable assertion) {
 		try {
 			assertion.run();
 		}
 		catch (AssertionError ex) {
-			throw new AssertionError(ex.getMessage() + "\n" + this, ex);
+			if (!this.diagnosticsLogged && logger.isErrorEnabled()) {
+				this.diagnosticsLogged = true;
+				logger.error("Request details for assertion failure:\n" + this);
+			}
+			throw ex;
 		}
 	}
 
@@ -236,11 +250,20 @@ public class ExchangeResult {
 				"\n" +
 				formatBody(getRequestHeaders().getContentType(), this.requestBody) + "\n" +
 				"\n" +
-				"< " + getStatus() + " " + getStatus().getReasonPhrase() + "\n" +
+				"< " + getStatus() + " " + getReasonPhrase(getStatus()) + "\n" +
 				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
 				"\n" +
 				formatBody(getResponseHeaders().getContentType(), this.responseBody) +"\n" +
 				formatMockServerResult();
+	}
+
+	private static String getReasonPhrase(HttpStatusCode statusCode) {
+		if (statusCode instanceof HttpStatus status) {
+			return status.getReasonPhrase();
+		}
+		else {
+			return "";
+		}
 	}
 
 	private String formatHeaders(HttpHeaders headers, String delimiter) {

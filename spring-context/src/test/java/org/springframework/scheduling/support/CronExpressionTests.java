@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.scheduling.support;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Year;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
 
 import org.assertj.core.api.Condition;
@@ -30,7 +30,9 @@ import org.junit.jupiter.api.Test;
 
 import static java.time.DayOfWeek.FRIDAY;
 import static java.time.DayOfWeek.MONDAY;
+import static java.time.DayOfWeek.SATURDAY;
 import static java.time.DayOfWeek.SUNDAY;
+import static java.time.DayOfWeek.THURSDAY;
 import static java.time.DayOfWeek.TUESDAY;
 import static java.time.DayOfWeek.WEDNESDAY;
 import static java.time.temporal.TemporalAdjusters.next;
@@ -41,15 +43,25 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class CronExpressionTests {
 
-	private static final Condition<Temporal> weekday = new Condition<Temporal>("weekday") {
+	private static final Condition<Temporal> weekday = new Condition<>("weekday") {
 
 		@Override
 		public boolean matches(Temporal value) {
-			int dayOfWeek = value.get(ChronoField.DAY_OF_WEEK);
-			return dayOfWeek != 6 && dayOfWeek != 7;
+			DayOfWeek dayOfWeek = DayOfWeek.from(value);
+			return dayOfWeek != SATURDAY && dayOfWeek != SUNDAY;
 		}
 	};
 
+	@Test
+	public void isValidExpression() {
+		assertThat(CronExpression.isValidExpression(null)).isFalse();
+		assertThat(CronExpression.isValidExpression("")).isFalse();
+		assertThat(CronExpression.isValidExpression("*")).isFalse();
+		assertThat(CronExpression.isValidExpression("* * * * *")).isFalse();
+		assertThat(CronExpression.isValidExpression("* * * * * * *")).isFalse();
+
+		assertThat(CronExpression.isValidExpression("* * * * * *")).isTrue();
+	}
 
 	@Test
 	void matchAll() {
@@ -116,6 +128,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().withMinute(10);
 		LocalDateTime expected = last.plusMinutes(1).withSecond(0).withNano(0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -149,6 +162,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.of(year, 10, 30, 11, 1);
 		LocalDateTime expected = last.withHour(12).withMinute(0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -173,6 +187,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().withDayOfMonth(1);
 		LocalDateTime expected = last.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -207,6 +222,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().withMonth(9).withDayOfMonth(30);
 		LocalDateTime expected = LocalDateTime.of(last.getYear(), 10, 1, 0, 0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -222,6 +238,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().withMonth(8).withDayOfMonth(30);
 		LocalDateTime expected = last.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -237,6 +254,7 @@ class CronExpressionTests {
 		ZonedDateTime last = ZonedDateTime.now(ZoneId.of("CET")).withMonth(10).withDayOfMonth(30);
 		ZonedDateTime expected = last.withDayOfMonth(31).withHour(0).withMinute(0).withSecond(0).withNano(0);
 		ZonedDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -251,6 +269,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().withMonth(10).withDayOfMonth(30);
 		LocalDateTime expected = LocalDateTime.of(last.getYear(), 11, 1, 0, 0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -265,6 +284,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().withYear(2010).withMonth(12).withDayOfMonth(31);
 		LocalDateTime expected = LocalDateTime.of(2011, 1, 1, 0, 0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -297,6 +317,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().with(next(MONDAY));
 		LocalDateTime expected = last.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 		assertThat(actual.getDayOfWeek()).isEqualTo(TUESDAY);
 	}
@@ -308,6 +329,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().with(next(WEDNESDAY));
 		LocalDateTime expected = last.plusDays(6).withHour(0).withMinute(0).withSecond(0).withNano(0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 		assertThat(actual.getDayOfWeek()).isEqualTo(TUESDAY);
 	}
@@ -319,6 +341,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().withMinute(4).withSecond(54);
 		LocalDateTime expected = last.plusMinutes(1).withSecond(55).withNano(0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -333,6 +356,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().withHour(9).withSecond(54);
 		LocalDateTime expected = last.plusHours(1).withMinute(0).withSecond(55).withNano(0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -347,6 +371,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().withHour(9).withMinute(4);
 		LocalDateTime expected = last.plusHours(1).plusMinutes(1).withSecond(0).withNano(0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -362,6 +387,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().withDayOfMonth(2).withSecond(54);
 		LocalDateTime expected = last.plusDays(1).withHour(0).withMinute(0).withSecond(55).withNano(0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -376,6 +402,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().withMonth(10).withDayOfMonth(2);
 		LocalDateTime expected = LocalDateTime.of(last.getYear(), 11, 3, 0, 0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -398,6 +425,7 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.now().withYear(2007).withMonth(2).withDayOfMonth(10);
 		LocalDateTime expected = LocalDateTime.of(2008, 2, 29, 0, 0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -413,12 +441,14 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.of(LocalDate.of(2009, 9, 26), LocalTime.now());
 		LocalDateTime expected = last.plusDays(2).withHour(7).withMinute(0).withSecond(0).withNano(0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		// Next day is a week day so add one
 		last = actual;
 		expected = expected.plusDays(1);
 		actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -433,12 +463,14 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.of(LocalDate.of(2010, 12, 30), LocalTime.now());
 		LocalDateTime expected = last.plusMonths(1).withHour(23).withMinute(30).withSecond(0).withSecond(0).withNano(0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		// Next trigger is 3 months later
 		last = actual;
 		expected = expected.plusMonths(3);
 		actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -477,6 +509,29 @@ class CronExpressionTests {
 	}
 
 	@Test
+	public void everyTenDays() {
+		CronExpression cronExpression = CronExpression.parse("0 15 12 */10 1-8 5");
+
+		LocalDateTime last = LocalDateTime.parse("2021-04-30T12:14:59");
+		LocalDateTime expected = LocalDateTime.parse("2021-05-21T12:15");
+		LocalDateTime actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = LocalDateTime.parse("2021-06-11T12:15");
+		actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = LocalDateTime.parse("2022-01-21T12:15");
+		actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
 	void yearly() {
 		CronExpression expression = CronExpression.parse("@yearly");
 		assertThat(expression).isEqualTo(CronExpression.parse("0 0 0 1 1 *"));
@@ -485,11 +540,13 @@ class CronExpressionTests {
 		LocalDateTime expected = LocalDateTime.of(last.getYear() + 1, 1, 1, 0, 0);
 
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
 		expected = expected.plusYears(1);
 		actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -513,11 +570,13 @@ class CronExpressionTests {
 		LocalDateTime expected = LocalDateTime.of(last.getYear(), 11, 1, 0, 0);
 
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
 		expected = expected.plusMonths(1);
 		actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -534,11 +593,13 @@ class CronExpressionTests {
 		LocalDateTime expected = last.with(next(SUNDAY)).withHour(0).withMinute(0).withSecond(0).withNano(0);
 
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
 		expected = expected.plusWeeks(1);
 		actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -555,11 +616,13 @@ class CronExpressionTests {
 		LocalDateTime expected = last.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
 
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
 		expected = expected.plusDays(1);
 		actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -583,11 +646,13 @@ class CronExpressionTests {
 		LocalDateTime expected = last.plusHours(1).withMinute(0).withSecond(0).withNano(0);
 
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
 		expected = expected.plusHours(1);
 		actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -603,16 +668,19 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.of(LocalDate.of(2008, 1, 4), LocalTime.now());
 		LocalDateTime expected = LocalDateTime.of(2008, 1, 31, 0, 0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
 		expected = LocalDateTime.of(2008, 2, 29, 0, 0);
 		actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
 		expected = LocalDateTime.of(2008, 3, 31, 0, 0);
 		actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -628,16 +696,19 @@ class CronExpressionTests {
 		LocalDateTime last = LocalDateTime.of(LocalDate.of(2008, 1, 4), LocalTime.now());
 		LocalDateTime expected = LocalDateTime.of(2008, 1, 28, 0, 0);
 		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
 		expected = LocalDateTime.of(2008, 2, 26, 0, 0);
 		actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
 		expected = LocalDateTime.of(2008, 3, 28, 0, 0);
 		actual = expression.next(last);
+		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 
 		last = actual;
@@ -888,6 +959,24 @@ class CronExpressionTests {
 		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 		assertThat(actual).is(weekday);
+
+		last = LocalDateTime.of(2022, 1, 1, 0, 0);
+		assertThat(last.getDayOfWeek()).isEqualTo(SATURDAY);
+		expected = LocalDateTime.of(2022, 1, 3, 0, 0);
+		assertThat(expected.getDayOfWeek()).isEqualTo(MONDAY);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).is(weekday);
+
+		last = LocalDateTime.of(2021, 8, 1, 0,0);
+		assertThat(last.getDayOfWeek()).isEqualTo(SUNDAY);
+		expected = LocalDateTime.of(2021, 8, 2, 0, 0);
+		assertThat(expected.getDayOfWeek()).isEqualTo(MONDAY);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).is(weekday);
 	}
 
 	@Test
@@ -1042,4 +1131,244 @@ class CronExpressionTests {
 		assertThat(actual).isEqualTo(expected);
 		assertThat(actual.getDayOfWeek()).isEqualTo(WEDNESDAY);
 	}
+
+	@Test
+	void dayOfMonthListWithQuartz() {
+		CronExpression expression = CronExpression.parse("0 0 0 1W,15,LW * ?");
+
+		LocalDateTime last = LocalDateTime.of(2019, 12, 30, 0, 0);
+		LocalDateTime expected = LocalDateTime.of(2019, 12, 31, 0, 0);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).is(weekday);
+
+		last = actual;
+		expected = LocalDateTime.of(2020, 1, 1, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).is(weekday);
+
+		last = actual;
+		expected = LocalDateTime.of(2020, 1, 15, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = LocalDateTime.of(2020, 1, 31, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).is(weekday);
+	}
+
+	@Test
+	void dayOfWeekListWithQuartz() {
+		CronExpression expression = CronExpression.parse("0 0 0 ? * THU#1,THU#3,THU#5");
+
+		LocalDateTime last = LocalDateTime.of(2019, 12, 31, 0, 0);
+		LocalDateTime expected = LocalDateTime.of(2020, 1, 2, 0, 0);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual.getDayOfWeek()).isEqualTo(THURSDAY);
+
+		last = actual;
+		expected = LocalDateTime.of(2020, 1, 16, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual.getDayOfWeek()).isEqualTo(THURSDAY);
+
+		last = actual;
+		expected = LocalDateTime.of(2020, 1, 30, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual.getDayOfWeek()).isEqualTo(THURSDAY);
+	}
+
+	@Test
+	void quartzLastDayOfMonthEveryHour() {
+		CronExpression expression = CronExpression.parse("0 0 * L * *");
+
+		LocalDateTime last = LocalDateTime.of(2021, 1, 30, 0, 1);
+		LocalDateTime expected = LocalDateTime.of(2021, 1, 31, 0, 0);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		last = LocalDateTime.of(2021, 1, 31, 1, 0);
+		expected = LocalDateTime.of(2021, 1, 31, 2, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	void quartzLastDayOfMonthOffsetEveryHour() {
+		CronExpression expression = CronExpression.parse("0 0 * L-1 * *");
+
+		LocalDateTime last = LocalDateTime.of(2021, 1, 29, 0, 1);
+		LocalDateTime expected = LocalDateTime.of(2021, 1, 30, 0, 0);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		last = LocalDateTime.of(2021, 1, 30, 1, 0);
+		expected = LocalDateTime.of(2021, 1, 30, 2, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	void quartzFirstWeekdayOfMonthEveryHour() {
+		CronExpression expression = CronExpression.parse("0 0 * 1W * *");
+
+		LocalDateTime last = LocalDateTime.of(2021, 1, 31, 0, 1);
+		LocalDateTime expected = LocalDateTime.of(2021, 2, 1, 0, 0);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		last = LocalDateTime.of(2021, 2, 1, 1, 0);
+		expected = LocalDateTime.of(2021, 2, 1, 2, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	void quartzLastWeekdayOfMonthEveryHour() {
+		CronExpression expression = CronExpression.parse("0 0 * LW * *");
+
+		LocalDateTime last = LocalDateTime.of(2021, 1, 28, 0, 1);
+		LocalDateTime expected = LocalDateTime.of(2021, 1, 29, 0, 0);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		last = LocalDateTime.of(2021, 1, 29, 1, 0);
+		expected = LocalDateTime.of(2021, 1, 29, 2, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	void quartz5thFridayOfTheMonthEveryHour() {
+		CronExpression expression = CronExpression.parse("0 0 * ? * FRI#5");
+
+		LocalDateTime last = LocalDateTime.of(2021, 1, 28, 0, 1);
+		LocalDateTime expected = LocalDateTime.of(2021, 1, 29, 0, 0);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual.getDayOfWeek()).isEqualTo(FRIDAY);
+
+		last = LocalDateTime.of(2021, 1, 29, 1, 0);
+		expected = LocalDateTime.of(2021, 1, 29, 2, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	void quartzLastFridayOfTheMonthEveryHour() {
+		CronExpression expression = CronExpression.parse("0 0 * ? * FRIL");
+
+		LocalDateTime last = LocalDateTime.of(2021, 1, 28, 0, 1);
+		LocalDateTime expected = LocalDateTime.of(2021, 1, 29, 0, 0);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual.getDayOfWeek()).isEqualTo(FRIDAY);
+
+		last = LocalDateTime.of(2021, 1, 29, 1, 0);
+		expected = LocalDateTime.of(2021, 1, 29, 2, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	public void sundayToFriday() {
+		CronExpression expression = CronExpression.parse("0 0 0 ? * SUN-FRI");
+
+		LocalDateTime last = LocalDateTime.of(2021, 2, 25, 15, 0);
+		LocalDateTime expected = LocalDateTime.of(2021, 2, 26, 0, 0);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual.getDayOfWeek()).isEqualTo(FRIDAY);
+
+		last = actual;
+		expected = LocalDateTime.of(2021, 2, 28, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual.getDayOfWeek()).isEqualTo(SUNDAY);
+	}
+
+	@Test
+	public void daylightSaving() {
+		CronExpression cronExpression = CronExpression.parse("0 0 9 * * *");
+
+		ZonedDateTime last = ZonedDateTime.parse("2021-03-27T09:00:00+01:00[Europe/Amsterdam]");
+		ZonedDateTime expected = ZonedDateTime.parse("2021-03-28T09:00:00+02:00[Europe/Amsterdam]");
+		ZonedDateTime actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		last = ZonedDateTime.parse("2021-10-30T09:00:00+02:00[Europe/Amsterdam]");
+		expected = ZonedDateTime.parse("2021-10-31T09:00:00+01:00[Europe/Amsterdam]");
+		actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		cronExpression = CronExpression.parse("0 10 2 * * *");
+
+		last = ZonedDateTime.parse("2013-03-31T01:09:00+01:00[Europe/Amsterdam]");
+		expected = ZonedDateTime.parse("2013-04-01T02:10:00+02:00[Europe/Amsterdam]");
+		actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		cronExpression = CronExpression.parse("0 5 0 * * *");
+
+		last = ZonedDateTime.parse("2021-03-28T01:00:00+01:00[Europe/Amsterdam]");
+		expected = ZonedDateTime.parse("2021-03-29T00:05+02:00[Europe/Amsterdam]");
+		actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		cronExpression = CronExpression.parse("0 5 0 * * *");
+
+		last = ZonedDateTime.parse("2019-10-27T01:05+02:00[Europe/Amsterdam]");
+		expected = ZonedDateTime.parse("2019-10-28T00:05+01:00[Europe/Amsterdam]");
+		actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	public void various() {
+		CronExpression cronExpression = CronExpression.parse("3-57 13-28 17,18 1,15 3-12 6#1");
+		LocalDateTime last =     LocalDateTime.of(2022, 9, 15, 17, 44, 11);
+		LocalDateTime expected = LocalDateTime.of(2022, 10, 1, 17, 13, 3);
+		LocalDateTime actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+
+		cronExpression = CronExpression.parse("*/28 56 22 */6 * *");
+		last = LocalDateTime.of(2022, 2, 27, 8, 0, 42);
+		expected = LocalDateTime.of(2022, 3, 1, 22, 56, 0);
+		actual = cronExpression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+	}
+
 }

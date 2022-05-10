@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ import org.springframework.lang.Nullable;
  * (only applicable when running in a web application context)
  * <li>{@code postProcessBeforeInitialization} methods of BeanPostProcessors
  * <li>InitializingBean's {@code afterPropertiesSet}
- * <li>a custom init-method definition
+ * <li>a custom {@code init-method} definition
  * <li>{@code postProcessAfterInitialization} methods of BeanPostProcessors
  * </ol>
  *
@@ -92,7 +92,7 @@ import org.springframework.lang.Nullable;
  * <ol>
  * <li>{@code postProcessBeforeDestruction} methods of DestructionAwareBeanPostProcessors
  * <li>DisposableBean's {@code destroy}
- * <li>a custom destroy-method definition
+ * <li>a custom {@code destroy-method} definition
  * </ol>
  *
  * @author Rod Johnson
@@ -102,6 +102,8 @@ import org.springframework.lang.Nullable;
  * @see BeanNameAware#setBeanName
  * @see BeanClassLoaderAware#setBeanClassLoader
  * @see BeanFactoryAware#setBeanFactory
+ * @see org.springframework.context.EnvironmentAware#setEnvironment
+ * @see org.springframework.context.EmbeddedValueResolverAware#setEmbeddedValueResolver
  * @see org.springframework.context.ResourceLoaderAware#setResourceLoader
  * @see org.springframework.context.ApplicationEventPublisherAware#setApplicationEventPublisher
  * @see org.springframework.context.MessageSourceAware#setMessageSource
@@ -111,6 +113,7 @@ import org.springframework.lang.Nullable;
  * @see InitializingBean#afterPropertiesSet
  * @see org.springframework.beans.factory.support.RootBeanDefinition#getInitMethodName
  * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessAfterInitialization
+ * @see org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor#postProcessBeforeDestruction
  * @see DisposableBean#destroy
  * @see org.springframework.beans.factory.support.RootBeanDefinition#getDestroyMethodName
  */
@@ -211,6 +214,7 @@ public interface BeanFactory {
 	/**
 	 * Return a provider for the specified bean, allowing for lazy on-demand retrieval
 	 * of instances, including availability and uniqueness options.
+	 * <p>For matching a generic type, consider {@link #getBeanProvider(ResolvableType)}.
 	 * @param requiredType type the bean must match; can be an interface or superclass
 	 * @return a corresponding provider handle
 	 * @since 5.1
@@ -220,13 +224,20 @@ public interface BeanFactory {
 
 	/**
 	 * Return a provider for the specified bean, allowing for lazy on-demand retrieval
-	 * of instances, including availability and uniqueness options.
-	 * @param requiredType type the bean must match; can be a generic type declaration.
-	 * Note that collection types are not supported here, in contrast to reflective
+	 * of instances, including availability and uniqueness options. This variant allows
+	 * for specifying a generic type to match, similar to reflective injection points
+	 * with generic type declarations in method/constructor parameters.
+	 * <p>Note that collections of beans are not supported here, in contrast to reflective
 	 * injection points. For programmatically retrieving a list of beans matching a
 	 * specific type, specify the actual bean type as an argument here and subsequently
 	 * use {@link ObjectProvider#orderedStream()} or its lazy streaming/iteration options.
+	 * <p>Also, generics matching is strict here, as per the Java assignment rules.
+	 * For lenient fallback matching with unchecked semantics (similar to the ´unchecked´
+	 * Java compiler warning), consider calling {@link #getBeanProvider(Class)} with the
+	 * raw type as a second step if no full generic match is
+	 * {@link ObjectProvider#getIfAvailable() available} with this variant.
 	 * @return a corresponding provider handle
+	 * @param requiredType type the bean must match; can be a generic type declaration
 	 * @since 5.1
 	 * @see ObjectProvider#iterator()
 	 * @see ObjectProvider#stream()

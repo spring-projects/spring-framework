@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -352,7 +352,7 @@ public class BindStatus {
 	public String toString() {
 		StringBuilder sb = new StringBuilder("BindStatus: ");
 		sb.append("expression=[").append(this.expression).append("]; ");
-		sb.append("value=[").append(this.value).append("]");
+		sb.append("value=[").append(this.value).append(']');
 		if (!ObjectUtils.isEmpty(this.errorCodes)) {
 			sb.append("; errorCodes=").append(Arrays.asList(this.errorCodes));
 		}

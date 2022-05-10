@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import org.springframework.core.io.ResourceLoader;
  * the {@link org.springframework.context.ApplicationContextAware} interface.
  *
  * <p>Note that {@link org.springframework.core.io.Resource} dependencies can also
- * be exposed as bean properties of type {@code Resource}, populated via Strings
- * with automatic type conversion by the bean factory. This removes the need for
- * implementing any callback interface just for the purpose of accessing a
- * specific file resource.
+ * be exposed as bean properties of type {@code Resource} or {@code Resource[]},
+ * populated via Strings with automatic type conversion by the bean factory. This
+ * removes the need for implementing any callback interface just for the purpose
+ * of accessing specific file resources.
  *
  * <p>You typically need a {@link ResourceLoader} when your application object has to
  * access a variety of file resources whose names are calculated. A good strategy is
@@ -48,7 +48,7 @@ import org.springframework.core.io.ResourceLoader;
  * default; see also the {@code ResourcePatternUtils.getResourcePatternResolver} method.
  *
  * <p>As an alternative to a {@code ResourcePatternResolver} dependency, consider
- * exposing bean properties of type {@code Resource} array, populated via pattern
+ * exposing bean properties of type {@code Resource[]} array, populated via pattern
  * Strings with automatic type conversion by the bean factory at binding time.
  *
  * @author Juergen Hoeller

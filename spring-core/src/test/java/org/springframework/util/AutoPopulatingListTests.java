@@ -48,7 +48,7 @@ class AutoPopulatingListTests {
 
 	@Test
 	void withElementFactoryAndUserSuppliedBackingList() throws Exception {
-		doTestWithElementFactory(new AutoPopulatingList<Object>(new ArrayList<>(), new MockElementFactory()));
+		doTestWithElementFactory(new AutoPopulatingList<>(new ArrayList<>(), new MockElementFactory()));
 	}
 
 	private void doTestWithClass(AutoPopulatingList<Object> list) {

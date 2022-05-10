@@ -1,7 +1,5 @@
 [[spring-core]]
 = Core Technologies
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 4
 :tabsize: 4

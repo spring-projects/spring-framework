@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,7 +80,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	 * @see #indicatesDisconnectedClient(Throwable)
 	 */
 	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS =
-			new HashSet<>(Arrays.asList("ClientAbortException", "EOFException", "EofException"));
+			Set.of("ClientAbortException", "EOFException", "EofException");
 
 
 	/**
@@ -407,17 +406,14 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	}
 
 	private static List<String> getUndelivered(String[] messages, int i) {
-		switch (messages.length - i) {
-			case 0:
-				return Collections.emptyList();
-			case 1:
-				return (messages[i].trim().isEmpty() ?
-						Collections.emptyList() : Collections.singletonList(messages[i]));
-			default:
-				return Arrays.stream(Arrays.copyOfRange(messages, i, messages.length))
-						.filter(message -> !message.trim().isEmpty())
-						.collect(Collectors.toList());
-		}
+		return switch (messages.length - i) {
+			case 0 -> Collections.emptyList();
+			case 1 -> (messages[i].trim().isEmpty() ?
+					Collections.<String>emptyList() : Collections.singletonList(messages[i]));
+			default -> Arrays.stream(Arrays.copyOfRange(messages, i, messages.length))
+					.filter(message -> !message.trim().isEmpty())
+					.collect(Collectors.toList());
+		};
 	}
 
 	/**

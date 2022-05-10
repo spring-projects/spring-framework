@@ -16,8 +16,7 @@
 
 package org.springframework.web.servlet.handler;
 
-import javax.servlet.ServletException;
-
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -33,7 +33,6 @@ import org.apache.commons.logging.LogFactory;
 import org.xnio.IoFuture;
 import org.xnio.XnioWorker;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -43,6 +42,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.adapter.ContextWebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.UndertowWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.adapter.UndertowWebSocketSession;
 
@@ -155,9 +155,9 @@ public class UndertowWebSocketClient implements WebSocketClient {
 	}
 
 	private Mono<Void> executeInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		MonoProcessor<Void> completion = MonoProcessor.fromSink(Sinks.one());
-		return Mono.fromCallable(
-				() -> {
+		Sinks.Empty<Void> completion = Sinks.empty();
+		return Mono.deferContextual(
+				contextView -> {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Connecting to " + url);
 					}
@@ -165,19 +165,22 @@ public class UndertowWebSocketClient implements WebSocketClient {
 					ConnectionBuilder builder = createConnectionBuilder(url);
 					DefaultNegotiation negotiation = new DefaultNegotiation(protocols, headers, builder);
 					builder.setClientNegotiation(negotiation);
-					return builder.connect().addNotifier(
+					builder.connect().addNotifier(
 							new IoFuture.HandlingNotifier<WebSocketChannel, Object>() {
 								@Override
 								public void handleDone(WebSocketChannel channel, Object attachment) {
-									handleChannel(url, handler, completion, negotiation, channel);
+									handleChannel(url, ContextWebSocketHandler.decorate(handler, contextView),
+											completion, negotiation, channel);
 								}
 								@Override
 								public void handleFailed(IOException ex, Object attachment) {
-									completion.onError(new IllegalStateException("Failed to connect to " + url, ex));
+									// Ignore result: can't overflow, ok if not first or no one listens
+									completion.tryEmitError(
+											new IllegalStateException("Failed to connect to " + url, ex));
 								}
 							}, null);
-				})
-				.then(completion);
+					return completion.asMono();
+				});
 	}
 
 	/**
@@ -194,12 +197,12 @@ public class UndertowWebSocketClient implements WebSocketClient {
 		return builder;
 	}
 
-	private void handleChannel(URI url, WebSocketHandler handler, MonoProcessor<Void> completion,
+	private void handleChannel(URI url, WebSocketHandler handler, Sinks.Empty<Void> completionSink,
 			DefaultNegotiation negotiation, WebSocketChannel channel) {
 
 		HandshakeInfo info = createHandshakeInfo(url, negotiation);
 		DataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
-		UndertowWebSocketSession session = new UndertowWebSocketSession(channel, info, bufferFactory, completion);
+		UndertowWebSocketSession session = new UndertowWebSocketSession(channel, info, bufferFactory, completionSink);
 		UndertowWebSocketHandlerAdapter adapter = new UndertowWebSocketHandlerAdapter(session);
 
 		channel.getReceiveSetter().set(adapter);

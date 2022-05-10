@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,18 +30,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-import javax.jms.TemporaryQueue;
-import javax.jms.TemporaryTopic;
-import javax.jms.Topic;
-import javax.jms.TopicSession;
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.QueueSession;
+import jakarta.jms.Session;
+import jakarta.jms.TemporaryQueue;
+import jakarta.jms.TemporaryTopic;
+import jakarta.jms.Topic;
+import jakarta.jms.TopicSession;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -49,8 +49,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * {@link SingleConnectionFactory} subclass that adds {@link javax.jms.Session}
- * caching as well {@link javax.jms.MessageProducer} caching. This ConnectionFactory
+ * {@link SingleConnectionFactory} subclass that adds {@link jakarta.jms.Session}
+ * caching as well {@link jakarta.jms.MessageProducer} caching. This ConnectionFactory
  * also switches the {@link #setReconnectOnException "reconnectOnException" property}
  * to "true" by default, allowing for automatic recovery of the underlying Connection.
  *
@@ -178,6 +178,23 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		return this.cacheConsumers;
 	}
 
+
+	/**
+	 * Return a current session count, indicating the number of sessions currently
+	 * cached by this connection factory.
+	 * @since 5.3.7
+	 */
+	public int getCachedSessionCount() {
+		int count = 0;
+		synchronized (this.cachedSessions) {
+			for (Deque<Session> sessionList : this.cachedSessions.values()) {
+				synchronized (sessionList) {
+					count += sessionList.size();
+				}
+			}
+		}
+		return count;
+	}
 
 	/**
 	 * Resets the Session cache as well.
@@ -406,6 +423,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			return new CachedMessageProducer(producer);
 		}
 
+		@SuppressWarnings("resource")
 		private MessageConsumer getCachedConsumer(Destination dest, @Nullable String selector,
 				@Nullable Boolean noLocal, @Nullable String subscription, boolean durable) throws JMSException {
 
@@ -580,10 +598,9 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof ConsumerCacheKey)) {
+			if (!(other instanceof ConsumerCacheKey otherKey)) {
 				return false;
 			}
-			ConsumerCacheKey otherKey = (ConsumerCacheKey) other;
 			return (destinationEquals(otherKey) &&
 					ObjectUtils.nullSafeEquals(this.selector, otherKey.selector) &&
 					ObjectUtils.nullSafeEquals(this.noLocal, otherKey.noLocal) &&

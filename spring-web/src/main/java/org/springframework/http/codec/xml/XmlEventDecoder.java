@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import org.springframework.util.xml.StaxUtils;
  * <p>Given the following XML:
  *
  * <pre class="code">
- * &lt;root>
+ * &lt;root&gt;
  *     &lt;child&gt;foo&lt;/child&gt;
  *     &lt;child&gt;bar&lt;/child&gt;
  * &lt;/root&gt;
@@ -122,7 +122,6 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "cast"})  // XMLEventReader is Iterator<Object> on JDK 9
 	public Flux<XMLEvent> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
@@ -137,7 +136,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 					.flatMapIterable(buffer -> {
 						try {
 							InputStream is = buffer.asInputStream();
-							Iterator eventReader = inputFactory.createXMLEventReader(is);
+							Iterator<Object> eventReader = inputFactory.createXMLEventReader(is);
 							List<XMLEvent> result = new ArrayList<>();
 							eventReader.forEachRemaining(event -> result.add((XMLEvent) event));
 							return result;

@@ -44,7 +44,7 @@ parallel, the Spring WebFlux reactive web framework.
 A note about modules: Spring's framework jars allow for deployment to JDK 9's module path
 ("Jigsaw"). For use in Jigsaw-enabled applications, the Spring Framework 5 jars come with
 "Automatic-Module-Name" manifest entries which define stable language-level module names
-("spring.core", "spring.context" etc) independent from jar artifact names (the jars follow
+("spring.core", "spring.context", etc.) independent from jar artifact names (the jars follow
 the same naming pattern with "-" instead of ".", e.g. "spring-core" and "spring-context").
 Of course, Spring's framework jars keep working fine on the classpath on both JDK 8 and 9+.
 
@@ -56,9 +56,10 @@ Of course, Spring's framework jars keep working fine on the classpath on both JD
 
 Spring came into being in 2003 as a response to the complexity of the early
 https://en.wikipedia.org/wiki/Java_Platform,_Enterprise_Edition[J2EE] specifications.
-While some consider Java EE and Spring to be in competition, Spring is, in fact, complementary
-to Java EE. The Spring programming model does not embrace the Java EE platform specification;
-rather, it integrates with carefully selected individual specifications from the EE umbrella:
+While some consider Java EE and its modern-day successor Jakarta EE to be in
+competition with Spring, they are in fact complementary. The Spring programming
+model does not embrace the Jakarta EE platform specification; rather, it integrates
+with carefully selected individual specifications from the traditional EE umbrella:
 
 * Servlet API (https://jcp.org/en/jsr/detail?id=340[JSR 340])
 * WebSocket API (https://www.jcp.org/en/jsr/detail?id=356[JSR 356])
@@ -71,19 +72,21 @@ rather, it integrates with carefully selected individual specifications from the
 
 The Spring Framework also supports the Dependency Injection
 (https://www.jcp.org/en/jsr/detail?id=330[JSR 330]) and Common Annotations
-(https://jcp.org/en/jsr/detail?id=250[JSR 250]) specifications, which application developers
-may choose to use instead of the Spring-specific mechanisms provided by the Spring Framework.
+(https://jcp.org/en/jsr/detail?id=250[JSR 250]) specifications, which application
+developers may choose to use instead of the Spring-specific mechanisms provided
+by the Spring Framework. Originally, those were based on common `javax` packages.
 
-As of Spring Framework 5.0, Spring requires the Java EE 7 level (e.g. Servlet 3.1+, JPA 2.1+)
-as a minimum - while at the same time providing out-of-the-box integration with newer APIs
-at the Java EE 8 level (e.g. Servlet 4.0, JSON Binding API) when encountered at runtime.
-This keeps Spring fully compatible with e.g. Tomcat 8 and 9, WebSphere 9, and JBoss EAP 7.
+As of Spring Framework 6.0, Spring has been upgraded to the Jakarta EE 9 level
+(e.g. Servlet 5.0+, JPA 3.0+), based on the `jakarta` namespace instead of the
+traditional `javax` packages. With EE 9 as the minimum, Spring is prepared to
+provide out-of-the-box support for further API evolution in EE 10+ once available.
+This makes Spring Framework 6 fully compatible with e.g. Tomcat 10+ and Jetty 11+.
 
-Over time, the role of Java EE in application development has evolved. In the early days of
-Java EE and Spring, applications were created to be deployed to an application server.
-Today, with the help of Spring Boot, applications are created in a devops- and
-cloud-friendly way, with the Servlet container embedded and trivial to change.
-As of Spring Framework 5, a WebFlux application does not even use the Servlet API directly
+Over time, the role of Java/Jakarta EE in application development has evolved. In the
+early days of J2EE and Spring, applications were created to be deployed to an application
+server. Today, with the help of Spring Boot, applications are created in a devops- and
+cloud-friendly way, with the Servlet container embedded and trivial to change. As of
+Spring Framework 5, a WebFlux application does not even use the Servlet API directly
 and can run on servers (such as Netty) that are not Servlet containers.
 
 Spring continues to innovate and to evolve. Beyond the Spring Framework, there are other
@@ -125,7 +128,7 @@ clean code structure with  no circular dependencies between packages.
 == Feedback and Contributions
 
 For how-to questions or diagnosing or debugging issues, we suggest using Stack Overflow. Click
-https://stackoverflow.com/questions/tagged/spring+or+spring-mvc+or+spring-aop+or+spring-jdbc+or+spring-r2dbc+or+spring-transactions+or+spring-annotations+or+spring-jms+or+spring-el+or+spring-test+or+spring+or+spring-remoting+or+spring-orm+or+spring-jmx+or+spring-cache+or+spring-webflux+or+spring-rsocket?tab=Newest[here]
+https://stackoverflow.com/questions/tagged/spring+or+spring-mvc+or+spring-aop+or+spring-jdbc+or+spring-r2dbc+or+spring-transactions+or+spring-annotations+or+spring-jms+or+spring-el+or+spring-test+or+spring+or+spring-orm+or+spring-jmx+or+spring-cache+or+spring-webflux+or+spring-rsocket?tab=Newest[here]
 for a list of the suggested tags to use on Stack Overflow. If you're fairly certain that
 there is a problem in the Spring Framework or would like to suggest a feature, please use
 the https://github.com/spring-projects/spring-framework/issues[GitHub Issues].
@@ -135,8 +138,7 @@ https://github.com/spring-projects/spring-framework[Github]. However, please kee
 that, for all but the most trivial issues, we expect a ticket to be filed in the issue
 tracker, where discussions take place and leave a record for future reference.
 
-For more details see the guidelines at the
-https://github.com/spring-projects/spring-framework/blob/master/CONTRIBUTING.md[CONTRIBUTING],
+For more details see the guidelines at the {spring-framework-main-code}/CONTRIBUTING.md[CONTRIBUTING],
 top-level project page.
 
 

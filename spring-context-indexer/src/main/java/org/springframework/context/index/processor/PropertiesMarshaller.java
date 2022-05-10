@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.springframework.context.index.processor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
@@ -44,7 +42,7 @@ abstract class PropertiesMarshaller {
 		Properties props = new Properties();
 		props.load(in);
 		props.forEach((type, value) -> {
-			Set<String> candidates = new HashSet<>(Arrays.asList(((String) value).split(",")));
+			Set<String> candidates = Set.of(((String) value).split(","));
 			result.add(new ItemMetadata((String) type, candidates));
 		});
 		return result;

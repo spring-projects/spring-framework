@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,12 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.TransactionRequiredException;
-import javax.persistence.spi.PersistenceUnitInfo;
-import javax.persistence.spi.PersistenceUnitTransactionType;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.TransactionRequiredException;
+import jakarta.persistence.spi.PersistenceUnitInfo;
+import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -47,14 +46,14 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
- * Delegate for creating a variety of {@link javax.persistence.EntityManager}
+ * Delegate for creating a variety of {@link jakarta.persistence.EntityManager}
  * proxies that follow the JPA spec's semantics for "extended" EntityManagers.
  *
  * <p>Supports several different variants of "extended" EntityManagers:
  * in particular, an "application-managed extended EntityManager", as defined
- * by {@link javax.persistence.EntityManagerFactory#createEntityManager()},
+ * by {@link jakarta.persistence.EntityManagerFactory#createEntityManager()},
  * as well as a "container-managed extended EntityManager", as defined by
- * {@link javax.persistence.PersistenceContextType#EXTENDED}.
+ * {@link jakarta.persistence.PersistenceContextType#EXTENDED}.
  *
  * <p>The original difference between "application-managed" and "container-managed"
  * was the need for explicit joining of an externally managed transaction through
@@ -69,9 +68,9 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * @author Rod Johnson
  * @author Mark Paluch
  * @since 2.0
- * @see javax.persistence.EntityManagerFactory#createEntityManager()
- * @see javax.persistence.PersistenceContextType#EXTENDED
- * @see javax.persistence.EntityManager#joinTransaction()
+ * @see jakarta.persistence.EntityManagerFactory#createEntityManager()
+ * @see jakarta.persistence.PersistenceContextType#EXTENDED
+ * @see jakarta.persistence.EntityManager#joinTransaction()
  * @see SharedEntityManagerCreator
  */
 public abstract class ExtendedEntityManagerCreator {
@@ -131,7 +130,7 @@ public abstract class ExtendedEntityManagerCreator {
 	 * JpaDialect and PersistenceUnitInfo will be detected accordingly.
 	 * @return a container-managed EntityManager that will automatically participate
 	 * in any managed transaction
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager()
+	 * @see jakarta.persistence.EntityManagerFactory#createEntityManager()
 	 */
 	public static EntityManager createContainerManagedEntityManager(EntityManagerFactory emf) {
 		return createContainerManagedEntityManager(emf, null, true);
@@ -146,7 +145,7 @@ public abstract class ExtendedEntityManagerCreator {
 	 * call (may be {@code null})
 	 * @return a container-managed EntityManager that will automatically participate
 	 * in any managed transaction
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 * @see jakarta.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
 	public static EntityManager createContainerManagedEntityManager(EntityManagerFactory emf, @Nullable Map<?, ?> properties) {
 		return createContainerManagedEntityManager(emf, properties, true);
@@ -164,14 +163,13 @@ public abstract class ExtendedEntityManagerCreator {
 	 * @return a container-managed EntityManager that expects container-driven lifecycle
 	 * management but may opt out of automatic transaction synchronization
 	 * @since 4.0
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 * @see jakarta.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
 	public static EntityManager createContainerManagedEntityManager(
 			EntityManagerFactory emf, @Nullable Map<?, ?> properties, boolean synchronizedWithTransaction) {
 
 		Assert.notNull(emf, "EntityManagerFactory must not be null");
-		if (emf instanceof EntityManagerFactoryInfo) {
-			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
+		if (emf instanceof EntityManagerFactoryInfo emfInfo) {
 			EntityManager rawEntityManager = emfInfo.createNativeEntityManager(properties);
 			return createProxy(rawEntityManager, emfInfo, true, synchronizedWithTransaction);
 		}
@@ -230,10 +228,10 @@ public abstract class ExtendedEntityManagerCreator {
 
 		if (emIfc != null) {
 			interfaces = cachedEntityManagerInterfaces.computeIfAbsent(emIfc, key -> {
-				Set<Class<?>> ifcs = new LinkedHashSet<>(4);
-				ifcs.add(key);
-				ifcs.add(EntityManagerProxy.class);
-				return ClassUtils.toClassArray(ifcs);
+				if (EntityManagerProxy.class.equals(key)) {
+					return new Class<?>[] {key};
+				}
+				return new Class<?>[] {key, EntityManagerProxy.class};
 			});
 		}
 		else {

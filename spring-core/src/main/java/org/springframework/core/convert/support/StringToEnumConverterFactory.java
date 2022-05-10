@@ -18,6 +18,7 @@ package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
+import org.springframework.lang.Nullable;
 
 /**
  * Converts from a String to a {@link java.lang.Enum} by calling {@link Enum#valueOf(Class, String)}.
@@ -44,6 +45,7 @@ final class StringToEnumConverterFactory implements ConverterFactory<String, Enu
 		}
 
 		@Override
+		@Nullable
 		public T convert(String source) {
 			if (source.isEmpty()) {
 				// It's an empty enum identifier: reset the enum value to null.

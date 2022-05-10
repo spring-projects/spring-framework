@@ -81,7 +81,6 @@ class DefaultDatabaseClientBuilder implements DatabaseClient.Builder {
 		Assert.notNull(this.connectionFactory, "ConnectionFactory must not be null");
 
 		BindMarkersFactory bindMarkers = this.bindMarkers;
-
 		if (bindMarkers == null) {
 			if (this.namedParameters) {
 				bindMarkers = BindMarkersFactoryResolver.resolve(this.connectionFactory);
@@ -91,13 +90,12 @@ class DefaultDatabaseClientBuilder implements DatabaseClient.Builder {
 			}
 		}
 
-		return new DefaultDatabaseClient(bindMarkers, this.connectionFactory,
-				this.executeFunction, this.namedParameters);
+		return new DefaultDatabaseClient(
+				bindMarkers, this.connectionFactory, this.executeFunction, this.namedParameters);
 	}
 
 	@Override
-	public DatabaseClient.Builder apply(
-			Consumer<DatabaseClient.Builder> builderConsumer) {
+	public DatabaseClient.Builder apply(Consumer<DatabaseClient.Builder> builderConsumer) {
 		Assert.notNull(builderConsumer, "BuilderConsumer must not be null");
 		builderConsumer.accept(this);
 		return this;

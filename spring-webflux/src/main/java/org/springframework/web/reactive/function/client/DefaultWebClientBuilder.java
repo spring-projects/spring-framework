@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
+import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
@@ -274,9 +275,13 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 				.map(filter -> filter.apply(exchange))
 				.orElse(exchange) : exchange);
 
+		HttpHeaders defaultHeaders = copyDefaultHeaders();
+
+		MultiValueMap<String, String> defaultCookies = copyDefaultCookies();
+
 		return new DefaultWebClient(filteredExchange, initUriBuilderFactory(),
-				this.defaultHeaders != null ? HttpHeaders.readOnlyHttpHeaders(this.defaultHeaders) : null,
-				this.defaultCookies != null ? CollectionUtils.unmodifiableMultiValueMap(this.defaultCookies) : null,
+				defaultHeaders,
+				defaultCookies,
 				this.defaultRequest, new DefaultWebClientBuilder(this));
 	}
 
@@ -290,7 +295,9 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		else if (httpComponentsClientPresent) {
 			return new HttpComponentsClientHttpConnector();
 		}
-		throw new IllegalStateException("No suitable default ClientHttpConnector found");
+		else {
+			return new JdkClientHttpConnector();
+		}
 	}
 
 	private ExchangeStrategies initExchangeStrategies() {
@@ -311,6 +318,30 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 				new DefaultUriBuilderFactory(this.baseUrl) : new DefaultUriBuilderFactory());
 		factory.setDefaultUriVariables(this.defaultUriVariables);
 		return factory;
+	}
+
+	@Nullable
+	private HttpHeaders copyDefaultHeaders() {
+		if (this.defaultHeaders != null) {
+			HttpHeaders copy = new HttpHeaders();
+			this.defaultHeaders.forEach((key, values) -> copy.put(key, new ArrayList<>(values)));
+			return HttpHeaders.readOnlyHttpHeaders(copy);
+		}
+		else {
+			return null;
+		}
+	}
+
+	@Nullable
+	private MultiValueMap<String, String> copyDefaultCookies() {
+		if (this.defaultCookies != null) {
+			MultiValueMap<String, String> copy = new LinkedMultiValueMap<>(this.defaultCookies.size());
+			this.defaultCookies.forEach((key, values) -> copy.put(key, new ArrayList<>(values)));
+			return CollectionUtils.unmodifiableMultiValueMap(copy);
+		}
+		else {
+			return null;
+		}
 	}
 
 }

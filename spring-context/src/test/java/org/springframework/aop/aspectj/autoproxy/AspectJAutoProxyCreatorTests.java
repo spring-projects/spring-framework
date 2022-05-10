@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package org.springframework.aop.aspectj.autoproxy;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.aopalliance.aop.Advice;
+import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -29,29 +30,41 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.aop.ClassFilter;
+import org.springframework.aop.IntroductionAdvisor;
+import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.aop.SpringProxy;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.config.AopConfigUtils;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyConfig;
+import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.DecoratingProxy;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -65,9 +78,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  */
 public class AspectJAutoProxyCreatorTests {
-
-	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
-
 
 	@Test
 	public void testAspectsAreApplied() {
@@ -299,6 +309,32 @@ public class AspectJAutoProxyCreatorTests {
 		assertThat(tb.getAge()).isEqualTo(68);
 	}
 
+	@ParameterizedTest(name = "[{index}] {0}")
+	@ValueSource(classes = {ProxyTargetClassFalseConfig.class, ProxyTargetClassTrueConfig.class})
+	void lambdaIsAlwaysProxiedWithJdkProxy(Class<?> configClass) {
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(configClass)) {
+			@SuppressWarnings("unchecked")
+			Supplier<String> supplier = context.getBean(Supplier.class);
+			assertThat(AopUtils.isAopProxy(supplier)).as("AOP proxy").isTrue();
+			assertThat(AopUtils.isJdkDynamicProxy(supplier)).as("JDK Dynamic proxy").isTrue();
+			assertThat(supplier.getClass().getInterfaces())
+				.containsExactlyInAnyOrder(Supplier.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
+			assertThat(supplier.get()).isEqualTo("advised: lambda");
+		}
+	}
+
+	@ParameterizedTest(name = "[{index}] {0}")
+	@ValueSource(classes = {MixinProxyTargetClassFalseConfig.class, MixinProxyTargetClassTrueConfig.class})
+	void lambdaIsAlwaysProxiedWithJdkProxyWithIntroductions(Class<?> configClass) {
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(configClass)) {
+			MessageGenerator messageGenerator = context.getBean(MessageGenerator.class);
+			assertThat(AopUtils.isAopProxy(messageGenerator)).as("AOP proxy").isTrue();
+			assertThat(AopUtils.isJdkDynamicProxy(messageGenerator)).as("JDK Dynamic proxy").isTrue();
+			assertThat(messageGenerator.getClass().getInterfaces())
+				.containsExactlyInAnyOrder(MessageGenerator.class, Mixin.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
+			assertThat(messageGenerator.generateMessage()).isEqualTo("mixin: lambda");
+		}
+	}
 
 	/**
 	 * Returns a new {@link ClassPathXmlApplicationContext} for the file ending in <var>fileSuffix</var>.
@@ -314,12 +350,6 @@ public class AspectJAutoProxyCreatorTests {
 	 */
 	private String qName(String fileSuffix) {
 		return String.format("%s-%s", getClass().getSimpleName(), fileSuffix);
-	}
-
-	private void assertStopWatchTimeLimit(final StopWatch sw, final long maxTimeMillis) {
-		long totalTimeMillis = sw.getTotalTimeMillis();
-		assertThat(totalTimeMillis < maxTimeMillis).as("'" + sw.getLastTaskName() + "' took too long: expected less than<" + maxTimeMillis +
-				"> ms, actual<" + totalTimeMillis + "> ms.").isTrue();
 	}
 
 }
@@ -570,12 +600,7 @@ class TestBeanAdvisor extends StaticMethodMatcherPointcutAdvisor {
 	public int count;
 
 	public TestBeanAdvisor() {
-		setAdvice(new MethodBeforeAdvice() {
-			@Override
-			public void before(Method method, Object[] args, @Nullable Object target) throws Throwable {
-				++count;
-			}
-		});
+		setAdvice((MethodBeforeAdvice) (method, args, target) -> ++count);
 	}
 
 	@Override
@@ -583,4 +608,112 @@ class TestBeanAdvisor extends StaticMethodMatcherPointcutAdvisor {
 		return ITestBean.class.isAssignableFrom(targetClass);
 	}
 
+}
+
+abstract class AbstractProxyTargetClassConfig {
+
+	@Bean
+	Supplier<String> stringSupplier() {
+		return () -> "lambda";
+	}
+
+	@Bean
+	SupplierAdvice supplierAdvice() {
+		return new SupplierAdvice();
+	}
+
+	@Aspect
+	static class SupplierAdvice {
+
+		@Around("execution(public * org.springframework.aop.aspectj.autoproxy..*.*(..))")
+		Object aroundSupplier(ProceedingJoinPoint joinPoint) throws Throwable {
+			return "advised: " + joinPoint.proceed();
+		}
+	}
+}
+
+@Configuration(proxyBeanMethods = false)
+@EnableAspectJAutoProxy(proxyTargetClass = false)
+class ProxyTargetClassFalseConfig extends AbstractProxyTargetClassConfig {
+}
+
+@Configuration(proxyBeanMethods = false)
+@EnableAspectJAutoProxy(proxyTargetClass = true)
+class ProxyTargetClassTrueConfig extends AbstractProxyTargetClassConfig {
+}
+
+@FunctionalInterface
+interface MessageGenerator {
+	String generateMessage();
+}
+
+interface Mixin {
+}
+
+class MixinIntroductionInterceptor implements IntroductionInterceptor {
+
+	@Override
+	public Object invoke(MethodInvocation invocation) throws Throwable {
+		return "mixin: " + invocation.proceed();
+	}
+
+	@Override
+	public boolean implementsInterface(Class<?> intf) {
+		return Mixin.class.isAssignableFrom(intf);
+	}
+
+}
+
+@SuppressWarnings("serial")
+class MixinAdvisor extends AbstractPointcutAdvisor implements IntroductionAdvisor {
+
+	@Override
+	public org.springframework.aop.Pointcut getPointcut() {
+		return org.springframework.aop.Pointcut.TRUE;
+	}
+
+	@Override
+	public Advice getAdvice() {
+		return new MixinIntroductionInterceptor();
+	}
+
+	@Override
+	public Class<?>[] getInterfaces() {
+		return new Class[] { Mixin.class };
+	}
+
+	@Override
+	public ClassFilter getClassFilter() {
+		return MessageGenerator.class::isAssignableFrom;
+	}
+
+	@Override
+	public void validateInterfaces() {
+		/* no-op */
+	}
+
+}
+
+abstract class AbstractMixinConfig {
+
+	@Bean
+	MessageGenerator messageGenerator() {
+		return () -> "lambda";
+	}
+
+	@Bean
+	MixinAdvisor mixinAdvisor() {
+		return new MixinAdvisor();
+	}
+
+}
+
+@Configuration(proxyBeanMethods = false)
+@EnableAspectJAutoProxy(proxyTargetClass = false)
+class MixinProxyTargetClassFalseConfig extends AbstractMixinConfig {
+}
+
+@Configuration(proxyBeanMethods = false)
+@EnableAspectJAutoProxy(proxyTargetClass = true)
+class MixinProxyTargetClassTrueConfig extends AbstractMixinConfig {
 }

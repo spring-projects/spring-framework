@@ -16,12 +16,12 @@
 
 package org.springframework.validation.beanvalidation;
 
-import javax.validation.MessageInterpolator;
-import javax.validation.TraversableResolver;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorContext;
-import javax.validation.ValidatorFactory;
+import jakarta.validation.MessageInterpolator;
+import jakarta.validation.TraversableResolver;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorContext;
+import jakarta.validation.ValidatorFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
@@ -48,7 +48,7 @@ public class CustomValidatorBean extends SpringValidatorAdapter implements Valid
 
 	/**
 	 * Set the ValidatorFactory to obtain the target Validator from.
-	 * <p>Default is {@link javax.validation.Validation#buildDefaultValidatorFactory()}.
+	 * <p>Default is {@link jakarta.validation.Validation#buildDefaultValidatorFactory()}.
 	 */
 	public void setValidatorFactory(ValidatorFactory validatorFactory) {
 		this.validatorFactory = validatorFactory;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,6 +94,8 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 
 	private boolean allowCoreThreadTimeOut = false;
 
+	private boolean prestartAllCoreThreads = false;
+
 	@Nullable
 	private TaskDecorator taskDecorator;
 
@@ -112,10 +114,10 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	public void setCorePoolSize(int corePoolSize) {
 		synchronized (this.poolSizeMonitor) {
-			this.corePoolSize = corePoolSize;
 			if (this.threadPoolExecutor != null) {
 				this.threadPoolExecutor.setCorePoolSize(corePoolSize);
 			}
+			this.corePoolSize = corePoolSize;
 		}
 	}
 
@@ -135,10 +137,10 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	public void setMaxPoolSize(int maxPoolSize) {
 		synchronized (this.poolSizeMonitor) {
-			this.maxPoolSize = maxPoolSize;
 			if (this.threadPoolExecutor != null) {
 				this.threadPoolExecutor.setMaximumPoolSize(maxPoolSize);
 			}
+			this.maxPoolSize = maxPoolSize;
 		}
 	}
 
@@ -158,10 +160,10 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	public void setKeepAliveSeconds(int keepAliveSeconds) {
 		synchronized (this.poolSizeMonitor) {
-			this.keepAliveSeconds = keepAliveSeconds;
 			if (this.threadPoolExecutor != null) {
 				this.threadPoolExecutor.setKeepAliveTime(keepAliveSeconds, TimeUnit.SECONDS);
 			}
+			this.keepAliveSeconds = keepAliveSeconds;
 		}
 	}
 
@@ -195,6 +197,16 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	public void setAllowCoreThreadTimeOut(boolean allowCoreThreadTimeOut) {
 		this.allowCoreThreadTimeOut = allowCoreThreadTimeOut;
+	}
+
+	/**
+	 * Specify whether to start all core threads, causing them to idly wait for work.
+	 * <p>Default is "false".
+	 * @since 5.3.14
+	 * @see java.util.concurrent.ThreadPoolExecutor#prestartAllCoreThreads
+	 */
+	public void setPrestartAllCoreThreads(boolean prestartAllCoreThreads) {
+		this.prestartAllCoreThreads = prestartAllCoreThreads;
 	}
 
 	/**
@@ -255,6 +267,9 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 
 		if (this.allowCoreThreadTimeOut) {
 			executor.allowCoreThreadTimeOut(true);
+		}
+		if (this.prestartAllCoreThreads) {
+			executor.prestartAllCoreThreads();
 		}
 
 		this.threadPoolExecutor = executor;
@@ -325,6 +340,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Deprecated
 	@Override
 	public void execute(Runnable task, long startTimeout) {
 		execute(task);

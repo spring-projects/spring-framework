@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,36 @@
 
 package org.springframework.test.web.client.match;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.FileUpload;
+import org.apache.tomcat.util.http.fileupload.UploadContext;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.hamcrest.Matcher;
 import org.w3c.dom.Node;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.mock.http.client.MockClientHttpRequest;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
@@ -193,7 +197,7 @@ public class ContentRequestMatchers {
 	 * <li>{@link Resource} - content from a file
 	 * <li>{@code byte[]} - other raw content
 	 * </ul>
-	 * <p><strong>Note:</strong> This method uses the Apache Commons File Upload
+	 * <p><strong>Note:</strong> This method uses the Apache Commons FileUpload
 	 * library to parse the multipart data and it must be on the test classpath.
 	 * @param expectedMap the expected multipart values
 	 * @since 5.3
@@ -217,7 +221,7 @@ public class ContentRequestMatchers {
 	@SuppressWarnings("ConstantConditions")
 	private RequestMatcher multipartData(MultiValueMap<String, ?> expectedMap, boolean containsExactly) {
 		return request -> {
-			MultiValueMap<String, ?> actualMap = MultipartHelper.parse(request);
+			MultiValueMap<String, ?> actualMap = MultipartHelper.parse((MockClientHttpRequest) request);
 			if (containsExactly) {
 				assertEquals("Multipart request content: " + actualMap, expectedMap.size(), actualMap.size());
 			}
@@ -235,8 +239,8 @@ public class ContentRequestMatchers {
 						expected = StreamUtils.copyToByteArray(((Resource) expected).getInputStream());
 					}
 					if (expected instanceof byte[]) {
-						assertTrue("Multipart is not a file", actual instanceof MultipartFile);
-						assertEquals("Multipart content", expected, ((MultipartFile) actual).getBytes());
+						assertTrue("Multipart is not a file", actual instanceof byte[]);
+						assertEquals("Multipart content", expected, actual);
 					}
 					else if (expected instanceof String) {
 						assertTrue("Multipart is not a String", actual instanceof String);
@@ -356,28 +360,42 @@ public class ContentRequestMatchers {
 
 	private static class MultipartHelper {
 
-		public static MultiValueMap<String, ?> parse(ClientHttpRequest request) {
-			MultipartHttpServletRequest servletRequest = adaptToMultipartRequest(request);
-			MultiValueMap<String, Object> result = new LinkedMultiValueMap<>();
-			for (Map.Entry<String, List<MultipartFile>> entry : servletRequest.getMultiFileMap().entrySet()) {
-				for (MultipartFile value : entry.getValue()) {
-					result.add(entry.getKey(), value);
-				}
-			}
-			for (Map.Entry<String, String[]> entry : servletRequest.getParameterMap().entrySet()) {
-				for (String value : entry.getValue()) {
-					result.add(entry.getKey(), value);
-				}
-			}
-			return result;
-		}
+		public static MultiValueMap<String, ?> parse(MockClientHttpRequest request) {
+			try {
+				FileUpload fileUpload = new FileUpload(new DiskFileItemFactory());
 
-		private static MultipartHttpServletRequest adaptToMultipartRequest(ClientHttpRequest request) {
-			MockClientHttpRequest source = (MockClientHttpRequest) request;
-			MockHttpServletRequest target = new MockHttpServletRequest();
-			target.setContent(source.getBodyAsBytes());
-			source.getHeaders().forEach((name, values) -> values.forEach(v -> target.addHeader(name, v)));
-			return new CommonsMultipartResolver().resolveMultipart(target);
+				List<FileItem> fileItems = fileUpload.parseRequest(new UploadContext() {
+					private final byte[] body = request.getBodyAsBytes();
+					@Override
+					@Nullable
+					public String getCharacterEncoding() {
+						return request.getHeaders().getFirst(HttpHeaders.CONTENT_ENCODING);
+					}
+					@Override
+					@Nullable
+					public String getContentType() {
+						return request.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
+					}
+					@Override
+					public InputStream getInputStream() {
+						return new ByteArrayInputStream(this.body);
+					}
+					@Override
+					public long contentLength() {
+						return this.body.length;
+					}
+				});
+
+				MultiValueMap<String, Object> result = new LinkedMultiValueMap<>();
+				for (FileItem fileItem : fileItems) {
+					result.add(fileItem.getFieldName(),
+							(fileItem.isFormField() ? fileItem.getString() : fileItem.get()));
+				}
+				return result;
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException("Failed to parse multipart request", ex);
+			}
 		}
 	}
 

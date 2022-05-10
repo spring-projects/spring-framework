@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -353,9 +353,31 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @since 3.0
 	 * @see #getBeanNamesForAnnotation
 	 * @see #getBeansWithAnnotation
+	 * @see #getType(String)
 	 */
 	@Nullable
 	<A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
+			throws NoSuchBeanDefinitionException;
+
+	/**
+	 * Find an {@link Annotation} of {@code annotationType} on the specified bean,
+	 * traversing its interfaces and super classes if no annotation can be found on
+	 * the given class itself, as well as checking the bean's factory method (if any).
+	 * @param beanName the name of the bean to look for annotations on
+	 * @param annotationType the type of annotation to look for
+	 * (at class, interface or factory method level of the specified bean)
+	 * @param allowFactoryBeanInit whether a {@code FactoryBean} may get initialized
+	 * just for the purpose of determining its object type
+	 * @return the annotation of the given type if found, or {@code null} otherwise
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @since 5.3.14
+	 * @see #getBeanNamesForAnnotation
+	 * @see #getBeansWithAnnotation
+	 * @see #getType(String, boolean)
+	 */
+	@Nullable
+	<A extends Annotation> A findAnnotationOnBean(
+			String beanName, Class<A> annotationType, boolean allowFactoryBeanInit)
 			throws NoSuchBeanDefinitionException;
 
 }

@@ -412,7 +412,7 @@ only Tomcat and Jetty expose such options.
 
 The easiest way to configure CORS and restrict access to a WebSocket endpoint is to
 have your `WebSocketHandler` implement `CorsConfigurationSource` and return a
-`CorsConfiguraiton` with allowed origins, headers, and other details. If you cannot do
+`CorsConfiguration` with allowed origins, headers, and other details. If you cannot do
 that, you can also set the `corsConfigurations` property on the `SimpleUrlHandler` to
 specify CORS settings by URL pattern. If both are specified, they are combined by using the
 `combine` method on `CorsConfiguration`.

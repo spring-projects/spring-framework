@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -523,10 +523,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof AspectJExpressionPointcut)) {
+		if (!(other instanceof AspectJExpressionPointcut otherPc)) {
 			return false;
 		}
-		AspectJExpressionPointcut otherPc = (AspectJExpressionPointcut) other;
 		return ObjectUtils.nullSafeEquals(this.getExpression(), otherPc.getExpression()) &&
 				ObjectUtils.nullSafeEquals(this.pointcutDeclarationScope, otherPc.pointcutDeclarationScope) &&
 				ObjectUtils.nullSafeEquals(this.pointcutParameterNames, otherPc.pointcutParameterNames) &&
@@ -547,7 +546,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		StringBuilder sb = new StringBuilder("AspectJExpressionPointcut: (");
 		for (int i = 0; i < this.pointcutParameterTypes.length; i++) {
 			sb.append(this.pointcutParameterTypes[i].getName());
-			sb.append(" ");
+			sb.append(' ');
 			sb.append(this.pointcutParameterNames[i]);
 			if ((i+1) < this.pointcutParameterTypes.length) {
 				sb.append(", ");

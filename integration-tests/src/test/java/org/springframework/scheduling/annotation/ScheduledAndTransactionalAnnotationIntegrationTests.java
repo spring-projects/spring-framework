@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		MyRepository repository = ctx.getBean(MyRepository.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
-		assertThat(AopUtils.isCglibProxy(repository)).isEqualTo(true);
+		assertThat(AopUtils.isCglibProxy(repository)).isTrue();
 		assertThat(repository.getInvocationCount()).isGreaterThan(0);
 		assertThat(txManager.commits).isGreaterThan(0);
 	}
@@ -182,7 +182,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 	@Aspect
 	public static class MyAspect {
 
-		private final AtomicInteger count = new AtomicInteger(0);
+		private final AtomicInteger count = new AtomicInteger();
 
 		@org.aspectj.lang.annotation.Before("execution(* scheduled())")
 		public void checkTransaction() {
@@ -200,7 +200,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 	@Repository
 	static class MyRepositoryImpl implements MyRepository {
 
-		private final AtomicInteger count = new AtomicInteger(0);
+		private final AtomicInteger count = new AtomicInteger();
 
 		@Transactional
 		@Scheduled(fixedDelay = 5)
@@ -226,7 +226,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 	@Repository
 	static class MyRepositoryWithScheduledMethodImpl implements MyRepositoryWithScheduledMethod {
 
-		private final AtomicInteger count = new AtomicInteger(0);
+		private final AtomicInteger count = new AtomicInteger();
 
 		@Autowired(required = false)
 		private MyAspect myAspect;

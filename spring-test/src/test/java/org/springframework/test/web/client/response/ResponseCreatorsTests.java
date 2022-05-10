@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.net.URI;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.ResponseCreator;
@@ -126,6 +127,15 @@ class ResponseCreatorsTests {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 		assertThat(response.getHeaders().isEmpty()).isTrue();
 		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
+	}
+
+	@Test
+	void withCustomStatus() throws Exception {
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withRawStatus(454);
+		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(454));
+		assertThat(response.getStatusText()).isEmpty();
 	}
 
 	@Test

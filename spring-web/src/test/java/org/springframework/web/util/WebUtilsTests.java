@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -45,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class WebUtilsTests {
 
 	@Test
-	public void findParameterValue() {
+	void findParameterValue() {
 		Map<String, Object> params = new HashMap<>();
 		params.put("myKey1", "myValue1");
 		params.put("myKey2_myValue2", "xxx");
@@ -60,7 +59,7 @@ public class WebUtilsTests {
 	}
 
 	@Test
-	public void parseMatrixVariablesString() {
+	void parseMatrixVariablesString() {
 		MultiValueMap<String, String> variables;
 
 		variables = WebUtils.parseMatrixVariables(null);
@@ -103,7 +102,7 @@ public class WebUtilsTests {
 	}
 
 	@Test
-	public void isValidOrigin() {
+	void isValidOrigin() {
 		List<String> allowed = Collections.emptyList();
 		assertThat(checkValidOrigin("mydomain1.example", -1, "http://mydomain1.example", allowed)).isTrue();
 		assertThat(checkValidOrigin("mydomain1.example", -1, "http://mydomain2.example", allowed)).isFalse();
@@ -117,7 +116,7 @@ public class WebUtilsTests {
 	}
 
 	@Test
-	public void isSameOrigin() {
+	void isSameOrigin() {
 		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example")).isTrue();
 		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example:80")).isTrue();
 		assertThat(checkSameOrigin("https", "mydomain1.example", 443, "https://mydomain1.example")).isTrue();
@@ -156,7 +155,7 @@ public class WebUtilsTests {
 	}
 
 	@Test  // SPR-16262
-	public void isSameOriginWithXForwardedHeaders() throws Exception {
+	void isSameOriginWithXForwardedHeaders() throws Exception {
 		String server = "mydomain1.example";
 		testWithXForwardedHeaders(server, -1, "https", null, -1, "https://mydomain1.example");
 		testWithXForwardedHeaders(server, 123, "https", null, -1, "https://mydomain1.example");
@@ -167,7 +166,7 @@ public class WebUtilsTests {
 	}
 
 	@Test  // SPR-16262
-	public void isSameOriginWithForwardedHeader() throws Exception {
+	void isSameOriginWithForwardedHeader() throws Exception {
 		String server = "mydomain1.example";
 		testWithForwardedHeader(server, -1, "proto=https", "https://mydomain1.example");
 		testWithForwardedHeader(server, 123, "proto=https", "https://mydomain1.example");

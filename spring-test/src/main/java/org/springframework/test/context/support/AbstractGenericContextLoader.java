@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,9 +97,9 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * context and registers a JVM shutdown hook for it.</li>
 	 * </ul>
 	 * @return a new application context
+	 * @since 3.1
 	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
 	 * @see GenericApplicationContext
-	 * @since 3.1
 	 */
 	@Override
 	public final ConfigurableApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
@@ -170,10 +170,10 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * and {@link AbstractContextLoader#prepareContext(ConfigurableApplicationContext, MergedContextConfiguration)}
 	 * for an alternative.
 	 * @return a new application context
+	 * @since 2.5
 	 * @see org.springframework.test.context.ContextLoader#loadContext
 	 * @see GenericApplicationContext
 	 * @see #loadContext(MergedContextConfiguration)
-	 * @since 2.5
 	 */
 	@Override
 	public final ConfigurableApplicationContext loadContext(String... locations) throws Exception {

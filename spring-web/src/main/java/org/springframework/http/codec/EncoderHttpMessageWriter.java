@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,9 @@ import org.springframework.util.StringUtils;
  */
 public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
+	private static final Log logger = HttpLogging.forLogName(EncoderHttpMessageWriter.class);
+
+
 	private final Encoder<T> encoder;
 
 	private final List<MediaType> mediaTypes;
@@ -102,6 +105,10 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		return this.mediaTypes;
 	}
 
+	@Override
+	public List<MediaType> getWritableMediaTypes(ResolvableType elementType) {
+		return MediaType.asMediaTypes(getEncoder().getEncodableMimeTypes(elementType));
+	}
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
@@ -125,17 +132,24 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 						return message.setComplete().then(Mono.empty());
 					}))
 					.flatMap(buffer -> {
+						Hints.touchDataBuffer(buffer, hints, logger);
 						message.getHeaders().setContentLength(buffer.readableByteCount());
 						return message.writeWith(Mono.just(buffer)
 								.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
-					});
+					})
+					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 		}
 
 		if (isStreamingMediaType(contentType)) {
-			return message.writeAndFlushWith(body.map(buffer ->
-					Mono.just(buffer).doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release)));
+			return message.writeAndFlushWith(body.map(buffer -> {
+				Hints.touchDataBuffer(buffer, hints, logger);
+				return Mono.just(buffer).doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+			}));
 		}
 
+		if (logger.isDebugEnabled()) {
+			body = body.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));
+		}
 		return message.writeWith(body);
 	}
 

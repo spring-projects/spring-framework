@@ -18,8 +18,8 @@ package org.springframework.web.servlet.tags;
 
 import java.beans.PropertyEditor;
 
-import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.PageContext;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;

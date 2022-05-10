@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -438,10 +438,9 @@ public class CronSequenceGenerator {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof CronSequenceGenerator)) {
+		if (!(other instanceof CronSequenceGenerator otherCron)) {
 			return false;
 		}
-		CronSequenceGenerator otherCron = (CronSequenceGenerator) other;
 		return (this.months.equals(otherCron.months) && this.daysOfMonth.equals(otherCron.daysOfMonth) &&
 				this.daysOfWeek.equals(otherCron.daysOfWeek) && this.hours.equals(otherCron.hours) &&
 				this.minutes.equals(otherCron.minutes) && this.seconds.equals(otherCron.seconds));

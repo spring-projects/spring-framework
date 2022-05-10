@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,8 +133,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
-		return (AnnotatedElementUtils.hasAnnotation(beanType, Controller.class) ||
-				AnnotatedElementUtils.hasAnnotation(beanType, RequestMapping.class));
+		return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
 	}
 
 	/**
@@ -341,7 +340,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 					"or an empty string (\"\"): current value is [" + allowCredentials + "]");
 		}
 
-		if (annotation.maxAge() >= 0 && config.getMaxAge() == null) {
+		if (annotation.maxAge() >= 0) {
 			config.setMaxAge(annotation.maxAge());
 		}
 	}

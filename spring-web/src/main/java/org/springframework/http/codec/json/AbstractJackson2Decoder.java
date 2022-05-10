@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -97,17 +98,36 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		JavaType javaType = getObjectMapper().constructType(elementType.getType());
+		ObjectMapper mapper = selectObjectMapper(elementType, mimeType);
+		if (mapper == null) {
+			return false;
+		}
+		JavaType javaType = mapper.constructType(elementType.getType());
 		// Skip String: CharSequenceDecoder + "*/*" comes after
-		return (!CharSequence.class.isAssignableFrom(elementType.toClass()) &&
-				getObjectMapper().canDeserialize(javaType) && supportsMimeType(mimeType));
+		if (CharSequence.class.isAssignableFrom(elementType.toClass()) || !supportsMimeType(mimeType)) {
+			return false;
+		}
+		if (!logger.isDebugEnabled()) {
+			return mapper.canDeserialize(javaType);
+		}
+		else {
+			AtomicReference<Throwable> causeRef = new AtomicReference<>();
+			if (mapper.canDeserialize(javaType, causeRef)) {
+				return true;
+			}
+			logWarningIfNecessary(javaType, causeRef.get());
+			return false;
+		}
 	}
 
 	@Override
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		ObjectMapper mapper = getObjectMapper();
+		ObjectMapper mapper = selectObjectMapper(elementType, mimeType);
+		if (mapper == null) {
+			throw new IllegalStateException("No ObjectMapper for " + elementType);
+		}
 
 		boolean forceUseOfBigDecimal = mapper.isEnabled(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
 		if (BigDecimal.class.equals(elementType.getType())) {
@@ -118,11 +138,11 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(processed, mapper.getFactory(), mapper,
 				true, forceUseOfBigDecimal, getMaxInMemorySize());
 
-		ObjectReader reader = getObjectReader(elementType, hints);
+		ObjectReader reader = getObjectReader(mapper, elementType, hints);
 
 		return tokens.handle((tokenBuffer, sink) -> {
 			try {
-				Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
+				Object value = reader.readValue(tokenBuffer.asParser(mapper));
 				logValue(value, hints);
 				if (value != null) {
 					sink.next(value);
@@ -163,8 +183,13 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Object decode(DataBuffer dataBuffer, ResolvableType targetType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
 
+		ObjectMapper mapper = selectObjectMapper(targetType, mimeType);
+		if (mapper == null) {
+			throw new IllegalStateException("No ObjectMapper for " + targetType);
+		}
+
 		try {
-			ObjectReader objectReader = getObjectReader(targetType, hints);
+			ObjectReader objectReader = getObjectReader(mapper, targetType, hints);
 			Object value = objectReader.readValue(dataBuffer.asInputStream());
 			logValue(value, hints);
 			return value;
@@ -177,7 +202,9 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		}
 	}
 
-	private ObjectReader getObjectReader(ResolvableType elementType, @Nullable Map<String, Object> hints) {
+	private ObjectReader getObjectReader(
+			ObjectMapper mapper, ResolvableType elementType, @Nullable Map<String, Object> hints) {
+
 		Assert.notNull(elementType, "'elementType' must not be null");
 		Class<?> contextClass = getContextClass(elementType);
 		if (contextClass == null && hints != null) {
@@ -186,8 +213,8 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		JavaType javaType = getJavaType(elementType.getType(), contextClass);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 		return jsonView != null ?
-				getObjectMapper().readerWithView(jsonView).forType(javaType) :
-				getObjectMapper().readerFor(javaType);
+				mapper.readerWithView(jsonView).forType(javaType) :
+				mapper.readerFor(javaType);
 	}
 
 	@Nullable
@@ -232,6 +259,10 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		return getMimeTypes();
 	}
 
+	@Override
+	public List<MimeType> getDecodableMimeTypes(ResolvableType targetType) {
+		return getMimeTypes(targetType);
+	}
 
 	// Jackson2CodecSupport
 

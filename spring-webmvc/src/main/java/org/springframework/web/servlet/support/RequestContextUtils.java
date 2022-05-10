@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
@@ -105,8 +105,6 @@ public abstract class RequestContextUtils {
 	 * that has initiated request processing, and for the global context if none
 	 * was found associated with the current request. The global context will
 	 * be found via the ServletContext or via ContextLoader's current context.
-	 * <p>NOTE: This variant requires Servlet 3.0+ and is generally recommended
-	 * for forward-looking custom user code.
 	 * @param request current HTTP request
 	 * @return the request-specific WebApplicationContext, or the global one
 	 * if no request-specific context has been found, or {@code null} if none
@@ -136,7 +134,7 @@ public abstract class RequestContextUtils {
 	 * LocaleResolver bound to the request by the DispatcherServlet
 	 * (if available), falling back to the request's accept-header Locale.
 	 * <p>This method serves as a straightforward alternative to the standard
-	 * Servlet {@link javax.servlet.http.HttpServletRequest#getLocale()} method,
+	 * Servlet {@link jakarta.servlet.http.HttpServletRequest#getLocale()} method,
 	 * falling back to the latter if no more specific locale has been found.
 	 * <p>Consider using {@link org.springframework.context.i18n.LocaleContextHolder#getLocale()}
 	 * which will normally be populated with the same Locale.

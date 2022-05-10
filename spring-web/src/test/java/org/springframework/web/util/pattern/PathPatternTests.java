@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1210,7 +1210,7 @@ public class PathPatternTests {
 	private String elementsToString(List<Element> elements) {
 		StringBuilder s = new StringBuilder();
 		for (Element element: elements) {
-			s.append("[").append(element.value()).append("]");
+			s.append('[').append(element.value()).append(']');
 		}
 		return s.toString();
 	}

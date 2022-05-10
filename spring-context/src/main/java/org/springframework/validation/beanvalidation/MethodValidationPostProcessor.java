@@ -18,9 +18,8 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.annotation.Annotation;
 
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
@@ -55,7 +54,7 @@ import org.springframework.validation.annotation.Validated;
  * @author Juergen Hoeller
  * @since 3.1
  * @see MethodValidationInterceptor
- * @see javax.validation.executable.ExecutableValidator
+ * @see jakarta.validation.executable.ExecutableValidator
  */
 @SuppressWarnings("serial")
 public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor
@@ -101,7 +100,7 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 	 * Set the JSR-303 ValidatorFactory to delegate to for validating methods,
 	 * using its default Validator.
 	 * <p>Default is the default ValidatorFactory's default Validator.
-	 * @see javax.validation.ValidatorFactory#getValidator()
+	 * @see jakarta.validation.ValidatorFactory#getValidator()
 	 */
 	public void setValidatorFactory(ValidatorFactory validatorFactory) {
 		this.validator = validatorFactory.getValidator();

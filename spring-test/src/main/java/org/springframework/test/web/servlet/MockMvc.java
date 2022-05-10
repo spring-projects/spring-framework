@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package org.springframework.test.web.servlet;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.lang.Nullable;
@@ -78,6 +79,9 @@ public final class MockMvc {
 	@Nullable
 	private RequestBuilder defaultRequestBuilder;
 
+	@Nullable
+	private Charset defaultResponseCharacterEncoding;
+
 	private List<ResultMatcher> defaultResultMatchers = new ArrayList<>();
 
 	private List<ResultHandler> defaultResultHandlers = new ArrayList<>();
@@ -104,6 +108,14 @@ public final class MockMvc {
 	 */
 	void setDefaultRequest(@Nullable RequestBuilder requestBuilder) {
 		this.defaultRequestBuilder = requestBuilder;
+	}
+
+	/**
+	 * The default character encoding to be applied to every response.
+	 * @see org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder#defaultResponseCharacterEncoding(Charset)
+	 */
+	void setDefaultResponseCharacterEncoding(@Nullable Charset defaultResponseCharacterEncoding) {
+		this.defaultResponseCharacterEncoding = defaultResponseCharacterEncoding;
 	}
 
 	/**
@@ -169,6 +181,10 @@ public final class MockMvc {
 			servletResponse = mockResponse;
 		}
 
+		if (this.defaultResponseCharacterEncoding != null) {
+			mockResponse.setDefaultCharacterEncoding(this.defaultResponseCharacterEncoding.name());
+		}
+
 		if (requestBuilder instanceof SmartRequestBuilder) {
 			request = ((SmartRequestBuilder) requestBuilder).postProcessRequest(request);
 		}
@@ -217,11 +233,11 @@ public final class MockMvc {
 	}
 
 	private void applyDefaultResultActions(MvcResult mvcResult) throws Exception {
-		for (ResultMatcher matcher : this.defaultResultMatchers) {
-			matcher.match(mvcResult);
-		}
 		for (ResultHandler handler : this.defaultResultHandlers) {
 			handler.handle(mvcResult);
+		}
+		for (ResultMatcher matcher : this.defaultResultMatchers) {
+			matcher.match(mvcResult);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 
@@ -70,9 +70,9 @@ public interface HandlerAdapter {
 	 * @param handler the handler to use. This object must have previously been passed
 	 * to the {@code supports} method of this interface, which must have
 	 * returned {@code true}.
-	 * @throws Exception in case of errors
 	 * @return a ModelAndView object with the name of the view and the required
 	 * model data, or {@code null} if the request has been handled directly
+	 * @throws Exception in case of errors
 	 */
 	@Nullable
 	ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception;
@@ -83,9 +83,10 @@ public interface HandlerAdapter {
 	 * @param request current HTTP request
 	 * @param handler the handler to use
 	 * @return the lastModified value for the given handler
-	 * @see javax.servlet.http.HttpServlet#getLastModified
-	 * @see org.springframework.web.servlet.mvc.LastModified#getLastModified
+	 * @deprecated as of 5.3.9 along with
+	 * {@link org.springframework.web.servlet.mvc.LastModified}.
 	 */
+	@Deprecated
 	long getLastModified(HttpServletRequest request, Object handler);
 
 }

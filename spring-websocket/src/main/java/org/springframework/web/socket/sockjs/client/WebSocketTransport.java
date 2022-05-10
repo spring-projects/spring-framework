@@ -145,7 +145,7 @@ public class WebSocketTransport implements Transport, Lifecycle {
 
 		private final WebSocketClientSockJsSession sockJsSession;
 
-		private final AtomicBoolean connected = new AtomicBoolean(false);
+		private final AtomicBoolean connected = new AtomicBoolean();
 
 		public ClientSockJsWebSocketHandler(WebSocketClientSockJsSession session) {
 			Assert.notNull(session, "Session must not be null");

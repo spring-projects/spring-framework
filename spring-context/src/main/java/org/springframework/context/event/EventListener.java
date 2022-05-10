@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.function.Predicate;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.core.annotation.AliasFor;
@@ -83,6 +84,7 @@ import org.springframework.core.annotation.AliasFor;
  * @author Sam Brannen
  * @since 4.2
  * @see EventListenerMethodProcessor
+ * @see org.springframework.transaction.event.TransactionalEventListener
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -127,5 +129,14 @@ public @interface EventListener {
 	 * </ul>
 	 */
 	String condition() default "";
+
+	/**
+	 * An optional identifier for the listener, defaulting to the fully-qualified
+	 * signature of the declaring method (e.g. "mypackage.MyClass.myMethod()").
+	 * @since 5.3.5
+	 * @see SmartApplicationListener#getListenerId()
+	 * @see ApplicationEventMulticaster#removeApplicationListeners(Predicate)
+	 */
+	String id() default "";
 
 }

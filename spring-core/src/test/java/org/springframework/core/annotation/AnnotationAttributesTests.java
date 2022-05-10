@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,8 @@ class AnnotationAttributesTests {
 
 		assertThat(attributes.getString("name")).isEqualTo("dave");
 		assertThat(attributes.getStringArray("names")).isEqualTo(new String[] {"dave", "frank", "hal"});
-		assertThat(attributes.getBoolean("bool1")).isEqualTo(true);
-		assertThat(attributes.getBoolean("bool2")).isEqualTo(false);
+		assertThat(attributes.getBoolean("bool1")).isTrue();
+		assertThat(attributes.getBoolean("bool2")).isFalse();
 		assertThat(attributes.<Color>getEnum("color")).isEqualTo(Color.RED);
 		assertThat(attributes.getClass("class").equals(Integer.class)).isTrue();
 		assertThat(attributes.getClassArray("classes")).isEqualTo(new Class<?>[] {Number.class, Short.class, Integer.class});

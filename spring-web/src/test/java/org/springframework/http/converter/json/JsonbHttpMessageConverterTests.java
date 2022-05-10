@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class JsonbHttpMessageConverterTests {
 	public void readTyped() throws IOException {
 		String body = "{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		MyBean result = (MyBean) this.converter.read(MyBean.class, inputMessage);
 
@@ -90,7 +90,7 @@ public class JsonbHttpMessageConverterTests {
 	public void readUntyped() throws IOException {
 		String body = "{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		HashMap<String, Object> result = (HashMap<String, Object>) this.converter.read(HashMap.class, inputMessage);
 		assertThat(result.get("string")).isEqualTo("Foo");
@@ -131,7 +131,8 @@ public class JsonbHttpMessageConverterTests {
 		assertThat(result.contains("\"array\":[\"Foo\",\"Bar\"]")).isTrue();
 		assertThat(result.contains("\"bool\":true")).isTrue();
 		assertThat(result.contains("\"bytes\":[1,2]")).isTrue();
-		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(new MediaType("application", "json", utf8));
+		assertThat(outputMessage.getHeaders().getContentType())
+				.as("Invalid content-type").isEqualTo(new MediaType("application", "json", utf8));
 	}
 
 	@Test
@@ -153,7 +154,8 @@ public class JsonbHttpMessageConverterTests {
 		assertThat(result.contains("\"array\":[\"Foo\",\"Bar\"]")).isTrue();
 		assertThat(result.contains("\"bool\":true")).isTrue();
 		assertThat(result.contains("\"bytes\":[1,2]")).isTrue();
-		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(new MediaType("application", "json", utf8));
+		assertThat(outputMessage.getHeaders().getContentType())
+				.as("Invalid content-type").isEqualTo(new MediaType("application", "json", utf8));
 	}
 
 	@Test
@@ -162,14 +164,14 @@ public class JsonbHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		String body = "H\u00e9llo W\u00f6rld";
 		this.converter.write(body, contentType, outputMessage);
-		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_16BE)).as("Invalid result").isEqualTo(body);
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_16BE)).as("Invalid result").isEqualTo("\"" + body + "\"");
 		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(contentType);
 	}
 
 	@Test
-	public void readInvalidJson() throws IOException {
+	public void readInvalidJson() {
 		String body = "FooBar";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		assertThatExceptionOfType(HttpMessageNotReadableException.class).isThrownBy(() ->
 				this.converter.read(MyBean.class, inputMessage));
@@ -205,7 +207,7 @@ public class JsonbHttpMessageConverterTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void readAndWriteParameterizedType() throws Exception {
-		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<List<MyBean>>() {};
+		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<>() {};
 
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";
@@ -231,8 +233,8 @@ public class JsonbHttpMessageConverterTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void writeParameterizedBaseType() throws Exception {
-		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<List<MyBean>>() {};
-		ParameterizedTypeReference<List<MyBase>> baseList = new ParameterizedTypeReference<List<MyBase>>() {};
+		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<>() {};
+		ParameterizedTypeReference<List<MyBase>> baseList = new ParameterizedTypeReference<>() {};
 
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";
@@ -260,7 +262,7 @@ public class JsonbHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setPrefixJson(true);
 		this.converter.writeInternal("foo", null, outputMessage);
-		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(")]}', foo");
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(")]}', \"foo\"");
 	}
 
 	@Test
@@ -268,7 +270,7 @@ public class JsonbHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setJsonPrefix(")))");
 		this.converter.writeInternal("foo", null, outputMessage);
-		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(")))foo");
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(")))\"foo\"");
 	}
 
 

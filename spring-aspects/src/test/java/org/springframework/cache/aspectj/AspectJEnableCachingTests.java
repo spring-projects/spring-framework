@@ -17,7 +17,7 @@
 package org.springframework.cache.aspectj;
 
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.config.AnnotatedClassCacheableService;
 import org.springframework.cache.config.CacheableService;
@@ -47,7 +47,7 @@ public class AspectJEnableCachingTests extends AbstractCacheAnnotationTests {
 
 	@Configuration
 	@EnableCaching(mode = AdviceMode.ASPECTJ)
-	static class EnableCachingConfig extends CachingConfigurerSupport {
+	static class EnableCachingConfig implements CachingConfigurer {
 
 		@Override
 		@Bean

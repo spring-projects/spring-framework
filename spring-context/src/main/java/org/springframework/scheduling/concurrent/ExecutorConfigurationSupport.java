@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	/**
 	 * Set the ThreadFactory to use for the ExecutorService's thread pool.
 	 * Default is the underlying ExecutorService's default thread factory.
-	 * <p>In a Java EE 7 or other managed environment with JSR-236 support,
+	 * <p>In a Jakarta EE or other managed environment with JSR-236 support,
 	 * consider specifying a JNDI-located ManagedThreadFactory: by default,
 	 * to be found at "java:comp/DefaultManagedThreadFactory".
 	 * Use the "jee:jndi-lookup" namespace element in XML or the programmatic
@@ -79,7 +79,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * Alternatively, consider using Spring's {@link DefaultManagedAwareThreadFactory}
 	 * with its fallback to local threads in case of no managed thread factory found.
 	 * @see java.util.concurrent.Executors#defaultThreadFactory()
-	 * @see javax.enterprise.concurrent.ManagedThreadFactory
+	 * @see jakarta.enterprise.concurrent.ManagedThreadFactory
 	 * @see DefaultManagedAwareThreadFactory
 	 */
 	public void setThreadFactory(@Nullable ThreadFactory threadFactory) {
@@ -177,8 +177,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * Set up the ExecutorService.
 	 */
 	public void initialize() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Initializing ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
+		if (logger.isDebugEnabled()) {
+			logger.debug("Initializing ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
 		}
 		if (!this.threadNamePrefixSet && this.beanName != null) {
 			setThreadNamePrefix(this.beanName + "-");
@@ -214,8 +214,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * @see java.util.concurrent.ExecutorService#shutdownNow()
 	 */
 	public void shutdown() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Shutting down ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
+		if (logger.isDebugEnabled()) {
+			logger.debug("Shutting down ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
 		}
 		if (this.executor != null) {
 			if (this.waitForTasksToCompleteOnShutdown) {

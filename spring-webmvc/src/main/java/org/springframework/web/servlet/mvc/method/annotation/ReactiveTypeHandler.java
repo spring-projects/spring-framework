@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -202,7 +202,7 @@ class ReactiveTypeHandler {
 							"-------------------------------\n" +
 							"Controller:\t" + returnType.getContainingClass().getName() + "\n" +
 							"Method:\t\t" + returnType.getMethod().getName() + "\n" +
-							"Returning:\t" + ResolvableType.forMethodParameter(returnType).toString() + "\n" +
+							"Returning:\t" + ResolvableType.forMethodParameter(returnType) + "\n" +
 							"!!!");
 					this.taskExecutorWarning = false;
 				}

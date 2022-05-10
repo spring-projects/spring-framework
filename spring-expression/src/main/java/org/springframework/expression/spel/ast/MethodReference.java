@@ -200,8 +200,7 @@ public class MethodReference extends SpelNodeImpl {
 			EvaluationContext evaluationContext) throws SpelEvaluationException {
 
 		AccessException accessException = null;
-		List<MethodResolver> methodResolvers = evaluationContext.getMethodResolvers();
-		for (MethodResolver methodResolver : methodResolvers) {
+		for (MethodResolver methodResolver : evaluationContext.getMethodResolvers()) {
 			try {
 				MethodExecutor methodExecutor = methodResolver.resolve(
 						evaluationContext, targetObject, this.name, argumentTypes);

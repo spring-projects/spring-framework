@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,16 @@ package org.springframework.web.servlet.view;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.http.MediaType;
@@ -273,7 +271,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * flag on but do not list specific bean names for this property.
 	 */
 	public void setExposedContextBeanNames(String... exposedContextBeanNames) {
-		this.exposedContextBeanNames = new HashSet<>(Arrays.asList(exposedContextBeanNames));
+		this.exposedContextBeanNames = Set.of(exposedContextBeanNames);
 	}
 
 	/**
@@ -388,7 +386,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * generating download content that requires temporary caching on the
 	 * client side, typically via the response OutputStream.
 	 * @see #prepareResponse
-	 * @see javax.servlet.http.HttpServletResponse#getOutputStream()
+	 * @see jakarta.servlet.http.HttpServletResponse#getOutputStream()
 	 */
 	protected boolean generatesDownloadContent() {
 		return false;
@@ -432,7 +430,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Expose the model objects in the given map as request attributes.
 	 * Names will be taken from the model Map.
-	 * This method is suitable for all resources reachable by {@link javax.servlet.RequestDispatcher}.
+	 * This method is suitable for all resources reachable by {@link jakarta.servlet.RequestDispatcher}.
 	 * @param model a Map of model objects to expose
 	 * @param request current HTTP request
 	 */

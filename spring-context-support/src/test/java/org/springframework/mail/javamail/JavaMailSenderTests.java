@@ -24,18 +24,17 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
 
-import javax.activation.FileTypeMap;
-import javax.mail.Address;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.NoSuchProviderException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.URLName;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
+import jakarta.activation.FileTypeMap;
+import jakarta.mail.Address;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.NoSuchProviderException;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.URLName;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.mail.MailParseException;
@@ -182,12 +181,9 @@ public class JavaMailSenderTests {
 
 		final List<Message> messages = new ArrayList<>();
 
-		MimeMessagePreparator preparator = new MimeMessagePreparator() {
-			@Override
-			public void prepare(MimeMessage mimeMessage) throws MessagingException {
-				mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("you@mail.org"));
-				messages.add(mimeMessage);
-			}
+		MimeMessagePreparator preparator = mimeMessage -> {
+			mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("you@mail.org"));
+			messages.add(mimeMessage);
 		};
 		sender.send(preparator);
 
@@ -208,19 +204,13 @@ public class JavaMailSenderTests {
 
 		final List<Message> messages = new ArrayList<>();
 
-		MimeMessagePreparator preparator1 = new MimeMessagePreparator() {
-			@Override
-			public void prepare(MimeMessage mimeMessage) throws MessagingException {
-				mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("he@mail.org"));
-				messages.add(mimeMessage);
-			}
+		MimeMessagePreparator preparator1 = mimeMessage -> {
+			mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("he@mail.org"));
+			messages.add(mimeMessage);
 		};
-		MimeMessagePreparator preparator2 = new MimeMessagePreparator() {
-			@Override
-			public void prepare(MimeMessage mimeMessage) throws MessagingException {
-				mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("she@mail.org"));
-				messages.add(mimeMessage);
-			}
+		MimeMessagePreparator preparator2 = mimeMessage -> {
+			mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("she@mail.org"));
+			messages.add(mimeMessage);
 		};
 		sender.send(preparator1, preparator2);
 
@@ -323,12 +313,7 @@ public class JavaMailSenderTests {
 	@Test
 	public void javaMailSenderWithParseExceptionOnMimeMessagePreparator() {
 		MockJavaMailSender sender = new MockJavaMailSender();
-		MimeMessagePreparator preparator = new MimeMessagePreparator() {
-			@Override
-			public void prepare(MimeMessage mimeMessage) throws MessagingException {
-				mimeMessage.setFrom(new InternetAddress(""));
-			}
-		};
+		MimeMessagePreparator preparator = mimeMessage -> mimeMessage.setFrom(new InternetAddress(""));
 		try {
 			sender.send(preparator);
 		}

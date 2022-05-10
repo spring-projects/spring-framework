@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -51,6 +52,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
+import org.springframework.web.util.UriUtils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,6 +73,7 @@ public class ResourceWebHandlerTests {
 	private static final Duration TIMEOUT = Duration.ofSeconds(1);
 
 	private ResourceWebHandler handler;
+
 
 	@BeforeEach
 	public void setup() throws Exception {
@@ -117,11 +120,10 @@ public class ResourceWebHandlerTests {
 		assertThat(headers.containsKey("Last-Modified")).isTrue();
 		assertThat(resourceLastModifiedDate("test/foo.css") / 1000).isEqualTo(headers.getLastModified() / 1000);
 		assertThat(headers.getFirst("Accept-Ranges")).isEqualTo("bytes");
-		assertThat(headers.get("Accept-Ranges").size()).isEqualTo(1);
+		assertThat(headers.get("Accept-Ranges")).hasSize(1);
 
 		StepVerifier.create(exchange.getResponse().getBody())
-				.expectErrorMatches(ex -> ex.getMessage().startsWith("No content was written"))
-				.verify();
+				.verifyComplete();
 	}
 
 	@Test
@@ -218,6 +220,61 @@ public class ResourceWebHandlerTests {
 		assertResponseBody(exchange, "function foo() { console.log(\"hello world\"); }");
 	}
 
+	@Test
+	public void getResourceWithRegisteredMediaType() throws Exception {
+		MediaType mediaType = new MediaType("foo", "bar");
+
+		ResourceWebHandler handler = new ResourceWebHandler();
+		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
+		handler.setMediaTypes(Collections.singletonMap("bar", mediaType));
+		handler.afterPropertiesSet();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
+		setPathWithinHandlerMapping(exchange, "foo.bar");
+		handler.handle(exchange).block(TIMEOUT);
+
+		HttpHeaders headers = exchange.getResponse().getHeaders();
+		assertThat(headers.getContentType()).isEqualTo(mediaType);
+		assertResponseBody(exchange, "foo bar foo bar foo bar");
+	}
+
+	@Test
+	public void getResourceFromFileSystem() throws Exception {
+		String path = new ClassPathResource("", getClass()).getFile().getCanonicalPath()
+				.replace('\\', '/').replace("classes/java", "resources") + "/";
+
+		ResourceWebHandler handler = new ResourceWebHandler();
+		handler.setLocations(Collections.singletonList(new FileSystemResource(path)));
+		handler.afterPropertiesSet();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
+		setPathWithinHandlerMapping(exchange, UriUtils.encodePath("test/foo with spaces.css", UTF_8));
+		handler.handle(exchange).block(TIMEOUT);
+
+		HttpHeaders headers = exchange.getResponse().getHeaders();
+		assertThat(headers.getContentType()).isEqualTo(MediaType.parseMediaType("text/css"));
+		assertThat(headers.getContentLength()).isEqualTo(17);
+		assertResponseBody(exchange, "h1 { color:red; }");
+	}
+
+	@Test  // gh-27538, gh-27624
+	public void filterNonExistingLocations() throws Exception {
+		List<Resource> inputLocations = Arrays.asList(
+				new ClassPathResource("test/", getClass()),
+				new ClassPathResource("testalternatepath/", getClass()),
+				new ClassPathResource("nosuchpath/", getClass()));
+
+		ResourceWebHandler handler = new ResourceWebHandler();
+		handler.setLocations(inputLocations);
+		handler.setOptimizeLocations(true);
+		handler.afterPropertiesSet();
+
+		List<Resource> actual = handler.getLocations();
+		assertThat(actual).hasSize(2);
+		assertThat(actual.get(0).getURL().toString()).endsWith("test/");
+		assertThat(actual.get(1).getURL().toString()).endsWith("testalternatepath/");
+	}
+
 	@Test // SPR-14577
 	public void getMediaTypeWithFavorPathExtensionOff() throws Exception {
 		List<Resource> paths = Collections.singletonList(new ClassPathResource("test/", getClass()));
@@ -275,7 +332,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
+					assertThat(((ResponseStatusException) err).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				}).verify(TIMEOUT);
 	}
 
@@ -321,7 +378,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
+					assertThat(((ResponseStatusException) err).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				})
 				.verify(TIMEOUT);
 		if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
@@ -416,7 +473,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
+					assertThat(((ResponseStatusException) err).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				}).verify(TIMEOUT);
 	}
 
@@ -427,7 +484,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
+					assertThat(((ResponseStatusException) err).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				}).verify(TIMEOUT);
 	}
 
@@ -438,7 +495,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
+					assertThat(((ResponseStatusException) err).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				}).verify(TIMEOUT);
 	}
 
@@ -473,7 +530,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(mono)
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
+					assertThat(((ResponseStatusException) err).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				}).verify(TIMEOUT);
 
 		// SPR-17475
@@ -629,6 +686,20 @@ public class ResourceWebHandlerTests {
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getHeaders().getCacheControl()).isEqualTo("max-age=3600");
+	}
+
+	@Test
+	void ignoreLastModified() {
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
+		setPathWithinHandlerMapping(exchange, "foo.css");
+		this.handler.setUseLastModified(false);
+		this.handler.handle(exchange).block(TIMEOUT);
+
+		HttpHeaders headers = exchange.getResponse().getHeaders();
+		assertThat(headers.getContentType()).isEqualTo(MediaType.parseMediaType("text/css"));
+		assertThat(headers.getContentLength()).isEqualTo(17);
+		assertThat(headers.containsKey("Last-Modified")).isFalse();
+		assertResponseBody(exchange, "h1 { color:red; }");
 	}
 
 

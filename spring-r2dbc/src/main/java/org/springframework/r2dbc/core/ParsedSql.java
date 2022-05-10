@@ -28,11 +28,11 @@ import java.util.List;
  */
 class ParsedSql {
 
-	private String originalSql;
+	private final String originalSql;
 
-	private List<String> parameterNames = new ArrayList<>();
+	private final List<String> parameterNames = new ArrayList<>();
 
-	private List<int[]> parameterIndexes = new ArrayList<>();
+	private final List<int[]> parameterIndexes = new ArrayList<>();
 
 	private int namedParameterCount;
 

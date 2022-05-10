@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.context.annotation;
 import java.util.Map;
 
 import javax.management.MBeanServer;
-import javax.naming.NamingException;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -28,14 +27,10 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.jmx.export.annotation.AnnotationMBeanExporter;
 import org.springframework.jmx.support.RegistrationPolicy;
-import org.springframework.jmx.support.WebSphereMBeanServerFactoryBean;
-import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -116,74 +111,11 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 			Assert.state(this.beanFactory != null, "No BeanFactory set");
 			exporter.setServer(this.beanFactory.getBean(server, MBeanServer.class));
 		}
-		else {
-			SpecificPlatform specificPlatform = SpecificPlatform.get();
-			if (specificPlatform != null) {
-				MBeanServer mbeanServer = specificPlatform.getMBeanServer();
-				if (mbeanServer != null) {
-					exporter.setServer(mbeanServer);
-				}
-			}
-		}
 	}
 
 	private void setupRegistrationPolicy(AnnotationMBeanExporter exporter, AnnotationAttributes enableMBeanExport) {
 		RegistrationPolicy registrationPolicy = enableMBeanExport.getEnum("registration");
 		exporter.setRegistrationPolicy(registrationPolicy);
-	}
-
-
-	/**
-	 * Specific platforms that might need custom MBean handling.
-	 */
-	public enum SpecificPlatform {
-
-		/**
-		 * Weblogic.
-		 */
-		WEBLOGIC("weblogic.management.Helper") {
-			@Override
-			public MBeanServer getMBeanServer() {
-				try {
-					return new JndiLocatorDelegate().lookup("java:comp/env/jmx/runtime", MBeanServer.class);
-				}
-				catch (NamingException ex) {
-					throw new MBeanServerNotFoundException("Failed to retrieve WebLogic MBeanServer from JNDI", ex);
-				}
-			}
-		},
-
-		/**
-		 * Websphere.
-		 */
-		WEBSPHERE("com.ibm.websphere.management.AdminServiceFactory") {
-			@Override
-			public MBeanServer getMBeanServer() {
-				WebSphereMBeanServerFactoryBean fb = new WebSphereMBeanServerFactoryBean();
-				fb.afterPropertiesSet();
-				return fb.getObject();
-			}
-		};
-
-		private final String identifyingClass;
-
-		SpecificPlatform(String identifyingClass) {
-			this.identifyingClass = identifyingClass;
-		}
-
-		@Nullable
-		public abstract MBeanServer getMBeanServer();
-
-		@Nullable
-		public static SpecificPlatform get() {
-			ClassLoader classLoader = MBeanExportConfiguration.class.getClassLoader();
-			for (SpecificPlatform environment : values()) {
-				if (ClassUtils.isPresent(environment.identifyingClass, classLoader)) {
-					return environment;
-				}
-			}
-			return null;
-		}
 	}
 
 }

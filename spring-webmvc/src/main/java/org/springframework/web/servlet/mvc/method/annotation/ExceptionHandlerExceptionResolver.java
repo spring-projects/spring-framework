@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.SpringProperties;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -342,6 +342,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			resolvers.addAll(getCustomArgumentResolvers());
 		}
 
+		// Catch-all
+		resolvers.add(new PrincipalMethodArgumentResolver());
+
 		return resolvers;
 	}
 
@@ -407,24 +410,27 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
+		ArrayList<Throwable> exceptions = new ArrayList<>();
 		try {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using @ExceptionHandler " + exceptionHandlerMethod);
 			}
-			Throwable cause = exception.getCause();
-			if (cause != null) {
-				// Expose cause as provided argument as well
-				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, cause, handlerMethod);
+			// Expose causes as provided arguments as well
+			Throwable exToExpose = exception;
+			while (exToExpose != null) {
+				exceptions.add(exToExpose);
+				Throwable cause = exToExpose.getCause();
+				exToExpose = (cause != exToExpose ? cause : null);
 			}
-			else {
-				// Otherwise, just the given exception as-is
-				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, handlerMethod);
-			}
+			Object[] arguments = new Object[exceptions.size() + 1];
+			exceptions.toArray(arguments);  // efficient arraycopy call in ArrayList
+			arguments[arguments.length - 1] = handlerMethod;
+			exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, arguments);
 		}
 		catch (Throwable invocationEx) {
-			// Any other than the original exception (or its cause) is unintended here,
+			// Any other than the original exception (or a cause) is unintended here,
 			// probably an accident (e.g. failed assertion or the like).
-			if (invocationEx != exception && invocationEx != exception.getCause() && logger.isWarnEnabled()) {
+			if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
 				logger.warn("Failure in @ExceptionHandler " + exceptionHandlerMethod, invocationEx);
 			}
 			// Continue with default processing of the original exception...
@@ -436,7 +442,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		}
 		else {
 			ModelMap model = mavContainer.getModel();
-			HttpStatus status = mavContainer.getStatus();
+			HttpStatusCode status = mavContainer.getStatus();
 			ModelAndView mav = new ModelAndView(mavContainer.getViewName(), model, status);
 			mav.setViewName(mavContainer.getViewName());
 			if (!mavContainer.isViewReference()) {
@@ -470,14 +476,11 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			// Local exception handler methods on the controller class itself.
 			// To be invoked through the proxy, even in case of an interface-based proxy.
 			handlerType = handlerMethod.getBeanType();
-			ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(handlerType);
-			if (resolver == null) {
-				resolver = new ExceptionHandlerMethodResolver(handlerType);
-				this.exceptionHandlerCache.put(handlerType, resolver);
-			}
+			ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.computeIfAbsent(
+					handlerType, ExceptionHandlerMethodResolver::new);
 			Method method = resolver.resolveMethod(exception);
 			if (method != null) {
-				return new ServletInvocableHandlerMethod(handlerMethod.getBean(), method);
+				return new ServletInvocableHandlerMethod(handlerMethod.getBean(), method, this.applicationContext);
 			}
 			// For advice applicability check below (involving base packages, assignable types
 			// and annotation presence), use target class instead of interface-based proxy.
@@ -492,7 +495,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 				ExceptionHandlerMethodResolver resolver = entry.getValue();
 				Method method = resolver.resolveMethod(exception);
 				if (method != null) {
-					return new ServletInvocableHandlerMethod(advice.resolveBean(), method);
+					return new ServletInvocableHandlerMethod(advice.resolveBean(), method, this.applicationContext);
 				}
 			}
 		}

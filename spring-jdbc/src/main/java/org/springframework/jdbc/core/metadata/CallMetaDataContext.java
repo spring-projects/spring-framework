@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -637,20 +637,22 @@ public class CallMetaDataContext {
 			schemaNameToUse = this.metaDataProvider.schemaNameToUse(getSchemaName());
 		}
 
-		String procedureNameToUse = this.metaDataProvider.procedureNameToUse(getProcedureName());
 		if (isFunction() || isReturnValueRequired()) {
-			callString = new StringBuilder().append("{? = call ").
-					append(StringUtils.hasLength(catalogNameToUse) ? catalogNameToUse + "." : "").
-					append(StringUtils.hasLength(schemaNameToUse) ? schemaNameToUse + "." : "").
-					append(procedureNameToUse).append("(");
+			callString = new StringBuilder("{? = call ");
 			parameterCount = -1;
 		}
 		else {
-			callString = new StringBuilder().append("{call ").
-					append(StringUtils.hasLength(catalogNameToUse) ? catalogNameToUse + "." : "").
-					append(StringUtils.hasLength(schemaNameToUse) ? schemaNameToUse + "." : "").
-					append(procedureNameToUse).append("(");
+			callString = new StringBuilder("{call ");
 		}
+
+		if (StringUtils.hasLength(catalogNameToUse)) {
+			callString.append(catalogNameToUse).append('.');
+		}
+		if (StringUtils.hasLength(schemaNameToUse)) {
+			callString.append(schemaNameToUse).append('.');
+		}
+		callString.append(this.metaDataProvider.procedureNameToUse(getProcedureName()));
+		callString.append('(');
 
 		for (SqlParameter parameter : this.callParameters) {
 			if (!parameter.isResultsParameter()) {

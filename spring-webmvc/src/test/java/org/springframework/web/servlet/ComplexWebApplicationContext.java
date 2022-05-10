@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -158,9 +158,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs = new MutablePropertyValues();
 		pvs.add("order", "0");
 		pvs.add("exceptionMappings", "java.lang.Exception=failed1");
-		List<RuntimeBeanReference> mappedHandlers = new ManagedList<>();
-		mappedHandlers.add(new RuntimeBeanReference("anotherLocaleHandler"));
-		pvs.add("mappedHandlers", mappedHandlers);
+		pvs.add("mappedHandlers", ManagedList.of(new RuntimeBeanReference("anotherLocaleHandler")));
 		pvs.add("defaultStatusCode", "500");
 		pvs.add("defaultErrorView", "failed2");
 		registerSingleton("handlerExceptionResolver", SimpleMappingExceptionResolver.class, pvs);
@@ -266,6 +264,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public long getLastModified(HttpServletRequest request, Object delegate) {
 			return ((MyHandler) delegate).lastModified();
 		}
@@ -286,6 +285,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public long getLastModified(HttpServletRequest request, Object delegate) {
 			return -1;
 		}

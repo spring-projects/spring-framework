@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,8 +86,8 @@ public class ChannelInterceptorTests {
 
 	@Test
 	public void postSendInterceptorMessageWasSent() {
-		final AtomicBoolean preSendInvoked = new AtomicBoolean(false);
-		final AtomicBoolean completionInvoked = new AtomicBoolean(false);
+		final AtomicBoolean preSendInvoked = new AtomicBoolean();
+		final AtomicBoolean completionInvoked = new AtomicBoolean();
 		this.channel.addInterceptor(new ChannelInterceptor() {
 			@Override
 			public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
@@ -119,8 +119,8 @@ public class ChannelInterceptorTests {
 				return false;
 			}
 		};
-		final AtomicBoolean preSendInvoked = new AtomicBoolean(false);
-		final AtomicBoolean completionInvoked = new AtomicBoolean(false);
+		final AtomicBoolean preSendInvoked = new AtomicBoolean();
+		final AtomicBoolean completionInvoked = new AtomicBoolean();
 		testChannel.addInterceptor(new ChannelInterceptor() {
 			@Override
 			public void postSend(Message<?> message, MessageChannel channel, boolean sent) {

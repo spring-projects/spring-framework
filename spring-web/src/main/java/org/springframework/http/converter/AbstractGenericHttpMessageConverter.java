@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 
 	@Override
 	public boolean canRead(Type type, @Nullable Class<?> contextClass, @Nullable MediaType mediaType) {
-		return (type instanceof Class ? canRead((Class<?>) type, mediaType) : canRead(mediaType));
+		return (type instanceof Class<?> clazz ? canRead(clazz, mediaType) : canRead(mediaType));
 	}
 
 	@Override
@@ -87,8 +87,7 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 		final HttpHeaders headers = outputMessage.getHeaders();
 		addDefaultHeaders(headers, t, contentType);
 
-		if (outputMessage instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
+		if (outputMessage instanceof StreamingHttpOutputMessage streamingOutputMessage) {
 			streamingOutputMessage.setBody(outputStream -> writeInternal(t, type, new HttpOutputMessage() {
 				@Override
 				public OutputStream getBody() {

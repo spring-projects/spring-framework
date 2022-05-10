@@ -30,8 +30,8 @@ package org.springframework.asm;
 /**
  * A visitor to visit a Java class. The methods of this class must be called in the following order:
  * {@code visit} [ {@code visitSource} ] [ {@code visitModule} ][ {@code visitNestHost} ][ {@code
- * visitPermittedSubclass} ][ {@code visitOuterClass} ] ( {@code visitAnnotation} | {@code
- * visitTypeAnnotation} | {@code visitAttribute} )* ( {@code visitNestMember} | {@code
+ * visitOuterClass} ] ( {@code visitAnnotation} | {@code visitTypeAnnotation} | {@code
+ * visitAttribute} )* ( {@code visitNestMember} | [ {@code * visitPermittedSubclass} ] | {@code
  * visitInnerClass} | {@code visitRecordComponent} | {@code visitField} | {@code visitMethod} )*
  * {@code visitEnd}.
  *
@@ -40,8 +40,8 @@ package org.springframework.asm;
 public abstract class ClassVisitor {
 
   /**
-   * The ASM API version implemented by this visitor. The value of this field must be one of {@link
-   * Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link Opcodes#ASM7}.
+   * The ASM API version implemented by this visitor. The value of this field must be one of the
+   * {@code ASM}<i>x</i> values in {@link Opcodes}.
    */
   protected final int api;
 
@@ -51,23 +51,22 @@ public abstract class ClassVisitor {
   /**
    * Constructs a new {@link ClassVisitor}.
    *
-   * @param api the ASM API version implemented by this visitor. Must be one of {@link
-   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link Opcodes#ASM7}.
+   * @param api the ASM API version implemented by this visitor. Must be one of the {@code
+   *     ASM}<i>x</i> values in {@link Opcodes}.
    */
-  public ClassVisitor(final int api) {
+  protected ClassVisitor(final int api) {
     this(api, null);
   }
 
   /**
    * Constructs a new {@link ClassVisitor}.
    *
-   * @param api the ASM API version implemented by this visitor. Must be one of {@link
-   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6}, {@link Opcodes#ASM7}, {@link
-   *     Opcodes#ASM8} or {@link Opcodes#ASM9}.
+   * @param api the ASM API version implemented by this visitor. Must be one of the {@code
+   *     ASM}<i>x</i> values in {@link Opcodes}.
    * @param classVisitor the class visitor to which this visitor must delegate method calls. May be
    *     null.
    */
-  public ClassVisitor(final int api, final ClassVisitor classVisitor) {
+  protected ClassVisitor(final int api, final ClassVisitor classVisitor) {
     if (api != Opcodes.ASM9
         && api != Opcodes.ASM8
         && api != Opcodes.ASM7
@@ -77,7 +76,7 @@ public abstract class ClassVisitor {
         && api != Opcodes.ASM10_EXPERIMENTAL) {
       throw new IllegalArgumentException("Unsupported api " + api);
     }
-    // SPRING PATCH: no preview mode check for ASM 9 experimental
+    // SPRING PATCH: no preview mode check for ASM experimental
     this.api = api;
     this.cv = classVisitor;
   }
