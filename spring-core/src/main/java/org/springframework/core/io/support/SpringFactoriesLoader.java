@@ -114,42 +114,16 @@ public class SpringFactoriesLoader {
 	private final Map<String, List<String>> factories;
 
 
-	private SpringFactoriesLoader(@Nullable ClassLoader classLoader, String resourceLocation) {
-		this.classLoader = classLoader;
-		this.factories = loadFactoriesResource((classLoader != null) ? classLoader
-				: SpringFactoriesLoader.class.getClassLoader(), resourceLocation);
-	}
-
+	/**
+	 * Create a new {@link SpringFactoriesLoader} instance.
+	 * @param classLoader the classloader used to instantiate the factories
+	 * @param factories a map of factory class name to implementation class names
+	 */
 	protected SpringFactoriesLoader(@Nullable ClassLoader classLoader, Map<String, List<String>> factories) {
 		this.classLoader = classLoader;
 		this.factories = factories;
 	}
 
-
-	private Map<String, List<String>> loadFactoriesResource(ClassLoader classLoader, String resourceLocation) {
-		Map<String, List<String>> result = new LinkedHashMap<>();
-		try {
-			Enumeration<URL> urls = classLoader.getResources(resourceLocation);
-			while (urls.hasMoreElements()) {
-				UrlResource resource = new UrlResource(urls.nextElement());
-				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
-				properties.forEach((name, value) -> {
-					List<String> implementations = result.computeIfAbsent(((String) name).trim(), key -> new ArrayList<>());
-					Arrays.stream(StringUtils.commaDelimitedListToStringArray((String) value))
-						.map(String::trim).forEach(implementations::add);
-				});
-			}
-			result.replaceAll(this::toDistinctUnmodifiableList);
-		}
-		catch (IOException ex) {
-			throw new IllegalArgumentException("Unable to load factories from location [" + resourceLocation + "]", ex);
-		}
-		return Collections.unmodifiableMap(result);
-	}
-
-	private List<String> toDistinctUnmodifiableList(String factoryType, List<String> implementations) {
-		return implementations.stream().distinct().toList();
-	}
 
 	/**
 	 * Load and instantiate the factory implementations of the given type from
@@ -343,17 +317,45 @@ public class SpringFactoriesLoader {
 	 */
 	public static SpringFactoriesLoader forResourceLocation(@Nullable ClassLoader classLoader, String resourceLocation) {
 		Assert.hasText(resourceLocation, "'resourceLocation' must not be empty");
-		Map<String, SpringFactoriesLoader> loaders = SpringFactoriesLoader.cache.get(classLoader);
+		ClassLoader resourceClassLoader = (classLoader != null) ? classLoader
+				: SpringFactoriesLoader.class.getClassLoader();
+		Map<String, SpringFactoriesLoader> loaders = SpringFactoriesLoader.cache.get(resourceClassLoader);
 		if (loaders == null) {
 			loaders = new ConcurrentReferenceHashMap<>();
-			SpringFactoriesLoader.cache.put(classLoader, loaders);
+			SpringFactoriesLoader.cache.put(resourceClassLoader, loaders);
 		}
 		SpringFactoriesLoader loader = loaders.get(resourceLocation);
 		if (loader == null) {
-			loader = new SpringFactoriesLoader(classLoader, resourceLocation);
+			Map<String, List<String>> factories = loadFactoriesResource(resourceClassLoader, resourceLocation);
+			loader = new SpringFactoriesLoader(classLoader, factories);
 			loaders.put(resourceLocation, loader);
 		}
 		return loader;
+	}
+
+	private static Map<String, List<String>> loadFactoriesResource(ClassLoader classLoader, String resourceLocation) {
+		Map<String, List<String>> result = new LinkedHashMap<>();
+		try {
+			Enumeration<URL> urls = classLoader.getResources(resourceLocation);
+			while (urls.hasMoreElements()) {
+				UrlResource resource = new UrlResource(urls.nextElement());
+				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
+				properties.forEach((name, value) -> {
+					List<String> implementations = result.computeIfAbsent(((String) name).trim(), key -> new ArrayList<>());
+					Arrays.stream(StringUtils.commaDelimitedListToStringArray((String) value))
+						.map(String::trim).forEach(implementations::add);
+				});
+			}
+			result.replaceAll(SpringFactoriesLoader::toDistinctUnmodifiableList);
+		}
+		catch (IOException ex) {
+			throw new IllegalArgumentException("Unable to load factories from location [" + resourceLocation + "]", ex);
+		}
+		return Collections.unmodifiableMap(result);
+	}
+
+	private static List<String> toDistinctUnmodifiableList(String factoryType, List<String> implementations) {
+		return implementations.stream().distinct().toList();
 	}
 
 

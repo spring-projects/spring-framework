@@ -34,6 +34,7 @@ import org.springframework.core.io.support.SpringFactoriesLoader.ArgumentResolve
 import org.springframework.core.io.support.SpringFactoriesLoader.FactoryInstantiator;
 import org.springframework.core.io.support.SpringFactoriesLoader.FailureHandler;
 import org.springframework.core.log.LogMessage;
+import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -167,6 +168,13 @@ class SpringFactoriesLoaderTests {
 				"META-INF/custom/custom-spring.factories").load(DummyFactory.class);
 		assertThat(factories).hasSize(1);
 		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
+	}
+
+	@Test
+	void sameCachedResultIsUsedForDefaultClassLoaderAndNullClassLoader() {
+		SpringFactoriesLoader forNull = SpringFactoriesLoader.forDefaultResourceLocation(null);
+		SpringFactoriesLoader forDefault = SpringFactoriesLoader.forDefaultResourceLocation(ClassUtils.getDefaultClassLoader());
+		assertThat(forNull).isSameAs(forDefault);
 	}
 
 
