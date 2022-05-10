@@ -1010,8 +1010,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		if (!mavContainer.isViewReference()) {
 			mav.setView((View) mavContainer.getView());
 		}
-		if (model instanceof RedirectAttributes m) {
-			Map<String, ?> flashAttributes = m.getFlashAttributes();
+		if (model instanceof RedirectAttributes redirectAttributes) {
+			Map<String, ?> flashAttributes = redirectAttributes.getFlashAttributes();
 			HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 			if (request != null) {
 				RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);
