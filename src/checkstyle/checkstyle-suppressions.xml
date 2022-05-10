@@ -103,9 +103,11 @@
 	<suppress files="org[\\/]springframework[\\/]web[\\/]bind[\\/]annotation[\\/]ValueConstants" checks="InterfaceIsType"/>
 	<suppress files="PatternParseException" checks="JavadocVariable"/>
 	<suppress files="web[\\/]reactive[\\/]socket[\\/]CloseStatus" checks="JavadocStyle"/>
+	<suppress files="RestClientResponseException" checks="MutableException"/>
 
 	<!-- spring-webflux -->
 	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]web[\\/]reactive[\\/]resource[\\/]GzipSupport" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
+	<suppress files="WebClientResponseException" checks="MutableException"/>
 
 	<!-- spring-webmvc -->
 	<suppress files="org[\\/]springframework[\\/]web[\\/]servlet[\\/]tags[\\/]form[\\/].*Tag" checks="JavadocVariable"/>

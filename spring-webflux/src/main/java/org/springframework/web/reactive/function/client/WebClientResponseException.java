@@ -18,12 +18,16 @@ package org.springframework.web.reactive.function.client;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Exceptions that contain actual HTTP response data.
@@ -50,6 +54,10 @@ public class WebClientResponseException extends WebClientException {
 
 	@Nullable
 	private final HttpRequest request;
+
+	@SuppressWarnings("MutableException")
+	@Nullable
+	private Function<ResolvableType, ?> bodyDecodeFunction;
 
 
 	/**
@@ -195,6 +203,37 @@ public class WebClientResponseException extends WebClientException {
 	}
 
 	/**
+	 * Decode the error content to the specified type.
+	 * @param targetType the type to decode to
+	 * @param <E> the expected target type
+	 * @return the decoded content, or {@code null} if there is no content
+	 * @throws IllegalStateException if a Decoder cannot be found
+	 * @throws org.springframework.core.codec.DecodingException if decoding fails
+	 * @since 6.0
+	 */
+	@Nullable
+	public <E> E getResponseBodyAs(Class<E> targetType) {
+		return getResponseBodyAs(ResolvableType.forClass(targetType));
+	}
+
+	/**
+	 * Variant of {@link #getResponseBodyAs(Class)} with
+	 * {@link ParameterizedTypeReference}.
+	 * @since 6.0
+	 */
+	@Nullable
+	public <E> E getResponseBodyAs(ParameterizedTypeReference<E> targetType) {
+		return getResponseBodyAs(ResolvableType.forType(targetType.getType()));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private <E> E getResponseBodyAs(ResolvableType targetType) {
+		Assert.state(this.bodyDecodeFunction != null, "Decoder function not set");
+		return (E) this.bodyDecodeFunction.apply(targetType);
+	}
+
+	/**
 	 * Return the corresponding request.
 	 * @since 5.1.4
 	 */
@@ -202,6 +241,17 @@ public class WebClientResponseException extends WebClientException {
 	public HttpRequest getRequest() {
 		return this.request;
 	}
+
+	/**
+	 * Provide a function to find a decoder the given target type.
+	 * For use with {@link #getResponseBodyAs(Class)}.
+	 * @param decoderFunction the function to find a decoder with
+	 * @since 6.0
+	 */
+	public void setBodyDecodeFunction(Function<ResolvableType, ?> decoderFunction) {
+		this.bodyDecodeFunction = decoderFunction;
+	}
+
 
 	/**
 	 * Create {@code WebClientResponseException} or an HTTP status specific subclass.

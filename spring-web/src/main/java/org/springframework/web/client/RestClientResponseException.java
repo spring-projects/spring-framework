@@ -19,10 +19,14 @@ package org.springframework.web.client;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Common base class for exceptions that contain actual HTTP response data.
@@ -48,6 +52,9 @@ public class RestClientResponseException extends RestClientException {
 
 	@Nullable
 	private final String responseCharset;
+
+	@Nullable
+	private Function<ResolvableType, ?> bodyConvertFunction;
 
 
 	/**
@@ -151,6 +158,45 @@ public class RestClientResponseException extends RestClientException {
 			// should not occur
 			throw new IllegalStateException(ex);
 		}
+	}
+
+	/**
+	 * Convert the error response content to the specified type.
+	 * @param targetType the type to convert to
+	 * @param <E> the expected target type
+	 * @return the converted object, or {@code null} if there is no content
+	 * @since 6.0
+	 */
+	@Nullable
+	public <E> E getResponseBodyAs(Class<E> targetType) {
+		return getResponseBodyAs(ResolvableType.forClass(targetType));
+	}
+
+	/**
+	 * Variant of {@link #getResponseBodyAs(Class)} with
+	 * {@link ParameterizedTypeReference}.
+	 * @since 6.0
+	 */
+	@Nullable
+	public <E> E getResponseBodyAs(ParameterizedTypeReference<E> targetType) {
+		return getResponseBodyAs(ResolvableType.forType(targetType.getType()));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private <E> E getResponseBodyAs(ResolvableType targetType) {
+		Assert.state(this.bodyConvertFunction != null, "Function to convert body not set");
+		return (E) this.bodyConvertFunction.apply(targetType);
+	}
+
+	/**
+	 * Provide a function to use to decode the response error content
+	 * via {@link #getResponseBodyAs(Class)}.
+	 * @param bodyConvertFunction the function to use
+	 * @since 6.0
+	 */
+	public void setBodyConvertFunction(Function<ResolvableType, ?> bodyConvertFunction) {
+		this.bodyConvertFunction = bodyConvertFunction;
 	}
 
 }
