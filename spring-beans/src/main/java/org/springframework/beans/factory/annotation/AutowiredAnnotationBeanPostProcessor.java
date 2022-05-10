@@ -878,7 +878,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	/**
 	 * {@link BeanRegistrationAotContribution} to autowire fields and methods.
 	 */
-	private class AotContribution implements BeanRegistrationAotContribution {
+	private static class AotContribution implements BeanRegistrationAotContribution {
 
 		private static final String APPLY_METHOD = "apply";
 

@@ -471,11 +471,8 @@ class BeanDefinitionPropertyValueCodeGeneratorTests {
 		@Test
 		void generatedWhenBeanReference() {
 			BeanReference beanReference = new RuntimeBeanNameReference("test");
-			compile(beanReference,
-					(instance,
-							compiler) -> assertThat(
-									((BeanReference) instance).getBeanName())
-											.isEqualTo(beanReference.getBeanName()));
+			compile(beanReference, (instance, compiler) ->
+					assertThat(((BeanReference) instance).getBeanName()).isEqualTo(beanReference.getBeanName()));
 		}
 
 	}
