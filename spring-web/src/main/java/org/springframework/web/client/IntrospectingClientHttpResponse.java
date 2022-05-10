@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
@@ -32,19 +31,18 @@ import org.springframework.lang.Nullable;
  * by actually reading the input stream.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 4.1.5
  * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.3.3">RFC 7230 Section 3.3.3</a>
  */
-class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
-
-	private final ClientHttpResponse response;
+class IntrospectingClientHttpResponse extends ClientHttpResponseDecorator {
 
 	@Nullable
 	private PushbackInputStream pushbackInputStream;
 
 
-	public MessageBodyClientHttpResponseWrapper(ClientHttpResponse response) {
-		this.response = response;
+	public IntrospectingClientHttpResponse(ClientHttpResponse response) {
+		super(response);
 	}
 
 
@@ -82,7 +80,7 @@ class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 	 */
 	@SuppressWarnings("ConstantConditions")
 	public boolean hasEmptyMessageBody() throws IOException {
-		InputStream body = this.response.getBody();
+		InputStream body = getDelegate().getBody();
 		// Per contract body shouldn't be null, but check anyway..
 		if (body == null) {
 			return true;
@@ -112,34 +110,8 @@ class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 
 
 	@Override
-	public HttpHeaders getHeaders() {
-		return this.response.getHeaders();
-	}
-
-	@Override
 	public InputStream getBody() throws IOException {
-		return (this.pushbackInputStream != null ? this.pushbackInputStream : this.response.getBody());
-	}
-
-	@Override
-	public HttpStatusCode getStatusCode() throws IOException {
-		return this.response.getStatusCode();
-	}
-
-	@Override
-	@Deprecated
-	public int getRawStatusCode() throws IOException {
-		return this.response.getRawStatusCode();
-	}
-
-	@Override
-	public String getStatusText() throws IOException {
-		return this.response.getStatusText();
-	}
-
-	@Override
-	public void close() {
-		this.response.close();
+		return (this.pushbackInputStream != null ? this.pushbackInputStream : getDelegate().getBody());
 	}
 
 }
