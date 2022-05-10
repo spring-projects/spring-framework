@@ -143,13 +143,12 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 			Advice advice = this.advisor.getAdvice();
 			StringBuilder sb = new StringBuilder(ClassUtils.getShortName(advice.getClass()));
 			boolean appended = false;
-			if (this.advisor instanceof Ordered) {
-				sb.append(": order = ").append(((Ordered) this.advisor).getOrder());
+			if (this.advisor instanceof Ordered ordered) {
+				sb.append(": order = ").append(ordered.getOrder());
 				appended = true;
 			}
-			if (advice instanceof AbstractAspectJAdvice) {
+			if (advice instanceof AbstractAspectJAdvice ajAdvice) {
 				sb.append(!appended ? ": " : ", ");
-				AbstractAspectJAdvice ajAdvice = (AbstractAspectJAdvice) advice;
 				sb.append("aspect name = ");
 				sb.append(ajAdvice.getAspectName());
 				sb.append(", declaration order = ");

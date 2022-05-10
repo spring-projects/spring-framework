@@ -80,8 +80,8 @@ public abstract class ScopedProxyUtils {
 		// Copy autowire settings from original bean definition.
 		proxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
 		proxyDefinition.setPrimary(targetDefinition.isPrimary());
-		if (targetDefinition instanceof AbstractBeanDefinition) {
-			proxyDefinition.copyQualifiersFrom((AbstractBeanDefinition) targetDefinition);
+		if (targetDefinition instanceof AbstractBeanDefinition abd) {
+			proxyDefinition.copyQualifiersFrom(abd);
 		}
 
 		// The target bean should be ignored in favor of the scoped proxy.

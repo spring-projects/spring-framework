@@ -556,7 +556,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				logger.debug("Refreshing target with name '" + this.targetName + "'");
 			}
 			Object target = this.beanFactory.getBean(this.targetName);
-			return (target instanceof TargetSource ? (TargetSource) target : new SingletonTargetSource(target));
+			return (target instanceof TargetSource targetSource ? targetSource : new SingletonTargetSource(target));
 		}
 	}
 

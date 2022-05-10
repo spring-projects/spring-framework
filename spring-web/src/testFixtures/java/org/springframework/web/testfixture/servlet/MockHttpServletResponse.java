@@ -692,7 +692,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			return true;
 		}
 		else if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			setContentLength(value instanceof Number ? ((Number) value).intValue() :
+			setContentLength(value instanceof Number number ? number.intValue() :
 					Integer.parseInt(value.toString()));
 			return true;
 		}
