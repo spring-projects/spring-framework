@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,30 +54,34 @@ public class RestClientResponseException extends RestClientException {
 	 * Construct a new instance of with the given response data.
 	 * @param statusCode the raw status code value
 	 * @param statusText the status text
-	 * @param responseHeaders the response headers (may be {@code null})
+	 * @param headers the response headers (may be {@code null})
 	 * @param responseBody the response body content (may be {@code null})
 	 * @param responseCharset the response body charset (may be {@code null})
 	 */
-	public RestClientResponseException(String message, int statusCode, String statusText,
-			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
-		this(message, HttpStatusCode.valueOf(statusCode), statusText, responseHeaders, responseBody, responseCharset);
+	public RestClientResponseException(
+			String message, int statusCode, String statusText, @Nullable HttpHeaders headers,
+			@Nullable byte[] responseBody, @Nullable Charset responseCharset) {
+
+		this(message, HttpStatusCode.valueOf(statusCode), statusText, headers, responseBody, responseCharset);
 	}
 
 	/**
 	 * Construct a new instance of with the given response data.
 	 * @param statusCode the raw status code value
 	 * @param statusText the status text
-	 * @param responseHeaders the response headers (may be {@code null})
+	 * @param headers the response headers (may be {@code null})
 	 * @param responseBody the response body content (may be {@code null})
 	 * @param responseCharset the response body charset (may be {@code null})
 	 * @since 6.0
 	 */
-	public RestClientResponseException(String message, HttpStatusCode statusCode, String statusText,
-			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
+	public RestClientResponseException(
+			String message, HttpStatusCode statusCode, String statusText, @Nullable HttpHeaders headers,
+			@Nullable byte[] responseBody, @Nullable Charset responseCharset) {
+
 		super(message);
 		this.statusCode = statusCode;
 		this.statusText = statusText;
-		this.responseHeaders = responseHeaders;
+		this.responseHeaders = headers;
 		this.responseBody = (responseBody != null ? responseBody : new byte[0]);
 		this.responseCharset = (responseCharset != null ? responseCharset.name() : null);
 	}
