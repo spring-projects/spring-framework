@@ -162,9 +162,8 @@ public abstract class BeanFactoryUtils {
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		String[] result = lbf.getBeanNamesForType(type);
 		if (lbf instanceof HierarchicalBeanFactory hbf) {
-			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
-				String[] parentResult = beanNamesForTypeIncludingAncestors(
-						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
+			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory pbf) {
+				String[] parentResult = beanNamesForTypeIncludingAncestors(pbf, type);
 				result = mergeNamesWithParent(result, parentResult, hbf);
 			}
 		}

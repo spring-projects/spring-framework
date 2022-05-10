@@ -52,8 +52,8 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 			return this.order;
 		}
 		Advice advice = getAdvice();
-		if (advice instanceof Ordered) {
-			return ((Ordered) advice).getOrder();
+		if (advice instanceof Ordered o) {
+			return o.getOrder();
 		}
 		return Ordered.LOWEST_PRECEDENCE;
 	}
