@@ -16,7 +16,6 @@
 
 package org.springframework.core.io.support;
 
-import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -89,10 +88,10 @@ class SpringFactoriesLoaderRuntimeHintsRegistrar implements RuntimeHintsRegistra
 	@Nullable
 	private Class<?> resolveClassName(ClassLoader classLoader, String factoryClassName) {
 		try {
-			Class<?> className = ClassUtils.resolveClassName(factoryClassName, classLoader);
-			// Force resolution of all constructors to catch
-			Constructor<?>[] constructors = className.getDeclaredConstructors();
-			return className;
+			Class<?> clazz = ClassUtils.resolveClassName(factoryClassName, classLoader);
+			// Force resolution of all constructors to cache
+			clazz.getDeclaredConstructors();
+			return clazz;
 		}
 		catch (Throwable ex) {
 			return null;
