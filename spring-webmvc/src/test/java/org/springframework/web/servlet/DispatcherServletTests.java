@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -519,7 +520,10 @@ public class DispatcherServletTests {
 
 		request = new MockHttpServletRequest(getServletContext(), "GET", "/form.do");
 		response = new MockHttpServletResponse();
+		request.addParameter("fail", "yes");
 		complexDispatcherServlet.service(request, response);
+		assertThat(response.getForwardedUrl()).as("forwarded URL").isEqualTo("failed1.jsp");
+		assertThat(request.getAttribute("exception")).isNull();
 	}
 
 	@Test
@@ -536,12 +540,15 @@ public class DispatcherServletTests {
 		complexDispatcherServlet.service(request, response);
 		assertThat(response.getContentAsString()).isEqualTo("body");
 
-		// SimpleControllerHandlerAdapter not detected
+		// MyHandlerAdapter not detected
 		request = new MockHttpServletRequest(getServletContext(), "GET", "/form.do");
 		response = new MockHttpServletResponse();
+		request.addParameter("fail", "yes");
 		complexDispatcherServlet.service(request, response);
-		assertThat(response.getForwardedUrl()).as("forwarded to failed").isEqualTo("failed0.jsp");
-		assertThat(request.getAttribute("exception").getClass().equals(ServletException.class)).as("Exception exposed").isTrue();
+		assertThat(response.getForwardedUrl()).as("forwarded URL").isEqualTo("failed0.jsp");
+		assertThat(request.getAttribute("exception"))
+			.asInstanceOf(InstanceOfAssertFactories.type(ServletException.class))
+			.extracting(Throwable::getMessage).asString().startsWith("No adapter for handler");
 	}
 
 	@Test
