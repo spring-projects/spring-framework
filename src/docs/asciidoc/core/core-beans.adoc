@@ -693,10 +693,11 @@ able to call this method (with optional arguments, as described later) and retur
 object, which subsequently is treated as if it had been created through a constructor.
 One use for such a bean definition is to call `static` factories in legacy code.
 
-The following bean definition specifies that the bean be created by calling a
+The following bean definition specifies that the bean will be created by calling a
 factory method. The definition does not specify the type (class) of the returned object,
-only the class containing the factory method. In this example, the `createInstance()`
-method must be a static method. The following example shows how to specify a factory method:
+but rather the class containing the factory method. In this example, the
+`createInstance()` method must be a `static` method. The following example shows how to
+specify a factory method:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -725,6 +726,7 @@ The following example shows a class that would work with the preceding bean defi
 	class ClientService private constructor() {
 		companion object {
 			private val clientService = ClientService()
+			@JvmStatic
 			fun createInstance() = clientService
 		}
 	}
