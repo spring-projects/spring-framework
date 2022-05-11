@@ -48,14 +48,14 @@ class CoreAnnotationsRuntimeHintsRegistrarTests {
 	@Test
 	void aliasForHasHints() {
 		assertThat(this.hints.reflection().getTypeHint(TypeReference.of(AliasFor.class)))
-				.satisfies((hint) -> assertThat(hint.getMemberCategories())
+				.satisfies(hint -> assertThat(hint.getMemberCategories())
 						.containsExactly(MemberCategory.INVOKE_DECLARED_METHODS));
 	}
 
 	@Test
 	void orderAnnotationHasHints() {
 		assertThat(this.hints.reflection().getTypeHint(TypeReference.of(Order.class)))
-				.satisfies((hint) -> assertThat(hint.getMemberCategories())
+				.satisfies(hint -> assertThat(hint.getMemberCategories())
 						.containsExactly(MemberCategory.INVOKE_DECLARED_METHODS));
 	}
 
