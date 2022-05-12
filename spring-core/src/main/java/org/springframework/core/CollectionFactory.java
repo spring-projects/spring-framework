@@ -35,6 +35,8 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Supplier;
+import java.util.Collections;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -402,6 +404,22 @@ public final class CollectionFactory {
 			throw new IllegalArgumentException("Supplied type is not an enum: " + enumType.getName());
 		}
 		return enumType.asSubclass(Enum.class);
+	}
+
+	/**
+	 * Create a variant of {@link java.util.Collection} that includes singe statement
+	 * @param collectionFactory the collection factory
+	 * @param collectionType the collection type to check
+	 * @param <E> element type
+	 * @param <C> collection type
+	 * @return a new {@code Collection} instance
+	 */
+	public static <E, C extends Collection<E>> C collectionOf(Class<?> collectionType,Supplier<C> collectionFactory, E elements) {
+		Assert.notNull(collectionFactory, "'collectionFactory' must not be null");
+		Assert.notNull(collectionType, "Collection type must not be null");
+		C collection = collectionFactory.get();
+		Collections.addAll(collection, elements);
+		return collection;
 	}
 
 }
