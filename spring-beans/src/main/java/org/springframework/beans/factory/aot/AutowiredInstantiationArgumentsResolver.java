@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.annotation;
+package org.springframework.beans.factory.aot;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -69,8 +69,7 @@ import org.springframework.util.function.ThrowingFunction;
  * @since 6.0
  * @see AutowiredArguments
  */
-public final class AutowiredInstantiationArgumentsResolver
-		extends AutowiredElementResolver {
+public final class AutowiredInstantiationArgumentsResolver extends AutowiredElementResolver {
 
 	private final ExecutableLookup lookup;
 

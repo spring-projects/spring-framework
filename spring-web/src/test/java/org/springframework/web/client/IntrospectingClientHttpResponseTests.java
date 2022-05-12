@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,29 +28,29 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link MessageBodyClientHttpResponseWrapper}.
+ * Unit tests for {@link IntrospectingClientHttpResponse}.
  *
  * @since 5.3.10
  * @author Yin-Jui Liao
  */
-class MessageBodyClientHttpResponseWrapperTests {
+class IntrospectingClientHttpResponseTests {
 
 	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
 
-	private final MessageBodyClientHttpResponseWrapper responseWrapper = new MessageBodyClientHttpResponseWrapper(response);
+	private final IntrospectingClientHttpResponse wrappedResponse = new IntrospectingClientHttpResponse(response);
 
 
 	@Test
 	void messageBodyDoesNotExist() throws Exception {
 		given(response.getBody()).willReturn(null);
-		assertThat(responseWrapper.hasEmptyMessageBody()).isTrue();
+		assertThat(wrappedResponse.hasEmptyMessageBody()).isTrue();
 	}
 
 	@Test
 	void messageBodyExists() throws Exception {
 		InputStream stream = new ByteArrayInputStream("content".getBytes());
 		given(response.getBody()).willReturn(stream);
-		assertThat(responseWrapper.hasEmptyMessageBody()).isFalse();
+		assertThat(wrappedResponse.hasEmptyMessageBody()).isFalse();
 	}
 
 }

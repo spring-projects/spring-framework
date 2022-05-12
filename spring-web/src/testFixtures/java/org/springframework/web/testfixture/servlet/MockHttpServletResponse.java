@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -423,7 +423,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			buf.append("; Domain=").append(cookie.getDomain());
 		}
 		int maxAge = cookie.getMaxAge();
-		ZonedDateTime expires = (cookie instanceof MockCookie ? ((MockCookie) cookie).getExpires() : null);
+		ZonedDateTime expires = (cookie instanceof MockCookie mockCookie? mockCookie.getExpires() : null);
 		if (maxAge >= 0) {
 			buf.append("; Max-Age=").append(maxAge);
 			buf.append("; Expires=");
@@ -692,7 +692,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			return true;
 		}
 		else if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			setContentLength(value instanceof Number ? ((Number) value).intValue() :
+			setContentLength(value instanceof Number number ? number.intValue() :
 					Integer.parseInt(value.toString()));
 			return true;
 		}

@@ -509,7 +509,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 
-	private class AotContribution implements BeanFactoryInitializationAotContribution {
+	private static class AotContribution implements BeanFactoryInitializationAotContribution {
 
 		private static final String BEAN_FACTORY_VARIABLE = BeanFactoryInitializationCode.BEAN_FACTORY_VARIABLE;
 

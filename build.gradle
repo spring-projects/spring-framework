@@ -28,7 +28,7 @@ configure(allprojects) { project ->
 	dependencyManagement {
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.13.1"
-			mavenBom "io.netty:netty-bom:4.1.76.Final"
+			mavenBom "io.netty:netty-bom:4.1.77.Final"
 			mavenBom "io.projectreactor:reactor-bom:2022.0.0-M2"
 			mavenBom "io.r2dbc:r2dbc-bom:Borca-SR1"
 			mavenBom "io.rsocket:rsocket-bom:1.1.2"
@@ -56,14 +56,14 @@ configure(allprojects) { project ->
 				entry 'aspectjtools'
 				entry 'aspectjweaver'
 			}
-			dependencySet(group: 'org.apache.groovy', version: '4.0.1') {
+			dependencySet(group: 'org.apache.groovy', version: '4.0.2') {
 				entry 'groovy'
 				entry 'groovy-jsr223'
 				entry 'groovy-templates'  // requires findbugs for warning-free compilation
 				entry 'groovy-xml'
 			}
 
-			dependency "io.reactivex.rxjava3:rxjava:3.1.3"
+			dependency "io.reactivex.rxjava3:rxjava:3.1.4"
 			dependency "io.smallrye.reactive:mutiny:1.4.0"
 			dependency "io.projectreactor.tools:blockhound:1.0.6.RELEASE"
 

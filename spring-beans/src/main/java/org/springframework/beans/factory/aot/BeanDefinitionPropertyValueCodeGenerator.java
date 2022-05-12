@@ -17,10 +17,8 @@
 package org.springframework.beans.factory.aot;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -61,25 +59,25 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 	private final MethodGenerator methodGenerator;
 
-	private final List<Delegate> delegates;
+	private final List<Delegate> delegates = List.of(
+			new PrimitiveDelegate(),
+			new StringDelegate(),
+			new EnumDelegate(),
+			new ClassDelegate(),
+			new ResolvableTypeDelegate(),
+			new ArrayDelegate(),
+			new ManagedListDelegate(),
+			new ManagedSetDelegate(),
+			new ManagedMapDelegate(),
+			new ListDelegate(),
+			new SetDelegate(),
+			new MapDelegate(),
+			new BeanReferenceDelegate()
+		);
 
 
 	BeanDefinitionPropertyValueCodeGenerator(MethodGenerator methodGenerator) {
 		this.methodGenerator = methodGenerator;
-		this.delegates = new ArrayList<>();
-		this.delegates.add(new PrimitiveDelegate());
-		this.delegates.add(new StringDelegate());
-		this.delegates.add(new EnumDelegate());
-		this.delegates.add(new ClassDelegate());
-		this.delegates.add(new ResolvableTypeDelegate());
-		this.delegates.add(new ArrayDelegate());
-		this.delegates.add(new ManagedListDelegate());
-		this.delegates.add(new ManagedSetDelegate());
-		this.delegates.add(new ManagedMapDelegate());
-		this.delegates.add(new ListDelegate());
-		this.delegates.add(new SetDelegate());
-		this.delegates.add(new MapDelegate());
-		this.delegates.add(new BeanReferenceDelegate());
 	}
 
 
@@ -119,22 +117,19 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	/**
 	 * {@link Delegate} for {@code primitive} types.
 	 */
-	private class PrimitiveDelegate implements Delegate {
+	private static class PrimitiveDelegate implements Delegate {
 
-		private static final Map<Character, String> CHAR_ESCAPES;
+		private static final Map<Character, String> CHAR_ESCAPES = Map.of(
+				'\b', "\\b",
+				'\t', "\\t",
+				'\n', "\\n",
+				'\f', "\\f",
+				'\r', "\\r",
+				'\"', "\"",
+				'\'', "\\'",
+				'\\', "\\\\"
+			);
 
-		static {
-			Map<Character, String> escapes = new HashMap<>();
-			escapes.put('\b', "\\b");
-			escapes.put('\t', "\\t");
-			escapes.put('\n', "\\n");
-			escapes.put('\f', "\\f");
-			escapes.put('\r', "\\r");
-			escapes.put('\"', "\"");
-			escapes.put('\'', "\\'");
-			escapes.put('\\', "\\\\");
-			CHAR_ESCAPES = Collections.unmodifiableMap(escapes);
-		}
 
 		@Override
 		@Nullable
@@ -177,7 +172,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	/**
 	 * {@link Delegate} for {@link String} types.
 	 */
-	private class StringDelegate implements Delegate {
+	private static class StringDelegate implements Delegate {
 
 		@Override
 		@Nullable
@@ -194,7 +189,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	/**
 	 * {@link Delegate} for {@link Enum} types.
 	 */
-	private class EnumDelegate implements Delegate {
+	private static class EnumDelegate implements Delegate {
 
 		@Override
 		@Nullable
@@ -212,7 +207,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	/**
 	 * {@link Delegate} for {@link Class} types.
 	 */
-	private class ClassDelegate implements Delegate {
+	private static class ClassDelegate implements Delegate {
 
 		@Override
 		@Nullable
@@ -229,7 +224,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	/**
 	 * {@link Delegate} for {@link ResolvableType} types.
 	 */
-	private class ResolvableTypeDelegate implements Delegate {
+	private static class ResolvableTypeDelegate implements Delegate {
 
 		@Override
 		@Nullable
@@ -258,7 +253,9 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				builder.add("new $T {", type.toClass());
 				for (int i = 0; i < length; i++) {
 					Object component = Array.get(value, i);
-					builder.add((i != 0) ? ", " : "");
+					if (i != 0) {
+						builder.add(", ");
+					}
 					builder.add("$L", BeanDefinitionPropertyValueCodeGenerator.this
 							.generateCode(component, componentType));
 				}
@@ -274,8 +271,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	/**
 	 * Abstract {@link Delegate} for {@code Collection} types.
 	 */
-	private abstract class CollectionDelegate<T extends Collection<?>>
-			implements Delegate {
+	private abstract class CollectionDelegate<T extends Collection<?>> implements Delegate {
 
 		private final Class<?> collectionType;
 
@@ -301,8 +297,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			return null;
 		}
 
-		protected CodeBlock generateCollectionCode(ResolvableType elementType,
-				T collection) {
+		protected CodeBlock generateCollectionCode(ResolvableType elementType, T collection) {
 			return generateCollectionOf(collection, this.collectionType, elementType);
 		}
 
@@ -315,7 +310,9 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				Object element = iterator.next();
 				builder.add("$L", BeanDefinitionPropertyValueCodeGenerator.this
 						.generateCode(element, elementType));
-				builder.add((!iterator.hasNext()) ? "" : ", ");
+				if (iterator.hasNext()) {
+					builder.add(", ");
+				}
 			}
 			builder.add(")");
 			return builder.build();
@@ -382,7 +379,9 @@ class BeanDefinitionPropertyValueCodeGenerator {
 								.generateCode(entry.getKey(), keyType),
 						BeanDefinitionPropertyValueCodeGenerator.this
 								.generateCode(entry.getValue(), valueType));
-				builder.add((!iterator.hasNext()) ? "" : ", ");
+				if (iterator.hasNext()) {
+					builder.add(", ");
+				}
 			}
 			builder.add(")");
 			return builder.build();
@@ -413,8 +412,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		}
 
 		@Override
-		protected CodeBlock generateCollectionCode(ResolvableType elementType,
-				Set<?> set) {
+		protected CodeBlock generateCollectionCode(ResolvableType elementType, Set<?> set) {
 			if (set instanceof LinkedHashSet) {
 				return CodeBlock.of("new $T($L)", LinkedHashSet.class,
 						generateCollectionOf(set, List.class, elementType));
@@ -473,7 +471,9 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				else {
 					builder.add("$T.entry($L,$L)", Map.class, keyCode, valueCode);
 				}
-				builder.add((!iterator.hasNext()) ? "" : ", ");
+				if (iterator.hasNext()) {
+					builder.add(", ");
+				}
 			}
 			builder.add(")");
 			return builder.build();
@@ -495,12 +495,11 @@ class BeanDefinitionPropertyValueCodeGenerator {
 						builder.returns(Map.class);
 						builder.addStatement("$T map = new $T($L)", Map.class,
 								LinkedHashMap.class, map.size());
-						map.forEach(
-								(key, value) -> builder.addStatement("map.put($L, $L)",
-										BeanDefinitionPropertyValueCodeGenerator.this
-												.generateCode(key, keyType),
-										BeanDefinitionPropertyValueCodeGenerator.this
-												.generateCode(value, valueType)));
+						map.forEach((key, value) -> builder.addStatement("map.put($L, $L)",
+								BeanDefinitionPropertyValueCodeGenerator.this
+										.generateCode(key, keyType),
+								BeanDefinitionPropertyValueCodeGenerator.this
+										.generateCode(value, valueType)));
 						builder.addStatement("return map");
 					});
 			return CodeBlock.of("$L()", method.getName());
@@ -512,7 +511,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	/**
 	 * {@link Delegate} for {@link BeanReference} types.
 	 */
-	private class BeanReferenceDelegate implements Delegate {
+	private static class BeanReferenceDelegate implements Delegate {
 
 		@Override
 		@Nullable

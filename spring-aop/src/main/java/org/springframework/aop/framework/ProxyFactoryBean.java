@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -436,12 +436,11 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			// Materialize interceptor chain from bean names.
 			for (String name : this.interceptorNames) {
 				if (name.endsWith(GLOBAL_SUFFIX)) {
-					if (!(this.beanFactory instanceof ListableBeanFactory)) {
+					if (!(this.beanFactory instanceof ListableBeanFactory lbf)) {
 						throw new AopConfigException(
 								"Can only use global advisors or interceptors with a ListableBeanFactory");
 					}
-					addGlobalAdvisors((ListableBeanFactory) this.beanFactory,
-							name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
+					addGlobalAdvisors(lbf, name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
 				}
 
 				else {
@@ -475,16 +474,16 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		Advisor[] advisors = getAdvisors();
 		List<Advisor> freshAdvisors = new ArrayList<>(advisors.length);
 		for (Advisor advisor : advisors) {
-			if (advisor instanceof PrototypePlaceholderAdvisor pa) {
+			if (advisor instanceof PrototypePlaceholderAdvisor ppa) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Refreshing bean named '" + pa.getBeanName() + "'");
+					logger.debug("Refreshing bean named '" + ppa.getBeanName() + "'");
 				}
 				// Replace the placeholder with a fresh prototype instance resulting from a getBean lookup
 				if (this.beanFactory == null) {
 					throw new IllegalStateException("No BeanFactory available anymore (probably due to " +
-							"serialization) - cannot resolve prototype advisor '" + pa.getBeanName() + "'");
+							"serialization) - cannot resolve prototype advisor '" + ppa.getBeanName() + "'");
 				}
-				Object bean = this.beanFactory.getBean(pa.getBeanName());
+				Object bean = this.beanFactory.getBean(ppa.getBeanName());
 				Advisor refreshedAdvisor = namedBeanToAdvisor(bean);
 				freshAdvisors.add(refreshedAdvisor);
 			}
@@ -556,7 +555,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				logger.debug("Refreshing target with name '" + this.targetName + "'");
 			}
 			Object target = this.beanFactory.getBean(this.targetName);
-			return (target instanceof TargetSource ? (TargetSource) target : new SingletonTargetSource(target));
+			return (target instanceof TargetSource targetSource ? targetSource : new SingletonTargetSource(target));
 		}
 	}
 

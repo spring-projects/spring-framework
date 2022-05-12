@@ -1,0 +1,3 @@
+org.springframework.aot.hint.RuntimeHintsRegistrar=\
+org.springframework.core.annotation.CoreAnnotationsRuntimeHintsRegistrar,\
+org.springframework.core.io.support.SpringFactoriesLoaderRuntimeHintsRegistrar

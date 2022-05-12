@@ -58,6 +58,9 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.aot.AutowiredArgumentsCodeGenerator;
+import org.springframework.beans.factory.aot.AutowiredFieldValueResolver;
+import org.springframework.beans.factory.aot.AutowiredMethodArgumentsResolver;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
@@ -654,7 +657,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	/**
 	 * Base class representing injection information.
 	 */
-	private abstract class AutowiredElement extends InjectionMetadata.InjectedElement {
+	private abstract static class AutowiredElement extends InjectionMetadata.InjectedElement {
 
 		protected final boolean required;
 
@@ -878,7 +881,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	/**
 	 * {@link BeanRegistrationAotContribution} to autowire fields and methods.
 	 */
-	private class AotContribution implements BeanRegistrationAotContribution {
+	private static class AotContribution implements BeanRegistrationAotContribution {
 
 		private static final String APPLY_METHOD = "apply";
 
