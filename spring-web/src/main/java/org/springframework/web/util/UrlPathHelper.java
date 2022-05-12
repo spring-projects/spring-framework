@@ -669,6 +669,20 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * Decode the given URI path variables without {@link #decodeRequestString}
+	 * it is assumed the URL path from which the variables were extracted is already decoded
+	 * through a call to {@link #getLookupPathForRequest(HttpServletRequest)}. Under certain
+	 * circumstance such as passing special character, it is the only way to keep any path
+	 * variable values passed as is.
+	 * @param vars the URI variables extracted from the URL path
+	 * @return the same Map
+	 */
+	public Map<String, String> decodePathVariablesForSpecialCharacter( Map<String, String> vars) {
+		this.setUrlDecode(false);
+		return vars;
+	}
+
+	/**
 	 * Decode the given matrix variables via {@link #decodeRequestString} unless
 	 * {@link #setUrlDecode} is set to {@code true} in which case it is assumed
 	 * the URL path from which the variables were extracted is already decoded
