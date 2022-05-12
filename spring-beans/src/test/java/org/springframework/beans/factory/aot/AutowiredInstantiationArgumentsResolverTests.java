@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.annotation;
+package org.springframework.beans.factory.aot;
 
 import java.io.InputStream;
 import java.lang.annotation.Retention;
@@ -38,7 +38,8 @@ import org.junit.jupiter.params.support.AnnotationConsumer;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
-import org.springframework.beans.factory.annotation.AutowiredInstantiationArgumentsResolverTests.Enclosing.InnerSingleArgConstructor;
+import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.aot.AutowiredInstantiationArgumentsResolverTests.Enclosing.InnerSingleArgConstructor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
