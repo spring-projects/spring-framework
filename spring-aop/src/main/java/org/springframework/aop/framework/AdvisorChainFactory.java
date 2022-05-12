@@ -40,4 +40,5 @@ public interface AdvisorChainFactory {
 	 */
 	List<Object> getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method, @Nullable Class<?> targetClass);
 
+	List<Object> getInterceptors(AdvisedSupport advisedSupport, Method method, @Nullable Class<?> targetClass);
 }
