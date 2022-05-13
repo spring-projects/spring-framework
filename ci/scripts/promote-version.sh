@@ -1,6 +1,5 @@
 #!/bin/bash
 
-source $(dirname $0)/common.sh
 CONFIG_DIR=git-repo/ci/config
 
 version=$( cat artifactory-repo/build-info.json | jq -r '.buildInfo.modules[0].id' | sed 's/.*:.*:\(.*\)/\1/' )
