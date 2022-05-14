@@ -152,16 +152,14 @@ class AnnotationConfigApplicationContextTests {
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
-				if (bean instanceof TestBean) {
-					TestBean testBean = (TestBean) bean;
+				if (bean instanceof TestBean testBean) {
 					testBean.name = testBean.name + "-before";
 				}
 				return bean;
 			}
 			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
-				if (bean instanceof TestBean) {
-					TestBean testBean = (TestBean) bean;
+				if (bean instanceof TestBean testBean) {
 					testBean.name = testBean.name + "-after";
 				}
 				return bean;
