@@ -154,19 +154,9 @@ class AnnotationConfigApplicationContextTests {
 				return (bean instanceof TestBean ? null : bean);
 			}
 		});
-		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
-			@Override
-			public Object postProcessBeforeInitialization(Object bean, String beanName) {
-				bean.getClass().getName();
-				return bean;
-			}
-			@Override
-			public Object postProcessAfterInitialization(Object bean, String beanName) {
-				bean.getClass().getName();
-				return bean;
-			}
-		});
 		context.refresh();
+
+		assertThat(context.getBean(TestBean.class)).isNotNull();
 	}
 
 	@Test
