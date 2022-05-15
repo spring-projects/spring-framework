@@ -76,7 +76,7 @@ import java.lang.annotation.Target;
  *
  *     &#064;DynamicPropertySource
  *     static void redisProperties(DynamicPropertyRegistry registry) {
- *         registry.add("redis.host", redis::getContainerIpAddress);
+ *         registry.add("redis.host", redis::getHost);
  *         registry.add("redis.port", redis::getMappedPort);
  *     }
  *
