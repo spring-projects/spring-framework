@@ -190,6 +190,13 @@ public abstract class PropertySource<T> {
 		return new ComparisonPropertySource(name);
 	}
 
+	
+	/**
+	 * 在应用程序上下文创建时无法立即初始化实际属性源的情况下，PropertySource 将用作占位符。
+	 * 例如，基于 ServletContext 的属性源必须等到 ServletContext 对象对其封闭的 ApplicationContext 可用。
+	 * 在这种情况下，应该使用存根来保存属性源的预期默认位置/顺序，然后在上下文刷新期间被替换。
+	 * 
+	 */
 
 	/**
 	 * {@code PropertySource} to be used as a placeholder in cases where an actual
