@@ -70,15 +70,21 @@ class SpringFactoriesLoaderRuntimeHintsRegistrar implements RuntimeHintsRegistra
 			String factoryClassName, List<String> implementationClassNames) {
 		Class<?> factoryClass = resolveClassName(classLoader, factoryClassName);
 		if(factoryClass == null) {
-			logger.trace(LogMessage.format("Skipping factories for [%s]", factoryClassName));
+			if (logger.isTraceEnabled()) {
+				logger.trace(LogMessage.format("Skipping factories for [%s]", factoryClassName));
+			}
 			return;
 		}
-		logger.trace(LogMessage.format("Processing factories for [%s]", factoryClassName));
+		if (logger.isTraceEnabled()) {
+			logger.trace(LogMessage.format("Processing factories for [%s]", factoryClassName));
+		}
 		hints.reflection().registerType(factoryClass, HINT);
 		for (String implementationClassName : implementationClassNames) {
 			Class<?> implementationType = resolveClassName(classLoader, implementationClassName);
-			logger.trace(LogMessage.format("%s factory type [%s] and implementation [%s]",
-					(implementationType != null) ? "Processing" : "Skipping", factoryClassName, implementationClassName));
+			if (logger.isTraceEnabled()) {
+				logger.trace(LogMessage.format("%s factory type [%s] and implementation [%s]",
+						(implementationType != null) ? "Processing" : "Skipping", factoryClassName, implementationClassName));
+			}
 			if (implementationType != null) {
 				hints.reflection().registerType(implementationType, HINT);
 			}
