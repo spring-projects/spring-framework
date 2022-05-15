@@ -4295,7 +4295,7 @@ properties.
 
 		@DynamicPropertySource
 		static void redisProperties(DynamicPropertyRegistry registry) {
-			registry.add("redis.host", redis::getContainerIpAddress);
+			registry.add("redis.host", redis::getHost);
 			registry.add("redis.port", redis::getMappedPort);
 		}
 
@@ -4319,7 +4319,7 @@ properties.
 			@DynamicPropertySource
 			@JvmStatic
 			fun redisProperties(registry: DynamicPropertyRegistry) {
-				registry.add("redis.host", redis::getContainerIpAddress)
+				registry.add("redis.host", redis::getHost)
 				registry.add("redis.port", redis::getMappedPort)
 			}
 		}
