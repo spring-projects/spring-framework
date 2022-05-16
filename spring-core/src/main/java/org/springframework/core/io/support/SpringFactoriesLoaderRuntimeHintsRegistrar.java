@@ -41,11 +41,11 @@ import org.springframework.util.ClassUtils;
  */
 class SpringFactoriesLoaderRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
-	private static List<String> RESOURCE_LOCATIONS = List
-			.of(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION);
+	private static List<String> RESOURCE_LOCATIONS =
+			List.of(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION);
 
-	private static final Consumer<TypeHint.Builder> HINT = builder -> builder
-			.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+	private static final Consumer<TypeHint.Builder> HINT = builder ->
+			builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 
 	private final Log logger = LogFactory.getLog(SpringFactoriesLoaderRuntimeHintsRegistrar.class);
 
@@ -57,11 +57,10 @@ class SpringFactoriesLoaderRuntimeHintsRegistrar implements RuntimeHintsRegistra
 		}
 	}
 
-	private void registerHints(RuntimeHints hints, ClassLoader classLoader,
-			String resourceLocation) {
+	private void registerHints(RuntimeHints hints, ClassLoader classLoader, String resourceLocation) {
 		hints.resources().registerPattern(resourceLocation);
-		Map<String, List<String>> factories = SpringFactoriesLoader
-				.loadFactoriesResource(classLoader, resourceLocation);
+		Map<String, List<String>> factories =
+				SpringFactoriesLoader.loadFactoriesResource(classLoader, resourceLocation);
 		factories.forEach((factoryClassName, implementationClassNames) ->
 				registerHints(hints, classLoader, factoryClassName, implementationClassNames));
 	}
@@ -69,7 +68,7 @@ class SpringFactoriesLoaderRuntimeHintsRegistrar implements RuntimeHintsRegistra
 	private void registerHints(RuntimeHints hints, ClassLoader classLoader,
 			String factoryClassName, List<String> implementationClassNames) {
 		Class<?> factoryClass = resolveClassName(classLoader, factoryClassName);
-		if(factoryClass == null) {
+		if (factoryClass == null) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(LogMessage.format("Skipping factories for [%s]", factoryClassName));
 			}
@@ -83,7 +82,8 @@ class SpringFactoriesLoaderRuntimeHintsRegistrar implements RuntimeHintsRegistra
 			Class<?> implementationType = resolveClassName(classLoader, implementationClassName);
 			if (logger.isTraceEnabled()) {
 				logger.trace(LogMessage.format("%s factory type [%s] and implementation [%s]",
-						(implementationType != null) ? "Processing" : "Skipping", factoryClassName, implementationClassName));
+						(implementationType != null ? "Processing" : "Skipping"), factoryClassName,
+						implementationClassName));
 			}
 			if (implementationType != null) {
 				hints.reflection().registerType(implementationType, HINT);

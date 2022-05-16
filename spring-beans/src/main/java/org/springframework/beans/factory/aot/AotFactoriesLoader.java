@@ -30,8 +30,8 @@ import org.springframework.util.Assert;
 
 /**
  * AOT specific factory loading mechanism for internal use within the framework.
- * <p>
- * Loads and instantiates factories of a given type from
+ *
+ * <p>Loads and instantiates factories of a given type from
  * {@value #FACTORIES_RESOURCE_LOCATION} and merges them with matching beans
  * from a {@link ListableBeanFactory}.
  *
