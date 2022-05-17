@@ -424,7 +424,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		if (!this.advisorChainInitialized && !ObjectUtils.isEmpty(this.interceptorNames)) {
 			if (this.beanFactory == null) {
 				throw new IllegalStateException("No BeanFactory available anymore (probably due to serialization) " +
-						"- cannot resolve interceptor names " + Arrays.asList(this.interceptorNames));
+						"- cannot resolve interceptor names " + Arrays.toString(this.interceptorNames));
 			}
 
 			// Globals can't be last unless we specified a targetSource using the property...
