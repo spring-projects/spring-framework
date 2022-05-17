@@ -64,6 +64,7 @@ public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetad
 	 * @since 5.3.16
 	 */
 	@SafeVarargs
+	@SuppressWarnings("varargs")
 	public static <E> ManagedList<E> of(E... elements) {
 		ManagedList<E> list = new ManagedList<>();
 		Collections.addAll(list, elements);

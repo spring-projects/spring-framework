@@ -63,6 +63,7 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 	 * @since 5.3.16
 	 */
 	@SafeVarargs
+	@SuppressWarnings("varargs")
 	public static <E> ManagedSet<E> of(E... elements) {
 		ManagedSet<E> set = new ManagedSet<>();
 		Collections.addAll(set, elements);
