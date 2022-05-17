@@ -220,8 +220,8 @@ class NamedValueArgumentResolverTests {
 		}
 
 		@Override
-		protected void addRequestValue(String name, String value, HttpRequestValues.Builder requestValues) {
-			this.testValues.add(name, value);
+		protected void addRequestValue(String name, Object value, HttpRequestValues.Builder requestValues) {
+			this.testValues.add(name, (String) value);
 		}
 	}
 

@@ -67,8 +67,8 @@ public class RequestParamArgumentResolver extends AbstractNamedValueArgumentReso
 	}
 
 	@Override
-	protected void addRequestValue(String name, String value, HttpRequestValues.Builder requestValues) {
-		requestValues.addRequestParameter(name, value);
+	protected void addRequestValue(String name, Object value, HttpRequestValues.Builder requestValues) {
+		requestValues.addRequestParameter(name, (String) value);
 	}
 
 }
