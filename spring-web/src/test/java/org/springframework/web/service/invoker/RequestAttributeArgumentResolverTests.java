@@ -19,19 +19,18 @@ package org.springframework.web.service.invoker;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.service.annotation.GetExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link PathVariableArgumentResolver}.
+ * Unit tests for {@link RequestAttributeArgumentResolver}.
  * <p>For base class functionality, see {@link NamedValueArgumentResolverTests}.
  *
- * @author Olga Maciaszek-Sharma
  * @author Rossen Stoyanchev
  */
-class PathVariableArgumentResolverTests {
+class RequestAttributeArgumentResolverTests {
 
 	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
@@ -41,21 +40,21 @@ class PathVariableArgumentResolverTests {
 	// Base class functionality should be tested in NamedValueArgumentResolverTests.
 
 	@Test
-	void pathVariable() {
+	void cookieValue() {
 		this.service.execute("test");
-		assertPathVariable("id", "test");
+		assertAttribute("attribute", "test");
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private void assertPathVariable(String name, @Nullable String expectedValue) {
-		assertThat(this.client.getRequestValues().getUriVariables().get(name)).isEqualTo(expectedValue);
+	private void assertAttribute(String name, @Nullable String expectedValue) {
+		assertThat(this.client.getRequestValues().getAttributes().get(name)).isEqualTo(expectedValue);
 	}
 
 
 	private interface Service {
 
 		@GetExchange
-		void execute(@PathVariable String id);
+		void execute(@RequestAttribute String attribute);
 
 	}
 
