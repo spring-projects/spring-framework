@@ -62,6 +62,17 @@ public abstract class CollectionUtils {
 	}
 
 	/**
+	 * Return {@code true} if the supplied Collection is neither {@code null} nor empty.
+	 * Otherwise, return {@code false}.
+	 *
+	 * @param collection the Collection to check
+	 * @return whether the given Collection is not empty
+	 */
+	public static boolean isNotEmpty(@Nullable Collection<?> collection) {
+		return !isEmpty(collection);
+	}
+
+	/**
 	 * Return {@code true} if the supplied Map is {@code null} or empty.
 	 * Otherwise, return {@code false}.
 	 * @param map the Map to check
@@ -69,6 +80,17 @@ public abstract class CollectionUtils {
 	 */
 	public static boolean isEmpty(@Nullable Map<?, ?> map) {
 		return (map == null || map.isEmpty());
+	}
+
+	/**
+	 * Return {@code true} if the supplied Map is neither {@code null} nor empty.
+	 * Otherwise, return {@code false}.
+	 *
+	 * @param map the Map to check
+	 * @return whether the given Map is not empty
+	 */
+	public static boolean isNotEmpty(@Nullable Map<?, ?> map) {
+		return !isEmpty(map);
 	}
 
 	/**
