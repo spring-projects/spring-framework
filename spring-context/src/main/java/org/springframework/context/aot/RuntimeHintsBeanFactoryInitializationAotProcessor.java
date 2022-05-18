@@ -36,18 +36,13 @@ import org.springframework.core.log.LogMessage;
 import org.springframework.lang.Nullable;
 
 /**
- * AOT {@code BeanFactoryPostProcessor} that processes
+ * {@link BeanFactoryInitializationAotProcessor} implementation that processes
  * {@link RuntimeHintsRegistrar} implementations declared as
  * {@code spring.factories} or using
  * {@link ImportRuntimeHints @ImportRuntimeHints} annotated configuration
  * classes or bean methods.
- * <p>
- * This processor is registered by default in the
- * {@link ApplicationContextAotGenerator} as it is only useful in an AOT
- * context.
  *
  * @author Brian Clozel
- * @see ApplicationContextAotGenerator
  */
 class RuntimeHintsBeanFactoryInitializationAotProcessor
 		implements BeanFactoryInitializationAotProcessor {
