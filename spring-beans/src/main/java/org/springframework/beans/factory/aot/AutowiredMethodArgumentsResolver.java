@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.annotation;
+package org.springframework.beans.factory.aot;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;

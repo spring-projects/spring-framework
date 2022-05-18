@@ -24,7 +24,6 @@ import java.lang.annotation.Target;
 
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.web.bind.annotation.Mapping;
-import org.springframework.web.service.invoker.UrlArgumentResolver;
 
 /**
  * Annotation that declares an HTTP service method as an HTTP endpoint defined
@@ -55,8 +54,7 @@ import org.springframework.web.service.invoker.UrlArgumentResolver;
  * <td>{@link java.net.URI URI}</td>
  * <td>Dynamically set the URL for the request, overriding the annotation's
  * {@link #url()} attribute</td>
- * <td>{@link UrlArgumentResolver
- * HttpUrlArgumentResolver}</td>
+ * <td>{@link org.springframework.web.service.invoker.UrlArgumentResolver}</td>
  * </tr>
  * <tr>
  * <td>{@link org.springframework.http.HttpMethod HttpMethod}</td>

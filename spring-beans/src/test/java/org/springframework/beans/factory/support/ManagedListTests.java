@@ -25,61 +25,61 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
+ * Unit tests for {@link ManagedList}.
+ *
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class ManagedListTests {
+class ManagedListTests {
 
 	@Test
-	public void mergeSunnyDay() {
+	void mergeSunnyDay() {
 		ManagedList parent = ManagedList.of("one", "two");
 		ManagedList child = ManagedList.of("three");
 		child.setMergeEnabled(true);
 		List mergedList = child.merge(parent);
-		assertThat(mergedList.size()).as("merge() obviously did not work.").isEqualTo(3);
+		assertThat(mergedList).as("merge() obviously did not work.").containsExactly("one", "two", "three");
 	}
 
 	@Test
-	public void mergeWithNullParent() {
+	void mergeWithNullParent() {
 		ManagedList child = ManagedList.of("one");
 		child.setMergeEnabled(true);
 		assertThat(child.merge(null)).isSameAs(child);
 	}
 
 	@Test
-	public void mergeNotAllowedWhenMergeNotEnabled() {
+	void mergeNotAllowedWhenMergeNotEnabled() {
 		ManagedList child = new ManagedList();
-		assertThatIllegalStateException().isThrownBy(() ->
-				child.merge(null));
+		assertThatIllegalStateException().isThrownBy(() -> child.merge(null));
 	}
 
 	@Test
-	public void mergeWithNonCompatibleParentType() {
+	void mergeWithIncompatibleParentType() {
 		ManagedList child = ManagedList.of("one");
 		child.setMergeEnabled(true);
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				child.merge("hello"));
+		assertThatIllegalArgumentException().isThrownBy(() -> child.merge("hello"));
 	}
 
 	@Test
-	public void mergeEmptyChild() {
+	void mergeEmptyChild() {
 		ManagedList parent = ManagedList.of("one", "two");
 		ManagedList child = new ManagedList();
 		child.setMergeEnabled(true);
 		List mergedList = child.merge(parent);
-		assertThat(mergedList.size()).as("merge() obviously did not work.").isEqualTo(2);
+		assertThat(mergedList).as("merge() obviously did not work.").containsExactly("one", "two");
 	}
 
 	@Test
-	public void mergeChildValuesOverrideTheParents() {
+	void mergedChildValuesDoNotOverrideTheParents() {
 		// doesn't make much sense in the context of a list...
 		ManagedList parent = ManagedList.of("one", "two");
 		ManagedList child = ManagedList.of("one");
 		child.setMergeEnabled(true);
 		List mergedList = child.merge(parent);
-		assertThat(mergedList.size()).as("merge() obviously did not work.").isEqualTo(3);
+		assertThat(mergedList).as("merge() obviously did not work.").containsExactly("one", "two", "one");
 	}
 
 }

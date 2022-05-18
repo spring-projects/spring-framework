@@ -30,8 +30,6 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodGenerator;
 import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
-import org.springframework.beans.factory.annotation.AutowiredArgumentsCodeGenerator;
-import org.springframework.beans.factory.annotation.AutowiredInstantiationArgumentsResolver;
 import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.ResolvableType;
