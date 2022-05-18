@@ -31,6 +31,7 @@ import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -50,6 +51,14 @@ public class RdbmsOperationTests {
 				operation::compile);
 	}
 
+	@Test
+	public void getSql() {
+		String sql = "select * from mytable";
+		operation.setDataSource(new DriverManagerDataSource());
+		operation.setSql(sql);
+		String strGotten = operation.getSql();
+		assertThat(strGotten.equals(sql));
+	}
 	@Test
 	public void setTypeAfterCompile() {
 		operation.setDataSource(new DriverManagerDataSource());
@@ -97,6 +106,15 @@ public class RdbmsOperationTests {
 		operation.setSql("select * from mytable");
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
 				operation.validateParameters(new Object[] { 1, 2 }));
+	}
+	@Test
+	public void tooManyMapParameters() {
+		operation.setSql("select * from mytable");
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				operation.validateNamedParameters(Map.ofEntries(
+						entry("a", "b"),
+						entry("c", "d")
+				) ));
 	}
 
 	@Test
