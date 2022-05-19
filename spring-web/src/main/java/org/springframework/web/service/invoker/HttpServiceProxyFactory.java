@@ -35,6 +35,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringValueResolver;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /**
@@ -50,6 +51,9 @@ public final class HttpServiceProxyFactory {
 
 	private final List<HttpServiceArgumentResolver> argumentResolvers;
 
+	@Nullable
+	private final StringValueResolver embeddedValueResolver;
+
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
 	private final Duration blockTimeout;
@@ -57,10 +61,12 @@ public final class HttpServiceProxyFactory {
 
 	private HttpServiceProxyFactory(
 			HttpClientAdapter clientAdapter, List<HttpServiceArgumentResolver> argumentResolvers,
-			ReactiveAdapterRegistry reactiveAdapterRegistry, Duration blockTimeout) {
+			@Nullable StringValueResolver embeddedValueResolver, ReactiveAdapterRegistry reactiveAdapterRegistry,
+			Duration blockTimeout) {
 
 		this.clientAdapter = clientAdapter;
 		this.argumentResolvers = argumentResolvers;
+		this.embeddedValueResolver = embeddedValueResolver;
 		this.reactiveAdapterRegistry = reactiveAdapterRegistry;
 		this.blockTimeout = blockTimeout;
 	}
@@ -80,8 +86,8 @@ public final class HttpServiceProxyFactory {
 						.stream()
 						.map(method ->
 								new HttpServiceMethod(
-										method, serviceType, this.argumentResolvers,
-										this.clientAdapter, this.reactiveAdapterRegistry, this.blockTimeout))
+										method, serviceType, this.argumentResolvers, this.clientAdapter,
+										this.embeddedValueResolver, this.reactiveAdapterRegistry, this.blockTimeout))
 						.toList();
 
 		return ProxyFactory.getProxy(serviceType, new HttpServiceMethodInterceptor(methods));
@@ -114,6 +120,9 @@ public final class HttpServiceProxyFactory {
 		@Nullable
 		private ConversionService conversionService;
 
+		@Nullable
+		private StringValueResolver embeddedValueResolver;
+
 		private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 		private Duration blockTimeout = Duration.ofSeconds(5);
@@ -141,6 +150,18 @@ public final class HttpServiceProxyFactory {
 		 */
 		public Builder setConversionService(ConversionService conversionService) {
 			this.conversionService = conversionService;
+			return this;
+		}
+
+		/**
+		 * Set the StringValueResolver to use for resolving placeholders and
+		 * expressions in {@link HttpExchange#url()}.
+		 * @param embeddedValueResolver the resolver to use
+		 * @return the same builder instance
+		 * @see org.springframework.context.EmbeddedValueResolverAware
+		 */
+		public Builder setEmbeddedValueResolver(@Nullable StringValueResolver embeddedValueResolver) {
+			this.embeddedValueResolver = embeddedValueResolver;
 			return this;
 		}
 
@@ -176,7 +197,8 @@ public final class HttpServiceProxyFactory {
 			List<HttpServiceArgumentResolver> resolvers = initArgumentResolvers(conversionService);
 
 			return new HttpServiceProxyFactory(
-					this.clientAdapter, resolvers, this.reactiveAdapterRegistry, this.blockTimeout);
+					this.clientAdapter, resolvers, this.embeddedValueResolver, this.reactiveAdapterRegistry,
+					this.blockTimeout);
 		}
 
 		private ConversionService initConversionService() {

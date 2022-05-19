@@ -168,7 +168,11 @@ public class HttpServiceMethodTests {
 	@Test
 	void typeAndMethodAnnotatedService() {
 
-		MethodLevelAnnotatedService service = this.proxyFactory.createClient(TypeAndMethodLevelAnnotatedService.class);
+		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.clientAdapter)
+				.setEmbeddedValueResolver(value -> (value.equals("${baseUrl}") ? "/base" : value))
+				.build();
+
+		MethodLevelAnnotatedService service = proxyFactory.createClient(TypeAndMethodLevelAnnotatedService.class);
 
 		service.performGet();
 
@@ -281,7 +285,7 @@ public class HttpServiceMethodTests {
 
 
 	@SuppressWarnings("unused")
-	@HttpExchange(url = "/base", contentType = APPLICATION_CBOR_VALUE, accept = APPLICATION_CBOR_VALUE)
+	@HttpExchange(url = "${baseUrl}", contentType = APPLICATION_CBOR_VALUE, accept = APPLICATION_CBOR_VALUE)
 	private interface TypeAndMethodLevelAnnotatedService extends MethodLevelAnnotatedService {
 	}
 
