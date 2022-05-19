@@ -113,4 +113,17 @@ class KeyHolderTests {
 			.withMessageStartingWith("The getKeys method should only be used when keys for a single row are returned.");
 	}
 
+	@Test
+	void getKeysWithDifferentKeyRows() {
+		@SuppressWarnings("serial")
+		Map<String, Object> m = Map.of("key", 3, "seq", 4,"last",5);
+		kh.getKeyList().addAll(asList(m, m, m));
+
+		assertThat(kh.getKeyList()).as("three rows should be in the list").hasSize(3);
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
+				.isThrownBy(() -> kh.getKeys())
+				.withMessageStartingWith("The getKeys method should only be used when keys for a single row are returned.");
+
+	}
+
 }
