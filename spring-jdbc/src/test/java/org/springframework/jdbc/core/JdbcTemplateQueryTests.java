@@ -18,7 +18,11 @@ package org.springframework.jdbc.core;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,7 +37,6 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.InstanceOfAssertFactories.URL_TYPE;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -218,47 +221,6 @@ public class JdbcTemplateQueryTests {
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
-
-	@Test
-	public void testQueryForObjectWithBoolean() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
-		given(this.resultSet.next()).willReturn(true, false);
-		given(this.resultSet.getBoolean(1)).willReturn(true);
-		assertThat(this.template.queryForObject(sql, Boolean.class)).isEqualTo(true);
-		verify(this.resultSet).close();
-		verify(this.statement).close();
-	}
-
-	@Test
-	public void testQueryForObjectWithByte() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
-		given(this.resultSet.next()).willReturn(true, false);
-		given(this.resultSet.getByte(1)).willReturn((byte) 32);
-		assertThat(this.template.queryForObject(sql, Byte.class)).isEqualTo((byte) 32);
-		verify(this.resultSet).close();
-		verify(this.statement).close();
-	}
-
-	@Test
-	public void testQueryForObjectWithDate() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
-		given(this.resultSet.next()).willReturn(true, false);
-		given(this.resultSet.getDate(1)).willReturn(Date.valueOf("2020-01-09"));
-		assertThat(this.template.queryForObject(sql, Date.class)).isEqualTo(Date.valueOf("2020-01-09"));
-		verify(this.resultSet).close();
-		verify(this.statement).close();
-	}
-
-	@Test
-	public void testQueryForObjectWithFloat() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
-		given(this.resultSet.next()).willReturn(true, false);
-		given(this.resultSet.getFloat(1)).willReturn((float) 5.28);
-		assertThat(this.template.queryForObject(sql, Float.class)).isEqualTo((float) 5.28);
-		verify(this.resultSet).close();
-		verify(this.statement).close();
-	}
-
 
 	@Test
 	public void testQueryForObjectWithIntegerAndNull() throws Exception {
