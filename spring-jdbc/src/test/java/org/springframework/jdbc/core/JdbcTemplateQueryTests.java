@@ -144,6 +144,21 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
+	public void testQueryForListWithMultipleElements() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID < 4";
+		given(this.resultSet.next()).willReturn(true, true,true, false);
+		given(this.resultSet.getObject(1)).willReturn(11, 12,13);
+		List<Map<String, Object>> li = this.template.queryForList(sql);
+		assertThat(li.size()).as("All rows returned").isEqualTo(3);
+		assertThat(((Integer) li.get(0).get("age")).intValue()).as("First row is Integer").isEqualTo(11);
+		assertThat(((Integer) li.get(1).get("age")).intValue()).as("Second row is Integer").isEqualTo(12);
+		assertThat(((Integer) li.get(2).get("age")).intValue()).as("Third row is Integer").isEqualTo(13);
+		verify(this.resultSet).close();
+		verify(this.statement).close();
+	}
+
+
+	@Test
 	public void testQueryForObjectThrowsIncorrectResultSizeForMoreThanOneRow() throws Exception {
 		String sql = "select pass from t_account where first_name='Alef'";
 		given(this.resultSet.next()).willReturn(true, true, false);
