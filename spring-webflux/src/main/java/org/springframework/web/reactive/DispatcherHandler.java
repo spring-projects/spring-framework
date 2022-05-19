@@ -199,7 +199,7 @@ public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, A
 
 	@Override
 	public Mono<Void> handlePreFlight(ServerWebExchange exchange) {
-		return Flux.fromIterable(this.handlerMappings != null ? this.handlerMappings : Collections.emptyList())
+		return Flux.fromIterable(this.handlerMappings)
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.switchIfEmpty(Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN)))
 				.next()
