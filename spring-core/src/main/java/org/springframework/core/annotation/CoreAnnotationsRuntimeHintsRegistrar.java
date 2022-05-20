@@ -16,12 +16,9 @@
 
 package org.springframework.core.annotation;
 
-import java.util.function.Consumer;
-
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.aot.hint.TypeHint;
+import org.springframework.aot.hint.support.RuntimeHintsUtils;
 
 /**
  * {@link RuntimeHintsRegistrar} for core annotations.
@@ -31,13 +28,10 @@ import org.springframework.aot.hint.TypeHint;
  */
 class CoreAnnotationsRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
-	private static final Consumer<TypeHint.Builder> HINT = builder -> builder.withMembers(
-			MemberCategory.INVOKE_DECLARED_METHODS);
-
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-		hints.reflection().registerType(AliasFor.class, HINT);
-		hints.reflection().registerType(Order.class, HINT);
+		hints.reflection().registerType(AliasFor.class, RuntimeHintsUtils.ANNOTATION_HINT)
+				.registerType(Order.class, RuntimeHintsUtils.ANNOTATION_HINT);
 	}
 
 }
