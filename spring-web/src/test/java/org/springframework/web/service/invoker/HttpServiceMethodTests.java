@@ -35,6 +35,8 @@ import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_CBOR_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -130,6 +132,9 @@ public class HttpServiceMethodTests {
 
 		String body = service.getBody();
 		assertThat(body).isEqualTo("requestToBody");
+
+		Optional<String> optional = service.getBodyOptional();
+		assertThat(optional).isEqualTo(Optional.of("requestToBody"));
 
 		ResponseEntity<String> entity = service.getEntity();
 		assertThat(entity.getBody()).isEqualTo("requestToEntity");
@@ -251,6 +256,9 @@ public class HttpServiceMethodTests {
 
 		@GetExchange
 		String getBody();
+
+		@GetExchange
+		Optional<String> getBodyOptional();
 
 		@GetExchange
 		ResponseEntity<Void> getVoidEntity();
