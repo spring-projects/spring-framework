@@ -324,7 +324,7 @@ final class HttpServiceMethod {
 				responseFunction = initBodyFunction(client, actualParam, reactiveAdapter);
 			}
 
-			boolean blockForOptional = actualType.equals(Optional.class);
+			boolean blockForOptional = returnType.equals(Optional.class);
 			return new ResponseFunction(responseFunction, reactiveAdapter, blockForOptional, blockTimeout);
 		}
 

@@ -16,6 +16,8 @@
 
 package org.springframework.web.service.invoker;
 
+import java.util.Optional;
+
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
@@ -130,6 +132,9 @@ public class HttpServiceMethodTests {
 
 		String body = service.getBody();
 		assertThat(body).isEqualTo("requestToBody");
+
+		Optional<String> optional = service.getBodyOptional();
+		assertThat(optional).isEqualTo(Optional.of("requestToBody"));
 
 		ResponseEntity<String> entity = service.getEntity();
 		assertThat(entity.getBody()).isEqualTo("requestToEntity");
@@ -251,6 +256,9 @@ public class HttpServiceMethodTests {
 
 		@GetExchange
 		String getBody();
+
+		@GetExchange
+		Optional<String> getBodyOptional();
 
 		@GetExchange
 		ResponseEntity<Void> getVoidEntity();
