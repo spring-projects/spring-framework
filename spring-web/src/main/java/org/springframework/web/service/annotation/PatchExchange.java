@@ -40,13 +40,13 @@ public @interface PatchExchange {
 	 * Alias for {@link HttpExchange#value}.
 	 */
 	@AliasFor(annotation = HttpExchange.class)
-	String[] value() default {};
+	String value() default "";
 
 	/**
 	 * Alias for {@link HttpExchange#url()}.
 	 */
 	@AliasFor(annotation = HttpExchange.class)
-	String[] url() default {};
+	String url() default "";
 
 	/**
 	 * Alias for {@link HttpExchange#contentType()}.
