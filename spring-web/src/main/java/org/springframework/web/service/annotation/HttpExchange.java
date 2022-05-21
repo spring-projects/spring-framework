@@ -32,7 +32,8 @@ import org.springframework.web.bind.annotation.Mapping;
  * <p>The annotation may only be used at the type level &mdash; for example to
  * specify a base URL path. At the method level, use one of the HTTP method
  * specific, shortcut annotations, each of which is <em>meta-annotated</em> with
- * {@link HttpExchange}:
+ * {@code HttpExchange}:
+ *
  * <ul>
  * <li>{@link GetExchange}
  * <li>{@link PostExchange}
