@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -279,13 +279,14 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Assert.notNull(locationPattern, "Location pattern must not be null");
 		if (locationPattern.startsWith(CLASSPATH_ALL_URL_PREFIX)) {
 			// a class path resource (multiple resources for same name possible)
-			if (getPathMatcher().isPattern(locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length()))) {
+			String locationPatternWithoutPrefix = locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length());
+			if (getPathMatcher().isPattern(locationPatternWithoutPrefix)) {
 				// a class path resource pattern
 				return findPathMatchingResources(locationPattern);
 			}
 			else {
 				// all class path resources with the given name
-				return findAllClassPathResources(locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length()));
+				return findAllClassPathResources(locationPatternWithoutPrefix);
 			}
 		}
 		else {
@@ -314,13 +315,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see #convertClassLoaderURL
 	 */
 	protected Resource[] findAllClassPathResources(String location) throws IOException {
-		String path = location;
-		if (path.startsWith("/")) {
-			path = path.substring(1);
-		}
+		String path = stripLeadingSlash(location);
 		Set<Resource> result = doFindAllClassPathResources(path);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Resolved classpath location [" + location + "] to resources " + result);
+			logger.trace("Resolved classpath location [" + path + "] to resources " + result);
 		}
 		return result.toArray(new Resource[0]);
 	}
@@ -830,6 +828,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 		Arrays.sort(files, Comparator.comparing(File::getName));
 		return files;
+	}
+
+
+	private static String stripLeadingSlash(String path) {
+		return (path.startsWith("/") ? path.substring(1) : path);
 	}
 
 
