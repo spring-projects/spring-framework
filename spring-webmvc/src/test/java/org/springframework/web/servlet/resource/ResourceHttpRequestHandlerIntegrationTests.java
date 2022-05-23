@@ -41,6 +41,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletConfig;
 import org.springframework.web.testfixture.servlet.MockServletContext;
 import org.springframework.web.util.UriUtils;
+import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,23 +61,35 @@ public class ResourceHttpRequestHandlerIntegrationTests {
 
 	public static Stream<Arguments> argumentSource() {
 		return Stream.of(
-				arguments(true, "/cp"),
-				arguments(true, "/fs"),
-				arguments(true, "/url"),
-				arguments(false, "/cp"),
-				arguments(false, "/fs"),
-				arguments(false, "/url")
+				// PathPattern
+				arguments(true, true, "/cp"),
+				arguments(true, true, "/fs"),
+				arguments(true, true, "/url"),
+
+				arguments(true, false, "/cp"),
+				arguments(true, false, "/fs"),
+				arguments(true, false, "/url"),
+
+				// PathMatcher
+				arguments(false, true, "/cp"),
+				arguments(false, true, "/fs"),
+				arguments(false, true, "/url"),
+
+				arguments(false, false, "/cp"),
+				arguments(false, false, "/fs"),
+				arguments(false, false, "/url")
 		);
 	}
 
 
 	@ParameterizedTest
 	@MethodSource("argumentSource")
-	void cssFile(boolean usePathPatterns, String pathPrefix) throws Exception {
+	void cssFile(boolean usePathPatterns, boolean decodingUrlPathHelper, String pathPrefix) throws Exception {
+
 		MockHttpServletRequest request = initRequest(pathPrefix + "/test/foo.css");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		DispatcherServlet servlet = initDispatcherServlet(usePathPatterns, WebConfig.class);
+		DispatcherServlet servlet = initDispatcherServlet(usePathPatterns, decodingUrlPathHelper, WebConfig.class);
 		servlet.service(request, response);
 
 		String description = "usePathPattern=" + usePathPatterns + ", prefix=" + pathPrefix;
@@ -87,11 +100,13 @@ public class ResourceHttpRequestHandlerIntegrationTests {
 
 	@ParameterizedTest
 	@MethodSource("argumentSource") // gh-26775
-	void classpathLocationWithEncodedPath(boolean usePathPatterns, String pathPrefix) throws Exception {
+	void classpathLocationWithEncodedPath(
+			boolean usePathPatterns, boolean decodingUrlPathHelper, String pathPrefix) throws Exception {
+
 		MockHttpServletRequest request = initRequest(pathPrefix + "/test/foo with spaces.css");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		DispatcherServlet servlet = initDispatcherServlet(usePathPatterns, WebConfig.class);
+		DispatcherServlet servlet = initDispatcherServlet(usePathPatterns, decodingUrlPathHelper, WebConfig.class);
 		servlet.service(request, response);
 
 		String description = "usePathPattern=" + usePathPatterns + ", prefix=" + pathPrefix;
@@ -100,14 +115,16 @@ public class ResourceHttpRequestHandlerIntegrationTests {
 		assertThat(response.getContentAsString()).as(description).isEqualTo("h1 { color:red; }");
 	}
 
-	private DispatcherServlet initDispatcherServlet(boolean usePathPatterns, Class<?>... configClasses)
-			throws ServletException {
+	private DispatcherServlet initDispatcherServlet(
+			boolean usePathPatterns, boolean decodingUrlPathHelper, Class<?>... configClasses) throws ServletException {
 
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.register(configClasses);
 		if (usePathPatterns) {
 			context.register(PathPatternParserConfig.class);
 		}
+		context.register(decodingUrlPathHelper ?
+				DecodingUrlPathHelperConfig.class : NonDecodingUrlPathHelperConfig.class);
 		context.setServletConfig(this.servletConfig);
 		context.refresh();
 
@@ -168,6 +185,28 @@ public class ResourceHttpRequestHandlerIntegrationTests {
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
 			configurer.setPatternParser(new PathPatternParser());
+		}
+	}
+
+
+	static class DecodingUrlPathHelperConfig implements WebMvcConfigurer {
+
+		@Override
+		public void configurePathMatch(PathMatchConfigurer configurer) {
+			UrlPathHelper helper = new UrlPathHelper();
+			helper.setUrlDecode(true);
+			configurer.setUrlPathHelper(helper);
+		}
+	}
+
+
+	static class NonDecodingUrlPathHelperConfig implements WebMvcConfigurer {
+
+		@Override
+		public void configurePathMatch(PathMatchConfigurer configurer) {
+			UrlPathHelper helper = new UrlPathHelper();
+			helper.setUrlDecode(false);
+			configurer.setUrlPathHelper(helper);
 		}
 	}
 
