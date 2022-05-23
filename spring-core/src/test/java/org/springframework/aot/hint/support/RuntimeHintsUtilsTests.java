@@ -21,11 +21,15 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.JdkProxyHint;
 import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.MergedAnnotations;
@@ -46,12 +50,8 @@ class RuntimeHintsUtilsTests {
 	void registerAnnotation() {
 		RuntimeHintsUtils.registerAnnotation(this.hints, MergedAnnotations
 				.from(SampleInvokerClass.class).get(SampleInvoker.class));
-		assertThat(this.hints.reflection().getTypeHint(SampleInvoker.class)).satisfies(typeHint -> {
-			assertThat(typeHint.constructors()).isEmpty();
-			assertThat(typeHint.fields()).isEmpty();
-			assertThat(typeHint.methods()).isEmpty();
-			assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_PUBLIC_METHODS);
-		});
+		assertThat(this.hints.reflection().typeHints()).singleElement()
+				.satisfies(annotationHint(SampleInvoker.class));
 		assertThat(this.hints.proxies().jdkProxies()).isEmpty();
 	}
 
@@ -59,15 +59,40 @@ class RuntimeHintsUtilsTests {
 	void registerAnnotationProxyRegistersJdkProxy() {
 		RuntimeHintsUtils.registerAnnotation(this.hints, MergedAnnotations
 				.from(RetryInvokerClass.class).get(RetryInvoker.class));
-		assertThat(this.hints.reflection().getTypeHint(RetryInvoker.class)).satisfies(typeHint -> {
+		assertThat(this.hints.reflection().typeHints()).singleElement()
+				.satisfies(annotationHint(RetryInvoker.class));
+		assertThat(this.hints.proxies().jdkProxies()).singleElement()
+				.satisfies(annotationProxy(RetryInvoker.class));
+	}
+
+	@Test
+	void registerAnnotationWhereUsedAsAMetaAnnotationRegistersHierarchy() {
+		RuntimeHintsUtils.registerAnnotation(this.hints, MergedAnnotations
+				.from(RetryWithEnabledFlagInvokerClass.class).get(SampleInvoker.class));
+		ReflectionHints reflection = this.hints.reflection();
+		assertThat(reflection.typeHints())
+				.anySatisfy(annotationHint(SampleInvoker.class))
+				.anySatisfy(annotationHint(RetryInvoker.class))
+				.anySatisfy(annotationHint(RetryWithEnabledFlagInvoker.class))
+				.hasSize(3);
+		assertThat(this.hints.proxies().jdkProxies()).singleElement()
+				.satisfies(annotationProxy(SampleInvoker.class));
+	}
+
+	private Consumer<TypeHint> annotationHint(Class<?> type) {
+		return typeHint -> {
+			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(type));
 			assertThat(typeHint.constructors()).isEmpty();
 			assertThat(typeHint.fields()).isEmpty();
 			assertThat(typeHint.methods()).isEmpty();
 			assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_PUBLIC_METHODS);
-		});
-		assertThat(this.hints.proxies().jdkProxies()).anySatisfy(jdkProxyHint ->
-				assertThat(jdkProxyHint.getProxiedInterfaces()).containsExactly(
-						TypeReference.of(RetryInvoker.class), TypeReference.of(SynthesizedAnnotation.class)));
+		};
+	}
+
+	private Consumer<JdkProxyHint> annotationProxy(Class<?> type) {
+		return jdkProxyHint -> assertThat(jdkProxyHint.getProxiedInterfaces())
+				.containsExactly(TypeReference.of(type),
+						TypeReference.of(SynthesizedAnnotation.class));
 	}
 
 
@@ -78,6 +103,11 @@ class RuntimeHintsUtilsTests {
 
 	@RetryInvoker
 	static class RetryInvokerClass {
+
+	}
+
+	@RetryWithEnabledFlagInvoker
+	static class RetryWithEnabledFlagInvokerClass {
 
 	}
 
@@ -99,6 +129,19 @@ class RuntimeHintsUtilsTests {
 
 		@AliasFor(attribute = "retries", annotation = SampleInvoker.class)
 		int value() default 1;
+
+	}
+
+	@Target({ ElementType.TYPE })
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	@RetryInvoker
+	@interface RetryWithEnabledFlagInvoker {
+
+		@AliasFor(attribute = "value", annotation = RetryInvoker.class)
+		int value() default 5;
+
+		boolean enabled() default true;
 
 	}
 

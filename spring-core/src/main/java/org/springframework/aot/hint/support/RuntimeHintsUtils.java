@@ -48,14 +48,14 @@ public abstract class RuntimeHintsUtils {
 	 * @see SynthesizedAnnotation
 	 */
 	public static void registerAnnotation(RuntimeHints hints, MergedAnnotation<?> annotation) {
-		registerAnnotation(hints, annotation.getType(),
-				annotation.synthesize() instanceof SynthesizedAnnotation);
-	}
-
-	private static void registerAnnotation(RuntimeHints hints, Class<?> annotationType, boolean withProxy) {
-		hints.reflection().registerType(annotationType, ANNOTATION_HINT);
-		if (withProxy) {
-			hints.proxies().registerJdkProxy(annotationType, SynthesizedAnnotation.class);
+		hints.reflection().registerType(annotation.getType(), ANNOTATION_HINT);
+		MergedAnnotation<?> parentSource = annotation.getMetaSource();
+		while (parentSource != null) {
+			hints.reflection().registerType(parentSource.getType(), ANNOTATION_HINT);
+			parentSource = parentSource.getMetaSource();
+		}
+		if (annotation.synthesize() instanceof SynthesizedAnnotation) {
+			hints.proxies().registerJdkProxy(annotation.getType(), SynthesizedAnnotation.class);
 		}
 	}
 
