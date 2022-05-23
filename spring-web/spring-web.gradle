@@ -47,6 +47,8 @@ dependencies {
 	optional("com.googlecode.protobuf-java-format:protobuf-java-format")
 	optional("com.rometools:rome")
 	optional("org.apache.groovy:groovy")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-json")

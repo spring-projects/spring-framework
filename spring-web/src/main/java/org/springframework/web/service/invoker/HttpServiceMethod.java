@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import kotlin.coroutines.Continuation;
+import kotlinx.coroutines.reactive.AwaitKt;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -279,6 +281,10 @@ final class HttpServiceMethod {
 				return this.returnTypeAdapter.fromPublisher(responsePublisher);
 			}
 
+			if (requestValues.getContinuation() != null) {
+				return KotlinDelegate.awaitFirstOrNull(responsePublisher, requestValues.getContinuation());
+			}
+
 			return (this.blockForOptional ?
 					((Mono<?>) responsePublisher).blockOptional(this.blockTimeout) :
 					((Mono<?>) responsePublisher).block(this.blockTimeout));
@@ -368,4 +374,12 @@ final class HttpServiceMethod {
 
 	}
 
+	private static class KotlinDelegate {
+
+		@SuppressWarnings({"unchecked"})
+		@Nullable
+		private static Object awaitFirstOrNull(Publisher<?> publisher, Object continuation) {
+			return AwaitKt.awaitFirstOrNull(publisher, (Continuation<Object>) continuation);
+		}
+	}
 }

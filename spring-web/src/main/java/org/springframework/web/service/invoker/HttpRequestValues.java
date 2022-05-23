@@ -79,12 +79,15 @@ public final class HttpRequestValues {
 	@Nullable
 	private final ParameterizedTypeReference<?> bodyElementType;
 
+	@Nullable
+	private final Object continuation;
 
 	private HttpRequestValues(HttpMethod httpMethod,
 			@Nullable URI uri, @Nullable String uriTemplate, Map<String, String> uriVariables,
 			HttpHeaders headers, MultiValueMap<String, String> cookies,
 			@Nullable Object bodyValue,
-			@Nullable Publisher<?> body, @Nullable ParameterizedTypeReference<?> bodyElementType) {
+			@Nullable Publisher<?> body, @Nullable ParameterizedTypeReference<?> bodyElementType,
+			@Nullable Object continuation) {
 
 		Assert.isTrue(uri != null || uriTemplate != null, "Neither URI nor URI template");
 
@@ -97,6 +100,7 @@ public final class HttpRequestValues {
 		this.bodyValue = bodyValue;
 		this.body = body;
 		this.bodyElementType = bodyElementType;
+		this.continuation = continuation;
 	}
 
 
@@ -176,6 +180,13 @@ public final class HttpRequestValues {
 		return this.bodyElementType;
 	}
 
+	/**
+	 * 	Return the Continuation parameter.
+	 */
+	@Nullable
+	public Object getContinuation() {
+		return this.continuation;
+	}
 
 	public static Builder builder(HttpMethod httpMethod) {
 		return new Builder(httpMethod);
@@ -217,6 +228,9 @@ public final class HttpRequestValues {
 
 		@Nullable
 		private ParameterizedTypeReference<?> bodyElementType;
+
+		@Nullable
+		private Object continuation;
 
 		private Builder(HttpMethod httpMethod) {
 			Assert.notNull(httpMethod, "HttpMethod is required");
@@ -348,6 +362,15 @@ public final class HttpRequestValues {
 		}
 
 		/**
+		 * Set the Continuation parameter.
+		 */
+		public Builder setContinuation(Object continuation) {
+			Assert.notNull(continuation, "HttpMethod is required");
+			this.continuation = continuation;
+			return this;
+		}
+
+		/**
 		 * Builder the {@link HttpRequestValues} instance.
 		 */
 		public HttpRequestValues build() {
@@ -390,7 +413,7 @@ public final class HttpRequestValues {
 
 			return new HttpRequestValues(
 					this.httpMethod, uri, uriTemplate, uriVars, headers, cookies, bodyValue,
-					this.body, this.bodyElementType);
+					this.body, this.bodyElementType, this.continuation);
 		}
 
 		private String appendQueryParams(

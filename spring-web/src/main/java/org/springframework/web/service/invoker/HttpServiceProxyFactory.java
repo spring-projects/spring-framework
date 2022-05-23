@@ -28,6 +28,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -193,6 +194,9 @@ public final class HttpServiceProxyFactory {
 			resolvers.add(new CookieValueArgumentResolver(conversionService));
 			resolvers.add(new UrlArgumentResolver());
 			resolvers.add(new HttpMethodArgumentResolver());
+			if (KotlinDetector.isKotlinPresent()) {
+				resolvers.add(new CoroutinesSuspendArgumentResolver());
+			}
 			return resolvers;
 		}
 
