@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,15 +36,16 @@ import org.springframework.core.io.ResourceLoader;
  * {@link ResourceArrayPropertyEditor} for populating {@code Resource} array bean
  * properties.
  *
- * <p>Can be used with any sort of location pattern (e.g. "/WEB-INF/*-context.xml"):
- * Input patterns have to match the strategy implementation. This interface just
- * specifies the conversion method rather than a specific pattern format.
+ * <p>Can be used with any sort of location pattern &mdash; for example,
+ * {@code "/WEB-INF/*-context.xml"}. However, input patterns have to match the
+ * strategy implementation. This interface just specifies the conversion method
+ * rather than a specific pattern format.
  *
- * <p>This interface also suggests a new resource prefix "classpath*:" for all
- * matching resources from the class path. Note that the resource location is
- * expected to be a path without placeholders in this case (e.g. "/beans.xml");
- * JAR files or different directories in the class path can contain multiple files
- * of the same name.
+ * <p>This interface also defines a {@code "classpath*:"} resource prefix for all
+ * matching resources from the class path. Note that the resource location may
+ * also contain placeholders &mdash; for example {@code "/beans-*.xml"}. JAR files
+ * or different directories in the class path can contain multiple files of the
+ * same name.
  *
  * @author Juergen Hoeller
  * @since 1.0.2
