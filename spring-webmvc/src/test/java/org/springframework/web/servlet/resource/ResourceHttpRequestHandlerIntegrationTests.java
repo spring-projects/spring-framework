@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class ResourceHttpRequestHandlerIntegrationTests {
 	}
 
 	@ParameterizedTest
-	@MethodSource("argumentSource")
+	@MethodSource("argumentSource") // gh-26775
 	void classpathLocationWithEncodedPath(boolean usePathPatterns, String pathPrefix) throws Exception {
 		MockHttpServletRequest request = initRequest(pathPrefix + "/test/foo with spaces.css");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -130,40 +130,35 @@ public class ResourceHttpRequestHandlerIntegrationTests {
 
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
+
 			ClassPathResource classPathLocation = new ClassPathResource("", getClass());
 			String path = getPath(classPathLocation);
 
-			registerClasspathLocation("/cp/**", classPathLocation, registry);
-			registerFileSystemLocation("/fs/**", path, registry);
-			registerUrlLocation("/url/**", "file:" + path, registry);
-		}
-
-		protected void registerClasspathLocation(String pattern, ClassPathResource resource, ResourceHandlerRegistry registry) {
-			registry.addResourceHandler(pattern).addResourceLocations(resource);
-		}
-
-		protected void registerFileSystemLocation(String pattern, String path, ResourceHandlerRegistry registry) {
-			FileSystemResource fileSystemLocation = new FileSystemResource(path);
-			registry.addResourceHandler(pattern).addResourceLocations(fileSystemLocation);
-		}
-
-		protected void registerUrlLocation(String pattern, String path, ResourceHandlerRegistry registry) {
-			try {
-				UrlResource urlLocation = new UrlResource(path);
-				registry.addResourceHandler(pattern).addResourceLocations(urlLocation);
-			}
-			catch (MalformedURLException ex) {
-				throw new IllegalStateException(ex);
-			}
+			registry.addResourceHandler("/cp/**").addResourceLocations(classPathLocation);
+			registry.addResourceHandler("/fs/**").addResourceLocations(new FileSystemResource(path));
+			registry.addResourceHandler("/url/**").addResourceLocations(urlResource(path));
 		}
 
 		private String getPath(ClassPathResource resource) {
 			try {
-				return resource.getFile().getCanonicalPath().replace('\\', '/').replace("classes/java", "resources") + "/";
+				return resource.getFile().getCanonicalPath()
+						.replace('\\', '/')
+						.replace("classes/java", "resources") + "/";
 			}
 			catch (IOException ex) {
 				throw new IllegalStateException(ex);
 			}
+		}
+
+		private UrlResource urlResource(String path) {
+			UrlResource urlResource;
+			try {
+				urlResource = new UrlResource("file:" + path);
+			}
+			catch (MalformedURLException ex) {
+				throw new IllegalStateException(ex);
+			}
+			return urlResource;
 		}
 	}
 
