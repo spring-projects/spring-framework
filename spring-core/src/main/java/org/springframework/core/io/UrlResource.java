@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core.io;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -37,6 +38,7 @@ import org.springframework.util.StringUtils;
  * case of the {@code "file:"} protocol.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 28.12.2003
  * @see java.net.URL
  */
@@ -131,6 +133,49 @@ public class UrlResource extends AbstractFileResolvingResource {
 			MalformedURLException exToThrow = new MalformedURLException(ex.getMessage());
 			exToThrow.initCause(ex);
 			throw exToThrow;
+		}
+	}
+
+
+	/**
+	 * Create a new {@code UrlResource} from the given {@link URI}.
+	 * <p>This factory method is a convenience for {@link #UrlResource(URI)} that
+	 * catches any {@link MalformedURLException} and rethrows it wrapped in an
+	 * {@link UncheckedIOException}; suitable for use in {@link java.util.Stream}
+	 * and {@link java.util.Optional} APIs or other scenarios when a checked
+	 * {@link IOException} is undesirable.
+	 * @param uri a URI
+	 * @throws UncheckedIOException if the given URL path is not valid
+	 * @since 6.0
+	 * @see #UrlResource(URI)
+	 */
+	public static UrlResource from(URI uri) throws UncheckedIOException {
+		try {
+			return new UrlResource(uri);
+		}
+		catch (MalformedURLException ex) {
+			throw new UncheckedIOException(ex);
+		}
+	}
+
+	/**
+	 * Create a new {@code UrlResource} from the given URL path.
+	 * <p>This factory method is a convenience for {@link #UrlResource(String)}
+	 * that catches any {@link MalformedURLException} and rethrows it wrapped in an
+	 * {@link UncheckedIOException}; suitable for use in {@link java.util.Stream}
+	 * and {@link java.util.Optional} APIs or other scenarios when a checked
+	 * {@link IOException} is undesirable.
+	 * @param path a URL path
+	 * @throws UncheckedIOException if the given URL path is not valid
+	 * @since 6.0
+	 * @see #UrlResource(String)
+	 */
+	public static UrlResource from(String path) throws UncheckedIOException {
+		try {
+			return new UrlResource(path);
+		}
+		catch (MalformedURLException ex) {
+			throw new UncheckedIOException(ex);
 		}
 	}
 
