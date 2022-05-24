@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xmlns="http://www.springframework.org/schema/beans"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd" default-autowire="byName">
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"
+default-autowire="byType"
+>
 
-	<bean id="firstBean" class="com.ysj.bean.FirstBean"/>
+	<bean id="a" class="com.ysj.autowireTest.A">
+	</bean>
+	<bean id="c" class="com.ysj.autowireTest.C"><property name="name" value="zhangsan"></property>
+	</bean>
+	<bean id="all" class="com.ysj.autowireTest.All">
+	</bean>
+	<bean id="ignoreDependencyTest" class="com.ysj.autowireTest.IgnoreDependencyTest"/>
 </beans>
