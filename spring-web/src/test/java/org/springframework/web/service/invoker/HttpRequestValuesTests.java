@@ -38,7 +38,7 @@ public class HttpRequestValuesTests {
 
 	@Test
 	void defaultUri() {
-		HttpRequestValues requestValues = HttpRequestValues.builder(HttpMethod.GET).build();
+		HttpRequestValues requestValues = HttpRequestValues.builder().setHttpMethod(HttpMethod.GET).build();
 
 		assertThat(requestValues.getUri()).isNull();
 		assertThat(requestValues.getUriTemplate()).isEqualTo("");
@@ -48,7 +48,7 @@ public class HttpRequestValuesTests {
 	@ValueSource(strings = {"POST", "PUT", "PATCH"})
 	void requestParamAsFormData(String httpMethod) {
 
-		HttpRequestValues requestValues = HttpRequestValues.builder(HttpMethod.valueOf(httpMethod))
+		HttpRequestValues requestValues = HttpRequestValues.builder().setHttpMethod(HttpMethod.valueOf(httpMethod))
 				.setContentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.addRequestParameter("param1", "1st value")
 				.addRequestParameter("param2", "2nd value A", "2nd value B")
@@ -62,7 +62,7 @@ public class HttpRequestValuesTests {
 	@Test
 	void requestParamAsQueryParamsInUriTemplate() {
 
-		HttpRequestValues requestValues = HttpRequestValues.builder(HttpMethod.POST)
+		HttpRequestValues requestValues = HttpRequestValues.builder().setHttpMethod(HttpMethod.POST)
 				.setUriTemplate("/path")
 				.addRequestParameter("param1", "1st value")
 				.addRequestParameter("param2", "2nd value A", "2nd value B")
@@ -96,7 +96,7 @@ public class HttpRequestValuesTests {
 	@Test
 	void requestParamAsQueryParamsInUri() {
 
-		HttpRequestValues requestValues = HttpRequestValues.builder(HttpMethod.POST)
+		HttpRequestValues requestValues = HttpRequestValues.builder().setHttpMethod(HttpMethod.POST)
 				.setUri(URI.create("/path"))
 				.addRequestParameter("param1", "1st value")
 				.addRequestParameter("param2", "2nd value A", "2nd value B")

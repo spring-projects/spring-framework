@@ -131,7 +131,7 @@ final class HttpServiceMethod {
 	 * and method-level {@link HttpExchange @HttpRequest} annotations.
 	 */
 	private record HttpRequestValuesInitializer(
-			HttpMethod httpMethod, @Nullable String url,
+			@Nullable HttpMethod httpMethod, @Nullable String url,
 			@Nullable MediaType contentType, @Nullable List<MediaType> acceptMediaTypes) {
 
 		private HttpRequestValuesInitializer(
@@ -145,7 +145,10 @@ final class HttpServiceMethod {
 		}
 
 		public HttpRequestValues.Builder initializeRequestValuesBuilder() {
-			HttpRequestValues.Builder requestValues = HttpRequestValues.builder(this.httpMethod);
+			HttpRequestValues.Builder requestValues = HttpRequestValues.builder();
+			if (this.httpMethod != null) {
+				requestValues.setHttpMethod(this.httpMethod);
+			}
 			if (this.url != null) {
 				requestValues.setUriTemplate(this.url);
 			}
@@ -178,7 +181,7 @@ final class HttpServiceMethod {
 			return new HttpRequestValuesInitializer(httpMethod, url, contentType, acceptableMediaTypes);
 		}
 
-
+		@Nullable
 		private static HttpMethod initHttpMethod(@Nullable HttpExchange typeAnnot, HttpExchange annot) {
 
 			String value1 = (typeAnnot != null ? typeAnnot.method() : null);
@@ -192,7 +195,7 @@ final class HttpServiceMethod {
 				return HttpMethod.valueOf(value1);
 			}
 
-			throw new IllegalStateException("HttpMethod is required");
+			return null;
 		}
 
 		@Nullable

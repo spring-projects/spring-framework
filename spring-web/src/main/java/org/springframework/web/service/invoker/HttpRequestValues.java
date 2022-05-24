@@ -56,6 +56,7 @@ public final class HttpRequestValues {
 			CollectionUtils.toMultiValueMap(Collections.emptyMap());
 
 
+	@Nullable
 	private final HttpMethod httpMethod;
 
 	@Nullable
@@ -82,7 +83,7 @@ public final class HttpRequestValues {
 	private final ParameterizedTypeReference<?> bodyElementType;
 
 
-	private HttpRequestValues(HttpMethod httpMethod,
+	private HttpRequestValues(@Nullable HttpMethod httpMethod,
 			@Nullable URI uri, @Nullable String uriTemplate, Map<String, String> uriVariables,
 			HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
 			@Nullable Object bodyValue,
@@ -106,6 +107,7 @@ public final class HttpRequestValues {
 	/**
 	 * Return the HTTP method to use for the request.
 	 */
+	@Nullable
 	public HttpMethod getHttpMethod() {
 		return this.httpMethod;
 	}
@@ -187,8 +189,8 @@ public final class HttpRequestValues {
 	}
 
 
-	public static Builder builder(HttpMethod httpMethod) {
-		return new Builder(httpMethod);
+	public static Builder builder() {
+		return new Builder();
 	}
 
 
@@ -199,6 +201,7 @@ public final class HttpRequestValues {
 
 		private static final Function<MultiValueMap<String, String>, byte[]> FORM_DATA_SERIALIZER = new FormDataSerializer();
 
+		@Nullable
 		private HttpMethod httpMethod;
 
 		@Nullable
@@ -231,16 +234,10 @@ public final class HttpRequestValues {
 		@Nullable
 		private ParameterizedTypeReference<?> bodyElementType;
 
-		private Builder(HttpMethod httpMethod) {
-			Assert.notNull(httpMethod, "HttpMethod is required");
-			this.httpMethod = httpMethod;
-		}
-
 		/**
 		 * Set the HTTP method for the request.
 		 */
 		public Builder setHttpMethod(HttpMethod httpMethod) {
-			Assert.notNull(httpMethod, "HttpMethod is required");
 			this.httpMethod = httpMethod;
 			return this;
 		}
