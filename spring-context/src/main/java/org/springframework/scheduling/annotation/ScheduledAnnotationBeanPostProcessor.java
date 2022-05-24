@@ -57,6 +57,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -529,7 +530,12 @@ public class ScheduledAnnotationBeanPostProcessor
 	 * @see ScheduledMethodRunnable#ScheduledMethodRunnable(Object, Method)
 	 */
 	protected Runnable createRunnable(Object target, Method method) {
-		Assert.isTrue(method.getParameterCount() == 0, "Only no-arg methods may be annotated with @Scheduled");
+		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
+			// add support for suspend function
+			Assert.isTrue(method.getParameterCount() == 0||method.getParameterCount()==1, "Only suspend methods or no-arg methods may be annotated with @Scheduled");
+		} else {
+			Assert.isTrue(method.getParameterCount() == 0, "Only no-arg methods may be annotated with @Scheduled");
+		}
 		Method invocableMethod = AopUtils.selectInvocableMethod(method, target.getClass());
 		return new ScheduledMethodRunnable(target, invocableMethod);
 	}

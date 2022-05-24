@@ -87,6 +87,10 @@ public abstract class CoroutinesUtils {
 	}
 
 	private static Object[] getSuspendedFunctionArgs(Object target, Object... args) {
+		// add support for suspend @Scheduled
+		if (args.length == 0) {
+			return new Object[]{target};
+		}
 		Object[] functionArgs = new Object[args.length];
 		functionArgs[0] = target;
 		System.arraycopy(args, 0, functionArgs, 1, args.length - 1);

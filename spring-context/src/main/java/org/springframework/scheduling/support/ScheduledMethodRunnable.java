@@ -16,11 +16,17 @@
 
 package org.springframework.scheduling.support;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import org.springframework.core.CoroutinesUtils;
+import org.springframework.core.KotlinDetector;
+import org.springframework.util.ReflectionUtils;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
-
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Variant of {@link MethodInvokingRunnable} meant to be used for processing
@@ -28,8 +34,8 @@ import org.springframework.util.ReflectionUtils;
  * assuming that an error strategy for Runnables is in place.
  *
  * @author Juergen Hoeller
- * @since 3.0.6
  * @see org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor
+ * @since 3.0.6
  */
 public class ScheduledMethodRunnable implements Runnable {
 
@@ -37,10 +43,12 @@ public class ScheduledMethodRunnable implements Runnable {
 
 	private final Method method;
 
+	private static final Log logger = LogFactory.getLog(ScheduledMethodRunnable.class);
 
 	/**
 	 * Create a {@code ScheduledMethodRunnable} for the given target instance,
 	 * calling the specified method.
+	 *
 	 * @param target the target instance to call the method on
 	 * @param method the target method to call
 	 */
@@ -52,7 +60,8 @@ public class ScheduledMethodRunnable implements Runnable {
 	/**
 	 * Create a {@code ScheduledMethodRunnable} for the given target instance,
 	 * calling the specified method by name.
-	 * @param target the target instance to call the method on
+	 *
+	 * @param target     the target instance to call the method on
 	 * @param methodName the name of the target method
 	 * @throws NoSuchMethodException if the specified method does not exist
 	 */
@@ -81,12 +90,35 @@ public class ScheduledMethodRunnable implements Runnable {
 	public void run() {
 		try {
 			ReflectionUtils.makeAccessible(this.method);
-			this.method.invoke(this.target);
-		}
-		catch (InvocationTargetException ex) {
+
+			if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
+				CoroutinesUtils.invokeSuspendingFunction(method, target).subscribe(new Subscriber<Object>() {
+					@Override
+					public void onSubscribe(Subscription s) {
+						s.request(Long.MAX_VALUE);
+					}
+
+					@Override
+					public void onNext(Object o) {
+
+					}
+
+					@Override
+					public void onError(Throwable t) {
+						logger.error("task run failed", t);
+					}
+
+					@Override
+					public void onComplete() {
+
+					}
+				});
+			} else {
+				this.method.invoke(this.target);
+			}
+		} catch (InvocationTargetException ex) {
 			ReflectionUtils.rethrowRuntimeException(ex.getTargetException());
-		}
-		catch (IllegalAccessException ex) {
+		} catch (IllegalAccessException ex) {
 			throw new UndeclaredThrowableException(ex);
 		}
 	}

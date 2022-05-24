@@ -54,6 +54,7 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
@@ -725,6 +726,17 @@ class ScheduledAnnotationBeanPostProcessorTests {
 				context::refresh);
 	}
 
+	@Test
+	void suspendFunction() throws InterruptedException {
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(SuspendFunctionTest.class);
+		BeanDefinition testScheduleDefinition = new RootBeanDefinition(ThreadPoolTaskScheduler.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.registerBeanDefinition("scheduler", testScheduleDefinition);
+		context.refresh();
+		Thread.sleep(6000);
+	}
 
 	static class FixedDelay {
 
