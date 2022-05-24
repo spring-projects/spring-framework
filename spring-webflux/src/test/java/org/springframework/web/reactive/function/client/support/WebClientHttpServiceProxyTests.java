@@ -65,7 +65,7 @@ public class WebClientHttpServiceProxyTests {
 
 
 	@Test
-	void greeting() {
+	void greeting() throws Exception {
 
 		prepareResponse(response ->
 				response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
@@ -77,7 +77,7 @@ public class WebClientHttpServiceProxyTests {
 	}
 
 	@Test
-	void greetingWithRequestAttribute() {
+	void greetingWithRequestAttribute() throws Exception {
 
 		Map<String, Object> attributes = new HashMap<>();
 
@@ -100,14 +100,15 @@ public class WebClientHttpServiceProxyTests {
 		assertThat(attributes).containsEntry("myAttribute", "myAttributeValue");
 	}
 
-	private TestHttpService initHttpService() {
+	private TestHttpService initHttpService() throws Exception {
 		WebClient webClient = WebClient.builder().baseUrl(this.server.url("/").toString()).build();
 		return initHttpService(webClient);
 	}
 
-	private TestHttpService initHttpService(WebClient webClient) {
-		WebClientAdapter clientAdapter = new WebClientAdapter(webClient);
-		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(clientAdapter).build();
+	private TestHttpService initHttpService(WebClient webClient) throws Exception {
+		WebClientAdapter client = new WebClientAdapter(webClient);
+		HttpServiceProxyFactory proxyFactory = new HttpServiceProxyFactory(client);
+		proxyFactory.afterPropertiesSet();
 		return proxyFactory.createClient(TestHttpService.class);
 	}
 

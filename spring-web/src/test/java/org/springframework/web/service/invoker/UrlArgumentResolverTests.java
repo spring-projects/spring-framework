@@ -18,6 +18,7 @@ package org.springframework.web.service.invoker;
 
 import java.net.URI;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.service.annotation.GetExchange;
@@ -34,7 +35,15 @@ public class UrlArgumentResolverTests {
 
 	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
-	private final Service service = HttpServiceProxyFactory.builder(this.client).build().createClient(Service.class);
+	private Service service;
+
+
+	@BeforeEach
+	void setUp() throws Exception {
+		HttpServiceProxyFactory proxyFactory = new HttpServiceProxyFactory(this.client);
+		proxyFactory.afterPropertiesSet();
+		this.service = proxyFactory.createClient(Service.class);
+	}
 
 
 	@Test
