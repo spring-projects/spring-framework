@@ -33,7 +33,6 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @since 6.0
- * @see GeneratedClassName
  */
 public final class ClassNameGenerator {
 

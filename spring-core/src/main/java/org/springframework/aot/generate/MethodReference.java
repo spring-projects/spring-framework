@@ -31,6 +31,7 @@ public final class MethodReference {
 
 	private final Kind kind;
 
+	@Nullable
 	private final ClassName declaringClass;
 
 	private final String methodName;
@@ -109,6 +110,7 @@ public final class MethodReference {
 	 * Return the referenced declaring class.
 	 * @return the declaring class
 	 */
+	@Nullable
 	public ClassName getDeclaringClass() {
 		return this.declaringClass;
 	}
@@ -147,7 +149,7 @@ public final class MethodReference {
 		};
 	}
 
-	private CodeBlock toCodeBlockForInstance(String instanceVariable) {
+	private CodeBlock toCodeBlockForInstance(@Nullable String instanceVariable) {
 		instanceVariable = (instanceVariable != null) ? instanceVariable : "this";
 		return CodeBlock.of("$L::$L", instanceVariable, this.methodName);
 

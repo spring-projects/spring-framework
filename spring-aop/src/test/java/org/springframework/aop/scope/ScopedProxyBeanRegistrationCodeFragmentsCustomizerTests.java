@@ -133,6 +133,7 @@ class ScopedProxyBeanRegistrationCodeFragmentsCustomizerTests {
 	private void testCompile(BiConsumer<DefaultListableBeanFactory, Compiled> result) {
 		BeanFactoryInitializationAotContribution contribution = this.processor
 				.processAheadOfTime(this.beanFactory);
+		assertThat(contribution).isNotNull();
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
 		this.generationContext.writeGeneratedContent();
 		TestCompiler.forSystem().withFiles(this.generatedFiles).printFiles(System.out)
@@ -151,7 +152,7 @@ class ScopedProxyBeanRegistrationCodeFragmentsCustomizerTests {
 	}
 
 
-	class MockBeanFactoryInitializationCode implements BeanFactoryInitializationCode {
+	static class MockBeanFactoryInitializationCode implements BeanFactoryInitializationCode {
 
 		private final GeneratedMethods generatedMethods = new GeneratedMethods();
 
@@ -168,7 +169,7 @@ class ScopedProxyBeanRegistrationCodeFragmentsCustomizerTests {
 		}
 
 		List<MethodReference> getInitializers() {
-			return initializers;
+			return this.initializers;
 		}
 
 	}
