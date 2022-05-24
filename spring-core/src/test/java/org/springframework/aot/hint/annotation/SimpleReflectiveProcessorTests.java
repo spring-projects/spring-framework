@@ -101,6 +101,7 @@ class SimpleReflectiveProcessorTests {
 
 	static class SampleBean {
 
+		@SuppressWarnings("unused")
 		private String name;
 
 		SampleBean(String name) {
