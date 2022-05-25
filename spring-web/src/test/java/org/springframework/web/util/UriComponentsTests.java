@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 /**
@@ -149,6 +150,29 @@ class UriComponentsTests {
 		assertThat(uri3.toUriString()).isEqualTo("https://example.com:8080/bar");
 		assertThat(uri4.getPort()).isEqualTo(8080);
 		assertThat(uri4.toUriString()).isEqualTo("https://example.com:8080/bar");
+	}
+
+	@Test  // gh-28521
+	void invalidPort() {
+		assertExceptionsForInvalidPort(fromUriString("https://example.com:XXX/bar").build());
+		assertExceptionsForInvalidPort(fromUriString("https://example.com/bar").port("XXX").build());
+		assertExceptionsForInvalidPort(fromHttpUrl("https://example.com:XXX/bar").build());
+		assertExceptionsForInvalidPort(fromHttpUrl("https://example.com/bar").port("XXX").build());
+	}
+
+	private void assertExceptionsForInvalidPort(UriComponents uriComponents) {
+		assertThatIllegalStateException()
+			.isThrownBy(uriComponents::getPort)
+			.withMessage("The port must be an integer: XXX");
+		assertThatIllegalStateException()
+			.isThrownBy(uriComponents::toUri)
+			.withMessage("The port must be an integer: XXX");
+		assertThatIllegalStateException()
+			.isThrownBy(uriComponents::toUriString)
+			.withMessage("The port must be an integer: XXX");
+		assertThatIllegalStateException()
+			.isThrownBy(uriComponents::toString)
+			.withMessage("The port must be an integer: XXX");
 	}
 
 	@Test

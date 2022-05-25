@@ -40,7 +40,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Unit tests for {@link UriComponentsBuilder}.
@@ -1314,11 +1314,13 @@ class UriComponentsBuilderTests {
 
 	@Test
 	void verifyInvalidPort() {
-		String url = "http://localhost:port/path";
-		assertThatThrownBy(() -> UriComponentsBuilder.fromUriString(url).build().toUri())
-				.isInstanceOf(NumberFormatException.class);
-		assertThatThrownBy(() -> UriComponentsBuilder.fromHttpUrl(url).build().toUri())
-				.isInstanceOf(NumberFormatException.class);
+		String url = "http://localhost:XXX/path";
+		assertThatIllegalStateException()
+				.isThrownBy(() -> UriComponentsBuilder.fromUriString(url).build().toUri())
+				.withMessage("The port must be an integer: XXX");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> UriComponentsBuilder.fromHttpUrl(url).build().toUri())
+				.withMessage("The port must be an integer: XXX");
 	}
 
 	@Test  // gh-27039
