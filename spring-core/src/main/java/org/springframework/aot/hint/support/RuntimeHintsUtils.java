@@ -16,13 +16,18 @@
 
 package org.springframework.aot.hint.support;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeHint.Builder;
-import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.SynthesizedAnnotation;
 
 /**
@@ -38,24 +43,38 @@ public abstract class RuntimeHintsUtils {
 	 * that its attributes are visible.
 	 */
 	public static final Consumer<Builder> ANNOTATION_HINT = hint ->
-			hint.withMembers(MemberCategory.INVOKE_PUBLIC_METHODS);
+			hint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS);
 
 	/**
 	 * Register the necessary hints so that the specified annotation is visible
-	 * at runtime.
+	 * at runtime. If an annotation attributes aliases an attribute of another
+	 * annotation, it is registered as well and a JDK proxy hints is defined
+	 * so that the synthesized annotation can be resolved.
 	 * @param hints the {@link RuntimeHints} instance ot use
-	 * @param annotation the annotation
+	 * @param annotationType the annotation type
 	 * @see SynthesizedAnnotation
 	 */
-	public static void registerAnnotation(RuntimeHints hints, MergedAnnotation<?> annotation) {
-		hints.reflection().registerType(annotation.getType(), ANNOTATION_HINT);
-		MergedAnnotation<?> parentSource = annotation.getMetaSource();
-		while (parentSource != null) {
-			hints.reflection().registerType(parentSource.getType(), ANNOTATION_HINT);
-			parentSource = parentSource.getMetaSource();
+	public static void registerAnnotation(RuntimeHints hints, Class<?> annotationType) {
+		Set<Class<?>> allAnnotations = new LinkedHashSet<>();
+		allAnnotations.add(annotationType);
+		collectAliasedAnnotations(allAnnotations, annotationType);
+		allAnnotations.forEach(annotation -> hints.reflection().registerType(annotation, ANNOTATION_HINT));
+		if (allAnnotations.size() > 1) {
+			hints.proxies().registerJdkProxy(annotationType, SynthesizedAnnotation.class);
 		}
-		if (annotation.synthesize() instanceof SynthesizedAnnotation) {
-			hints.proxies().registerJdkProxy(annotation.getType(), SynthesizedAnnotation.class);
+	}
+
+	private static void collectAliasedAnnotations(Set<Class<?>> types, Class<?> annotationType) {
+		for (Method method : annotationType.getDeclaredMethods()) {
+			MergedAnnotations methodAnnotations = MergedAnnotations.from(method);
+			if (methodAnnotations.isPresent(AliasFor.class)) {
+				Class<?> aliasedAnnotation = methodAnnotations.get(AliasFor.class).getClass("annotation");
+				boolean process = (aliasedAnnotation != Annotation.class && !types.contains(aliasedAnnotation));
+				if (process) {
+					types.add(aliasedAnnotation);
+					collectAliasedAnnotations(types, aliasedAnnotation);
+				}
+			}
 		}
 	}
 

@@ -97,7 +97,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 		process(SampleMethodMetaAnnotatedBean.class);
 		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
 		assertThat(runtimeHints.reflection().getTypeHint(SampleInvoker.class)).satisfies(typeHint ->
-				assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_PUBLIC_METHODS));
+				assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_DECLARED_METHODS));
 		assertThat(runtimeHints.proxies().jdkProxies()).isEmpty();
 	}
 
@@ -106,7 +106,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 		process(SampleMethodMetaAnnotatedBeanWithAlias.class);
 		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
 		assertThat(runtimeHints.reflection().getTypeHint(RetryInvoker.class)).satisfies(typeHint ->
-				assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_PUBLIC_METHODS));
+				assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_DECLARED_METHODS));
 		assertThat(runtimeHints.proxies().jdkProxies()).anySatisfy(jdkProxyHint ->
 				assertThat(jdkProxyHint.getProxiedInterfaces()).containsExactly(
 						TypeReference.of(RetryInvoker.class), TypeReference.of(SynthesizedAnnotation.class)));

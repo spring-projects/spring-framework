@@ -32,7 +32,6 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.SynthesizedAnnotation;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,36 +46,34 @@ class RuntimeHintsUtilsTests {
 	private final RuntimeHints hints = new RuntimeHints();
 
 	@Test
-	void registerAnnotation() {
-		RuntimeHintsUtils.registerAnnotation(this.hints, MergedAnnotations
-				.from(SampleInvokerClass.class).get(SampleInvoker.class));
+	void registerAnnotationType() {
+		RuntimeHintsUtils.registerAnnotation(this.hints, SampleInvoker.class);
 		assertThat(this.hints.reflection().typeHints()).singleElement()
 				.satisfies(annotationHint(SampleInvoker.class));
 		assertThat(this.hints.proxies().jdkProxies()).isEmpty();
 	}
 
 	@Test
-	void registerAnnotationProxyRegistersJdkProxy() {
-		RuntimeHintsUtils.registerAnnotation(this.hints, MergedAnnotations
-				.from(RetryInvokerClass.class).get(RetryInvoker.class));
-		assertThat(this.hints.reflection().typeHints()).singleElement()
-				.satisfies(annotationHint(RetryInvoker.class));
+	void registerAnnotationTypeProxyRegistersJdkProxy() {
+		RuntimeHintsUtils.registerAnnotation(this.hints, RetryInvoker.class);
+		assertThat(this.hints.reflection().typeHints())
+				.anySatisfy(annotationHint(RetryInvoker.class))
+				.anySatisfy(annotationHint(SampleInvoker.class));
 		assertThat(this.hints.proxies().jdkProxies()).singleElement()
 				.satisfies(annotationProxy(RetryInvoker.class));
 	}
 
 	@Test
-	void registerAnnotationWhereUsedAsAMetaAnnotationRegistersHierarchy() {
-		RuntimeHintsUtils.registerAnnotation(this.hints, MergedAnnotations
-				.from(RetryWithEnabledFlagInvokerClass.class).get(SampleInvoker.class));
+	void registerAnnotationTypeWhereUsedAsAMetaAnnotationRegistersHierarchy() {
+		RuntimeHintsUtils.registerAnnotation(this.hints, RetryWithEnabledFlagInvoker.class);
 		ReflectionHints reflection = this.hints.reflection();
 		assertThat(reflection.typeHints())
-				.anySatisfy(annotationHint(SampleInvoker.class))
-				.anySatisfy(annotationHint(RetryInvoker.class))
 				.anySatisfy(annotationHint(RetryWithEnabledFlagInvoker.class))
+				.anySatisfy(annotationHint(RetryInvoker.class))
+				.anySatisfy(annotationHint(SampleInvoker.class))
 				.hasSize(3);
 		assertThat(this.hints.proxies().jdkProxies()).singleElement()
-				.satisfies(annotationProxy(SampleInvoker.class));
+				.satisfies(annotationProxy(RetryWithEnabledFlagInvoker.class));
 	}
 
 	private Consumer<TypeHint> annotationHint(Class<?> type) {
@@ -85,7 +82,7 @@ class RuntimeHintsUtilsTests {
 			assertThat(typeHint.constructors()).isEmpty();
 			assertThat(typeHint.fields()).isEmpty();
 			assertThat(typeHint.methods()).isEmpty();
-			assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_PUBLIC_METHODS);
+			assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_DECLARED_METHODS);
 		};
 	}
 

@@ -27,10 +27,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.aot.hint.annotation.ReflectiveProcessor;
 import org.springframework.aot.hint.support.RuntimeHintsUtils;
@@ -118,8 +116,6 @@ class ReflectiveProcessorBeanRegistrationAotProcessor implements BeanRegistratio
 
 	private static class ReflectiveProcessorBeanRegistrationAotContribution implements BeanRegistrationAotContribution {
 
-		private static final Consumer<Builder> ANNOTATION_CUSTOMIZATIONS = hint -> hint.withMembers(MemberCategory.INVOKE_PUBLIC_METHODS);
-
 		private final Iterable<Entry> entries;
 
 		public ReflectiveProcessorBeanRegistrationAotContribution(Iterable<Entry> entries) {
@@ -129,7 +125,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessor implements BeanRegistratio
 		@Override
 		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 			RuntimeHints runtimeHints = generationContext.getRuntimeHints();
-			runtimeHints.reflection().registerType(Reflective.class, ANNOTATION_CUSTOMIZATIONS);
+			RuntimeHintsUtils.registerAnnotation(runtimeHints, Reflective.class);
 			this.entries.forEach(entry -> {
 				AnnotatedElement element = entry.element();
 				entry.processor().registerReflectionHints(runtimeHints.reflection(), element);
@@ -140,7 +136,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessor implements BeanRegistratio
 		private void registerAnnotationIfNecessary(RuntimeHints hints, AnnotatedElement element) {
 			MergedAnnotation<Reflective> reflectiveAnnotation = MergedAnnotations.from(element).get(Reflective.class);
 			if (reflectiveAnnotation.getDistance() > 0) {
-				RuntimeHintsUtils.registerAnnotation(hints, reflectiveAnnotation.getRoot());
+				RuntimeHintsUtils.registerAnnotation(hints, reflectiveAnnotation.getRoot().getType());
 			}
 		}
 
