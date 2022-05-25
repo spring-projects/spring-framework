@@ -16,6 +16,7 @@
 
 package org.springframework.web.service.invoker;
 
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.MethodIntrospector;
@@ -215,10 +217,19 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 		}
 
 		@Override
-		public Object invoke(MethodInvocation invocation) {
+		public Object invoke(MethodInvocation invocation) throws Throwable {
 			Method method = invocation.getMethod();
 			HttpServiceMethod httpServiceMethod = this.httpServiceMethods.get(method);
-			return httpServiceMethod.invoke(invocation.getArguments());
+			if (httpServiceMethod != null) {
+				return httpServiceMethod.invoke(invocation.getArguments());
+			}
+			if (method.isDefault()) {
+				if (invocation instanceof ReflectiveMethodInvocation reflectiveMethodInvocation) {
+					Object proxy = reflectiveMethodInvocation.getProxy();
+					return InvocationHandler.invokeDefault(proxy, method, invocation.getArguments());
+				}
+			}
+			throw new IllegalStateException("Unexpected method invocation: " + method);
 		}
 	}
 

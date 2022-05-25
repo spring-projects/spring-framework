@@ -100,6 +100,8 @@ public class HttpServiceMethodTests {
 		Mono<ResponseEntity<Flux<String>>> fluxEntity= service.getFluxEntity();
 		StepVerifier.create(fluxEntity.flatMapMany(HttpEntity::getBody)).expectNext("request", "To", "Entity", "Flux").verifyComplete();
 		verifyClientInvocation("requestToEntityFlux", BODY_TYPE);
+
+		assertThat(service.getDefaultMethodValue()).isEqualTo("default value");
 	}
 
 	@Test
@@ -228,6 +230,10 @@ public class HttpServiceMethodTests {
 
 		@GetExchange
 		Mono<ResponseEntity<Flux<String>>> getFluxEntity();
+
+		default String getDefaultMethodValue() {
+			return "default value";
+		}
 	}
 
 
