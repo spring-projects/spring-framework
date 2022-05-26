@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.context.annotation;
 
 /**
  * A {@link Condition} that offers more fine-grained control when used with
- * {@code @Configuration}. Allows certain {@link Condition Conditions} to adapt when they match
+ * {@code @Configuration}. Allows certain conditions to adapt when they match
  * based on the configuration phase. For example, a condition that checks if a bean
  * has already been registered might choose to only be evaluated during the
  * {@link ConfigurationPhase#REGISTER_BEAN REGISTER_BEAN} {@link ConfigurationPhase}.
@@ -52,8 +52,8 @@ public interface ConfigurationCondition extends Condition {
 		 * The {@link Condition} should be evaluated when adding a regular
 		 * (non {@code @Configuration}) bean. The condition will not prevent
 		 * {@code @Configuration} classes from being added.
-		 * <p>At the time that the condition is evaluated, all {@code @Configuration}s
-		 * will have been parsed.
+		 * <p>At the time that the condition is evaluated, all {@code @Configuration}
+		 * classes will have been parsed.
 		 */
 		REGISTER_BEAN
 	}

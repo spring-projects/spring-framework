@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
  */
 public class SpringFailOnTimeoutTests {
 
-	private Statement statement = mock(Statement.class);
+	private final Statement statement = mock(Statement.class);
 
 
 	@Test

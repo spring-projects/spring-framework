@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Clark Duplichien
+ * @author Sam Brannen
  * @since 3.0
  */
 public class PropertyOrFieldReference extends SpelNodeImpl {
@@ -91,8 +92,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		TypedValue tv = getValueInternal(state.getActiveContextObject(), state.getEvaluationContext(),
 				state.getConfiguration().isAutoGrowNullReferences());
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;
-		if (accessorToUse instanceof CompilablePropertyAccessor) {
-			CompilablePropertyAccessor accessor = (CompilablePropertyAccessor) accessorToUse;
+		if (accessorToUse instanceof CompilablePropertyAccessor accessor) {
 			setExitTypeDescriptor(CodeFlow.toDescriptor(accessor.getPropertyType()));
 		}
 		return tv;
@@ -196,8 +196,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		try {
 			for (PropertyAccessor accessor : accessorsToTry) {
 				if (accessor.canRead(evalContext, contextObject.getValue(), name)) {
-					if (accessor instanceof ReflectivePropertyAccessor) {
-						accessor = ((ReflectivePropertyAccessor) accessor).createOptimalAccessor(
+					if (accessor instanceof ReflectivePropertyAccessor reflectivePropertyAccessor) {
+						accessor = reflectivePropertyAccessor.createOptimalAccessor(
 								evalContext, contextObject.getValue(), name);
 					}
 					this.cachedReadAccessor = accessor;
@@ -330,9 +330,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	@Override
 	public boolean isCompilable() {
-		PropertyAccessor accessorToUse = this.cachedReadAccessor;
-		return (accessorToUse instanceof CompilablePropertyAccessor &&
-				((CompilablePropertyAccessor) accessorToUse).isCompilable());
+		return (this.cachedReadAccessor instanceof CompilablePropertyAccessor compilablePropertyAccessor &&
+				compilablePropertyAccessor.isCompilable());
 	}
 
 	@Override
@@ -404,9 +403,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		public TypedValue getValue() {
 			TypedValue value =
 					this.ref.getValueInternal(this.contextObject, this.evalContext, this.autoGrowNullReferences);
-			PropertyAccessor accessorToUse = this.ref.cachedReadAccessor;
-			if (accessorToUse instanceof CompilablePropertyAccessor) {
-				this.ref.setExitTypeDescriptor(CodeFlow.toDescriptor(((CompilablePropertyAccessor) accessorToUse).getPropertyType()));
+			if (this.ref.cachedReadAccessor instanceof CompilablePropertyAccessor compilablePropertyAccessor) {
+				this.ref.setExitTypeDescriptor(CodeFlow.toDescriptor(compilablePropertyAccessor.getPropertyType()));
 			}
 			return value;
 		}

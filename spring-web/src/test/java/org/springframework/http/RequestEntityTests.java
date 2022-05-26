@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,11 +36,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link org.springframework.http.RequestEntity}.
  *
  * @author Arjen Poutsma
+ * @author Parviz Rozikov
  */
-public class RequestEntityTests {
+class RequestEntityTests {
 
 	@Test
-	public void normal() throws URISyntaxException {
+	void normal() throws URISyntaxException {
 		String headerName = "My-Custom-Header";
 		String headerValue = "HeaderValue";
 		URI url = new URI("https://example.com");
@@ -57,7 +59,7 @@ public class RequestEntityTests {
 	}
 
 	@Test
-	public void uriVariablesExpansion() throws URISyntaxException {
+	void uriVariablesExpansion() throws URISyntaxException {
 		URI uri = UriComponentsBuilder.fromUriString("https://example.com/{foo}").buildAndExpand("bar").toUri();
 		RequestEntity.get(uri).accept(MediaType.TEXT_PLAIN).build();
 
@@ -80,7 +82,20 @@ public class RequestEntityTests {
 	}
 
 	@Test
-	public void get() {
+	void uriExpansion() {
+		RequestEntity<Void> entity =
+				RequestEntity.get("https://www.{host}.com/{path}", "example", "foo/bar").build();
+
+		assertThat(entity).isInstanceOf(RequestEntity.UriTemplateRequestEntity.class);
+		RequestEntity.UriTemplateRequestEntity<Void> ext = (RequestEntity.UriTemplateRequestEntity<Void>) entity;
+
+		assertThat(ext.getUriTemplate()).isEqualTo("https://www.{host}.com/{path}");
+		assertThat(ext.getVars()).containsExactly("example", "foo/bar");
+	}
+
+
+	@Test
+	void get() {
 		RequestEntity<Void> requestEntity = RequestEntity.get(URI.create("https://example.com")).accept(
 				MediaType.IMAGE_GIF, MediaType.IMAGE_JPEG, MediaType.IMAGE_PNG).build();
 
@@ -92,7 +107,7 @@ public class RequestEntityTests {
 	}
 
 	@Test
-	public void headers() throws URISyntaxException {
+	void headers() throws URISyntaxException {
 		MediaType accept = MediaType.TEXT_PLAIN;
 		long ifModifiedSince = 12345L;
 		String ifNoneMatch = "\"foo\"";
@@ -125,7 +140,7 @@ public class RequestEntityTests {
 	}
 
 	@Test
-	public void methods() throws URISyntaxException {
+	void methods() throws URISyntaxException {
 		URI url = new URI("https://example.com");
 
 		RequestEntity<?> entity = RequestEntity.get(url).build();
@@ -152,13 +167,46 @@ public class RequestEntityTests {
 	}
 
 	@Test  // SPR-13154
-	public void types() throws URISyntaxException {
+	void types() throws URISyntaxException {
 		URI url = new URI("https://example.com");
 		List<String> body = Arrays.asList("foo", "bar");
 		ParameterizedTypeReference<?> typeReference = new ParameterizedTypeReference<List<String>>() {};
 
 		RequestEntity<?> entity = RequestEntity.post(url).body(body, typeReference.getType());
 		assertThat(entity.getType()).isEqualTo(typeReference.getType());
+	}
+
+	@Test
+	void equalityWithUrl() {
+		RequestEntity<Void> requestEntity1 = RequestEntity.method(HttpMethod.GET, "http://test.api/path/").build();
+		RequestEntity<Void> requestEntity2 = RequestEntity.method(HttpMethod.GET, "http://test.api/path/").build();
+		RequestEntity<Void> requestEntity3 = RequestEntity.method(HttpMethod.GET, "http://test.api/pathX/").build();
+
+		assertThat(requestEntity1).isEqualTo(requestEntity2);
+		assertThat(requestEntity2).isEqualTo(requestEntity1);
+		assertThat(requestEntity1).isNotEqualTo(requestEntity3);
+		assertThat(requestEntity3).isNotEqualTo(requestEntity2);
+		assertThat(requestEntity1.hashCode()).isEqualTo(requestEntity2.hashCode());
+		assertThat(requestEntity1.hashCode()).isNotEqualTo(requestEntity3.hashCode());
+	}
+
+	@Test  // gh-27531
+	void equalityWithUriTemplate() {
+		Map<String, Object> vars = Collections.singletonMap("id", "1");
+
+		RequestEntity<Void> requestEntity1 =
+				RequestEntity.method(HttpMethod.GET, "http://test.api/path/{id}", vars).build();
+		RequestEntity<Void> requestEntity2 =
+				RequestEntity.method(HttpMethod.GET, "http://test.api/path/{id}", vars).build();
+		RequestEntity<Void> requestEntity3 =
+				RequestEntity.method(HttpMethod.GET, "http://test.api/pathX/{id}", vars).build();
+
+		assertThat(requestEntity1).isEqualTo(requestEntity2);
+		assertThat(requestEntity2).isEqualTo(requestEntity1);
+		assertThat(requestEntity1).isNotEqualTo(requestEntity3);
+		assertThat(requestEntity3).isNotEqualTo(requestEntity2);
+		assertThat(requestEntity1.hashCode()).isEqualTo(requestEntity2.hashCode());
+		assertThat(requestEntity1.hashCode()).isNotEqualTo(requestEntity3.hashCode());
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import org.springframework.lang.Nullable;
 
 /**
  * JNDI-based variant of {@link CustomizableThreadFactory}, performing a default lookup
- * for JSR-236's "java:comp/DefaultManagedThreadFactory" in a Java EE 7 environment,
+ * for JSR-236's "java:comp/DefaultManagedThreadFactory" in a Jakarta EE environment,
  * falling back to the local {@link CustomizableThreadFactory} setup if not found.
  *
- * <p>This is a convenient way to use managed threads when running in a Java EE 7
+ * <p>This is a convenient way to use managed threads when running in a Jakarta EE
  * environment, simply using regular local threads otherwise - without conditional
  * setup (i.e. without profiles).
  *
@@ -51,7 +51,7 @@ public class DefaultManagedAwareThreadFactory extends CustomizableThreadFactory 
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private JndiLocatorDelegate jndiLocator = new JndiLocatorDelegate();
+	private final JndiLocatorDelegate jndiLocator = new JndiLocatorDelegate();
 
 	@Nullable
 	private String jndiName = "java:comp/DefaultManagedThreadFactory";
@@ -77,7 +77,7 @@ public class DefaultManagedAwareThreadFactory extends CustomizableThreadFactory 
 	}
 
 	/**
-	 * Set whether the lookup occurs in a Java EE container, i.e. if the prefix
+	 * Set whether the lookup occurs in a Jakarta EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
 	 * contain it. PersistenceAnnotationBeanPostProcessor's default is "true".
 	 * @see org.springframework.jndi.JndiLocatorSupport#setResourceRef

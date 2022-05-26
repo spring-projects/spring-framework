@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -74,11 +74,12 @@ public class ClientResponseWrapper implements ClientResponse {
 	}
 
 	@Override
-	public HttpStatus statusCode() {
+	public HttpStatusCode statusCode() {
 		return this.delegate.statusCode();
 	}
 
 	@Override
+	@Deprecated
 	public int rawStatusCode() {
 		return this.delegate.rawStatusCode();
 	}
@@ -151,6 +152,11 @@ public class ClientResponseWrapper implements ClientResponse {
 	@Override
 	public Mono<WebClientResponseException> createException() {
 		return this.delegate.createException();
+	}
+
+	@Override
+	public <T> Mono<T> createError() {
+		return this.delegate.createError();
 	}
 
 	@Override

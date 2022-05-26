@@ -53,10 +53,11 @@ public class HttpMessageWriterViewTests {
 
 
 	@Test
-	public void supportedMediaTypes() throws Exception {
-		assertThat(this.view.getSupportedMediaTypes()).isEqualTo(Arrays.asList(
+	public void supportedMediaTypes() {
+		assertThat(this.view.getSupportedMediaTypes()).containsExactly(
 				MediaType.APPLICATION_JSON,
-				MediaType.parseMediaType("application/*+json")));
+				MediaType.parseMediaType("application/*+json"),
+				MediaType.APPLICATION_NDJSON);
 	}
 
 	@Test

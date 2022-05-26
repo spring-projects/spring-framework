@@ -21,11 +21,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.Set;
 
-import javax.servlet.ServletException;
-
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,10 +33,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.ResourceRegionHttpMessageConverter;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.PathPatternsTestUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
@@ -61,19 +60,13 @@ public class ResourceHandlerFunctionTests {
 	public void createContext() {
 		this.messageConverter = new ResourceHttpMessageConverter();
 		ResourceRegionHttpMessageConverter regionConverter = new ResourceRegionHttpMessageConverter();
-		this.context = new ServerResponse.Context() {
-			@Override
-			public List<HttpMessageConverter<?>> messageConverters() {
-				return Arrays.asList(messageConverter, regionConverter);
-			}
-
-		};
+		this.context = () -> Arrays.asList(messageConverter, regionConverter);
 	}
 
 
 	@Test
 	public void get() throws IOException, ServletException {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
 
 		ServerResponse response = this.handlerFunction.handle(request);
@@ -97,7 +90,7 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void getRange() throws IOException, ServletException {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.addHeader("Range", "bytes=0-5");
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
 
@@ -126,7 +119,7 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void getInvalidRange() throws IOException, ServletException {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.addHeader("Range", "bytes=0-10, 0-10, 0-10, 0-10, 0-10, 0-10");
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
 
@@ -152,7 +145,7 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void head() throws IOException, ServletException {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("HEAD", "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("HEAD", "/", true);
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
 
 		ServerResponse response = this.handlerFunction.handle(request);
@@ -174,25 +167,25 @@ public class ResourceHandlerFunctionTests {
 		assertThat(servletResponse.getContentLength()).isEqualTo(this.resource.contentLength());
 	}
 
-
 	@Test
 	public void options() throws ServletException, IOException {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("OPTIONS", "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("OPTIONS", "/", true);
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
 
 		ServerResponse response = this.handlerFunction.handle(request);
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(response.headers().getAllow()).isEqualTo(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS));
+		assertThat(response.headers().getAllow()).isEqualTo(Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS));
 
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
 		ModelAndView mav = response.writeTo(servletRequest, servletResponse, this.context);
 		assertThat(mav).isNull();
 
 		assertThat(servletResponse.getStatus()).isEqualTo(200);
-		assertThat(servletResponse.getHeader("Allow")).isEqualTo("GET,HEAD,OPTIONS");
+		String allowHeader = servletResponse.getHeader("Allow");
+		String[] methods = StringUtils.tokenizeToStringArray(allowHeader, ",");
+		assertThat(methods).containsExactlyInAnyOrder("GET","HEAD","OPTIONS");
 		byte[] actualBytes = servletResponse.getContentAsByteArray();
 		assertThat(actualBytes.length).isEqualTo(0);
 	}
-
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Duration;
+import java.util.List;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,6 +27,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
@@ -66,18 +69,19 @@ class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationTests {
 	void value(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		Mono<Msg> result = this.webClient.get()
+		Mono<ResponseEntity<Msg>> result = this.webClient.get()
 				.uri("/message")
-				.exchange()
-				.doOnNext(response -> {
-					assertThat(response.headers().contentType().get().getParameters().containsKey("delimited")).isFalse();
-					assertThat(response.headers().header("X-Protobuf-Schema").get(0)).isEqualTo("sample.proto");
-					assertThat(response.headers().header("X-Protobuf-Message").get(0)).isEqualTo("Msg");
-				})
-				.flatMap(response -> response.bodyToMono(Msg.class));
+				.retrieve()
+				.toEntity(Msg.class);
 
 		StepVerifier.create(result)
-				.expectNext(TEST_MSG)
+				.consumeNextWith(entity -> {
+					HttpHeaders headers = entity.getHeaders();
+					assertThat(headers.getContentType().getParameters().containsKey("delimited")).isFalse();
+					assertThat(headers.getFirst("X-Protobuf-Schema")).isEqualTo("sample.proto");
+					assertThat(headers.getFirst("X-Protobuf-Message")).isEqualTo("Msg");
+					assertThat(entity.getBody()).isEqualTo(TEST_MSG);
+				})
 				.verifyComplete();
 	}
 
@@ -85,20 +89,19 @@ class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationTests {
 	void values(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		Flux<Msg> result = this.webClient.get()
+		Mono<ResponseEntity<List<Msg>>> result = this.webClient.get()
 				.uri("/messages")
-				.exchange()
-				.doOnNext(response -> {
-					assertThat(response.headers().contentType().get().getParameters().get("delimited")).isEqualTo("true");
-					assertThat(response.headers().header("X-Protobuf-Schema").get(0)).isEqualTo("sample.proto");
-					assertThat(response.headers().header("X-Protobuf-Message").get(0)).isEqualTo("Msg");
-				})
-				.flatMapMany(response -> response.bodyToFlux(Msg.class));
+				.retrieve()
+				.toEntityList(Msg.class);
 
 		StepVerifier.create(result)
-				.expectNext(TEST_MSG)
-				.expectNext(TEST_MSG)
-				.expectNext(TEST_MSG)
+				.consumeNextWith(entity -> {
+					HttpHeaders headers = entity.getHeaders();
+					assertThat(headers.getContentType().getParameters().get("delimited")).isEqualTo("true");
+					assertThat(headers.getFirst("X-Protobuf-Schema")).isEqualTo("sample.proto");
+					assertThat(headers.getFirst("X-Protobuf-Message")).isEqualTo("Msg");
+					assertThat(entity.getBody()).containsExactly(TEST_MSG, TEST_MSG, TEST_MSG);
+				})
 				.verifyComplete();
 	}
 
@@ -108,13 +111,12 @@ class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 		Flux<Msg> result = this.webClient.get()
 				.uri("/message-stream")
-				.exchange()
-				.doOnNext(response -> {
+				.exchangeToFlux(response -> {
 					assertThat(response.headers().contentType().get().getParameters().get("delimited")).isEqualTo("true");
 					assertThat(response.headers().header("X-Protobuf-Schema").get(0)).isEqualTo("sample.proto");
 					assertThat(response.headers().header("X-Protobuf-Message").get(0)).isEqualTo("Msg");
-				})
-				.flatMapMany(response -> response.bodyToFlux(Msg.class));
+					return response.bodyToFlux(Msg.class);
+				});
 
 		StepVerifier.create(result)
 				.expectNext(Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(0).build()).build())

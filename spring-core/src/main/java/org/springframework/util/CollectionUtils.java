@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,6 +44,14 @@ import org.springframework.lang.Nullable;
 public abstract class CollectionUtils {
 
 	/**
+	 * Default load factor for {@link HashMap}/{@link LinkedHashMap} variants.
+	 * @see #newHashMap(int)
+	 * @see #newLinkedHashMap(int)
+	 */
+	static final float DEFAULT_LOAD_FACTOR = 0.75f;
+
+
+	/**
 	 * Return {@code true} if the supplied Collection is {@code null} or empty.
 	 * Otherwise, return {@code false}.
 	 * @param collection the Collection to check
@@ -63,6 +72,40 @@ public abstract class CollectionUtils {
 	}
 
 	/**
+	 * Instantiate a new {@link HashMap} with an initial capacity
+	 * that can accommodate the specified number of elements without
+	 * any immediate resize/rehash operations to be expected.
+	 * <p>This differs from the regular {@link HashMap} constructor
+	 * which takes an initial capacity relative to a load factor
+	 * but is effectively aligned with the JDK's
+	 * {@link java.util.concurrent.ConcurrentHashMap#ConcurrentHashMap(int)}.
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
+	 * @since 5.3
+	 * @see #newLinkedHashMap(int)
+	 */
+	public static <K, V> HashMap<K, V> newHashMap(int expectedSize) {
+		return new HashMap<>((int) (expectedSize / DEFAULT_LOAD_FACTOR), DEFAULT_LOAD_FACTOR);
+	}
+
+	/**
+	 * Instantiate a new {@link LinkedHashMap} with an initial capacity
+	 * that can accommodate the specified number of elements without
+	 * any immediate resize/rehash operations to be expected.
+	 * <p>This differs from the regular {@link LinkedHashMap} constructor
+	 * which takes an initial capacity relative to a load factor but is
+	 * aligned with Spring's own {@link LinkedCaseInsensitiveMap} and
+	 * {@link LinkedMultiValueMap} constructor semantics as of 5.3.
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
+	 * @since 5.3
+	 * @see #newHashMap(int)
+	 */
+	public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(int expectedSize) {
+		return new LinkedHashMap<>((int) (expectedSize / DEFAULT_LOAD_FACTOR), DEFAULT_LOAD_FACTOR);
+	}
+
+	/**
 	 * Convert the supplied array into a List. A primitive array gets converted
 	 * into a List of the appropriate wrapper type.
 	 * <p><b>NOTE:</b> Generally prefer the standard {@link Arrays#asList} method.
@@ -74,8 +117,7 @@ public abstract class CollectionUtils {
 	 * @see ObjectUtils#toObjectArray(Object)
 	 * @see Arrays#asList(Object[])
 	 */
-	@SuppressWarnings("rawtypes")
-	public static List arrayToList(@Nullable Object source) {
+	public static List<?> arrayToList(@Nullable Object source) {
 		return Arrays.asList(ObjectUtils.toObjectArray(source));
 	}
 
@@ -87,9 +129,7 @@ public abstract class CollectionUtils {
 	@SuppressWarnings("unchecked")
 	public static <E> void mergeArrayIntoCollection(@Nullable Object array, Collection<E> collection) {
 		Object[] arr = ObjectUtils.toObjectArray(array);
-		for (Object elem : arr) {
-			collection.add((E) elem);
-		}
+		Collections.addAll(collection, (E[])arr);
 	}
 
 	/**
@@ -191,15 +231,14 @@ public abstract class CollectionUtils {
 	 * @param candidates the candidates to search for
 	 * @return the first present object, or {@code null} if not found
 	 */
-	@SuppressWarnings("unchecked")
 	@Nullable
 	public static <E> E findFirstMatch(Collection<?> source, Collection<E> candidates) {
 		if (isEmpty(source) || isEmpty(candidates)) {
 			return null;
 		}
-		for (Object candidate : candidates) {
+		for (E candidate : candidates) {
 			if (source.contains(candidate)) {
-				return (E) candidate;
+				return candidate;
 			}
 		}
 		return null;
@@ -405,7 +444,7 @@ public abstract class CollectionUtils {
 	 * @return the adapted {@code Iterator}
 	 */
 	public static <E> Iterator<E> toIterator(@Nullable Enumeration<E> enumeration) {
-		return (enumeration != null ? new EnumerationIterator<>(enumeration) : Collections.emptyIterator());
+		return (enumeration != null ? enumeration.asIterator() : Collections.emptyIterator());
 	}
 
 	/**
@@ -415,7 +454,6 @@ public abstract class CollectionUtils {
 	 * @since 3.1
 	 */
 	public static <K, V> MultiValueMap<K, V> toMultiValueMap(Map<K, List<V>> targetMap) {
-		Assert.notNull(targetMap, "'targetMap' must not be null");
 		return new MultiValueMapAdapter<>(targetMap);
 	}
 
@@ -430,41 +468,10 @@ public abstract class CollectionUtils {
 			MultiValueMap<? extends K, ? extends V> targetMap) {
 
 		Assert.notNull(targetMap, "'targetMap' must not be null");
-		Map<K, List<V>> result = new LinkedHashMap<>(targetMap.size());
-		targetMap.forEach((key, value) -> {
-			List<? extends V> values = Collections.unmodifiableList(value);
-			result.put(key, (List<V>) values);
-		});
-		Map<K, List<V>> unmodifiableMap = Collections.unmodifiableMap(result);
-		return toMultiValueMap(unmodifiableMap);
-	}
-
-
-	/**
-	 * Iterator wrapping an Enumeration.
-	 */
-	private static class EnumerationIterator<E> implements Iterator<E> {
-
-		private final Enumeration<E> enumeration;
-
-		public EnumerationIterator(Enumeration<E> enumeration) {
-			this.enumeration = enumeration;
+		if (targetMap instanceof UnmodifiableMultiValueMap) {
+			return (MultiValueMap<K, V>) targetMap;
 		}
-
-		@Override
-		public boolean hasNext() {
-			return this.enumeration.hasMoreElements();
-		}
-
-		@Override
-		public E next() {
-			return this.enumeration.nextElement();
-		}
-
-		@Override
-		public void remove() throws UnsupportedOperationException {
-			throw new UnsupportedOperationException("Not supported");
-		}
+		return new UnmodifiableMultiValueMap<>(targetMap);
 	}
 
 

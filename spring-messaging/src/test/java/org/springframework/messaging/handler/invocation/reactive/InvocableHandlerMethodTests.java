@@ -183,6 +183,8 @@ public class InvocableHandlerMethodTests {
 
 		private AtomicReference<String> result = new AtomicReference<>();
 
+		public Handler() {
+		}
 
 		public String getResult() {
 			return this.result.get();

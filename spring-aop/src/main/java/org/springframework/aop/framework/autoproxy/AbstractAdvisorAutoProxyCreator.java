@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,13 @@ import org.springframework.util.Assert;
  * also override the inherited {@link #shouldSkip} method to exclude certain
  * objects from auto-proxying.
  *
- * <p>Advisors or advices requiring ordering should implement the
+ * <p>Advisors or advices requiring ordering should be annotated with
+ * {@link org.springframework.core.annotation.Order @Order} or implement the
  * {@link org.springframework.core.Ordered} interface. This class sorts
- * Advisors by Ordered order value. Advisors that don't implement the
- * Ordered interface will be considered as unordered; they will appear
- * at the end of the advisor chain in undefined order.
+ * advisors using the {@link AnnotationAwareOrderComparator}. Advisors that are
+ * not annotated with {@code @Order} or don't implement the {@code Ordered}
+ * interface will be considered as unordered; they will appear at the end of the
+ * advisor chain in an undefined order.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

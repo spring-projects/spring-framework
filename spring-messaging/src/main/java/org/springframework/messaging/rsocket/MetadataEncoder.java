@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket;
 
 import java.util.ArrayList;
@@ -101,7 +102,7 @@ final class MetadataEncoder {
 		if (ObjectUtils.isEmpty(routeVars)) {
 			return route;
 		}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int index = 0;
 		Matcher matcher = VARS_PATTERN.matcher(route);
 		while (matcher.find()) {
@@ -184,12 +185,12 @@ final class MetadataEncoder {
 			CompositeByteBuf composite = this.allocator.compositeBuffer();
 			try {
 				if (this.route != null) {
-					io.rsocket.metadata.CompositeMetadataFlyweight.encodeAndAddMetadata(composite, this.allocator,
+					io.rsocket.metadata.CompositeMetadataCodec.encodeAndAddMetadata(composite, this.allocator,
 							WellKnownMimeType.MESSAGE_RSOCKET_ROUTING, encodeRoute());
 				}
 				entries.forEach(entry -> {
 					Object value = entry.value();
-					io.rsocket.metadata.CompositeMetadataFlyweight.encodeAndAddMetadata(
+					io.rsocket.metadata.CompositeMetadataCodec.encodeAndAddMetadata(
 							composite, this.allocator, entry.mimeType().toString(),
 							value instanceof ByteBuf ? (ByteBuf) value : PayloadUtils.asByteBuf(encodeEntry(entry)));
 				});
@@ -219,9 +220,8 @@ final class MetadataEncoder {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private ByteBuf encodeRoute() {
-		return io.rsocket.metadata.TaggingMetadataFlyweight.createRoutingMetadata(
+		return io.rsocket.metadata.TaggingMetadataCodec.createRoutingMetadata(
 				this.allocator, Collections.singletonList(this.route)).getContent();
 	}
 

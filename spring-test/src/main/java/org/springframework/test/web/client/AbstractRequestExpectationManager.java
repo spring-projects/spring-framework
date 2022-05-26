@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.springframework.test.web.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,9 +50,9 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractRequestExpectationManager implements RequestExpectationManager {
 
-	private final List<RequestExpectation> expectations = new LinkedList<>();
+	private final List<RequestExpectation> expectations = new ArrayList<>();
 
-	private final List<ClientHttpRequest> requests = new LinkedList<>();
+	private final List<ClientHttpRequest> requests = new ArrayList<>();
 
 	private final Map<ClientHttpRequest, Throwable> requestFailures = new LinkedHashMap<>();
 
@@ -78,23 +80,15 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		return expectation;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public ClientHttpResponse validateRequest(ClientHttpRequest request) throws IOException {
-		RequestExpectation expectation = null;
+		RequestExpectation expectation;
 		synchronized (this.requests) {
 			if (this.requests.isEmpty()) {
 				afterExpectationsDeclared();
 			}
 			try {
-				// Try this first for backwards compatibility
-				ClientHttpResponse response = validateRequestInternal(request);
-				if (response != null) {
-					return response;
-				}
-				else {
-					expectation = matchRequest(request);
-				}
+				expectation = matchRequest(request);
 			}
 			catch (Throwable ex) {
 				this.requestFailures.put(request, ex);
@@ -115,19 +109,6 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	}
 
 	/**
-	 * Subclasses must implement the actual validation of the request
-	 * matching to declared expectations.
-	 * @deprecated as of 5.0.3, subclasses should implement {@link #matchRequest(ClientHttpRequest)}
-	 * instead and return only the matched expectation, leaving the call to create the response
-	 * as a separate step (to be invoked by this class).
-	 */
-	@Deprecated
-	@Nullable
-	protected ClientHttpResponse validateRequestInternal(ClientHttpRequest request) throws IOException {
-		return null;
-	}
-
-	/**
 	 * As of 5.0.3 subclasses should implement this method instead of
 	 * {@link #validateRequestInternal(ClientHttpRequest)} in order to match the
 	 * request to an expectation, leaving the call to create the response as a separate step
@@ -145,18 +126,28 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 
 	@Override
 	public void verify() {
-		if (this.expectations.isEmpty()) {
-			return;
-		}
-		int count = 0;
-		for (RequestExpectation expectation : this.expectations) {
-			if (!expectation.isSatisfied()) {
-				count++;
-			}
-		}
+		int count = verifyInternal();
 		if (count > 0) {
 			String message = "Further request(s) expected leaving " + count + " unsatisfied expectation(s).\n";
 			throw new AssertionError(message + getRequestDetails());
+		}
+	}
+
+	@Override
+	public void verify(Duration timeout) {
+		Instant endTime = Instant.now().plus(timeout);
+		do {
+			if (verifyInternal() == 0) {
+				return;
+			}
+		}
+		while (Instant.now().isBefore(endTime));
+		verify();
+	}
+
+	private int verifyInternal() {
+		if (this.expectations.isEmpty()) {
+			return 0;
 		}
 		if (!this.requestFailures.isEmpty()) {
 			throw new AssertionError("Some requests did not execute successfully.\n" +
@@ -164,6 +155,13 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 							.map(entry -> "Failed request:\n" + entry.getKey() + "\n" + entry.getValue())
 							.collect(Collectors.joining("\n", "\n", "")));
 		}
+		int count = 0;
+		for (RequestExpectation expectation : this.expectations) {
+			if (!expectation.isSatisfied()) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	/**
@@ -175,7 +173,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		if (!this.requests.isEmpty()) {
 			sb.append(":\n");
 			for (ClientHttpRequest request : this.requests) {
-				sb.append(request.toString()).append("\n");
+				sb.append(request.toString()).append('\n');
 			}
 		}
 		else {
@@ -238,7 +236,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		/**
 		 * Invoke this for an expectation that has been matched.
 		 * <p>The count of the given expectation is incremented, then it is
-		 * either stored if remainingCount > 0 or removed otherwise.
+		 * either stored if remainingCount &gt; 0 or removed otherwise.
 		 */
 		public void update(RequestExpectation expectation) {
 			expectation.incrementAndValidate();
@@ -252,15 +250,6 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 			else {
 				this.expectations.remove(expectation);
 			}
-		}
-
-		/**
-		 * Add expectations to this group.
-		 * @deprecated as of 5.0.3, if favor of {@link #addAllExpectations}
-		 */
-		@Deprecated
-		public void updateAll(Collection<RequestExpectation> expectations) {
-			expectations.forEach(this::updateInternal);
 		}
 
 		/**

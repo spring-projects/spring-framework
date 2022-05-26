@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -409,7 +409,7 @@ public class MethodParameter {
 
 	/**
 	 * Check whether this method parameter is annotated with any variant of a
-	 * {@code Nullable} annotation, e.g. {@code javax.annotation.Nullable} or
+	 * {@code Nullable} annotation, e.g. {@code jakarta.annotation.Nullable} or
 	 * {@code edu.umd.cs.findbugs.annotations.Nullable}.
 	 */
 	private boolean hasNullableAnnotation() {
@@ -753,10 +753,9 @@ public class MethodParameter {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof MethodParameter)) {
+		if (!(other instanceof MethodParameter otherParam)) {
 			return false;
 		}
-		MethodParameter otherParam = (MethodParameter) other;
 		return (getContainingClass() == otherParam.getContainingClass() &&
 				ObjectUtils.nullSafeEquals(this.typeIndexesPerLevel, otherParam.typeIndexesPerLevel) &&
 				this.nestingLevel == otherParam.nestingLevel &&
@@ -910,7 +909,7 @@ public class MethodParameter {
 		 * Return the generic return type of the method, with support of suspending
 		 * functions via Kotlin reflection.
 		 */
-		static private Type getGenericReturnType(Method method) {
+		private static Type getGenericReturnType(Method method) {
 			try {
 				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 				if (function != null && function.isSuspend()) {
@@ -927,7 +926,7 @@ public class MethodParameter {
 		 * Return the return type of the method, with support of suspending
 		 * functions via Kotlin reflection.
 		 */
-		static private Class<?> getReturnType(Method method) {
+		private static Class<?> getReturnType(Method method) {
 			try {
 				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 				if (function != null && function.isSuspend()) {

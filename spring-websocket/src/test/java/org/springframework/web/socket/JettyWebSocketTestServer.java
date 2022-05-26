@@ -18,16 +18,16 @@ package org.springframework.web.socket;
 
 import java.util.EnumSet;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.ServletContext;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -58,6 +58,7 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 		ServletHolder servletHolder = new ServletHolder(new DispatcherServlet(wac));
 		this.contextHandler = new ServletContextHandler();
 		this.contextHandler.addServlet(servletHolder, "/");
+		this.contextHandler.addServletContainerInitializer(new JettyWebSocketServletContainerInitializer());
 		for (Filter filter : filters) {
 			this.contextHandler.addFilter(new FilterHolder(filter), "/*", getDispatcherTypes());
 		}

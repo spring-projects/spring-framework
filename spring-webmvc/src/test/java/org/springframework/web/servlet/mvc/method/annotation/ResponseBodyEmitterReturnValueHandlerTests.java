@@ -23,8 +23,8 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -227,16 +227,16 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		this.request.addHeader("Accept", "text/event-stream");
 
 		MethodParameter type = on(TestController.class).resolveReturnType(Flux.class, String.class);
-		EmitterProcessor<String> processor = EmitterProcessor.create();
-		this.handler.handleReturnValue(processor, type, this.mavContainer, this.webRequest);
+		Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
+		this.handler.handleReturnValue(sink.asFlux(), type, this.mavContainer, this.webRequest);
 
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(200);
 
-		processor.onNext("foo");
-		processor.onNext("bar");
-		processor.onNext("baz");
-		processor.onComplete();
+		sink.tryEmitNext("foo");
+		sink.tryEmitNext("bar");
+		sink.tryEmitNext("baz");
+		sink.tryEmitComplete();
 
 		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getContentAsString()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
@@ -248,14 +248,14 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		this.request.addHeader("Accept", "text/event-stream");
 
 		MethodParameter type = on(TestController.class).resolveReturnType(Flux.class, String.class);
-		EmitterProcessor<String> processor = EmitterProcessor.create();
-		this.handler.handleReturnValue(processor, type, this.mavContainer, this.webRequest);
+		Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
+		this.handler.handleReturnValue(sink.asFlux(), type, this.mavContainer, this.webRequest);
 
 		assertThat(this.request.isAsyncStarted()).isTrue();
 
 		IllegalStateException ex = new IllegalStateException("wah wah");
-		processor.onError(ex);
-		processor.onComplete();
+		sink.tryEmitError(ex);
+		sink.tryEmitComplete();
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.webRequest);
 		assertThat(asyncManager.getConcurrentResult()).isSameAs(ex);
@@ -290,8 +290,8 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	@Test
 	public void responseEntityFlux() throws Exception {
 
-		EmitterProcessor<String> processor = EmitterProcessor.create();
-		ResponseEntity<Flux<String>> entity = ResponseEntity.ok().body(processor);
+		Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
+		ResponseEntity<Flux<String>> entity = ResponseEntity.ok().body(sink.asFlux());
 		ResolvableType bodyType = forClassWithGenerics(Flux.class, String.class);
 		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, bodyType);
 		this.handler.handleReturnValue(entity, type, this.mavContainer, this.webRequest);
@@ -299,10 +299,10 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(200);
 
-		processor.onNext("foo");
-		processor.onNext("bar");
-		processor.onNext("baz");
-		processor.onComplete();
+		sink.tryEmitNext("foo");
+		sink.tryEmitNext("bar");
+		sink.tryEmitNext("baz");
+		sink.tryEmitComplete();
 
 		assertThat(this.response.getContentType()).isEqualTo("text/plain");
 		assertThat(this.response.getContentAsString()).isEqualTo("foobarbaz");
@@ -311,8 +311,8 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	@Test // SPR-17076
 	public void responseEntityFluxWithCustomHeader() throws Exception {
 
-		EmitterProcessor<SimpleBean> processor = EmitterProcessor.create();
-		ResponseEntity<Flux<SimpleBean>> entity = ResponseEntity.ok().header("x-foo", "bar").body(processor);
+		Sinks.Many<SimpleBean> sink = Sinks.many().unicast().onBackpressureBuffer();
+		ResponseEntity<Flux<SimpleBean>> entity = ResponseEntity.ok().header("x-foo", "bar").body(sink.asFlux());
 		ResolvableType bodyType = forClassWithGenerics(Flux.class, SimpleBean.class);
 		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, bodyType);
 		this.handler.handleReturnValue(entity, type, this.mavContainer, this.webRequest);

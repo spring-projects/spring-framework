@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -85,10 +84,11 @@ public abstract class SpringBeanAutowiringSupport {
 			bpp.processInjection(target);
 		}
 		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Current WebApplicationContext is not available for processing of " +
+			if (logger.isWarnEnabled()) {
+				logger.warn("Current WebApplicationContext is not available for processing of " +
 						ClassUtils.getShortName(target.getClass()) + ": " +
-						"Make sure this class gets constructed in a Spring web application. Proceeding without injection.");
+						"Make sure this class gets constructed in a Spring web application after the " +
+						"Spring WebApplicationContext has been initialized. Proceeding without injection.");
 			}
 		}
 	}
@@ -100,7 +100,7 @@ public abstract class SpringBeanAutowiringSupport {
 	 * <p>Intended for use as a delegate.
 	 * @param target the target object to process
 	 * @param servletContext the ServletContext to find the Spring web application context in
-	 * @see WebApplicationContextUtils#getWebApplicationContext(javax.servlet.ServletContext)
+	 * @see WebApplicationContextUtils#getWebApplicationContext(jakarta.servlet.ServletContext)
 	 */
 	public static void processInjectionBasedOnServletContext(Object target, ServletContext servletContext) {
 		Assert.notNull(target, "Target object must not be null");

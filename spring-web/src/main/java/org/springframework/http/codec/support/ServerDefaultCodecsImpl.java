@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.codec.support;
 
 import java.util.List;
@@ -22,8 +23,10 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
+import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
-import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
+import org.springframework.http.codec.multipart.PartEventHttpMessageReader;
+import org.springframework.http.codec.multipart.PartHttpMessageWriter;
 import org.springframework.lang.Nullable;
 
 /**
@@ -53,11 +56,13 @@ class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecCo
 	@Override
 	public void multipartReader(HttpMessageReader<?> reader) {
 		this.multipartReader = reader;
+		initTypedReaders();
 	}
 
 	@Override
 	public void serverSentEventEncoder(Encoder<?> encoder) {
 		this.sseEncoder = encoder;
+		initObjectWriters();
 	}
 
 
@@ -65,13 +70,18 @@ class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecCo
 	protected void extendTypedReaders(List<HttpMessageReader<?>> typedReaders) {
 		if (this.multipartReader != null) {
 			addCodec(typedReaders, this.multipartReader);
-			return;
 		}
-		if (synchronossMultipartPresent) {
-			SynchronossPartHttpMessageReader partReader = new SynchronossPartHttpMessageReader();
+		else {
+			DefaultPartHttpMessageReader partReader = new DefaultPartHttpMessageReader();
 			addCodec(typedReaders, partReader);
 			addCodec(typedReaders, new MultipartHttpMessageReader(partReader));
 		}
+		addCodec(typedReaders, new PartEventHttpMessageReader());
+	}
+
+	@Override
+	protected void extendTypedWriters(List<HttpMessageWriter<?>> typedWriters) {
+		addCodec(typedWriters, new PartHttpMessageWriter());
 	}
 
 	@Override
@@ -81,7 +91,10 @@ class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecCo
 
 	@Nullable
 	private Encoder<?> getSseEncoder() {
-		return this.sseEncoder != null ? this.sseEncoder : jackson2Present ? getJackson2JsonEncoder() : null;
+		return this.sseEncoder != null ? this.sseEncoder :
+				jackson2Present ? getJackson2JsonEncoder() :
+				kotlinSerializationJsonPresent ? getKotlinSerializationJsonEncoder() :
+				null;
 	}
 
 }

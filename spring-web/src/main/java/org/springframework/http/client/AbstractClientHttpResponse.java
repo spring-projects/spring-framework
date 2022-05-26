@@ -18,19 +18,21 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
 /**
  * Abstract base for {@link ClientHttpResponse}.
  *
  * @author Arjen Poutsma
  * @since 3.1.1
+ * @deprecated as of 6.0, with no direct replacement
  */
+@Deprecated
 public abstract class AbstractClientHttpResponse implements ClientHttpResponse {
 
 	@Override
-	public HttpStatus getStatusCode() throws IOException {
-		return HttpStatus.valueOf(getRawStatusCode());
+	public HttpStatusCode getStatusCode() throws IOException {
+		return HttpStatusCode.valueOf(getRawStatusCode());
 	}
 
 }

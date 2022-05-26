@@ -18,11 +18,10 @@ package org.springframework.orm.hibernate5.support;
 
 import java.io.IOException;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -204,11 +203,10 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * @throws DataAccessResourceFailureException if the Session could not be created
 	 * @see FlushMode#MANUAL
 	 */
-	@SuppressWarnings("deprecation")
 	protected Session openSession(SessionFactory sessionFactory) throws DataAccessResourceFailureException {
 		try {
 			Session session = sessionFactory.openSession();
-			session.setFlushMode(FlushMode.MANUAL);
+			session.setHibernateFlushMode(FlushMode.MANUAL);
 			return session;
 		}
 		catch (HibernateException ex) {

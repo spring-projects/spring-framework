@@ -25,6 +25,7 @@
 		<Logger name="org.springframework.test.context.support.DelegatingSmartContextLoader" level="info" />
 		<Logger name="org.springframework.test.context.support.AbstractGenericContextLoader" level="info" />
 		<Logger name="org.springframework.test.context.support.AnnotationConfigContextLoader" level="info" />
+		<Logger name="org.springframework.test.context.support.AbstractDirtiesContextTestExecutionListener" level="warn" />
 		<Logger name="org.springframework.test.context.support.TestPropertySourceUtils" level="trace" />
 		<Logger name="org.springframework.beans" level="warn" />
 		<Logger name="org.springframework.test.web.servlet.result" level="debug" />

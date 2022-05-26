@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.reactive.handler;
 
 import java.net.URI;
+import java.util.Collections;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +45,7 @@ public class SimpleUrlHandlerMappingTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void handlerMappingJavaConfig() throws Exception {
+	void handlerMappingJavaConfig() {
 		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
 		wac.register(WebConfig.class);
 		wac.refresh();
@@ -61,7 +63,7 @@ public class SimpleUrlHandlerMappingTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void handlerMappingXmlConfig() throws Exception {
+	void handlerMappingXmlConfig() {
 		ClassPathXmlApplicationContext wac = new ClassPathXmlApplicationContext("map.xml", getClass());
 		wac.refresh();
 
@@ -98,7 +100,7 @@ public class SimpleUrlHandlerMappingTests {
 		testUrl("outofpattern*ye", null, handlerMapping, null);
 	}
 
-	private void testUrl(String url, Object bean, HandlerMapping handlerMapping, String pathWithinMapping) {
+	void testUrl(String url, Object bean, HandlerMapping handlerMapping, String pathWithinMapping) {
 		MockServerHttpRequest request = MockServerHttpRequest.method(HttpMethod.GET, URI.create(url)).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		Object actual = handlerMapping.getHandler(exchange).block();
@@ -115,6 +117,19 @@ public class SimpleUrlHandlerMappingTests {
 		}
 	}
 
+	@Test
+	void uriTemplateVariables() {
+		Object handler = new Object();
+		SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+		mapping.registerHandlers(Collections.singletonMap("/foo/{bar}/baz", handler));
+
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo/123/baz").build());
+		Object expected = mapping.getHandler(exchange).block();
+		assertThat(expected).isSameAs(handler);
+
+		Map<String, String> vars = exchange.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+		assertThat(vars).isNotNull().containsEntry("bar", "123");
+	}
 
 	@Configuration
 	static class WebConfig {

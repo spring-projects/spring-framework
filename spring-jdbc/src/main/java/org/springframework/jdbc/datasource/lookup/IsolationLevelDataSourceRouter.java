@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,8 +106,7 @@ public class IsolationLevelDataSourceRouter extends AbstractRoutingDataSource {
 		if (lookupKey instanceof Integer) {
 			return lookupKey;
 		}
-		else if (lookupKey instanceof String) {
-			String constantName = (String) lookupKey;
+		else if (lookupKey instanceof String constantName) {
 			if (!constantName.startsWith(DefaultTransactionDefinition.PREFIX_ISOLATION)) {
 				throw new IllegalArgumentException("Only isolation constants allowed");
 			}

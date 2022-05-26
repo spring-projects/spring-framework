@@ -37,8 +37,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Chris Beams
  * @since 3.1
- * @see org.springframework.beans.factory.xml.XmlBeanFactoryTests#testWithDuplicateName
- * @see org.springframework.beans.factory.xml.XmlBeanFactoryTests#testWithDuplicateNameInAlias
+ * @see org.springframework.beans.factory.xml.XmlBeanFactoryTests#withDuplicateName
+ * @see org.springframework.beans.factory.xml.XmlBeanFactoryTests#withDuplicateNameInAlias
  */
 public class DuplicateBeanIdTests {
 

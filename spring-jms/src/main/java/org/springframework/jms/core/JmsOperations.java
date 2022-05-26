@@ -16,9 +16,9 @@
 
 package org.springframework.jms.core;
 
-import javax.jms.Destination;
-import javax.jms.Message;
-import javax.jms.Queue;
+import jakarta.jms.Destination;
+import jakarta.jms.Message;
+import jakarta.jms.Queue;
 
 import org.springframework.jms.JmsException;
 import org.springframework.lang.Nullable;
@@ -41,10 +41,10 @@ import org.springframework.lang.Nullable;
  * @author Stephane Nicoll
  * @since 1.1
  * @see JmsTemplate
- * @see javax.jms.Destination
- * @see javax.jms.Session
- * @see javax.jms.MessageProducer
- * @see javax.jms.MessageConsumer
+ * @see jakarta.jms.Destination
+ * @see jakarta.jms.Session
+ * @see jakarta.jms.MessageProducer
+ * @see jakarta.jms.MessageConsumer
  */
 public interface JmsOperations {
 

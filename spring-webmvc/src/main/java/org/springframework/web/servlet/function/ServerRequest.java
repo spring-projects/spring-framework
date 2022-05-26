@@ -29,10 +29,11 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Consumer;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -42,10 +43,12 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UriBuilder;
 
 /**
@@ -63,15 +66,14 @@ public interface ServerRequest {
 	 * @return the HTTP method as an HttpMethod enum value, or {@code null}
 	 * if not resolvable (e.g. in case of a non-standard HTTP method)
 	 */
-	@Nullable
-	default HttpMethod method() {
-		return HttpMethod.resolve(methodName());
-	}
+	HttpMethod method();
 
 	/**
 	 * Get the name of the HTTP method.
 	 * @return the HTTP method as a String
+	 * @deprecated in favor of {@link #method()}
 	 */
+	@Deprecated
 	String methodName();
 
 	/**
@@ -82,7 +84,6 @@ public interface ServerRequest {
 	/**
 	 * Get a {@code UriBuilderComponents} from the URI associated with this
 	 * {@code ServerRequest}.
-	 *
 	 * @return a URI builder
 	 */
 	UriBuilder uriBuilder();
@@ -91,14 +92,24 @@ public interface ServerRequest {
 	 * Get the request path.
 	 */
 	default String path() {
-		return uri().getRawPath();
+		return requestPath().pathWithinApplication().value();
 	}
 
 	/**
 	 * Get the request path as a {@code PathContainer}.
+	 * @deprecated as of 5.3, in favor on {@link #requestPath()}
 	 */
+	@Deprecated
 	default PathContainer pathContainer() {
-		return PathContainer.parsePath(path());
+		return requestPath();
+	}
+
+	/**
+	 * Get the request path as a {@code PathContainer}.
+	 * @since 5.3
+	 */
+	default RequestPath requestPath() {
+		return ServletRequestPathUtils.getParsedRequestPath(servletRequest());
 	}
 
 	/**
@@ -187,6 +198,17 @@ public interface ServerRequest {
 	MultiValueMap<String, String> params();
 
 	/**
+	 * Get the parts of a multipart request, provided the Content-Type is
+	 * {@code "multipart/form-data"}, or an exception otherwise.
+	 * @return the multipart data, mapping from name to part(s)
+	 * @throws IOException           if an I/O error occurred during the retrieval
+	 * @throws ServletException      if this request is not of type {@code "multipart/form-data"}
+	 * @since 5.3
+	 * @see HttpServletRequest#getParts()
+	 */
+	MultiValueMap<String, Part> multipartData() throws IOException, ServletException;
+
+	/**
 	 * Get the path variable with the given name, if present.
 	 * @param name the variable name
 	 * @return the variable value
@@ -236,7 +258,7 @@ public interface ServerRequest {
 	 * public ServerResponse myHandleMethod(ServerRequest request) {
 	 *   Instant lastModified = // application-specific calculation
 	 *	 return request.checkNotModified(lastModified)
-	 *	   .orElseGet(() -> {
+	 *	   .orElseGet(() -&gt; {
 	 *	     // further request processing, actually building content
 	 *		 return ServerResponse.ok().body(...);
 	 *	   });
@@ -270,7 +292,7 @@ public interface ServerRequest {
 	 * public ServerResponse myHandleMethod(ServerRequest request) {
 	 *   String eTag = // application-specific calculation
 	 *	 return request.checkNotModified(eTag)
-	 *	   .orElseGet(() -> {
+	 *	   .orElseGet(() -&gt; {
 	 *	     // further request processing, actually building content
 	 *		 return ServerResponse.ok().body(...);
 	 *	   });
@@ -307,7 +329,7 @@ public interface ServerRequest {
 	 *   Instant lastModified = // application-specific calculation
 	 *   String eTag = // application-specific calculation
 	 *	 return request.checkNotModified(lastModified, eTag)
-	 *	   .orElseGet(() -> {
+	 *	   .orElseGet(() -&gt; {
 	 *	     // further request processing, actually building content
 	 *		 return ServerResponse.ok().body(...);
 	 *	   });
@@ -528,6 +550,32 @@ public interface ServerRequest {
 		 * @return this builder
 		 */
 		Builder attributes(Consumer<Map<String, Object>> attributesConsumer);
+
+		/**
+		 * Add a parameter with the given name and value.
+		 * @param name the parameter name
+		 * @param values the parameter value(s)
+		 * @return this builder
+		 */
+		Builder param(String name, String... values);
+
+		/**
+		 * Manipulate this request's parameters with the given consumer.
+		 * <p>The map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing cookies,
+		 * {@linkplain MultiValueMap#remove(Object) remove} cookies, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param paramsConsumer a function that consumes the parameters map
+		 * @return this builder
+		 */
+		Builder params(Consumer<MultiValueMap<String, String>> paramsConsumer);
+
+		/**
+		 * Set the remote address of the request.
+		 * @param remoteAddress the remote address
+		 * @return this builder
+		 */
+		Builder remoteAddress(InetSocketAddress remoteAddress);
 
 		/**
 		 * Build the request.

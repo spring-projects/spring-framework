@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.testfixture.http.server.reactive.bootstrap;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicReference;
 
 import reactor.netty.DisposableServer;
@@ -38,8 +39,7 @@ public class ReactorHttpServer extends AbstractHttpServer {
 	protected void initServer() {
 		this.reactorHandler = createHttpHandlerAdapter();
 		this.reactorServer = reactor.netty.http.server.HttpServer.create()
-				.tcpConfiguration(server -> server.host(getHost()))
-				.port(getPort());
+				.host(getHost()).port(getPort());
 	}
 
 	private ReactorHttpHandlerAdapter createHttpHandlerAdapter() {
@@ -49,7 +49,7 @@ public class ReactorHttpServer extends AbstractHttpServer {
 	@Override
 	protected void startInternal() {
 		DisposableServer server = this.reactorServer.handle(this.reactorHandler).bind().block();
-		setPort(server.address().getPort());
+		setPort(((InetSocketAddress) server.address()).getPort());
 		this.serverRef.set(server);
 	}
 

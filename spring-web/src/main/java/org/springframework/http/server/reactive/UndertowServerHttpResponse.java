@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.lang.Nullable;
@@ -81,12 +81,13 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 	}
 
 	@Override
-	public HttpStatus getStatusCode() {
-		HttpStatus status = super.getStatusCode();
-		return (status != null ? status : HttpStatus.resolve(this.exchange.getStatusCode()));
+	public HttpStatusCode getStatusCode() {
+		HttpStatusCode status = super.getStatusCode();
+		return (status != null ? status : HttpStatusCode.valueOf(this.exchange.getStatusCode()));
 	}
 
 	@Override
+	@Deprecated
 	public Integer getRawStatusCode() {
 		Integer status = super.getRawStatusCode();
 		return (status != null ? status : this.exchange.getStatusCode());
@@ -94,9 +95,9 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 
 	@Override
 	protected void applyStatusCode() {
-		Integer status = super.getRawStatusCode();
+		HttpStatusCode status = super.getStatusCode();
 		if (status != null) {
-			this.exchange.setStatusCode(status);
+			this.exchange.setStatusCode(status.value());
 		}
 	}
 
@@ -104,6 +105,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 	protected void applyHeaders() {
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void applyCookies() {
 		for (String name : getCookies().keySet()) {
@@ -121,6 +123,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				cookie.setSameSiteMode(httpCookie.getSameSite());
+				// getResponseCookies() is deprecated in Undertow 2.2
 				this.exchange.getResponseCookies().putIfAbsent(name, cookie);
 			}
 		}
@@ -203,10 +206,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 			int total = buffer.remaining();
 			int written = writeByteBuffer(buffer);
 
-			if (logger.isTraceEnabled()) {
-				logger.trace(getLogPrefix() + "Wrote " + written + " of " + total + " bytes");
-			}
-			else if (rsWriteLogger.isTraceEnabled()) {
+			if (rsWriteLogger.isTraceEnabled()) {
 				rsWriteLogger.trace(getLogPrefix() + "Wrote " + written + " of " + total + " bytes");
 			}
 			if (written != total) {
@@ -282,12 +282,6 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 				}
 				channel.flush();
 			}
-		}
-
-		@Override
-		protected void flushingFailed(Throwable t) {
-			cancel();
-			onError(t);
 		}
 
 		@Override

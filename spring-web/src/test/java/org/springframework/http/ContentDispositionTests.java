@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,22 +25,22 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.springframework.http.ContentDisposition.builder;
 
 /**
  * Unit tests for {@link ContentDisposition}
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class ContentDispositionTests {
+class ContentDispositionTests {
 
 	private static DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
 
 
 	@Test
-	public void parse() {
+	@SuppressWarnings("deprecation")
+	void parse() {
 		assertThat(parse("form-data; name=\"foo\"; filename=\"foo.txt\"; size=123"))
-				.isEqualTo(builder("form-data")
+				.isEqualTo(ContentDisposition.formData()
 						.name("foo")
 						.filename("foo.txt")
 						.size(123L)
@@ -48,55 +48,100 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void parseFilenameUnquoted() {
+	void parseFilenameUnquoted() {
 		assertThat(parse("form-data; filename=unquoted"))
-				.isEqualTo(builder("form-data")
+				.isEqualTo(ContentDisposition.formData()
 						.filename("unquoted")
 						.build());
 	}
 
 	@Test  // SPR-16091
-	public void parseFilenameWithSemicolon() {
+	void parseFilenameWithSemicolon() {
 		assertThat(parse("attachment; filename=\"filename with ; semicolon.txt\""))
-				.isEqualTo(builder("attachment")
+				.isEqualTo(ContentDisposition.attachment()
 						.filename("filename with ; semicolon.txt")
 						.build());
 	}
 
 	@Test
-	public void parseEncodedFilename() {
+	void parseEncodedFilename() {
 		assertThat(parse("form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt"))
-				.isEqualTo(builder("form-data")
+				.isEqualTo(ContentDisposition.formData()
 						.name("name")
 						.filename("中文.txt", StandardCharsets.UTF_8)
 						.build());
 	}
 
 	@Test // gh-24112
-	public void parseEncodedFilenameWithPaddedCharset() {
+	void parseEncodedFilenameWithPaddedCharset() {
 		assertThat(parse("attachment; filename*= UTF-8''some-file.zip"))
-				.isEqualTo(builder("attachment")
+				.isEqualTo(ContentDisposition.attachment()
 						.filename("some-file.zip", StandardCharsets.UTF_8)
 						.build());
 	}
 
+	@Test // gh-26463
+	void parseBase64EncodedFilename() {
+		String input = "attachment; filename=\"=?UTF-8?B?5pel5pys6KqeLmNzdg==?=\"";
+		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
+	}
+
 	@Test
-	public void parseEncodedFilenameWithoutCharset() {
+	void parseBase64EncodedFilenameMultipleSegments() {
+		String input =
+				"attachment; filename=\"=?utf-8?B?U3ByaW5n5qGG5p625Li65Z+65LqOSmF2YeeahOeOsOS7o+S8geS4muW6lA==?= " +
+				"=?utf-8?B?55So56iL5bqP5o+Q5L6b5LqG5YWo6Z2i55qE57yW56iL5ZKM6YWN572u5qih?= " +
+				"=?utf-8?B?5Z6LLnR4dA==?=\"";
+		assertThat(parse(input).getFilename()).isEqualTo("Spring框架为基于Java的现代企业应用程序提供了全面的编程和配置模型.txt");
+	}
+
+	@Test // gh-26463
+	void parseBase64EncodedShiftJISFilename() {
+		String input = "attachment; filename=\"=?SHIFT_JIS?B?k/qWe4zqLmNzdg==?=\"";
+		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
+	}
+
+	@Test
+	void parseQuotedPrintableFilename() {
+		String input = "attachment; filename=\"=?UTF-8?Q?=E6=97=A5=E6=9C=AC=E8=AA=9E.csv?=\"";
+		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
+	}
+
+	@Test
+	void parseQuotedPrintableFilenameMultipleSegments() {
+		String input =
+				"attachment; filename=\"=?utf-8?Q?Spring=E6=A1=86=E6=9E=B6=E4=B8=BA=E5=9F=BA=E4=BA=8E?=" +
+						"=?utf-8?Q?Java=E7=9A=84=E7=8E=B0=E4=BB=A3=E4=BC=81=E4=B8=9A=E5=BA=94?=" +
+						"=?utf-8?Q?=E7=94=A8=E7=A8=8B=E5=BA=8F=E6=8F=90=E4=BE=9B=E4=BA=86=E5=85=A8?=" +
+						"=?utf-8?Q?=E9=9D=A2=E7=9A=84=E7=BC=96=E7=A8=8B=E5=92=8C=E9=85=8D=E7=BD=AE?=" +
+						"=?utf-8?Q?=E6=A8=A1=E5=9E=8B.txt?=\"";
+		assertThat(parse(input).getFilename()).isEqualTo("Spring框架为基于Java的现代企业应用程序提供了全面的编程和配置模型.txt");
+
+	}
+
+	@Test
+	void parseQuotedPrintableShiftJISFilename() {
+		String input = "attachment; filename=\"=?SHIFT_JIS?Q?=93=FA=96{=8C=EA.csv?=\"";
+		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
+	}
+
+	@Test
+	void parseEncodedFilenameWithoutCharset() {
 		assertThat(parse("form-data; name=\"name\"; filename*=test.txt"))
-				.isEqualTo(builder("form-data")
+				.isEqualTo(ContentDisposition.formData()
 						.name("name")
 						.filename("test.txt")
 						.build());
 	}
 
 	@Test
-	public void parseEncodedFilenameWithInvalidCharset() {
+	void parseEncodedFilenameWithInvalidCharset() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> parse("form-data; name=\"name\"; filename*=UTF-16''test.txt"));
 	}
 
 	@Test
-	public void parseEncodedFilenameWithInvalidName() {
+	void parseEncodedFilenameWithInvalidName() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> parse("form-data; name=\"name\"; filename*=UTF-8''%A"));
 
@@ -105,12 +150,12 @@ public class ContentDispositionTests {
 	}
 
 	@Test // gh-23077
-	public void parseWithEscapedQuote() {
-
+	@SuppressWarnings("deprecation")
+	void parseWithEscapedQuote() {
 		BiConsumer<String, String> tester = (description, filename) ->
 			assertThat(parse("form-data; name=\"file\"; filename=\"" + filename + "\"; size=123"))
 					.as(description)
-					.isEqualTo(builder("form-data").name("file").filename(filename).size(123L).build());
+					.isEqualTo(ContentDisposition.formData().name("file").filename(filename).size(123L).build());
 
 		tester.accept("Escaped quotes should be ignored",
 				"\\\"The Twilight Zone\\\".txt");
@@ -126,9 +171,10 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void parseWithExtraSemicolons() {
+	@SuppressWarnings("deprecation")
+	void parseWithExtraSemicolons() {
 		assertThat(parse("form-data; name=\"foo\";; ; filename=\"foo.txt\"; size=123"))
-				.isEqualTo(builder("form-data")
+				.isEqualTo(ContentDisposition.formData()
 						.name("foo")
 						.filename("foo.txt")
 						.size(123L)
@@ -136,7 +182,8 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void parseDates() {
+	@SuppressWarnings("deprecation")
+	void parseDates() {
 		ZonedDateTime creationTime = ZonedDateTime.parse("Mon, 12 Feb 2007 10:15:30 -0500", formatter);
 		ZonedDateTime modificationTime = ZonedDateTime.parse("Tue, 13 Feb 2007 10:15:30 -0500", formatter);
 		ZonedDateTime readTime = ZonedDateTime.parse("Wed, 14 Feb 2007 10:15:30 -0500", formatter);
@@ -146,7 +193,7 @@ public class ContentDispositionTests {
 						"creation-date=\"" + creationTime.format(formatter) + "\"; " +
 						"modification-date=\"" + modificationTime.format(formatter) + "\"; " +
 						"read-date=\"" + readTime.format(formatter) + "\"")).isEqualTo(
-				builder("attachment")
+				ContentDisposition.attachment()
 						.creationDate(creationTime)
 						.modificationDate(modificationTime)
 						.readDate(readTime)
@@ -154,7 +201,8 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void parseIgnoresInvalidDates() {
+	@SuppressWarnings("deprecation")
+	void parseIgnoresInvalidDates() {
 		ZonedDateTime readTime = ZonedDateTime.parse("Wed, 14 Feb 2007 10:15:30 -0500", formatter);
 
 		assertThat(
@@ -162,23 +210,23 @@ public class ContentDispositionTests {
 						"creation-date=\"-1\"; " +
 						"modification-date=\"-1\"; " +
 						"read-date=\"" + readTime.format(formatter) + "\"")).isEqualTo(
-				builder("attachment")
+				ContentDisposition.attachment()
 						.readDate(readTime)
 						.build());
 	}
 
 	@Test
-	public void parseEmpty() {
+	void parseEmpty() {
 		assertThatIllegalArgumentException().isThrownBy(() -> parse(""));
 	}
 
 	@Test
-	public void parseNoType() {
+	void parseNoType() {
 		assertThatIllegalArgumentException().isThrownBy(() -> parse(";"));
 	}
 
 	@Test
-	public void parseInvalidParameter() {
+	void parseInvalidParameter() {
 		assertThatIllegalArgumentException().isThrownBy(() -> parse("foo;bar"));
 	}
 
@@ -188,9 +236,10 @@ public class ContentDispositionTests {
 
 
 	@Test
-	public void format() {
+	@SuppressWarnings("deprecation")
+	void format() {
 		assertThat(
-				builder("form-data")
+				ContentDisposition.formData()
 						.name("foo")
 						.filename("foo.txt")
 						.size(123L)
@@ -199,9 +248,9 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void formatWithEncodedFilename() {
+	void formatWithEncodedFilename() {
 		assertThat(
-				builder("form-data")
+				ContentDisposition.formData()
 						.name("name")
 						.filename("中文.txt", StandardCharsets.UTF_8)
 						.build().toString())
@@ -209,9 +258,9 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void formatWithEncodedFilenameUsingUsAscii() {
+	void formatWithEncodedFilenameUsingUsAscii() {
 		assertThat(
-				builder("form-data")
+				ContentDisposition.formData()
 						.name("name")
 						.filename("test.txt", StandardCharsets.US_ASCII)
 						.build()
@@ -220,14 +269,14 @@ public class ContentDispositionTests {
 	}
 
 	@Test // gh-24220
-	public void formatWithFilenameWithQuotes() {
+	void formatWithFilenameWithQuotes() {
 
 		BiConsumer<String, String> tester = (input, output) -> {
 
-			assertThat(builder("form-data").filename(input).build().toString())
+			assertThat(ContentDisposition.formData().filename(input).build().toString())
 					.isEqualTo("form-data; filename=\"" + output + "\"");
 
-			assertThat(builder("form-data").filename(input, StandardCharsets.US_ASCII).build().toString())
+			assertThat(ContentDisposition.formData().filename(input, StandardCharsets.US_ASCII).build().toString())
 					.isEqualTo("form-data; filename=\"" + output + "\"");
 		};
 
@@ -255,9 +304,9 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void formatWithEncodedFilenameUsingInvalidCharset() {
+	void formatWithEncodedFilenameUsingInvalidCharset() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				builder("form-data")
+				ContentDisposition.formData()
 						.name("name")
 						.filename("test.txt", StandardCharsets.UTF_16)
 						.build()

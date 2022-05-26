@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
@@ -100,19 +99,19 @@ public class ProducesRequestConditionTests {
 		String base = "application/atom+xml";
 		ProducesRequestCondition condition = new ProducesRequestCondition(base + ";type=feed");
 		HttpServletRequest request = createRequest(base + ";type=entry");
-		assertThat(condition.getMatchingCondition(request)).as("Declared parameter value must match if present in request").isNull();
+		assertThat(condition.getMatchingCondition(request)).isNull();
 
 		condition = new ProducesRequestCondition(base + ";type=feed");
 		request = createRequest(base + ";type=feed");
-		assertThat(condition.getMatchingCondition(request)).as("Declared parameter value must match if present in request").isNotNull();
+		assertThat(condition.getMatchingCondition(request)).isNotNull();
 
 		condition = new ProducesRequestCondition(base + ";type=feed");
 		request = createRequest(base);
-		assertThat(condition.getMatchingCondition(request)).as("Declared parameter has no impact if not present in request").isNotNull();
+		assertThat(condition.getMatchingCondition(request)).isNotNull();
 
 		condition = new ProducesRequestCondition(base);
 		request = createRequest(base + ";type=feed");
-		assertThat(condition.getMatchingCondition(request)).as("No impact from other parameters in request").isNotNull();
+		assertThat(condition.getMatchingCondition(request)).isNotNull();
 	}
 
 	@Test
@@ -222,10 +221,10 @@ public class ProducesRequestConditionTests {
 		HttpServletRequest request = createRequest("text/plain");
 
 		int result = condition1.compareTo(condition2, request);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 
 		result = condition2.compareTo(condition1, request);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 	}
 
 	@Test

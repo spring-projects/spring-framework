@@ -164,7 +164,7 @@ public class MessageHeadersTests {
 		map.put("name", "joe");
 		map.put("age", 42);
 		MessageHeaders input = new MessageHeaders(map);
-		MessageHeaders output = (MessageHeaders) SerializationTestUtils.serializeAndDeserialize(input);
+		MessageHeaders output = SerializationTestUtils.serializeAndDeserialize(input);
 		assertThat(output.get("name")).isEqualTo("joe");
 		assertThat(output.get("age")).isEqualTo(42);
 		assertThat(input.get("name")).isEqualTo("joe");
@@ -178,7 +178,7 @@ public class MessageHeadersTests {
 		map.put("name", "joe");
 		map.put("address", address);
 		MessageHeaders input = new MessageHeaders(map);
-		MessageHeaders output = (MessageHeaders) SerializationTestUtils.serializeAndDeserialize(input);
+		MessageHeaders output = SerializationTestUtils.serializeAndDeserialize(input);
 		assertThat(output.get("name")).isEqualTo("joe");
 		assertThat(output.get("address")).isNull();
 		assertThat(input.get("name")).isEqualTo("joe");

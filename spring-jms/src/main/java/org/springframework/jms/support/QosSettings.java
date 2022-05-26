@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.jms.support;
 
-import javax.jms.Message;
+import jakarta.jms.Message;
 
 import org.springframework.lang.Nullable;
 
@@ -59,10 +59,10 @@ public class QosSettings {
 	 * Set the delivery mode to use when sending a message.
 	 * Default is the JMS Message default: "PERSISTENT".
 	 * @param deliveryMode the delivery mode to use
-	 * @see javax.jms.DeliveryMode#PERSISTENT
-	 * @see javax.jms.DeliveryMode#NON_PERSISTENT
-	 * @see javax.jms.Message#DEFAULT_DELIVERY_MODE
-	 * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
+	 * @see jakarta.jms.DeliveryMode#PERSISTENT
+	 * @see jakarta.jms.DeliveryMode#NON_PERSISTENT
+	 * @see jakarta.jms.Message#DEFAULT_DELIVERY_MODE
+	 * @see jakarta.jms.MessageProducer#send(jakarta.jms.Message, int, int, long)
 	 */
 	public void setDeliveryMode(int deliveryMode) {
 		this.deliveryMode = deliveryMode;
@@ -77,8 +77,8 @@ public class QosSettings {
 
 	/**
 	 * Set the priority of a message when sending.
-	 * @see javax.jms.Message#DEFAULT_PRIORITY
-	 * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
+	 * @see jakarta.jms.Message#DEFAULT_PRIORITY
+	 * @see jakarta.jms.MessageProducer#send(jakarta.jms.Message, int, int, long)
 	 */
 	public void setPriority(int priority) {
 		this.priority = priority;
@@ -94,8 +94,8 @@ public class QosSettings {
 	/**
 	 * Set the time-to-live of the message when sending.
 	 * @param timeToLive the message's lifetime (in milliseconds)
-	 * @see javax.jms.Message#DEFAULT_TIME_TO_LIVE
-	 * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
+	 * @see jakarta.jms.Message#DEFAULT_TIME_TO_LIVE
+	 * @see jakarta.jms.MessageProducer#send(jakarta.jms.Message, int, int, long)
 	 */
 	public void setTimeToLive(long timeToLive) {
 		this.timeToLive = timeToLive;
@@ -114,11 +114,10 @@ public class QosSettings {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof QosSettings)) {
+		if (!(other instanceof QosSettings otherSettings)) {
 			return false;
 		}
 
-		QosSettings otherSettings = (QosSettings) other;
 		return (this.deliveryMode == otherSettings.deliveryMode &&
 				this.priority == otherSettings.priority &&
 				this.timeToLive == otherSettings.timeToLive);

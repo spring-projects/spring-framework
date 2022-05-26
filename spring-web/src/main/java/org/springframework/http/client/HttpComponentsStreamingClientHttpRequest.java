@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.lang.Nullable;
@@ -64,8 +65,13 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 		this.httpContext = context;
 	}
 
+	@Override
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.httpRequest.getMethod());
+	}
 
 	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.httpRequest.getMethod();
 	}
@@ -90,8 +96,7 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 	protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
 		HttpComponentsClientHttpRequest.addHeaders(this.httpRequest, headers);
 
-		if (this.httpRequest instanceof HttpEntityEnclosingRequest && this.body != null) {
-			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) this.httpRequest;
+		if (this.httpRequest instanceof HttpEntityEnclosingRequest entityEnclosingRequest && this.body != null) {
 			HttpEntity requestEntity = new StreamingHttpEntity(getHeaders(), this.body);
 			entityEnclosingRequest.setEntity(requestEntity);
 		}

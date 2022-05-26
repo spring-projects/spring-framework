@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,8 +200,7 @@ public class ExponentialBackOff implements BackOff {
 			}
 			else if (this.currentInterval < 0) {
 				long initialInterval = getInitialInterval();
-				this.currentInterval = (initialInterval < maxInterval
-						? initialInterval : maxInterval);
+				this.currentInterval = Math.min(initialInterval, maxInterval);
 			}
 			else {
 				this.currentInterval = multiplyInterval(maxInterval);
@@ -212,7 +211,7 @@ public class ExponentialBackOff implements BackOff {
 		private long multiplyInterval(long maxInterval) {
 			long i = this.currentInterval;
 			i *= getMultiplier();
-			return (i > maxInterval ? maxInterval : i);
+			return Math.min(i, maxInterval);
 		}
 
 

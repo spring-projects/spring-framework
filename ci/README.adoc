@@ -1,0 +1,57 @@
+== Spring Framework Concourse pipeline
+
+The Spring Framework uses https://concourse-ci.org/[Concourse] for its CI build and other automated tasks.
+The Spring team has a dedicated Concourse instance available at https://ci.spring.io with a build pipeline
+for https://ci.spring.io/teams/spring-framework/pipelines/spring-framework-6.0.x[Spring Framework 6.0.x].
+
+=== Setting up your development environment
+
+If you're part of the Spring Framework project on GitHub, you can get access to CI management features.
+First, you need to go to https://ci.spring.io and install the client CLI for your platform (see bottom right of the screen).
+
+You can then login with the instance using:
+
+[source]
+----
+$ fly -t spring login -n spring-framework -c https://ci.spring.io
+----
+
+Once logged in, you should get something like:
+
+[source]
+----
+$ fly ts
+name                  url                   team                  expiry
+spring                https://ci.spring.io  spring-framework      Wed, 25 Mar 2020 17:45:26 UTC
+----
+
+=== Pipeline configuration and structure
+
+The build pipelines are described in `pipeline.yml` file.
+
+This file is listing Concourse resources, i.e. build inputs and outputs such as container images, artifact repositories, source repositories, notification services, etc.
+
+It also describes jobs (a job is a sequence of inputs, tasks and outputs); jobs are organized by groups.
+
+The `pipeline.yml` definition contains `((parameters))` which are loaded from the `parameters.yml` file or from our https://docs.cloudfoundry.org/credhub/[credhub instance].
+
+You'll find in this folder the following resources:
+
+* `pipeline.yml` the build pipeline
+* `parameters.yml` the build parameters used for the pipeline
+* `images/` holds the container images definitions used in this pipeline
+* `scripts/` holds the build scripts that ship within the CI container images
+* `tasks` contains the task definitions used in the main `pipeline.yml`
+
+=== Updating the build pipeline
+
+Updating files on the repository is not enough to update the build pipeline, as changes need to be applied.
+
+The pipeline can be deployed using the following command:
+
+[source]
+----
+$ fly -t spring set-pipeline -p spring-framework-6.0.x -c ci/pipeline.yml -l ci/parameters.yml
+----
+
+NOTE: This assumes that you have credhub integration configured with the appropriate secrets.

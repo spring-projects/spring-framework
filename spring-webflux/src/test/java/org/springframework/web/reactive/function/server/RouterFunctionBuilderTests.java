@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,6 +27,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
@@ -49,13 +51,12 @@ public class RouterFunctionBuilderTests {
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com/foo").build();
 		ServerRequest getRequest = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 
-		Mono<Integer> responseMono = route.route(getRequest)
+		Mono<HttpStatusCode> responseMono = route.route(getRequest)
 				.flatMap(handlerFunction -> handlerFunction.handle(getRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
+				.map(ServerResponse::statusCode);
 
 		StepVerifier.create(responseMono)
-				.expectNext(200)
+				.expectNext(HttpStatus.OK)
 				.verifyComplete();
 
 		mockRequest = MockServerHttpRequest.head("https://example.com/foo").build();
@@ -64,11 +65,10 @@ public class RouterFunctionBuilderTests {
 
 		responseMono = route.route(headRequest)
 				.flatMap(handlerFunction -> handlerFunction.handle(headRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
+				.map(ServerResponse::statusCode);
 
 		StepVerifier.create(responseMono)
-				.expectNext(202)
+				.expectNext(HttpStatus.ACCEPTED)
 				.verifyComplete();
 
 		mockRequest = MockServerHttpRequest.post("https://example.com/").
@@ -78,11 +78,10 @@ public class RouterFunctionBuilderTests {
 
 		responseMono = route.route(barRequest)
 				.flatMap(handlerFunction -> handlerFunction.handle(barRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
+				.map(ServerResponse::statusCode);
 
 		StepVerifier.create(responseMono)
-				.expectNext(204)
+				.expectNext(HttpStatus.NO_CONTENT)
 				.verifyComplete();
 
 		mockRequest = MockServerHttpRequest.post("https://example.com/").build();
@@ -91,8 +90,7 @@ public class RouterFunctionBuilderTests {
 
 		responseMono = route.route(invalidRequest)
 				.flatMap(handlerFunction -> handlerFunction.handle(invalidRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
+				.map(ServerResponse::statusCode);
 
 		StepVerifier.create(responseMono)
 				.verifyComplete();
@@ -111,13 +109,12 @@ public class RouterFunctionBuilderTests {
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://localhost/resources/response.txt").build();
 		ServerRequest resourceRequest = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 
-		Mono<Integer> responseMono = route.route(resourceRequest)
+		Mono<HttpStatusCode> responseMono = route.route(resourceRequest)
 				.flatMap(handlerFunction -> handlerFunction.handle(resourceRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
+				.map(ServerResponse::statusCode);
 
 		StepVerifier.create(responseMono)
-				.expectNext(200)
+				.expectNext(HttpStatus.OK)
 				.verifyComplete();
 
 		mockRequest = MockServerHttpRequest.post("https://localhost/resources/foo.txt").build();
@@ -125,8 +122,7 @@ public class RouterFunctionBuilderTests {
 
 		responseMono = route.route(invalidRequest)
 				.flatMap(handlerFunction -> handlerFunction.handle(invalidRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
+				.map(ServerResponse::statusCode);
 
 		StepVerifier.create(responseMono)
 				.verifyComplete();
@@ -145,13 +141,12 @@ public class RouterFunctionBuilderTests {
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://localhost/foo/bar/baz").build();
 		ServerRequest fooRequest = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 
-		Mono<Integer> responseMono = route.route(fooRequest)
+		Mono<HttpStatusCode> responseMono = route.route(fooRequest)
 				.flatMap(handlerFunction -> handlerFunction.handle(fooRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
+				.map(ServerResponse::statusCode);
 
 		StepVerifier.create(responseMono)
-				.expectNext(200)
+				.expectNext(HttpStatus.OK)
 				.verifyComplete();
 	}
 
@@ -200,14 +195,53 @@ public class RouterFunctionBuilderTests {
 		mockRequest = MockServerHttpRequest.get("https://localhost/bar").build();
 		ServerRequest barRequest = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 
-		Mono<Integer> barResponseMono = route.route(barRequest)
+		Mono<HttpStatusCode> barResponseMono = route.route(barRequest)
 				.flatMap(handlerFunction -> handlerFunction.handle(barRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
+				.map(ServerResponse::statusCode);
 
 		StepVerifier.create(barResponseMono)
-				.expectNext(500)
+				.expectNext(HttpStatus.INTERNAL_SERVER_ERROR)
 				.verifyComplete();
 	}
+
+	@Test
+	public void multipleOnErrors() {
+		RouterFunction<ServerResponse> route = RouterFunctions.route()
+				.GET("/error", request -> Mono.error(new IOException()))
+				.onError(IOException.class, (t, r) -> ServerResponse.status(200).build())
+				.onError(Exception.class, (t, r) -> ServerResponse.status(201).build())
+				.build();
+
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com/error").build();
+		ServerRequest serverRequest = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<HttpStatusCode> responseStatus = route.route(serverRequest)
+				.flatMap(handlerFunction -> handlerFunction.handle(serverRequest))
+				.map(ServerResponse::statusCode);
+
+		StepVerifier.create(responseStatus)
+				.assertNext(status -> assertThat(status).isEqualTo(HttpStatus.OK))
+				.verifyComplete();
+
+	}
+
+	@Test
+	public void attributes() {
+		RouterFunction<ServerResponse> route = RouterFunctions.route()
+				.GET("/atts/1", request -> ServerResponse.ok().build())
+				.withAttribute("foo", "bar")
+				.withAttribute("baz", "qux")
+				.GET("/atts/2", request -> ServerResponse.ok().build())
+				.withAttributes(atts -> {
+					atts.put("foo", "bar");
+					atts.put("baz", "qux");
+				})
+				.build();
+
+		AttributesTestVisitor visitor = new AttributesTestVisitor();
+		route.accept(visitor);
+		assertThat(visitor.visitCount()).isEqualTo(2);
+	}
+
 
 }

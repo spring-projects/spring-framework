@@ -1,0 +1,16 @@
+This is the preamble.  It is to be ignored, though it
+is a handy place for mail composers to include an
+explanatory note to non-MIME compliant readers.
+--simple-boundary
+
+This is implicitly typed plain ASCII text.
+It does NOT end with a linebreak.
+--simple-boundary
+Content-type: text/plain; charset=us-ascii
+
+This is explicitly typed plain ASCII text.
+It DOES end with a linebreak.
+
+--simple-boundary--
+This is the epilogue.  It is also to be ignored.
+

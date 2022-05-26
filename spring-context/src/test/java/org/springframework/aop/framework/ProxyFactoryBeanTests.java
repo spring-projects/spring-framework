@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.aop.framework;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.aopalliance.aop.Advice;
@@ -65,10 +65,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 
 /**
- * @since 13.03.2003
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @since 13.03.2003
  */
 public class ProxyFactoryBeanTests {
 
@@ -138,20 +138,22 @@ public class ProxyFactoryBeanTests {
 	private void testDoubleTargetSourceIsRejected(String name) {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(DBL_TARGETSOURCE_CONTEXT, CLASS));
-		assertThatExceptionOfType(BeanCreationException.class).as("Should not allow TargetSource to be specified in interceptorNames as well as targetSource property").isThrownBy(() ->
-				bf.getBean(name))
-			.withCauseInstanceOf(AopConfigException.class)
-			.satisfies(ex -> assertThat(ex.getCause().getMessage()).contains("TargetSource"));
+		assertThatExceptionOfType(BeanCreationException.class).as("Should not allow TargetSource to be specified in interceptorNames as well as targetSource property")
+			.isThrownBy(() -> bf.getBean(name))
+			.havingCause()
+			.isInstanceOf(AopConfigException.class)
+			.withMessageContaining("TargetSource");
 	}
 
 	@Test
 	public void testTargetSourceNotAtEndOfInterceptorNamesIsRejected() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(NOTLAST_TARGETSOURCE_CONTEXT, CLASS));
-		assertThatExceptionOfType(BeanCreationException.class).as("TargetSource or non-advised object must be last in interceptorNames").isThrownBy(() ->
-				bf.getBean("targetSourceNotLast"))
-			.withCauseInstanceOf(AopConfigException.class)
-			.satisfies(ex -> assertThat(ex.getCause().getMessage()).contains("interceptorNames"));
+		assertThatExceptionOfType(BeanCreationException.class).as("TargetSource or non-advised object must be last in interceptorNames")
+			.isThrownBy(() -> bf.getBean("targetSourceNotLast"))
+			.havingCause()
+			.isInstanceOf(AopConfigException.class)
+			.withMessageContaining("interceptorNames");
 	}
 
 	@Test
@@ -302,18 +304,15 @@ public class ProxyFactoryBeanTests {
 
 		final Exception ex = new UnsupportedOperationException("invoke");
 		// Add evil interceptor to head of list
-		config.addAdvice(0, new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				throw ex;
-			}
+		config.addAdvice(0, (MethodInterceptor) invocation -> {
+			throw ex;
 		});
 		assertThat(config.getAdvisors().length).as("Have correct advisor count").isEqualTo(2);
 
 		ITestBean tb1 = (ITestBean) factory.getBean("test1");
-		assertThatExceptionOfType(Exception.class).isThrownBy(
-				tb1::toString)
-			.satisfies(thrown -> assertThat(thrown).isSameAs(ex));
+		assertThatExceptionOfType(Exception.class)
+			.isThrownBy(tb1::toString)
+			.isSameAs(ex);
 	}
 
 	/**
@@ -521,7 +520,7 @@ public class ProxyFactoryBeanTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(SERIALIZATION_CONTEXT, CLASS));
 		Person p = (Person) bf.getBean("serializableSingleton");
 		assertThat(bf.getBean("serializableSingleton")).as("Should be a Singleton").isSameAs(p);
-		Person p2 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		Person p2 = SerializationTestUtils.serializeAndDeserialize(p);
 		assertThat(p2).isEqualTo(p);
 		assertThat(p2).isNotSameAs(p);
 		assertThat(p2.getName()).isEqualTo("serializableSingleton");
@@ -544,7 +543,7 @@ public class ProxyFactoryBeanTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(SERIALIZATION_CONTEXT, CLASS));
 		Person p = (Person) bf.getBean("serializablePrototype");
 		assertThat(bf.getBean("serializablePrototype")).as("Should not be a Singleton").isNotSameAs(p);
-		Person p2 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		Person p2 = SerializationTestUtils.serializeAndDeserialize(p);
 		assertThat(p2).isEqualTo(p);
 		assertThat(p2).isNotSameAs(p);
 		assertThat(p2.getName()).isEqualTo("serializablePrototype");
@@ -556,7 +555,7 @@ public class ProxyFactoryBeanTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(SERIALIZATION_CONTEXT, CLASS));
 		Person p = (Person) bf.getBean("serializableSingleton");
 		ProxyFactoryBean pfb = (ProxyFactoryBean) bf.getBean("&serializableSingleton");
-		ProxyFactoryBean pfb2 = (ProxyFactoryBean) SerializationTestUtils.serializeAndDeserialize(pfb);
+		ProxyFactoryBean pfb2 = SerializationTestUtils.serializeAndDeserialize(pfb);
 		Person p2 = (Person) pfb2.getObject();
 		assertThat(p2).isEqualTo(p);
 		assertThat(p2).isNotSameAs(p);
@@ -631,18 +630,48 @@ public class ProxyFactoryBeanTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(FROZEN_CONTEXT, CLASS));
 
-		Advised advised = (Advised)bf.getBean("frozen");
+		Advised advised = (Advised) bf.getBean("frozen");
 		assertThat(advised.isFrozen()).as("The proxy should be frozen").isTrue();
 	}
 
 	@Test
-	public void testDetectsInterfaces() throws Exception {
+	public void testDetectsInterfaces() {
 		ProxyFactoryBean fb = new ProxyFactoryBean();
 		fb.setTarget(new TestBean());
 		fb.addAdvice(new DebugInterceptor());
 		fb.setBeanFactory(new DefaultListableBeanFactory());
+
 		ITestBean proxy = (ITestBean) fb.getObject();
 		assertThat(AopUtils.isJdkDynamicProxy(proxy)).isTrue();
+	}
+
+	@Test
+	public void testWithInterceptorNames() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerSingleton("debug", new DebugInterceptor());
+
+		ProxyFactoryBean fb = new ProxyFactoryBean();
+		fb.setTarget(new TestBean());
+		fb.setInterceptorNames("debug");
+		fb.setBeanFactory(bf);
+
+		Advised proxy = (Advised) fb.getObject();
+		assertThat(proxy.getAdvisorCount()).isEqualTo(1);
+	}
+
+	@Test
+	public void testWithLateInterceptorNames() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerSingleton("debug", new DebugInterceptor());
+
+		ProxyFactoryBean fb = new ProxyFactoryBean();
+		fb.setTarget(new TestBean());
+		fb.setBeanFactory(bf);
+		fb.getObject();
+
+		fb.setInterceptorNames("debug");
+		Advised proxy = (Advised) fb.getObject();
+		assertThat(proxy.getAdvisorCount()).isEqualTo(1);
 	}
 
 
@@ -652,19 +681,16 @@ public class ProxyFactoryBeanTests {
 	@SuppressWarnings("serial")
 	public static class PointcutForVoid extends DefaultPointcutAdvisor {
 
-		public static List<String> methodNames = new LinkedList<>();
+		public static List<String> methodNames = new ArrayList<>();
 
 		public static void reset() {
 			methodNames.clear();
 		}
 
 		public PointcutForVoid() {
-			setAdvice(new MethodInterceptor() {
-				@Override
-				public Object invoke(MethodInvocation invocation) throws Throwable {
-					methodNames.add(invocation.getMethod().getName());
-					return invocation.proceed();
-				}
+			setAdvice((MethodInterceptor) invocation -> {
+				methodNames.add(invocation.getMethod().getName());
+				return invocation.proceed();
 			});
 			setPointcut(new DynamicMethodMatcherPointcut() {
 				@Override

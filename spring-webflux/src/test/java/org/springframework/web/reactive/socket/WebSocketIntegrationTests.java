@@ -27,14 +27,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
-import reactor.core.publisher.ReplayProcessor;
 import reactor.util.retry.Retry;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
@@ -81,15 +80,16 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	private void testEcho() {
 		int count = 100;
 		Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
-		ReplayProcessor<Object> output = ReplayProcessor.create(count);
-		this.client.execute(getUrl("/echo"), session -> session
-				.send(input.map(session::textMessage))
-				.thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
-				.subscribeWith(output)
-				.then())
+		AtomicReference<List<String>> actualRef = new AtomicReference<>();
+		this.client.execute(getUrl("/echo"), session ->
+				session.send(input.map(session::textMessage))
+						.thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
+						.collectList()
+						.doOnNext(actualRef::set)
+						.then())
 				.block(TIMEOUT);
-		assertThat(output.isTerminated()).isTrue();
-		assertThat(output.collectList().block()).isEqualTo(input.collectList().block());
+		assertThat(actualRef.get()).isNotNull();
+		assertThat(actualRef.get()).isEqualTo(input.collectList().block());
 	}
 
 	@ParameterizedWebSocketTest
@@ -98,7 +98,7 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		String protocol = "echo-v1";
 		AtomicReference<HandshakeInfo> infoRef = new AtomicReference<>();
-		MonoProcessor<Object> output = MonoProcessor.create();
+		AtomicReference<Object> protocolRef = new AtomicReference<>();
 
 		this.client.execute(getUrl("/sub-protocol"),
 				new WebSocketHandler() {
@@ -112,7 +112,8 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 						infoRef.set(session.getHandshakeInfo());
 						return session.receive()
 								.map(WebSocketMessage::getPayloadAsText)
-								.subscribeWith(output)
+								.doOnNext(protocolRef::set)
+								.doOnError(protocolRef::set)
 								.then();
 					}
 				})
@@ -122,7 +123,7 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 		assertThat(info.getHeaders().getFirst("Upgrade")).isEqualToIgnoringCase("websocket");
 		assertThat(info.getHeaders().getFirst("Sec-WebSocket-Protocol")).isEqualTo(protocol);
 		assertThat(info.getSubProtocol()).as("Wrong protocol accepted").isEqualTo(protocol);
-		assertThat(output.block(TIMEOUT)).as("Wrong protocol detected on the server side").isEqualTo(protocol);
+		assertThat(protocolRef.get()).as("Wrong protocol detected on the server side").isEqualTo(protocol);
 	}
 
 	@ParameterizedWebSocketTest
@@ -131,25 +132,28 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("my-header", "my-value");
-		MonoProcessor<Object> output = MonoProcessor.create();
+		AtomicReference<Object> headerRef = new AtomicReference<>();
 
 		this.client.execute(getUrl("/custom-header"), headers,
 				session -> session.receive()
 						.map(WebSocketMessage::getPayloadAsText)
-						.subscribeWith(output)
+						.doOnNext(headerRef::set)
+						.doOnError(headerRef::set)
 						.then())
 				.block(TIMEOUT);
 
-		assertThat(output.block(TIMEOUT)).isEqualTo("my-header:my-value");
+		assertThat(headerRef.get()).isEqualTo("my-header:my-value");
 	}
 
 	@ParameterizedWebSocketTest
 	void sessionClosing(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
 		startServer(client, server, serverConfigClass);
 
+		AtomicReference<Object> statusRef = new AtomicReference<>();
 		this.client.execute(getUrl("/close"),
 				session -> {
 					logger.debug("Starting..");
+					session.closeStatus().subscribe(statusRef::set, statusRef::set, () -> {});
 					return session.receive()
 							.doOnNext(s -> logger.debug("inbound " + s))
 							.then()
@@ -158,24 +162,27 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 							);
 				})
 				.block(TIMEOUT);
+
+		assertThat(statusRef.get()).isEqualTo(CloseStatus.GOING_AWAY);
 	}
 
 	@ParameterizedWebSocketTest
 	void cookie(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
 		startServer(client, server, serverConfigClass);
 
-		MonoProcessor<Object> output = MonoProcessor.create();
 		AtomicReference<String> cookie = new AtomicReference<>();
+		AtomicReference<Object> receivedCookieRef = new AtomicReference<>();
 		this.client.execute(getUrl("/cookie"),
 				session -> {
 					cookie.set(session.getHandshakeInfo().getHeaders().getFirst("Set-Cookie"));
 					return session.receive()
 							.map(WebSocketMessage::getPayloadAsText)
-							.subscribeWith(output)
+							.doOnNext(receivedCookieRef::set)
+							.doOnError(receivedCookieRef::set)
 							.then();
 				})
 				.block(TIMEOUT);
-		assertThat(output.block(TIMEOUT)).isEqualTo("cookie");
+		assertThat(receivedCookieRef.get()).isEqualTo("cookie");
 		assertThat(cookie.get()).isEqualTo("project=spring");
 	}
 
@@ -210,8 +217,11 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		@Override
 		public Mono<Void> handle(WebSocketSession session) {
-			// Use retain() for Reactor Netty
-			return session.send(session.receive().doOnNext(WebSocketMessage::retain));
+			return Mono.deferContextual(contextView -> {
+				String key = ServerWebExchangeContextFilter.EXCHANGE_CONTEXT_ATTRIBUTE;
+				assertThat(contextView.getOrEmpty(key).orElse(null)).isNotNull();
+				return session.send(session.receive().doOnNext(WebSocketMessage::retain));
+			});
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,9 @@ import org.springframework.util.StringUtils;
  * @author Ruslan Sibgatullin
  * @since 3.0
  * @see CronTrigger
+ * @deprecated as of 5.3, in favor of {@link CronExpression}
  */
+@Deprecated
 public class CronSequenceGenerator {
 
 	private final String expression;
@@ -75,23 +77,27 @@ public class CronSequenceGenerator {
 
 
 	/**
-	 * Construct a {@link CronSequenceGenerator} from the pattern provided,
+	 * Construct a {@code CronSequenceGenerator} from the pattern provided,
 	 * using the default {@link TimeZone}.
 	 * @param expression a space-separated list of time fields
 	 * @throws IllegalArgumentException if the pattern cannot be parsed
 	 * @see java.util.TimeZone#getDefault()
+	 * @deprecated as of 5.3, in favor of {@link CronExpression#parse(String)}
 	 */
+	@Deprecated
 	public CronSequenceGenerator(String expression) {
 		this(expression, TimeZone.getDefault());
 	}
 
 	/**
-	 * Construct a {@link CronSequenceGenerator} from the pattern provided,
+	 * Construct a {@code CronSequenceGenerator} from the pattern provided,
 	 * using the specified {@link TimeZone}.
 	 * @param expression a space-separated list of time fields
 	 * @param timeZone the TimeZone to use for generated trigger times
 	 * @throws IllegalArgumentException if the pattern cannot be parsed
+	 * @deprecated as of 5.3, in favor of {@link CronExpression#parse(String)}
 	 */
+	@Deprecated
 	public CronSequenceGenerator(String expression, TimeZone timeZone) {
 		this.expression = expression;
 		this.timeZone = timeZone;
@@ -432,10 +438,9 @@ public class CronSequenceGenerator {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof CronSequenceGenerator)) {
+		if (!(other instanceof CronSequenceGenerator otherCron)) {
 			return false;
 		}
-		CronSequenceGenerator otherCron = (CronSequenceGenerator) other;
 		return (this.months.equals(otherCron.months) && this.daysOfMonth.equals(otherCron.daysOfMonth) &&
 				this.daysOfWeek.equals(otherCron.daysOfWeek) && this.hours.equals(otherCron.hours) &&
 				this.minutes.equals(otherCron.minutes) && this.seconds.equals(otherCron.seconds));

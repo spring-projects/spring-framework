@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.expression.spel.testresources;
 
-///CLOVER:OFF
 public class Person {
+
 	private String privateName;
+
 	Company company;
 
 	public Person(String name) {
@@ -41,4 +42,5 @@ public class Person {
 	public Company getCompany() {
 		return company;
 	}
+
 }

@@ -18,12 +18,13 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.util.Assert;
 
 /**
@@ -43,7 +44,7 @@ import org.springframework.util.Assert;
  */
 public class RelativeRedirectFilter extends OncePerRequestFilter {
 
-	private HttpStatus redirectStatus = HttpStatus.SEE_OTHER;
+	private HttpStatusCode redirectStatus = HttpStatus.SEE_OTHER;
 
 
 	/**
@@ -51,7 +52,7 @@ public class RelativeRedirectFilter extends OncePerRequestFilter {
 	 * <p>By default this is {@link HttpStatus#SEE_OTHER}.
 	 * @param status the 3xx redirect status to use
 	 */
-	public void setRedirectStatus(HttpStatus status) {
+	public void setRedirectStatus(HttpStatusCode status) {
 		Assert.notNull(status, "Property 'redirectStatus' is required");
 		Assert.isTrue(status.is3xxRedirection(), "Not a redirect status code");
 		this.redirectStatus = status;
@@ -60,7 +61,7 @@ public class RelativeRedirectFilter extends OncePerRequestFilter {
 	/**
 	 * Return the configured redirect status.
 	 */
-	public HttpStatus getRedirectStatus() {
+	public HttpStatusCode getRedirectStatus() {
 		return this.redirectStatus;
 	}
 

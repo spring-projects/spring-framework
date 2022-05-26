@@ -19,13 +19,12 @@ package org.springframework.validation.beanvalidation;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-import javax.validation.executable.ExecutableValidator;
-
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import jakarta.validation.executable.ExecutableValidator;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -33,6 +32,8 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -55,7 +56,7 @@ import org.springframework.validation.annotation.Validated;
  * @author Juergen Hoeller
  * @since 3.1
  * @see MethodValidationPostProcessor
- * @see javax.validation.executable.ExecutableValidator
+ * @see jakarta.validation.executable.ExecutableValidator
  */
 public class MethodValidationInterceptor implements MethodInterceptor {
 
@@ -87,6 +88,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 
 
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		// Avoid Validator invocation on FactoryBean.getObjectType/isSingleton
 		if (isFactoryBeanMetadataMethod(invocation.getMethod())) {
@@ -100,17 +102,18 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		Method methodToValidate = invocation.getMethod();
 		Set<ConstraintViolation<Object>> result;
 
+		Object target = invocation.getThis();
+		Assert.state(target != null, "Target must not be null");
+
 		try {
-			result = execVal.validateParameters(
-					invocation.getThis(), methodToValidate, invocation.getArguments(), groups);
+			result = execVal.validateParameters(target, methodToValidate, invocation.getArguments(), groups);
 		}
 		catch (IllegalArgumentException ex) {
 			// Probably a generic type mismatch between interface and impl as reported in SPR-12237 / HV-1011
 			// Let's try to find the bridged method on the implementation class...
 			methodToValidate = BridgeMethodResolver.findBridgedMethod(
-					ClassUtils.getMostSpecificMethod(invocation.getMethod(), invocation.getThis().getClass()));
-			result = execVal.validateParameters(
-					invocation.getThis(), methodToValidate, invocation.getArguments(), groups);
+					ClassUtils.getMostSpecificMethod(invocation.getMethod(), target.getClass()));
+			result = execVal.validateParameters(target, methodToValidate, invocation.getArguments(), groups);
 		}
 		if (!result.isEmpty()) {
 			throw new ConstraintViolationException(result);
@@ -118,7 +121,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 
 		Object returnValue = invocation.proceed();
 
-		result = execVal.validateReturnValue(invocation.getThis(), methodToValidate, returnValue, groups);
+		result = execVal.validateReturnValue(target, methodToValidate, returnValue, groups);
 		if (!result.isEmpty()) {
 			throw new ConstraintViolationException(result);
 		}
@@ -157,7 +160,9 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	protected Class<?>[] determineValidationGroups(MethodInvocation invocation) {
 		Validated validatedAnn = AnnotationUtils.findAnnotation(invocation.getMethod(), Validated.class);
 		if (validatedAnn == null) {
-			validatedAnn = AnnotationUtils.findAnnotation(invocation.getThis().getClass(), Validated.class);
+			Object target = invocation.getThis();
+			Assert.state(target != null, "Target must not be null");
+			validatedAnn = AnnotationUtils.findAnnotation(target.getClass(), Validated.class);
 		}
 		return (validatedAnn != null ? validatedAnn.value() : new Class<?>[0]);
 	}

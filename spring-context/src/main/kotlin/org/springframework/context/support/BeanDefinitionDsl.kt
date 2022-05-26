@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,7 +178,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 									  role: Role? = null) {
 
 		val customizer = BeanDefinitionCustomizer { bd ->
-			scope?.let { bd.scope = scope.name.toLowerCase() }
+			scope?.let { bd.scope = scope.name.lowercase() }
 			isLazyInit?.let { bd.isLazyInit = isLazyInit }
 			isPrimary?.let { bd.isPrimary = isPrimary }
 			isAutowireCandidate?.let { bd.isAutowireCandidate = isAutowireCandidate }
@@ -221,7 +221,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 									  crossinline function: BeanSupplierContext.() -> T) {
 
 		val customizer = BeanDefinitionCustomizer { bd ->
-			scope?.let { bd.scope = scope.name.toLowerCase() }
+			scope?.let { bd.scope = scope.name.lowercase() }
 			isLazyInit?.let { bd.isLazyInit = isLazyInit }
 			isPrimary?.let { bd.isPrimary = isPrimary }
 			isAutowireCandidate?.let { bd.isAutowireCandidate = isAutowireCandidate }
@@ -1110,7 +1110,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 		}
 
 		/**
-		 * Return an provider for the specified bean, allowing for lazy on-demand retrieval
+		 * Return a provider for the specified bean, allowing for lazy on-demand retrieval
 		 * of instances, including availability and uniqueness options.
 		 * @see org.springframework.beans.factory.BeanFactory.getBeanProvider
 		 */

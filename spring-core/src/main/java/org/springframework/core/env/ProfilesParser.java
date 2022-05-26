@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@ package org.springframework.core.env;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.Predicate;
 
@@ -30,6 +33,7 @@ import org.springframework.util.StringUtils;
  * Internal parser used by {@link Profiles#of}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.1
  */
 final class ProfilesParser {
@@ -56,6 +60,7 @@ final class ProfilesParser {
 	private static Profiles parseTokens(String expression, StringTokenizer tokens) {
 		return parseTokens(expression, tokens, Context.NONE);
 	}
+
 	private static Profiles parseTokens(String expression, StringTokenizer tokens, Context context) {
 		List<Profiles> elements = new ArrayList<>();
 		Operator operator = null;
@@ -65,25 +70,23 @@ final class ProfilesParser {
 				continue;
 			}
 			switch (token) {
-				case "(":
+				case "(" -> {
 					Profiles contents = parseTokens(expression, tokens, Context.BRACKET);
 					if (context == Context.INVERT) {
 						return contents;
 					}
 					elements.add(contents);
-					break;
-				case "&":
+				}
+				case "&" -> {
 					assertWellFormed(expression, operator == null || operator == Operator.AND);
 					operator = Operator.AND;
-					break;
-				case "|":
+				}
+				case "|" -> {
 					assertWellFormed(expression, operator == null || operator == Operator.OR);
 					operator = Operator.OR;
-					break;
-				case "!":
-					elements.add(not(parseTokens(expression, tokens, Context.INVERT)));
-					break;
-				case ")":
+				}
+				case "!" -> elements.add(not(parseTokens(expression, tokens, Context.INVERT)));
+				case ")" -> {
 					Profiles merged = merge(expression, elements, operator);
 					if (context == Context.BRACKET) {
 						return merged;
@@ -91,13 +94,14 @@ final class ProfilesParser {
 					elements.clear();
 					elements.add(merged);
 					operator = null;
-					break;
-				default:
+				}
+				default -> {
 					Profiles value = equals(token);
 					if (context == Context.INVERT) {
 						return value;
 					}
 					elements.add(value);
+				}
 			}
 		}
 		return merge(expression, elements, operator);
@@ -145,12 +149,12 @@ final class ProfilesParser {
 
 	private static class ParsedProfiles implements Profiles {
 
-		private final String[] expressions;
+		private final Set<String> expressions = new LinkedHashSet<>();
 
 		private final Profiles[] parsed;
 
 		ParsedProfiles(String[] expressions, Profiles[] parsed) {
-			this.expressions = expressions;
+			Collections.addAll(this.expressions, expressions);
 			this.parsed = parsed;
 		}
 
@@ -165,9 +169,30 @@ final class ProfilesParser {
 		}
 
 		@Override
-		public String toString() {
-			return StringUtils.arrayToDelimitedString(this.expressions, " or ");
+		public int hashCode() {
+			return this.expressions.hashCode();
 		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			ParsedProfiles that = (ParsedProfiles) obj;
+			return this.expressions.equals(that.expressions);
+		}
+
+		@Override
+		public String toString() {
+			return StringUtils.collectionToDelimitedString(this.expressions, " or ");
+		}
+
 	}
 
 }

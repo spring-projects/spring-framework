@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,13 +37,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ErrorTests {
+class ErrorTests {
 
 	private final WebTestClient client = WebTestClient.bindToController(new TestController()).build();
 
 
 	@Test
-	public void notFound(){
+	void notFound(){
 		this.client.get().uri("/invalid")
 				.exchange()
 				.expectStatus().isNotFound()
@@ -51,7 +51,7 @@ public class ErrorTests {
 	}
 
 	@Test
-	public void serverException() {
+	void serverException() {
 		this.client.get().uri("/server-error")
 				.exchange()
 				.expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -59,7 +59,7 @@ public class ErrorTests {
 	}
 
 	@Test // SPR-17363
-	public void badRequestBeforeRequestBodyConsumed() {
+	void badRequestBeforeRequestBodyConsumed() {
 		EntityExchangeResult<Void> result = this.client.post()
 				.uri("/post")
 				.contentType(MediaType.APPLICATION_JSON)

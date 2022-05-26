@@ -16,8 +16,7 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletContextEvent;
-
+import jakarta.servlet.ServletContextEvent;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;

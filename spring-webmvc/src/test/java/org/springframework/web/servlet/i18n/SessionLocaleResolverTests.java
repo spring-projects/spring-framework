@@ -18,8 +18,7 @@ package org.springframework.web.servlet.i18n;
 
 import java.util.Locale;
 
-import javax.servlet.http.HttpSession;
-
+import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;

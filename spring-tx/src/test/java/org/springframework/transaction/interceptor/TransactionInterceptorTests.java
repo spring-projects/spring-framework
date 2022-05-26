@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,12 +90,11 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		ti.setTransactionAttributes(props);
 		PlatformTransactionManager ptm = new SerializableTransactionManager();
 		ti.setTransactionManager(ptm);
-		ti = (TransactionInterceptor) SerializationTestUtils.serializeAndDeserialize(ti);
+		ti = SerializationTestUtils.serializeAndDeserialize(ti);
 
 		// Check that logger survived deserialization
 		assertThat(ti.logger).isNotNull();
-		boolean condition = ti.getTransactionManager() instanceof SerializableTransactionManager;
-		assertThat(condition).isTrue();
+		assertThat(ti.getTransactionManager()).isInstanceOf(SerializableTransactionManager.class);
 		assertThat(ti.getTransactionAttributeSource()).isNotNull();
 	}
 
@@ -115,7 +114,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		ti.setTransactionAttributeSources(tas1, tas2);
 		PlatformTransactionManager ptm = new SerializableTransactionManager();
 		ti.setTransactionManager(ptm);
-		ti = (TransactionInterceptor) SerializationTestUtils.serializeAndDeserialize(ti);
+		ti = SerializationTestUtils.serializeAndDeserialize(ti);
 
 		boolean condition3 = ti.getTransactionManager() instanceof SerializableTransactionManager;
 		assertThat(condition3).isTrue();

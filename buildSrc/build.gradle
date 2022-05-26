@@ -8,8 +8,7 @@ repositories {
 }
 
 dependencies {
-	implementation "me.champeau.gradle:japicmp-gradle-plugin:0.2.8"
-	implementation "com.google.guava:guava:28.2-jre" // required by japicmp-gradle-plugin
+	implementation "me.champeau.gradle:japicmp-gradle-plugin:0.3.0"
 }
 
 gradlePlugin {

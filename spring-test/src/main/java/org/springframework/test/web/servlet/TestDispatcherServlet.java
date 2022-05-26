@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockAsyncContext;
@@ -80,8 +80,9 @@ final class TestDispatcherServlet extends DispatcherServlet {
 				MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
 				Assert.notNull(mockRequest, "Expected MockHttpServletRequest");
 				asyncContext = (MockAsyncContext) mockRequest.getAsyncContext();
+				String requestClassName = request.getClass().getName();
 				Assert.notNull(asyncContext, () ->
-						"Outer request wrapper " + request.getClass().getName() + " has an AsyncContext," +
+						"Outer request wrapper " + requestClassName + " has an AsyncContext," +
 								"but it is not a MockAsyncContext, while the nested " +
 								mockRequest.getClass().getName() + " does not have an AsyncContext at all.");
 			}

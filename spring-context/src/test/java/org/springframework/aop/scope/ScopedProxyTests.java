@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public class ScopedProxyTests {
 		assertThat(scope.getMap().containsKey("testBeanTarget")).isTrue();
 		assertThat(scope.getMap().get("testBeanTarget").getClass()).isEqualTo(TestBean.class);
 
-		ITestBean deserialized = (ITestBean) SerializationTestUtils.serializeAndDeserialize(bean);
+		ITestBean deserialized = SerializationTestUtils.serializeAndDeserialize(bean);
 		assertThat(deserialized).isNotNull();
 		assertThat(AopUtils.isJdkDynamicProxy(deserialized)).isTrue();
 		assertThat(bean.getAge()).isEqualTo(101);

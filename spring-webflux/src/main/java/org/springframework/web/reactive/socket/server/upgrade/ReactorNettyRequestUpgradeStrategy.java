@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import reactor.netty.http.server.HttpServerResponse;
 import reactor.netty.http.server.WebsocketServerSpec;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.http.server.reactive.AbstractServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.lang.Nullable;
@@ -53,16 +52,16 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 
 
 	/**
-	 * Create an instances with a default {@link WebsocketServerSpec.Builder}.
+	 * Create an instances with a default {@link reactor.netty.http.server.WebsocketServerSpec.Builder}.
 	 * @since 5.2.6
 	 */
 	public ReactorNettyRequestUpgradeStrategy() {
-		this(WebsocketServerSpec.builder());
+		this(WebsocketServerSpec::builder);
 	}
 
 
 	/**
-	 * Create an instance with a pre-configured {@link WebsocketServerSpec.Builder}
+	 * Create an instance with a pre-configured {@link reactor.netty.http.server.WebsocketServerSpec.Builder}
 	 * to use for WebSocket upgrades.
 	 * @since 5.2.6
 	 */
@@ -83,7 +82,7 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 		return buildSpec(null);
 	}
 
-	private WebsocketServerSpec buildSpec(@Nullable String subProtocol) {
+	WebsocketServerSpec buildSpec(@Nullable String subProtocol) {
 		WebsocketServerSpec.Builder builder = this.specBuilderSupplier.get();
 		if (subProtocol != null) {
 			builder.protocols(subProtocol);
@@ -108,7 +107,8 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 	 * @param maxFramePayloadLength the max length for frames.
 	 * @since 5.1
 	 * @deprecated as of 5.2.6 in favor of providing a supplier of
-	 * {@link WebsocketServerSpec.Builder} wiht a constructor argument.
+	 * {@link reactor.netty.http.server.WebsocketServerSpec.Builder} with a
+	 * constructor argument
 	 */
 	@Deprecated
 	public void setMaxFramePayloadLength(Integer maxFramePayloadLength) {
@@ -136,7 +136,8 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 	 * @param handlePing whether to let Ping frames through for handling
 	 * @since 5.2.4
 	 * @deprecated as of 5.2.6 in favor of providing a supplier of
-	 * {@link WebsocketServerSpec.Builder} wiht a constructor argument.
+	 * {@link reactor.netty.http.server.WebsocketServerSpec.Builder} with a
+	 * constructor argument
 	 */
 	@Deprecated
 	public void setHandlePing(boolean handlePing) {
@@ -159,7 +160,7 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory) {
 
 		ServerHttpResponse response = exchange.getResponse();
-		HttpServerResponse reactorResponse = getNativeResponse(response);
+		HttpServerResponse reactorResponse = ServerHttpResponseDecorator.getNativeResponse(response);
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
 		URI uri = exchange.getRequest().getURI();
@@ -175,19 +176,6 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 						return handler.handle(session).checkpoint(uri + " [ReactorNettyRequestUpgradeStrategy]");
 					}, spec);
 				}));
-	}
-
-	private static HttpServerResponse getNativeResponse(ServerHttpResponse response) {
-		if (response instanceof AbstractServerHttpResponse) {
-			return ((AbstractServerHttpResponse) response).getNativeResponse();
-		}
-		else if (response instanceof ServerHttpResponseDecorator) {
-			return getNativeResponse(((ServerHttpResponseDecorator) response).getDelegate());
-		}
-		else {
-			throw new IllegalArgumentException(
-					"Couldn't find native response in " + response.getClass().getName());
-		}
 	}
 
 }

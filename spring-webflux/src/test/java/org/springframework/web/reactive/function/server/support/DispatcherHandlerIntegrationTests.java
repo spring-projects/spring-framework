@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.HttpHandler;
@@ -63,7 +64,7 @@ class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		ResponseEntity<String> result = this.restTemplate
 				.getForEntity("http://localhost:" + this.port + "/foo/bar", String.class);
 
-		assertThat(result.getStatusCodeValue()).isEqualTo(200);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
 

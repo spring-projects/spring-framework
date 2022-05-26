@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,9 @@ import org.springframework.util.comparator.Comparators;
 
 /**
  * A {@link Comparator} that converts values before they are compared.
- * The specified {@link Converter} will be used to convert each value
- * before it passed to the underlying {@code Comparator}.
+ *
+ * <p>The specified {@link Converter} will be used to convert each value
+ * before it is passed to the underlying {@code Comparator}.
  *
  * @author Phillip Webb
  * @since 3.2
@@ -82,8 +83,8 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	}
 
 	/**
-	 * Create a new {@link ConvertingComparator} that compares {@link java.util.Map.Entry
-	 * map * entries} based on their {@link java.util.Map.Entry#getKey() keys}.
+	 * Create a new {@link ConvertingComparator} that compares {@linkplain java.util.Map.Entry
+	 * map entries} based on their {@linkplain java.util.Map.Entry#getKey() keys}.
 	 * @param comparator the underlying comparator used to compare keys
 	 * @return a new {@link ConvertingComparator} instance
 	 */
@@ -92,8 +93,8 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	}
 
 	/**
-	 * Create a new {@link ConvertingComparator} that compares {@link java.util.Map.Entry
-	 * map entries} based on their {@link java.util.Map.Entry#getValue() values}.
+	 * Create a new {@link ConvertingComparator} that compares {@linkplain java.util.Map.Entry
+	 * map entries} based on their {@linkplain java.util.Map.Entry#getValue() values}.
 	 * @param comparator the underlying comparator used to compare values
 	 * @return a new {@link ConvertingComparator} instance
 	 */
@@ -111,8 +112,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 
 		private final Class<? extends T> targetType;
 
-		public ConversionServiceConverter(ConversionService conversionService,
-			Class<? extends T> targetType) {
+		public ConversionServiceConverter(ConversionService conversionService, Class<? extends T> targetType) {
 			Assert.notNull(conversionService, "ConversionService must not be null");
 			Assert.notNull(targetType, "TargetType must not be null");
 			this.conversionService = conversionService;

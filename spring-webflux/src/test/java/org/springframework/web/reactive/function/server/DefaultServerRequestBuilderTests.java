@@ -23,7 +23,6 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseCookie;
@@ -42,9 +41,6 @@ import static org.assertj.core.api.Assertions.entry;
  */
 public class DefaultServerRequestBuilderTests {
 
-	private final DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-
-
 	@Test
 	public void from() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("https://example.com")
@@ -58,7 +54,7 @@ public class DefaultServerRequestBuilderTests {
 
 		Flux<DataBuffer> body = Flux.just("baz")
 				.map(s -> s.getBytes(StandardCharsets.UTF_8))
-				.map(dataBufferFactory::wrap);
+				.map(DefaultDataBufferFactory.sharedInstance::wrap);
 
 		ServerRequest result = ServerRequest.from(other)
 				.method(HttpMethod.HEAD)

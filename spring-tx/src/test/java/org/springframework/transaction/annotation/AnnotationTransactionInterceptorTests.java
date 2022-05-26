@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,20 @@
 
 package org.springframework.transaction.annotation;
 
+import java.time.Duration;
+
 import io.vavr.control.Try;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.testfixture.CallCountingTransactionManager;
+import org.springframework.transaction.testfixture.ReactiveCallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -32,14 +39,17 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Mark Paluch
  */
 public class AnnotationTransactionInterceptorTests {
 
 	private final CallCountingTransactionManager ptm = new CallCountingTransactionManager();
 
+	private final ReactiveCallCountingTransactionManager rtm = new ReactiveCallCountingTransactionManager();
+
 	private final AnnotationTransactionAttributeSource source = new AnnotationTransactionAttributeSource();
 
-	private final TransactionInterceptor ti = new TransactionInterceptor(this.ptm, this.source);
+	private final TransactionInterceptor ti = new TransactionInterceptor((TransactionManager) this.ptm, this.source);
 
 
 	@Test
@@ -167,6 +177,78 @@ public class AnnotationTransactionInterceptorTests {
 		assertThatExceptionOfType(Exception.class).isThrownBy(
 				proxy::doSomethingElseWithCheckedExceptionAndRollbackRule)
 			.satisfies(ex -> assertGetTransactionAndRollbackCount(1));
+	}
+
+	@Test
+	public void withMonoSuccess() {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new TestWithReactive());
+		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
+
+		TestWithReactive proxy = (TestWithReactive) proxyFactory.getProxy();
+
+		StepVerifier.withVirtualTime(proxy::monoSuccess).thenAwait(Duration.ofSeconds(10)).verifyComplete();
+		assertReactiveGetTransactionAndCommitCount(1);
+	}
+
+	@Test
+	public void withMonoFailure() {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new TestWithReactive());
+		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
+
+		TestWithReactive proxy = (TestWithReactive) proxyFactory.getProxy();
+
+		proxy.monoFailure().as(StepVerifier::create).verifyError();
+		assertReactiveGetTransactionAndRollbackCount(1);
+	}
+
+	@Test
+	public void withMonoRollback() {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new TestWithReactive());
+		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
+
+		TestWithReactive proxy = (TestWithReactive) proxyFactory.getProxy();
+
+		StepVerifier.withVirtualTime(proxy::monoSuccess).thenAwait(Duration.ofSeconds(1)).thenCancel().verify();
+		assertReactiveGetTransactionAndRollbackCount(1);
+	}
+
+	@Test
+	public void withFluxSuccess() {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new TestWithReactive());
+		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
+
+		TestWithReactive proxy = (TestWithReactive) proxyFactory.getProxy();
+
+		StepVerifier.withVirtualTime(proxy::fluxSuccess).thenAwait(Duration.ofSeconds(10)).expectNextCount(1).verifyComplete();
+		assertReactiveGetTransactionAndCommitCount(1);
+	}
+
+	@Test
+	public void withFluxFailure() {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new TestWithReactive());
+		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
+
+		TestWithReactive proxy = (TestWithReactive) proxyFactory.getProxy();
+
+		proxy.fluxFailure().as(StepVerifier::create).verifyError();
+		assertReactiveGetTransactionAndRollbackCount(1);
+	}
+
+	@Test
+	public void withFluxRollback() {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new TestWithReactive());
+		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
+
+		TestWithReactive proxy = (TestWithReactive) proxyFactory.getProxy();
+
+		StepVerifier.withVirtualTime(proxy::fluxSuccess).thenAwait(Duration.ofSeconds(1)).thenCancel().verify();
+		assertReactiveGetTransactionAndRollbackCount(1);
 	}
 
 	@Test
@@ -342,6 +424,16 @@ public class AnnotationTransactionInterceptorTests {
 		assertThat(this.ptm.rollbacks).isEqualTo(expectedCount);
 	}
 
+	private void assertReactiveGetTransactionAndCommitCount(int expectedCount) {
+		assertThat(this.rtm.begun).isEqualTo(expectedCount);
+		assertThat(this.rtm.commits).isEqualTo(expectedCount);
+	}
+
+	private void assertReactiveGetTransactionAndRollbackCount(int expectedCount) {
+		assertThat(this.rtm.begun).isEqualTo(expectedCount);
+		assertThat(this.rtm.rollbacks).isEqualTo(expectedCount);
+	}
+
 
 	@Transactional
 	public static class TestClassLevelOnly {
@@ -452,6 +544,25 @@ public class AnnotationTransactionInterceptorTests {
 		}
 	}
 
+	@Transactional
+	public static class TestWithReactive {
+
+		public Mono<Void> monoSuccess() {
+			return Mono.delay(Duration.ofSeconds(10)).then();
+		}
+
+		public Mono<Void> monoFailure() {
+			return Mono.error(new IllegalStateException());
+		}
+
+		public Flux<Object> fluxSuccess() {
+			return Flux.just(new Object()).delayElements(Duration.ofSeconds(10));
+		}
+
+		public Flux<Object> fluxFailure() {
+			return Flux.error(new IllegalStateException());
+		}
+	}
 
 	@Transactional
 	public static class TestWithVavrTry {

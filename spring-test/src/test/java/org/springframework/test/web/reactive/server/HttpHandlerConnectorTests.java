@@ -121,7 +121,7 @@ public class HttpHandlerConnectorTests {
 	}
 
 	private DataBuffer toDataBuffer(String body) {
-		return new DefaultDataBufferFactory().wrap(body.getBytes(UTF_8));
+		return DefaultDataBufferFactory.sharedInstance.wrap(body.getBytes(UTF_8));
 	}
 
 

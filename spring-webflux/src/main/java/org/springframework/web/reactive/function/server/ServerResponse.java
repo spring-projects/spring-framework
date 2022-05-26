@@ -35,6 +35,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -60,19 +61,17 @@ public interface ServerResponse {
 
 	/**
 	 * Return the status code of this response.
-	 * @return the status as an HttpStatus enum value
-	 * @throws IllegalArgumentException in case of an unknown HTTP status code
-	 * @see HttpStatus#valueOf(int)
+	 * @return the status as an HttpStatusCode value
 	 */
-	HttpStatus statusCode();
+	HttpStatusCode statusCode();
 
 	/**
-	 * Return the (potentially non-standard) status code of this response.
+	 * Return the status code of this response as integer.
 	 * @return the status as an integer
 	 * @since 5.2
-	 * @see #statusCode()
-	 * @see HttpStatus#resolve(int)
+	 * @deprecated as of 6.0, in favor of {@link #statusCode()}
 	 */
+	@Deprecated
 	int rawStatusCode();
 
 	/**
@@ -110,7 +109,7 @@ public interface ServerResponse {
 	 * @param status the response status
 	 * @return the created builder
 	 */
-	static BodyBuilder status(HttpStatus status) {
+	static BodyBuilder status(HttpStatusCode status) {
 		return new DefaultServerResponseBuilder(status);
 	}
 
@@ -121,7 +120,7 @@ public interface ServerResponse {
 	 * @since 5.0.3
 	 */
 	static BodyBuilder status(int status) {
-		return new DefaultServerResponseBuilder(status);
+		return new DefaultServerResponseBuilder(HttpStatusCode.valueOf(status));
 	}
 
 	/**
@@ -265,7 +264,6 @@ public interface ServerResponse {
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
 		 * by the {@code Allow} header.
-		 *
 		 * @param allowedMethods the allowed methods
 		 * @return this builder
 		 * @see HttpHeaders#setAllow(Set)

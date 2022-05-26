@@ -50,21 +50,21 @@ class TestGroupParsingTests {
 
 	@Test
 	void parseWithSpaces() {
-		assertThat(TestGroup.parse(" PERFORMANCE,  PERFORMANCE ")).containsOnly(TestGroup.PERFORMANCE);
+		assertThat(TestGroup.parse(" LONG_RUNNING,  LONG_RUNNING ")).containsOnly(TestGroup.LONG_RUNNING);
 	}
 
 	@Test
 	void parseInMixedCase() {
-		assertThat(TestGroup.parse("performance,  PERFormaNCE")).containsOnly(TestGroup.PERFORMANCE);
+		assertThat(TestGroup.parse("long_running,  LonG_RunnING")).containsOnly(TestGroup.LONG_RUNNING);
 	}
 
 	@Test
 	void parseMissing() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> TestGroup.parse("performance, missing"))
+			.isThrownBy(() -> TestGroup.parse("long_running, missing"))
 			.withMessageContaining("Unable to find test group 'missing' when parsing " +
-					"testGroups value: 'performance, missing'. Available groups include: " +
-					"[LONG_RUNNING,PERFORMANCE]");
+					"testGroups value: 'long_running, missing'. Available groups include: " +
+					"[LONG_RUNNING]");
 	}
 
 	@Test
@@ -73,10 +73,10 @@ class TestGroupParsingTests {
 	}
 
 	@Test
-	void parseAllExceptPerformance() {
+	void parseAllExceptLongRunning() {
 		Set<TestGroup> expected = EnumSet.allOf(TestGroup.class);
-		expected.remove(TestGroup.PERFORMANCE);
-		assertThat(TestGroup.parse("all-performance")).isEqualTo(expected);
+		expected.remove(TestGroup.LONG_RUNNING);
+		assertThat(TestGroup.parse("all-long_running")).isEqualTo(expected);
 	}
 
 	@Test
@@ -85,7 +85,7 @@ class TestGroupParsingTests {
 			.isThrownBy(() -> TestGroup.parse("all-missing"))
 			.withMessageContaining("Unable to find test group 'missing' when parsing " +
 					"testGroups value: 'all-missing'. Available groups include: " +
-					"[LONG_RUNNING,PERFORMANCE]");
+					"[LONG_RUNNING]");
 	}
 
 }

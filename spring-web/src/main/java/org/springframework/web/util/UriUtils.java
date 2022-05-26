@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -246,15 +246,15 @@ public abstract class UriUtils {
 	 * Encode the query parameters from the given {@code MultiValueMap} with UTF-8.
 	 * <p>This can be used with {@link UriComponentsBuilder#queryParams(MultiValueMap)}
 	 * when building a URI from an already encoded template.
-	 * <pre class="code">
-	 * MultiValueMap&lt;String, String&gt; params = new LinkedMultiValueMap<>(2);
+	 * <pre class="code">{@code
+	 * MultiValueMap<String, String> params = new LinkedMultiValueMap<>(2);
 	 * // add to params...
 	 *
 	 * ServletUriComponentsBuilder.fromCurrentRequest()
 	 *         .queryParams(UriUtils.encodeQueryParams(params))
 	 *         .build(true)
 	 *         .toUriString();
-	 * </pre>
+	 * }</pre>
 	 * @param params the parameters to encode
 	 * @return a new {@code MultiValueMap} with the encoded names and values
 	 * @since 5.2.3
@@ -325,7 +325,7 @@ public abstract class UriUtils {
 	 * @since 5.0
 	 */
 	public static Map<String, String> encodeUriVariables(Map<String, ?> uriVariables) {
-		Map<String, String> result = new LinkedHashMap<>(uriVariables.size());
+		Map<String, String> result = CollectionUtils.newLinkedHashMap(uriVariables.size());
 		uriVariables.forEach((key, value) -> {
 			String stringValue = (value != null ? value.toString() : "");
 			result.put(key, encode(stringValue, StandardCharsets.UTF_8));
@@ -407,7 +407,7 @@ public abstract class UriUtils {
 		int paramIndex = path.indexOf(';', begin);
 		end = (paramIndex != -1 && paramIndex < end ? paramIndex : end);
 		int extIndex = path.lastIndexOf('.', end);
-		if (extIndex != -1 && extIndex > begin) {
+		if (extIndex != -1 && extIndex >= begin) {
 			return path.substring(extIndex + 1, end);
 		}
 		return null;

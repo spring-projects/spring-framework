@@ -83,8 +83,7 @@ public class LocaleResolverTests {
 		}
 
 		// check LocaleContext
-		if (localeResolver instanceof LocaleContextResolver) {
-			LocaleContextResolver localeContextResolver = (LocaleContextResolver) localeResolver;
+		if (localeResolver instanceof LocaleContextResolver localeContextResolver) {
 			LocaleContext localeContext = localeContextResolver.resolveLocaleContext(request);
 			if (shouldSet) {
 				assertThat(localeContext.getLocale()).isEqualTo(Locale.GERMANY);

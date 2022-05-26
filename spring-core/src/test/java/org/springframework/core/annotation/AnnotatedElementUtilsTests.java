@@ -32,9 +32,9 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-import javax.annotation.Resource;
 import javax.annotation.meta.When;
 
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -611,7 +611,7 @@ class AnnotatedElementUtilsTests {
 
 	/**
 	 * Bridge/bridged method setup code copied from
-	 * {@link org.springframework.core.BridgeMethodResolverTests#testWithGenericParameter()}.
+	 * {@link org.springframework.core.BridgeMethodResolverTests#withGenericParameter()}.
 	 * @since 4.2
 	 */
 	@Test

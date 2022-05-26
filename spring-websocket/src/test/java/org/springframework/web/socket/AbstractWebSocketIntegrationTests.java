@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrate
 import org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
+import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
@@ -66,15 +67,15 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 	static Stream<Arguments> argumentsFactory() {
 		return Stream.of(
-				arguments(new JettyWebSocketTestServer(), new JettyWebSocketClient()),
-				arguments(new TomcatWebSocketTestServer(), new StandardWebSocketClient()),
-				arguments(new UndertowTestServer(), new StandardWebSocketClient()));
+				arguments(named("Jetty", new JettyWebSocketTestServer()), named("Jetty", new JettyWebSocketClient())),
+				arguments(named("Tomcat", new TomcatWebSocketTestServer()), named("Standard", new StandardWebSocketClient())),
+				arguments(named("Undertow", new UndertowTestServer()), named("Standard", new StandardWebSocketClient())));
 	}
 
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "[{index}] server [{0}], client [{1}]")
+	@ParameterizedTest(name = "[{index}] server = {0}, client = {1}")
 	@MethodSource("argumentsFactory")
 	protected @interface ParameterizedWebSocketTest {
 	}

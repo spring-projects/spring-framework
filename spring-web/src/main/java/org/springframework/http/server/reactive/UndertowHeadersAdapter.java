@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.springframework.http.server.reactive;
 
 import java.util.AbstractSet;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,12 +30,14 @@ import io.undertow.util.HeaderValues;
 import io.undertow.util.HttpString;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
  * {@code MultiValueMap} implementation for wrapping Undertow HTTP headers.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 5.1.1
  */
 class UndertowHeadersAdapter implements MultiValueMap<String, String> {
@@ -81,7 +83,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		Map<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
+		Map<String, String> singleValueMap = CollectionUtils.newLinkedHashMap(this.headers.size());
 		this.headers.forEach(values ->
 				singleValueMap.put(values.getHeaderName().toString(), values.getFirst()));
 		return singleValueMap;
@@ -99,7 +101,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String && this.headers.contains((String) key));
+		return (key instanceof String headerName && this.headers.contains(headerName));
 	}
 
 	@Override
@@ -113,10 +115,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	@Nullable
 	public List<String> get(Object key) {
-		if (key instanceof String) {
-			return this.headers.get((String) key);
-		}
-		return null;
+		return (key instanceof String headerName ? this.headers.get(headerName) : null);
 	}
 
 	@Override
@@ -130,8 +129,11 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	@Nullable
 	public List<String> remove(Object key) {
-		if (key instanceof String) {
-			this.headers.remove((String) key);
+		if (key instanceof String headerName) {
+			Collection<String> removed = this.headers.remove(headerName);
+			if (removed != null) {
+				return new ArrayList<>(removed);
+			}
 		}
 		return null;
 	}
@@ -149,9 +151,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Set<String> keySet() {
-		return this.headers.getHeaderNames().stream()
-				.map(HttpString::toString)
-				.collect(Collectors.toSet());
+		return new HeaderNames();
 	}
 
 	@Override
@@ -163,7 +163,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
-		return new AbstractSet<Entry<String, List<String>>>() {
+		return new AbstractSet<>() {
 			@Override
 			public Iterator<Entry<String, List<String>>> iterator() {
 				return new EntryIterator();
@@ -185,7 +185,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
-		private Iterator<HttpString> names = headers.getHeaderNames().iterator();
+		private final Iterator<HttpString> names = headers.getHeaderNames().iterator();
 
 		@Override
 		public boolean hasNext() {
@@ -222,6 +222,54 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 			List<String> previousValues = headers.get(this.key);
 			headers.putAll(this.key, value);
 			return previousValues;
+		}
+	}
+
+
+	private class HeaderNames extends AbstractSet<String> {
+
+		@Override
+		public Iterator<String> iterator() {
+			return new HeaderNamesIterator(headers.getHeaderNames().iterator());
+		}
+
+		@Override
+		public int size() {
+			return headers.getHeaderNames().size();
+		}
+	}
+
+	private final class HeaderNamesIterator implements Iterator<String> {
+
+		private final Iterator<HttpString> iterator;
+
+		@Nullable
+		private String currentName;
+
+		private HeaderNamesIterator(Iterator<HttpString> iterator) {
+			this.iterator = iterator;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return this.iterator.hasNext();
+		}
+
+		@Override
+		public String next() {
+			this.currentName = this.iterator.next().toString();
+			return this.currentName;
+		}
+
+		@Override
+		public void remove() {
+			if (this.currentName == null) {
+				throw new IllegalStateException("No current Header in iterator");
+			}
+			if (!headers.contains(this.currentName)) {
+				throw new IllegalStateException("Header not present: " + this.currentName);
+			}
+			headers.remove(this.currentName);
 		}
 	}
 

@@ -18,6 +18,7 @@ package org.springframework.transaction.annotation;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
 
@@ -31,12 +32,16 @@ import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationCondition;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
+import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -98,6 +103,9 @@ public class EnableTransactionManagementTests {
 		assertThat(txManager.begun).isEqualTo(1);
 		assertThat(txManager.commits).isEqualTo(1);
 		assertThat(txManager.rollbacks).isEqualTo(0);
+		assertThat(txManager.lastDefinition.isReadOnly()).isTrue();
+		assertThat(txManager.lastDefinition.getTimeout()).isEqualTo(5);
+		assertThat(((TransactionAttribute) txManager.lastDefinition).getLabels()).contains("LABEL");
 
 		ctx.close();
 	}
@@ -106,6 +114,7 @@ public class EnableTransactionManagementTests {
 	public void txManagerIsResolvedCorrectlyWhenMultipleManagersArePresent() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				EnableTxConfig.class, MultiTxManagerConfig.class);
+		assertThat(ctx.getBeansOfType(TransactionManager.class)).hasSize(2);
 		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
 		CallCountingTransactionManager txManager = ctx.getBean("txManager", CallCountingTransactionManager.class);
 		CallCountingTransactionManager txManager2 = ctx.getBean("txManager2", CallCountingTransactionManager.class);
@@ -126,6 +135,7 @@ public class EnableTransactionManagementTests {
 	public void txManagerIsResolvedCorrectlyWhenMultipleManagersArePresentAndOneIsPrimary() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				EnableTxConfig.class, PrimaryMultiTxManagerConfig.class);
+		assertThat(ctx.getBeansOfType(TransactionManager.class)).hasSize(2);
 		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
 		CallCountingTransactionManager primary = ctx.getBean("primary", CallCountingTransactionManager.class);
 		CallCountingTransactionManager txManager2 = ctx.getBean("txManager2", CallCountingTransactionManager.class);
@@ -147,6 +157,7 @@ public class EnableTransactionManagementTests {
 	public void txManagerIsResolvedCorrectlyWithTxMgmtConfigurerAndPrimaryPresent() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				EnableTxConfig.class, PrimaryTxManagerAndTxMgmtConfigurerConfig.class);
+		assertThat(ctx.getBeansOfType(TransactionManager.class)).hasSize(2);
 		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
 		CallCountingTransactionManager primary = ctx.getBean("primary", CallCountingTransactionManager.class);
 		CallCountingTransactionManager annotationDriven = ctx.getBean("annotationDrivenTransactionManager", CallCountingTransactionManager.class);
@@ -157,6 +168,29 @@ public class EnableTransactionManagementTests {
 		assertThat(primary.begun).isEqualTo(0);
 		assertThat(primary.commits).isEqualTo(0);
 		assertThat(primary.rollbacks).isEqualTo(0);
+		assertThat(annotationDriven.begun).isEqualTo(1);
+		assertThat(annotationDriven.commits).isEqualTo(1);
+		assertThat(annotationDriven.rollbacks).isEqualTo(0);
+
+		ctx.close();
+	}
+
+	@Test
+	public void txManagerIsResolvedCorrectlyWithSingleTxManagerBeanAndTxMgmtConfigurer() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				EnableTxConfig.class, SingleTxManagerBeanAndTxMgmtConfigurerConfig.class);
+		assertThat(ctx.getBeansOfType(TransactionManager.class)).hasSize(1);
+		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
+		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
+		SingleTxManagerBeanAndTxMgmtConfigurerConfig config = ctx.getBean(SingleTxManagerBeanAndTxMgmtConfigurerConfig.class);
+		CallCountingTransactionManager annotationDriven = config.annotationDriven;
+
+		// invoke a transactional method, causing the PlatformTransactionManager bean to be resolved.
+		bean.findAllFoos();
+
+		assertThat(txManager.begun).isEqualTo(0);
+		assertThat(txManager.commits).isEqualTo(0);
+		assertThat(txManager.rollbacks).isEqualTo(0);
 		assertThat(annotationDriven.begun).isEqualTo(1);
 		assertThat(annotationDriven.commits).isEqualTo(1);
 		assertThat(annotationDriven.rollbacks).isEqualTo(0);
@@ -239,7 +273,7 @@ public class EnableTransactionManagementTests {
 	@Service
 	public static class TransactionalTestBean {
 
-		@Transactional(readOnly = true)
+		@Transactional(label = "${myLabel}", timeoutString = "${myTimeout}", readOnly = true)
 		public Collection<?> findAllFoos() {
 			return null;
 		}
@@ -248,14 +282,31 @@ public class EnableTransactionManagementTests {
 		public void saveQualifiedFoo() {
 		}
 
-		@Transactional(transactionManager = "qualifiedTransactionManager")
+		@Transactional(transactionManager = "${myTransactionManager}")
 		public void saveQualifiedFooWithAttributeAlias() {
 		}
 	}
 
 
 	@Configuration
+	static class PlaceholderConfig {
+
+		@Bean
+		public PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
+			PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
+			Properties props = new Properties();
+			props.setProperty("myLabel", "LABEL");
+			props.setProperty("myTimeout", "5");
+			props.setProperty("myTransactionManager", "qualifiedTransactionManager");
+			pspc.setProperties(props);
+			return pspc;
+		}
+	}
+
+
+	@Configuration
 	@EnableTransactionManagement
+	@Import(PlaceholderConfig.class)
 	static class EnableTxConfig {
 	}
 
@@ -267,6 +318,7 @@ public class EnableTransactionManagementTests {
 
 	@Configuration
 	@EnableTransactionManagement
+	@Import(PlaceholderConfig.class)
 	@Conditional(NeverCondition.class)
 	static class ParentEnableTxConfig {
 
@@ -381,7 +433,32 @@ public class EnableTransactionManagementTests {
 
 
 	@Configuration
+	static class SingleTxManagerBeanAndTxMgmtConfigurerConfig implements TransactionManagementConfigurer {
+
+		final CallCountingTransactionManager annotationDriven = new CallCountingTransactionManager();
+
+		@Bean
+		public TransactionalTestBean testBean() {
+			return new TransactionalTestBean();
+		}
+
+		@Bean
+		public PlatformTransactionManager txManager() {
+			return new CallCountingTransactionManager();
+		}
+
+		// The transaction manager returned from this method is intentionally not
+		// registered as a bean in the ApplicationContext.
+		@Override
+		public PlatformTransactionManager annotationDrivenTransactionManager() {
+			return annotationDriven;
+		}
+	}
+
+
+	@Configuration
 	@EnableTransactionManagement
+	@Import(PlaceholderConfig.class)
 	static class Spr11915Config {
 
 		@Autowired

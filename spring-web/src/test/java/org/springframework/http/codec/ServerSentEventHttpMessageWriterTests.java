@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 
 
 	@ParameterizedDataBufferAllocatingTest
-	void canWrite(String displayName, DataBufferFactory bufferFactory) {
+	void canWrite(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		assertThat(this.messageWriter.canWrite(forClass(Object.class), null)).isTrue();
@@ -73,7 +73,7 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writeServerSentEvent(String displayName, DataBufferFactory bufferFactory) {
+	void writeServerSentEvent(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		ServerSentEvent<?> event = ServerSentEvent.builder().data("bar").id("c42").event("foo")
@@ -91,7 +91,7 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writeString(String displayName, DataBufferFactory bufferFactory) {
+	void writeString(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
@@ -106,7 +106,7 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writeMultiLineString(String displayName, DataBufferFactory bufferFactory) {
+	void writeMultiLineString(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
@@ -121,7 +121,7 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 	}
 
 	@ParameterizedDataBufferAllocatingTest // SPR-16516
-	void writeStringWithCustomCharset(String displayName, DataBufferFactory bufferFactory) {
+	void writeStringWithCustomCharset(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
@@ -142,7 +142,7 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writePojo(String displayName, DataBufferFactory bufferFactory) {
+	void writePojo(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
@@ -150,14 +150,18 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 		testWrite(source, outputMessage, Pojo.class);
 
 		StepVerifier.create(outputMessage.getBody())
-				.consumeNextWith(stringConsumer("data:{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n\n"))
-				.consumeNextWith(stringConsumer("data:{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n\n"))
+				.consumeNextWith(stringConsumer("data:"))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"))
+				.consumeNextWith(stringConsumer("\n\n"))
+				.consumeNextWith(stringConsumer("data:"))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
+				.consumeNextWith(stringConsumer("\n\n"))
 				.expectComplete()
 				.verify();
 	}
 
 	@ParameterizedDataBufferAllocatingTest  // SPR-14899
-	void writePojoWithPrettyPrint(String displayName, DataBufferFactory bufferFactory) {
+	void writePojoWithPrettyPrint(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json().indentOutput(true).build();
@@ -168,18 +172,22 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 		testWrite(source, outputMessage, Pojo.class);
 
 		StepVerifier.create(outputMessage.getBody())
-				.consumeNextWith(stringConsumer("data:{\n" +
+				.consumeNextWith(stringConsumer("data:"))
+				.consumeNextWith(stringConsumer("{\n" +
 						"data:  \"foo\" : \"foofoo\",\n" +
-						"data:  \"bar\" : \"barbar\"\n" + "data:}\n\n"))
-				.consumeNextWith(stringConsumer("data:{\n" +
+						"data:  \"bar\" : \"barbar\"\n" + "data:}"))
+				.consumeNextWith(stringConsumer("\n\n"))
+				.consumeNextWith(stringConsumer("data:"))
+				.consumeNextWith(stringConsumer("{\n" +
 						"data:  \"foo\" : \"foofoofoo\",\n" +
-						"data:  \"bar\" : \"barbarbar\"\n" + "data:}\n\n"))
+						"data:  \"bar\" : \"barbarbar\"\n" + "data:}"))
+				.consumeNextWith(stringConsumer("\n\n"))
 				.expectComplete()
 				.verify();
 	}
 
 	@ParameterizedDataBufferAllocatingTest // SPR-16516, SPR-16539
-	void writePojoWithCustomEncoding(String displayName, DataBufferFactory bufferFactory) {
+	void writePojoWithCustomEncoding(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
@@ -190,11 +198,9 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 
 		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(mediaType);
 		StepVerifier.create(outputMessage.getBody())
-				.consumeNextWith(dataBuffer -> {
-					String value = dataBuffer.toString(charset);
-					DataBufferUtils.release(dataBuffer);
-					assertThat(value).isEqualTo("data:{\"foo\":\"foo\uD834\uDD1E\",\"bar\":\"bar\uD834\uDD1E\"}\n\n");
-				})
+				.consumeNextWith(stringConsumer("data:", charset))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foo\uD834\uDD1E\",\"bar\":\"bar\uD834\uDD1E\"}", charset))
+				.consumeNextWith(stringConsumer("\n\n", charset))
 				.expectComplete()
 				.verify();
 	}

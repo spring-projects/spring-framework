@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ResourceUtils;
 
 /**
- * Strategy interface for loading resources (e.. class path or file system
+ * Strategy interface for loading resources (e.g., class path or file system
  * resources). An {@link org.springframework.context.ApplicationContext}
- * is required to provide this functionality, plus extended
+ * is required to provide this functionality plus extended
  * {@link org.springframework.core.io.support.ResourcePatternResolver} support.
  *
  * <p>{@link DefaultResourceLoader} is a standalone implementation that is
- * usable outside an ApplicationContext, also used by {@link ResourceEditor}.
+ * usable outside an ApplicationContext and is also used by {@link ResourceEditor}.
  *
- * <p>Bean properties of type Resource and Resource array can be populated
+ * <p>Bean properties of type {@code Resource} and {@code Resource[]} can be populated
  * from Strings when running in an ApplicationContext, using the particular
  * context's resource loading strategy.
  *
@@ -46,7 +46,7 @@ public interface ResourceLoader {
 
 
 	/**
-	 * Return a Resource handle for the specified resource location.
+	 * Return a {@code Resource} handle for the specified resource location.
 	 * <p>The handle should always be a reusable resource descriptor,
 	 * allowing for multiple {@link Resource#getInputStream()} calls.
 	 * <p><ul>
@@ -56,10 +56,10 @@ public interface ResourceLoader {
 	 * (This will be implementation-specific, typically provided by an
 	 * ApplicationContext implementation.)
 	 * </ul>
-	 * <p>Note that a Resource handle does not imply an existing resource;
+	 * <p>Note that a {@code Resource} handle does not imply an existing resource;
 	 * you need to invoke {@link Resource#exists} to check for existence.
 	 * @param location the resource location
-	 * @return a corresponding Resource handle (never {@code null})
+	 * @return a corresponding {@code Resource} handle (never {@code null})
 	 * @see #CLASSPATH_URL_PREFIX
 	 * @see Resource#exists()
 	 * @see Resource#getInputStream()
@@ -67,12 +67,12 @@ public interface ResourceLoader {
 	Resource getResource(String location);
 
 	/**
-	 * Expose the ClassLoader used by this ResourceLoader.
-	 * <p>Clients which need to access the ClassLoader directly can do so
-	 * in a uniform manner with the ResourceLoader, rather than relying
-	 * on the thread context ClassLoader.
-	 * @return the ClassLoader
-	 * (only {@code null} if even the system ClassLoader isn't accessible)
+	 * Expose the {@link ClassLoader} used by this {@code ResourceLoader}.
+	 * <p>Clients which need to access the {@code ClassLoader} directly can do so
+	 * in a uniform manner with the {@code ResourceLoader}, rather than relying
+	 * on the thread context {@code ClassLoader}.
+	 * @return the {@code ClassLoader}
+	 * (only {@code null} if even the system {@code ClassLoader} isn't accessible)
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 * @see org.springframework.util.ClassUtils#forName(String, ClassLoader)
 	 */

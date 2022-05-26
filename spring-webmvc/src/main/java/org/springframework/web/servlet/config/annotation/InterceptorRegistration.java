@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
+import org.springframework.web.util.ServletRequestPathUtils;
+import org.springframework.web.util.pattern.PathPattern;
 
 /**
  * Assists with the creation of a {@link MappedInterceptor}.
@@ -38,9 +41,11 @@ public class InterceptorRegistration {
 
 	private final HandlerInterceptor interceptor;
 
-	private final List<String> includePatterns = new ArrayList<>();
+	@Nullable
+	private List<String> includePatterns;
 
-	private final List<String> excludePatterns = new ArrayList<>();
+	@Nullable
+	private List<String> excludePatterns;
 
 	@Nullable
 	private PathMatcher pathMatcher;
@@ -58,7 +63,11 @@ public class InterceptorRegistration {
 
 
 	/**
-	 * Add URL patterns to which the registered interceptor should apply to.
+	 * Add patterns for URLs the interceptor should be included in.
+	 * <p>For pattern syntax see {@link PathPattern} when parsed patterns
+	 * are {@link PathMatchConfigurer#setPatternParser enabled} or
+	 * {@link AntPathMatcher} otherwise. The syntax is largely the same with
+	 * {@link PathPattern} more tailored for web usage and more efficient.
 	 */
 	public InterceptorRegistration addPathPatterns(String... patterns) {
 		return addPathPatterns(Arrays.asList(patterns));
@@ -69,12 +78,18 @@ public class InterceptorRegistration {
 	 * @since 5.0.3
 	 */
 	public InterceptorRegistration addPathPatterns(List<String> patterns) {
+		this.includePatterns = (this.includePatterns != null ?
+				this.includePatterns : new ArrayList<>(patterns.size()));
 		this.includePatterns.addAll(patterns);
 		return this;
 	}
 
 	/**
-	 * Add URL patterns to which the registered interceptor should not apply to.
+	 * Add patterns for URLs the interceptor should be excluded from.
+	 * <p>For pattern syntax see {@link PathPattern} when parsed patterns
+	 * are {@link PathMatchConfigurer#setPatternParser enabled} or
+	 * {@link AntPathMatcher} otherwise. The syntax is largely the same with
+	 * {@link PathPattern} more tailored for web usage and more efficient.
 	 */
 	public InterceptorRegistration excludePathPatterns(String... patterns) {
 		return excludePathPatterns(Arrays.asList(patterns));
@@ -85,15 +100,22 @@ public class InterceptorRegistration {
 	 * @since 5.0.3
 	 */
 	public InterceptorRegistration excludePathPatterns(List<String> patterns) {
+		this.excludePatterns = (this.excludePatterns != null ?
+				this.excludePatterns : new ArrayList<>(patterns.size()));
 		this.excludePatterns.addAll(patterns);
 		return this;
 	}
 
 	/**
-	 * A PathMatcher implementation to use with this interceptor. This is an optional,
-	 * advanced property required only if using custom PathMatcher implementations
-	 * that support mapping metadata other than the Ant path patterns supported
-	 * by default.
+	 * Configure the PathMatcher to use to match URL paths with against include
+	 * and exclude patterns.
+	 * <p>This is an advanced property that should be used only when a
+	 * customized {@link AntPathMatcher} or a custom PathMatcher is required.
+	 * <p>By default this is {@link AntPathMatcher}.
+	 * <p><strong>Note:</strong> Setting {@code PathMatcher} enforces use of
+	 * String pattern matching even when a
+	 * {@link ServletRequestPathUtils#parseAndCache parsed} {@code RequestPath}
+	 * is available.
 	 */
 	public InterceptorRegistration pathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
@@ -121,16 +143,20 @@ public class InterceptorRegistration {
 	 * type is {@link MappedInterceptor}; otherwise {@link HandlerInterceptor}.
 	 */
 	protected Object getInterceptor() {
-		if (this.includePatterns.isEmpty() && this.excludePatterns.isEmpty()) {
+
+		if (this.includePatterns == null && this.excludePatterns == null) {
 			return this.interceptor;
 		}
 
-		String[] include = StringUtils.toStringArray(this.includePatterns);
-		String[] exclude = StringUtils.toStringArray(this.excludePatterns);
-		MappedInterceptor mappedInterceptor = new MappedInterceptor(include, exclude, this.interceptor);
+		MappedInterceptor mappedInterceptor = new MappedInterceptor(
+				StringUtils.toStringArray(this.includePatterns),
+				StringUtils.toStringArray(this.excludePatterns),
+				this.interceptor);
+
 		if (this.pathMatcher != null) {
 			mappedInterceptor.setPathMatcher(this.pathMatcher);
 		}
+
 		return mappedInterceptor;
 	}
 

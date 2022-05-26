@@ -65,6 +65,12 @@ public class ClassWriter extends ClassVisitor {
    */
   public static final int COMPUTE_FRAMES = 2;
 
+  /**
+   * The flags passed to the constructor. Must be zero or more of {@link #COMPUTE_MAXS} and {@link
+   * #COMPUTE_FRAMES}.
+   */
+  private final int flags;
+
   // Note: fields are ordered as in the ClassFile structure, and those related to attributes are
   // ordered as in Section 4.7 of the JVMS.
 
@@ -79,8 +85,8 @@ public class ClassWriter extends ClassVisitor {
 
   /**
    * The access_flags field of the JVMS ClassFile structure. This field can contain ASM specific
-   * access flags, such as {@link Opcodes#ACC_DEPRECATED}, which are removed when generating the
-   * ClassFile structure.
+   * access flags, such as {@link Opcodes#ACC_DEPRECATED} or {@link Opcodes#ACC_RECORD}, which are
+   * removed when generating the ClassFile structure.
    */
   private int accessFlags;
 
@@ -177,11 +183,11 @@ public class ClassWriter extends ClassVisitor {
   /** The 'classes' array of the NestMembers attribute, or {@literal null}. */
   private ByteVector nestMemberClasses;
 
-  /** The number_of_classes field of the PermittedSubtypes attribute, or 0. */
-  private int numberOfPermittedSubtypeClasses;
+  /** The number_of_classes field of the PermittedSubclasses attribute, or 0. */
+  private int numberOfPermittedSubclasses;
 
-  /** The 'classes' array of the PermittedSubtypes attribute, or {@literal null}. */
-  private ByteVector permittedSubtypeClasses;
+  /** The 'classes' array of the PermittedSubclasses attribute, or {@literal null}. */
+  private ByteVector permittedSubclasses;
 
   /**
    * The record components of this class, stored in a linked list of {@link RecordComponentWriter}
@@ -248,21 +254,37 @@ public class ClassWriter extends ClassVisitor {
    * @param classReader the {@link ClassReader} used to read the original class. It will be used to
    *     copy the entire constant pool and bootstrap methods from the original class and also to
    *     copy other fragments of original bytecode where applicable.
-   * @param flags option flags that can be used to modify the default behavior of this class.Must be
-   *     zero or more of {@link #COMPUTE_MAXS} and {@link #COMPUTE_FRAMES}. <i>These option flags do
-   *     not affect methods that are copied as is in the new class. This means that neither the
+   * @param flags option flags that can be used to modify the default behavior of this class. Must
+   *     be zero or more of {@link #COMPUTE_MAXS} and {@link #COMPUTE_FRAMES}. <i>These option flags
+   *     do not affect methods that are copied as is in the new class. This means that neither the
    *     maximum stack size nor the stack frames will be computed for these methods</i>.
    */
   public ClassWriter(final ClassReader classReader, final int flags) {
-    super(/* latest api = */ Opcodes.ASM7);
+    super(/* latest api = */ Opcodes.ASM9);
+    this.flags = flags;
     symbolTable = classReader == null ? new SymbolTable(this) : new SymbolTable(this, classReader);
     if ((flags & COMPUTE_FRAMES) != 0) {
-      this.compute = MethodWriter.COMPUTE_ALL_FRAMES;
+      compute = MethodWriter.COMPUTE_ALL_FRAMES;
     } else if ((flags & COMPUTE_MAXS) != 0) {
-      this.compute = MethodWriter.COMPUTE_MAX_STACK_AND_LOCAL;
+      compute = MethodWriter.COMPUTE_MAX_STACK_AND_LOCAL;
     } else {
-      this.compute = MethodWriter.COMPUTE_NOTHING;
+      compute = MethodWriter.COMPUTE_NOTHING;
     }
+  }
+
+  // -----------------------------------------------------------------------------------------------
+  // Accessors
+  // -----------------------------------------------------------------------------------------------
+
+  /**
+   * Returns true if all the given flags were passed to the constructor.
+   *
+   * @param flags some option flags. Must be zero or more of {@link #COMPUTE_MAXS} and {@link
+   *     #COMPUTE_FRAMES}.
+   * @return true if all the given flags, or more, were passed to the constructor.
+   */
+  public boolean hasFlags(final int flags) {
+    return (this.flags & flags) == flags;
   }
 
   // -----------------------------------------------------------------------------------------------
@@ -373,13 +395,12 @@ public class ClassWriter extends ClassVisitor {
   }
 
   @Override
-  @SuppressWarnings("deprecation")
-  public final void visitPermittedSubtypeExperimental(final String permittedSubtype) {
-    if (permittedSubtypeClasses == null) {
-      permittedSubtypeClasses = new ByteVector();
+  public final void visitPermittedSubclass(final String permittedSubclass) {
+    if (permittedSubclasses == null) {
+      permittedSubclasses = new ByteVector();
     }
-    ++numberOfPermittedSubtypeClasses;
-    permittedSubtypeClasses.putShort(symbolTable.addConstantClass(permittedSubtype).index);
+    ++numberOfPermittedSubclasses;
+    permittedSubclasses.putShort(symbolTable.addConstantClass(permittedSubclass).index);
   }
 
   @Override
@@ -408,11 +429,10 @@ public class ClassWriter extends ClassVisitor {
   }
 
   @Override
-  @SuppressWarnings("deprecation")
-  public final RecordComponentVisitor visitRecordComponentExperimental(
-      final int access, final String name, final String descriptor, final String signature) {
+  public final RecordComponentVisitor visitRecordComponent(
+      final String name, final String descriptor, final String signature) {
     RecordComponentWriter recordComponentWriter =
-        new RecordComponentWriter(symbolTable, access, name, descriptor, signature);
+        new RecordComponentWriter(symbolTable, name, descriptor, signature);
     if (firstRecordComponent == null) {
       firstRecordComponent = recordComponentWriter;
     } else {
@@ -571,14 +591,14 @@ public class ClassWriter extends ClassVisitor {
       size += 8 + nestMemberClasses.length;
       symbolTable.addConstantUtf8(Constants.NEST_MEMBERS);
     }
-    if (permittedSubtypeClasses != null) {
+    if (permittedSubclasses != null) {
       ++attributesCount;
-      size += 8 + permittedSubtypeClasses.length;
-      symbolTable.addConstantUtf8(Constants.PERMITTED_SUBTYPES);
+      size += 8 + permittedSubclasses.length;
+      symbolTable.addConstantUtf8(Constants.PERMITTED_SUBCLASSES);
     }
     int recordComponentCount = 0;
     int recordSize = 0;
-    if (firstRecordComponent != null) {
+    if ((accessFlags & Opcodes.ACC_RECORD) != 0 || firstRecordComponent != null) {
       RecordComponentWriter recordComponentWriter = firstRecordComponent;
       while (recordComponentWriter != null) {
         ++recordComponentCount;
@@ -693,14 +713,14 @@ public class ClassWriter extends ClassVisitor {
           .putShort(numberOfNestMemberClasses)
           .putByteArray(nestMemberClasses.data, 0, nestMemberClasses.length);
     }
-    if (permittedSubtypeClasses != null) {
+    if (permittedSubclasses != null) {
       result
-          .putShort(symbolTable.addConstantUtf8(Constants.PERMITTED_SUBTYPES))
-          .putInt(permittedSubtypeClasses.length + 2)
-          .putShort(numberOfPermittedSubtypeClasses)
-          .putByteArray(permittedSubtypeClasses.data, 0, permittedSubtypeClasses.length);
+          .putShort(symbolTable.addConstantUtf8(Constants.PERMITTED_SUBCLASSES))
+          .putInt(permittedSubclasses.length + 2)
+          .putShort(numberOfPermittedSubclasses)
+          .putByteArray(permittedSubclasses.data, 0, permittedSubclasses.length);
     }
-    if (firstRecordComponent != null) {
+    if ((accessFlags & Opcodes.ACC_RECORD) != 0 || firstRecordComponent != null) {
       result
           .putShort(symbolTable.addConstantUtf8(Constants.RECORD))
           .putInt(recordSize + 2)
@@ -747,8 +767,8 @@ public class ClassWriter extends ClassVisitor {
     nestHostClassIndex = 0;
     numberOfNestMemberClasses = 0;
     nestMemberClasses = null;
-    numberOfPermittedSubtypeClasses = 0;
-    permittedSubtypeClasses = null;
+    numberOfPermittedSubclasses = 0;
+    permittedSubclasses = null;
     firstRecordComponent = null;
     lastRecordComponent = null;
     firstAttribute = null;
@@ -916,7 +936,7 @@ public class ClassWriter extends ClassVisitor {
    * if the constant pool already contains a similar item. <i>This method is intended for {@link
    * Attribute} sub classes, and is normally not needed by class generators or adapters.</i>
    *
-   * @param name the name of the invoked method.
+   * @param name name of the invoked method.
    * @param descriptor field descriptor of the constant type.
    * @param bootstrapMethodHandle the bootstrap method.
    * @param bootstrapMethodArguments the bootstrap method constant arguments.
@@ -937,7 +957,7 @@ public class ClassWriter extends ClassVisitor {
    * the constant pool already contains a similar item. <i>This method is intended for {@link
    * Attribute} sub classes, and is normally not needed by class generators or adapters.</i>
    *
-   * @param name the name of the invoked method.
+   * @param name name of the invoked method.
    * @param descriptor descriptor of the invoke method.
    * @param bootstrapMethodHandle the bootstrap method.
    * @param bootstrapMethodArguments the bootstrap method constant arguments.

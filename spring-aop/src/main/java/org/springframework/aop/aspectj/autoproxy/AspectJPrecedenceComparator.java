@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,20 +27,22 @@ import org.springframework.util.Assert;
 /**
  * Orders AspectJ advice/advisors by precedence (<i>not</i> invocation order).
  *
- * <p>Given two pieces of advice, {@code a} and {@code b}:
+ * <p>Given two pieces of advice, {@code A} and {@code B}:
  * <ul>
- * <li>if {@code a} and {@code b} are defined in different aspects, then the advice
- * in the aspect with the lowest order value has the highest precedence</li>
- * <li>if {@code a} and {@code b} are defined in the same aspect, then if one of
- * {@code a} or {@code b} is a form of after advice, then the advice declared last
- * in the aspect has the highest precedence. If neither {@code a} nor {@code b} is
- * a form of after advice, then the advice declared first in the aspect has the
- * highest precedence.</li>
+ * <li>If {@code A} and {@code B} are defined in different aspects, then the advice
+ * in the aspect with the lowest order value has the highest precedence.</li>
+ * <li>If {@code A} and {@code B} are defined in the same aspect, if one of
+ * {@code A} or {@code B} is a form of <em>after</em> advice, then the advice declared
+ * last in the aspect has the highest precedence. If neither {@code A} nor {@code B}
+ * is a form of <em>after</em> advice, then the advice declared first in the aspect
+ * has the highest precedence.</li>
  * </ul>
  *
- * <p>Important: Note that unlike a normal comparator a return of 0 means
- * we don't care about the ordering, not that the two elements must be sorted
- * identically. Used with AspectJ PartialOrder class.
+ * <p>Important: This comparator is used with AspectJ's
+ * {@link org.aspectj.util.PartialOrder PartialOrder} sorting utility. Thus, unlike
+ * a normal {@link Comparator}, a return value of {@code 0} from this comparator
+ * means we don't care about the ordering, not that the two elements must be sorted
+ * identically.
  *
  * @author Adrian Colyer
  * @author Juergen Hoeller
@@ -59,16 +61,16 @@ class AspectJPrecedenceComparator implements Comparator<Advisor> {
 
 
 	/**
-	 * Create a default AspectJPrecedenceComparator.
+	 * Create a default {@code AspectJPrecedenceComparator}.
 	 */
 	public AspectJPrecedenceComparator() {
 		this.advisorComparator = AnnotationAwareOrderComparator.INSTANCE;
 	}
 
 	/**
-	 * Create a AspectJPrecedenceComparator, using the given Comparator
+	 * Create an {@code AspectJPrecedenceComparator}, using the given {@link Comparator}
 	 * for comparing {@link org.springframework.aop.Advisor} instances.
-	 * @param advisorComparator the Comparator to use for Advisors
+	 * @param advisorComparator the {@code Comparator} to use for advisors
 	 */
 	public AspectJPrecedenceComparator(Comparator<? super Advisor> advisorComparator) {
 		Assert.notNull(advisorComparator, "Advisor comparator must not be null");
@@ -125,27 +127,21 @@ class AspectJPrecedenceComparator implements Comparator<Advisor> {
 				getAspectName(advisor1).equals(getAspectName(advisor2)));
 	}
 
-	private boolean hasAspectName(Advisor anAdvisor) {
-		return (anAdvisor instanceof AspectJPrecedenceInformation ||
-				anAdvisor.getAdvice() instanceof AspectJPrecedenceInformation);
+	private boolean hasAspectName(Advisor advisor) {
+		return (advisor instanceof AspectJPrecedenceInformation ||
+				advisor.getAdvice() instanceof AspectJPrecedenceInformation);
 	}
 
 	// pre-condition is that hasAspectName returned true
-	private String getAspectName(Advisor anAdvisor) {
-		AspectJPrecedenceInformation pi = AspectJAopUtils.getAspectJPrecedenceInformationFor(anAdvisor);
-		Assert.state(pi != null, "Unresolvable precedence information");
-		return pi.getAspectName();
+	private String getAspectName(Advisor advisor) {
+		AspectJPrecedenceInformation precedenceInfo = AspectJAopUtils.getAspectJPrecedenceInformationFor(advisor);
+		Assert.state(precedenceInfo != null, () -> "Unresolvable AspectJPrecedenceInformation for " + advisor);
+		return precedenceInfo.getAspectName();
 	}
 
-	private int getAspectDeclarationOrder(Advisor anAdvisor) {
-		AspectJPrecedenceInformation precedenceInfo =
-			AspectJAopUtils.getAspectJPrecedenceInformationFor(anAdvisor);
-		if (precedenceInfo != null) {
-			return precedenceInfo.getDeclarationOrder();
-		}
-		else {
-			return 0;
-		}
+	private int getAspectDeclarationOrder(Advisor advisor) {
+		AspectJPrecedenceInformation precedenceInfo = AspectJAopUtils.getAspectJPrecedenceInformationFor(advisor);
+		return (precedenceInfo != null ? precedenceInfo.getDeclarationOrder() : 0);
 	}
 
 }

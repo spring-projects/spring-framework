@@ -20,7 +20,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import org.springframework.http.HttpInputMessage;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
 /**
  * Represents a client-side HTTP response.
@@ -36,26 +36,21 @@ import org.springframework.http.HttpStatus;
 public interface ClientHttpResponse extends HttpInputMessage, Closeable {
 
 	/**
-	 * Get the HTTP status code as an {@link HttpStatus} enum value.
-	 * <p>For status codes not supported by {@code HttpStatus}, use
-	 * {@link #getRawStatusCode()} instead.
-	 * @return the HTTP status as an HttpStatus enum value (never {@code null})
+	 * Get the HTTP status code as an {@link HttpStatusCode}.
+	 * @return the HTTP status as {@code HttpStatusCode} value (never {@code null})
 	 * @throws IOException in case of I/O errors
-	 * @throws IllegalArgumentException in case of an unknown HTTP status code
-	 * @since #getRawStatusCode()
-	 * @see HttpStatus#valueOf(int)
 	 */
-	HttpStatus getStatusCode() throws IOException;
+	HttpStatusCode getStatusCode() throws IOException;
 
 	/**
-	 * Get the HTTP status code (potentially non-standard and not
-	 * resolvable through the {@link HttpStatus} enum) as an integer.
+	 * Get the HTTP status code as an integer.
 	 * @return the HTTP status as an integer value
 	 * @throws IOException in case of I/O errors
 	 * @since 3.1.1
 	 * @see #getStatusCode()
-	 * @see HttpStatus#resolve(int)
+	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
 	 */
+	@Deprecated
 	int getRawStatusCode() throws IOException;
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,8 @@ package org.springframework.web.servlet.i18n;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.i18n.LocaleContext;
@@ -158,7 +157,7 @@ public class CookieLocaleResolverTests {
 		Cookie cookie = response.getCookie(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
 		assertThat(cookie).isNotNull();
 		assertThat(cookie.getName()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
-		assertThat(cookie.getDomain()).isEqualTo(null);
+		assertThat(cookie.getDomain()).isNull();
 		assertThat(cookie.getPath()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_PATH);
 		assertThat(cookie.getSecure()).isFalse();
 
@@ -244,7 +243,7 @@ public class CookieLocaleResolverTests {
 		Cookie cookie = response.getCookie(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
 		assertThat(cookie).isNotNull();
 		assertThat(cookie.getName()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
-		assertThat(cookie.getDomain()).isEqualTo(null);
+		assertThat(cookie.getDomain()).isNull();
 		assertThat(cookie.getPath()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_PATH);
 		assertThat(cookie.getSecure()).isFalse();
 		assertThat(cookie.getValue()).isEqualTo("de-AT");
@@ -270,7 +269,7 @@ public class CookieLocaleResolverTests {
 		Cookie cookie = response.getCookie(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
 		assertThat(cookie).isNotNull();
 		assertThat(cookie.getName()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
-		assertThat(cookie.getDomain()).isEqualTo(null);
+		assertThat(cookie.getDomain()).isNull();
 		assertThat(cookie.getPath()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_PATH);
 		assertThat(cookie.getSecure()).isFalse();
 		assertThat(cookie.getValue()).isEqualTo("de_AT");

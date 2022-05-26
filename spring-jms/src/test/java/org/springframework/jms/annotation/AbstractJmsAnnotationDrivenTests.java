@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,8 @@ package org.springframework.jms.annotation;
 
 import java.lang.reflect.Method;
 
-import javax.jms.JMSException;
-import javax.jms.Session;
-
+import jakarta.jms.JMSException;
+import jakarta.jms.Session;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
@@ -189,7 +188,7 @@ abstract class AbstractJmsAnnotationDrivenTests {
 				simpleFactory.getListenerContainer("first").getEndpoint();
 		assertThat(first.getId()).isEqualTo("first");
 		assertThat(first.getDestination()).isEqualTo("myQueue");
-		assertThat(first.getConcurrency()).isEqualTo(null);
+		assertThat(first.getConcurrency()).isNull();
 
 		MethodJmsListenerEndpoint second = (MethodJmsListenerEndpoint)
 				simpleFactory.getListenerContainer("second").getEndpoint();

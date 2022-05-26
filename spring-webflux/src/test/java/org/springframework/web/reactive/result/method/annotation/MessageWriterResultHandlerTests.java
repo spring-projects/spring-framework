@@ -27,13 +27,13 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import io.reactivex.Flowable;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Observable;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import rx.Completable;
-import rx.Observable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.codec.ByteBufferEncoder;
@@ -117,11 +117,11 @@ public class MessageWriterResultHandlerTests {
 		testVoid(Completable.complete(), on(TestController.class).resolveReturnType(Completable.class));
 		testVoid(Observable.empty(), on(TestController.class).resolveReturnType(Observable.class, Void.class));
 
-		MethodParameter type = on(TestController.class).resolveReturnType(io.reactivex.Completable.class);
-		testVoid(io.reactivex.Completable.complete(), type);
+		MethodParameter type = on(TestController.class).resolveReturnType(Completable.class);
+		testVoid(Completable.complete(), type);
 
-		type = on(TestController.class).resolveReturnType(io.reactivex.Observable.class, Void.class);
-		testVoid(io.reactivex.Observable.empty(), type);
+		type = on(TestController.class).resolveReturnType(Observable.class, Void.class);
+		testVoid(Observable.empty(), type);
 
 		type = on(TestController.class).resolveReturnType(Flowable.class, Void.class);
 		testVoid(Flowable.empty(), type);
@@ -274,13 +274,9 @@ public class MessageWriterResultHandlerTests {
 
 		Completable completable() { return null; }
 
-		io.reactivex.Completable rxJava2Completable() { return null; }
-
 		Flux<Void> fluxVoid() { return null; }
 
 		Observable<Void> observableVoid() { return null; }
-
-		io.reactivex.Observable<Void> rxJava2ObservableVoid() { return null; }
 
 		Flowable<Void> flowableVoid() { return null; }
 

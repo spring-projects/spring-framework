@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.springframework.lang.Nullable;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.web.servlet.view.InternalResourceViewResolver
- * @see org.springframework.web.servlet.view.ResourceBundleViewResolver
- * @see org.springframework.web.servlet.view.XmlViewResolver
+ * @see org.springframework.web.servlet.view.ContentNegotiatingViewResolver
+ * @see org.springframework.web.servlet.view.BeanNameViewResolver
  */
 public interface ViewResolver {
 

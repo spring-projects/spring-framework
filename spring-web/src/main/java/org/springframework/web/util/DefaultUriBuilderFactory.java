@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
@@ -39,62 +40,6 @@ import org.springframework.util.StringUtils;
  * @see UriComponentsBuilder
  */
 public class DefaultUriBuilderFactory implements UriBuilderFactory {
-
-	/**
-	 * Enum to represent multiple URI encoding strategies. The following are
-	 * available:
-	 * <ul>
-	 * <li>{@link #TEMPLATE_AND_VALUES}
-	 * <li>{@link #VALUES_ONLY}
-	 * <li>{@link #URI_COMPONENT}
-	 * <li>{@link #NONE}
-	 * </ul>
-	 * @see #setEncodingMode
-	 */
-	public enum EncodingMode {
-
-		/**
-		 * Pre-encode the URI template first, then strictly encode URI variables
-		 * when expanded, with the following rules:
-		 * <ul>
-		 * <li>For the URI template replace <em>only</em> non-ASCII and illegal
-		 * (within a given URI component type) characters with escaped octets.
-		 * <li>For URI variables do the same and also replace characters with
-		 * reserved meaning.
-		 * </ul>
-		 * <p>For most cases, this mode is most likely to give the expected
-		 * result because in treats URI variables as opaque data to be fully
-		 * encoded, while {@link #URI_COMPONENT} by comparison is useful only
-		 * if intentionally expanding URI variables with reserved characters.
-		 * @since 5.0.8
-		 * @see UriComponentsBuilder#encode()
-		 */
-		TEMPLATE_AND_VALUES,
-
-		/**
-		 * Does not encode the URI template and instead applies strict encoding
-		 * to URI variables via {@link UriUtils#encodeUriVariables} prior to
-		 * expanding them into the template.
-		 * @see UriUtils#encodeUriVariables(Object...)
-		 * @see UriUtils#encodeUriVariables(Map)
-		 */
-		VALUES_ONLY,
-
-		/**
-		 * Expand URI variables first, and then encode the resulting URI
-		 * component values, replacing <em>only</em> non-ASCII and illegal
-		 * (within a given URI component type) characters, but not characters
-		 * with reserved meaning.
-		 * @see UriComponents#encode()
-		 */
-		URI_COMPONENT,
-
-		/**
-		 * No encoding should be applied.
-		 */
-		NONE
-	}
-
 
 	@Nullable
 	private final UriComponentsBuilder baseUri;
@@ -223,6 +168,62 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 
 	/**
+	 * Enum to represent multiple URI encoding strategies. The following are
+	 * available:
+	 * <ul>
+	 * <li>{@link #TEMPLATE_AND_VALUES}
+	 * <li>{@link #VALUES_ONLY}
+	 * <li>{@link #URI_COMPONENT}
+	 * <li>{@link #NONE}
+	 * </ul>
+	 * @see #setEncodingMode
+	 */
+	public enum EncodingMode {
+
+		/**
+		 * Pre-encode the URI template first, then strictly encode URI variables
+		 * when expanded, with the following rules:
+		 * <ul>
+		 * <li>For the URI template replace <em>only</em> non-ASCII and illegal
+		 * (within a given URI component type) characters with escaped octets.
+		 * <li>For URI variables do the same and also replace characters with
+		 * reserved meaning.
+		 * </ul>
+		 * <p>For most cases, this mode is most likely to give the expected
+		 * result because in treats URI variables as opaque data to be fully
+		 * encoded, while {@link #URI_COMPONENT} by comparison is useful only
+		 * if intentionally expanding URI variables with reserved characters.
+		 * @since 5.0.8
+		 * @see UriComponentsBuilder#encode()
+		 */
+		TEMPLATE_AND_VALUES,
+
+		/**
+		 * Does not encode the URI template and instead applies strict encoding
+		 * to URI variables via {@link UriUtils#encodeUriVariables} prior to
+		 * expanding them into the template.
+		 * @see UriUtils#encodeUriVariables(Object...)
+		 * @see UriUtils#encodeUriVariables(Map)
+		 */
+		VALUES_ONLY,
+
+		/**
+		 * Expand URI variables first, and then encode the resulting URI
+		 * component values, replacing <em>only</em> non-ASCII and illegal
+		 * (within a given URI component type) characters, but not characters
+		 * with reserved meaning.
+		 * @see UriComponents#encode()
+		 */
+		URI_COMPONENT,
+
+		/**
+		 * No encoding should be applied.
+		 */
+		NONE
+	}
+
+
+	/**
 	 * {@link DefaultUriBuilderFactory} specific implementation of UriBuilder.
 	 */
 	private class DefaultUriBuilder implements UriBuilder {
@@ -341,6 +342,18 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
+		public DefaultUriBuilder queryParamIfPresent(String name, Optional<?> value) {
+			this.uriComponentsBuilder.queryParamIfPresent(name, value);
+			return this;
+		}
+
+		@Override
+		public DefaultUriBuilder queryParams(MultiValueMap<String, String> params) {
+			this.uriComponentsBuilder.queryParams(params);
+			return this;
+		}
+
+		@Override
 		public DefaultUriBuilder replaceQueryParam(String name, Object... values) {
 			this.uriComponentsBuilder.replaceQueryParam(name, values);
 			return this;
@@ -349,12 +362,6 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		@Override
 		public DefaultUriBuilder replaceQueryParam(String name, @Nullable Collection<?> values) {
 			this.uriComponentsBuilder.replaceQueryParam(name, values);
-			return this;
-		}
-
-		@Override
-		public DefaultUriBuilder queryParams(MultiValueMap<String, String> params) {
-			this.uriComponentsBuilder.queryParams(params);
 			return this;
 		}
 

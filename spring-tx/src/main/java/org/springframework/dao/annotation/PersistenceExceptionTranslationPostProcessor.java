@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import org.springframework.util.Assert;
  * PersistenceExceptionTranslator} interface, which are subsequently asked to translate
  * candidate exceptions.
  *
-
  * <p>All of Spring's applicable resource factories (e.g.
  * {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean})
  * implement the {@code PersistenceExceptionTranslator} interface out of the box.
@@ -46,6 +45,11 @@ import org.springframework.util.Assert;
  * translation is marking all affected beans (such as Repositories or DAOs)
  * with the {@code @Repository} annotation, along with defining this post-processor
  * as a bean in the application context.
+ *
+ * <p>As of 5.3, {@code PersistenceExceptionTranslator} beans will be sorted according
+ * to Spring's dependency ordering rules: see {@link org.springframework.core.Ordered}
+ * and {@link org.springframework.core.annotation.Order}. Note that such beans will
+ * get retrieved from any scope, not just singleton scope, as of this 5.3 revision.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

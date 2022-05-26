@@ -52,8 +52,6 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final URI url;
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
 	private Flux<DataBuffer> body = Flux.error(
 			new IllegalStateException("The body is not set. " +
 					"Did handling complete with success? Is a custom \"writeHandler\" configured?"));
@@ -81,7 +79,6 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 	 * <p>The default write handler consumes and caches the request body so it
 	 * may be accessed subsequently, e.g. in test assertions. Use this property
 	 * when the request body is an infinite stream.
-	 *
 	 * @param writeHandler the write handler to use returning {@code Mono<Void>}
 	 * when the body has been "written" (i.e. consumed).
 	 */
@@ -103,7 +100,13 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public DataBufferFactory bufferFactory() {
-		return this.bufferFactory;
+		return DefaultDataBufferFactory.sharedInstance;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getNativeRequest() {
+		return (T) this;
 	}
 
 	@Override

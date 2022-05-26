@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.web.server;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -48,38 +48,43 @@ public class MethodNotAllowedException extends ResponseStatusException {
 	}
 
 	public MethodNotAllowedException(String method, @Nullable Collection<HttpMethod> supportedMethods) {
-		super(HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + method + "' not supported");
+		super(HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + method + "' is not supported.");
 		Assert.notNull(method, "'method' is required");
 		if (supportedMethods == null) {
 			supportedMethods = Collections.emptySet();
 		}
 		this.method = method;
 		this.httpMethods = Collections.unmodifiableSet(new LinkedHashSet<>(supportedMethods));
+
+		getBody().setDetail(this.httpMethods.isEmpty() ? getReason() :
+				"Supported methods: " + this.httpMethods.stream()
+						.map(HttpMethod::toString).collect(Collectors.joining("', '", "'", "'")));
 	}
 
 
 	/**
-	 * Return a Map with an "Allow" header.
-	 * @since 5.1.11
-	 */
-	@SuppressWarnings("deprecation")
-	@Override
-	public Map<String, String> getHeaders() {
-		return getResponseHeaders().toSingleValueMap();
-	}
-
-	/**
-	 * Return HttpHeaders with an "Allow" header.
-	 * @since 5.1.13
+	 * Return HttpHeaders with an "Allow" header that documents the allowed
+	 * HTTP methods for this URL, if available, or an empty instance otherwise.
 	 */
 	@Override
-	public HttpHeaders getResponseHeaders() {
+	public HttpHeaders getHeaders() {
 		if (CollectionUtils.isEmpty(this.httpMethods)) {
 			return HttpHeaders.EMPTY;
 		}
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAllow(this.httpMethods);
 		return headers;
+	}
+
+	/**
+	 * Delegates to {@link #getHeaders()}.
+	 * @since 5.1.13
+	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}
+	 */
+	@Deprecated
+	@Override
+	public HttpHeaders getResponseHeaders() {
+		return getHeaders();
 	}
 
 	/**

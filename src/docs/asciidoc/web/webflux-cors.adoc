@@ -1,5 +1,6 @@
 [[webflux-cors]]
 = CORS
+:doc-spring-security: {doc-root}/spring-security/reference
 [.small]#<<web.adoc#mvc-cors, Web MVC>>#
 
 Spring WebFlux lets you handle CORS (Cross-Origin Resource Sharing). This section
@@ -128,10 +129,11 @@ By default, `@CrossOrigin` allows:
 * All headers.
 * All HTTP methods to which the controller method is mapped.
 
-
-`allowedCredentials` is not enabled by default, since that establishes a trust level
+`allowCredentials` is not enabled by default, since that establishes a trust level
 that exposes sensitive user-specific information (such as cookies and CSRF tokens) and
-should be used only where appropriate.
+should be used only where appropriate. When it is enabled either `allowOrigins` must be
+set to one or more specific domain (but not the special value `"*"`) or alternatively
+the `allowOriginPatterns` property may be used to match to a dynamic set of origins.
 
 `maxAge` is set to 30 minutes.
 
@@ -245,7 +247,9 @@ By default global configuration enables the following:
 
 `allowedCredentials` is not enabled by default, since that establishes a trust level
 that exposes sensitive user-specific information( such as cookies and CSRF tokens) and
-should be used only where appropriate.
+should be used only where appropriate. When it is enabled either `allowOrigins` must be
+set to one or more specific domain (but not the special value `"*"`) or alternatively
+the `allowOriginPatterns` property may be used to match to a dynamic set of origins.
 
 `maxAge` is set to 30 minutes.
 
@@ -306,9 +310,8 @@ You can apply CORS support through the built-in
 good fit with <<webflux-fn, functional endpoints>>.
 
 NOTE: If you try to use the `CorsFilter` with Spring Security, keep in mind that Spring
-Security has
-https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#cors[built-in support]
-for CORS.
+Security has {doc-spring-security}/servlet/integrations/cors.html[built-in support] for
+CORS.
 
 To configure the filter, you can declare a `CorsWebFilter` bean and pass a
 `CorsConfigurationSource` to its constructor, as the following example shows:

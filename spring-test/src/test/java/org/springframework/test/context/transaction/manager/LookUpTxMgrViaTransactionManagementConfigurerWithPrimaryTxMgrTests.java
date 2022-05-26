@@ -34,9 +34,9 @@ import org.springframework.transaction.testfixture.CallCountingTransactionManage
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration test that verifies the current behavior for transaction manager
- * lookups when one transaction manager is {@link Primary @Primary} and an
- * additional transaction manager is configured via the
+ * Integration test that verifies the behavior for transaction manager lookups
+ * when one transaction manager is {@link Primary @Primary} and an additional
+ * transaction manager is configured via the
  * {@link TransactionManagementConfigurer} API.
  *
  * @author Sam Brannen
@@ -44,7 +44,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringJUnitConfig
 @Transactional
-// TODO Update assertions once https://github.com/spring-projects/spring-framework/issues/24869 is fixed.
 class LookUpTxMgrViaTransactionManagementConfigurerWithPrimaryTxMgrTests {
 
 	@Autowired
@@ -57,28 +56,28 @@ class LookUpTxMgrViaTransactionManagementConfigurerWithPrimaryTxMgrTests {
 
 	@Test
 	void transactionalTest() {
-		assertThat(primary.begun).isEqualTo(1);
-		assertThat(primary.inflight).isEqualTo(1);
+		assertThat(primary.begun).isEqualTo(0);
+		assertThat(primary.inflight).isEqualTo(0);
 		assertThat(primary.commits).isEqualTo(0);
 		assertThat(primary.rollbacks).isEqualTo(0);
 
-		assertThat(annotationDriven.begun).isEqualTo(0);
-		assertThat(annotationDriven.inflight).isEqualTo(0);
+		assertThat(annotationDriven.begun).isEqualTo(1);
+		assertThat(annotationDriven.inflight).isEqualTo(1);
 		assertThat(annotationDriven.commits).isEqualTo(0);
 		assertThat(annotationDriven.rollbacks).isEqualTo(0);
 	}
 
 	@AfterTransaction
 	void afterTransaction() {
-		assertThat(primary.begun).isEqualTo(1);
+		assertThat(primary.begun).isEqualTo(0);
 		assertThat(primary.inflight).isEqualTo(0);
 		assertThat(primary.commits).isEqualTo(0);
-		assertThat(primary.rollbacks).isEqualTo(1);
+		assertThat(primary.rollbacks).isEqualTo(0);
 
-		assertThat(annotationDriven.begun).isEqualTo(0);
+		assertThat(annotationDriven.begun).isEqualTo(1);
 		assertThat(annotationDriven.inflight).isEqualTo(0);
 		assertThat(annotationDriven.commits).isEqualTo(0);
-		assertThat(annotationDriven.rollbacks).isEqualTo(0);
+		assertThat(annotationDriven.rollbacks).isEqualTo(1);
 	}
 
 

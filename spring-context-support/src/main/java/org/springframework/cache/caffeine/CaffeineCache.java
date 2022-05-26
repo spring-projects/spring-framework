@@ -83,16 +83,6 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 		return this.cache;
 	}
 
-	@Override
-	@Nullable
-	public ValueWrapper get(Object key) {
-		if (this.cache instanceof LoadingCache) {
-			Object value = ((LoadingCache<Object, Object>) this.cache).get(key);
-			return toValueWrapper(value);
-		}
-		return super.get(key);
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	@Nullable
@@ -103,6 +93,9 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 	@Override
 	@Nullable
 	protected Object lookup(Object key) {
+		if (this.cache instanceof LoadingCache) {
+			return ((LoadingCache<Object, Object>) this.cache).get(key);
+		}
 		return this.cache.getIfPresent(key);
 	}
 

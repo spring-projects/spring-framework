@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -37,7 +37,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
 
 /**
- * {@link javax.servlet.Filter} that generates an {@code ETag} value based on the
+ * {@link jakarta.servlet.Filter} that generates an {@code ETag} value based on the
  * content on the response. This ETag is compared to the {@code If-None-Match}
  * header of the request. If these headers are equal, the response content is
  * not sent, but rather a {@code 304 "Not Modified"} status instead.
@@ -45,9 +45,6 @@ import org.springframework.web.util.WebUtils;
  * <p>Since the ETag is based on the response content, the response
  * (e.g. a {@link org.springframework.web.servlet.View}) is still rendered.
  * As such, this filter only saves bandwidth, not server performance.
- *
- * <p><b>NOTE:</b> As of Spring Framework 5.0, this filter uses request/response
- * decorators built on the Servlet 3.1 API.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -99,7 +96,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		HttpServletResponse responseToUse = response;
-		if (!isAsyncDispatch(request) && !(response instanceof ContentCachingResponseWrapper)) {
+		if (!isAsyncDispatch(request) && !(response instanceof ConditionalContentCachingResponseWrapper)) {
 			responseToUse = new ConditionalContentCachingResponseWrapper(response, request);
 		}
 
@@ -111,10 +108,8 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	}
 
 	private void updateResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-		ContentCachingResponseWrapper wrapper =
-				WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
-
+		ConditionalContentCachingResponseWrapper wrapper =
+				WebUtils.getNativeResponse(response, ConditionalContentCachingResponseWrapper.class);
 		Assert.notNull(wrapper, "ContentCachingResponseWrapper not found");
 		HttpServletResponse rawResponse = (HttpServletResponse) wrapper.getResponse();
 
@@ -181,16 +176,6 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		return builder.toString();
 	}
 
-	private boolean compareETagHeaderValue(String requestETag, String responseETag) {
-		if (requestETag.startsWith("W/")) {
-			requestETag = requestETag.substring(2);
-		}
-		if (responseETag.startsWith("W/")) {
-			responseETag = responseETag.substring(2);
-		}
-		return requestETag.equals(responseETag);
-	}
-
 
 	/**
 	 * This method can be used to suppress the content caching response wrapper
@@ -218,7 +203,6 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	private static class ConditionalContentCachingResponseWrapper extends ContentCachingResponseWrapper {
 
 		private final HttpServletRequest request;
-
 
 		ConditionalContentCachingResponseWrapper(HttpServletResponse response, HttpServletRequest request) {
 			super(response);

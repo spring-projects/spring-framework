@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -58,7 +58,7 @@ public class StompEncoder  {
 
 	@SuppressWarnings("serial")
 	private final Map<String, byte[]> headerKeyUpdateCache =
-			new LinkedHashMap<String, byte[]>(HEADER_KEY_CACHE_LIMIT, 0.75f, true) {
+			new LinkedHashMap<>(HEADER_KEY_CACHE_LIMIT, 0.75f, true) {
 				@Override
 				protected boolean removeEldestEntry(Map.Entry<String, byte[]> eldest) {
 					if (size() > HEADER_KEY_CACHE_LIMIT) {
@@ -212,7 +212,7 @@ public class StompEncoder  {
 	private StringBuilder getStringBuilder(@Nullable StringBuilder sb, String inString, int i) {
 		if (sb == null) {
 			sb = new StringBuilder(inString.length());
-			sb.append(inString.substring(0, i));
+			sb.append(inString, 0, i);
 		}
 		return sb;
 	}
@@ -228,31 +228,32 @@ public class StompEncoder  {
 		void add(byte b);
 
 		byte[] toByteArray();
-
 	}
 
+
 	@SuppressWarnings("serial")
-	private static class DefaultResult extends LinkedList<Object> implements Result {
+	private static class DefaultResult extends ArrayList<Object> implements Result {
 
 		private int size;
 
-
+		@Override
 		public void add(byte[] bytes) {
 			this.size += bytes.length;
 			super.add(bytes);
 		}
 
+		@Override
 		public void add(byte b) {
 			this.size++;
 			super.add(b);
 		}
 
+		@Override
 		public byte[] toByteArray() {
 			byte[] result = new byte[this.size];
 			int position = 0;
 			for (Object o : this) {
-				if (o instanceof byte[]) {
-					byte[] src = (byte[]) o;
+				if (o instanceof byte[] src) {
 					System.arraycopy(src, 0, result, position, src.length);
 					position += src.length;
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,14 +76,14 @@ public class TimedSpringRunnerTests {
 		}
 
 		// Should Fail due to timeout.
-		@Test(timeout = 100)
+		@Test(timeout = 10)
 		public void jUnitTimeoutWithSleep() throws Exception {
 			Thread.sleep(200);
 		}
 
 		// Should Fail due to timeout.
 		@Test
-		@Timed(millis = 100)
+		@Timed(millis = 10)
 		public void springTimeoutWithSleep() throws Exception {
 			Thread.sleep(200);
 		}
@@ -97,7 +97,7 @@ public class TimedSpringRunnerTests {
 
 		// Should Fail due to timeout.
 		@Test
-		@MetaTimedWithOverride(millis = 100)
+		@MetaTimedWithOverride(millis = 10)
 		public void springTimeoutWithSleepAndMetaAnnotationAndOverride() throws Exception {
 			Thread.sleep(200);
 		}
@@ -110,7 +110,7 @@ public class TimedSpringRunnerTests {
 		}
 	}
 
-	@Timed(millis = 100)
+	@Timed(millis = 10)
 	@Retention(RetentionPolicy.RUNTIME)
 	private static @interface MetaTimed {
 	}

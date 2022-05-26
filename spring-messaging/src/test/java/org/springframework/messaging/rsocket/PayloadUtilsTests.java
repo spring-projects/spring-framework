@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket;
 
 import java.nio.charset.StandardCharsets;
@@ -44,8 +45,6 @@ public class PayloadUtilsTests {
 	private LeakAwareNettyDataBufferFactory nettyBufferFactory =
 			new LeakAwareNettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
 
-	private DefaultDataBufferFactory defaultBufferFactory = new DefaultDataBufferFactory();
-
 
 	@AfterEach
 	public void tearDown() throws Exception {
@@ -70,7 +69,7 @@ public class PayloadUtilsTests {
 	@Test
 	public void retainAndReleaseWithDefaultFactory() {
 		Payload payload = ByteBufPayload.create("sample data");
-		DataBuffer buffer = PayloadUtils.retainDataAndReleasePayload(payload, this.defaultBufferFactory);
+		DataBuffer buffer = PayloadUtils.retainDataAndReleasePayload(payload, DefaultDataBufferFactory.sharedInstance);
 
 		assertThat(buffer).isInstanceOf(DefaultDataBuffer.class);
 		assertThat(payload.refCnt()).isEqualTo(0);
@@ -163,7 +162,7 @@ public class PayloadUtilsTests {
 	}
 
 	private DefaultDataBuffer createDefaultDataBuffer(String content) {
-		DefaultDataBuffer buffer = this.defaultBufferFactory.allocateBuffer();
+		DefaultDataBuffer buffer = DefaultDataBufferFactory.sharedInstance.allocateBuffer();
 		buffer.write(content, StandardCharsets.UTF_8);
 		return buffer;
 	}

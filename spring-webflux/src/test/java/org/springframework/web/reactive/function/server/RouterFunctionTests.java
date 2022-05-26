@@ -26,6 +26,7 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 
 /**
  * @author Arjen Poutsma
@@ -126,9 +127,29 @@ public class RouterFunctionTests {
 				.verify();
 	}
 
+	@Test
+	public void attributes() {
+		RouterFunction<ServerResponse> route = RouterFunctions.route(
+				GET("/atts/1"), request -> ServerResponse.ok().build())
+				.withAttribute("foo", "bar")
+				.withAttribute("baz", "qux")
+				.and(RouterFunctions.route(GET("/atts/2"), request -> ServerResponse.ok().build())
+				.withAttributes(atts -> {
+					atts.put("foo", "bar");
+					atts.put("baz", "qux");
+				}));
+
+		AttributesTestVisitor visitor = new AttributesTestVisitor();
+		route.accept(visitor);
+		assertThat(visitor.visitCount()).isEqualTo(2);
+	}
+
+
 
 	private Mono<ServerResponse> handlerMethod(ServerRequest request) {
 		return ServerResponse.ok().bodyValue("42");
 	}
+
+
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -43,9 +44,28 @@ import org.springframework.lang.Nullable;
 public interface HttpMessageWriter<T> {
 
 	/**
-	 * Return the {@link MediaType}'s that this writer supports.
+	 * Return the list of media types supported by this Writer. The list may not
+	 * apply to every possible target element type and calls to this method should
+	 * typically be guarded via {@link #canWrite(ResolvableType, MediaType)
+	 * canWrite(elementType, null)}. The list may also exclude media types
+	 * supported only for a specific element type. Alternatively, use
+	 * {@link #getWritableMediaTypes(ResolvableType)} for a more precise list.
+	 * @return the general list of supported media types
 	 */
 	List<MediaType> getWritableMediaTypes();
+
+	/**
+	 * Return the list of media types supported by this Writer for the given type
+	 * of element. This list may differ from {@link #getWritableMediaTypes()}
+	 * if the Writer doesn't support the element type, or if it supports it
+	 * only for a subset of media types.
+	 * @param elementType the type of element to encode
+	 * @return the list of media types supported for the given class
+	 * @since 5.3.4
+	 */
+	default List<MediaType> getWritableMediaTypes(ResolvableType elementType) {
+		return (canWrite(elementType, null) ? getWritableMediaTypes() : Collections.emptyList());
+	}
 
 	/**
 	 * Whether the given object type is supported by this writer.

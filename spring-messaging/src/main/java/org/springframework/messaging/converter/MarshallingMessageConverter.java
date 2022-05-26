@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,8 @@ import org.springframework.util.MimeType;
  *
  * @author Arjen Poutsma
  * @since 4.2
+ * @see Marshaller
+ * @see Unmarshaller
  */
 public class MarshallingMessageConverter extends AbstractMessageConverter {
 
@@ -61,7 +63,8 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	 * {@link #setUnmarshaller(Unmarshaller)} to be invoked separately.
 	 */
 	public MarshallingMessageConverter() {
-		this(new MimeType("application", "xml"), new MimeType("text", "xml"), new MimeType("application", "*+xml"));
+		this(new MimeType("application", "xml"), new MimeType("text", "xml"),
+				new MimeType("application", "*+xml"));
 	}
 
 	/**
@@ -160,7 +163,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 			return new StreamSource(new ByteArrayInputStream((byte[]) payload));
 		}
 		else {
-			return new StreamSource(new StringReader((String) payload));
+			return new StreamSource(new StringReader(payload.toString()));
 		}
 	}
 
@@ -172,13 +175,13 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
 		try {
 			if (byte[].class == getSerializedPayloadClass()) {
-				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
 				Result result = new StreamResult(out);
 				this.marshaller.marshal(payload, result);
 				payload = out.toByteArray();
 			}
 			else {
-				Writer writer = new StringWriter();
+				Writer writer = new StringWriter(1024);
 				Result result = new StreamResult(writer);
 				this.marshaller.marshal(payload, result);
 				payload = writer.toString();

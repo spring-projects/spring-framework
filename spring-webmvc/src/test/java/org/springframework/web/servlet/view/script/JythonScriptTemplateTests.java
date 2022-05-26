@@ -19,8 +19,7 @@ package org.springframework.web.servlet.view.script;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

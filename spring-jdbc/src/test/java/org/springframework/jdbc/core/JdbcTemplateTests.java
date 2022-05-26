@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -153,12 +152,12 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithStaticSql() throws Exception {
-		doTestStrings(null, null, null, null, (template, sql, rch) -> template.query(sql, rch));
+		doTestStrings(null, null, null, null, JdbcTemplate::query);
 	}
 
 	@Test
 	public void testStringsWithStaticSqlAndFetchSizeAndMaxRows() throws Exception {
-		doTestStrings(10, 20, 30, null, (template, sql, rch) -> template.query(sql, rch));
+		doTestStrings(10, 20, 30, null, JdbcTemplate::query);
 	}
 
 	@Test
@@ -175,12 +174,14 @@ public class JdbcTemplateTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testStringsWithEmptyPreparedStatementArgs() throws Exception {
 		doTestStrings(null, null, null, null,
 				(template, sql, rch) -> template.query(sql, (Object[]) null, rch));
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testStringsWithPreparedStatementArgs() throws Exception {
 		final Integer argument = 99;
 		doTestStrings(null, null, null, argument,
@@ -194,7 +195,7 @@ public class JdbcTemplateTests {
 		String[] results = {"rod", "gary", " portia"};
 
 		class StringHandler implements RowCallbackHandler {
-			private List<String> list = new LinkedList<>();
+			private List<String> list = new ArrayList<>();
 			@Override
 			public void processRow(ResultSet rs) throws SQLException {
 				this.list.add(rs.getString(1));
@@ -267,28 +268,22 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testConnectionCallback() throws Exception {
-		String result = this.template.execute(new ConnectionCallback<String>() {
-			@Override
-			public String doInConnection(Connection con) {
-				assertThat(con instanceof ConnectionProxy).isTrue();
-				assertThat(((ConnectionProxy) con).getTargetConnection()).isSameAs(JdbcTemplateTests.this.connection);
-				return "test";
-			}
+		String result = this.template.execute((ConnectionCallback<String>) con -> {
+			assertThat(con instanceof ConnectionProxy).isTrue();
+			assertThat(((ConnectionProxy) con).getTargetConnection()).isSameAs(JdbcTemplateTests.this.connection);
+			return "test";
 		});
 		assertThat(result).isEqualTo("test");
 	}
 
 	@Test
 	public void testConnectionCallbackWithStatementSettings() throws Exception {
-		String result = this.template.execute(new ConnectionCallback<String>() {
-			@Override
-			public String doInConnection(Connection con) throws SQLException {
-				PreparedStatement ps = con.prepareStatement("some SQL");
-				ps.setFetchSize(10);
-				ps.setMaxRows(20);
-				ps.close();
-				return "test";
-			}
+		String result = this.template.execute((ConnectionCallback<String>) con -> {
+			PreparedStatement ps = con.prepareStatement("some SQL");
+			ps.setFetchSize(10);
+			ps.setMaxRows(20);
+			ps.close();
+			return "test";
 		});
 
 		assertThat(result).isEqualTo("test");

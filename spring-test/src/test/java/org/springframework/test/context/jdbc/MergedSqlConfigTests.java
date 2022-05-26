@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.context.jdbc;
 
 import java.lang.reflect.Method;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -182,86 +183,62 @@ class MergedSqlConfigTests {
 			.withMessage("You may declare the 'commentPrefix' or 'commentPrefixes' attribute in @SqlConfig but not both");
 	}
 
-	@Test
-	void globalConfigWithDefaults() throws Exception {
-		Method method = GlobalConfigWithDefaultsClass.class.getMethod("globalConfigMethod");
-		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
-		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, GlobalConfigWithDefaultsClass.class);
-		assertDefaults(cfg);
+	@Nested
+	class TopLevelMergedSqlConfigTests {
+
+		@Test
+		void globalConfigWithDefaults() throws Exception {
+			assertGlobalConfigWithDefaults(GlobalConfigWithDefaultsClass.class);
+		}
+
+		@Test
+		void globalConfig() throws Exception {
+			assertGlobalConfig(GlobalConfigClass.class);
+		}
+
+		@Test
+		void globalConfigWithLocalOverrides() throws Exception {
+			assertGlobalConfigWithLocalOverrides(GlobalConfigClass.class);
+		}
+
+		@Test
+		void globalConfigWithCommentPrefixAndLocalOverrides() throws Exception {
+			assertGlobalConfigWithCommentPrefixAndLocalOverrides(GlobalConfigWithPrefixClass.class);
+		}
+
+		@Test
+		void globalConfigWithCommentPrefixesAndLocalOverrides() throws Exception {
+			assertGlobalConfigWithCommentPrefixesAndLocalOverrides(GlobalConfigWithPrefixesClass.class);
+		}
 	}
 
-	@Test
-	void globalConfig() throws Exception {
-		Method method = GlobalConfigClass.class.getMethod("globalConfigMethod");
-		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
-		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, GlobalConfigClass.class);
+	@Nested
+	class NestedMergedSqlConfigTests {
 
-		assertSoftly(softly -> {
-			softly.assertThat(cfg).isNotNull();
-			softly.assertThat(cfg.getDataSource()).as("dataSource").isEqualTo("");
-			softly.assertThat(cfg.getTransactionManager()).as("transactionManager").isEqualTo("");
-			softly.assertThat(cfg.getTransactionMode()).as("transactionMode").isEqualTo(INFERRED);
-			softly.assertThat(cfg.getEncoding()).as("encoding").isEqualTo("global");
-			softly.assertThat(cfg.getSeparator()).as("separator").isEqualTo("\n");
-			softly.assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("`", "--"));
-			softly.assertThat(cfg.getBlockCommentStartDelimiter()).as("blockCommentStartDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_START_DELIMITER);
-			softly.assertThat(cfg.getBlockCommentEndDelimiter()).as("blockCommentEndDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_END_DELIMITER);
-			softly.assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(IGNORE_FAILED_DROPS);
-		});
-	}
+		@Test
+		void globalConfigWithDefaults() throws Exception {
+			assertGlobalConfigWithDefaults(GlobalConfigWithDefaultsClass.Nested.class);
+		}
 
-	@Test
-	void globalConfigWithLocalOverrides() throws Exception {
-		Method method = GlobalConfigClass.class.getMethod("globalConfigWithLocalOverridesMethod");
-		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
-		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, GlobalConfigClass.class);
+		@Test
+		void globalConfig() throws Exception {
+			assertGlobalConfig(GlobalConfigClass.Nested.class);
+		}
 
-		assertSoftly(softly -> {
-			softly.assertThat(cfg).isNotNull();
-			softly.assertThat(cfg.getDataSource()).as("dataSource").isEqualTo("");
-			softly.assertThat(cfg.getTransactionManager()).as("transactionManager").isEqualTo("");
-			softly.assertThat(cfg.getTransactionMode()).as("transactionMode").isEqualTo(INFERRED);
-			softly.assertThat(cfg.getEncoding()).as("encoding").isEqualTo("local");
-			softly.assertThat(cfg.getSeparator()).as("separator").isEqualTo("@@");
-			softly.assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#"));
-			softly.assertThat(cfg.getBlockCommentStartDelimiter()).as("blockCommentStartDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_START_DELIMITER);
-			softly.assertThat(cfg.getBlockCommentEndDelimiter()).as("blockCommentEndDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_END_DELIMITER);
-			softly.assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(CONTINUE_ON_ERROR);
-		});
-	}
+		@Test
+		void globalConfigWithLocalOverrides() throws Exception {
+			assertGlobalConfigWithLocalOverrides(GlobalConfigClass.Nested.class);
+		}
 
-	@Test
-	void globalConfigWithCommentPrefixAndLocalOverrides() throws Exception {
-		Class<?> testClass = GlobalConfigWithPrefixClass.class;
+		@Test
+		void globalConfigWithCommentPrefixAndLocalOverrides() throws Exception {
+			assertGlobalConfigWithCommentPrefixAndLocalOverrides(GlobalConfigWithPrefixClass.Nested.class);
+		}
 
-		Method method = testClass.getMethod("commentPrefixesOverrideCommentPrefix");
-		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
-		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, testClass);
-
-		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#", "@"));
-
-		method = testClass.getMethod("commentPrefixOverridesCommentPrefix");
-		localSqlConfig = method.getAnnotation(Sql.class).config();
-		cfg = new MergedSqlConfig(localSqlConfig, testClass);
-
-		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#"));
-	}
-
-	@Test
-	void globalConfigWithCommentPrefixesAndLocalOverrides() throws Exception {
-		Class<?> testClass = GlobalConfigWithPrefixesClass.class;
-
-		Method method = testClass.getMethod("commentPrefixesOverrideCommentPrefixes");
-		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
-		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, testClass);
-
-		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#", "@"));
-
-		method = testClass.getMethod("commentPrefixOverridesCommentPrefixes");
-		localSqlConfig = method.getAnnotation(Sql.class).config();
-		cfg = new MergedSqlConfig(localSqlConfig, testClass);
-
-		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#"));
+		@Test
+		void globalConfigWithCommentPrefixesAndLocalOverrides() throws Exception {
+			assertGlobalConfigWithCommentPrefixesAndLocalOverrides(GlobalConfigWithPrefixesClass.Nested.class);
+		}
 	}
 
 	private void assertDefaults(MergedSqlConfig cfg) {
@@ -277,6 +254,79 @@ class MergedSqlConfigTests {
 			softly.assertThat(cfg.getBlockCommentEndDelimiter()).as("blockCommentEndDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 			softly.assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(FAIL_ON_ERROR);
 		});
+	}
+
+	private void assertGlobalConfigWithDefaults(Class<?> testClass) throws Exception {
+		Method method = testClass.getMethod("globalConfigMethod");
+		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
+		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, testClass);
+		assertDefaults(cfg);
+	}
+
+	private void assertGlobalConfig(Class<?> testClass) throws NoSuchMethodException {
+		Method method = testClass.getMethod("globalConfigMethod");
+		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
+		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, testClass);
+
+		assertSoftly(softly -> {
+			softly.assertThat(cfg).isNotNull();
+			softly.assertThat(cfg.getDataSource()).as("dataSource").isEqualTo("");
+			softly.assertThat(cfg.getTransactionManager()).as("transactionManager").isEqualTo("");
+			softly.assertThat(cfg.getTransactionMode()).as("transactionMode").isEqualTo(INFERRED);
+			softly.assertThat(cfg.getEncoding()).as("encoding").isEqualTo("global");
+			softly.assertThat(cfg.getSeparator()).as("separator").isEqualTo("\n");
+			softly.assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("`", "--"));
+			softly.assertThat(cfg.getBlockCommentStartDelimiter()).as("blockCommentStartDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_START_DELIMITER);
+			softly.assertThat(cfg.getBlockCommentEndDelimiter()).as("blockCommentEndDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+			softly.assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(IGNORE_FAILED_DROPS);
+		});
+	}
+
+	private void assertGlobalConfigWithLocalOverrides(Class<?> testClass) throws Exception {
+		Method method = testClass.getMethod("globalConfigWithLocalOverridesMethod");
+		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
+		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, testClass);
+
+		assertSoftly(softly -> {
+			softly.assertThat(cfg).isNotNull();
+			softly.assertThat(cfg.getDataSource()).as("dataSource").isEqualTo("");
+			softly.assertThat(cfg.getTransactionManager()).as("transactionManager").isEqualTo("");
+			softly.assertThat(cfg.getTransactionMode()).as("transactionMode").isEqualTo(INFERRED);
+			softly.assertThat(cfg.getEncoding()).as("encoding").isEqualTo("local");
+			softly.assertThat(cfg.getSeparator()).as("separator").isEqualTo("@@");
+			softly.assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#"));
+			softly.assertThat(cfg.getBlockCommentStartDelimiter()).as("blockCommentStartDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_START_DELIMITER);
+			softly.assertThat(cfg.getBlockCommentEndDelimiter()).as("blockCommentEndDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+			softly.assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(CONTINUE_ON_ERROR);
+		});
+	}
+
+	private void assertGlobalConfigWithCommentPrefixAndLocalOverrides(Class<?> testClass) throws Exception {
+		Method method = testClass.getMethod("commentPrefixesOverrideCommentPrefix");
+		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
+		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, testClass);
+
+		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#", "@"));
+
+		method = testClass.getMethod("commentPrefixOverridesCommentPrefix");
+		localSqlConfig = method.getAnnotation(Sql.class).config();
+		cfg = new MergedSqlConfig(localSqlConfig, testClass);
+
+		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#"));
+	}
+
+	private void assertGlobalConfigWithCommentPrefixesAndLocalOverrides(Class<?> testClass) throws Exception {
+		Method method = testClass.getMethod("commentPrefixesOverrideCommentPrefixes");
+		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
+		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, testClass);
+
+		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#", "@"));
+
+		method = testClass.getMethod("commentPrefixOverridesCommentPrefixes");
+		localSqlConfig = method.getAnnotation(Sql.class).config();
+		cfg = new MergedSqlConfig(localSqlConfig, testClass);
+
+		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#"));
 	}
 
 	private static String[] array(String... elements) {
@@ -339,6 +389,13 @@ class MergedSqlConfigTests {
 		@Sql
 		public void globalConfigMethod() {
 		}
+
+		class Nested {
+
+			@Sql
+			public void globalConfigMethod() {
+			}
+		}
 	}
 
 	@SqlConfig(encoding = "global", separator = "\n", commentPrefixes = { "`", "--" }, errorMode = IGNORE_FAILED_DROPS)
@@ -350,6 +407,17 @@ class MergedSqlConfigTests {
 
 		@Sql(config = @SqlConfig(encoding = "local", separator = "@@", commentPrefix = "#", errorMode = CONTINUE_ON_ERROR))
 		public void globalConfigWithLocalOverridesMethod() {
+		}
+
+		class Nested {
+
+			@Sql
+			public void globalConfigMethod() {
+			}
+
+			@Sql(config = @SqlConfig(encoding = "local", separator = "@@", commentPrefix = "#", errorMode = CONTINUE_ON_ERROR))
+			public void globalConfigWithLocalOverridesMethod() {
+			}
 		}
 	}
 
@@ -363,6 +431,17 @@ class MergedSqlConfigTests {
 		@Sql(config = @SqlConfig(commentPrefix = "#"))
 		public void commentPrefixOverridesCommentPrefix() {
 		}
+
+		class Nested {
+
+			@Sql(config = @SqlConfig(commentPrefixes = { "#", "@" }))
+			public void commentPrefixesOverrideCommentPrefix() {
+			}
+
+			@Sql(config = @SqlConfig(commentPrefix = "#"))
+			public void commentPrefixOverridesCommentPrefix() {
+			}
+		}
 	}
 
 	@SqlConfig(commentPrefixes = { "`", "--" })
@@ -374,6 +453,17 @@ class MergedSqlConfigTests {
 
 		@Sql(config = @SqlConfig(commentPrefix = "#"))
 		public void commentPrefixOverridesCommentPrefixes() {
+		}
+
+		class Nested {
+
+			@Sql(config = @SqlConfig(commentPrefixes = { "#", "@" }))
+			public void commentPrefixesOverrideCommentPrefixes() {
+			}
+
+			@Sql(config = @SqlConfig(commentPrefix = "#"))
+			public void commentPrefixOverridesCommentPrefixes() {
+			}
 		}
 	}
 

@@ -28,7 +28,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.user.SimpSubscription;
-import org.springframework.messaging.simp.user.SimpSubscriptionMatcher;
 import org.springframework.messaging.simp.user.SimpUser;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.CloseStatus;
@@ -143,12 +142,7 @@ public class DefaultSimpUserRegistryTests {
 		subscribeEvent = new SessionSubscribeEvent(this, message, user);
 		registry.onApplicationEvent(subscribeEvent);
 
-		Set<SimpSubscription> matches = registry.findSubscriptions(new SimpSubscriptionMatcher() {
-			@Override
-			public boolean match(SimpSubscription subscription) {
-				return subscription.getDestination().equals("/match");
-			}
-		});
+		Set<SimpSubscription> matches = registry.findSubscriptions(subscription -> subscription.getDestination().equals("/match"));
 
 		assertThat(matches.size()).isEqualTo(2);
 

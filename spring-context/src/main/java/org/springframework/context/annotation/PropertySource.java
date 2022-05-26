@@ -98,16 +98,17 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * }</pre>
  *
  * <p>Assuming that "my.placeholder" is present in one of the property sources already
- * registered, e.g. system properties or environment variables, the placeholder will
- * be resolved to the corresponding value. If not, then "default/path" will be used as a
- * default. Expressing a default value (delimited by colon ":") is optional.  If no
- * default is specified and a property cannot be resolved, an {@code
+ * registered &mdash; for example, system properties or environment variables &mdash;
+ * the placeholder will be resolved to the corresponding value. If not, then "default/path"
+ * will be used as a default. Expressing a default value (delimited by colon ":") is
+ * optional. If no default is specified and a property cannot be resolved, an {@code
  * IllegalArgumentException} will be thrown.
  *
- * <h3>A note on property overriding with @PropertySource</h3>
+ * <h3>A note on property overriding with {@code @PropertySource}</h3>
  *
  * <p>In cases where a given property key exists in more than one {@code .properties}
- * file, the last {@code @PropertySource} annotation processed will 'win' and override.
+ * file, the last {@code @PropertySource} annotation processed will 'win' and override
+ * any previous key with the same name.
  *
  * <p>For example, given two properties files {@code a.properties} and
  * {@code b.properties}, consider the following two configuration classes
@@ -140,16 +141,16 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * <p>In certain situations, it may not be possible or practical to tightly control
  * property source ordering when using {@code @PropertySource} annotations. For example,
  * if the {@code @Configuration} classes above were registered via component-scanning,
- * the ordering is difficult to predict. In such cases - and if overriding is important -
- * it is recommended that the user fall back to using the programmatic PropertySource API.
- * See {@link org.springframework.core.env.ConfigurableEnvironment ConfigurableEnvironment}
- * and {@link org.springframework.core.env.MutablePropertySources MutablePropertySources}
- * javadocs for details.
+ * the ordering is difficult to predict. In such cases &mdash; and if overriding is important
+ * &mdash; it is recommended that the user fall back to using the programmatic
+ * {@code PropertySource} API. See {@link org.springframework.core.env.ConfigurableEnvironment
+ * ConfigurableEnvironment} and {@link org.springframework.core.env.MutablePropertySources
+ * MutablePropertySources} javadocs for details.
  *
  * <p><b>NOTE: This annotation is repeatable according to Java 8 conventions.</b>
  * However, all such {@code @PropertySource} annotations need to be declared at the same
- * level: either directly on the configuration class or as meta-annotations within the
- * same custom annotation. Mixing of direct annotations and meta-annotations is not
+ * level: either directly on the configuration class or as meta-annotations on the
+ * same custom annotation. Mixing direct annotations and meta-annotations is not
  * recommended since direct annotations will effectively override meta-annotations.
  *
  * @author Chris Beams
@@ -170,7 +171,7 @@ import org.springframework.core.io.support.PropertySourceFactory;
 public @interface PropertySource {
 
 	/**
-	 * Indicate the name of this property source. If omitted, the {@link #factory()}
+	 * Indicate the name of this property source. If omitted, the {@link #factory}
 	 * will generate a name based on the underlying resource (in the case of
 	 * {@link org.springframework.core.io.support.DefaultPropertySourceFactory}:
 	 * derived from the resource description through a corresponding name-less
@@ -186,7 +187,8 @@ public @interface PropertySource {
 	 * &mdash; for example, {@code "classpath:/com/myco/app.properties"}
 	 * or {@code "file:/path/to/file.xml"}.
 	 * <p>Resource location wildcards (e.g. *&#42;/*.properties) are not permitted;
-	 * each location must evaluate to exactly one {@code .properties} resource.
+	 * each location must evaluate to exactly one {@code .properties} or {@code .xml}
+	 * resource.
 	 * <p>${...} placeholders will be resolved against any/all property sources already
 	 * registered with the {@code Environment}. See {@linkplain PropertySource above}
 	 * for examples.
@@ -196,10 +198,10 @@ public @interface PropertySource {
 	String[] value();
 
 	/**
-	 * Indicate if failure to find the a {@link #value() property resource} should be
+	 * Indicate if a failure to find a {@link #value property resource} should be
 	 * ignored.
 	 * <p>{@code true} is appropriate if the properties file is completely optional.
-	 * Default is {@code false}.
+	 * <p>Default is {@code false}.
 	 * @since 4.0
 	 */
 	boolean ignoreResourceNotFound() default false;

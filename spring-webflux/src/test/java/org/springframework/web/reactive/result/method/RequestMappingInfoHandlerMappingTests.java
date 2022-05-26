@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +36,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
@@ -52,7 +53,7 @@ import org.springframework.web.reactive.result.method.RequestMappingInfo.Builder
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.server.UnsatisfiedRequestParameterException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
@@ -139,7 +140,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
 		assertError(mono, MethodNotAllowedException.class,
-				ex -> assertThat(ex.getSupportedMethods()).isEqualTo(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD)));
+				ex -> assertThat(ex.getSupportedMethods()).isEqualTo(Set.of(HttpMethod.GET, HttpMethod.HEAD)));
 	}
 
 	@Test  // SPR-9603
@@ -181,7 +182,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void getHandlerTestRequestParamMismatch() {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/params"));
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
-		assertError(mono, ServerWebInputException.class, ex -> {
+		assertError(mono, UnsatisfiedRequestParameterException.class, ex -> {
 			assertThat(ex.getReason()).contains("[foo=bar]");
 			assertThat(ex.getReason()).contains("[bar=baz]");
 		});
@@ -192,10 +193,12 @@ public class RequestMappingInfoHandlerMappingTests {
 		List<HttpMethod> allMethodExceptTrace = new ArrayList<>(Arrays.asList(HttpMethod.values()));
 		allMethodExceptTrace.remove(HttpMethod.TRACE);
 
-		testHttpOptions("/foo", EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS));
-		testHttpOptions("/person/1", EnumSet.of(HttpMethod.PUT, HttpMethod.OPTIONS));
-		testHttpOptions("/persons", EnumSet.copyOf(allMethodExceptTrace));
-		testHttpOptions("/something", EnumSet.of(HttpMethod.PUT, HttpMethod.POST));
+		testHttpOptions("/foo", Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS), null);
+		testHttpOptions("/person/1", Set.of(HttpMethod.PUT, HttpMethod.OPTIONS), null);
+		testHttpOptions("/persons", Set.copyOf(allMethodExceptTrace), null);
+		testHttpOptions("/something", Set.of(HttpMethod.PUT, HttpMethod.POST), null);
+		testHttpOptions("/qux", Set.of(HttpMethod.PATCH,HttpMethod.GET,HttpMethod.HEAD,HttpMethod.OPTIONS),
+				new MediaType("foo", "bar"));
 	}
 
 	@Test
@@ -209,7 +212,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		exchange = MockServerWebExchange.from(get("/content").accept(MediaType.APPLICATION_JSON));
 		this.handlerMapping.getHandler(exchange).block();
 
-		assertThat(exchange.getAttributes().get(name)).as("Negated expression shouldn't be listed as producible type").isNull();
+		assertThat(exchange.getAttributes().get(name))
+				.as("Negated expression shouldn't be listed as producible type")
+				.isNull();
 	}
 
 	@Test
@@ -313,6 +318,26 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertThat(uriVariables.get("cars")).isEqualTo("cars");
 	}
 
+	@Test
+	public void handlePatchUnsupportedMediaType() {
+		MockServerHttpRequest request = MockServerHttpRequest.patch("/qux")
+				.header("content-type", "application/xml")
+				.build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
+
+		StepVerifier.create(mono)
+				.expectErrorSatisfies(ex -> {
+					assertThat(ex).isInstanceOf(UnsupportedMediaTypeStatusException.class);
+					UnsupportedMediaTypeStatusException umtse = (UnsupportedMediaTypeStatusException) ex;
+					MediaType mediaType = new MediaType("foo", "bar");
+					assertThat(umtse.getSupportedMediaTypes()).containsExactly(mediaType);
+					assertThat(umtse.getHeaders().getAcceptPatch()).containsExactly(mediaType);
+				})
+				.verify();
+
+	}
+
 
 	@SuppressWarnings("unchecked")
 	private <T> void assertError(Mono<Object> mono, final Class<T> exceptionClass, final Consumer<T> consumer) {
@@ -329,10 +354,12 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
-		assertError(mono, UnsupportedMediaTypeStatusException.class, ex -> assertThat(ex.getSupportedMediaTypes()).as("Invalid supported consumable media types").isEqualTo(Collections.singletonList(new MediaType("application", "xml"))));
+		assertError(mono, UnsupportedMediaTypeStatusException.class, ex -> assertThat(ex.getSupportedMediaTypes())
+				.as("Invalid supported consumable media types")
+				.isEqualTo(Collections.singletonList(new MediaType("application", "xml"))));
 	}
 
-	private void testHttpOptions(String requestURI, Set<HttpMethod> allowedMethods) {
+	private void testHttpOptions(String requestURI, Set<HttpMethod> allowedMethods, @Nullable MediaType acceptPatch) {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options(requestURI));
 		HandlerMethod handlerMethod = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
 
@@ -346,14 +373,22 @@ public class RequestMappingInfoHandlerMappingTests {
 		Object value = result.getReturnValue();
 		assertThat(value).isNotNull();
 		assertThat(value.getClass()).isEqualTo(HttpHeaders.class);
-		assertThat(((HttpHeaders) value).getAllow()).isEqualTo(allowedMethods);
+
+		HttpHeaders headers = (HttpHeaders) value;
+		assertThat(headers.getAllow()).hasSameElementsAs(allowedMethods);
+
+		if (acceptPatch != null && headers.getAllow().contains(HttpMethod.PATCH) ) {
+			assertThat(headers.getAcceptPatch()).containsExactly(acceptPatch);
+		}
 	}
 
 	private void testMediaTypeNotAcceptable(String url) {
 		ServerWebExchange exchange = MockServerWebExchange.from(get(url).accept(MediaType.APPLICATION_JSON));
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
-		assertError(mono, NotAcceptableStatusException.class, ex -> assertThat(ex.getSupportedMediaTypes()).as("Invalid supported producible media types").isEqualTo(Collections.singletonList(new MediaType("application", "xml"))));
+		assertError(mono, NotAcceptableStatusException.class, ex -> assertThat(ex.getSupportedMediaTypes())
+				.as("Invalid supported producible media types")
+				.isEqualTo(Collections.singletonList(new MediaType("application", "xml"))));
 	}
 
 	private void handleMatch(ServerWebExchange exchange, String pattern) {
@@ -429,6 +464,16 @@ public class RequestMappingInfoHandlerMappingTests {
 			headers.add("Allow", "PUT,POST");
 			return headers;
 		}
+
+		@RequestMapping(value = "/qux", method = RequestMethod.GET, produces = "application/xml")
+		public String getBaz() {
+			return "";
+		}
+
+		@RequestMapping(value = "/qux", method = RequestMethod.PATCH, consumes = "foo/bar")
+		public void patchBaz(String value) {
+		}
+
 
 		public void dummy() { }
 	}

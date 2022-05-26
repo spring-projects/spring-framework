@@ -22,12 +22,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -273,7 +275,7 @@ public class NamedParameterJdbcTemplateTests {
 
 		params.put("id", new SqlParameterValue(Types.DECIMAL, 1));
 		params.put("country", "UK");
-		final List<Customer> customers = new LinkedList<>();
+		final List<Customer> customers = new ArrayList<>();
 		namedParameterTemplate.query(SELECT_NAMED_PARAMETERS, params, rs -> {
 			Customer cust = new Customer();
 			cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -298,7 +300,7 @@ public class NamedParameterJdbcTemplateTests {
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
 
-		final List<Customer> customers = new LinkedList<>();
+		final List<Customer> customers = new ArrayList<>();
 		namedParameterTemplate.query(SELECT_NO_PARAMETERS, rs -> {
 			Customer cust = new Customer();
 			cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -384,6 +386,39 @@ public class NamedParameterJdbcTemplateTests {
 
 		assertThat(cust.getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(cust.getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
+		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
+		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
+		verify(preparedStatement).setString(2, "UK");
+		verify(resultSet).close();
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test
+	public void testQueryForStreamWithRowMapper() throws SQLException {
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getInt("id")).willReturn(1);
+		given(resultSet.getString("forename")).willReturn("rod");
+
+		params.put("id", new SqlParameterValue(Types.DECIMAL, 1));
+		params.put("country", "UK");
+		AtomicInteger count = new AtomicInteger();
+
+		try (Stream<Customer> s = namedParameterTemplate.queryForStream(SELECT_NAMED_PARAMETERS, params,
+				(rs, rownum) -> {
+					Customer cust1 = new Customer();
+					cust1.setId(rs.getInt(COLUMN_NAMES[0]));
+					cust1.setForename(rs.getString(COLUMN_NAMES[1]));
+					return cust1;
+				})) {
+			s.forEach(cust -> {
+				count.incrementAndGet();
+				assertThat(cust.getId() == 1).as("Customer id was assigned correctly").isTrue();
+				assertThat(cust.getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
+			});
+		}
+
+		assertThat(count.get()).isEqualTo(1);
 		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
 		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
 		verify(preparedStatement).setString(2, "UK");
@@ -526,10 +561,11 @@ public class NamedParameterJdbcTemplateTests {
 
 	@Test
 	public void testBatchUpdateWithSqlParameterSourcePlusTypeInfo() throws Exception {
-		SqlParameterSource[] ids = new SqlParameterSource[2];
-		ids[0] = new MapSqlParameterSource().addValue("id", 100, Types.NUMERIC);
-		ids[1] = new MapSqlParameterSource().addValue("id", 200, Types.NUMERIC);
-		final int[] rowsAffected = new int[] {1, 2};
+		SqlParameterSource[] ids = new SqlParameterSource[3];
+		ids[0] = new MapSqlParameterSource().addValue("id", null, Types.NULL);
+		ids[1] = new MapSqlParameterSource().addValue("id", 100, Types.NUMERIC);
+		ids[2] = new MapSqlParameterSource().addValue("id", 200, Types.NUMERIC);
+		final int[] rowsAffected = new int[] {1, 2, 3};
 
 		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
 		given(connection.getMetaData()).willReturn(databaseMetaData);
@@ -537,13 +573,15 @@ public class NamedParameterJdbcTemplateTests {
 
 		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
-		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected.length == 3).as("executed 3 updates").isTrue();
 		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
 		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		assertThat(actualRowsAffected[2]).isEqualTo(rowsAffected[2]);
 		verify(connection).prepareStatement("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?");
+		verify(preparedStatement).setNull(1, Types.NULL);
 		verify(preparedStatement).setObject(1, 100, Types.NUMERIC);
 		verify(preparedStatement).setObject(1, 200, Types.NUMERIC);
-		verify(preparedStatement, times(2)).addBatch();
+		verify(preparedStatement, times(3)).addBatch();
 		verify(preparedStatement, atLeastOnce()).close();
 		verify(connection, atLeastOnce()).close();
 	}

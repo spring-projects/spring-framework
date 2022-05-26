@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket;
 
 import java.time.Duration;
@@ -203,7 +204,7 @@ public class MetadataEncoderTests {
 
 	@Test
 	public void defaultDataBufferFactory() {
-		DefaultDataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+		DefaultDataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
 		RSocketStrategies strategies = RSocketStrategies.builder().dataBufferFactory(bufferFactory).build();
 
 		DataBuffer buffer = new MetadataEncoder(COMPOSITE_METADATA, strategies)
