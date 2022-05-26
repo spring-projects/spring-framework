@@ -54,6 +54,15 @@ class RuntimeHintsUtilsTests {
 	}
 
 	@Test
+	void registerAnnotationTypeWithLocalUseOfAliasForRegistersProxy() {
+		RuntimeHintsUtils.registerAnnotation(this.hints, LocalMapping.class);
+		assertThat(this.hints.reflection().typeHints()).singleElement()
+				.satisfies(annotationHint(LocalMapping.class));
+		assertThat(this.hints.proxies().jdkProxies()).singleElement()
+				.satisfies(annotationProxy(LocalMapping.class));
+	}
+
+	@Test
 	void registerAnnotationTypeProxyRegistersJdkProxy() {
 		RuntimeHintsUtils.registerAnnotation(this.hints, RetryInvoker.class);
 		assertThat(this.hints.reflection().typeHints())
@@ -105,6 +114,19 @@ class RuntimeHintsUtilsTests {
 
 	@RetryWithEnabledFlagInvoker
 	static class RetryWithEnabledFlagInvokerClass {
+
+	}
+
+	@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	@interface LocalMapping {
+
+		@AliasFor("retries")
+		int value() default 0;
+
+		@AliasFor("value")
+		int retries() default 0;
 
 	}
 
