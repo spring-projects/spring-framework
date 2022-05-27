@@ -62,21 +62,14 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 
 	@Test
 	void getBeanDefinitionMethodGeneratorConsidersFactoryLoadedExcludeFiltersAndBeansInOrderedOrder() {
-		MockBeanRegistrationExcludeFilter filter1 = new MockBeanRegistrationExcludeFilter(
-				false, 1);
-		MockBeanRegistrationExcludeFilter filter2 = new MockBeanRegistrationExcludeFilter(
-				false, 2);
-		MockBeanRegistrationExcludeFilter filter3 = new MockBeanRegistrationExcludeFilter(
-				false, 3);
-		MockBeanRegistrationExcludeFilter filter4 = new MockBeanRegistrationExcludeFilter(
-				true, 4);
-		MockBeanRegistrationExcludeFilter filter5 = new MockBeanRegistrationExcludeFilter(
-				true, 5);
-		MockBeanRegistrationExcludeFilter filter6 = new MockBeanRegistrationExcludeFilter(
-				true, 6);
+		MockBeanRegistrationExcludeFilter filter1 = new MockBeanRegistrationExcludeFilter(false, 1);
+		MockBeanRegistrationExcludeFilter filter2 = new MockBeanRegistrationExcludeFilter(false, 2);
+		MockBeanRegistrationExcludeFilter filter3 = new MockBeanRegistrationExcludeFilter(false, 3);
+		MockBeanRegistrationExcludeFilter filter4 = new MockBeanRegistrationExcludeFilter(true, 4);
+		MockBeanRegistrationExcludeFilter filter5 = new MockBeanRegistrationExcludeFilter(true, 5);
+		MockBeanRegistrationExcludeFilter filter6 = new MockBeanRegistrationExcludeFilter(true, 6);
 		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
-		springFactoriesLoader.addInstance(BeanRegistrationExcludeFilter.class, filter3,
-				filter1, filter5);
+		springFactoriesLoader.addInstance(BeanRegistrationExcludeFilter.class, filter3, filter1, filter5);
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerSingleton("filter4", filter4);
 		beanFactory.registerSingleton("filter2", filter2);

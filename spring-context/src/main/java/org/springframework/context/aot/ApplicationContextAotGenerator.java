@@ -52,7 +52,7 @@ public class ApplicationContextAotGenerator {
 		DefaultListableBeanFactory beanFactory = applicationContext
 				.getDefaultListableBeanFactory();
 		ApplicationContextInitializationCodeGenerator codeGenerator = new ApplicationContextInitializationCodeGenerator();
-		new BeanFactoryInitializationContributions(beanFactory).applyTo(generationContext,
+		new BeanFactoryInitializationAotContributions(beanFactory).applyTo(generationContext,
 				codeGenerator);
 		JavaFile javaFile = codeGenerator.generateJavaFile(generatedInitializerClassName);
 		generationContext.getGeneratedFiles().addSourceFile(javaFile);
