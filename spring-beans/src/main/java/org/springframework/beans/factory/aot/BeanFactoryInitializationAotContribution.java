@@ -22,6 +22,10 @@ import org.springframework.aot.generate.GenerationContext;
  * AOT contribution from a {@link BeanFactoryInitializationAotProcessor} used to
  * initialize a bean factory.
  *
+ * <p>Note: Beans implementing interface will not have registration methods
+ * generated during AOT processing unless they also implement
+ * {@link org.springframework.beans.factory.aot.BeanRegistrationExcludeFilter}.
+ *
  * @author Phillip Webb
  * @since 6.0
  * @see BeanFactoryInitializationAotProcessor

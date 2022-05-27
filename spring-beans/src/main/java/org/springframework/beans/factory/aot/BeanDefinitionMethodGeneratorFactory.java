@@ -114,6 +114,9 @@ class BeanDefinitionMethodGeneratorFactory {
 
 	private boolean isImplicitlyExcluded(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
+		if (BeanRegistrationExcludeFilter.class.isAssignableFrom(beanClass)) {
+			return false;
+		}
 		return BeanFactoryInitializationAotProcessor.class.isAssignableFrom(beanClass)
 				|| BeanRegistrationAotProcessor.class.isAssignableFrom(beanClass);
 	}

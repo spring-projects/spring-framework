@@ -23,6 +23,10 @@ import org.springframework.lang.Nullable;
  * AOT processor that makes bean factory initialization contributions by
  * processing {@link ConfigurableListableBeanFactory} instances.
  *
+ * <p>Note: Beans implementing interface will not have registration methods
+ * generated during AOT processing unless they also implement
+ * {@link org.springframework.beans.factory.aot.BeanRegistrationExcludeFilter}.
+ *
  * @author Phillip Webb
  * @since 6.0
  * @see BeanFactoryInitializationAotContribution

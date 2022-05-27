@@ -18,6 +18,7 @@ package org.springframework.beans.factory.aot;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
@@ -109,6 +110,34 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 				.containsExactly(beanContribution, loaderContribution);
 	}
 
+	@Test
+	void getBeanDefinitionMethodGeneratorWhenRegisteredBeanIsAotProcessorFilteresBean() {
+		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("test1", BeanDefinitionBuilder
+				.rootBeanDefinition(TestBeanFactoryInitializationAotProcessorBean.class).getBeanDefinition());
+		RegisteredBean registeredBean1 = RegisteredBean.of(beanFactory, "test1");
+		beanFactory.registerBeanDefinition("test2", BeanDefinitionBuilder
+				.rootBeanDefinition(TestBeanRegistrationAotProcessorBean.class).getBeanDefinition());
+		RegisteredBean registeredBean2 = RegisteredBean.of(beanFactory, "test2");
+		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
+				new AotFactoriesLoader(beanFactory, springFactoriesLoader));
+		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean1, null)).isNull();
+		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean2, null)).isNull();
+	}
+
+	@Test
+	void getBeanDefinitionMethodGeneratorWhenRegisteredBeanIsAotProcessorAndFilteresBeanBeanRegistrationExcludeFilterDoesNotFilterBean() {
+		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("test", BeanDefinitionBuilder
+				.rootBeanDefinition(TestBeanRegistrationAotProcessorAndFilterBean.class).getBeanDefinition());
+		RegisteredBean registeredBean1 = RegisteredBean.of(beanFactory, "test");
+		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
+				new AotFactoriesLoader(beanFactory, springFactoriesLoader));
+		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean1, null)).isNotNull();
+	}
+
 	private RegisteredBean registerTestBean(DefaultListableBeanFactory beanFactory) {
 		beanFactory.registerBeanDefinition("test", BeanDefinitionBuilder
 				.rootBeanDefinition(TestBean.class).getBeanDefinition());
@@ -147,6 +176,35 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 	}
 
 	static class TestBean {
+
+	}
+
+	static class TestBeanFactoryInitializationAotProcessorBean implements BeanFactoryInitializationAotProcessor{
+
+		@Override
+		public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
+			return null;
+		}
+
+	}
+
+	static class TestBeanRegistrationAotProcessorBean implements BeanRegistrationAotProcessor {
+
+		@Override
+		public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+			return null;
+		}
+
+	}
+
+	static class TestBeanRegistrationAotProcessorAndFilterBean
+			extends TestBeanRegistrationAotProcessorBean
+			implements BeanRegistrationExcludeFilter {
+
+		@Override
+		public boolean isExcluded(RegisteredBean registeredBean) {
+			return false;
+		}
 
 	}
 
