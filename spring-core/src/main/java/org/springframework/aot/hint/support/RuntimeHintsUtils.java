@@ -27,6 +27,7 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeHint.Builder;
+import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.SynthesizedAnnotation;
@@ -66,7 +67,7 @@ public abstract class RuntimeHintsUtils {
 	}
 
 	private static void collectAliasedAnnotations(Set<Class<?>> seen, Set<Class<?>> types, Class<?> annotationType) {
-		if (seen.contains(annotationType)) {
+		if (seen.contains(annotationType) || Reflective.class.equals(annotationType)) {
 			return;
 		}
 		seen.add(annotationType);
