@@ -104,7 +104,7 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 			Predicate<String> attributeFilter) {
 
 		return new BeanDefinitionPropertiesCodeGenerator(
-				generationContext.getRuntimeHints(), attributeFilter,
+				generationContext.getRuntimeHints(),
 				beanRegistrationCode.getMethodGenerator(),
 				(name, value) -> generateValueCode(generationContext, name, value))
 						.generateCode(beanDefinition);

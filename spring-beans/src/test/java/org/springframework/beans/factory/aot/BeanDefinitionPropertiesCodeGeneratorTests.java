@@ -65,7 +65,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	private final RuntimeHints hints = new RuntimeHints();
 
 	private BeanDefinitionPropertiesCodeGenerator generator = new BeanDefinitionPropertiesCodeGenerator(
-			this.hints, attribute -> true, this.generatedMethods, (name, value) -> null);
+			this.hints, this.generatedMethods, (name, value) -> null);
 
 
 	@Test
@@ -350,33 +350,6 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			Object value = actual.getPropertyValues().get("value");
 			assertThat(value).isInstanceOf(ManagedMap.class);
 			assertThat(((Map<?, ?>) value).get("test")).isInstanceOf(BeanReference.class);
-		});
-	}
-
-	@Test
-	void attributesWhenAllFiltered() {
-		this.beanDefinition.setAttribute("a", "A");
-		this.beanDefinition.setAttribute("b", "B");
-		Predicate<String> attributeFilter = attribute -> false;
-		this.generator = new BeanDefinitionPropertiesCodeGenerator(this.hints,
-				attributeFilter, this.generatedMethods, (name, value) -> null);
-		testCompiledResult((actual, compiled) -> {
-			assertThat(compiled.getSourceFile()).doesNotContain("setAttribute");
-			assertThat(actual.getAttribute("a")).isNull();
-			assertThat(actual.getAttribute("b")).isNull();
-		});
-	}
-
-	@Test
-	void attributesWhenSomeFiltered() {
-		this.beanDefinition.setAttribute("a", "A");
-		this.beanDefinition.setAttribute("b", "B");
-		Predicate<String> attributeFilter = attribute -> "a".equals(attribute);
-		this.generator = new BeanDefinitionPropertiesCodeGenerator(this.hints,
-				attributeFilter, this.generatedMethods, (name, value) -> null);
-		testCompiledResult(this.beanDefinition, (actual, compiled) -> {
-			assertThat(actual.getAttribute("a")).isEqualTo("A");
-			assertThat(actual.getAttribute("b")).isNull();
 		});
 	}
 

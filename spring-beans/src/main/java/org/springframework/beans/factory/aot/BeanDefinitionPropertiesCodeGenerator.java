@@ -88,19 +88,16 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 	private final RuntimeHints hints;
 
-	private final Predicate<String> attributeFilter;
-
 	private final BiFunction<String, Object, CodeBlock> customValueCodeGenerator;
 
 	private final BeanDefinitionPropertyValueCodeGenerator valueCodeGenerator;
 
 
 	BeanDefinitionPropertiesCodeGenerator(RuntimeHints hints,
-			Predicate<String> attributeFilter, MethodGenerator methodGenerator,
+			MethodGenerator methodGenerator,
 			BiFunction<String, Object, CodeBlock> customValueCodeGenerator) {
 
 		this.hints = hints;
-		this.attributeFilter = attributeFilter;
 		this.customValueCodeGenerator = customValueCodeGenerator;
 		this.valueCodeGenerator = new BeanDefinitionPropertyValueCodeGenerator(
 				methodGenerator);
@@ -133,7 +130,6 @@ class BeanDefinitionPropertiesCodeGenerator {
 		}
 		addConstructorArgumentValues(builder, beanDefinition);
 		addPropertyValues(builder, beanDefinition);
-		addAttributes(builder, beanDefinition);
 		return builder.build();
 	}
 
@@ -241,21 +237,6 @@ class BeanDefinitionPropertiesCodeGenerator {
 				.filter(pd -> propertyName.equals(pd.getName()))
 				.map(java.beans.PropertyDescriptor::getWriteMethod)
 				.filter(Objects::nonNull).findFirst().orElse(null);
-	}
-
-
-	private void addAttributes(CodeBlock.Builder builder, BeanDefinition beanDefinition) {
-		String[] attributeNames = beanDefinition.attributeNames();
-		if (!ObjectUtils.isEmpty(attributeNames)) {
-			for (String attributeName : attributeNames) {
-				if (this.attributeFilter.test(attributeName)) {
-					CodeBlock value = this.valueCodeGenerator
-							.generateCode(beanDefinition.getAttribute(attributeName));
-					builder.addStatement("$L.setAttribute($S, $L)",
-							BEAN_DEFINITION_VARIABLE, attributeName, value);
-				}
-			}
-		}
 	}
 
 	private boolean hasScope(String defaultValue, String actualValue) {

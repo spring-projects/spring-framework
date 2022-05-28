@@ -167,39 +167,20 @@ class BeanDefinitionMethodGeneratorTests {
 	}
 
 	@Test
-	void generateBeanDefinitionMethodWhenHasAttributeFilterGeneratesMethod() {
+	void generateBeanDefinitionMethodWhenHasAttributes() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(TestBean.class);
 		beanDefinition.setAttribute("a", "A");
 		beanDefinition.setAttribute("b", "B");
 		RegisteredBean registeredBean = registerBean(beanDefinition);
-		List<BeanRegistrationCodeFragmentsCustomizer> fragmentCustomizers = Collections
-				.singletonList(this::customizeWithAttributeFilter);
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
-				Collections.emptyList(), fragmentCustomizers);
+				Collections.emptyList(), Collections.emptyList());
 		MethodReference method = generator.generateBeanDefinitionMethod(
 				this.generationContext, this.beanRegistrationsCode);
 		testCompiledResult(method, (actual, compiled) -> {
-			assertThat(actual.getAttribute("a")).isEqualTo("A");
+			assertThat(actual.getAttribute("a")).isNull();
 			assertThat(actual.getAttribute("b")).isNull();
 		});
-	}
-
-	private BeanRegistrationCodeFragments customizeWithAttributeFilter(
-			RegisteredBean registeredBean, BeanRegistrationCodeFragments codeFragments) {
-		return new BeanRegistrationCodeFragments(codeFragments) {
-
-			@Override
-			public CodeBlock generateSetBeanDefinitionPropertiesCode(
-					GenerationContext generationContext,
-					BeanRegistrationCode beanRegistrationCode,
-					RootBeanDefinition beanDefinition,
-					Predicate<String> attributeFilter) {
-				return super.generateSetBeanDefinitionPropertiesCode(generationContext,
-						beanRegistrationCode, beanDefinition, name -> "a".equals(name));
-			}
-
-		};
 	}
 
 	@Test
